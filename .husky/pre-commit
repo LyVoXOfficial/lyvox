@@ -1,1 +1,1 @@
-pnpm dlx husky init
+pnpm test
