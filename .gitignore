@@ -139,3 +139,31 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 # Turborepo
 .out
+# === LyVoX project-specific ignores ===
+
+# Supabase CLI bootstrap leftovers
+npx supabase login/
+
+# Local Supabase data/configs
+supabase/.temp/
+supabase/.branches/
+
+# Build caches
+.turbo/
+.cache/
+*.zst
+*.tar.zst
+diff.txt
+tmp.txt
+
+# VSCode local
+.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Normalize line endings warning fix
+.gitattributes
