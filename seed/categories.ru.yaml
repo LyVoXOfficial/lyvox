@@ -1,0 +1,23 @@
+# 3-уровневая таксономия (пример)
+- name_ru: Электроника
+  icon: smartphone
+  children:
+    - name_ru: Телефоны
+      children:
+        - name_ru: Смартфоны
+        - name_ru: Кнопочные
+    - name_ru: Компьютеры
+      children:
+        - name_ru: Ноутбуки
+        - name_ru: Настольные ПК
+- name_ru: Дом и сад
+  icon: home
+  children:
+    - name_ru: Мебель
+      children:
+        - name_ru: Диваны
+        - name_ru: Стулья
+    - name_ru: Бытовая техника
+      children:
+        - name_ru: Стиральные машины
+        - name_ru: Холодильники

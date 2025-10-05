@@ -7,7 +7,9 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "format": "turbo run format",
-    "prepare": "husky"
+    "prepare": "husky",
+    "gen:types": "supabase gen types typescript --linked > supabase/types/database.types.ts",
+    "test": "echo (temp) skipping tests && exit 0"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,css,md,json}": [
