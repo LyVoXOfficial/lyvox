@@ -164,6 +164,3 @@ tmp.txt
 # OS files
 .DS_Store
 Thumbs.db
-
-# Normalize line endings warning fix
-.gitattributes
