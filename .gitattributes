@@ -1,0 +1,20 @@
+# === Normalize line endings for all files ===
+* text=auto eol=lf
+
+# Explicitly enforce LF endings for code and docs
+*.{ts,tsx,js,jsx,css,md,json,yml,yaml,sql,html,sh,env} text eol=lf
+
+# Binary files (no diff / conversion)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.tar binary
+*.zst binary
+
+# Windows-only exceptions (keep CRLF if needed)
+*.bat text eol=crlf
+*.cmd text eol=crlf
