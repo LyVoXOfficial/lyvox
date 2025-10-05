@@ -39,3 +39,25 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# build & caches
+.turbo/
+.next/
+dist/
+coverage/
+node_modules/
+
+# local env
+.env.local
+.env.*
+!.env.example
+
+# logs & temps
+*.log
+*.tar.zst
+*.zst
+*.zip
+diff.txt
+tmp.txt
+
+# accidental bootstrap dir
+npx supabase login/
