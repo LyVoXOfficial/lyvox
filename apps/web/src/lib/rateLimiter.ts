@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Ratelimit, type RatelimitResponse } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
 type RateLimiterOptions = {
   limit: number;
@@ -20,6 +21,7 @@ type RateLimiterFn = (key: string) => Promise<RateLimitResult>;
 
 const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
 const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+const redisClient = redisUrl && redisToken ? new Redis({ url: redisUrl, token: redisToken }) : null;
 
 const disabledLogger = (() => {
   let didWarn = false;
@@ -41,7 +43,7 @@ export function createRateLimiter({
   prefix,
   bucketId = "default",
 }: RateLimiterOptions): RateLimiterFn {
-  if (!redisUrl || !redisToken) {
+  if (!redisClient) {
     disabledLogger();
     return async () => ({
       success: true,
@@ -55,7 +57,7 @@ export function createRateLimiter({
   const namespace = ["rl", prefix, bucketId, String(limit), String(windowSec)].join(":");
 
   const ratelimit = new Ratelimit({
-    redis: { url: redisUrl, token: redisToken },
+    redis: redisClient,
     limiter: Ratelimit.slidingWindow(limit, `${windowSec} s`),
     analytics: process.env.NODE_ENV === "production",
     prefix: namespace,
