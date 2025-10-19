@@ -14,6 +14,7 @@
 - Публикация объявления → draft → upload media → publish.
 - Верификация телефона → request OTP (rate-limit) → verify → mark verified.
 - Жалоба/модерация → create report → admin list → update → trust_inc.
+- Регистрация (email/password) → GDPR consent log → Supabase signUp → redirect на `/onboarding`.
 
 ## Rate limiting
 

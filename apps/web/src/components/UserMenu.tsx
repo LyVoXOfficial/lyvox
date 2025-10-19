@@ -2,11 +2,18 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { hasAdminRole } from "@/lib/adminRole";
+import { hasAdminRole, type SupabaseUserLike } from "@/lib/adminRole";
+
+type MeResponse = {
+  user: unknown;
+  phone: { number?: string | null; verified?: boolean | null } | null;
+  verifiedPhone?: boolean;
+};
 
 export default function UserMenu() {
   const [email, setEmail] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [phoneVerified, setPhoneVerified] = useState<boolean | null>(null);
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -19,16 +26,28 @@ export default function UserMenu() {
           cache: "no-store",
           credentials: "include",
         });
-        const data = await response.json().catch(() => null);
+        const data: MeResponse = await response.json().catch(() => ({ user: null, phone: null }));
         if (!cancelled) {
-          const user = data?.user ?? null;
-          setEmail(user?.email ?? null);
-          setIsAdmin(hasAdminRole(user));
+          const rawUser = data?.user ?? null;
+          let emailValue: string | null = null;
+          if (rawUser && typeof rawUser === "object" && "email" in rawUser) {
+            const candidate = (rawUser as { email?: unknown }).email;
+            if (typeof candidate === "string") {
+              emailValue = candidate;
+            }
+          }
+          setEmail(emailValue);
+          setIsAdmin(hasAdminRole(rawUser as SupabaseUserLike));
+
+          const verifiedFromPhone = typeof data?.phone?.verified === "boolean" ? data.phone.verified : null;
+          const verifiedFallback = typeof data?.verifiedPhone === "boolean" ? data.verifiedPhone : null;
+          setPhoneVerified(verifiedFromPhone ?? verifiedFallback);
         }
       } catch {
         if (!cancelled) {
           setEmail(null);
           setIsAdmin(false);
+          setPhoneVerified(null);
         }
       }
     })();
@@ -78,14 +97,24 @@ export default function UserMenu() {
 
   if (!email) {
     return (
-      <Link
-        href="/login"
-        className="rounded-xl border px-3 py-2 text-sm font-medium hover:bg-muted"
-      >
-        ����
-      </Link>
+      <div className="flex items-center gap-2">
+        <Link
+          href="/login"
+          className="rounded-xl border px-3 py-2 text-sm font-medium hover:bg-muted"
+        >
+          Войти
+        </Link>
+        <Link
+          href="/register"
+          className="rounded-xl border border-primary bg-primary px-3 py-2 text-sm font-medium text-white hover:opacity-90"
+        >
+          Регистрация
+        </Link>
+      </div>
     );
   }
+
+  const showPhoneVerification = phoneVerified === false;
 
   return (
     <div ref={containerRef} className="relative">
@@ -97,7 +126,7 @@ export default function UserMenu() {
         aria-expanded={open}
       >
         <span className="hidden sm:inline">{email}</span>
-        <span className="sm:hidden">������</span>
+        <span className="sm:hidden">Аккаунт</span>
         <svg className="h-3 w-3 text-muted-foreground" viewBox="0 0 12 8" aria-hidden>
           <path d="M10.59 1.59 6 6.17 1.41 1.59 0 3l6 6 6-6z" fill="currentColor" />
         </svg>
@@ -113,7 +142,7 @@ export default function UserMenu() {
             className="block rounded-lg px-3 py-2 text-sm hover:bg-muted"
             role="menuitem"
           >
-            ��䨫�
+            Профиль
           </Link>
           <Link
             href="/profile/ads"
@@ -121,16 +150,18 @@ export default function UserMenu() {
             className="block rounded-lg px-3 py-2 text-sm hover:bg-muted"
             role="menuitem"
           >
-            ��� �������
+            Мои объявления
           </Link>
-          <Link
-            href="/profile/phone"
-            onClick={closeMenu}
-            className="block rounded-lg px-3 py-2 text-sm hover:bg-muted"
-            role="menuitem"
-          >
-            ���䨪��� ⥫�䮭�
-          </Link>
+          {showPhoneVerification && (
+            <Link
+              href="/profile/phone"
+              onClick={closeMenu}
+              className="block rounded-lg px-3 py-2 text-sm hover:bg-muted"
+              role="menuitem"
+            >
+              Верификация телефона
+            </Link>
+          )}
           {isAdmin && (
             <Link
               href="/admin/reports"
@@ -138,7 +169,7 @@ export default function UserMenu() {
               className="mt-1 block rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
               role="menuitem"
             >
-              ������ �����樨
+              Админ-панель
             </Link>
           )}
           <button
@@ -147,7 +178,7 @@ export default function UserMenu() {
             className="mt-1 w-full rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
             role="menuitem"
           >
-            ���
+            Выйти
           </button>
         </div>
       )}

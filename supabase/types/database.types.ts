@@ -326,6 +326,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          consents: Json | null
           created_at: string | null
           display_name: string | null
           id: string
@@ -334,6 +335,7 @@ export type Database = {
           verified_phone: boolean | null
         }
         Insert: {
+          consents?: Json | null
           created_at?: string | null
           display_name?: string | null
           id: string
@@ -342,6 +344,7 @@ export type Database = {
           verified_phone?: boolean | null
         }
         Update: {
+          consents?: Json | null
           created_at?: string | null
           display_name?: string | null
           id?: string

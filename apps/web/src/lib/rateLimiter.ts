@@ -73,9 +73,7 @@ export function createRateLimiter({
       };
     }
 
-    const identifier = prefix ? `${prefix}:${normalizedKey}` : normalizedKey;
-
-    const result = (await ratelimit.limit(identifier)) as InternalResult;
+    const result = (await ratelimit.limit(normalizedKey)) as InternalResult;
     const resetSeconds = normalizeReset(result.reset);
     const nowSeconds = Math.floor(Date.now() / 1000);
     const retryAfterSec = result.success ? 0 : Math.max(0, resetSeconds - nowSeconds);
@@ -120,7 +118,7 @@ export function withRateLimit(handler: RouteHandler, options: WithRateLimitOptio
     const userId = options.getUserId ? await options.getUserId(req) : null;
     const keys = toKeyArray(options.makeKey(req, userId, ip));
 
-    let lastSuccess: RateLimitResult | null = null;
+    let headerResult: RateLimitResult | null = null;
 
     for (const key of keys) {
       const result = await options.limiter(key);
@@ -128,14 +126,14 @@ export function withRateLimit(handler: RouteHandler, options: WithRateLimitOptio
         await options.onLimited?.({ req, userId, ip, key, result });
         return build429(result);
       }
-      lastSuccess = result;
+      headerResult = pickStricterResult(headerResult, result);
     }
 
     const response = await handler(req);
-    if (lastSuccess) {
-      response.headers.set("RateLimit-Limit", String(lastSuccess.limit));
-      response.headers.set("RateLimit-Remaining", String(Math.max(lastSuccess.remaining, 0)));
-      response.headers.set("RateLimit-Reset", String(lastSuccess.reset));
+    if (headerResult) {
+      response.headers.set("RateLimit-Limit", String(headerResult.limit));
+      response.headers.set("RateLimit-Remaining", String(Math.max(headerResult.remaining, 0)));
+      response.headers.set("RateLimit-Reset", String(headerResult.reset));
     }
     return response;
   };
@@ -148,6 +146,20 @@ const toKeyArray = (value: MaybeArray<string>): string[] => {
   }
   const trimmed = value.trim();
   return trimmed ? [trimmed] : [];
+};
+
+const pickStricterResult = (
+  current: RateLimitResult | null,
+  next: RateLimitResult,
+): RateLimitResult => {
+  if (!current) return next;
+
+  const currentRatio = current.remaining / current.limit;
+  const nextRatio = next.remaining / next.limit;
+
+  if (nextRatio < currentRatio) return next;
+  if (nextRatio === currentRatio && next.limit <= current.limit) return next;
+  return current;
 };
 
 const build429 = ({ limit, reset, retryAfterSec }: RateLimitResult): Response => {
@@ -194,7 +206,7 @@ export function getClientIp(req: Request): string | null {
   }
 
   return null;
-}
+};
 
 const firstIpFromList = (value: string | null): string | null => {
   if (!value) return null;

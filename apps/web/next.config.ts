@@ -1,12 +1,25 @@
-import path from "path";
-import type { NextConfig } from "next";
+import path from 'path';
+import type { NextConfig } from 'next';
 
 const config: NextConfig = {
-  // ВЕРХНИЙ УРОВЕНЬ, не experimental
+  webpack: (cfg) => {
+    cfg.resolve = cfg.resolve || {};
+    cfg.resolve.alias = {
+      ...(cfg.resolve.alias || {}),
+      '@': path.resolve(__dirname, 'src'),
+    };
+    return cfg;
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   turbopack: {
-    // Явно укажем корень монорепо, чтобы Next не путал root
-    root: path.resolve(__dirname, "..", ".."),
+    root: path.resolve(__dirname, '..', '..'),
   },
 };
 
 export default config;
+

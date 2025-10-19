@@ -66,8 +66,8 @@
 - Enable Row Level Security on all domain tables; apply policies from `docs/requirements.md`.
 - Configure Storage bucket `ad-media` with public read and authenticated write policies.
 - Create RPC `trust_inc` and triggers by running `supabase/reports.sql` once.
-- Schedule a cron (Supabase Edge Function) to purge expired OTPs (`phone_otps.expires_at < now()`).
-
+- Apply the new migrations (`supabase/migrations/20251004120000`-`20251004122000`) so `reports`, `trust_score`, triggers, and `trust_inc` are provisioned (`pnpm supabase db push`).
+- Deploy and schedule the Supabase Edge Function `maintenance-cleanup` (see `supabase/functions/maintenance-cleanup`) to purge expired OTPs and anonymise audit logs.
 ## WAF & Zero Trust Checklist
 - **Cloudflare:**
   - Enforce HTTPS, HTTP/2, and bot management.

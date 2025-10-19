@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
@@ -16,15 +16,15 @@ type FormData = {
   location: string;
 };
 
-export default function PostPage() {
+function PostPageInner() {
   const sp = useSearchParams();
-  const editId = useMemo(() => sp.get("edit"), [sp]); // если есть — режим редактирования
+  const editId = useMemo(() => sp.get("edit"), [sp]);
 
   const [userId, setUserId] = useState<string | null>(null);
   const [advertId, setAdvertId] = useState<string | null>(editId || null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [creating, setCreating] = useState(false);
-  const [loading, setLoading] = useState<boolean>(!!editId); // в edit сначала грузим объявление
+  const [loading, setLoading] = useState<boolean>(!!editId);
 
   const { register, handleSubmit, reset, setValue } = useForm<FormData>({
     defaultValues: {
@@ -36,7 +36,6 @@ export default function PostPage() {
     },
   });
 
-  // 1) загрузим пользователя, категории
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
     supabase
@@ -49,12 +48,10 @@ export default function PostPage() {
       });
   }, []);
 
-  // 2) если editId есть — подгружаем объявление и заполняем форму
   useEffect(() => {
     if (!editId) return;
     (async () => {
       setLoading(true);
-      // берём объявление
       const { data: ad, error } = await supabase
         .from("adverts")
         .select("id,user_id,title,description,price,category_id,location,status")
@@ -67,7 +64,6 @@ export default function PostPage() {
         return;
       }
 
-      // безопасность: редактировать может только владелец
       const { data: u } = await supabase.auth.getUser();
       if (ad.user_id !== u.user?.id) {
         alert("У вас нет прав редактировать это объявление");
@@ -76,7 +72,6 @@ export default function PostPage() {
       }
 
       setAdvertId(ad.id);
-      // заполняем форму значениями
       setValue("title", ad.title ?? "");
       setValue("description", ad.description ?? "");
       setValue("price", ad.price ?? null);
@@ -86,12 +81,10 @@ export default function PostPage() {
     })();
   }, [editId, setValue]);
 
-  // 3) создание черновика (если НЕ режим редактирования)
   const createDraft = async () => {
     if (!userId) return alert("Войдите, чтобы создать объявление");
     setCreating(true);
 
-    // подставим любую категорию верхнего уровня, чтобы пройти NOT NULL
     const { data: cat } = await supabase
       .from("categories")
       .select("id")
@@ -119,19 +112,15 @@ export default function PostPage() {
       alert("Ошибка создания черновика: " + error.message);
     } else {
       setAdvertId(data!.id);
-      // очистим форму на старт
       reset({ title: "", description: "", price: null, category_id: categoryId ?? "", location: "" });
-      // добавим ?edit=ID в URL (чтобы можно было вернуться по ссылке)
       const url = new URL(window.location.href);
       url.searchParams.set("edit", data!.id);
       window.history.replaceState(null, "", url.toString());
     }
   };
 
-  // 4) сабмит — если есть advertId → update, иначе (теоретически) insert
   const onSubmit = async (values: FormData) => {
-    // небольшая валидация
-    if (!values.title?.trim()) return alert("Введите заголовок");
+    if (!values.title?.trim()) return alert("Введите название");
     if (!values.category_id) return alert("Выберите категорию");
 
     if (!advertId) {
@@ -157,7 +146,6 @@ export default function PostPage() {
       alert("Ошибка сохранения: " + error.message);
     } else {
       alert("Объявление опубликовано!");
-      // редирект на карточку
       window.location.href = `/ad/${advertId}`;
     }
   };
@@ -165,24 +153,23 @@ export default function PostPage() {
   return (
     <div className="space-y-6 max-w-2xl">
       <h1 className="text-2xl font-semibold">
-        {editId ? "Редактировать объявление" : "Разместить объявление"}
+        {editId ? "Редактировать объявление" : "Создать объявление"}
       </h1>
 
-      {/* если editId есть, не показываем кнопку создания черновика */}
       {!advertId && !editId ? (
         <div>
           <Button disabled={!userId || creating} onClick={createDraft}>
-            {creating ? "Создаём..." : "Создать черновик"}
+            {creating ? "Создание..." : "Создать черновик"}
           </Button>
         </div>
       ) : null}
 
       {loading ? (
-        <p>Загрузка…</p>
+        <p>Загрузка...</p>
       ) : advertId ? (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="block mb-1">Заголовок</label>
+            <label className="block mb-1">Название</label>
             <input
               type="text"
               {...register("title", { required: true })}
@@ -239,11 +226,19 @@ export default function PostPage() {
             <UploadGallery advertId={advertId} />
           </div>
 
-          <Button type="submit">{editId ? "Сохранить и опубликовать" : "Опубликовать"}</Button>
+          <Button type="submit">{editId ? "Обновить и опубликовать" : "Опубликовать"}</Button>
         </form>
       ) : (
         <p>Сначала создайте черновик (или откройте страницу с параметром ?edit=&lt;id&gt;)</p>
       )}
     </div>
+  );
+}
+
+export default function PostPage() {
+  return (
+    <Suspense fallback={<p>Загрузка...</p>}>
+      <PostPageInner />
+    </Suspense>
   );
 }

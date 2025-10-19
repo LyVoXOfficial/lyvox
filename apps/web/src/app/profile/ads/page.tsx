@@ -50,6 +50,9 @@ export default async function ProfileAdsPage() {
           Вы не авторизованы. {" "}
           <Link href="/login" className="underline">
             Войти
+          </Link>{" или "}
+          <Link href="/register" className="underline">
+            Зарегистрироваться
           </Link>
         </p>
       </main>

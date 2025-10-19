@@ -1,18 +1,84 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import UserMenu from "@/components/UserMenu";
 
+type MeResponse = {
+  user: unknown | null;
+};
+
+const hasUser = (payload: MeResponse | { user?: unknown } | null | undefined) => {
+  if (!payload || typeof payload !== "object") {
+    return false;
+  }
+  const candidate = (payload as { user?: unknown }).user;
+  return !!candidate;
+};
+
 export default function MainHeader() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
+  const [hasSession, setHasSession] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    (async () => {
+      try {
+        const response = await fetch("/api/me", {
+          cache: "no-store",
+          credentials: "include",
+        });
+        const data: MeResponse = await response.json().catch(() => ({ user: null }));
+        if (active) {
+          setHasSession(hasUser(data));
+        }
+      } catch {
+        if (active) {
+          setHasSession(false);
+        }
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const submitSearch = (event: React.FormEvent) => {
     event.preventDefault();
     const query = search.trim();
     if (!query) return;
     window.location.href = `/search?q=${encodeURIComponent(query)}`;
+  };
+
+  const handlePostClick = async () => {
+    let session = hasSession;
+
+    if (session === null) {
+      try {
+        const response = await fetch("/api/me", {
+          cache: "no-store",
+          credentials: "include",
+        });
+        const data: MeResponse = await response.json().catch(() => ({ user: null }));
+        session = hasUser(data);
+        setHasSession(session);
+      } catch {
+        session = false;
+        setHasSession(false);
+      }
+    }
+
+    if (session) {
+      router.push("/post");
+    } else {
+      const next = encodeURIComponent("/post");
+      router.push(`/register?next=${next}`);
+    }
   };
 
   return (
@@ -36,9 +102,7 @@ export default function MainHeader() {
         </form>
 
         <div className="flex items-center gap-2">
-          <Link href="/post">
-            <Button>Подать объявление</Button>
-          </Link>
+          <Button onClick={handlePostClick}>Подать объявление</Button>
           <UserMenu />
         </div>
       </div>

@@ -43,11 +43,12 @@ Key capabilities implemented in the codebase:
 - API handlers use `supabaseServer()` (anon key + cookies) for user-scoped queries and `supabaseService()` (service role) for privileged admin tasks.
 - The auth callback route exchanges Supabase magic-link codes before redirecting back into the App Router experience.
 - Logging is centralized in a `logs` table for audit trails on phone verification and moderation actions.
+- `/api/auth/register` creates Supabase users with email verification, records `profiles.consents`, and redirects new sessions to the `/onboarding` checklist.
 
 ### Database & Storage
 
 - Supabase Postgres hosts core tables: `adverts`, `media`, `categories`, `profiles`, `phones`, `phone_otps`, `reports`, `trust_score`, `logs`, plus supporting tables such as `ad_item_specifics`.
-- `supabase/reports.sql` defines the `reports` and `trust_score` tables, triggers for `updated_at`, RLS policies, and the `trust_inc(uid, pts)` helper function.
+- Supabase migrations `20251004120000` ? `20251004122000` provision the `reports` and `trust_score` tables, attach `updated_at` triggers, seed baseline RLS, and expose the `trust_inc(uid, pts)` helper function.
 - Supabase Storage bucket `ad-media` stores advert images; paths follow `user_id/advert_id/timestamp-filename`.
 - Category taxonomy is seeded via `scripts/seedCategories.ts`, which consumes `seed/categories.ru.yaml`.
 - Authentication data is provided by Supabase Auth (`auth.users`), reused across API handlers and RLS policies.
@@ -90,7 +91,7 @@ All critical flows rely on Supabase sessions. Admin functions should migrate fro
 
 ## Row-Level Security & Access Policies
 
-No migrations currently enable RLS on most domain tables. The following policies must be applied in Supabase (actual policies for `reports` and `trust_score` already exist in `supabase/reports.sql`). `auth.jwt()` or `auth.uid()` refer to Supabase helper functions.
+No migrations currently enable RLS on most domain tables. The following policies must be applied in Supabase (policies for `reports` and `trust_score` ship with migrations `20251004122000` and are refined in `20251005191500`). `auth.jwt()` or `auth.uid()` refer to Supabase helper functions.
 
 ### adverts
 
@@ -347,7 +348,7 @@ erDiagram
 
 | Table / System                          | Data Category                              | Purpose                              | Retention                                        | Legal Basis                           | Notes                                                                             |
 | --------------------------------------- | ------------------------------------------ | ------------------------------------ | ------------------------------------------------ | ------------------------------------- | --------------------------------------------------------------------------------- |
-| `profiles`, `auth.users`                | Personal identifiers (email, display name) | Account management, communications   | Active account + 24 months                       | Contract (ToS)                        | Users can self-edit; DSAR exports via Supabase `select` filtered by `auth.uid()`. |
+| `profiles`, `auth.users`                | Personal identifiers (email, display name) | Account management, communications   | Active account + 24 months                       | Contract (ToS)                        | Users can self-edit; DSAR exports via Supabase `select` filtered by `auth.uid()` and include consent snapshots. |
 | `phones`, `phone_otps`                  | Contact data, OTP secrets                  | Stronger authentication, Trust Score | OTP rows: 24h; phones: life of account           | Legitimate interest (security)        | Ensure cron purges expired OTPs; phone deletion on DSAR request.                  |
 | `adverts`, `media`, `ad_item_specifics` | User-generated content                     | Marketplace listings                 | Until user removes or 24 months after inactivity | Contract; Legitimate interest         | Provide delete button; include in export for DSAR.                                |
 | `reports`                               | Moderation records, reporter IDs           | DSA compliance, risk mitigation      | Minimum 12 months post resolution                | Legal obligation (DSA)                | Must be retrievable for regulators; status changes logged.                        |
@@ -372,12 +373,12 @@ erDiagram
 
 ## Roadmap
 
-- Replace placeholder registration page with full onboarding (email + optional phone capture).
+- Add self-service consent management (opt-in/out, version history export) in profile settings.
 - Consolidate category routing (`/c/[categoryPath]`) to serve listings directly and improve SEO.
 - Monitor Upstash rate limiting metrics and adjust quotas for regional traffic spikes.
 - Expand automated tests for API routes and Supabase policies (auth, reports, phone verification).
 - Document and automate Cloudflare WAF plus Zero Trust posture in infrastructure-as-code.
-- Add background jobs for OTP cleanup and inactive advert archival, respecting retention windows.
+- Supabase Edge Function `maintenance-cleanup` runs daily (02:00 UTC) to purge expired OTP secrets and anonymise audit logs older than 18 months; see `supabase/functions/maintenance-cleanup` for implementation and scheduling.
 
 -## Project Overview
 +## Project Overview {#project-overview}

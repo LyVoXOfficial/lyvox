@@ -36,10 +36,10 @@
 **Критерии готовности:** все перечисленные таблицы защищены RLS, роли считываются из JWT, UI/ API учитывают роль, лог фиксирует админ-операции ([TODO #1], [TODO #2]).
 
 **Исполняемые задачи (M2 Backlog):**
-1. Сгенерировать миграцию Supabase с включением RLS и политик на `adverts`, `media`, `profiles`, `phones`, `phone_otps`, `reports`, `trust_score`, `logs` согласно `docs/requirements.md#database-schema`; выполнить локальный `supabase db push`.
+1. [DONE 2025-10-06] Supabase migrations 20251004120000-20251004122000 create `reports` and `trust_score`; legacy policies consolidated in 20251005191500_enable_rls_and_policies.sql.
 2. Переписать серверные guard'ы (middleware, `/api/reports/*`, server actions) на проверку `user.app_metadata.role = 'admin'` и использовать `supabaseService()` только после валидации роли.
 3. Обновить клиентские компоненты (`UserMenu`, страницы `/admin/**`) чтобы получать роль через `/api/me`, скрывать админ-навигацию для не-админов и корректно обрабатывать 403.
-4. Синхронизировать документацию (`docs/requirements.md`, `docs/API_REFERENCE.md`, `docs/TODO.md`) после внедрения RLS и role-based guard'ов.
+4. [DONE 2025-10-06] Documentation (requirements, API_REFERENCE, TODO) refreshed to reflect RLS, consent flow, and cron duties.
 5. Провести QA: проверить RLS от лица обычного пользователя и админа, убедиться в логировании событий модерации в `logs` и запрете прямых вызовов API без роли.
 6. Подготовить автоматические проверки: расширить существующие API-тесты и CI шаги, покрывающие новые политики и проверки роли.
 
@@ -63,7 +63,7 @@
 **Основные задачи:**
 - Frontend: адаптация форм под изменения схемы (при необходимости).
 - Backend: синхронизация DTO с новыми миграциями.
-- База данных: разнести `supabase/reports.sql` на миграции, настроить очистку OTP и логов.
+- ���� ������: migrations 20251004120000-20251004122000 фиксируют `reports`/`trust_score`, Edge Function `maintenance-cleanup` обслуживает OTP и логи.
 - Инфраструктура: запуск Supabase cron/Edge функций.
 - AI и автоматизация: оповещения о неудачных миграциях/очистках.
 - Безопасность и соответствие: контроль сроков хранения данных.
@@ -122,6 +122,26 @@
 - Интеграции и внешние сервисы — см. [REQ:Integrations].
 - Соответствие нормативам — см. [REQ:Compliance].
 
+### M4 - ����������� � onboarding (GDPR)
+**����:** ������� ������������ registration � ��������� GDPR-������� �� Supabase ������, ��������� ������ ������������ �� onboarding.
+**�᭮��� �����:**
+- Frontend: �������� `/register` � i18n (RU/EN/NL/FR), ������������� ��������, checkbox'� �������, redirect �� `/onboarding`.
+- Backend: `/api/auth/register` (Supabase signUp + service role upsert `profiles`, ��������� consent � `logs`), ���������� `/api/me` (`verifiedEmail`, `consents`).
+- ���� ������: �������� `profiles.consents jsonb` + ����������� � requirements/API docs.
+- UX: серверная `/onboarding` � checklist (email confirm, profile edit, phone verify).
+**����ᨬ���:** ??
+**�ਮ���:** P1.
+**���ਨ ��⮢����:** 
+- ������������ �� email/password ����� ��û������ �������� (`terms`/`privacy`) ([REQ:Compliance]).
+- Supabase ��������� confirmation email � redirect `next=/onboarding`.
+- `/api/me` ���������� `verifiedEmail`, `verifiedPhone`, `consents` ([REQ:Security], [REQ:Compliance]).
+- Audit log `consent_accept` ���������� `logs` ([REQ:Data]).
+
+**�ᯮ��塞� ����� (M4 Backlog):**
+1. �������� UI ����������� ������� в профиле (opt-in/out marketing) ([REQ:Compliance], [TODO #5]).
+2. Авто-тесты API `/api/auth/register` и happy/error paths ([REQ:Quality], [TODO #6]).
+3. Прогресс-бар onboarding на клиенте + напоминания по шагам ([REQ:Core]).
+
 ## 4. Рекомендованный график
 - M2 — 4–6 недель.
 - M3 — 3–4 недели после завершения M2.
@@ -134,7 +154,7 @@
 - Отсутствие RLS на ключевых таблицах повышает риск утечек ([REQ:Security], [TODO #1]).
 - Админ-доступ по email подвержен spoofing ([REQ:Security], [TODO #2]).
 - Rate limiting опирается на внешнюю конфигурацию Upstash; при неверных квотах возможны ложные блокировки или перерасход ([REQ:Security]).
-- Миграции и cron-задачи не автоматизированы — риск расхождения схем ([REQ:Data], [TODO #4], [TODO #5]).
+- Миграции и cron-задачи: reports/trust_score уже вынесены в миграции, ежедневный cleanup запланирован через Edge Function `maintenance-cleanup`; остаются остальные автоматизации ([REQ:Data], [TODO #4], [TODO #5]).
 - Недостаточно тестов для API и RLS — риск регрессий ([REQ:Quality], [TODO #6]).
 - Интеграции Itsme/KBO и WAF требуют координации с комплаенсом ([REQ:Integrations], [REQ:Compliance]).
 

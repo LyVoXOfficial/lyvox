@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseServer } from "@/lib/supabaseServer";
+import { coerceConsentSnapshot } from "@/lib/consents";
+import ConsentSettings from "./ConsentSettings";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -12,6 +14,7 @@ type ProfileRow = {
   verified_email: boolean | null;
   verified_phone: boolean | null;
   created_at: string | null;
+  consents: Record<string, unknown> | null;
 };
 
 async function loadProfile(
@@ -20,7 +23,7 @@ async function loadProfile(
 ): Promise<ProfileRow | null> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("display_name, phone, verified_email, verified_phone, created_at")
+    .select("display_name, phone, verified_email, verified_phone, created_at, consents")
     .eq("id", userId)
     .maybeSingle();
 
@@ -41,7 +44,9 @@ export default async function ProfilePage() {
     return (
       <main className="mx-auto max-w-3xl p-4">
         <p>
-          Вы не авторизованы. <Link href="/login" className="underline">Войти</Link>
+          Вы не авторизованы. {" "}
+          <Link href="/login" className="underline">Войти</Link>{" или " }
+          <Link href="/register" className="underline">Зарегистрироваться</Link>
         </p>
       </main>
     );
@@ -75,7 +80,11 @@ export default async function ProfilePage() {
     ? new Intl.DateTimeFormat("ru-RU", { dateStyle: "medium" }).format(
         new Date(createdAt),
       )
-    : "—";
+    : "-";
+
+  const consentSnapshot = coerceConsentSnapshot(profile?.consents ?? null);
+  const marketingOptIn = consentSnapshot?.marketing?.accepted ?? false;
+  const marketingUpdatedAt = consentSnapshot?.marketing?.accepted_at ?? null;
 
   return (
     <main className="mx-auto max-w-3xl space-y-4 p-4">
@@ -138,6 +147,9 @@ export default async function ProfilePage() {
           Мои объявления
         </Link>
       </div>
+
+      <ConsentSettings initialMarketingOptIn={marketingOptIn} lastUpdated={marketingUpdatedAt} />
     </main>
   );
 }
+

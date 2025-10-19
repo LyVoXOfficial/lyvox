@@ -1,14 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 
 export const runtime = "nodejs";
 
-type RouteContext = {
-  params: { id: string };
-};
-
-export async function DELETE(_request: Request, context: RouteContext) {
-  const advertId = context.params.id;
+export async function DELETE(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id: advertId } = await context.params;
 
   if (!advertId) {
     return NextResponse.json(
