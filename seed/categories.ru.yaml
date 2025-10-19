@@ -3,218 +3,377 @@
   icon: car
   children:
     - name_ru: Легковые автомобили
+      icon: car-front
       children:
         - name_ru: Новые автомобили
+          icon: car-new
         - name_ru: Автомобили с пробегом
+          icon: car-used
     - name_ru: Мотоциклы и спецтехника
+      icon: motor
       children:
         - name_ru: Мототехника (мотоциклы, скутеры, мопеды)
+          icon: motor
         - name_ru: Грузовики и автобусы
+          icon: truck
         - name_ru: Спецтехника
+          icon: crane
         - name_ru: Водный транспорт (лодки, катера, яхты)
+          icon: boat
     - name_ru: Запчасти и аксессуары
+      icon: wrench
       children:
         - name_ru: Шины, диски и колёса
+          icon: tires
         - name_ru: Автохимия и масла
+          icon: chemistry
         - name_ru: Аудио-, видео- и навигация
+          icon: audio
         - name_ru: Багажники и фаркопы
+          icon: luggage
         - name_ru: Аксессуары (чехлы, коврики и т.д.)
+          icon: accessories
 
 - name_ru: Недвижимость
   icon: home
   children:
     - name_ru: Продажа недвижимости
+      icon: sale
       children:
         - name_ru: Квартиры
+          icon: apartment
         - name_ru: Комнаты
+          icon: room
         - name_ru: Дома, дачи, коттеджи
+          icon: house
         - name_ru: Участки
+          icon: land
         - name_ru: Коммерческая недвижимость
+          icon: commercial
         - name_ru: Гаражи и машиноместа
+          icon: garage
     - name_ru: Аренда недвижимости
+      icon: rent
       children:
         - name_ru: Аренда квартир
+          icon: key
         - name_ru: Аренда домов
+          icon: rent-house
         - name_ru: Аренда коммерческой недвижимости
+          icon: rent-commercial
 
 - name_ru: Личные вещи
-  icon: hanger
+  icon: wardrobe
   children:
     - name_ru: Женский гардероб
+      icon: wardrobe-women
       children:
         - name_ru: Верхняя одежда
+          icon: outerwear
         - name_ru: Платья и юбки
+          icon: dress
         - name_ru: Блузы и рубашки
+          icon: blouse
         - name_ru: Штаны и шорты
+          icon: pants
         - name_ru: Свитеры и толстовки
+          icon: sweater
         - name_ru: Футболки и топы
+          icon: tshirt
         - name_ru: Спортивная одежда
+          icon: sport
         - name_ru: Домашняя одежда
+          icon: homewear
         - name_ru: Нижнее бельё
+          icon: underwear
         - name_ru: Купальники
+          icon: swimwear
         - name_ru: Обувь
+          icon: shoes
         - name_ru: Аксессуары (сумки, ремни, шарфы)
+          icon: accessories
         - name_ru: Головные уборы
+          icon: hats
     - name_ru: Мужской гардероб
+      icon: wardrobe-men
       children:
         - name_ru: Верхняя одежда
+          icon: outerwear
         - name_ru: Пиджаки и костюмы
+          icon: suit
         - name_ru: Рубашки
+          icon: blouse
         - name_ru: Штаны и шорты
+          icon: pants
         - name_ru: Свитеры и толстовки
+          icon: sweater
         - name_ru: Футболки и майки
+          icon: tshirt
         - name_ru: Спортивная одежда
+          icon: sport
         - name_ru: Домашняя одежда
+          icon: homewear
         - name_ru: Нижнее бельё
+          icon: underwear
         - name_ru: Обувь
+          icon: shoes
         - name_ru: Аксессуары (галстуки, ремни, портмоне)
+          icon: wallet
         - name_ru: Головные уборы
+          icon: hats
     - name_ru: Детский гардероб
+      icon: wardrobe-kids
       children:
         - name_ru: Одежда для новорождённых
+          icon: baby
         - name_ru: Верхняя одежда
+          icon: outerwear
         - name_ru: Комбинезоны и боди
+          icon: baby
         - name_ru: Платья и юбки
+          icon: dress
         - name_ru: Штаны и шорты
+          icon: pants
         - name_ru: Футболки
+          icon: tshirt
         - name_ru: Свитеры и толстовки
+          icon: sweater
         - name_ru: Спортивная одежда
+          icon: sport
         - name_ru: Обувь
+          icon: shoes
         - name_ru: Аксессуары
+          icon: accessories
         - name_ru: Головные уборы
+          icon: hats
 
 - name_ru: Электроника и техника
-  icon: smartphone
+  icon: electronics
   children:
     - name_ru: Телефоны и планшеты
+      icon: phones
       children:
         - name_ru: Мобильные телефоны
+          icon: mobiles
         - name_ru: Планшеты
+          icon: tablets
         - name_ru: Умные часы и браслеты
+          icon: wearables
         - name_ru: Наушники и гарнитуры
+          icon: audio
         - name_ru: Аксессуары (чехлы, зарядные устройства)
+          icon: chargers
     - name_ru: Компьютеры и оргтехника
+      icon: computers
       children:
         - name_ru: Ноутбуки
+          icon: laptop
         - name_ru: Компьютеры и моноблоки
+          icon: desktop
         - name_ru: Комплектующие
+          icon: components
         - name_ru: Игровые приставки и аксессуары
+          icon: gaming
         - name_ru: Оргтехника (принтеры, МФУ)
+          icon: printer
         - name_ru: Сетевое оборудование
+          icon: network
         - name_ru: Программное обеспечение
+          icon: software
     - name_ru: Фото- и видеотехника
+      icon: photo
       children:
         - name_ru: Фотоаппараты
+          icon: camera
         - name_ru: Видеокамеры
+          icon: video
         - name_ru: Объективы
+          icon: lens
         - name_ru: Экшн-камеры
+          icon: action-cam
     - name_ru: ТВ, аудио и видео
+      icon: tv
       children:
         - name_ru: Телевизоры
+          icon: tv
         - name_ru: Аудиотехника
+          icon: audio
         - name_ru: Медиаплееры
+          icon: media
     - name_ru: Бытовая техника
+      icon: appliances
       children:
         - name_ru: Техника для кухни
+          icon: kitchen
         - name_ru: Техника для дома
+          icon: home-tech
         - name_ru: Климатическая техника
+          icon: climate
         - name_ru: Техника для красоты и здоровья
+          icon: beauty
 
 - name_ru: Для дома, хобби и детей
-  icon: sofa
+  icon: home-hobby
   children:
     - name_ru: Для дома и дачи
+      icon: home-garden
       children:
         - name_ru: Мебель
+          icon: furniture
         - name_ru: Текстиль и ковры
+          icon: textile
         - name_ru: Посуда и кухонные принадлежности
+          icon: tableware
         - name_ru: Освещение
+          icon: lighting
         - name_ru: Интерьер и декор
+          icon: decor
         - name_ru: Сад и огород
+          icon: garden
         - name_ru: Хозяйственные товары
+          icon: household
     - name_ru: Детские товары
+      icon: kids
       children:
         - name_ru: Игрушки и игры
+          icon: toys
         - name_ru: Детские коляски
+          icon: strollers
         - name_ru: Автокресла
+          icon: car-seat
         - name_ru: Товары для кормления
+          icon: feeding
         - name_ru: Мебель для детской
+          icon: kids-furniture
         - name_ru: Товары для мам
+          icon: moms
         - name_ru: Гигиена и уход
+          icon: hygiene
     - name_ru: Хобби и отдых
+      icon: hobby
       children:
         - name_ru: Спортивные товары
+          icon: sport
         - name_ru: Книги и журналы
+          icon: books
         - name_ru: Музыкальные инструменты
+          icon: music
         - name_ru: Коллекционирование
+          icon: collecting
         - name_ru: Настольные игры
+          icon: boardgames
         - name_ru: Туризм и рыбалка
+          icon: outdoor
         - name_ru: Билеты
+          icon: tickets
     - name_ru: Хэндмейд и творчество
+      icon: handmade
       children:
         - name_ru: Украшения ручной работы
+          icon: jewelry
         - name_ru: Подарки и сувениры
+          icon: gifts
         - name_ru: Товары для творчества
+          icon: crafts
         - name_ru: Куклы и игрушки ручной работы
+          icon: handmade-toys
 
 - name_ru: Услуги и бизнес
-  icon: briefcase
+  icon: services
   children:
     - name_ru: Услуги
+      icon: services
       children:
         - name_ru: Ремонт и строительство
+          icon: renovation
         - name_ru: Отделочные работы
+          icon: finishing
         - name_ru: Грузоперевозки
+          icon: delivery
         - name_ru: Красота и здоровье
+          icon: beauty
         - name_ru: Ремонт техники
+          icon: repair
         - name_ru: Обучение и курсы
+          icon: education
         - name_ru: Уборка
+          icon: cleaning
         - name_ru: Уход за животными
+          icon: pet-care
         - name_ru: Организация праздников
+          icon: events
     - name_ru: Заявки на услуги
+      icon: requests
       children:
         - name_ru: Ищу мастера
+          icon: need-master
         - name_ru: Ищу обучение
+          icon: need-education
         - name_ru: Ищу перевозку
+          icon: need-delivery
 
 - name_ru: Животные
-  icon: paw
+  icon: animals
   children:
     - name_ru: Животные
+      icon: animals
       children:
         - name_ru: Собаки
+          icon: dogs
         - name_ru: Кошки
+          icon: cats
         - name_ru: Грызуны
+          icon: rodents
         - name_ru: Птицы
+          icon: birds
         - name_ru: Аквариумистика
+          icon: aquarium
     - name_ru: Товары для животных
+      icon: pet-goods
       children:
         - name_ru: Корм и лакомства
+          icon: pet-food
         - name_ru: Переноски и клетки
+          icon: carriers
         - name_ru: Игрушки и аксессуары
+          icon: pet-toys
 
 - name_ru: Работа и карьера
-  icon: briefcase-variant
+  icon: jobs
   children:
     - name_ru: Вакансии
+      icon: vacancies
       children:
         - name_ru: Полная занятость
+          icon: full-time
         - name_ru: Частичная занятость
+          icon: part-time
         - name_ru: Временная/подработка
+          icon: temporary
     - name_ru: Резюме
+      icon: resumes
       children:
         - name_ru: Специалисты
+          icon: specialists
         - name_ru: Рабочие профессии
+          icon: labor
         - name_ru: Студенты и стажёры
+          icon: students
 
 - name_ru: Особые категории
-  icon: gift
+  icon: special
   children:
     - name_ru: Отдам даром
+      icon: free
       children:
         - name_ru: Бесплатно
+          icon: free
         - name_ru: На обмен
+          icon: exchange
     - name_ru: Поиск и обмен
+      icon: search
       children:
         - name_ru: Ищу вещь
+          icon: search
         - name_ru: Предлагаю обмен
+          icon: exchange

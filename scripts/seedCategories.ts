@@ -3,16 +3,15 @@ import { createClient } from "@supabase/supabase-js";
 import { readFileSync } from "fs";
 import path from "path";
 
-// @ts-ignore - js-yaml без типов нам ок
+// @ts-ignore - js-yaml ships without types by default
 import yaml from "js-yaml";
 
 /**
- * Ожидаем переменные окружения:
+ * Перед запуском установите переменные окружения:
  *   SUPABASE_URL
- *   SUPABASE_SERVICE_ROLE_KEY  (НИКОГДА не коммитить!)
+ *   SUPABASE_SERVICE_ROLE_KEY (секретный ключ сервисной роли!)
  *
- * Таблица public.categories должна существовать и иметь уникальный slug.
- * Поля: id, parent_id, slug, level, name_ru, path, sort, icon, is_active
+ * Скрипт заполняет таблицу public.categories структурой из seed/categories.ru.yaml.
  */
 
 type Node = {
@@ -22,18 +21,52 @@ type Node = {
 };
 
 function slugify(input: string): string {
-  // простая транслитерация RU -> латиница + дефисы
-  const map: Record<string, string> = {
-    а:"a", б:"b", в:"v", г:"g", д:"d", е:"e", ё:"yo", ж:"zh", з:"z", и:"i",
-    й:"y", к:"k", л:"l", м:"m", н:"n", о:"o", п:"p", р:"r", с:"s", т:"t",
-    у:"u", ф:"f", х:"h", ц:"c", ч:"ch", ш:"sh", щ:"sch", ъ:"", ы:"y", ь:"",
-    э:"e", ю:"yu", я:"ya", " ":"-", "_":"-", "/":"-"
+  const translitMap: Record<string, string> = {
+    а: "a",
+    б: "b",
+    в: "v",
+    г: "g",
+    д: "d",
+    е: "e",
+    ё: "yo",
+    ж: "zh",
+    з: "z",
+    и: "i",
+    й: "y",
+    к: "k",
+    л: "l",
+    м: "m",
+    н: "n",
+    о: "o",
+    п: "p",
+    р: "r",
+    с: "s",
+    т: "t",
+    у: "u",
+    ф: "f",
+    х: "h",
+    ц: "c",
+    ч: "ch",
+    ш: "sh",
+    щ: "shch",
+    ъ: "",
+    ы: "y",
+    ь: "",
+    э: "e",
+    ю: "yu",
+    я: "ya",
   };
+
   return input
     .trim()
     .toLowerCase()
     .split("")
-    .map((ch) => map[ch as keyof typeof map] ?? ch)
+    .map((ch) => {
+      if (translitMap[ch]) return translitMap[ch];
+      if (/[a-z0-9]/.test(ch)) return ch;
+      if (ch === " " || ch === "_" || ch === "/") return "-";
+      return "";
+    })
     .join("")
     .replace(/[^a-z0-9-]+/g, "")
     .replace(/--+/g, "-")
@@ -54,10 +87,12 @@ async function main() {
 
   let sortCounter = 0;
 
-  // Рекурсивный upsert
-  async function upsertNode(node: Node, parent: { id: string | null; path: string; level: number }) {
+  async function upsertNode(
+    node: Node,
+    parent: { id: string | null; path: string; level: number },
+  ) {
     const level = parent.level + 1;
-    if (level > 3) return; // ограничим тремя уровнями
+    if (level > 3) return;
 
     const slug = slugify(node.name_ru);
     const myPath = parent.path ? `${parent.path}/${slug}` : slug;
@@ -65,7 +100,6 @@ async function main() {
 
     sortCounter += 1;
 
-    // upsert по уникальному slug
     const { data, error } = await supabase
       .from("categories")
       .upsert(
@@ -79,7 +113,7 @@ async function main() {
           icon,
           is_active: true,
         },
-        { onConflict: "slug" }
+        { onConflict: "slug" },
       )
       .select("id")
       .single();

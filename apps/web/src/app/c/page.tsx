@@ -25,7 +25,10 @@ export default function CategoriesIndex() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Категории</h1>
+      <h1 className="text-2xl font-semibold text-zinc-900">Категории</h1>
+      <p className="text-sm text-muted-foreground">
+        Выберите раздел, чтобы перейти к объявлениям и подкатегориям.
+      </p>
       {loading ? <p>Загрузка…</p> : <CategoryList items={items} base="/c" />}
     </div>
   );
