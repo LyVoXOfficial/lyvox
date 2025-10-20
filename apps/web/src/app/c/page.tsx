@@ -1,27 +1,17 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseService } from "@/lib/supabaseService";
 import type { Category } from "@/lib/types";
 import CategoryList from "@/components/category-list";
 
-export default function CategoriesIndex() {
-  const [items, setItems] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+export default async function CategoriesIndex() {
+  const supabase = supabaseService();
+  const { data, error } = await supabase
+    .from("categories")
+    .select("*")
+    .eq("level", 1)
+    .eq("is_active", true)
+    .order("sort", { ascending: true });
 
-  useEffect(() => {
-    (async () => {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("*")
-        .eq("level", 1)
-        .eq("is_active", true)
-        .order("sort", { ascending: true });
-
-      if (!error && data) setItems(data as Category[]);
-      setLoading(false);
-    })();
-  }, []);
+  const items = error ? [] : ((data as Category[]) ?? []);
 
   return (
     <div className="space-y-4">
@@ -29,7 +19,11 @@ export default function CategoriesIndex() {
       <p className="text-sm text-muted-foreground">
         Выберите раздел, чтобы перейти к объявлениям и подкатегориям.
       </p>
-      {loading ? <p>Загрузка…</p> : <CategoryList items={items} base="/c" />}
+      {items.length ? (
+        <CategoryList items={items} base="/c" />
+      ) : (
+        <p className="text-sm text-muted-foreground">Категории временно недоступны.</p>
+      )}
     </div>
   );
 }

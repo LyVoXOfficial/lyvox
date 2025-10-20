@@ -1,181 +1,114 @@
-"use client";
-
-import { useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
 import Link from "next/link";
-import { supabase } from "@/lib/supabaseClient";
+import { notFound } from "next/navigation";
+import { supabaseService } from "@/lib/supabaseService";
 import type { Category } from "@/lib/types";
 import CategoryList from "@/components/category-list";
 import AdsGrid from "@/components/ads-grid";
-
-type MediaRow = {
-  advert_id: string;
-  url: string;
-  sort: number | null;
-};
 
 type Breadcrumb = {
   path: string;
   name: string;
 };
 
-function humanizeSlug(slug: string): string {
-  return slug
-    .split("-")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
+type AdvertItem = {
+  id: string;
+  title: string;
+  price?: number | null;
+  location?: string | null;
+  image?: string | null;
+  createdAt?: string | null;
+};
 
-export default function CategoryPage() {
-  const params = useParams<{ path: string[] }>();
-  const slugPath = useMemo(
-    () => (Array.isArray(params.path) ? params.path.join("/") : ""),
-    [params.path],
-  );
+type Props = {
+  params: { path: string[] };
+};
 
-  const [current, setCurrent] = useState<Category | null>(null);
-  const [children, setChildren] = useState<Category[]>([]);
-  const [ads, setAds] = useState<
-    Array<{
-      id: string;
-      title: string;
-      price?: number | null;
-      location?: string | null;
-      image?: string | null;
-      createdAt?: string | null;
-    }>
-  >([]);
-  const [breadcrumbs, setBreadcrumbs] = useState<Breadcrumb[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!slugPath) return;
-
-    let cancelled = false;
-
-    const load = async () => {
-      setLoading(true);
-      setError(null);
-
-      const { data: cur, error: currentError } = await supabase
-        .from("categories")
-        .select("*")
-        .eq("path", slugPath)
-        .eq("is_active", true)
-        .maybeSingle();
-
-      if (currentError || !cur) {
-        if (!cancelled) {
-          setError("Категория не найдена.");
-          setCurrent(null);
-          setChildren([]);
-          setAds([]);
-          setBreadcrumbs([]);
-          setLoading(false);
-        }
-        return;
-      }
-
-      if (cancelled) return;
-
-      const typedCurrent = cur as Category;
-      setCurrent(typedCurrent);
-
-      const crumbPaths = slugPath
-        .split("/")
-        .filter(Boolean)
-        .map((_, idx, arr) => arr.slice(0, idx + 1).join("/"));
-
-      if (crumbPaths.length) {
-        const { data: crumbData } = await supabase
-          .from("categories")
-          .select("path,name_ru")
-          .in("path", crumbPaths)
-          .eq("is_active", true);
-
-        if (!cancelled) {
-          const nameByPath = new Map<string, string>();
-          crumbData?.forEach((item) => {
-            nameByPath.set(item.path, item.name_ru);
-          });
-          setBreadcrumbs(
-            crumbPaths.map((path) => ({
-              path,
-              name: nameByPath.get(path) ?? humanizeSlug(path.split("/").pop() ?? path),
-            })),
-          );
-        }
-      } else {
-        setBreadcrumbs([]);
-      }
-
-      const { data: kidData } = await supabase
-        .from("categories")
-        .select("*")
-        .eq("parent_id", typedCurrent.id)
-        .eq("is_active", true)
-        .order("sort", { ascending: true });
-
-      if (cancelled) return;
-
-      setChildren((kidData ?? []) as Category[]);
-
-      const { data: adverts } = await supabase
-        .from("adverts")
-        .select("id,title,price,location,created_at")
-        .eq("category_id", typedCurrent.id)
-        .eq("status", "active")
-        .order("created_at", { ascending: false })
-        .limit(24);
-
-      if (cancelled) return;
-
-      if (!adverts?.length) {
-        setAds([]);
-        setLoading(false);
-        return;
-      }
-
-      const ids = adverts.map((a) => a.id);
-      const { data: media } = await supabase
-        .from("media")
-        .select("advert_id,url,sort")
-        .in("advert_id", ids)
-        .order("sort", { ascending: true });
-
-      if (cancelled) return;
-
-      const firstByAd = new Map<string, string>();
-      (media as MediaRow[] | null)?.forEach((m) => {
-        if (!firstByAd.has(m.advert_id)) {
-          firstByAd.set(m.advert_id, m.url);
-        }
-      });
-
-      setAds(
-        adverts.map((a) => ({
-          id: a.id,
-          title: a.title,
-          price: a.price,
-          location: a.location,
-          createdAt: (a as { created_at?: string | null }).created_at ?? null,
-          image: firstByAd.get(a.id) ?? null,
-        })),
-      );
-
-      setLoading(false);
-    };
-
-    load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [slugPath]);
-
+export default async function CategoryPage({ params }: Props) {
+  const slugPath = Array.isArray(params.path) ? params.path.join("/") : "";
   if (!slugPath) {
-    return <div>Категория не найдена.</div>;
+    notFound();
+  }
+
+  const supabase = supabaseService();
+
+  const { data: current, error } = await supabase
+    .from("categories")
+    .select("*")
+    .eq("path", slugPath)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  if (error || !current) {
+    notFound();
+  }
+
+  const typedCurrent = current as Category;
+
+  const crumbPaths = slugPath
+    .split("/")
+    .filter(Boolean)
+    .map((_, idx, arr) => arr.slice(0, idx + 1).join("/"));
+
+  const breadcrumbs: Breadcrumb[] = [];
+  if (crumbPaths.length) {
+    const { data: crumbData } = await supabase
+      .from("categories")
+      .select("path,name_ru")
+      .in("path", crumbPaths)
+      .eq("is_active", true);
+
+    const nameByPath = new Map<string, string>();
+    crumbData?.forEach((item) => nameByPath.set(item.path, item.name_ru));
+    crumbPaths.forEach((path) => {
+      const slug = path.split("/").pop() ?? path;
+      const name = nameByPath.get(path) ?? slug.replace(/-/g, " ");
+      breadcrumbs.push({ path, name });
+    });
+  }
+
+  const { data: childData } = await supabase
+    .from("categories")
+    .select("*")
+    .eq("parent_id", typedCurrent.id)
+    .eq("is_active", true)
+    .order("sort", { ascending: true });
+
+  const children = (childData as Category[] | null) ?? [];
+
+  const adverts: AdvertItem[] = [];
+  const { data: advertsRaw } = await supabase
+    .from("adverts")
+    .select("id,title,price,location,created_at")
+    .eq("category_id", typedCurrent.id)
+    .eq("status", "active")
+    .order("created_at", { ascending: false })
+    .limit(24);
+
+  if (advertsRaw?.length) {
+    const ids = advertsRaw.map((a) => a.id);
+    const { data: media } = await supabase
+      .from("media")
+      .select("advert_id,url,sort")
+      .in("advert_id", ids)
+      .order("sort", { ascending: true });
+
+    const firstMedia = new Map<string, string>();
+    media?.forEach((row: { advert_id: string; url: string }) => {
+      if (!firstMedia.has(row.advert_id)) {
+        firstMedia.set(row.advert_id, row.url);
+      }
+    });
+
+    advertsRaw.forEach((row) => {
+      adverts.push({
+        id: row.id,
+        title: row.title,
+        price: row.price,
+        location: row.location,
+        createdAt: (row as { created_at?: string | null }).created_at ?? null,
+        image: firstMedia.get(row.id) ?? null,
+      });
+    });
   }
 
   return (
@@ -194,38 +127,26 @@ export default function CategoryPage() {
         ))}
       </nav>
 
-      {loading ? (
-        <p>Загрузка…</p>
-      ) : error ? (
-        <p className="text-sm text-red-600">{error}</p>
-      ) : !current ? (
-        <p className="text-sm text-red-600">Категория не найдена.</p>
+      <header className="space-y-1">
+        <h1 className="text-2xl font-semibold text-zinc-900">{typedCurrent.name_ru}</h1>
+        <p className="text-sm text-muted-foreground">
+          Список объявлений в этой категории обновляется в режиме реального времени.
+        </p>
+      </header>
+
+      {children.length ? (
+        <section className="space-y-3">
+          <h2 className="text-lg font-medium text-zinc-900">Подкатегории</h2>
+          <CategoryList items={children} base="/c" />
+        </section>
       ) : (
-        <>
-          <header className="space-y-1">
-            <h1 className="text-2xl font-semibold text-zinc-900">{current.name_ru}</h1>
-            <p className="text-sm text-muted-foreground">
-              Список объявлений в этой категории обновляется в режиме реального времени.
-            </p>
-          </header>
-
-          {children.length ? (
-            <section className="space-y-3">
-              <h2 className="text-lg font-medium text-zinc-900">Подкатегории</h2>
-              <CategoryList items={children} base="/c" />
-            </section>
-          ) : (
-            <p className="text-sm text-muted-foreground">Подкатегории отсутствуют.</p>
-          )}
-
-          <section className="space-y-3">
-            <h2 className="text-lg font-medium text-zinc-900">Объявления</h2>
-            <AdsGrid items={ads} />
-          </section>
-        </>
+        <p className="text-sm text-muted-foreground">Подкатегории отсутствуют.</p>
       )}
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-medium text-zinc-900">Объявления</h2>
+        <AdsGrid items={adverts} />
+      </section>
     </div>
   );
 }
-
-
