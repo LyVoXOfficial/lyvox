@@ -62,6 +62,7 @@ export default function CategoryPage() {
         .from("categories")
         .select("*")
         .eq("path", slugPath)
+        .eq("is_active", true)
         .maybeSingle();
 
       if (currentError || !cur) {
@@ -90,7 +91,8 @@ export default function CategoryPage() {
         const { data: crumbData } = await supabase
           .from("categories")
           .select("path,name_ru")
-          .in("path", crumbPaths);
+          .in("path", crumbPaths)
+          .eq("is_active", true);
 
         if (!cancelled) {
           const nameByPath = new Map<string, string>();
@@ -225,3 +227,5 @@ export default function CategoryPage() {
     </div>
   );
 }
+
+

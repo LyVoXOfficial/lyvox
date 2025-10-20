@@ -315,7 +315,7 @@
 - name_ru: Животные
   icon: PawPrint
   children:
-    - name_ru: Животные
+    - name_ru: Домашние питомцы
       icon: PawPrint
       children:
         - name_ru: Собаки
@@ -377,3 +377,4 @@
           icon: Search
         - name_ru: Предлагаю обмен
           icon: RefreshCw
+

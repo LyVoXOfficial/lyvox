@@ -5,11 +5,13 @@ import type { Category } from "@/lib/types";
 import { getCategoryIcon } from "@/lib/categoryIcons";
 
 export default function CategoryList({ items, base = "/c" }: { items: Category[]; base?: string }) {
-  if (!items?.length) {
+  const filtered = (items ?? []).filter((cat) => cat.is_active !== false);
+
+  if (!filtered.length) {
     return <p className="text-sm text-muted-foreground">Список пуст.</p>;
   }
 
-  const uniqueItems = Array.from(new Map(items.map((item) => [item.slug, item])).values());
+  const uniqueItems = Array.from(new Map(filtered.map((item) => [item.slug, item])).values());
 
   return (
     <ul className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
