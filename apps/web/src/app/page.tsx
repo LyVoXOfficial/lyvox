@@ -105,20 +105,20 @@ export default function Home() {
     <div className="space-y-8">
       <InfoCarousel />
 
-      <div>
+      <section className="space-y-4">
         <SectionTitle>Категории</SectionTitle>
         <CategoriesCarousel />
-      </div>
+      </section>
 
-      <div>
+      <section className="space-y-4">
         <SectionTitle>Бесплатные объявления</SectionTitle>
         {loading ? <p>Загрузка…</p> : <AdsGrid items={freeAds} />}
-      </div>
+      </section>
 
-      <div>
+      <section className="space-y-4">
         <SectionTitle>Новые объявления</SectionTitle>
         {loading ? <p>Загрузка…</p> : <AdsGrid items={latest} />}
-      </div>
+      </section>
     </div>
   );
 }

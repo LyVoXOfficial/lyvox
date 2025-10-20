@@ -1,17 +1,18 @@
+import { config } from "dotenv";
+config({ path: "apps/web/.env.local", override: false });
+config({ path: ".env.local", override: false });
 // scripts/seedCategories.ts
 import { createClient } from "@supabase/supabase-js";
 import { readFileSync } from "fs";
 import path from "path";
-
-// @ts-ignore - js-yaml ships without types by default
 import yaml from "js-yaml";
 
 /**
- * Перед запуском установите переменные окружения:
+ * Перед запуском убедитесь, что заданы переменные окружения:
  *   SUPABASE_URL
- *   SUPABASE_SERVICE_ROLE_KEY (секретный ключ сервисной роли!)
+ *   SUPABASE_SERVICE_ROLE_KEY
  *
- * Скрипт заполняет таблицу public.categories структурой из seed/categories.ru.yaml.
+ * Скрипт загружает YAML (seed/categories.ru.yaml) и апдейтит public.categories.
  */
 
 type Node = {
@@ -21,7 +22,7 @@ type Node = {
 };
 
 function slugify(input: string): string {
-  const translitMap: Record<string, string> = {
+  const map: Record<string, string> = {
     а: "a",
     б: "b",
     в: "v",
@@ -62,7 +63,7 @@ function slugify(input: string): string {
     .toLowerCase()
     .split("")
     .map((ch) => {
-      if (translitMap[ch]) return translitMap[ch];
+      if (map[ch]) return map[ch];
       if (/[a-z0-9]/.test(ch)) return ch;
       if (ch === " " || ch === "_" || ch === "/") return "-";
       return "";
@@ -74,7 +75,7 @@ function slugify(input: string): string {
 }
 
 async function main() {
-  const url = process.env.SUPABASE_URL;
+  const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !serviceKey) {
     throw new Error("Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in env before running.");
@@ -86,6 +87,7 @@ async function main() {
   const doc = yaml.load(readFileSync(yamlPath, "utf8")) as Node[];
 
   let sortCounter = 0;
+  const touchedSlugs = new Set<string>();
 
   async function upsertNode(
     node: Node,
@@ -95,6 +97,7 @@ async function main() {
     if (level > 3) return;
 
     const slug = slugify(node.name_ru);
+    touchedSlugs.add(slug);
     const myPath = parent.path ? `${parent.path}/${slug}` : slug;
     const icon = node.icon ?? null;
 
@@ -136,7 +139,16 @@ async function main() {
     await upsertNode(top, { id: null, path: "", level: 0 });
   }
 
-  console.log("Categories seeded successfully.");
+  const slugList = Array.from(touchedSlugs);
+  if (slugList.length) {
+    const tuple = `(${slugList.map((slug) => `"${slug}"`).join(",")})`;
+    await supabase
+      .from("categories")
+      .update({ is_active: false })
+      .not("slug", "in", tuple);
+  }
+
+  console.log(`Categories seeded successfully (${slugList.length} slugs touched).`);
 }
 
 main().catch((e) => {
