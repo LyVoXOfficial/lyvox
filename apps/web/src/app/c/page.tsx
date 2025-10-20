@@ -1,3 +1,7 @@
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import { supabaseService } from "@/lib/supabaseService";
 import type { Category } from "@/lib/types";
 import CategoryList from "@/components/category-list";

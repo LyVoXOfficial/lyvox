@@ -1,3 +1,7 @@
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabaseService } from "@/lib/supabaseService";
@@ -128,7 +132,7 @@ export default async function CategoryPage({ params }: Props) {
       </nav>
 
       <header className="space-y-1">
-        <h1 className="text-2xl font-semibold text-zinc-900">{typedCurrent.name_ru}</h1>
+        <h1 className="text-2xl font-semibold text-зinc-900">{typedCurrent.name_ru}</h1>
         <p className="text-sm text-muted-foreground">
           Список объявлений в этой категории обновляется в режиме реального времени.
         </p>
@@ -136,7 +140,7 @@ export default async function CategoryPage({ params }: Props) {
 
       {children.length ? (
         <section className="space-y-3">
-          <h2 className="text-lg font-medium text-zinc-900">Подкатегории</h2>
+          <h2 className="text-lg font-medium text-зinc-900">Подкатегории</h2>
           <CategoryList items={children} base="/c" />
         </section>
       ) : (
@@ -144,7 +148,7 @@ export default async function CategoryPage({ params }: Props) {
       )}
 
       <section className="space-y-3">
-        <h2 className="text-lg font-medium text-zinc-900">Объявления</h2>
+        <h2 className="text-lg font-medium text-зinc-900">Объявления</h2>
         <AdsGrid items={adverts} />
       </section>
     </div>
