@@ -57,14 +57,19 @@ function PostPageInner() {
     [categories, selectedCategoryId],
   );
 
-  const isTransportVehicle = useMemo(() => {
-    const path = selectedCategory?.path ?? "";
-    return path.includes("transport/legkovye-avtomobili");
-  }, [selectedCategory]);
+  const selectedCategoryPath = selectedCategory?.path ?? "";
+  const isTransportCategory = useMemo(
+    () => selectedCategoryPath.startsWith("transport"),
+    [selectedCategoryPath],
+  );
+  const isPassengerVehicleCategory = useMemo(
+    () => selectedCategoryPath.includes("transport/legkovye-avtomobili"),
+    [selectedCategoryPath],
+  );
 
   const vehicleModels = useMemo(
-    () => (selectedMake ? VEHICLE_DATA[selectedMake] ?? [] : []),
-    [selectedMake],
+    () => (isPassengerVehicleCategory && selectedMake ? VEHICLE_DATA[selectedMake] ?? [] : []),
+    [isPassengerVehicleCategory, selectedMake],
   );
 
   const selectedModel = useMemo(
@@ -73,24 +78,24 @@ function PostPageInner() {
   );
 
   const yearOptions = useMemo(() => {
-    if (!selectedModel) return [];
+    if (!isPassengerVehicleCategory || !selectedModel) return [];
     const end = selectedModel.yearEnd ?? CURRENT_YEAR;
     const years: string[] = [];
     for (let y = end; y >= selectedModel.yearStart; y -= 1) {
       years.push(String(y));
     }
     return years;
-  }, [selectedModel]);
+  }, [isPassengerVehicleCategory, selectedModel]);
 
   useEffect(() => {
-    if (!isTransportVehicle) {
+    if (!isTransportCategory) {
       setValue("vehicle_make", "");
       setValue("vehicle_model", "");
       setValue("vehicle_year", "");
       setValue("vehicle_mileage", "");
       setValue("vehicle_condition", "");
     }
-  }, [isTransportVehicle, setValue]);
+  }, [isTransportCategory, setValue]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -213,7 +218,7 @@ function PostPageInner() {
     const transportModels = normalizedMake ? VEHICLE_DATA[normalizedMake] ?? [] : [];
     const modelMeta = transportModels.find((model) => model.name === normalizedModel) ?? null;
 
-    if (isTransportVehicle) {
+    if (isPassengerVehicleCategory) {
       if (!normalizedMake) return alert("???? ?????");
       if (!normalizedModel) return alert("???? ??????");
       if (!values.vehicle_year) return alert("???? ??? ???????");
@@ -233,7 +238,7 @@ function PostPageInner() {
       if (!values.vehicle_condition) return alert("???? ??????? ???????? ?????????");
     }
 
-    const vehiclePayload = isTransportVehicle
+    const vehiclePayload = isPassengerVehicleCategory
       ? {
           make: normalizedMake,
           model: normalizedModel,
@@ -299,10 +304,15 @@ function PostPageInner() {
             />
           </div>
 
-          {isTransportVehicle ? (
+          {isTransportCategory ? (
             <div className="space-y-4 border rounded px-4 py-4">
+              {!isPassengerVehicleCategory ? (
+                <p className="text-sm text-muted-foreground">
+                  Select the "Legkovye avtomobili" subcategory to provide make, model, and year details.
+                </p>
+              ) : null}
               <div>
-                <label className="block mb-1">�����</label>
+                <label className="block mb-1">?????</label>
                 <select
                   {...register("vehicle_make", {
                     onChange: (event) => {
@@ -314,8 +324,9 @@ function PostPageInner() {
                     },
                   })}
                   className="w-full border rounded px-3 py-2"
+                  disabled={!isPassengerVehicleCategory}
                 >
-                  <option value="">�롥��...</option>
+                  <option value="">????...</option>
                   {VEHICLE_MAKES.map((make) => (
                     <option key={make} value={make}>
                       {make}
@@ -325,7 +336,7 @@ function PostPageInner() {
               </div>
 
               <div>
-                <label className="block mb-1">������</label>
+                <label className="block mb-1">??????</label>
                 <select
                   {...register("vehicle_model", {
                     onChange: (event) => {
@@ -336,9 +347,9 @@ function PostPageInner() {
                     },
                   })}
                   className="w-full border rounded px-3 py-2"
-                  disabled={!selectedMake}
+                  disabled={!isPassengerVehicleCategory || !selectedMake}
                 >
-                  <option value="">{selectedMake ? "�롥��..." : "�஡���� �� �����"}</option>
+                  <option value="">{selectedMake ? "????..." : "?????? ?? ?????"}</option>
                   {vehicleModels.map((model) => (
                     <option key={model.name} value={model.name}>
                       {model.name}
@@ -348,13 +359,13 @@ function PostPageInner() {
               </div>
 
               <div>
-                <label className="block mb-1">���</label>
+                <label className="block mb-1">???</label>
                 <select
                   {...register("vehicle_year")}
                   className="w-full border rounded px-3 py-2"
-                  disabled={!selectedModel}
+                  disabled={!isPassengerVehicleCategory || !selectedModel}
                 >
-                  <option value="">{selectedModel ? "�롥��..." : "��ࠢ��� ������"}</option>
+                  <option value="">{selectedModel ? "????..." : "?????? ??????"}</option>
                   {yearOptions.map((year) => (
                     <option key={year} value={year}>
                       {year}
@@ -364,33 +375,35 @@ function PostPageInner() {
               </div>
 
               <div>
-                <label className="block mb-1">������� (���⨭)</label>
+                <label className="block mb-1">??????? (????)</label>
                 <input
                   type="number"
                   min="0"
                   step="1"
                   {...register("vehicle_mileage")}
                   className="w-full border rounded px-3 py-2"
+                  disabled={!isPassengerVehicleCategory}
                 />
               </div>
 
               <div>
-                <label className="block mb-1">�������� ���������</label>
+                <label className="block mb-1">???????? ?????????</label>
                 <select
                   {...register("vehicle_condition")}
                   className="w-full border rounded px-3 py-2"
+                  disabled={!isPassengerVehicleCategory}
                 >
-                  <option value="">�롥��...</option>
-                  <option value="new">�����</option>
-                  <option value="excellent">������</option>
-                  <option value="good">�������</option>
-                  <option value="needs_repair">������� ��������</option>
+                  <option value="">????...</option>
+                  <option value="new">?????</option>
+                  <option value="excellent">??????</option>
+                  <option value="good">???????</option>
+                  <option value="needs_repair">??????? ????????</option>
                 </select>
               </div>
 
               {selectedModel ? (
                 <p className="text-sm text-muted-foreground">
-                  ����� ����: {selectedModel.bodyType}. ������: {selectedModel.country}.
+                  ????? ????: {selectedModel.bodyType}. ??????: {selectedModel.country}.
                 </p>
               ) : null}
             </div>
@@ -461,4 +474,3 @@ export default function PostPage() {
     </Suspense>
   );
 }
-
