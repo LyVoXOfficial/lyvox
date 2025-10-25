@@ -305,7 +305,7 @@ curl -X GET https://localhost:3000/api/profile/get \
 - **Error codes:**
   - `400 INVALID_FORMAT`: `{ "ok": false, "error": "INVALID_FORMAT" }`
   - `401 UNAUTH`: `{ "ok": false, "error": "UNAUTH" }`
-  - `429 rate_limited`: `{ "error": "rate_limited", "retryAfter": <seconds>, "limit": <n>, "remaining": 0, "resetAt": "<iso>" }` with headers `Retry-After`, `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`.
+- `429 rate_limited`: `{ "error": "rate_limited", "retry_after_seconds": <seconds>, "limit": <n>, "remaining": 0, "resetAt": "<iso>" }` with headers `Retry-After`, `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`.
   - `500 SMS_SEND_FAIL`: Twilio failure `{ "ok": false, "error": "SMS_SEND_FAIL" }`
   - `500 INTERNAL_ERROR`: unexpected issue `{ "ok": false, "error": "INTERNAL_ERROR", "detail": "..." }`
 - **curl:**
@@ -396,7 +396,7 @@ curl -X DELETE https://localhost:3000/api/adverts/00000000-0000-0000-0000-000000
   - `401 UNAUTH`: `{ "ok": false, "error": "UNAUTH" }`
   - `400 BAD_INPUT`: `{ "ok": false, "error": "BAD_INPUT" }`
   - `409 ALREADY_REPORTED`: `{ "ok": false, "error": "ALREADY_REPORTED" }`
-  - `429 rate_limited`: `{ "error": "rate_limited", "retryAfter": <seconds>, "limit": <n>, "remaining": 0, "resetAt": "<iso>" }` with headers `Retry-After`, `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`.
+- `429 rate_limited`: `{ "error": "rate_limited", "retry_after_seconds": <seconds>, "limit": <n>, "remaining": 0, "resetAt": "<iso>" }` with headers `Retry-After`, `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`.
   - `400 <db_error>`: `{ "ok": false, "error": "<message>" }`
 - **curl:**
 ```bash
@@ -452,7 +452,7 @@ curl -X POST https://localhost:3000/api/reports/create \
 - **Error codes:**
   - `403 FORBIDDEN`: `{ "ok": false, "error": "FORBIDDEN" }`
   - `500 SERVICE_ROLE_REQUIRED`: `{ "ok": false, "error": "SUPABASE_SERVICE_ROLE_KEY is not configured..." }`
-  - `429 rate_limited`: `{ "error": "rate_limited", "retryAfter": <seconds>, "limit": <n>, "remaining": 0, "resetAt": "<iso>" }` with headers `Retry-After`, `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`.
+- `429 rate_limited`: `{ "error": "rate_limited", "retry_after_seconds": <seconds>, "limit": <n>, "remaining": 0, "resetAt": "<iso>" }` with headers `Retry-After`, `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`.
   - `400 <db_error>`: `{ "ok": false, "error": "<message>" }`
 - **curl:**
 ```bash
@@ -487,7 +487,7 @@ curl -X GET "https://localhost:3000/api/reports/list?status=pending" \
   - `500 SERVICE_ROLE_REQUIRED`: `{ "ok": false, "error": "SUPABASE_SERVICE_ROLE_KEY is not configured..." }`
   - `404 NOT_FOUND`: `{ "ok": false, "error": "NOT_FOUND" }`
   - `400 UPDATE_FAILED`: `{ "ok": false, "error": "<message>" }`
-  - `429 rate_limited`: `{ "error": "rate_limited", "retryAfter": <seconds>, "limit": <n>, "remaining": 0, "resetAt": "<iso>" }` with headers `Retry-After`, `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`.
+- `429 rate_limited`: `{ "error": "rate_limited", "retry_after_seconds": <seconds>, "limit": <n>, "remaining": 0, "resetAt": "<iso>" }` with headers `Retry-After`, `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`.
 - **curl (server-side execution)**:
 ```bash
 curl -X POST https://localhost:3000/api/reports/update \

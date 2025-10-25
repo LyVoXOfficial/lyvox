@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
+import { supabaseService } from "@/lib/supabaseService";
 
 export const runtime = "nodejs";
 
@@ -46,6 +47,11 @@ export async function DELETE(_request: NextRequest, context: { params: Promise<{
     );
   }
 
+  const { data: mediaRows } = await supabase
+    .from("media")
+    .select("url")
+    .eq("advert_id", advertId);
+
   const deleteSpecifics = await supabase
     .from("ad_item_specifics")
     .delete()
@@ -70,6 +76,15 @@ export async function DELETE(_request: NextRequest, context: { params: Promise<{
     );
   }
 
+  if (mediaRows?.length) {
+    const storagePaths = mediaRows
+      .map((row) => row.url)
+      .filter((path) => path && !path.startsWith("http"));
+    if (storagePaths.length) {
+      await supabaseService().storage.from("ad-media").remove(storagePaths);
+    }
+  }
+
   const { error: deleteAdvertError } = await supabase
     .from("adverts")
     .delete()
@@ -81,6 +96,14 @@ export async function DELETE(_request: NextRequest, context: { params: Promise<{
       { status: 400 },
     );
   }
+
+  await supabaseService()
+    .from("logs")
+    .insert({
+      user_id: user.id,
+      action: "advert_delete",
+      details: { advertId },
+    });
 
   return NextResponse.json({ ok: true });
 }

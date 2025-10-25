@@ -165,10 +165,11 @@ const pickStricterResult = (
 };
 
 const build429 = ({ limit, reset, retryAfterSec }: RateLimitResult): Response => {
+  // RATE_LIMIT: contract enforced for 429 payload shape
   const response = NextResponse.json(
     {
       error: "rate_limited",
-      retryAfter: retryAfterSec,
+      retry_after_seconds: retryAfterSec,
       limit,
       remaining: 0,
       resetAt: new Date(reset * 1000).toISOString(),

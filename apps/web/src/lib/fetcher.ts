@@ -54,7 +54,8 @@ export async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Pr
 }
 
 const pickRetryAfter = (body: unknown, header: string | null): number | null => {
-  const retryAfterValue = getNumberField(body, "retryAfter");
+  const retryAfterValue =
+    getNumberField(body, "retry_after_seconds") ?? getNumberField(body, "retryAfter");
   if (retryAfterValue && retryAfterValue > 0) {
     const ceiled = Math.ceil(retryAfterValue);
     return ceiled > 0 ? ceiled : null;

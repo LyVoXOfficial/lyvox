@@ -26,6 +26,7 @@ Key capabilities implemented in the codebase:
 - Public advert detail pages displaying pricing, location, and gallery assets.
 - Account area with profile details, trust score display, and phone verification via SMS codes.
 - Complaint submission from advert pages and moderation tooling for administrators.
+- Category **Transport** (cars, motorcycles, parts) must collect structured attributes (make, model, year, mileage, condition) via cascading dropdowns backed by `seed/transport_make_model.csv`, and surface a dedicated EV subcategory for battery vehicles.
 
 ## System Architecture
 
@@ -51,6 +52,7 @@ Key capabilities implemented in the codebase:
 - Supabase migrations `20251004120000` ? `20251004122000` provision the `reports` and `trust_score` tables, attach `updated_at` triggers, seed baseline RLS, and expose the `trust_inc(uid, pts)` helper function.
 - Supabase Storage bucket `ad-media` stores advert images; paths follow `user_id/advert_id/timestamp-filename`.
 - Category taxonomy is seeded via `scripts/seedCategories.ts`, which consumes `seed/categories.ru.yaml`.
+- Transport make/model metadata lives in `seed/transport_make_model.csv`; server-side code must expose dependent dropdown options for make → model and validate EV listings against the EV subcategory rules.
 - Authentication data is provided by Supabase Auth (`auth.users`), reused across API handlers and RLS policies.
 
 ### Infrastructure & Integrations
@@ -71,7 +73,7 @@ Key capabilities implemented in the codebase:
 
 ## Authorization & Permissions
 
-All critical flows rely on Supabase sessions. Admin functions should migrate from email comparisons to JWT `app_metadata.role` claims checked on the server (see TODO). Service-role access is limited to API routes instantiating `supabaseService()`.
+All critical flows rely on Supabase sessions. Admin-only actions check the JWT `app_metadata.role` claim through the `public.is_admin()` helper before escalating to the service-role client. The `supabaseService()` helper is only constructed inside server routes that require privileged writes.
 
 ### Permission Matrix
 
@@ -91,159 +93,18 @@ All critical flows rely on Supabase sessions. Admin functions should migrate fro
 
 ## Row-Level Security & Access Policies
 
-No migrations currently enable RLS on most domain tables. The following policies must be applied in Supabase (policies for `reports` and `trust_score` ship with migrations `20251004122000` and are refined in `20251005191500`). `auth.jwt()` or `auth.uid()` refer to Supabase helper functions.
+Migrations `20251004122000_initial_reports_policies.sql` and `20251005191500_enable_rls_and_policies.sql` enable RLS across the public schema and introduce the `public.is_admin()` helper that inspects `app_metadata.role` inside JWT claims.
 
-### adverts
-
-- **Current state:** RLS rules missing. Reads and writes require policies to protect ownership and published listings.
-- **Target policies:**
-  - `SELECT`: allow public access to rows where `status = 'active'`; allow owner (`user_id = auth.uid()`) and admins (`request.jwt()->>'role' = 'admin'`).
-  - `INSERT/UPDATE/DELETE`: allow only authenticated owners; admins via service role may bypass via `auth.role() = 'service_role'`.
-- **SQL (add after enabling RLS):**
-
-```sql
-alter table adverts enable row level security;
-create policy "Public can read active adverts" on adverts
-  for select using (status = 'active');
-create policy "Owner can read own adverts" on adverts
-  for select to authenticated using (user_id = auth.uid());
-create policy "Owner manage own adverts" on adverts
-  for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
-create policy "Admin can manage adverts" on adverts
-  for all using (coalesce(request.jwt()->>'role','') = 'admin');
-```
-
-### media
-
-- **Current state:** No policies. Media must be publicly viewable for active adverts but writable only by owners.
-- **Target policies:**
-  - `SELECT`: permit when owner or linked advert is active (`exists` join) or admin.
-  - `INSERT/UPDATE/DELETE`: owner or admin only.
-- **SQL:**
-
-```sql
-alter table media enable row level security;
-create policy "Public view active advert media" on media
-  for select using (
-    exists (
-      select 1
-      from adverts a
-      where a.id = media.advert_id
-        and a.status = 'active'
-    )
-  );
-create policy "Owner view media" on media
-  for select to authenticated using (
-    exists (
-      select 1
-      from adverts a
-      where a.id = media.advert_id
-        and a.user_id = auth.uid()
-    )
-  );
-create policy "Owner manage media" on media
-  for all to authenticated using (
-    exists (
-      select 1
-      from adverts a
-      where a.id = media.advert_id
-        and a.user_id = auth.uid()
-    )
-  ) with check (
-    exists (
-      select 1
-      from adverts a
-      where a.id = media.advert_id
-        and a.user_id = auth.uid()
-    )
-  );
-create policy "Admin manage media" on media
-  for all using (coalesce(request.jwt()->>'role','') = 'admin');
-```
-
-### categories
-
-- **Current state:** No RLS (likely disabled) though table is seed-driven.
-- **Policy goal:** expose read-only access to everyone, restrict writes to service role or maintenance procedures.
-
-```sql
-alter table categories enable row level security;
-create policy "Public read categories" on categories for select using (true);
-create policy "Service role manage categories" on categories
-  for all using (auth.role() = 'service_role');
-```
-
-### profiles
-
-- **Current state:** Missing RLS, yet profile data is sensitive PII.
-- **Policies:**
-  - `SELECT/UPDATE/INSERT`: owner only (`id = auth.uid()`), admins via service role.
-  - `DELETE`: owner or service role.
-
-```sql
-alter table profiles enable row level security;
-create policy "Owner read profile" on profiles
-  for select to authenticated using (id = auth.uid());
-create policy "Owner upsert profile" on profiles
-  for insert with check (id = auth.uid());
-create policy "Owner update profile" on profiles
-  for update using (id = auth.uid()) with check (id = auth.uid());
-create policy "Owner delete profile" on profiles
-  for delete using (id = auth.uid());
-create policy "Admin manage profiles" on profiles
-  for all using (coalesce(request.jwt()->>'role','') = 'admin');
-```
-
-### phones
-
-- **Current state:** No policies; table stores verified phone numbers and lookup data.
-
-```sql
-alter table phones enable row level security;
-create policy "Owner read phone" on phones
-  for select to authenticated using (user_id = auth.uid());
-create policy "Owner upsert phone" on phones
-  for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
-create policy "Admin manage phones" on phones
-  for all using (coalesce(request.jwt()->>'role','') = 'admin');
-```
-
-### phone_otps
-
-- **Current state:** No policies; OTP secrets must be owner-only with admin fallback.
-
-```sql
-alter table phone_otps enable row level security;
-create policy "Owner read active OTP" on phone_otps
-  for select to authenticated using (user_id = auth.uid());
-create policy "Owner manage OTP" on phone_otps
-  for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
-create policy "Admin manage OTP" on phone_otps
-  for all using (coalesce(request.jwt()->>'role','') = 'admin');
-```
-
-### reports (existing)
-
-- `SELECT`: authenticated users see reports they filed or on adverts they own.
-- `INSERT`: authenticated users may create reports for themselves (`reporter = auth.uid()`).
-- `UPDATE/DELETE`: currently service role only (no policy, rely on admin RPC/`supabaseService()`).
-
-### trust_score (existing)
-
-- `SELECT`: authenticated owners read their own scores (`user_id = auth.uid()`).
-- `INSERT/UPDATE/DELETE`: reserved for service role via `trust_inc` or admin tooling.
-
-### logs
-
-- **Current state:** No policies. Server actions log events via anon key; policy needed to restrict inserts to authenticated sessions while keeping records private.
-
-```sql
-alter table logs enable row level security;
-create policy "Owner insert log" on logs
-  for insert to authenticated with check (user_id = auth.uid());
-create policy "Service role read logs" on logs
-  for select using (auth.role() = 'service_role' or coalesce(request.jwt()->>'role','') = 'admin');
-```
+- `public.adverts`: public `SELECT` is limited to rows where `status = 'active'`; authenticated owners (`user_id = auth.uid()`) can read and manage their own listings; admins detected via `public.is_admin()` have full access.
+- `public.media`: media for active adverts is publicly readable; authenticated owners manage their own assets; admins manage all media through `public.is_admin()`.
+- `public.profiles`: owners can select/upsert/update/delete their profile (`id = auth.uid()`); admins bypass via `public.is_admin()`.
+- `public.phones`: owners can read and upsert their verified number (`user_id = auth.uid()`); admins manage via `public.is_admin()`.
+- `public.phone_otps`: owners control their OTP history; admins can review or purge attempts via `public.is_admin()`.
+- `public.reports`: reporters can see submissions they created; advert owners can read reports tied to their listings; admins manage moderation state via the service role or `public.is_admin()`.
+- `public.trust_score`: owners read their own score; admins adjust trust via `public.is_admin()` or the `trust_inc` helper.
+- `public.logs`: authenticated sessions insert audit entries for themselves; read access is restricted to the service role or `public.is_admin()`.
+- `public.categories` / `public.locations`: `SELECT` is public for catalogue browsing; writes remain limited to service-role tooling and seeding scripts.
+- `public.ad_item_specifics`: RLS is still disabled; rows are currently touched only through owner-scoped advert mutations, and tightening policies should accompany future schema work.
 
 ## API Surface
 
@@ -269,6 +130,8 @@ Detailed request/response contracts, error codes, and curl recipes are documente
 | `RATE_LIMIT_REPORT_USER_PER_10M` | optional    | server          | Override report submissions per user (default 5 per 10 minutes).     |
 | `RATE_LIMIT_REPORT_IP_PER_24H`   | optional    | server          | Override report submissions per IP (default 50 per 24 hours).        |
 | `RATE_LIMIT_ADMIN_PER_MIN`       | optional    | server          | Override admin moderation actions per minute (default 60).           |
+| `OTP_PURGE_GRACE_MINUTES`       | optional    | server (edge fn) | Minutes to delay OTP deletion inside `maintenance-cleanup` (default 0). |
+| `LOG_RETENTION_MONTHS`          | optional    | server (edge fn) | Months before `maintenance-cleanup` anonymises historical `logs` (default 18). |
 | `SUPABASE_JWT_ADMIN_ROLE`       | planned     | server          | Optional custom claim key to detect admin role.                      |
 
 `NEXT_PUBLIC_ADMIN_EMAIL` must be removed; use Supabase JWT claims (`app_metadata.role`) to show admin UI affordances client-side.
@@ -292,7 +155,7 @@ When a window is exceeded the server returns **HTTP 429** with a JSON payload:
 ```json
 {
   "error": "rate_limited",
-  "retryAfter": 42,
+  "retry_after_seconds": 42,
   "limit": 5,
   "remaining": 0,
   "resetAt": "2025-10-05T18:30:00.000Z"
@@ -308,29 +171,30 @@ All tunables fall back to the defaults above; override via the `RATE_LIMIT_*` en
 _Source of truth: generated types in `supabase/types/database.types.ts`. The linked `supabase/schema.sql` dump currently carries no extra constraints beyond those types._
 
 ### Domain tables
-
-- **public.adverts** — marketplace listings keyed by `id uuid`. Stores `title`, optional `description`, pricing fields (`price numeric`, `currency text`), `condition text`, free-form `location text`, and audit timestamps (`created_at`, `updated_at`). Ownership is tracked with `user_id uuid` (logical link to `auth.users`). Foreign keys: `category_id uuid → public.categories.id`; `location_id uuid → public.locations.id` (nullable). `status text` follows the app workflow (`draft`, `active`, `inactive`, `archived`).
+- **public.adverts** — marketplace listings keyed by `id uuid`. Stores `title`, optional `description`, monetary fields (`price numeric`, `currency text` default `'EUR'`), `condition text`, free-form `location text`, and audit timestamps (`created_at`, `updated_at`). Ownership is tracked with `user_id uuid → auth.users.id`. Foreign keys: `category_id uuid → public.categories.id`; optional `location_id uuid → public.locations.id`. `status text` reflects workflow values such as `draft`, `active`, `inactive`, `archived`.
 - **public.ad_item_specifics** — one-to-one JSON payload per advert. Columns: `advert_id uuid → public.adverts.id` (unique) and `specifics jsonb` for arbitrary key/value details.
-- **public.categories** — hierarchical taxonomy. Columns include `id uuid` (PK), `parent_id uuid` self-reference, `level int`, `slug`, `path`, optional `icon`, multilingual labels (`name_ru` plus optional `name_en`/`name_fr`/`name_nl`), `sort int`, and `is_active boolean`.
-- **public.locations** — normalized geodata for adverts. Stores `id uuid`, optional `country`, `region`, `city`, `postcode`, and a PostGIS point (`point geometry`). Referenced from `public.adverts.location_id`.
-- **public.media** — advert media assets. Columns: `id uuid`, `advert_id uuid → public.adverts.id`, `url text`, optional dimensions `w`/`h` (numeric), `sort int` for ordering, and `created_at` timestamp.
-- **public.profiles** — user profile metadata keyed by `id uuid` (matches Supabase Auth users). Contains optional `display_name`, `phone`, verification flags (`verified_email`, `verified_phone`), and `created_at`.
-- **public.phones** — latest verified phone per user. Columns: `user_id uuid` (logical PK), `e164 text`, `verified boolean`, `updated_at timestamptz`, and optional `lookup jsonb` (Twilio carrier metadata).
-- **public.phone_otps** — OTP tokens. Stores `id bigint`, `user_id uuid` (nullable for pre-auth flows), `e164 text`, `code text`, `attempts int`, `expires_at timestamptz`, `created_at timestamptz`, and `used boolean`. No foreign keys are declared.
-- **public.reports** — moderation complaints. Columns: `id bigint`, `advert_id uuid → public.adverts.id`, `reporter uuid` (Supabase Auth user ID), `reason text`, optional `details text`, `status text`, `reviewed_by uuid` (nullable), and audit timestamps.
-- **public.trust_score** — trust reputation ledger keyed by `user_id uuid`, with `score int` and `updated_at timestamptz`.
-- **public.logs** — audit trail. Columns: `id bigint`, `action text`, optional `details jsonb`, `user_id uuid` (nullable), and `created_at timestamptz`.
+- **public.categories** — hierarchical taxonomy with `id uuid` (PK), self-referencing `parent_id uuid`, `level int`, `slug`, `path`, optional `icon`, multilingual labels (`name_ru` plus optional `name_en` / `name_fr` / `name_nl`), `sort int`, and `is_active boolean`.
+- **public.locations** — normalized geodata for adverts. Stores `id uuid`, optional `country`, `region`, `city`, `postcode`, and a PostGIS `point geometry`.
+- **public.media** — advert media assets with `id uuid`, `advert_id uuid → public.adverts.id`, `url text`, optional dimensions `w`/`h`, `sort int`, and `created_at timestamptz`.
+- **public.profiles** — user profile metadata keyed by `id uuid → auth.users.id`. Contains optional `display_name`, `phone`, verification flags (`verified_email`, `verified_phone`), `consents jsonb` (latest GDPR snapshot), and `created_at timestamptz`.
+- **public.phones** — latest verified phone per user. Columns: `user_id uuid → auth.users.id` (PK), unique `e164 text`, `verified boolean`, optional `lookup jsonb` for Twilio carrier metadata, and `updated_at timestamptz`.
+- **public.phone_otps** — OTP tokens with `id bigint`, optional `user_id uuid → auth.users.id`, `e164 text`, `code text`, `attempts int`, `expires_at timestamptz`, `created_at timestamptz`, and `used boolean`.
+- **public.reports** — moderation complaints with `id bigint`, `advert_id uuid → public.adverts.id`, `reporter uuid → auth.users.id`, optional `details text`, `status text`, optional `reviewed_by uuid → auth.users.id`, and audit timestamps.
+- **public.trust_score** — trust reputation ledger keyed by `user_id uuid → auth.users.id` with `score int` and `updated_at timestamptz`.
+- **public.logs** — audit trail capturing `id bigint`, `action text`, optional `details jsonb`, optional `user_id uuid`, and `created_at timestamptz`.
+- Vehicle-specific attributes (e.g. `vehicle_make`, `vehicle_model`, `vehicle_year`, `vehicle_mileage`, `vehicle_engine_type`, `vehicle_region`) are stored in `public.ad_item_specifics.specifics` as validated JSON sourced from the transport make/model dataset.
 
 ### System tables & views
 
 - **public.spatial_ref_sys** plus the PostGIS helper views (`geometry_columns`, `geography_columns`, etc.) are managed by the PostGIS extension and not directly manipulated by the application.
 
-_Fields such as `user_id` across `adverts`, `profiles`, `phones`, `phone_otps`, `trust_score`, and `logs` reference Supabase Auth user IDs at the application layer, but no foreign-key constraint is declared in the canonical schema._
+_Fields that reference Supabase Auth users (`adverts.user_id`, `profiles.id`, `phones.user_id`, `phone_otps.user_id`, `reports.reporter`, `reports.reviewed_by`, `trust_score.user_id`) rely on Supabase-managed foreign keys in the auth schema._
 
 ### Supporting Functions & Triggers
 
 - `set_updated_at()` — keeps `updated_at` in sync on mutable tables (`reports`, `trust_score`).
 - `trust_inc(uid, pts)` — service-role helper invoked by moderation flows to increment `public.trust_score`.
+- `is_admin()` — policy helper that inspects `app_metadata.role` inside JWT claims to grant admin access.
 
 ### Entity-Relationship Diagram
 
@@ -358,6 +222,13 @@ erDiagram
 | Vercel                                  | Application logs                           | Hosting & operations                 | 30 days (default)                                | Legitimate interest                   | Ensure logging level minimises PII.                                               |
 | Supabase                                | DB, storage, auth                          | Core data processing                 | Configurable                                     | Contract                              | Acts as processor; sign DPA.                                                      |
 
+### Electronic Waste (WEEE / Recupel) Compliance
+
+- **Scope:** Mandatory for commercial sellers (companies, sole traders) listing electrical or electronic equipment within Belgium as of **29.03.2025** per EU WEEE rules implemented via Recupel.
+- **Private sellers:** No Recupel membership required when selling personal second-hand items.
+- **Commercial sellers:** Must provide a valid Recupel membership ID during onboarding; listings should be blocked until the ID is verified.
+- **Support:** Recupel – [www.recupel.be](https://www.recupel.be), `logistics@recupel.be`. Retain contact details in admin tooling for escalations.
+
 **DSAR workflow:**
 
 1. Verify requester via Supabase auth.
@@ -373,33 +244,17 @@ erDiagram
 
 ## Roadmap
 
-- Add self-service consent management (opt-in/out, version history export) in profile settings.
-- Consolidate category routing (`/c/[categoryPath]`) to serve listings directly and improve SEO.
-- Monitor Upstash rate limiting metrics and adjust quotas for regional traffic spikes.
-- Expand automated tests for API routes and Supabase policies (auth, reports, phone verification).
-- Document and automate Cloudflare WAF plus Zero Trust posture in infrastructure-as-code.
-- Supabase Edge Function `maintenance-cleanup` runs daily (02:00 UTC) to purge expired OTP secrets and anonymise audit logs older than 18 months; see `supabase/functions/maintenance-cleanup` for implementation and scheduling.
+- Expand automated API and RLS regression tests (aligns with the open item in `docs/TODO.md`).
+- Instrument Upstash rate limiting metrics and alerting around `/api/phone/*` and `/api/reports/*`.
+- Codify Cloudflare WAF plus Zero Trust configuration as infrastructure-as-code.
+- Configure a Supabase cron (or external trigger) for the `maintenance-cleanup` Edge Function and surface retention knobs via env.
+- Ship dependent make/model/year pickers for Transport listings (EV subcategory, structured mileage/condition capture) powered by `seed/transport_make_model.csv`.
 
--## Project Overview
-+## Project Overview {#project-overview}
 
--## Technologies & Libraries
-+## Technologies & Libraries {#technologies--libraries}
 
--## System Architecture
-+## System Architecture {#system-architecture}
 
--## Database Schema
-+## Database Schema {#database-schema}
 
--## Infrastructure & Integrations
-+## Infrastructure & Integrations {#infrastructure--integrations}
 
--## Compliance (GDPR / DSA)
-+## Compliance (GDPR / DSA) {#compliance-gdpr--dsa}
 
--## Roadmap
-+## Roadmap {#roadmap}
 
--## Authorization & Permissions
-+## Authorization & Permissions {#authorization--permissions}
+

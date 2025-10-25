@@ -157,6 +157,8 @@
 - Миграции и cron-задачи: reports/trust_score уже вынесены в миграции, ежедневный cleanup запланирован через Edge Function `maintenance-cleanup`; остаются остальные автоматизации ([REQ:Data], [TODO #4], [TODO #5]).
 - Недостаточно тестов для API и RLS — риск регрессий ([REQ:Quality], [TODO #6]).
 - Интеграции Itsme/KBO и WAF требуют координации с комплаенсом ([REQ:Integrations], [REQ:Compliance]).
+- Recupel / WEEE: ���������������� ������������ �� ������ ID Recupel (������ �� 29.03.2025); ��������� ���� � ������������ ����� �������� ([REQ:Compliance], [TODO #7]).
+- Транспорт: каскадные списки марка/модель/год + сбор пробега и состояния; EV-подкатегория с привязкой к seed/transport_make_model.csv ([REQ:Core], [REQ:Data], [TODO #8]).
 
 ## 6. Примечание по управлению проектом
 Файл PLAN.md формируется на основе актуальных требований и архитектуры. Его нужно обновлять после каждого значимого изменения в базе данных, архитектуре или дорожной карте, чтобы оставаться синхронизированным с `docs/requirements.md`, `docs/ARCH_RULES.md`, `docs/TODO.md` и `docs/ARCHITECTURE.md`.
@@ -175,3 +177,5 @@
 [TODO #4]: TODO.md#lyvox-todo
 [TODO #5]: TODO.md#lyvox-todo
 [TODO #6]: TODO.md#lyvox-todo
+[TODO #7]: TODO.md#lyvox-todo
+[TODO #8]: TODO.md#lyvox-todo

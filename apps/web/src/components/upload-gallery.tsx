@@ -4,132 +4,226 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { readImageSize } from "@/lib/image";
+import { apiFetch } from "@/lib/fetcher";
 
-function sanitizeFileName(name: string) {
-  // убираем диакритику/кириллицу → латиница, пробелы → '-', всё лишнее выкинуть
-  return name
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9._-]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
-
-type Media = {
+type MediaItem = {
   id: string;
   url: string;
+  storagePath: string;
   w: number | null;
   h: number | null;
-  sort: number | null;
+  sort: number;
 };
 
+const MAX_MEDIA_PER_ADVERT = 12;
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+
 export default function UploadGallery({ advertId }: { advertId: string }) {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [items, setItems] = useState<Media[]>([]);
+  const [items, setItems] = useState<MediaItem[]>([]);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
-    (async () => {
-      const { data } = await supabase
-        .from("media")
-        .select("*")
-        .eq("advert_id", advertId)
-        .order("sort", { ascending: true });
-      setItems((data as any) ?? []);
-    })();
-  }, [advertId]);
-
-  const onFiles = async (files: FileList | null) => {
-    if (!files || !userId) return;
-    const list = Array.from(files).slice(0, 10);
-    setBusy(true);
-    let baseSort = (items.at(-1)?.sort ?? 0) + 1;
-
-    for (const file of list) {
-      try {
-        const { w, h } = await readImageSize(file);
-        const safe = sanitizeFileName(file.name);
-        const pathname = `${userId}/${advertId}/${Date.now()}-${safe}`;
-
-
-        const { error: upErr } = await supabase.storage
-          .from("ad-media")
-          .upload(pathname, file, { upsert: false, contentType: file.type });
-        if (upErr) throw upErr;
-
-        const { data: pub } = supabase.storage.from("ad-media").getPublicUrl(pathname);
-        const url = pub.publicUrl;
-
-        const { data: m, error: insErr } = await supabase
-          .from("media")
-          .insert({ advert_id: advertId, url, w, h, sort: baseSort })
-          .select("*")
-          .single();
-        if (insErr) throw insErr;
-
-        baseSort += 1;
-        setItems((prev) => [...prev, m as any]);
-      } catch (e: any) {
-        alert("Ошибка загрузки: " + e.message);
+  const loadItems = async () => {
+    try {
+      const response = await apiFetch(`/api/media/list?advertId=${advertId}`, {
+        cache: "no-store",
+      });
+      const payload = await response.json();
+      if (!payload.ok) {
+        throw new Error(payload.error ?? "FAILED_TO_LOAD_MEDIA");
       }
+      setItems(
+        (payload.items as MediaItem[]).map((item) => ({
+          ...item,
+          storagePath: item.storagePath ?? "",
+          sort: item.sort ?? 0,
+        })),
+      );
+    } catch (err) {
+      console.error("MEDIA_LIST_ERROR", err);
+      setError("��ࠢ�� 䠩�� ���� ���������.");
     }
-    setBusy(false);
   };
 
-  const removeItem = async (m: Media) => {
-    if (!userId) return;
+  useEffect(() => {
+    loadItems();
+  }, [advertId]);
+
+  const handleFiles = async (files: FileList | null) => {
+    if (!files?.length) return;
+    const current = items.length;
+    const candidates = Array.from(files);
+    if (current + candidates.length > MAX_MEDIA_PER_ADVERT) {
+      setError("��ᯮ���� 12 ���������� ��� �������.");
+      return;
+    }
+
+    setError(null);
     setBusy(true);
     try {
-      const idx = m.url.indexOf("/object/public/ad-media/");
-      const path = m.url.substring(idx + "/object/public/ad-media/".length);
+      for (const file of candidates) {
+        if (file.size > MAX_FILE_SIZE_BYTES) {
+          setError("���� ☦� ��������� �� 5MB.");
+          continue;
+        }
 
-      await supabase.storage.from("ad-media").remove([path]);
-      await supabase.from("media").delete().eq("id", m.id);
+        const dims = await readImageSize(file).catch(() => ({ w: null, h: null }));
 
-      setItems((prev) => prev.filter((x) => x.id !== m.id));
+        const signResponse = await apiFetch("/api/media/sign", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            advertId,
+            fileName: file.name,
+            contentType: file.type,
+            fileSize: file.size,
+          }),
+        });
+        const signPayload = await signResponse.json();
+        if (!signPayload.ok) {
+          throw new Error(signPayload.error ?? "SIGNED_UPLOAD_FAILED");
+        }
+
+        const { path, token } = signPayload;
+        const uploadResult = await supabase.storage
+          .from("ad-media")
+          .uploadToSignedUrl(path, token, file);
+        if (uploadResult.error) {
+          throw uploadResult.error;
+        }
+
+        const completeResponse = await apiFetch("/api/media/complete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            advertId,
+            storagePath: path,
+            width: dims.w,
+            height: dims.h,
+          }),
+        });
+        const completePayload = await completeResponse.json();
+        if (!completePayload.ok) {
+          throw new Error(completePayload.error ?? "MEDIA_COMPLETE_FAILED");
+        }
+
+        const media: MediaItem = completePayload.media;
+        setItems((prev) =>
+          [...prev, media].sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0)),
+        );
+      }
+    } catch (err) {
+      console.error("MEDIA_UPLOAD_ERROR", err);
+      setError("�� ��⮩稢�� ��᫠ �� ��������� ����.");
     } finally {
       setBusy(false);
     }
   };
 
-  const move = async (m: Media, dir: -1 | 1) => {
-    const target = items.find((x) => x.sort === (m.sort ?? 0) + dir);
-    if (!target) return;
-    await supabase.from("media").update({ sort: target.sort }).eq("id", m.id);
-    await supabase.from("media").update({ sort: m.sort }).eq("id", target.id);
+  const removeItem = async (id: string) => {
+    setBusy(true);
+    setError(null);
+    try {
+      const response = await apiFetch(`/api/media/${id}`, { method: "DELETE" });
+      const payload = await response.json();
+      if (!payload.ok) {
+        throw new Error(payload.error ?? "MEDIA_DELETE_FAILED");
+      }
+      await loadItems();
+    } catch (err) {
+      console.error("MEDIA_DELETE_ERROR", err);
+      setError("�訡�� �� ��������� ����.");
+    } finally {
+      setBusy(false);
+    }
+  };
 
-    const { data } = await supabase
-      .from("media")
-      .select("*")
-      .eq("advert_id", advertId)
-      .order("sort", { ascending: true });
-    setItems((data as any) ?? []);
+  const submitOrder = async (ordered: MediaItem[]) => {
+    await apiFetch("/api/media/reorder", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        advertId,
+        orderedIds: ordered.map((item) => item.id),
+      }),
+    });
+    setItems(ordered);
+  };
+
+  const move = async (index: number, direction: -1 | 1) => {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= items.length) return;
+    const ordered = [...items];
+    const [current] = ordered.splice(index, 1);
+    ordered.splice(targetIndex, 0, current);
+    ordered.forEach((item, idx) => {
+      item.sort = idx;
+    });
+    setBusy(true);
+    try {
+      await submitOrder(ordered);
+    } catch (err) {
+      console.error("MEDIA_REORDER_ERROR", err);
+      setError("���� �ணࠬ���� ����� ����.");
+      await loadItems();
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
     <div className="space-y-3">
-      <input type="file" accept="image/*" multiple onChange={(e) => onFiles(e.target.files)} disabled={busy || !userId} />
+      <input
+        type="file"
+        accept="image/*"
+        multiple
+        onChange={(event) => handleFiles(event.target.files)}
+        disabled={busy || items.length >= MAX_MEDIA_PER_ADVERT}
+      />
+
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-        {items.map((m) => (
-          <div key={m.id} className="border rounded p-2">
+        {items.map((item, index) => (
+          <div key={item.id} className="border rounded p-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={m.url} alt="" className="aspect-square object-cover w-full rounded" />
-            <div className="flex justify-between items-center mt-2 text-sm">
-              <span>{m.w}×{m.h}</span>
+            <img src={item.url} alt="" className="aspect-square object-cover w-full rounded" />
+            <div className="flex justify-between items-center mt-2 text-xs text-muted-foreground">
+              <span>
+                {item.w ?? "?"}×{item.h ?? "?"}
+              </span>
               <div className="flex gap-1">
-                <Button size="sm" variant="outline" onClick={() => move(m, -1)}>&uarr;</Button>
-                <Button size="sm" variant="outline" onClick={() => move(m, 1)}>&darr;</Button>
-                <Button size="sm" variant="destructive" onClick={() => removeItem(m)}>Удалить</Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => move(index, -1)}
+                  disabled={busy || index === 0}
+                >
+                  &uarr;
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => move(index, 1)}
+                  disabled={busy || index === items.length - 1}
+                >
+                  &darr;
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => removeItem(item.id)}
+                  disabled={busy}
+                >
+                  �������
+                </Button>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {busy && <p>Загружаем…</p>}
+      {busy && <p>����㦠��...</p>}
     </div>
   );
 }

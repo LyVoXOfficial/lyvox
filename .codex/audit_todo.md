@@ -1,0 +1,3 @@
+2025-10-25 - Pending comprehensive compliance audit for remaining API route handlers (`apps/web/src/app/api/**`) to verify role enforcement, media ownership, and moderator logging. Prioritised after rate-limit contract fix. (ref: compliance run request)
+2025-10-25 - Legacy `media.url` records still store public URLs; migrate them to storage paths and purge legacy public assets once users re-upload. (ref: apps/web/src/app/api/media/list/route.ts legacy branch)
+2025-10-25 - DB_CHANGELOG: Secure media pipeline reuses existing `media` schema (sort, dimensions) and `logs` table; no migration required. Confirmed compatibility with `supabase/types/database.types.ts`.

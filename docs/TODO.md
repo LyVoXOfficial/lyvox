@@ -6,6 +6,8 @@
 - [x] Break down `supabase/reports.sql` into incremental migrations and register them with the Supabase CLI.
 - [x] Add a scheduled job (Edge Function or cron) to delete expired `phone_otps` rows and anonymise stale `logs` entries beyond retention windows.
 - [ ] Expand automated API tests to cover happy/error-paths described in `docs/API_REFERENCE.md`.
+- [ ] Capture and validate Recupel membership IDs for commercial sellers before allowing electronic listings (WEEE compliance, 2025-03-29).
+- [ ] Implement cascading make/model/year selectors for Transport listings using `seed/transport_make_model.csv`, require mileage & condition inputs, and surface a dedicated EV subcategory.
 
 _No undocumented or deprecated API routes were detected during the 2025-10-05 audit._
 - [x] Add consent management UI in profile settings (toggle marketing opt-in, export history).
