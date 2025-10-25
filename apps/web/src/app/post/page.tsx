@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { apiFetch } from "@/lib/fetcher";
 import { CURRENT_YEAR, VEHICLE_DATA, VEHICLE_MAKES } from "@/data/vehicles";
 import { Button } from "@/components/ui/button";
 import UploadGallery from "@/components/upload-gallery";
@@ -165,41 +166,21 @@ function PostPageInner() {
   }, [editId, setValue]);
 
   const createDraft = async () => {
-    if (!userId) return alert("Войдите, чтобы создать объявление");
+    if (!userId) return alert("������, �⮡� ᮧ���� �������");
     setCreating(true);
-
-    const { data: cat } = await supabase
-      .from("categories")
-      .select("id")
-      .eq("level", 1)
-      .order("sort", { ascending: true })
-      .limit(1)
-      .maybeSingle();
-
-    const categoryId = cat?.id;
-
-    const { data, error } = await supabase
-      .from("adverts")
-      .insert({
-        user_id: userId,
-        category_id: categoryId,
-        title: "Черновик объявления",
-        status: "draft",
-      })
-      .select("id")
-      .single();
-
-    setCreating(false);
-
-    if (error) {
-      alert("Ошибка создания черновика: " + error.message);
-    } else {
-      setAdvertId(data!.id);
+    try {
+      const response = await apiFetch("/api/adverts", { method: "POST" });
+      const payload = await response.json();
+      if (!payload.ok) {
+        throw new Error(payload.error ?? "CREATE_FAILED");
+      }
+      const categoryId: string = payload.advert?.category_id ?? "";
+      setAdvertId(payload.advert.id);
       reset({
         title: "",
         description: "",
         price: null,
-        category_id: categoryId ?? "",
+        category_id: categoryId,
         location: "",
         vehicle_make: "",
         vehicle_model: "",
@@ -208,17 +189,20 @@ function PostPageInner() {
         vehicle_condition: "",
       });
       const url = new URL(window.location.href);
-      url.searchParams.set("edit", data!.id);
+      url.searchParams.set("edit", payload.advert.id);
       window.history.replaceState(null, "", url.toString());
+    } catch (err) {
+      console.error("CREATE_DRAFT_ERROR", err);
+      alert("�訡�� ᮧ����� �୮����. ��������");
+    } finally {
+      setCreating(false);
     }
-  };
-
-  const onSubmit = async (values: FormData) => {
-    if (!values.title?.trim()) return alert("������ ��������");
-    if (!values.category_id) return alert("�롥�� ��⥣���");
+  };  const onSubmit = async (values: FormData) => {
+    if (!values.title?.trim()) return alert("?????? ????????");
+    if (!values.category_id) return alert("???? ??????");
 
     if (!advertId) {
-      alert("���砫� ᮧ���� �୮���");
+      alert("????? ????? ?????");
       return;
     }
 
@@ -230,75 +214,64 @@ function PostPageInner() {
     const modelMeta = transportModels.find((model) => model.name === normalizedModel) ?? null;
 
     if (isTransportVehicle) {
-      if (!normalizedMake) return alert("�롥�� �����");
-      if (!normalizedModel) return alert("�롥�� ������");
-      if (!values.vehicle_year) return alert("�롥�� ��� �ணࠬ����");
-      if (!modelMeta) return alert("��� ������ �� ���뫮��");
-      if (vehicleYear === null || Number.isNaN(vehicleYear)) return alert("�������� ��� �������� ���");
+      if (!normalizedMake) return alert("???? ?????");
+      if (!normalizedModel) return alert("???? ??????");
+      if (!values.vehicle_year) return alert("???? ??? ???????");
+      if (!modelMeta) return alert("??? ?????? ?? ??????");
+      if (vehicleYear === null || Number.isNaN(vehicleYear)) return alert("???????? ??? ???????? ???");
 
       const maxYear = modelMeta.yearEnd ?? CURRENT_YEAR;
       if (vehicleYear < modelMeta.yearStart || vehicleYear > maxYear) {
-        return alert(`���� ��࠭����� �� ${modelMeta.yearStart} �� ${maxYear}`);
+        return alert(`???? ???????? ?? ${modelMeta.yearStart} ?? ${maxYear}`);
       }
 
-      if (!values.vehicle_mileage) return alert("�롥�� ������ ������� (���⨭)");
+      if (!values.vehicle_mileage) return alert("???? ?????? ??????? (????)");
       if (vehicleMileage === null || Number.isNaN(vehicleMileage) || vehicleMileage < 0) {
-        return alert("�������� �������� ���������");
+        return alert("???????? ???????? ?????????");
       }
 
-      if (!values.vehicle_condition) return alert("�롥�� ������� �������� ���������");
+      if (!values.vehicle_condition) return alert("???? ??????? ???????? ?????????");
     }
 
-    const payload = {
-      title: values.title,
-      description: values.description,
-      price: values.price,
-      category_id: values.category_id,
-      location: values.location,
-      condition: isTransportVehicle ? values.vehicle_condition || null : null,
-      status: "active" as const,
-    };
+    const vehiclePayload = isTransportVehicle
+      ? {
+          make: normalizedMake,
+          model: normalizedModel,
+          year: vehicleYear,
+          mileage: vehicleMileage,
+          condition: values.vehicle_condition,
+        }
+      : undefined;
 
-    const { error } = await supabase.from("adverts").update(payload).eq("id", advertId);
+    try {
+      const response = await apiFetch(`/api/adverts/${advertId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: values.title,
+          description: values.description,
+          price: values.price,
+          category_id: values.category_id,
+          location: values.location,
+          status: "active",
+          vehicle: vehiclePayload,
+        }),
+      });
 
-    if (error) {
-      alert("�訡�� ��࠭����: " + error.message);
-      return;
-    }
-
-    if (isTransportVehicle) {
-      const specificsPayload = {
-        vehicle_make: normalizedMake,
-        vehicle_model: normalizedModel,
-        vehicle_year: vehicleYear!,
-        vehicle_mileage: vehicleMileage !== null ? Math.round(vehicleMileage) : null,
-        vehicle_body_type: modelMeta!.bodyType,
-        vehicle_country: modelMeta!.country,
-      };
-
-      const { error: specificsError } = await supabase
-        .from("ad_item_specifics")
-        .upsert({ advert_id: advertId, specifics: specificsPayload });
-
-      if (specificsError) {
-        alert("�訡�� �ਭ���� ������ ��������: " + specificsError.message);
+      const payload = await response.json();
+      if (!payload.ok) {
+        console.error("ADVERT_UPDATE_ERROR", payload);
+        alert("???? ???????: " + (payload.error ?? "unknown"));
         return;
       }
-    } else {
-      const { error: specificsError } = await supabase
-        .from("ad_item_specifics")
-        .delete()
-        .eq("advert_id", advertId);
 
-      if (specificsError) {
-        console.warn("Failed to clear vehicle specifics", specificsError.message);
-      }
+      alert("???????? ??????????!");
+      window.location.href = `/ad/${advertId}`;
+    } catch (err) {
+      console.error("ADVERT_UPDATE_EXCEPTION", err);
+      alert("������ ������. �������� �����.");
     }
-
-    alert("������� ��㡫�������!");
-    window.location.href = `/ad/${advertId}`;
   };
-
   return (
     <div className="space-y-6 max-w-2xl">
       <h1 className="text-2xl font-semibold">
@@ -488,3 +461,4 @@ export default function PostPage() {
     </Suspense>
   );
 }
+
