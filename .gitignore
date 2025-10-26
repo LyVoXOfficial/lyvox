@@ -164,3 +164,7 @@ tmp.txt
 # OS files
 .DS_Store
 Thumbs.db
+
+# Generated seeds/artifacts
+/scripts/vehicles_seed.sql
+
