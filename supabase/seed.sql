@@ -12,7 +12,6 @@ values (
   true,
   'Sportscars / Classic'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -42,7 +41,6 @@ values (
   4,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -70,7 +68,6 @@ values (
   null,
   'The original Anglo-American collaboration featuring Ford V8 engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -98,7 +95,6 @@ values (
   null,
   'Modern continuation and specialized versions.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -122,7 +118,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -152,7 +147,6 @@ values (
   5.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -180,7 +174,6 @@ values (
   null,
   'Lightweight British sports car, the predecessor to the Cobra.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -204,7 +197,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -234,7 +226,6 @@ values (
   5,
   4.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -262,7 +253,6 @@ values (
   null,
   'The fixed-head coupe version of the Ace, offering slightly more practicality.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -286,7 +276,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -298,7 +287,6 @@ values (
   false,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -328,7 +316,6 @@ values (
   8,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -356,7 +343,6 @@ values (
   null,
   'The AMC Eagle was the first mass-produced American four-wheel-drive passenger car, blending sedan comfort with rugged 4x4 capability, preceding the SUV boom.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -380,7 +366,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -410,7 +395,6 @@ values (
   6.5,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -438,7 +422,6 @@ values (
   null,
   'Known as the ''flying fishbowl'' due to its large glass area, the Pacer was a wide, futuristic-looking compact car designed to maximize interior space.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -462,7 +445,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -492,7 +474,6 @@ values (
   7.2,
   6.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -520,7 +501,6 @@ values (
   null,
   'One of the earliest American subcompacts, the Gremlin was notorious for its unconventional, abbreviated Kammback design, based on the AMC Hornet platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -544,7 +524,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -556,7 +535,6 @@ values (
   false,
   'Off-road vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -586,7 +564,6 @@ values (
   4,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -614,7 +591,6 @@ values (
   null,
   'The main series of ARO, widely used for military and civilian purposes, known for its ruggedness and versatility.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -638,7 +614,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -668,7 +643,6 @@ values (
   5,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -696,7 +670,6 @@ values (
   null,
   'A smaller, lightweight off-road vehicle often sharing mechanics with Dacia or Renault models.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -720,7 +693,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -750,7 +722,6 @@ values (
   4.5,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -778,7 +749,6 @@ values (
   null,
   'A military and export success, based on the earlier IMS models, featuring simple, powerful mechanics for the era.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -802,7 +772,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -814,7 +783,6 @@ values (
   true,
   'Sportscars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -844,7 +812,6 @@ values (
   7.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -872,7 +839,6 @@ values (
   null,
   'High-performance variant of the Fiat 500, continuously updated, known for its small size, agile handling, and aggressive exhaust note.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -896,7 +862,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -926,7 +891,6 @@ values (
   8,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -954,7 +918,6 @@ values (
   null,
   'A turbocharged, performance-oriented version of the Fiat 124 Spider, sharing its platform and basic structure with the Mazda MX-5.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -978,7 +941,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -1008,7 +970,6 @@ values (
   7,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -1036,7 +997,6 @@ values (
   null,
   'The first modern Abarth model, a performance version of the Fiat Grande Punto.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -1064,7 +1024,6 @@ values (
   null,
   'Updated version (Punto Evo Abarth) featuring MultiAir engine technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -1088,7 +1047,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -1100,7 +1058,6 @@ values (
   true,
   'Luxury Car/SUV'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -1130,7 +1087,6 @@ values (
   8.8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -1158,7 +1114,6 @@ values (
   null,
   'First generation MDX based on the Honda Global Mid-Size Platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -1186,7 +1141,6 @@ values (
   null,
   'Third generation, focusing on lighter weight and improved fuel economy.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -1210,7 +1164,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -1240,7 +1193,6 @@ values (
   9,
   8.2
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -1268,7 +1220,6 @@ values (
   null,
   'First generation RDX, featuring a turbocharged K23A1 engine and SH-AWD.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -1296,7 +1247,6 @@ values (
   null,
   'Second generation RDX, transitioning to a naturally aspirated V6 engine (J35Z2).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -1320,7 +1270,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -1350,7 +1299,6 @@ values (
   8.5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -1378,7 +1326,6 @@ values (
   null,
   'First generation sedan replacing both the TL and TSX, featuring 8-speed DCT and 9-speed ZF automatic options.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -1406,7 +1353,6 @@ values (
   null,
   'Second generation, adopting a distinctive design language and standard 10-speed automatic transmission.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -1430,7 +1376,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -1442,7 +1387,6 @@ values (
   true,
   'Passenger Vehicles / EV Brands'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -1472,7 +1416,6 @@ values (
   7.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -1500,7 +1443,6 @@ values (
   null,
   'First generation of Aiways'' flagship electric SUV, known for its decent range and spacious interior.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -1524,7 +1466,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -1554,7 +1495,6 @@ values (
   7.7,
   7.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -1582,7 +1522,6 @@ values (
   null,
   'A sporty coupe version of the U5, offering improved aerodynamics and distinctive styling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -1606,7 +1545,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -1636,7 +1574,6 @@ values (
   7.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -1664,7 +1601,6 @@ values (
   null,
   'A planned large family SUV/MPV crossover featuring three rows of seating and premium technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -1688,7 +1624,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -1700,7 +1635,6 @@ values (
   true,
   'Passenger Car'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -1730,7 +1664,6 @@ values (
   7,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -1758,7 +1691,6 @@ values (
   null,
   'Modern design evolution focusing on improved comfort and equipment options.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -1782,7 +1714,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -1812,7 +1743,6 @@ values (
   7,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -1836,7 +1766,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -1866,7 +1795,6 @@ values (
   6,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -1890,7 +1818,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -1902,7 +1829,6 @@ values (
   true,
   'Premium Passenger Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -1932,7 +1858,6 @@ values (
   7.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -1960,7 +1885,6 @@ values (
   null,
   'Modern rear-wheel-drive sports sedan marking Alfa Romeo''s return to competitive premium segments, known for its dynamic handling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -1984,7 +1908,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -2014,7 +1937,6 @@ values (
   7,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -2042,7 +1964,6 @@ values (
   null,
   'Alfa Romeo''s first production SUV, built on the Giorgio platform, offering sports car-like handling characteristics.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -2066,7 +1987,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -2096,7 +2016,6 @@ values (
   6.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -2124,7 +2043,6 @@ values (
   null,
   'Compact executive hatchback known for its distinctive styling and use of the MultiAir and TCT gearbox technologies.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -2148,7 +2066,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -2160,7 +2077,6 @@ values (
   true,
   'Luxury Cars/Performance Division'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -2190,7 +2106,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -2218,7 +2133,6 @@ values (
   null,
   'High-performance version of the BMW 3-series (F30 generation), known for combining robust power and luxurious long-distance comfort.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -2246,7 +2160,6 @@ values (
   null,
   'Current generation based on the BMW G20 series, featuring improved dynamics and mild-hybrid technology in later years.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -2270,7 +2183,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -2300,7 +2212,6 @@ values (
   8.2,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -2328,7 +2239,6 @@ values (
   null,
   'Flagship luxury high-performance model based on the BMW 5 Series (G30 generation), offering supercar levels of power with ultimate comfort.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -2352,7 +2262,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -2382,7 +2291,6 @@ values (
   8.5,
   7.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -2410,7 +2318,6 @@ values (
   null,
   'Performance diesel variant based on the BMW 3 Series, highly valued in Europe for its incredible torque, power, and low fuel consumption.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -2434,7 +2341,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -2446,7 +2352,6 @@ values (
   true,
   'Sportscars/Luxury'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -2476,7 +2381,6 @@ values (
   7.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -2504,7 +2408,6 @@ values (
   null,
   'Modern lightweight sports coupe reviving the iconic nameplate.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -2528,7 +2431,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -2558,7 +2460,6 @@ values (
   5.5,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -2586,7 +2487,6 @@ values (
   null,
   'Initial 4-cylinder version, fiberglass body.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -2614,7 +2514,6 @@ values (
   null,
   'Upgraded version featuring the PRV V6 engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -2638,7 +2537,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -2668,7 +2566,6 @@ values (
   6,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -2696,7 +2593,6 @@ values (
   null,
   'A heavily revised version of the GTA, serving as Alpine''s last model before the brand hiatus.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -2720,7 +2616,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -2732,7 +2627,6 @@ values (
   false,
   'kit_cars/historical'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -2762,7 +2656,6 @@ values (
   6.5,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -2790,7 +2683,6 @@ values (
   null,
   'Fiberglas body on Volkswagen Beetle chassis, mimicking the Porsche 356 Speedster.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -2814,7 +2706,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -2844,7 +2735,6 @@ values (
   7,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -2872,7 +2762,6 @@ values (
   null,
   'Classic fiberglass dune buggy body kit installed on a shortened VW Beetle platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -2896,7 +2785,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -2926,7 +2814,6 @@ values (
   6,
   3
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -2954,7 +2841,6 @@ values (
   null,
   'A small, closed two-seater GT coupe featuring a fiberglass body, often utilizing mechanical components from Renault or VW.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -2978,7 +2864,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -2990,7 +2875,6 @@ values (
   true,
   '/sports-cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -3020,7 +2904,6 @@ values (
   8,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -3048,7 +2931,6 @@ values (
   null,
   'Original generation featuring Rover K-Series engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -3076,7 +2958,6 @@ values (
   null,
   'Major revision utilizing Honda K20Z engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -3104,7 +2985,6 @@ values (
   null,
   'Latest generation with significant chassis and handling improvements, using Honda Civic Type R (K20C) engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -3128,7 +3008,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -3158,7 +3037,6 @@ values (
   8.5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -3186,7 +3064,6 @@ values (
   null,
   'First generation focusing on off-road capability, based on the Atom design philosophy.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -3210,7 +3087,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -3240,7 +3116,6 @@ values (
   6.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -3268,7 +3143,6 @@ values (
   null,
   'Limited edition variant featuring a custom 3.0L V8 engine built from two modified Suzuki Hayabusa engines, offering extreme performance.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -3292,7 +3166,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -3304,7 +3177,6 @@ values (
   true,
   '/sports-cars/luxury-gt'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -3334,7 +3206,6 @@ values (
   6.5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -3362,7 +3233,6 @@ values (
   null,
   'Original release using the VH platform, featuring the potent 5.9L V12 engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -3390,7 +3260,6 @@ values (
   null,
   'Significant styling and structural revisions, including the updated 510 hp engine (DB9 GT).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -3414,7 +3283,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -3444,7 +3312,6 @@ values (
   7,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -3472,7 +3339,6 @@ values (
   null,
   'Launch model with the 4.3L V8 engine (380 hp).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -3500,7 +3366,6 @@ values (
   null,
   'Engine displacement increased to 4.7L (420 hp+), improving performance significantly. Sportshift II introduced later.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -3524,7 +3389,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -3554,7 +3418,6 @@ values (
   7.5,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -3582,7 +3445,6 @@ values (
   null,
   'First model launched under Aston Martin''s ''Second Century'' plan, introducing the new bonded aluminum platform and twin-turbo V12 engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -3606,7 +3468,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -3618,7 +3479,6 @@ values (
   true,
   'Premium/Luxury Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -3648,7 +3508,6 @@ values (
   8,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -3676,7 +3535,6 @@ values (
   null,
   'Fifth generation of the A4, based on the MLB Evo platform, known for its extensive technology and improved efficiency.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -3700,7 +3558,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -3730,7 +3587,6 @@ values (
   7.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -3758,7 +3614,6 @@ values (
   null,
   'The fourth modern generation A6, featuring extensive use of aluminum and MMI Touch interface.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -3782,7 +3637,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -3812,7 +3666,6 @@ values (
   7.8,
   9.2
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -3840,7 +3693,6 @@ values (
   null,
   'First generation compact luxury crossover SUV, sharing the MLB platform with the A4.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -3864,7 +3716,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -3876,7 +3727,6 @@ values (
   false,
   'Historic/CompactCars/UK'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -3906,7 +3756,6 @@ values (
   6.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -3934,7 +3783,6 @@ values (
   null,
   'Original Mini design, known for external door hinges and smaller rear window.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -3962,7 +3810,6 @@ values (
   null,
   'Updated grille and larger rear window, but still retained Austin badging during the late 60s era.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -3986,7 +3833,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -4016,7 +3862,6 @@ values (
   6,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -4044,7 +3889,6 @@ values (
   null,
   'Launched as Austin Mini Metro, intended to replace the Mini, featuring A-Plus engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -4072,7 +3916,6 @@ values (
   null,
   'Renamed Austin Metro, minor restyling and improvements to trim and details.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -4096,7 +3939,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -4126,7 +3968,6 @@ values (
   5,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -4154,7 +3995,6 @@ values (
   null,
   'Initial release, known for controversial styling and square steering wheel.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -4182,7 +4022,6 @@ values (
   null,
   'Final version with revised interior, conventional steering wheel, and improved features.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -4206,7 +4045,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -4218,7 +4056,6 @@ values (
   false,
   'Historic Vehicles/European'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -4248,7 +4085,6 @@ values (
   6,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -4276,7 +4112,6 @@ values (
   null,
   'The Auto Union 1000 was a continuation and development of the DKW three-cylinder line, marking the use of the Auto Union badge prominently.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -4300,7 +4135,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -4330,7 +4164,6 @@ values (
   6,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -4358,7 +4191,6 @@ values (
   null,
   'The 1000 SP (Spezial) was a sporty, low volume version featuring unique styling inspired by American Thunderbird models.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -4382,7 +4214,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -4412,7 +4243,6 @@ values (
   6.5,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -4440,7 +4270,6 @@ values (
   null,
   'One of the first post-war DKW cars produced by Auto Union GmbH, utilizing a modernized body and the standard three-cylinder two-stroke engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -4464,7 +4293,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -4476,7 +4304,6 @@ values (
   false,
   'Passenger Cars/City Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -4506,7 +4333,6 @@ values (
   6.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -4534,7 +4360,6 @@ values (
   null,
   'Original shape, smaller engines (up to 903 cc).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -4562,7 +4387,6 @@ values (
   null,
   'Introduction of larger engines (including 1050 cc Abarth) and significant cosmetic changes.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -4586,7 +4410,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -4616,7 +4439,6 @@ values (
   7.5,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -4644,7 +4466,6 @@ values (
   null,
   'Microcar based on Fiat 500 mechanicals, known for its various, often luxurious, body styles.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -4668,7 +4489,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -4698,7 +4518,6 @@ values (
   6,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -4726,7 +4545,6 @@ values (
   null,
   'A revolutionary model for the Fiat Group, introducing the front-wheel drive and transverse engine configuration.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -4750,7 +4568,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -4762,7 +4579,6 @@ values (
   true,
   '/sports/exotic'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -4792,7 +4608,6 @@ values (
   7,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -4820,7 +4635,6 @@ values (
   null,
   'The original lightweight, high-performance single-seater track car designed for road use, featuring a Cosworth 2.3L engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -4848,7 +4662,6 @@ values (
   null,
   'Updated version featuring a lighter chassis and a naturally aspirated 2.5 L Mountune engine, enhancing performance and handling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -4872,7 +4685,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -4902,7 +4714,6 @@ values (
   8,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -4930,7 +4741,6 @@ values (
   null,
   'The highest performance iteration, featuring increased power, reduced weight, and advanced materials like graphene-enhanced carbon fibre in a limited production run.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -4954,7 +4764,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -4984,7 +4793,6 @@ values (
   8,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -5012,7 +4820,6 @@ values (
   null,
   'The second major generation of the standard Mono, featuring a shift to a turbocharged 2.3L engine developed by Mountune for increased torque and performance.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -5036,7 +4843,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -5048,7 +4854,6 @@ values (
   true,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -5078,7 +4883,6 @@ values (
   8,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -5106,7 +4910,6 @@ values (
   null,
   'Fifth generation 3 Series, known for improved handling and introduction of turbocharged engines (N54/N55).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -5134,7 +4937,6 @@ values (
   null,
   'Sixth generation 3 Series, featuring the efficient N20 four-cylinder turbo engine and refined design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -5158,7 +4960,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -5188,7 +4989,6 @@ values (
   8.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -5216,7 +5016,6 @@ values (
   null,
   'Sixth generation 5 Series, known for its comfortable ride, high technology level, and widespread use of turbocharged inline sixes (N55).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -5240,7 +5039,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -5270,7 +5068,6 @@ values (
   7.8,
   8.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -5298,7 +5095,6 @@ values (
   null,
   'Second generation X5, featuring optional third-row seating, improved driving dynamics, and the introduction of iDrive second generation.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -5322,7 +5118,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -5334,7 +5129,6 @@ values (
   true,
   '/passenger_cars/electric/'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -5364,7 +5158,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -5392,7 +5185,6 @@ values (
   null,
   'Compact electric SUV based on the BYD e-Platform 3.0, known for its blade battery technology and modern interior.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -5416,7 +5208,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -5446,7 +5237,6 @@ values (
   8.5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -5474,7 +5264,6 @@ values (
   null,
   'High-performance electric sedan, often compared to the Tesla Model 3, featuring advanced CTB (Cell-to-Body) technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -5498,7 +5287,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -5528,7 +5316,6 @@ values (
   7.8,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -5556,7 +5343,6 @@ values (
   null,
   'A compact, urban electric hatchback known for its affordability and practical interior design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -5580,7 +5366,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -5592,7 +5377,6 @@ values (
   true,
   '/luxury-cars/performance/'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -5622,7 +5406,6 @@ values (
   7,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -5650,7 +5433,6 @@ values (
   null,
   'First generation Continental GT, defined Bentley''s modern era.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -5678,7 +5460,6 @@ values (
   null,
   'Second generation, introducing the V8 engine option.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -5706,7 +5487,6 @@ values (
   null,
   'Current generation, based on Porsche MSB platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -5730,7 +5510,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -5760,7 +5539,6 @@ values (
   7.5,
   7.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -5788,7 +5566,6 @@ values (
   null,
   'Derived from the Continental GT coupe.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -5816,7 +5593,6 @@ values (
   null,
   'Second generation, officially named Flying Spur.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -5844,7 +5620,6 @@ values (
   null,
   'Current generation, platform based on Continental GT and Porsche Panamera.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -5868,7 +5643,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -5898,7 +5672,6 @@ values (
   8,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -5926,7 +5699,6 @@ values (
   null,
   'First SUV model from Bentley, based on the MLB Evo platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -5950,7 +5722,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -5962,7 +5733,6 @@ values (
   true,
   'Sports Cars / Collector Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -5992,7 +5762,6 @@ values (
   3,
   10
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -6020,7 +5789,6 @@ values (
   null,
   'Original production run of the iconic race car derived GT, renowned for its low, sleek profile and use of American V8 power.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -6044,7 +5812,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -6074,7 +5841,6 @@ values (
   10,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -6102,7 +5868,6 @@ values (
   null,
   'Mid-engined racing prototype intended for Le Mans, utilizing both Chevrolet and Lamborghini engines in its short history.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -6126,7 +5891,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -6156,7 +5920,6 @@ values (
   8,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -6184,7 +5947,6 @@ values (
   null,
   'The modern flagship hypercar designed by Giorgetto Giugiaro, marking the rebirth of the Bizzarrini brand with a focus on modern performance and exclusive design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -6208,7 +5970,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -6220,7 +5981,6 @@ values (
   false,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -6250,7 +6010,6 @@ values (
   4,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -6278,7 +6037,6 @@ values (
   null,
   'Rebadged and slightly modernized version of the Lada 2110, produced by Bogdan in Ukraine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -6302,7 +6060,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -6332,7 +6089,6 @@ values (
   4,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -6360,7 +6116,6 @@ values (
   null,
   'Wagon version based on Lada 2111, offering increased practicality compared to the sedan.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -6384,7 +6139,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -6414,7 +6168,6 @@ values (
   4.5,
   4.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -6442,7 +6195,6 @@ values (
   null,
   'A light pickup variant based on the 2110/2111 platform, designed for small commercial loads.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -6466,7 +6218,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -6478,7 +6229,6 @@ values (
   true,
   'Passenger Cars/SUV'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -6508,7 +6258,6 @@ values (
   6.5,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -6536,7 +6285,6 @@ values (
   null,
   'The BX7 was the first model launched by the revived Borgward brand, positioned as a mid-size premium SUV.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -6560,7 +6308,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -6590,7 +6337,6 @@ values (
   7,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -6618,7 +6364,6 @@ values (
   null,
   'The BX5 is a compact SUV, aimed at younger buyers, offering a stylish design and competitive price point.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -6642,7 +6387,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -6672,7 +6416,6 @@ values (
   6,
   3
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -6700,7 +6443,6 @@ values (
   null,
   'The BX6 is a crossover coupe variant based on the BX5 platform, featuring a sportier roofline and more aggressive styling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -6724,7 +6466,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -6736,7 +6477,6 @@ values (
   false,
   '/luxury/specialty'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -6766,7 +6506,6 @@ values (
   7,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -6794,7 +6533,6 @@ values (
   null,
   'Third major iteration of the Blenheim, featuring minor styling changes and performance improvements while retaining the classic British luxury coupe format.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -6818,7 +6556,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -6848,7 +6585,6 @@ values (
   6.5,
   3
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -6876,7 +6612,6 @@ values (
   null,
   'High-performance sports car featuring gullwing doors and a massive V10 engine sourced from the Dodge Viper.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -6900,7 +6635,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -6930,7 +6664,6 @@ values (
   8,
   10
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -6958,7 +6691,6 @@ values (
   null,
   'The final and rarest series of the 411, featuring the reduced capacity 5.9L engine and minor cosmetic refinement.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -6982,7 +6714,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -6994,7 +6725,6 @@ values (
   true,
   'Passenger Cars/Electric Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -7024,7 +6754,6 @@ values (
   7.5,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -7052,7 +6781,6 @@ values (
   null,
   'The first iteration of Buddy''s city car, focused on affordability and urban maneuverability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -7076,7 +6804,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -7106,7 +6833,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -7134,7 +6860,6 @@ values (
   null,
   'A popular compact electric hatchback, establishing Buddy in the mass market.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -7162,7 +6887,6 @@ values (
   null,
   'Mid-cycle refresh introducing minor battery improvements and updated infotainment.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -7186,7 +6910,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -7216,7 +6939,6 @@ values (
   7,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -7244,7 +6966,6 @@ values (
   null,
   'Buddy''s entry into the crucial compact crossover segment, featuring modern design and improved range.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -7268,7 +6989,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -7280,7 +7000,6 @@ values (
   true,
   'Hypercars & Exotic Sports Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -7310,7 +7029,6 @@ values (
   5,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -7338,7 +7056,6 @@ values (
   null,
   'The first production car to achieve speeds over 400 km/h, setting new standards for hypercars.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -7362,7 +7079,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -7392,7 +7108,6 @@ values (
   6,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -7420,7 +7135,6 @@ values (
   null,
   'Successor to the Veyron, pushing the boundaries of power with 1500+ PS.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -7444,7 +7158,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -7474,7 +7187,6 @@ values (
   4.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -7502,7 +7214,6 @@ values (
   null,
   'The flagship model during Bugatti''s brief Italian revival under Romano Artioli, featuring a V12 engine and all-wheel drive.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -7526,7 +7237,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -7538,7 +7248,6 @@ values (
   true,
   'Automotive/Passenger Cars/USA'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -7568,7 +7277,6 @@ values (
   7.5,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -7596,7 +7304,6 @@ values (
   null,
   'Subcompact luxury crossover, sharing mechanicals and platform (Gamma II) with the Opel Mokka A.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -7620,7 +7327,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -7650,7 +7356,6 @@ values (
   7.8,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -7678,7 +7383,6 @@ values (
   null,
   'Fifth generation Regal, a rebadged version of the European Opel Insignia A, built on the Epsilon II platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -7702,7 +7406,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -7732,7 +7435,6 @@ values (
   8.5,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -7760,7 +7462,6 @@ values (
   null,
   'Second generation, a large premium sedan based on the global Epsilon II platform, known for its spaciousness and quiet ride.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -7784,7 +7485,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -7796,7 +7496,6 @@ values (
   false,
   '/passenger/electric/'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -7826,7 +7525,6 @@ values (
   6,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -7854,7 +7552,6 @@ values (
   null,
   'The initial production intent model, known for its massive 48-inch Shared Experience Display (SED) and focus on connectivity, although mass production never fully materialized due to financial issues.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -7878,7 +7575,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -7908,7 +7604,6 @@ values (
   0,
   10
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -7932,7 +7627,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -7962,7 +7656,6 @@ values (
   0,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -7986,7 +7679,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -7998,7 +7690,6 @@ values (
   true,
   'Luxury Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -8028,7 +7719,6 @@ values (
   6,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -8056,7 +7746,6 @@ values (
   null,
   'The fourth-generation Escalade was built on the GMT K2XX platform, featuring a massive 6.2L V8 engine and increased luxury and technology, making it extremely popular in key markets.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -8080,7 +7769,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -8110,7 +7798,6 @@ values (
   7,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -8138,7 +7825,6 @@ values (
   null,
   'The third generation CTS was built on the lightweight Alpha platform, offering sharper handling and superior dynamics compared to previous models.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -8162,7 +7848,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -8192,7 +7877,6 @@ values (
   7,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -8220,7 +7904,6 @@ values (
   null,
   'The second generation SRX was a major shift, moving to a traditional luxury crossover form factor and becoming Cadillac''s highest volume model globally.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -8244,7 +7927,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -8256,7 +7938,6 @@ values (
   true,
   'Sports/Roadster'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -8286,7 +7967,6 @@ values (
   7.5,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -8314,7 +7994,6 @@ values (
   null,
   'High-performance track day focused variant, often utilizing the wider SV chassis.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -8338,7 +8017,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -8368,7 +8046,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -8396,7 +8073,6 @@ values (
   null,
   'The balanced performance variant, widely considered the sweet spot for road and occasional track use.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -8420,7 +8096,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -8450,7 +8125,6 @@ values (
   8.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -8478,7 +8152,6 @@ values (
   null,
   'The lightest and most compact modern Caterham, derived from the Japanese Kei car regulations using a small turbocharged Suzuki engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -8502,7 +8175,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -8514,7 +8186,6 @@ values (
   true,
   'Asia/China'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -8544,7 +8215,6 @@ values (
   7.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -8572,7 +8242,6 @@ values (
   null,
   'The Tiggo 7 Pro is a modern compact crossover characterized by a high level of equipment and striking design, targeting the budget-conscious SUV buyer.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -8596,7 +8265,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -8626,7 +8294,6 @@ values (
   7,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -8654,7 +8321,6 @@ values (
   null,
   'The flagship crossover, offering 7 seats, premium finishing for its class, and advanced driver assistance systems, competitive in the large family SUV segment.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -8678,7 +8344,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -8708,7 +8373,6 @@ values (
   8,
   8.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -8736,7 +8400,6 @@ values (
   null,
   'A restyled and modernized version of the Tiggo 4, focusing on a youthful demographic with updated styling and improved interior technology, positioned as a budget urban SUV.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -8760,7 +8423,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -8772,7 +8434,6 @@ values (
   true,
   'Passenger Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -8802,7 +8463,6 @@ values (
   7.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -8830,7 +8490,6 @@ values (
   null,
   'The first generation Cruze, built on the Delta II platform, was crucial for Chevrolet''s global strategy, replacing the Cobalt and Lacetti in many markets.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -8858,7 +8517,6 @@ values (
   null,
   'A major facelift for the global J300 platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -8882,7 +8540,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -8912,7 +8569,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -8940,7 +8596,6 @@ values (
   null,
   'Designed by Giorgetto Giugiaro, the Lacetti (Daewoo Lacetti/Chevrolet Optra/Nubira) was a highly popular, budget-friendly compact car globally, especially in CIS markets.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -8964,7 +8619,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -8994,7 +8648,6 @@ values (
   6.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -9022,7 +8675,6 @@ values (
   null,
   'The original Captiva, developed in collaboration with Opel (Antara), offering seating for five or seven people.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -9050,7 +8702,6 @@ values (
   null,
   'A significant facelift bringing updated engines, transmissions, and exterior styling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -9074,7 +8725,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -9086,7 +8736,6 @@ values (
   true,
   'Passenger Car'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -9098,7 +8747,6 @@ values (
   true,
   'Passenger Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -9128,7 +8776,6 @@ values (
   7,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -9156,7 +8803,6 @@ values (
   null,
   'First generation, known for its distinctive styling including the fixed central steering wheel hub.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -9184,7 +8830,6 @@ values (
   null,
   'Second generation, more conservative design and improved overall quality.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -9208,7 +8853,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -9238,7 +8882,6 @@ values (
   7.5,
   7.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -9266,7 +8909,6 @@ values (
   null,
   'Second generation, known for robust build quality, classic design, and optional Hydractive suspension.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -9290,7 +8932,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -9320,7 +8961,6 @@ values (
   8,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -9348,7 +8988,6 @@ values (
   null,
   'Second generation, focused on maximum practicality and utility.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -9376,7 +9015,6 @@ values (
   null,
   'Third generation, significantly improved comfort, safety, and infotainment systems.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -9400,7 +9038,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -9412,7 +9049,6 @@ values (
   true,
   'Passenger vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -9442,7 +9078,6 @@ values (
   8.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -9470,7 +9105,6 @@ values (
   null,
   'Compact crossover SUV, Cupra''s first standalone model characterized by coupe-like styling and high performance.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -9494,7 +9128,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -9524,7 +9157,6 @@ values (
   8.2,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -9552,7 +9184,6 @@ values (
   null,
   'High-performance derivative of the SEAT Leon, available as a practical Sportstourer (wagon) or standard five-door hatchback.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -9576,7 +9207,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -9606,7 +9236,6 @@ values (
   8,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -9634,7 +9263,6 @@ values (
   null,
   'The first dedicated model of the Cupra brand, a high-performance compact SUV based on the SEAT Ateca platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -9658,7 +9286,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -9670,7 +9297,6 @@ values (
   false,
   'Passenger Car (Historical)'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -9700,7 +9326,6 @@ values (
   8,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -9728,7 +9353,6 @@ values (
   null,
   'The final passenger car developed entirely by DAF before the company was sold to Volvo. It featured improved styling and used Renault engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -9752,7 +9376,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -9782,7 +9405,6 @@ values (
   7.5,
   6.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -9810,7 +9432,6 @@ values (
   null,
   'DAF''s first model equipped with a water-cooled engine, using the Renault 1.1 L unit. A significant upgrade from the air-cooled 44.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -9834,7 +9455,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -9864,7 +9484,6 @@ values (
   7,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -9892,7 +9511,6 @@ values (
   null,
   'An early economy car featuring DAF''s proprietary 850 cc air-cooled engine and the unique Variomatic transmission.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -9916,7 +9534,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -9928,7 +9545,6 @@ values (
   false,
   'Historical/Classic Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -9958,7 +9574,6 @@ values (
   6,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -9986,7 +9601,6 @@ values (
   null,
   'The last pre-war small DKW featuring a wooden frame body.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -10010,7 +9624,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -10040,7 +9653,6 @@ values (
   7,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -10068,7 +9680,6 @@ values (
   null,
   'Advanced three-cylinder two-stroke successor, marketed as being as powerful as a six-cylinder four-stroke engine (hence 3=6).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -10092,7 +9703,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -10122,7 +9732,6 @@ values (
   8,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -10150,7 +9759,6 @@ values (
   null,
   'Robust 4x4 off-road vehicle developed primarily for the German armed forces (Bundeswehr), known for its durability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -10174,7 +9782,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -10186,7 +9793,6 @@ values (
   true,
   '/passenger-vehicles/premium-crossover/'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -10216,7 +9822,6 @@ values (
   7.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -10244,7 +9849,6 @@ values (
   null,
   'The first dedicated DS SUV, focusing on high technology and interior refinement.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -10272,7 +9876,6 @@ values (
   null,
   'Mid-cycle refresh dropped ''Crossback'' name, updated styling and infotainment.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -10296,7 +9899,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -10326,7 +9928,6 @@ values (
   7,
   7.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -10354,7 +9955,6 @@ values (
   null,
   'A premium compact hatchback built on the EMP2 platform, known for its bold coupe-like design and luxurious materials.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -10378,7 +9978,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -10408,7 +10007,6 @@ values (
   7.2,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -10436,7 +10034,6 @@ values (
   null,
   'Subcompact crossover positioning itself as a premium urban vehicle, featuring distinctive design elements like shark fin B-pillars.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -10464,7 +10061,6 @@ values (
   null,
   'Facelift updated front grille, introduced new technology, and streamlined trim levels.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -10488,7 +10084,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -10500,7 +10095,6 @@ values (
   true,
   'Automotive/Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -10530,7 +10124,6 @@ values (
   7.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -10558,7 +10151,6 @@ values (
   null,
   'The first generation Duster established Dacia''s reputation for rugged, affordable SUVs, offering surprisingly good off-road capability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -10586,7 +10178,6 @@ values (
   null,
   'Improved interior quality and significantly better technology while retaining its budget focus and high ground clearance.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -10610,7 +10201,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -10640,7 +10230,6 @@ values (
   8,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -10668,7 +10257,6 @@ values (
   null,
   'The first generation, based on the Logan platform, offering basic transport.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -10696,7 +10284,6 @@ values (
   null,
   'Switched to the modern CMF-B platform, dramatically improving safety, technology, and driving dynamics.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -10720,7 +10307,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -10750,7 +10336,6 @@ values (
   8.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -10778,7 +10363,6 @@ values (
   null,
   'The original model, known for its extremely basic design, low price, and durability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -10806,7 +10390,6 @@ values (
   null,
   'Modernized version, significantly improving safety and internal comfort, sharing components with Sandero II.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -10830,7 +10413,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -10842,7 +10424,6 @@ values (
   false,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -10872,7 +10453,6 @@ values (
   7.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -10900,7 +10480,6 @@ values (
   null,
   'Original model derived from Opel Kadett E, widely produced in CIS countries.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -10928,7 +10507,6 @@ values (
   null,
   'Facelifted version with minor exterior and interior changes, primarily aimed at the CIS market.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -10952,7 +10530,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -10982,7 +10559,6 @@ values (
   8,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -11010,7 +10586,6 @@ values (
   null,
   'First generation city car designed by Italdesign Giugiaro.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -11038,7 +10613,6 @@ values (
   null,
   'Facelifted version M150, the most common variant sold globally and in CIS markets.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -11062,7 +10636,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -11092,7 +10665,6 @@ values (
   7.8,
   8.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -11120,7 +10692,6 @@ values (
   null,
   'Initial generation, sharing platform components with Opel models.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -11148,7 +10719,6 @@ values (
   null,
   'Facelifted and localized production version, known widely as Chevrolet Lanos or ZAZ Sens/Lanos.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -11172,7 +10742,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -11184,7 +10753,6 @@ values (
   true,
   'Passenger Car'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -11214,7 +10782,6 @@ values (
   7.5,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -11242,7 +10809,6 @@ values (
   null,
   'First generation, characterized by its compact size and standard full-time 4WD.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -11270,7 +10836,6 @@ values (
   null,
   'Second generation, larger and more modern, shared platform with Toyota Rush.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -11294,7 +10859,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -11324,7 +10888,6 @@ values (
   8,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -11352,7 +10915,6 @@ values (
   null,
   'First generation Sirion, known for simplicity and efficiency.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -11380,7 +10942,6 @@ values (
   null,
   'Second generation, shares platform with Toyota Passo/Subaru Justy.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -11404,7 +10965,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -11434,7 +10994,6 @@ values (
   7,
   4.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -11462,7 +11021,6 @@ values (
   null,
   'Fourth generation, the last independent Charade model sold internationally before badge engineering.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -11486,7 +11044,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -11498,7 +11055,6 @@ values (
   true,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -11528,7 +11084,6 @@ values (
   7.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -11556,7 +11111,6 @@ values (
   null,
   'The W213 generation introduced a significant leap in technology and design, adopting the current corporate style and advanced driver-assistance systems.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -11580,7 +11134,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -11610,7 +11163,6 @@ values (
   7.8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -11638,7 +11190,6 @@ values (
   null,
   'The W205 marked a significant redesign, positioning the C-Class as a smaller version of the S-Class in terms of interior quality and features.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -11662,7 +11213,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -11692,7 +11242,6 @@ values (
   7.9,
   9.2
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -11720,7 +11269,6 @@ values (
   null,
   'The GLC replaced the GLK, offering a more rounded design and focusing heavily on on-road comfort and luxury features.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -11744,7 +11292,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -11756,7 +11303,6 @@ values (
   false,
   'Sports Cars / Luxury'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -11786,7 +11332,6 @@ values (
   5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -11814,7 +11359,6 @@ values (
   null,
   'Mid-engined sports car powered by Ford V8 engines, designed by Tom Tjaarda.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -11838,7 +11382,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -11868,7 +11411,6 @@ values (
   4,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -11896,7 +11438,6 @@ values (
   null,
   'Early mid-engined sports car featuring a distinctive gull-wing engine cover and chassis designed by Giorgetto Giugiaro.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -11920,7 +11461,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -11950,7 +11490,6 @@ values (
   3.5,
   3
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -11978,7 +11517,6 @@ values (
   null,
   'The last model produced by the original De Tomaso company. A lightweight supercar based on a Maserati concept, utilizing BMW V8 engines initially.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -12002,7 +11540,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -12014,7 +11551,6 @@ values (
   true,
   'Passenger Vehicles/Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -12044,7 +11580,6 @@ values (
   6.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -12072,7 +11607,6 @@ values (
   null,
   'First and only generation of the compact crossover hatchback.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -12096,7 +11630,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -12126,7 +11659,6 @@ values (
   7.5,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -12154,7 +11686,6 @@ values (
   null,
   'Original release based on the Chrysler JC platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -12182,7 +11713,6 @@ values (
   null,
   'Major refresh including redesigned interior, suspension, and new engines (Pentastar V6).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -12206,7 +11736,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -12236,7 +11765,6 @@ values (
   6,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -12264,7 +11792,6 @@ values (
   null,
   'Mid-size sedan replacing the Dodge Stratus, popular for its aggressive styling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -12288,7 +11815,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -12300,7 +11826,6 @@ values (
   true,
   'Automobile/Sport_Car/Niche'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -12330,7 +11855,6 @@ values (
   7.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -12358,7 +11882,6 @@ values (
   null,
   'The D8 GTO marked a significant evolution, utilizing the Audi 2.5L R5 TFSI engine and a substantially stiffer chassis, moving the brand towards hypercar performance levels while maintaining extreme lightness.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -12382,7 +11905,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -12412,7 +11934,6 @@ values (
   8,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -12440,7 +11961,6 @@ values (
   null,
   'The D8 model family solidified Donkervoort''s reputation. Initially featuring Ford Zetec engines, later models adopted high-performance Audi 1.8T engines, focusing purely on driver involvement and weight reduction.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -12464,7 +11984,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -12494,7 +12013,6 @@ values (
   7.8,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -12522,7 +12040,6 @@ values (
   null,
   'The F22 is the successor to the D8 GTO, featuring a completely new design philosophy, dramatically increased torsional stiffness, and improved practicality, while still utilizing the powerful Audi 2.5 TFSI engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -12546,7 +12063,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -12558,7 +12074,6 @@ values (
   true,
   'Passenger Vehicles/Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -12588,7 +12103,6 @@ values (
   7,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -12616,7 +12130,6 @@ values (
   null,
   'The first generation was known for its simplicity and robustness, making it very popular in Eastern Europe as an affordable family car.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -12640,7 +12153,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -12670,7 +12182,6 @@ values (
   7.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -12698,7 +12209,6 @@ values (
   null,
   'The Polon became the brand''s mid-size staple, offering spaciousness and durable engines, often utilizing licensed diesel technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -12722,7 +12232,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -12752,7 +12261,6 @@ values (
   8,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -12780,7 +12288,6 @@ values (
   null,
   'FSC''s modern entry into the Crossover market, featuring better safety and GDI engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -12804,7 +12311,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -12816,7 +12322,6 @@ values (
   false,
   'Historic/Economy Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -12846,7 +12351,6 @@ values (
   4,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -12874,7 +12378,6 @@ values (
   null,
   'License production of the Fiat 125, featuring mechanicals from the older Fiat 1300/1500.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -12902,7 +12405,6 @@ values (
   null,
   'The model continued under the FSO brand after the Fiat license expired, with minor cosmetic updates.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -12926,7 +12428,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -12956,7 +12457,6 @@ values (
   5,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -12984,7 +12484,6 @@ values (
   null,
   'First generation models, using modernized Fiat 125p mechanicals beneath a Giugiaro-designed body.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -13012,7 +12511,6 @@ values (
   null,
   'Heavily modernized versions featuring new headlights, revised interior, and optional modern engines (e.g., Rover K-series).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -13036,7 +12534,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -13066,7 +12563,6 @@ values (
   3,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -13094,7 +12590,6 @@ values (
   null,
   'The initial series of the first fully domestic Polish post-war car, notable for its two-stroke engine and quirky design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -13118,7 +12613,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -13130,7 +12624,6 @@ values (
   true,
   'Supercars and Sports Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -13160,7 +12653,6 @@ values (
   7,
   9.3
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -13188,7 +12680,6 @@ values (
   null,
   'The 458 Italia was Ferrari''s mid-engine V8 standard bearer, succeeding the F430. It was the last naturally aspirated V8 model produced by Ferrari before switching to turbocharging in its mainstream V8 line.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -13212,7 +12703,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -13242,7 +12732,6 @@ values (
   6.8,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -13270,7 +12759,6 @@ values (
   null,
   'The F430 was renowned for introducing several Ferrari innovations derived from Formula 1, including the E-Diff electronic differential and the steering wheel-mounted manettino switch.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -13294,7 +12782,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -13324,7 +12811,6 @@ values (
   7.2,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -13352,7 +12838,6 @@ values (
   null,
   'The 488 GTB replaced the 458 Italia, marking Ferrari''s return to forced induction for its mid-engine V8 primary line since the F40, utilizing a twin-turbocharged engine to achieve massive performance gains.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -13376,7 +12861,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -13388,7 +12872,6 @@ values (
   true,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -13418,7 +12901,6 @@ values (
   7,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -13446,7 +12928,6 @@ values (
   null,
   'Retro-styled city car reviving the classic 500 nameplate, popular for its design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -13470,7 +12951,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -13500,7 +12980,6 @@ values (
   8,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -13528,7 +13007,6 @@ values (
   null,
   'Practical and affordable city car known for its ruggedness and availability of 4x4 versions.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -13552,7 +13030,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -13582,7 +13059,6 @@ values (
   6,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -13610,7 +13086,6 @@ values (
   null,
   'Affordable compact car (C-segment) offering good space and value for money.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -13638,7 +13113,6 @@ values (
   null,
   'Mid-cycle refresh introducing new engines and design updates, including a Cross variant.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -13662,7 +13136,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -13674,7 +13147,6 @@ values (
   true,
   'Passenger/SUV/Utility Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -13704,7 +13176,6 @@ values (
   7.5,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -13732,7 +13203,6 @@ values (
   null,
   'First generation Gurkha, heavily based on the Mercedes-Benz G-Wagen chassis and styling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -13760,7 +13230,6 @@ values (
   null,
   'Second generation with significant updates, retaining core off-road capabilities.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -13784,7 +13253,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -13814,7 +13282,6 @@ values (
   8,
   4.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -13838,7 +13305,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -13868,7 +13334,6 @@ values (
   6.5,
   3
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -13896,7 +13361,6 @@ values (
   null,
   'Force Motors attempt at a mainstream SUV, featuring licensed technology from Daimler.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -13920,7 +13384,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -13932,7 +13395,6 @@ values (
   true,
   'Passenger Vehicles/Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -13962,7 +13424,6 @@ values (
   7.8,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -13990,7 +13451,6 @@ values (
   null,
   'The third generation brought Ford''s Kinetic Design language and shifted towards a global platform, emphasizing handling and advanced technologies.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -14018,7 +13478,6 @@ values (
   null,
   'Mid-cycle refresh featuring the Aston Martin-style grille, updated infotainment (SYNC 3), and new engine options, including EcoBoost.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -14042,7 +13501,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -14072,7 +13530,6 @@ values (
   8.5,
   8.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -14100,7 +13557,6 @@ values (
   null,
   'This generation adopted the Kinetic Design language, becoming significantly more stylish and appealing, especially in the European supermini segment. Known for its sharp handling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -14124,7 +13580,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -14154,7 +13609,6 @@ values (
   7.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -14182,7 +13636,6 @@ values (
   null,
   'Large family car platform, known for its spacious interior, comfort, and good road manners. Built on Ford''s EUCD platform (shared with Volvo).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -14210,7 +13663,6 @@ values (
   null,
   'Mid-life update focusing on improved cabin materials, enhanced equipment, and the introduction of the modern EcoBoost engines and Powershift transmission.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -14234,7 +13686,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -14246,7 +13697,6 @@ values (
   true,
   'Supercar / Niche Manufacturer'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -14276,7 +13726,6 @@ values (
   5,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -14304,7 +13753,6 @@ values (
   null,
   'High-performance luxury SUV based on a robust space frame chassis and utilizing powerful American V8 engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -14328,7 +13776,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -14358,7 +13805,6 @@ values (
   6,
   3
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -14386,7 +13832,6 @@ values (
   null,
   'A series of retro-styled sports cars (coupe and roadster) designed for high-speed touring, featuring traditional V8 powerplants.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -14410,7 +13855,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -14440,7 +13884,6 @@ values (
   5,
   2
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -14468,7 +13911,6 @@ values (
   null,
   'A highly exclusive, open-top off-road utility vehicle designed for specialized recreational use.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -14492,7 +13934,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -14504,7 +13945,6 @@ values (
   true,
   'Automobile Manufacturers / Russia'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -14534,7 +13974,6 @@ values (
   6,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -14562,7 +14001,6 @@ values (
   null,
   'The original model series, defining the classic light commercial platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -14590,7 +14028,6 @@ values (
   null,
   'The significantly modernized version featuring improved cabin design and chassis components.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -14614,7 +14051,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -14644,7 +14080,6 @@ values (
   6.5,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -14672,7 +14107,6 @@ values (
   null,
   'Modernization of the long-running Volga series, replacing the GAZ-31029.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -14700,7 +14134,6 @@ values (
   null,
   'Final mass-produced passenger iteration of the classic Volga line, featuring modernized optics and front suspension.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -14724,7 +14157,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -14754,7 +14186,6 @@ values (
   6.5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -14782,7 +14213,6 @@ values (
   null,
   'The original short-wheelbase, smaller capacity version of the GAZelle platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -14810,7 +14240,6 @@ values (
   null,
   'Facelifted series with improved engine options and popular 4x4 modification for rough terrain.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -14834,7 +14263,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -14846,7 +14274,6 @@ values (
   true,
   'Trucks/SUVs'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -14876,7 +14303,6 @@ values (
   7.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -14904,7 +14330,6 @@ values (
   null,
   'The current generation offers increased space, independent rear suspension, and updated technology, enhancing ride comfort.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -14928,7 +14353,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -14958,7 +14382,6 @@ values (
   7,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -14986,7 +14409,6 @@ values (
   null,
   'The fourth generation is known for its unique MultiPro tailgate and refined interior options.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -15010,7 +14432,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -15040,7 +14461,6 @@ values (
   6.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -15068,7 +14488,6 @@ values (
   null,
   'The second generation adopted a smaller, lighter platform, offering better fuel economy and a modern design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -15092,7 +14511,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -15104,7 +14522,6 @@ values (
   true,
   'Passenger Cars/SUVs'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -15134,7 +14551,6 @@ values (
   7.8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -15162,7 +14578,6 @@ values (
   null,
   'First generation compact SUV, known globally as Binyue or Coolray, built on BMA platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -15186,7 +14601,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -15216,7 +14630,6 @@ values (
   8,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -15244,7 +14657,6 @@ values (
   null,
   'First generation mid-size crossover, highly popular in CIS countries.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -15272,7 +14684,6 @@ values (
   null,
   'Facelifted version (Atlas Pro/Boyue Pro) featuring updated design and powertrain options.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -15296,7 +14707,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -15326,7 +14736,6 @@ values (
   8.2,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -15354,7 +14763,6 @@ values (
   null,
   'Modern 4th generation Emgrand sedan built on the BMA platform, popular due to affordability and modern design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -15378,7 +14786,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -15390,7 +14797,6 @@ values (
   true,
   'Luxury/Premium'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -15420,7 +14826,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -15448,7 +14853,6 @@ values (
   null,
   'The second generation of Genesis G80, transitioning to a distinct luxury design language based on ''Athletic Elegance''.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -15472,7 +14876,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -15502,7 +14905,6 @@ values (
   7.8,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -15530,7 +14932,6 @@ values (
   null,
   'Genesis'' first flagship SUV, offering robust performance and high-end luxury, competing directly with German rivals.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -15554,7 +14955,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -15584,7 +14984,6 @@ values (
   8.3,
   8.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -15612,7 +15011,6 @@ values (
   null,
   'A sporty and stylish compact luxury crossover aimed at younger buyers, sharing platform elements with the G70 sedan.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -15636,7 +15034,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -15648,7 +15045,6 @@ values (
   true,
   'Sports Cars & Exotics'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -15678,7 +15074,6 @@ values (
   6.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -15706,7 +15101,6 @@ values (
   null,
   'Original generation featuring various V6 and V8 engines, highly customizable.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -15734,7 +15128,6 @@ values (
   null,
   'Mid-life refresh with updated aerodynamics and powertrain options, including the Maserati V8.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -15762,7 +15155,6 @@ values (
   null,
   'Modern iteration (Vertigo V8) focusing on lightweight construction and high power output.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -15786,7 +15178,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -15816,7 +15207,6 @@ values (
   8,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -15844,7 +15234,6 @@ values (
   null,
   'Lightweight, track-focused sports car designed for driving purity.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -15868,7 +15257,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -15898,7 +15286,6 @@ values (
   7.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -15926,7 +15313,6 @@ values (
   null,
   'Flagship hybrid performance coupe utilizing advanced electric power assistance.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -15950,7 +15336,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -15962,7 +15347,6 @@ values (
   true,
   'Sports Cars / Track Day Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -15992,7 +15376,6 @@ values (
   7,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -16020,7 +15403,6 @@ values (
   null,
   'The G40 is a lightweight, compact sports coupe designed for both road use and competitive racing (G40 Junior, G40 Cup).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -16044,7 +15426,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -16074,7 +15455,6 @@ values (
   8,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -16102,7 +15482,6 @@ values (
   null,
   'Primarily a successful GT4 specification race car, featuring a powerful Ford V6 engine and advanced aerodynamics.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -16126,7 +15505,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -16156,7 +15534,6 @@ values (
   6.5,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -16184,7 +15561,6 @@ values (
   null,
   'The iconic lightweight sports car that established Ginetta. Known for its fiberglass body and Ford-based mechanicals.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -16208,7 +15584,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -16220,7 +15595,6 @@ values (
   true,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -16250,7 +15624,6 @@ values (
   7.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -16278,7 +15651,6 @@ values (
   null,
   'Second generation SUV, known for its frame structure and improved comfort/safety compared to H3.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -16302,7 +15674,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -16332,7 +15703,6 @@ values (
   7,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -16360,7 +15730,6 @@ values (
   null,
   'Mid-size pickup known for utility and affordability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -16384,7 +15753,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -16414,7 +15782,6 @@ values (
   7.8,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -16442,7 +15809,6 @@ values (
   null,
   'Affordable subcompact sedan focused on city driving and fuel efficiency.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -16466,7 +15832,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -16478,7 +15843,6 @@ values (
   false,
   'High Performance / Exotic Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -16508,7 +15872,6 @@ values (
   3,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -16536,7 +15899,6 @@ values (
   null,
   'The original Gumpert hypercar, designed by Roland Gumpert. It featured an Audi-sourced twin-turbo V8 engine and extreme aerodynamics.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -16560,7 +15922,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -16590,7 +15951,6 @@ values (
   3,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -16618,7 +15978,6 @@ values (
   null,
   'A higher-performance variant of the Apollo, featuring enhanced engine tuning and often more aggressive aero kits for better track performance.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -16642,7 +16001,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -16672,7 +16030,6 @@ values (
   3,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -16700,7 +16057,6 @@ values (
   null,
   'The final evolution under the Gumpert name, the Apollo S offered maximum performance and slightly revised styling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -16724,7 +16080,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -16736,7 +16091,6 @@ values (
   true,
   'SUVs'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -16766,7 +16120,6 @@ values (
   8,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -16794,7 +16147,6 @@ values (
   null,
   'The third generation H6 adopted the new L.E.M.O.N. platform, featuring significant improvements in design, technology, and engine efficiency, making it a global sales success.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -16818,7 +16170,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -16848,7 +16199,6 @@ values (
   7.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -16876,7 +16226,6 @@ values (
   null,
   'The F7 is a key model for Haval, built locally in Russia for the CIS market, offering aggressive styling and strong tech features, particularly in the F7x coupe variant.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -16900,7 +16249,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -16930,7 +16278,6 @@ values (
   8.2,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -16958,7 +16305,6 @@ values (
   null,
   'The Jolion is a popular budget-friendly compact SUV built on the L.E.M.O.N. platform, known for its modern styling and extensive features for the price point.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -16982,7 +16328,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -16994,7 +16339,6 @@ values (
   false,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -17024,7 +16368,6 @@ values (
   5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -17052,7 +16395,6 @@ values (
   null,
   'Revolutionary small rear-engined car designed to compete with the Mini, known for its aluminum engine and lively performance.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -17076,7 +16418,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -17106,7 +16447,6 @@ values (
   7,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -17134,7 +16474,6 @@ values (
   null,
   'A conventional, robust saloon that replaced the Minx and was highly successful, especially in export markets.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -17158,7 +16497,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -17188,7 +16526,6 @@ values (
   6,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -17216,7 +16553,6 @@ values (
   null,
   'The final iteration of the famous Minx series before its replacement by the Hunter, known for its durable and conventional design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -17240,7 +16576,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -17252,7 +16587,6 @@ values (
   true,
   'Passenger Car/Luxury EV'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -17282,7 +16616,6 @@ values (
   8,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -17310,7 +16643,6 @@ values (
   null,
   'The flagship model known for its unique ''gull-wing'' doors and extremely advanced technology, setting the standard for the brand.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -17334,7 +16666,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -17364,7 +16695,6 @@ values (
   7.8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -17392,7 +16722,6 @@ values (
   null,
   'A high-performance electric GT with striking futuristic design, advanced robotic features, and exceptional power output.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -17416,7 +16745,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -17446,7 +16774,6 @@ values (
   8.2,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -17474,7 +16801,6 @@ values (
   null,
   'A more market-friendly luxury EV crossover, offering a balance of high technology and practicality for everyday use.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -17498,7 +16824,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -17510,7 +16835,6 @@ values (
   true,
   'Luxury Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -17540,7 +16864,6 @@ values (
   6,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -17568,7 +16891,6 @@ values (
   null,
   'The H6 was Hispano-Suiza''s most famous pre-war model, featuring an advanced engine derived from aircraft technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -17592,7 +16914,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -17622,7 +16943,6 @@ values (
   5.5,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -17650,7 +16970,6 @@ values (
   null,
   'Named after the Spanish King, the Alfonso XIII was one of the first true sports cars, emphasizing speed and handling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -17674,7 +16993,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -17704,7 +17022,6 @@ values (
   9,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -17732,7 +17049,6 @@ values (
   null,
   'A modern, all-electric hypercar reviving the brand, featuring extreme performance and exclusive design influenced by the classic H6.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -17756,7 +17072,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -17768,7 +17083,6 @@ values (
   true,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -17798,7 +17112,6 @@ values (
   9.2,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -17826,7 +17139,6 @@ values (
   null,
   'Eighth generation Civic, known for its futuristic styling (especially the European hatchback) and high mechanical reliability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -17854,7 +17166,6 @@ values (
   null,
   'Ninth generation, offering increased interior refinement and better fuel economy, though design was considered less radical than its predecessor.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -17878,7 +17189,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -17908,7 +17218,6 @@ values (
   9.4,
   9.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -17936,7 +17245,6 @@ values (
   null,
   'Third generation CR-V. Transitioned to a more car-like, family-oriented crossover, becoming extremely popular globally for its comfort and reliability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -17964,7 +17272,6 @@ values (
   null,
   'Fourth generation, featuring improved fuel efficiency and a more spacious interior while retaining the established Honda reliability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -17988,7 +17295,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -18018,7 +17324,6 @@ values (
   8.9,
   8.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -18046,7 +17351,6 @@ values (
   null,
   'Eighth generation (European/Japanese market), positioned as a sporty executive sedan known for sharp handling and aggressive styling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -18074,7 +17378,6 @@ values (
   null,
   'Ninth generation, focused primarily on the US market, prioritizing interior space and comfort over the previous generation''s sporty character.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -18098,7 +17401,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -18110,7 +17412,6 @@ values (
   true,
   'Luxury Vehicles / Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -18140,7 +17441,6 @@ values (
   7.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -18168,7 +17468,6 @@ values (
   null,
   'First generation of Hongqi''s flagship electric SUV, known for its imposing design and advanced technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -18192,7 +17491,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -18222,7 +17520,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -18250,7 +17547,6 @@ values (
   null,
   'Hongqi''s flagship executive sedan, often compared to luxury models from BMW and Mercedes-Benz, known for its opulent styling and rear-seat comfort.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -18274,7 +17570,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -18304,7 +17599,6 @@ values (
   8.5,
   7.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -18332,7 +17626,6 @@ values (
   null,
   'A popular mid-sized SUV offering a blend of luxury features and mainstream practicality, serving as Hongqi''s volume seller.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -18356,7 +17649,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -18368,7 +17660,6 @@ values (
   false,
   'SUVs and Off-road vehicles/Luxury Off-road'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -18398,7 +17689,6 @@ values (
   7.5,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -18426,7 +17716,6 @@ values (
   null,
   'The civilian version of the military M998 Humvee. Known for extreme off-road capability and durability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -18450,7 +17739,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -18480,7 +17768,6 @@ values (
   6,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -18508,7 +17795,6 @@ values (
   null,
   'The first consumer-focused Hummer model, based on a modified GM truck platform (GMT820). Known for massive size and chrome accents.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -18532,7 +17818,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -18562,7 +17847,6 @@ values (
   7,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -18590,7 +17874,6 @@ values (
   null,
   'The smallest and most efficient Hummer, based on the Chevrolet Colorado/GMC Canyon platform. More civil and easier to manage daily.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -18614,7 +17897,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -18626,7 +17908,6 @@ values (
   true,
   'Passenger Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -18656,7 +17937,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -18684,7 +17964,6 @@ values (
   null,
   'First generation, shared platform with Kia Cee''d.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -18712,7 +17991,6 @@ values (
   null,
   'Third generation, emphasizing European design and driving dynamics.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -18736,7 +18014,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -18766,7 +18043,6 @@ values (
   8.2,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -18794,7 +18070,6 @@ values (
   null,
   'Fifth generation (J4), known for durability and simple design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -18822,7 +18097,6 @@ values (
   null,
   'Sixth generation, offered with reliable G4FG and G4NA engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -18850,7 +18124,6 @@ values (
   null,
   'Seventh generation, radical ''Parametric Dynamics'' design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -18874,7 +18147,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -18904,7 +18176,6 @@ values (
   8.8,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -18932,7 +18203,6 @@ values (
   null,
   'First generation, designed for emerging markets, built on the PB platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -18960,7 +18230,6 @@ values (
   null,
   'Second generation, larger and featuring bolder design elements.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -18984,7 +18253,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -18996,7 +18264,6 @@ values (
   false,
   'Passenger Cars/Economy'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -19026,7 +18293,6 @@ values (
   5.5,
   4.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -19054,7 +18320,6 @@ values (
   null,
   'The first Soviet hatchback (liftback), based on the Moskvich 412 platform, offering increased practicality.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -19078,7 +18343,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -19108,7 +18372,6 @@ values (
   6,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -19136,7 +18399,6 @@ values (
   null,
   'A ubiquitous small commercial panel van and pickup truck known as ''The Heel'', derived from the Moskvich 412 platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -19160,7 +18422,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -19190,7 +18451,6 @@ values (
   4,
   3
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -19218,7 +18478,6 @@ values (
   null,
   'An attempt to create a more modern rear-wheel-drive economy car in the late Soviet/post-Soviet period. Known for quality inconsistencies.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -19242,7 +18501,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -19254,7 +18512,6 @@ values (
   true,
   'Premium/Luxury Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -19284,7 +18541,6 @@ values (
   7.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -19312,7 +18568,6 @@ values (
   null,
   'First generation crossover known for sports car handling and powerful V8 engine option.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -19340,7 +18595,6 @@ values (
   null,
   'Second generation (later QX70) featuring a more aggressive design and improved chassis. Diesel engine introduced later.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -19364,7 +18618,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -19394,7 +18647,6 @@ values (
   8,
   7.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -19422,7 +18674,6 @@ values (
   null,
   ''
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -19450,7 +18701,6 @@ values (
   null,
   'Introduced the powerful VQ37VHR engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -19478,7 +18728,6 @@ values (
   null,
   'Renamed Q50. Known for its updated styling and technology, including hybrid and turbo engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -19502,7 +18751,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -19532,7 +18780,6 @@ values (
   8.2,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -19560,7 +18807,6 @@ values (
   null,
   'Compact luxury crossover known for its coupe-like styling and high reliability, largely sharing components with the G series.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -19584,7 +18830,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -19596,7 +18841,6 @@ values (
   false,
   'Passenger cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -19626,7 +18870,6 @@ values (
   5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -19654,7 +18897,6 @@ values (
   null,
   'First generation based on the original BMC Mini platform, featuring the A-series engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -19682,7 +18924,6 @@ values (
   null,
   'Second generation, restyled by Bertone and powered by reliable Daihatsu 3-cylinder engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -19706,7 +18947,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -19736,7 +18976,6 @@ values (
   6,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -19760,7 +18999,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -19790,7 +19028,6 @@ values (
   6,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -19814,7 +19051,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -19826,7 +19062,6 @@ values (
   false,
   'Historic Luxury GTs / Collector Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -19856,7 +19091,6 @@ values (
   5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -19884,7 +19118,6 @@ values (
   null,
   'Original Grifo design by Giorgetto Giugiaro, featuring Chevrolet V8 engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -19912,7 +19145,6 @@ values (
   null,
   'Updated styling (hidden headlamps), introduction of the massive 7-liter engine option.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -19936,7 +19168,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -19966,7 +19197,6 @@ values (
   6,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -19994,7 +19224,6 @@ values (
   null,
   'The first modern Iso model, intended as a high-speed Gran Turismo competing with Ferrari and Maserati.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -20018,7 +19247,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -20048,7 +19276,6 @@ values (
   4.5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -20076,7 +19303,6 @@ values (
   null,
   'A high-performance four-door sedan often called ''The fastest four seats in the world''.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -20100,7 +19326,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -20112,7 +19337,6 @@ values (
   true,
   'Passenger Cars/SUVs & Pickups'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -20142,7 +19366,6 @@ values (
   8.8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -20170,7 +19393,6 @@ values (
   null,
   'First generation, highly durable workhorse.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -20198,7 +19420,6 @@ values (
   null,
   'Second generation, improved comfort and safety.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -20226,7 +19447,6 @@ values (
   null,
   'Third generation, major redesign with modern technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -20250,7 +19470,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -20280,7 +19499,6 @@ values (
   8,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -20308,7 +19526,6 @@ values (
   null,
   'Original rugged off-road SUV.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -20336,7 +19553,6 @@ values (
   null,
   'Second generation, more refined but retained capability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -20360,7 +19576,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -20390,7 +19605,6 @@ values (
   8.7,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -20418,7 +19632,6 @@ values (
   null,
   'Seven-seater SUV based on the D-Max platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -20446,7 +19659,6 @@ values (
   null,
   'Completely modernized version with enhanced safety features.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -20470,7 +19682,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -20482,7 +19693,6 @@ values (
   true,
   '/passenger/crossovers'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -20512,7 +19722,6 @@ values (
   6.5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -20540,7 +19749,6 @@ values (
   null,
   'Compact crossover, positioned for budget and mass markets, also known as JAC S4 in some regions.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -20564,7 +19772,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -20594,7 +19801,6 @@ values (
   6,
   6.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -20622,7 +19828,6 @@ values (
   null,
   'Mid-size crossover built on a modular platform, featuring a more premium look and feel than the JS4.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -20646,7 +19851,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -20676,7 +19880,6 @@ values (
   6.2,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -20704,7 +19907,6 @@ values (
   null,
   'Five-door liftback sedan offering practical cargo space and attractive fastback styling. Known as JAC A5 in China.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -20728,7 +19930,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -20740,7 +19941,6 @@ values (
   true,
   'Automotive/Passenger_Cars/SUV_Crossover'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -20770,7 +19970,6 @@ values (
   7.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -20798,7 +19997,6 @@ values (
   null,
   'First generation of the compact crossover, known for its rugged styling and technology package.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -20822,7 +20020,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -20852,7 +20049,6 @@ values (
   7,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -20880,7 +20076,6 @@ values (
   null,
   'The flagship SUV model offering enhanced luxury and a powerful 2.0L engine option.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -20904,7 +20099,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -20934,7 +20128,6 @@ values (
   8,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -20962,7 +20155,6 @@ values (
   null,
   'Compact model focusing on urban usability, often available with pure electric or plug-in hybrid powertrains.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -20986,7 +20178,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -20998,7 +20189,6 @@ values (
   true,
   'Premium'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -21028,7 +20218,6 @@ values (
   7,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -21056,7 +20245,6 @@ values (
   null,
   'First performance crossover by Jaguar, sharing platform components with the XE.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -21084,7 +20272,6 @@ values (
   null,
   'Major interior and technology update, including the introduction of Pivi Pro infotainment.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -21108,7 +20295,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -21138,7 +20324,6 @@ values (
   6.5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -21166,7 +20351,6 @@ values (
   null,
   'Replaced the S-Type, defining Jaguar''s modern design language and featuring a rotary gear selector.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -21194,7 +20378,6 @@ values (
   null,
   'Switched to lightweight aluminum architecture (D7a), improving efficiency and dynamics.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -21222,7 +20405,6 @@ values (
   null,
   'Interior refresh, adopting the Pivi Pro infotainment system and dropping V6 options.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -21246,7 +20428,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -21276,7 +20457,6 @@ values (
   7.2,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -21304,7 +20484,6 @@ values (
   null,
   'Jaguar''s compact executive sedan, focused on driving dynamics and featuring an aluminum-intensive structure.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -21332,7 +20511,6 @@ values (
   null,
   'Significant interior update with Pivi Pro, simplifying the engine lineup to focus on Ingenium units.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -21356,7 +20534,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -21368,7 +20545,6 @@ values (
   true,
   'Passenger Car/SUV'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -21398,7 +20574,6 @@ values (
   7.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -21426,7 +20601,6 @@ values (
   null,
   'Third generation, known for solid axles and blending off-road capability with increasing luxury features.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -21454,7 +20628,6 @@ values (
   null,
   'Fourth generation, adopted a unibody construction and shared platform components with Mercedes-Benz ML-Class, significantly increasing on-road refinement.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -21478,7 +20651,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -21508,7 +20680,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -21536,7 +20707,6 @@ values (
   null,
   'Fourth major generation, significantly modernized with improved on-road manners and technology, while retaining exceptional off-road capabilities.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -21560,7 +20730,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -21590,7 +20759,6 @@ values (
   7,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -21618,7 +20786,6 @@ values (
   null,
   'Mid-size crossover built on Fiat Group architecture, known for its divisive styling and advanced AWD systems, replacing the Liberty nameplate in North America.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -21642,7 +20809,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -21654,7 +20820,6 @@ values (
   true,
   'Passenger Vehicles/SUV/Crossover'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -21684,7 +20849,6 @@ values (
   7,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -21712,7 +20876,6 @@ values (
   null,
   'First generation of the subcompact crossover Tivoli, known for its stylish design and spacious interior relative to its size.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -21740,7 +20903,6 @@ values (
   null,
   'Major facelift introducing new engines (1.5L turbo petrol) and updated exterior/interior styling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -21764,7 +20926,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -21794,7 +20955,6 @@ values (
   7.5,
   7.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -21822,7 +20982,6 @@ values (
   null,
   'The fourth generation (G4) Rexton, marketed as a premium body-on-frame SUV with luxurious features and serious off-road capabilities.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -21846,7 +21005,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -21876,7 +21034,6 @@ values (
   7.2,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -21904,7 +21061,6 @@ values (
   null,
   'The fourth modern generation of the Korando (C300), featuring a completely redesigned platform, modern safety systems, and electrified options (e-Motion).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -21928,7 +21084,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -21940,7 +21095,6 @@ values (
   true,
   'Sportscars / Specialty'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -21970,7 +21124,6 @@ values (
   7.5,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -21998,7 +21151,6 @@ values (
   null,
   'Lightweight, high-performance track car utilizing Audi powerplants and featuring a carbon monocoque chassis.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -22022,7 +21174,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -22052,7 +21203,6 @@ values (
   7.5,
   4.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -22080,7 +21230,6 @@ values (
   null,
   'A more civilized, road-focused version of the X-Bow featuring a wraparound windshield and increased weather protection.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -22104,7 +21253,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -22134,7 +21282,6 @@ values (
   8,
   3
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -22162,7 +21309,6 @@ values (
   null,
   'Dedicated closed-cockpit racing version built to GT racing regulations, featuring the powerful Audi five-cylinder engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -22186,7 +21332,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -22198,7 +21343,6 @@ values (
   true,
   '/roadster/kit_car'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -22228,7 +21372,6 @@ values (
   7,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -22256,7 +21399,6 @@ values (
   null,
   'Kit car resembling the Lotus Seven, built primarily on Skoda Octavia and Fabia components.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -22280,7 +21422,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -22310,7 +21451,6 @@ values (
   7.5,
   4.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -22338,7 +21478,6 @@ values (
   null,
   'Original Kaipan model based on the mechanicals of the Skoda Favorit and Felicia.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -22362,7 +21501,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -22392,7 +21530,6 @@ values (
   7.2,
   4.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -22420,7 +21557,6 @@ values (
   null,
   'Modern roadster based on the mechanical platform of the Skoda Fabia Mk1/Mk2.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -22444,7 +21580,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -22456,7 +21591,6 @@ values (
   true,
   'Passenger Vehicles/Cars/SUVs & Crossovers'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -22486,7 +21620,6 @@ values (
   8,
   9.2
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -22514,7 +21647,6 @@ values (
   null,
   'Third generation, marked a significant shift towards European design and quality.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -22542,7 +21674,6 @@ values (
   null,
   'Fourth generation, introducing updated safety features and connectivity.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -22566,7 +21697,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -22596,7 +21726,6 @@ values (
   8.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -22624,7 +21753,6 @@ values (
   null,
   'Second generation, focused on quality improvement and European driving characteristics.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -22652,7 +21780,6 @@ values (
   null,
   'Third generation, renamed ''Ceed'' (dropping the apostrophe), featuring advanced safety tech.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -22676,7 +21803,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -22706,7 +21832,6 @@ values (
   9,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -22734,7 +21859,6 @@ values (
   null,
   'Third generation (Russia/CIS version), known for reliability and adaptation to poor roads.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -22762,7 +21886,6 @@ values (
   null,
   'Fourth generation, improved safety and comfort features while retaining mechanical simplicity.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -22786,7 +21909,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -22798,7 +21920,6 @@ values (
   true,
   'Cars/Supercars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -22828,7 +21949,6 @@ values (
   9.5,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -22856,7 +21976,6 @@ values (
   null,
   'The initial Agera and Agera R models, featuring Koenigsegg''s in-house 5.0L V8.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -22884,7 +22003,6 @@ values (
   null,
   'More extreme variants including the Agera RS and One:1, focusing on lightweight and record performance.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -22908,7 +22026,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -22938,7 +22055,6 @@ values (
   9.3,
   4.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -22966,7 +22082,6 @@ values (
   null,
   'A limited-production hybrid mega-car focusing on luxury and immense power, featuring the innovative Koenigsegg Direct Drive system.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -22990,7 +22105,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -23020,7 +22134,6 @@ values (
   9.6,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -23048,7 +22161,6 @@ values (
   null,
   'Koenigsegg''s current flagship, designed as a replacement for the Agera, featuring the 9-speed Light Speed Transmission (LST).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -23072,7 +22184,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -23084,7 +22195,6 @@ values (
   true,
   'Passenger Vehicles/Cars/EU/Premium'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -23114,7 +22224,6 @@ values (
   8.8,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -23142,7 +22251,6 @@ values (
   null,
   'Flagship large SUV known for high safety standards and advanced tech features, targeting the premium family segment.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -23166,7 +22274,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -23196,7 +22303,6 @@ values (
   9.2,
   9.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -23224,7 +22330,6 @@ values (
   null,
   'Reliable and fuel-efficient compact car, popular in Eastern European cities due to low running costs.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -23252,7 +22357,6 @@ values (
   null,
   'Mid-cycle refresh improving infotainment system and exterior styling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -23276,7 +22380,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -23306,7 +22409,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -23334,7 +22436,6 @@ values (
   null,
   'Mid-size sedan offering comfort and competitive pricing, popular among fleet and family buyers in the CIS market.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -23358,7 +22459,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -23370,7 +22470,6 @@ values (
   true,
   '/passenger-cars/mass-market'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -23400,7 +22499,6 @@ values (
   7.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -23428,7 +22526,6 @@ values (
   null,
   'The first modern Lada model, built on the Lada B/C platform, establishing the X-style design language.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -23456,7 +22553,6 @@ values (
   null,
   'Deep modernization (Vesta NG) focusing on interior quality, electronics, and localizing components.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -23480,7 +22576,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -23510,7 +22605,6 @@ values (
   8,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -23538,7 +22632,6 @@ values (
   null,
   'Ultra-budget sedan based on the Kalina platform, positioned as the successor to Samara.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -23566,7 +22659,6 @@ values (
   null,
   'Facelifted version with the unified Vesta-style front fascia; consolidated lineup after phasing out Kalina.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -23590,7 +22682,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -23620,7 +22711,6 @@ values (
   7,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -23648,7 +22738,6 @@ values (
   null,
   'Original design (VAZ-2121), iconic compact off-roader with permanent AWD.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -23676,7 +22765,6 @@ values (
   null,
   'Major update (21213/4), featuring a new engine, revised interior, and larger vertical tailgate. Known as Lada 4x4.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -23704,7 +22792,6 @@ values (
   null,
   'Renamed Niva Legend following minor technical updates and branding separation.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -23728,7 +22815,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -23740,7 +22826,6 @@ values (
   true,
   'Supercars/Luxury SUVs'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -23770,7 +22855,6 @@ values (
   7.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -23798,7 +22882,6 @@ values (
   null,
   'Original Aventador generation with 700 hp V12 engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -23826,7 +22909,6 @@ values (
   null,
   'Updated version with four-wheel steering and increased power.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -23850,7 +22932,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -23880,7 +22961,6 @@ values (
   8,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -23908,7 +22988,6 @@ values (
   null,
   'First generation using 5.2L V10 engine, available in AWD and RWD versions.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -23936,7 +23015,6 @@ values (
   null,
   'Updated generation with improved aerodynamics and connectivity.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -23960,7 +23038,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -23990,7 +23067,6 @@ values (
   8.5,
   9.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -24018,7 +23094,6 @@ values (
   null,
   'Initial generation of the Super Sport Utility Vehicle (SSUV).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -24046,7 +23121,6 @@ values (
   null,
   'Refreshed models with enhanced performance and styling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -24070,7 +23144,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -24082,7 +23155,6 @@ values (
   true,
   'Passenger Vehicles/Premium'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -24112,7 +23184,6 @@ values (
   6,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -24140,7 +23211,6 @@ values (
   null,
   'The third generation Lancia Delta was marketed as a premium C-segment hatchback, sharing platform components with the Fiat Bravo.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -24164,7 +23234,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -24194,7 +23263,6 @@ values (
   7,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -24222,7 +23290,6 @@ values (
   null,
   'A successful premium supermini based on the Fiat Punto platform, known for its fashionable interior.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -24246,7 +23313,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -24276,7 +23342,6 @@ values (
   6.5,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -24304,7 +23369,6 @@ values (
   null,
   'A compact executive car replacing the Dedra, known for its high comfort level and classic Italian styling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -24328,7 +23392,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -24340,7 +23403,6 @@ values (
   true,
   'Land Rover'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -24370,7 +23432,6 @@ values (
   7.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -24398,7 +23459,6 @@ values (
   null,
   'The second generation of the Range Rover Sport, built on a platform shared with the full-size Range Rover, offering a blend of luxury and dynamic performance.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -24422,7 +23482,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -24452,7 +23511,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -24480,7 +23538,6 @@ values (
   null,
   'The second generation Evoque introduced new mild-hybrid powertrains, improved interior quality, and retained its distinctive coupe-like styling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -24504,7 +23561,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -24534,7 +23590,6 @@ values (
   7,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -24562,7 +23617,6 @@ values (
   null,
   'The fifth-generation Discovery adopted a monocoque aluminum architecture for improved on-road dynamics while retaining 7-seat capacity and substantial off-road capability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -24586,7 +23640,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -24598,7 +23651,6 @@ values (
   true,
   'Passenger Vehicles/Electric Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -24628,7 +23680,6 @@ values (
   7.5,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -24656,7 +23707,6 @@ values (
   null,
   'Compact electric city car known for its range and technology features relative to its size, making it popular in emerging EV markets.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -24680,7 +23730,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -24710,7 +23759,6 @@ values (
   8,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -24738,7 +23786,6 @@ values (
   null,
   'Mid-size intelligent electric SUV offering impressive range, a three-screen cockpit, and high performance options (RWD/AWD).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -24762,7 +23809,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -24792,7 +23838,6 @@ values (
   7.8,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -24820,7 +23865,6 @@ values (
   null,
   'Flagship executive electric sedan utilizing cell-to-chassis (CTC) technology for improved safety and space, positioned as a luxury alternative.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -24844,7 +23888,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -24856,7 +23899,6 @@ values (
   true,
   'Luxury Cars/Premium Sedans & SUVs'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -24886,7 +23928,6 @@ values (
   9,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -24914,7 +23955,6 @@ values (
   null,
   'The fourth generation RX features polarizing design, advanced safety features, and continued focus on comfort and reliability, particularly popular in hybrid configuration.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -24938,7 +23978,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -24968,7 +24007,6 @@ values (
   9.2,
   8.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -24996,7 +24034,6 @@ values (
   null,
   'Built on the GA-K platform, the ES seven generation transitioned to front-wheel drive, offering exceptional passenger space, comfort, and standard Lexus reliability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -25020,7 +24057,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -25050,7 +24086,6 @@ values (
   8.5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -25078,7 +24113,6 @@ values (
   null,
   'The third generation IS adopted the aggressive ''spindle grille'' design and focused on sharper handling to compete with German rivals, while maintaining Lexus quality standards.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -25102,7 +24136,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -25114,7 +24147,6 @@ values (
   true,
   'passenger-car/suv'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -25144,7 +24176,6 @@ values (
   8.5,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -25172,7 +24203,6 @@ values (
   null,
   'Flagship 6-seater full-size EREV SUV, known for its extensive technology and range capabilities.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -25196,7 +24226,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -25226,7 +24255,6 @@ values (
   8.7,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -25254,7 +24282,6 @@ values (
   null,
   'Large 6-seater EREV SUV, positioned just below the flagship L9, offering a balance of size and functionality.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -25278,7 +24305,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -25308,7 +24334,6 @@ values (
   8.8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -25336,7 +24361,6 @@ values (
   null,
   '5-seater large EREV SUV, prioritizing comfort and luxury for the first two rows, and often referred to as a family flagship.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -25360,7 +24384,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -25372,7 +24395,6 @@ values (
   true,
   'Passenger Vehicles/Microcar'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -25402,7 +24424,6 @@ values (
   7.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -25430,7 +24451,6 @@ values (
   null,
   'Initial release, replacing the Ixo series design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -25458,7 +24478,6 @@ values (
   null,
   'Major external and internal restyling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -25486,7 +24505,6 @@ values (
   null,
   'Updated dashboard and engine choices (DCI Revolution).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -25510,7 +24528,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -25540,7 +24557,6 @@ values (
   7,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -25568,7 +24584,6 @@ values (
   null,
   'Successor to the X-TOO R, known for its rounded styling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -25592,7 +24607,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -25622,7 +24636,6 @@ values (
   7.8,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -25650,7 +24663,6 @@ values (
   null,
   'Modern crossover styling applied to a quadricycle platform, targeting premium microcar buyers.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -25674,7 +24686,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -25686,7 +24697,6 @@ values (
   true,
   'Luxury Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -25716,7 +24726,6 @@ values (
   7.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -25744,7 +24753,6 @@ values (
   null,
   'The fourth generation is known for its aluminum body, powerful twin-turbo V6, and advanced luxury features, offering a spacious and imposing presence.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -25768,7 +24776,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -25798,7 +24805,6 @@ values (
   7,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -25826,7 +24832,6 @@ values (
   null,
   'The return of the flagship sedan (10th generation), emphasizing quietness, advanced seating options, and smooth ride quality.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -25850,7 +24855,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -25880,7 +24884,6 @@ values (
   8,
   7.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -25908,7 +24911,6 @@ values (
   null,
   'The Nautilus nameplate was introduced as a facelifted and revised version of the second-generation MKX, bringing updated styling and new standard technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -25932,7 +24934,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -25944,7 +24945,6 @@ values (
   true,
   'Sportscars/Exotic'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -25974,7 +24974,6 @@ values (
   8.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -26002,7 +25001,6 @@ values (
   null,
   'The original lightweight Elise, known for its bonded aluminium chassis.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -26030,7 +25028,6 @@ values (
   null,
   'Revised design, incorporated Rover and later Toyota engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -26058,7 +25055,6 @@ values (
   null,
   'Final iteration focusing on efficiency and performance, often using supercharged Toyota units.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -26082,7 +25078,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -26112,7 +25107,6 @@ values (
   8.3,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -26140,7 +25134,6 @@ values (
   null,
   'Track-focused derivative of the Elise S1.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -26168,7 +25161,6 @@ values (
   null,
   'Introduced forced induction (supercharging), significantly boosting performance.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -26196,7 +25188,6 @@ values (
   null,
   'Switched to 3.5L V6 engines (supercharged) for high-performance track models.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -26220,7 +25211,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -26250,7 +25240,6 @@ values (
   8,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -26278,7 +25267,6 @@ values (
   null,
   'The initial Evora, aimed at a more comfortable GT market.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -26306,7 +25294,6 @@ values (
   null,
   'Performance update with significantly more power and revised styling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -26330,7 +25317,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -26342,7 +25328,6 @@ values (
   true,
   'Passenger Car'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -26372,7 +25357,6 @@ values (
   8,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -26400,7 +25384,6 @@ values (
   null,
   'First generation of Lucid''s flagship sedan, focusing on maximizing range and efficiency.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -26424,7 +25407,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -26454,7 +25436,6 @@ values (
   7.8,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -26482,7 +25463,6 @@ values (
   null,
   'High-performance trim of the Air sedan featuring increased power output and advanced features.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -26506,7 +25486,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -26536,7 +25515,6 @@ values (
   7.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -26564,7 +25542,6 @@ values (
   null,
   'Lucid''s first luxury electric SUV, promising Air''s efficiency and range characteristics in a larger, 3-row package.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -26588,7 +25565,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -26600,7 +25576,6 @@ values (
   true,
   '/passenger-cars/crossovers-and-suvs/'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -26630,7 +25605,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -26658,7 +25632,6 @@ values (
   null,
   'The debut model, a compact SUV based on the CMA platform (shared with Volvo XC40).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -26682,7 +25655,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -26712,7 +25684,6 @@ values (
   7.8,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -26740,7 +25711,6 @@ values (
   null,
   'A lower-slung crossover/hatchback sibling to the 01, also using the CMA platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -26764,7 +25734,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -26794,7 +25763,6 @@ values (
   8.2,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -26822,7 +25790,6 @@ values (
   null,
   'A premium coupe SUV based on the CMA platform, featuring a distinctive fastback design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -26846,7 +25813,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -26858,7 +25824,6 @@ values (
   true,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -26888,7 +25853,6 @@ values (
   7.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -26916,7 +25880,6 @@ values (
   null,
   'Initial release model focusing on value and compact SUV segment entry.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -26944,7 +25907,6 @@ values (
   null,
   'Mid-cycle refresh with updated styling, technology, and improved interior quality.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -26968,7 +25930,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -26998,7 +25959,6 @@ values (
   8,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -27026,7 +25986,6 @@ values (
   null,
   'C-segment SUV offering relative luxury, space, and powerful engine options.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -27050,7 +26009,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -27080,7 +26038,6 @@ values (
   8.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -27108,7 +26065,6 @@ values (
   null,
   'Dedicated electric hatchback built on the modular scaleable platform (MSP), known for RWD handling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -27132,7 +26088,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -27144,7 +26099,6 @@ values (
   true,
   'SUV'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -27174,7 +26128,6 @@ values (
   7,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -27202,7 +26155,6 @@ values (
   null,
   'A rugged, body-on-frame SUV known for reliability and off-road capability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -27226,7 +26178,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -27256,7 +26207,6 @@ values (
   6,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -27284,7 +26234,6 @@ values (
   null,
   'Mahindra''s first monocoque chassis SUV, offering 7 seats and modern features for its time.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -27308,7 +26257,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -27338,7 +26286,6 @@ values (
   7.5,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -27366,7 +26313,6 @@ values (
   null,
   'A compact SUV based on the SsangYong Tivoli platform, known for safety and good performance.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -27390,7 +26336,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -27402,7 +26347,6 @@ values (
   false,
   'Sports Cars / Niche Manufacturers'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -27432,7 +26376,6 @@ values (
   3,
   10
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -27460,7 +26403,6 @@ values (
   null,
   'The first series-produced prototype sports car from Marussia Motors, featuring a mid-engine layout and high-performance turbocharged engines sourced primarily from Cosworth.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -27484,7 +26426,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -27514,7 +26455,6 @@ values (
   4,
   1.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -27542,7 +26482,6 @@ values (
   null,
   'The successor to the B1, featuring an even more aggressive, angular, and ''space-age'' design, sharing most mechanical components with its predecessor.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -27566,7 +26505,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -27596,7 +26534,6 @@ values (
   0,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -27624,7 +26561,6 @@ values (
   null,
   'A large concept SUV/Crossover prototype developed by Marussia, intended for potential mass production using a mixed chassis (likely SsangYong components).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -27648,7 +26584,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -27660,7 +26595,6 @@ values (
   true,
   'Luxury/Performance'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -27690,7 +26624,6 @@ values (
   6,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -27718,7 +26651,6 @@ values (
   null,
   'The third generation Ghibli introduced a smaller, more accessible luxury sports sedan format, crucial for Maserati''s modern sales volume.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -27742,7 +26674,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -27772,7 +26703,6 @@ values (
   6.5,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -27800,7 +26730,6 @@ values (
   null,
   'Levante was Maserati''s first venture into the SUV segment, bringing Maserati performance and luxury to the highly competitive crossover market.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -27824,7 +26753,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -27854,7 +26782,6 @@ values (
   5.5,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -27882,7 +26809,6 @@ values (
   null,
   'The sixth generation of the flagship Quattroporte, prioritizing size, luxury, and powerful Ferrari-derived engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -27906,7 +26832,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -27918,7 +26843,6 @@ values (
   false,
   'Historic Manufacturers/France'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -27948,7 +26872,6 @@ values (
   7,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -27976,7 +26899,6 @@ values (
   null,
   'A leisure activity vehicle based on the Simca 1100 pickup chassis, pioneering the crossover concept.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -28000,7 +26922,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -28030,7 +26951,6 @@ values (
   6,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -28058,7 +26978,6 @@ values (
   null,
   'A mid-engined sports car featuring a unique three-abreast seating layout. Successor to the Bagheera.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -28082,7 +27001,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -28112,7 +27030,6 @@ values (
   5.5,
   6.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -28140,7 +27057,6 @@ values (
   null,
   'Original design, mid-engined 3-seater sports car.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -28168,7 +27084,6 @@ values (
   null,
   'Revised bumpers and dashboard.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -28192,7 +27107,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -28204,7 +27118,6 @@ values (
   true,
   'Passenger Vehicles/SUV & MPV'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -28234,7 +27147,6 @@ values (
   6.5,
   6.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -28262,7 +27174,6 @@ values (
   null,
   'First generation of the large, body-on-frame SUV.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -28290,7 +27201,6 @@ values (
   null,
   'Major update focusing on interior technology and powertrain efficiency.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -28314,7 +27224,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -28344,7 +27253,6 @@ values (
   6.7,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -28372,7 +27280,6 @@ values (
   null,
   'Modern generation pickup, succeeding the T60, focusing on technology and powerful bi-turbo diesel engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -28396,7 +27303,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -28426,7 +27332,6 @@ values (
   7,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -28454,7 +27359,6 @@ values (
   null,
   'A large, luxury all-electric MPV designed for executive transport and large families.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -28478,7 +27382,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -28490,7 +27393,6 @@ values (
   true,
   'Automotive/Passenger Cars/Luxury'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -28520,7 +27422,6 @@ values (
   7,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -28548,7 +27449,6 @@ values (
   null,
   'The first modern iteration of the standalone Maybach brand, available in two lengths (57 and 62).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -28572,7 +27472,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -28602,7 +27501,6 @@ values (
   8.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -28630,7 +27528,6 @@ values (
   null,
   'The ultra-luxury sub-brand model based on the long-wheelbase Mercedes-Benz S-Class (W222).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -28654,7 +27551,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -28684,7 +27580,6 @@ values (
   8,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -28712,7 +27607,6 @@ values (
   null,
   'The ultra-luxury SUV offering from the Mercedes-Maybach line, based on the Mercedes-Benz GLS platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -28736,7 +27630,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -28748,7 +27641,6 @@ values (
   true,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -28778,7 +27670,6 @@ values (
   8.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -28806,7 +27697,6 @@ values (
   null,
   'The third generation introduced Skyactiv technology, focusing on efficiency and driving dynamics.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -28834,7 +27724,6 @@ values (
   null,
   'The current generation emphasizes premium design and handling, integrating Mild-Hybrid and optional AWD.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -28858,7 +27747,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -28888,7 +27776,6 @@ values (
   8.7,
   8.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -28916,7 +27803,6 @@ values (
   null,
   'The flagship sedan/wagon utilizing KODO design language and the full Skyactiv suite, known for its sleek design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -28940,7 +27826,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -28970,7 +27855,6 @@ values (
   9,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -28998,7 +27882,6 @@ values (
   null,
   'The first CX-5 model to fully incorporate both KODO design and Skyactiv technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -29026,7 +27909,6 @@ values (
   null,
   'The second generation refined the KODO design, improved interior quality, and further optimized the Skyactiv platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -29050,7 +27932,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -29062,7 +27943,6 @@ values (
   true,
   'Luxury Cars/Hypercars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -29092,7 +27972,6 @@ values (
   7,
   4.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -29120,7 +27999,6 @@ values (
   null,
   'Original version of the Evantra hypercar, hand-built in Tuscany, featuring the naturally aspirated V8 engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -29144,7 +28022,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -29174,7 +28051,6 @@ values (
   6.5,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -29202,7 +28078,6 @@ values (
   null,
   'Extreme performance version of the Evantra, featuring over 1000 horsepower (Millecavalli means ''A Thousand Horses'').'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -29226,7 +28101,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -29256,7 +28130,6 @@ values (
   7.2,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -29284,7 +28157,6 @@ values (
   null,
   'Performance upgrade package offering slightly increased power (771 PS) and revised aerodynamics over the standard Evantra V8.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -29308,7 +28180,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -29320,7 +28191,6 @@ values (
   true,
   '/supercars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -29350,7 +28220,6 @@ values (
   8,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -29378,7 +28247,6 @@ values (
   null,
   'The second generation of the Super Series, featuring the Monocage II carbon fiber tub and the powerful M840T engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -29402,7 +28270,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -29432,7 +28299,6 @@ values (
   7,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -29460,7 +28326,6 @@ values (
   null,
   'The core model of the Sport Series, designed to be a more accessible, everyday supercar. Utilizes the MonoCell II chassis.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -29484,7 +28349,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -29514,7 +28378,6 @@ values (
   6,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -29542,7 +28405,6 @@ values (
   null,
   'A heavily revised version of the 12C, inheriting styling cues from the P1 and featuring improved dynamics and power output.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -29566,7 +28428,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -29578,7 +28439,6 @@ values (
   true,
   'Luxury Cars / Premium'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -29608,7 +28468,6 @@ values (
   8,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -29636,7 +28495,6 @@ values (
   null,
   'The fourth generation of the C-Class, adopting the new Mercedes design language reminiscent of the S-Class.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -29664,7 +28522,6 @@ values (
   null,
   'Mid-cycle refresh introducing new engines, updated headlights, and modern MBUX system upgrades.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -29688,7 +28545,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -29718,7 +28574,6 @@ values (
   8.5,
   9.2
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -29746,7 +28601,6 @@ values (
   null,
   'The tenth generation of the E-Class, featuring a highly digital cockpit (Widescreen Cockpit) and advanced semi-autonomous driving features.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -29774,7 +28628,6 @@ values (
   null,
   'Mid-cycle refresh introducing the MBUX system, redesigned headlights/taillights, and updated steering wheel controls.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -29798,7 +28651,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -29828,7 +28680,6 @@ values (
   8.2,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -29856,7 +28707,6 @@ values (
   null,
   'Compact luxury SUV succeeding the GLK-Class, based on the C-Class platform (W205).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -29884,7 +28734,6 @@ values (
   null,
   'Updated with MBUX infotainment, new headlights, and updated engine lineup (including M264).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -29908,7 +28757,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -29920,7 +28768,6 @@ values (
   false,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -29950,7 +28797,6 @@ values (
   7.5,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -29978,7 +28824,6 @@ values (
   null,
   'Full-size, body-on-frame sedan, renowned for reliability and comfort, popular among fleet operators and taxi services.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -30006,7 +28851,6 @@ values (
   null,
   'Received major chassis and suspension revisions for improved handling characteristics.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -30030,7 +28874,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -30060,7 +28903,6 @@ values (
   6.5,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -30088,7 +28930,6 @@ values (
   null,
   'The final generation. A sporty, front-wheel-drive coupe based on the European Ford Mondeo platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -30112,7 +28953,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -30142,7 +28982,6 @@ values (
   7,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -30170,7 +29009,6 @@ values (
   null,
   'Featured a radical, oval aerodynamic design, mechanically similar to the Ford Taurus.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -30198,7 +29036,6 @@ values (
   null,
   'A redesign moving away from the oval styling toward a more conservative look.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -30222,7 +29059,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -30234,7 +29070,6 @@ values (
   true,
   'Passenger Cars/Premium Subcompact'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -30264,7 +29099,6 @@ values (
   8,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -30292,7 +29126,6 @@ values (
   null,
   'Second generation under BMW ownership, introduced the Prince engine family (N14/N18).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -30320,7 +29153,6 @@ values (
   null,
   'Third generation, switched to the BMW UKL platform and reliable B-series engines (B38/B48).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -30344,7 +29176,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -30374,7 +29205,6 @@ values (
   8.5,
   8.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -30402,7 +29232,6 @@ values (
   null,
   'First generation of the compact crossover, offering optional ALL4 all-wheel drive.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -30430,7 +29259,6 @@ values (
   null,
   'Second, larger generation, based on the BMW X1 platform (UKL2).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -30454,7 +29282,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -30484,7 +29311,6 @@ values (
   8.2,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -30512,7 +29338,6 @@ values (
   null,
   'First generation Clubman, featuring the unique side clubdoor (suicide door) and rear barn doors.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -30540,7 +29365,6 @@ values (
   null,
   'Second generation, becoming a larger, conventional four-door station wagon while retaining the signature barn doors.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -30564,7 +29388,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -30576,7 +29399,6 @@ values (
   true,
   'Cars / SUV'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -30606,7 +29428,6 @@ values (
   7.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -30634,7 +29455,6 @@ values (
   null,
   'First generation, based on the Mitsubishi Airtrek concept.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -30662,7 +29482,6 @@ values (
   null,
   'Third generation, known for its focus on comfort and available PHEV version.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -30686,7 +29505,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -30716,7 +29534,6 @@ values (
   8,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -30744,7 +29561,6 @@ values (
   null,
   'Ninth generation (Lancer IX), known for simplicity, reliability, and low cost of ownership.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -30772,7 +29588,6 @@ values (
   null,
   'Tenth generation (Lancer X), featuring a sportier design and shared platform with Outlander.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -30796,7 +29611,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -30826,7 +29640,6 @@ values (
   7,
   7.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -30854,7 +29667,6 @@ values (
   null,
   'First generation (with numerous facelifts), a compact crossover sharing architecture with the Lancer and Outlander.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -30878,7 +29690,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -30890,7 +29701,6 @@ values (
   false,
   'Cars / Luxury Sports'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -30920,7 +29730,6 @@ values (
   5,
   2
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -30948,7 +29757,6 @@ values (
   null,
   'High-end luxury SUV based on International Harvester Scout components, but heavily modified. Used powerful Chrysler V8 engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -30972,7 +29780,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -31002,7 +29809,6 @@ values (
   5.5,
   1.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -31030,7 +29836,6 @@ values (
   null,
   'Luxury sedan designed to compete with the Mercedes S-Class. Built using heavily modified components from the Dodge Aspen.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -31054,7 +29859,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -31084,7 +29888,6 @@ values (
   4,
   2.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -31112,7 +29915,6 @@ values (
   null,
   'The original luxury grand tourer, known for its powerful Chrysler V8 and bespoke Italian coachwork.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -31136,7 +29938,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -31148,7 +29949,6 @@ values (
   true,
   'Sports Cars/Bespoke'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -31178,7 +29978,6 @@ values (
   8.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -31206,7 +30005,6 @@ values (
   null,
   'The classic Morgan design utilizing Ford/Mazda engines, offering traditional feel with modern reliability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -31230,7 +30028,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -31260,7 +30057,6 @@ values (
   7,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -31288,7 +30084,6 @@ values (
   null,
   'A nostalgic revival of the original 3-wheeled design, powered by a motorcycle V-twin engine mounted externally.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -31312,7 +30107,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -31342,7 +30136,6 @@ values (
   8,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -31370,7 +30163,6 @@ values (
   null,
   'Morgan''s first completely new design since 1962, featuring an aluminum chassis and BMW V8 power.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -31394,7 +30186,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -31406,7 +30197,6 @@ values (
   false,
   '/classic/morris'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -31436,7 +30226,6 @@ values (
   6,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -31464,7 +30253,6 @@ values (
   null,
   'Original low-headlamp version with side-valve engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -31492,7 +30280,6 @@ values (
   null,
   'Introduced the OHV A-Series engine and higher headlamps.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -31520,7 +30307,6 @@ values (
   null,
   'Further improvements, including the 948cc and 1098cc engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -31544,7 +30330,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -31574,7 +30359,6 @@ values (
   5.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -31602,7 +30386,6 @@ values (
   null,
   'The original version, sold under both Austin and Morris badges.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -31630,7 +30413,6 @@ values (
   null,
   'Minor changes, including a redesigned grille and larger rear window.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -31654,7 +30436,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -31684,7 +30465,6 @@ values (
   6.5,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -31712,7 +30492,6 @@ values (
   null,
   'Farina-styled large family saloon, successor to the Series V, featured the 1.5L B-Series engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -31736,7 +30515,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -31748,7 +30526,6 @@ values (
   false,
   'Passenger Cars/Sedan'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -31778,7 +30555,6 @@ values (
   7,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -31806,7 +30582,6 @@ values (
   null,
   'The second generation of Moskvich, featuring the new advanced UZAM-412 engine, making it popular both domestically and for export.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -31830,7 +30605,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -31860,7 +30634,6 @@ values (
   6.5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -31888,7 +30661,6 @@ values (
   null,
   'A deep modernization of the 412 platform, featuring updated exterior styling, revised interior, and improved brakes (front discs on most models).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -31912,7 +30684,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -31942,7 +30713,6 @@ values (
   5,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -31970,7 +30740,6 @@ values (
   null,
   'Also known as Aleko. The first front-wheel-drive Moskvich, representing a major technological leap for the company, although suffering from inconsistent build quality.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -31994,7 +30763,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -32006,7 +30774,6 @@ values (
   false,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -32036,7 +30803,6 @@ values (
   7,
   4.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -32064,7 +30830,6 @@ values (
   null,
   'The first fully electric vehicle developed by NEVS based on the second-generation Saab 9-3 architecture. Focused primarily on the Chinese market fleet operations.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -32088,7 +30853,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -32118,7 +30882,6 @@ values (
   7.2,
   2.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -32146,7 +30909,6 @@ values (
   null,
   'The electric wagon version of the 9-3, offering increased utility based on the 9-3X model platform, primarily intended for fleet buyers.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -32170,7 +30932,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -32200,7 +30961,6 @@ values (
   9,
   10
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -32224,7 +30984,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -32236,7 +30995,6 @@ values (
   true,
   'Cars/Electric Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -32266,7 +31024,6 @@ values (
   7.5,
   7.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -32294,7 +31051,6 @@ values (
   null,
   'First generation flagship electric SUV.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -32322,7 +31078,6 @@ values (
   null,
   'Second generation ES8 built on the advanced NT 2.0 platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -32346,7 +31101,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -32376,7 +31130,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -32404,7 +31157,6 @@ values (
   null,
   'Mid-size sports sedan/wagon positioned for global volume markets.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -32428,7 +31180,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -32458,7 +31209,6 @@ values (
   7.7,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -32486,7 +31236,6 @@ values (
   null,
   'NIO''s large executive sedan, featuring advanced autonomous driving capabilities.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -32510,7 +31259,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -32522,7 +31270,6 @@ values (
   false,
   'Historical Passenger Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -32552,7 +31299,6 @@ values (
   6.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -32580,7 +31326,6 @@ values (
   null,
   'A small rear-engined economy car known for its reliable air-cooled two-cylinder engine and somewhat futuristic (for its time) boxy styling reminiscent of the Chevrolet Corvair.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -32604,7 +31349,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -32634,7 +31378,6 @@ values (
   4,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -32662,7 +31405,6 @@ values (
   null,
   'A revolutionary executive sedan famous for its aerodynamic styling and, controversially, being the first large-scale production car powered by a twin-rotor Wankel engine. Initial engine reliability issues nearly bankrupted NSU.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -32686,7 +31428,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -32716,7 +31457,6 @@ values (
   7.5,
   6.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -32744,7 +31484,6 @@ values (
   null,
   'Performance versions of the Prinz line, featuring larger, powerful air-cooled four-cylinder engines and improved handling, often used in amateur racing. The TTS model was particularly potent for its size.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -32768,7 +31507,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -32780,7 +31518,6 @@ values (
   true,
   'Passenger Cars/Electric Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -32810,7 +31547,6 @@ values (
   7.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -32838,7 +31574,6 @@ values (
   null,
   'First generation ES8 based on the NT1 platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -32866,7 +31601,6 @@ values (
   null,
   'Second generation ES8, significantly updated and moved to the NT2 platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -32890,7 +31624,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -32920,7 +31653,6 @@ values (
   8,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -32948,7 +31680,6 @@ values (
   null,
   'Flagship electric luxury sedan based on the NT2 platform, focused on smart technology and long range.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -32972,7 +31703,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -33002,7 +31732,6 @@ values (
   7.9,
   7.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -33030,7 +31759,6 @@ values (
   null,
   'Mid-to-large sized coupe-SUV, known as ES7 in China and EL7 in Europe, based on the NT2 platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -33054,7 +31782,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -33066,7 +31793,6 @@ values (
   true,
   'Passenger Vehicles / SUV / Crossover'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -33096,7 +31822,6 @@ values (
   7.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -33124,7 +31849,6 @@ values (
   null,
   'First generation, defining the compact crossover segment.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -33152,7 +31876,6 @@ values (
   null,
   'Second generation, introducing better technology and materials.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -33180,7 +31903,6 @@ values (
   null,
   'Third generation, heavily featuring electrification (e-Power).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -33204,7 +31926,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -33234,7 +31955,6 @@ values (
   7,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -33262,7 +31982,6 @@ values (
   null,
   'Second generation, robust design, known for off-road capability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -33290,7 +32009,6 @@ values (
   null,
   'Third generation, switched to a more crossover-like, aerodynamic design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -33318,7 +32036,6 @@ values (
   null,
   'Fourth generation, featuring e-Power technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -33342,7 +32059,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -33372,7 +32088,6 @@ values (
   8,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -33400,7 +32115,6 @@ values (
   null,
   'First generation, distinctive styling and compact dimensions.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -33428,7 +32142,6 @@ values (
   null,
   'Second generation, modernized design and improved technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -33452,7 +32165,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -33464,7 +32176,6 @@ values (
   true,
   'High Performance Sports Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -33494,7 +32205,6 @@ values (
   6.5,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -33522,7 +32232,6 @@ values (
   null,
   'Original lightweight mid-engined sports car based on a highly developed Ford Duratec V6 engine, offering exceptional handling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -33546,7 +32255,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -33576,7 +32284,6 @@ values (
   6,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -33604,7 +32311,6 @@ values (
   null,
   'Track-focused evolution of the M12, featuring a more powerful engine (425 hp) and revised suspension setup for superior circuit performance.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -33628,7 +32334,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -33658,7 +32363,6 @@ values (
   7,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -33686,7 +32390,6 @@ values (
   null,
   'Flagship supercar utilizing a Yamaha/Volvo twin-turbo V8 engine, known for its raw, unfiltered driving experience and highly analogue feel.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -33710,7 +32413,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -33722,7 +32424,6 @@ values (
   false,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -33752,7 +32453,6 @@ values (
   6.8,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -33780,7 +32480,6 @@ values (
   null,
   'Mid-size RWD model, iconic of the 80s American car scene.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -33808,7 +32507,6 @@ values (
   null,
   'Switched to FWD platform, popular mid-90s sedan and coupe.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -33832,7 +32530,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -33862,7 +32559,6 @@ values (
   5.5,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -33890,7 +32586,6 @@ values (
   null,
   'Flagship luxury sedan, introduced the highly complex Northstar V8 derivative (L47).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -33918,7 +32613,6 @@ values (
   null,
   'Updated design, offered both V8 and a standard V6 option.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -33942,7 +32636,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -33972,7 +32665,6 @@ values (
   7,
   7.2
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -34000,7 +32692,6 @@ values (
   null,
   'Compact sedan/coupe, shared platform with Pontiac Grand Am. One of the last Oldsmobile models produced.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -34024,7 +32715,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -34036,7 +32726,6 @@ values (
   true,
   'Passenger Vehicles/SUV-Crossover'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -34066,7 +32755,6 @@ values (
   6.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -34094,7 +32782,6 @@ values (
   null,
   'The initial generation of Omoda''s compact crossover, known for its futuristic styling and standard turbo engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -34118,7 +32805,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -34148,7 +32834,6 @@ values (
   7,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -34176,7 +32861,6 @@ values (
   null,
   'Omoda''s entry into the compact sedan segment, aimed at budget-conscious buyers seeking a modern design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -34200,7 +32884,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -34230,7 +32913,6 @@ values (
   8,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -34258,7 +32940,6 @@ values (
   null,
   'The fully electric version of the C5, featuring significant design changes and focusing on zero-emission urban commuting.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -34282,7 +32963,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -34294,7 +32974,6 @@ values (
   true,
   'Automotive/Passenger Cars/European'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -34324,7 +33003,6 @@ values (
   7.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -34352,7 +33030,6 @@ values (
   null,
   'Fifth generation Astra, significantly lighter than its predecessor (J), built on GM''s D2XX platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -34376,7 +33053,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -34406,7 +33082,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -34434,7 +33109,6 @@ values (
   null,
   'Sixth generation Corsa, developed under PSA ownership, sharing the CMP platform with the Peugeot 208.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -34458,7 +33132,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -34488,7 +33161,6 @@ values (
   6.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -34516,7 +33188,6 @@ values (
   null,
   'Second generation Insignia (also known as Insignia Grand Sport), significantly larger and lighter than the previous Insignia A.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -34540,7 +33211,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -34552,7 +33222,6 @@ values (
   true,
   'Passenger Cars/Sedans & Hatchbacks/Electric Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -34564,7 +33233,6 @@ values (
   true,
   'Hypercars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -34594,7 +33262,6 @@ values (
   7.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -34622,7 +33289,6 @@ values (
   null,
   'Original production series, featuring AMG V12 engines derived from Mercedes-Benz.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -34650,7 +33316,6 @@ values (
   null,
   'Significant redesign and power upgrade, leading to the Zonda Cinque and R variants.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -34674,7 +33339,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -34704,7 +33368,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -34732,7 +33395,6 @@ values (
   null,
   'Original coupe, featuring a bespoke Mercedes-AMG twin-turbo V12 M158 engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -34760,7 +33422,6 @@ values (
   null,
   'Open-top version and lightweight, track-focused evolution (BC), with increased power.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -34784,7 +33445,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -34814,7 +33474,6 @@ values (
   9,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -34842,7 +33501,6 @@ values (
   null,
   'The third major chapter in Pagani''s history, focusing on lightness and driving purity, offering a manual transmission option.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -34866,7 +33524,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -34878,7 +33535,6 @@ values (
   false,
   'Historic/Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -34908,7 +33564,6 @@ values (
   6.5,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -34936,7 +33591,6 @@ values (
   null,
   'Innovative lightweight aluminum-bodied car, later switched to steel. Known for its small, efficient flat-twin engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -34960,7 +33614,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -34990,7 +33643,6 @@ values (
   6,
   3.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -35018,7 +33670,6 @@ values (
   null,
   'An evolution of the Dyna Z design, featuring improved styling and performance, including the higher-output Tigre engine option.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -35042,7 +33693,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -35072,7 +33722,6 @@ values (
   7,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -35100,7 +33749,6 @@ values (
   null,
   'The final passenger car model produced by Panhard. A stylish, modern coupe that shared mechanics with Citroën, known for its futuristic styling and comfort.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -35124,7 +33772,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -35136,7 +33783,6 @@ values (
   false,
   'Historic/Luxury/Sports'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -35166,7 +33812,6 @@ values (
   3,
   10
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -35194,7 +33839,6 @@ values (
   null,
   'Designed by Wilfredo Ricart, the Z-102 was a high-tech sports car for its era, featuring advanced DOHC V8 engines and aluminum construction.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -35218,7 +33862,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -35248,7 +33891,6 @@ values (
   1,
   1
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -35276,7 +33918,6 @@ values (
   null,
   'Planned successor to the Z-102, featuring an increased engine displacement, though only a handful of prototypes were constructed.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -35300,7 +33941,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -35330,7 +33970,6 @@ values (
   1,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -35358,7 +33997,6 @@ values (
   null,
   'An experimental racing prototype based on Z-102 mechanicals, intended for high-speed competition like Le Mans. Extremely rare and unique design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -35382,7 +34020,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -35394,7 +34031,6 @@ values (
   true,
   'Passenger Cars/City Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -35424,7 +34060,6 @@ values (
   9,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -35452,7 +34087,6 @@ values (
   null,
   'First generation, highly popular city car based on Daihatsu Sirion/Toyota Passo.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -35480,7 +34114,6 @@ values (
   null,
   'Second generation, larger and more refined.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -35508,7 +34141,6 @@ values (
   null,
   'Third generation, featuring improved safety and modern design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -35532,7 +34164,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -35562,7 +34193,6 @@ values (
   8.5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -35590,7 +34220,6 @@ values (
   null,
   'First generation, ultra-compact city car focusing on maximum fuel economy.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -35618,7 +34247,6 @@ values (
   null,
   'Second generation, based on Daihatsu Ayla.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -35642,7 +34270,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -35672,7 +34299,6 @@ values (
   8,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -35700,7 +34326,6 @@ values (
   null,
   'First generation compact 7-seater MPV, essentially a rebadged Daihatsu.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -35728,7 +34353,6 @@ values (
   null,
   'Second generation, significantly improved based on the Toyota Veloz/Avanza platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -35752,7 +34376,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -35764,7 +34387,6 @@ values (
   true,
   'Europe/France/Peugeot'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -35794,7 +34416,6 @@ values (
   7,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -35822,7 +34443,6 @@ values (
   null,
   'The second generation 308 introduced the i-Cockpit concept and significantly improved build quality, becoming a strong competitor in the C-segment.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -35850,7 +34470,6 @@ values (
   null,
   'The third generation (P5) adopted a bolder design language and introduced hybrid powertrains, further emphasizing technology and efficiency.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -35874,7 +34493,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -35904,7 +34522,6 @@ values (
   5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -35932,7 +34549,6 @@ values (
   null,
   'The 307 was known for its spacious, almost MPV-like cabin design, though early models suffered from electrical faults.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -35960,7 +34576,6 @@ values (
   null,
   'The facelift (T6) addressed major reliability issues, especially regarding multiplex wiring and introduced new engine variants.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -35984,7 +34599,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -36014,7 +34628,6 @@ values (
   6,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -36042,7 +34655,6 @@ values (
   null,
   'The 206 replaced the highly successful 205. It was immensely popular globally due to its stylish looks, compact size, and good handling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -36066,7 +34678,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -36078,7 +34689,6 @@ values (
   true,
   'Hypercars/Luxury GTs'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -36108,7 +34718,6 @@ values (
   9,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -36136,7 +34745,6 @@ values (
   null,
   'First production hypercar by Automobili Pininfarina, based on Rimac technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -36160,7 +34768,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -36190,7 +34797,6 @@ values (
   9,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -36218,7 +34824,6 @@ values (
   null,
   'Limited edition open-top electric hypercar celebrating 95 years of Pininfarina design, built upon Battista technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -36242,7 +34847,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -36272,7 +34876,6 @@ values (
   7,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -36300,7 +34903,6 @@ values (
   null,
   'Hydrogen fuel cell powered high-performance track car prototype, later offered as a limited track-only series.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -36324,7 +34926,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -36336,7 +34937,6 @@ values (
   false,
   'Historic/American Muscle'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -36366,7 +34966,6 @@ values (
   5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -36394,7 +34993,6 @@ values (
   null,
   'The third generation, known as the E-body, is the most famous, offering powerful V8 engines, including the legendary 426 Hemi.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -36418,7 +35016,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -36448,7 +35045,6 @@ values (
   7,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -36476,7 +35072,6 @@ values (
   null,
   'A compact, performance-oriented variant of the Valiant, designed for affordability and speed.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -36500,7 +35095,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -36530,7 +35124,6 @@ values (
   6,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -36558,7 +35151,6 @@ values (
   null,
   'The second generation saw the adoption of aerodynamic styling and improved engines, making the platform highly successful globally.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -36582,7 +35174,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -36594,7 +35185,6 @@ values (
   true,
   'Cars/Premium/Electric'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -36624,7 +35214,6 @@ values (
   8.5,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -36652,7 +35241,6 @@ values (
   null,
   'The first mass-market electric vehicle from Polestar, competing directly with Tesla Model 3.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -36676,7 +35264,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -36706,7 +35293,6 @@ values (
   8.8,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -36734,7 +35320,6 @@ values (
   null,
   'A large electric SUV, sharing technology with the Volvo EX90, focusing on aerodynamics and luxury.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -36758,7 +35343,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -36788,7 +35372,6 @@ values (
   7.5,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -36816,7 +35399,6 @@ values (
   null,
   'A limited-edition high-performance plug-in hybrid coupe, serving as the halo car for the Polestar brand launch.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -36840,7 +35422,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -36852,7 +35433,6 @@ values (
   false,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -36882,7 +35462,6 @@ values (
   4,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -36910,7 +35489,6 @@ values (
   null,
   'Original model range, known as ''Borewicz'', based on Fiat 125p mechanicals.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -36938,7 +35516,6 @@ values (
   null,
   'Introduction of the five-bearing crankshaft engine and significant exterior updates, including a revised rear end (''Akwarium'').'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -36962,7 +35539,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -36992,7 +35568,6 @@ values (
   5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -37020,7 +35595,6 @@ values (
   null,
   'Major exterior redesign (new front/rear masks) improving aerodynamics and modernizing the look.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -37044,7 +35618,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -37074,7 +35647,6 @@ values (
   5.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -37102,7 +35674,6 @@ values (
   null,
   'Final modernization package (Plus) featuring rounded body elements, a new dashboard, and the sedan variant (Atu).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -37126,7 +35697,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -37138,7 +35708,6 @@ values (
   false,
   '/american/mass-market'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -37168,7 +35737,6 @@ values (
   6.5,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -37196,7 +35764,6 @@ values (
   null,
   'The final generation, known for its sleek design and powerful LT1/LS1 V8 engines. Highly popular among enthusiasts.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -37220,7 +35787,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -37250,7 +35816,6 @@ values (
   8.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -37278,7 +35843,6 @@ values (
   null,
   'A compact crossover/hatchback developed jointly with Toyota (Matrix twin), known for its reliability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -37306,7 +35870,6 @@ values (
   null,
   'The final, slightly larger generation, featuring updated engines and design, but with a very short production run.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -37330,7 +35893,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -37360,7 +35922,6 @@ values (
   7,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -37388,7 +35949,6 @@ values (
   null,
   'The last generation, a mid-size sedan known for its distinctive styling and available supercharged V6 engines (GTP).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -37412,7 +35972,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -37424,7 +35983,6 @@ values (
   true,
   '/luxury/sports_cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -37454,7 +36012,6 @@ values (
   8.5,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -37482,7 +36039,6 @@ values (
   null,
   'The current iteration of the iconic sports car, featuring enhanced performance, digitization, and wide-body styling across the range.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -37506,7 +36062,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -37536,7 +36091,6 @@ values (
   8,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -37564,7 +36118,6 @@ values (
   null,
   'The third generation SUV offering enhanced luxury, technology, and improved dynamic performance, now exclusively built on the MLB Evo platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -37588,7 +36141,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -37618,7 +36170,6 @@ values (
   8.2,
   8.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -37646,7 +36197,6 @@ values (
   null,
   'Porsche''s entry-level compact luxury SUV, renowned for its athletic handling and strong performance derived from the Audi Q5 platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -37670,7 +36220,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -37682,7 +36231,6 @@ values (
   true,
   'Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -37712,7 +36260,6 @@ values (
   8.5,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -37740,7 +36287,6 @@ values (
   null,
   'High-performance track car, occasionally registered for road use depending on local regulations. Features a highly tuned Renault Sport engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -37764,7 +36310,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -37794,7 +36339,6 @@ values (
   6,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -37822,7 +36366,6 @@ values (
   null,
   'The original light car series that cemented Praga''s reputation for reliable, affordable motoring in Czechoslovakia.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -37850,7 +36393,6 @@ values (
   null,
   'Later, more robust versions of the Piccolo lineup.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -37874,7 +36416,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -37904,7 +36445,6 @@ values (
   6.5,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -37932,7 +36472,6 @@ values (
   null,
   'A successful mid-range family car introduced just before WWII, continuing production briefly post-war.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -37956,7 +36495,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -37968,7 +36506,6 @@ values (
   true,
   'Passenger Vehicles/Asian'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -37998,7 +36535,6 @@ values (
   7,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -38026,7 +36562,6 @@ values (
   null,
   'The Proton Wira (Persona in some markets) was based heavily on the 1992 Mitsubishi Lancer, offering simple, reliable transport.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -38050,7 +36585,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -38080,7 +36614,6 @@ values (
   6,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -38108,7 +36641,6 @@ values (
   null,
   'The first generation Persona was essentially a sedan version of the Proton Gen-2, replacing the old Wira/Persona in export markets.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -38132,7 +36664,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -38162,7 +36693,6 @@ values (
   7.5,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -38190,7 +36720,6 @@ values (
   null,
   'The first Proton model ever produced, based on the second generation Mitsubishi Lancer Fiore.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -38218,7 +36747,6 @@ values (
   null,
   'A long-running facelifted version of the original Saga, kept in production as a budget option.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -38242,7 +36770,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -38254,7 +36781,6 @@ values (
   false,
   'Automobiles/OffRoad'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -38284,7 +36810,6 @@ values (
   8.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -38312,7 +36837,6 @@ values (
   null,
   'Original military and civilian off-roader, extremely rugged.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -38340,7 +36864,6 @@ values (
   null,
   'Luxury and permanent AWD introduced, sold under the Puch badge in specific markets.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -38364,7 +36887,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -38394,7 +36916,6 @@ values (
   6,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -38422,7 +36943,6 @@ values (
   null,
   'Austrian version of the Fiat 500/600, featuring a unique air-cooled boxer engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -38446,7 +36966,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -38476,7 +36995,6 @@ values (
   9,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -38504,7 +37022,6 @@ values (
   null,
   'Original design, air-cooled engine, 4x4 or 6x6 configuration, highly capable utility vehicle.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -38532,7 +37049,6 @@ values (
   null,
   'Updated version with mostly water-cooled engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -38556,7 +37072,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -38568,7 +37083,6 @@ values (
   false,
   'Passenger Cars/Utility Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -38598,7 +37112,6 @@ values (
   7.5,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -38626,7 +37139,6 @@ values (
   null,
   'First and only generation, focusing on robustness and low maintenance cost for Eastern Bloc markets.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -38650,7 +37162,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -38680,7 +37191,6 @@ values (
   6.5,
   3
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -38708,7 +37218,6 @@ values (
   null,
   'Raba''s short-lived attempt at a compact, rugged SUV primarily using commercial vehicle mechanical components.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -38732,7 +37241,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -38762,7 +37270,6 @@ values (
   8,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -38790,7 +37297,6 @@ values (
   null,
   'A utilitarian panel van model converted for passenger use (Minivan variant), emphasizing cargo capacity and industrial durability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -38814,7 +37320,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -38826,7 +37331,6 @@ values (
   true,
   'Sports Cars / Track Day Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -38856,7 +37360,6 @@ values (
   7,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -38884,7 +37387,6 @@ values (
   null,
   'Original SR3 model, establishing the Radical sports prototype lineage.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -38912,7 +37414,6 @@ values (
   null,
   'Updated chassis and engine options, improving aerodynamics and usability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -38940,7 +37441,6 @@ values (
   null,
   'Current iteration featuring advanced electronics and refined chassis for maximum performance.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -38964,7 +37464,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -38994,7 +37493,6 @@ values (
   6,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -39022,7 +37520,6 @@ values (
   null,
   'Original model featuring the unique RPE V8 engine, known for breaking Nürburgring records.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -39050,7 +37547,6 @@ values (
   null,
   'Mid-life update with improved aerodynamics and reliability features.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -39078,7 +37574,6 @@ values (
   null,
   'The ultimate evolution of the SR8 platform, often equipped with 3.0L V8.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -39102,7 +37597,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -39132,7 +37626,6 @@ values (
   8,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -39160,7 +37653,6 @@ values (
   null,
   'Entry-level prototype aimed at Radical''s spec racing series.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -39188,7 +37680,6 @@ values (
   null,
   'Modernized version with improved brakes, cooling, and Radical''s advanced digital display.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -39212,7 +37703,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -39224,7 +37714,6 @@ values (
   true,
   'Passenger Cars/SUV/Luxury SUV'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -39236,7 +37725,6 @@ values (
   true,
   'Automobiles/Passenger_Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -39266,7 +37754,6 @@ values (
   8.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -39294,7 +37781,6 @@ values (
   null,
   'The fourth generation Clio featured a distinctive, stylish design and introduced modern turbo engines, becoming a benchmark for the B segment in Europe. Known for its handling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -39318,7 +37804,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -39348,7 +37833,6 @@ values (
   8,
   8.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -39376,7 +37860,6 @@ values (
   null,
   'A comfortable and reliable generation known for its good chassis and wide range of diesel engines, especially popular as an estate version. Improved build quality compared to predecessors.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -39400,7 +37883,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -39430,7 +37912,6 @@ values (
   9,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -39458,7 +37939,6 @@ values (
   null,
   'Known for its incredible robustness, high ground clearance, and reliable 4x4 system, making it extremely popular in regions with poor road infrastructure and harsh winters.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -39482,7 +37962,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -39494,7 +37973,6 @@ values (
   true,
   'Tuner/Concept Car Manufacturer'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -39524,7 +38002,6 @@ values (
   4,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -39552,7 +38029,6 @@ values (
   null,
   'Limited edition high-performance conversion based on the Porsche 996 platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -39576,7 +38052,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -39606,7 +38081,6 @@ values (
   6.5,
   10
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -39634,7 +38108,6 @@ values (
   null,
   'A highly modified take on the Porsche 930 Turbo, featuring unique styling cues.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -39658,7 +38131,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -39688,7 +38160,6 @@ values (
   5,
   2
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -39716,7 +38187,6 @@ values (
   null,
   'A radically styled, heavily customized version of the Smart Fortwo, focusing on lightweight fun.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -39740,7 +38210,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -39752,7 +38221,6 @@ values (
   true,
   'Electric Vehicles/Trucks and SUVs'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -39782,7 +38250,6 @@ values (
   7.5,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -39810,7 +38277,6 @@ values (
   null,
   'Initial generation of Rivian''s electric adventure pickup truck, known for its quad-motor setup and off-road capability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -39834,7 +38300,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -39864,7 +38329,6 @@ values (
   7.7,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -39892,7 +38356,6 @@ values (
   null,
   'Electric seven-seater SUV built on the R1 platform, offering performance and family utility.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -39916,7 +38379,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -39928,7 +38390,6 @@ values (
   true,
   '/cars/rolls-royce'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -39958,7 +38419,6 @@ values (
   8.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -39986,7 +38446,6 @@ values (
   null,
   'The first model developed under BMW ownership, reviving the iconic nameplate with modern technology and scale.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -40014,7 +38473,6 @@ values (
   null,
   'Built on the new ''Architecture of Luxury'' platform, featuring advanced luxury and sound isolation.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -40038,7 +38496,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -40068,7 +38525,6 @@ values (
   8.2,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -40096,7 +38552,6 @@ values (
   null,
   'The ''entry-level'' Rolls-Royce, based heavily on BMW 7-Series technology, but highly customized.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -40124,7 +38579,6 @@ values (
   null,
   'Based on the dedicated ''Architecture of Luxury'', sharing less with BMW platform components, offering ''Post Opulence'' design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -40148,7 +38602,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -40178,7 +38631,6 @@ values (
   8.8,
   9.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -40206,7 +38658,6 @@ values (
   null,
   'Rolls-Royce''s first and only SUV, built on the ''Architecture of Luxury'' platform with all-wheel drive.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -40230,7 +38681,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -40242,7 +38692,6 @@ values (
   false,
   'Passenger Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -40272,7 +38721,6 @@ values (
   6.5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -40300,7 +38748,6 @@ values (
   null,
   'The Rover 75 was the last large model designed by Rover Group, renowned for its comfortable ride and retro luxury styling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -40324,7 +38771,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -40354,7 +38800,6 @@ values (
   6,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -40382,7 +38827,6 @@ values (
   null,
   'Second generation Rover 400, developed jointly with Honda (sister model to the Honda Civic).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -40410,7 +38854,6 @@ values (
   null,
   'Facelifted version rebranded as the Rover 45, featuring visual updates and improved suspension.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -40434,7 +38877,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -40464,7 +38906,6 @@ values (
   5.5,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -40492,7 +38933,6 @@ values (
   null,
   'Third generation of the Rover 200 series, aiming for a more premium supermini segment.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -40520,7 +38960,6 @@ values (
   null,
   'Facelifted version rebranded as the Rover 25, incorporating styling cues from the Rover 75.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -40544,7 +38983,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -40556,7 +38994,6 @@ values (
   true,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -40586,7 +39023,6 @@ values (
   7.8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -40614,7 +39050,6 @@ values (
   null,
   'Third generation Leon, utilizing the highly versatile MQB platform, offering improved dynamics and efficiency.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -40642,7 +39077,6 @@ values (
   null,
   'Fourth generation, featuring a fully digitalized cabin, updated design language, and the introduction of mild and plug-in hybrid powertrains.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -40666,7 +39100,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -40696,7 +39129,6 @@ values (
   8.2,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -40724,7 +39156,6 @@ values (
   null,
   'Fifth generation, based on the MQB A0 platform. Significant improvements in space, technology, and handling compared to previous generations.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -40748,7 +39179,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -40778,7 +39208,6 @@ values (
   7.9,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -40806,7 +39235,6 @@ values (
   null,
   'SEAT''s first compact SUV, built on the MQB platform. Known for its dynamic driving characteristics relative to its class.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -40830,7 +39258,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -40842,7 +39269,6 @@ values (
   false,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -40872,7 +39298,6 @@ values (
   7,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -40900,7 +39325,6 @@ values (
   null,
   'The second generation 9-3, built on the GM Epsilon platform, known for its distinct styling, high safety ratings, and focus on driver ergonomics.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -40928,7 +39352,6 @@ values (
   null,
   'Major facelift bringing revised front-end styling, new interior materials, and updated engine options, including XWD all-wheel drive.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -40952,7 +39375,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -40982,7 +39404,6 @@ values (
   6.5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -41010,7 +39431,6 @@ values (
   null,
   'Saab''s flagship executive car built on the GM2900 platform derivative. Known for powerful torque and spacious interiors.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -41034,7 +39454,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -41064,7 +39483,6 @@ values (
   6.8,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -41092,7 +39510,6 @@ values (
   null,
   'The second generation Saab 900 (often called NG or New Generation), based on the Opel Vectra platform but featuring unique Saab drivetrains and suspension.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -41116,7 +39533,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -41128,7 +39544,6 @@ values (
   false,
   'Cars/SUV/Off-Road'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -41158,7 +39573,6 @@ values (
   6,
   3
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -41186,7 +39600,6 @@ values (
   null,
   'Rugged utility vehicle derived from Land Rover technology, later incorporating Iveco mechanics. Used widely by Spanish military and utility sectors.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -41210,7 +39623,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -41240,7 +39652,6 @@ values (
   7,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -41268,7 +39679,6 @@ values (
   null,
   'An evolution of the Land Rover Series III licensed model, featuring improvements like parabolic leaf springs and a five-speed gearbox.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -41292,7 +39702,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -41322,7 +39731,6 @@ values (
   7.5,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -41350,7 +39758,6 @@ values (
   null,
   'A Spanish-built and slightly restyled version of the second-generation Suzuki Vitara/Grand Vitara, known as the 300 (3-door) and 350 (5-door).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -41374,7 +39781,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -41386,7 +39792,6 @@ values (
   false,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -41416,7 +39821,6 @@ values (
   6.5,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -41444,7 +39848,6 @@ values (
   null,
   'First generation built on the GM Epsilon platform, notably featured plastic body panels and collaboration with Honda for the V6 engine option.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -41472,7 +39875,6 @@ values (
   null,
   'Second generation, a rebadged version of the Opel Antara/Chevrolet Captiva, moving to the globally utilized GM Theta platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -41496,7 +39898,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -41526,7 +39927,6 @@ values (
   7,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -41554,7 +39954,6 @@ values (
   null,
   'First and only generation, built on the GM Epsilon platform, sharing core components with the Opel Vectra and Saab 9-3.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -41578,7 +39977,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -41608,7 +40006,6 @@ values (
   6,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -41636,7 +40033,6 @@ values (
   null,
   'First and only generation, built on the GM Delta platform. Notable for its plastic dent-resistant body panels and unique interior layout.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -41660,7 +40056,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -41672,7 +40067,6 @@ values (
   true,
   'Cars/Crossovers & SUVs'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -41702,7 +40096,6 @@ values (
   7.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -41730,7 +40123,6 @@ values (
   null,
   'Compact electric crossover, known in some markets as DFSK Glory E3. It serves as Seres'' entry point into the mainstream EU EV market, focusing on affordability.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -41754,7 +40146,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -41784,7 +40175,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -41812,7 +40202,6 @@ values (
   null,
   'Premium mid-size SUV developed jointly with Huawei (marketed as AITO M5 in China). Features advanced HarmonyOS infotainment and powerful EREV powertrains.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -41836,7 +40225,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -41866,7 +40254,6 @@ values (
   7.8,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -41894,7 +40281,6 @@ values (
   null,
   'A large, luxury EREV SUV focused on maximizing passenger space, often featuring a 6-seater configuration and powerful E-motors for long range and comfort.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -41918,7 +40304,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -41930,7 +40315,6 @@ values (
   false,
   'Cars/Passenger'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -41960,7 +40344,6 @@ values (
   6,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -41988,7 +40371,6 @@ values (
   null,
   'The Simca 1000 was a small, rear-engined four-door saloon, competing with the Renault Dauphine and Fiat 850. Known for its distinct styling and lively performance in high-powered versions.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -42012,7 +40394,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -42042,7 +40423,6 @@ values (
   6.5,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -42070,7 +40450,6 @@ values (
   null,
   'The 1100 was one of the earliest successful European superminis/compact cars, featuring a front-engine, front-wheel-drive layout and a practical hatchback body, preceding the VW Golf.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -42094,7 +40473,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -42124,7 +40502,6 @@ values (
   6,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -42152,7 +40529,6 @@ values (
   null,
   'Launched as Simca 1307/1308 and later rebranded as Talbot Alpine, this model was a popular large family hatchback, winning the European Car of the Year in 1976.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -42176,7 +40552,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -42188,7 +40563,6 @@ values (
   false,
   'Cars/Passenger'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -42218,7 +40592,6 @@ values (
   6,
   4.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -42246,7 +40619,6 @@ values (
   null,
   'Original Gazelle models utilizing the Audax body style.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -42274,7 +40646,6 @@ values (
   null,
   'Later models based on the Rootes Arrow platform, sharing components with Hillman Hunter.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -42298,7 +40669,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -42328,7 +40698,6 @@ values (
   5.5,
   3
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -42356,7 +40725,6 @@ values (
   null,
   'First generation, shared chassis with the Hillman Super Minx.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -42380,7 +40748,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -42410,7 +40777,6 @@ values (
   4,
   2.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -42438,7 +40804,6 @@ values (
   null,
   'A high-end version of the Hillman Imp, featuring luxury materials and extra soundproofing.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -42462,7 +40827,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -42474,7 +40838,6 @@ values (
   true,
   'Automotive'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -42504,7 +40867,6 @@ values (
   8.5,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -42532,7 +40894,6 @@ values (
   null,
   'The third generation Octavia, built on the MQB platform, offering significant interior space and advanced technology for its class.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -42556,7 +40917,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -42586,7 +40946,6 @@ values (
   8.8,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -42614,7 +40973,6 @@ values (
   null,
   'A small, practical supermini known for its reliability and low running costs, utilizing Volkswagen Group''s PQ26 and later MQB A0 platforms.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -42638,7 +40996,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -42668,7 +41025,6 @@ values (
   8.3,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -42696,7 +41052,6 @@ values (
   null,
   'Skoda''s first large 7-seater SUV, offering substantial space, sophisticated design, and optional all-wheel drive, built on the MQB platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -42720,7 +41075,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -42732,7 +41086,6 @@ values (
   true,
   'City Car/Microcar'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -42762,7 +41115,6 @@ values (
   7.5,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -42790,7 +41142,6 @@ values (
   null,
   'The second generation Fortwo, significantly improved safety and comfort compared to the W450, while retaining its microcar dimensions.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -42814,7 +41165,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -42844,7 +41194,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -42872,7 +41221,6 @@ values (
   null,
   'Third generation, switched to a conventional 5-speed manual or 6-speed DCT gearbox, addressing the biggest complaint of previous models. Rear-engined layout retained.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -42896,7 +41244,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -42926,7 +41273,6 @@ values (
   7.8,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -42954,7 +41300,6 @@ values (
   null,
   'A four-door, four-seater version of the third-generation Smart, sharing components and rear-engine layout with the Renault Twingo III.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -42978,7 +41323,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -42990,7 +41334,6 @@ values (
   true,
   'Sports Cars / High-End Exotics'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -43020,7 +41363,6 @@ values (
   3,
   1
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -43048,7 +41390,6 @@ values (
   null,
   'Initial generation including Spyder, Laviolette, and Double 12 models. Defined by aerospace styling and Audi V8 power.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -43076,7 +41417,6 @@ values (
   null,
   'The second major iteration, featuring a longer wheelbase and updated styling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -43100,7 +41440,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -43130,7 +41469,6 @@ values (
   2,
   0
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -43158,7 +41496,6 @@ values (
   null,
   'High-performance model based on the C8 platform but planned with a W12 engine, showcased as concepts (Magnum, Zagato).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -43182,7 +41519,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -43212,7 +41548,6 @@ values (
   2,
   0
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -43240,7 +41575,6 @@ values (
   null,
   'A proposed entry-level sports car intended to expand the brand''s production volume, but the project was halted after financial difficulties.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -43264,7 +41598,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -43276,7 +41609,6 @@ values (
   true,
   'Passenger Cars/SUVs'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -43306,7 +41638,6 @@ values (
   6.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -43334,7 +41665,6 @@ values (
   null,
   'First generation, based on Mercedes-Benz M-Class platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -43362,7 +41692,6 @@ values (
   null,
   'Fourth generation (G4), modernized body-on-frame SUV.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -43386,7 +41715,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -43416,7 +41744,6 @@ values (
   7,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -43444,7 +41771,6 @@ values (
   null,
   'Mid-size SUV based on the extended Musso platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -43472,7 +41798,6 @@ values (
   null,
   'Facelift version with revised exterior styling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -43496,7 +41821,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -43526,7 +41850,6 @@ values (
   7.5,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -43554,7 +41877,6 @@ values (
   null,
   'Second generation, transitioning to a unibody crossover platform (also known as Korando C).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -43582,7 +41904,6 @@ values (
   null,
   'Major facelift with improved interior and exterior design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -43606,7 +41927,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -43618,7 +41938,6 @@ values (
   true,
   'Off-Road Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -43648,7 +41967,6 @@ values (
   9,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -43676,7 +41994,6 @@ values (
   null,
   'First generation utility version, basic interior, extremely robust.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -43704,7 +42021,6 @@ values (
   null,
   'Luxury variant introduced alongside the utility model, built by Steyr-Puch in Graz.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -43728,7 +42044,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -43758,7 +42073,6 @@ values (
   9.5,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -43786,7 +42100,6 @@ values (
   null,
   'Original Steyr-Puch utility vehicle, known for its extreme cross-country mobility.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -43810,7 +42123,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -43840,7 +42152,6 @@ values (
   8.5,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -43868,7 +42179,6 @@ values (
   null,
   'A very small, lightweight 4x4 off-road vehicle designed primarily for military use in mountainous terrain.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -43892,7 +42202,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -43904,7 +42213,6 @@ values (
   true,
   'Automobiles/Passenger Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -43934,7 +42242,6 @@ values (
   7.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -43962,7 +42269,6 @@ values (
   null,
   'Fourth generation, significantly improved in terms of interior space and fuel efficiency, transitioning to the FB engine family.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -43990,7 +42296,6 @@ values (
   null,
   'Fifth generation built on the Subaru Global Platform (SGP), offering increased rigidity and safety.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -44014,7 +42319,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -44044,7 +42348,6 @@ values (
   8,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -44072,7 +42375,6 @@ values (
   null,
   'Fifth generation, grown significantly in size, focusing on comfort, quietness, and advanced safety features (EyeSight).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -44100,7 +42402,6 @@ values (
   null,
   'Sixth generation, built on the SGP platform, featuring a prominent vertical infotainment screen.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -44124,7 +42425,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -44154,7 +42454,6 @@ values (
   7,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -44182,7 +42481,6 @@ values (
   null,
   'Fourth generation, focusing on lighter weight and improved efficiency with the new FB series engines. Basis for the XV.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -44210,7 +42508,6 @@ values (
   null,
   'Fifth generation, utilizing the SGP platform for enhanced driving dynamics and safety.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -44234,7 +42531,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -44246,7 +42542,6 @@ values (
   false,
   '/cars/classic-european'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -44276,7 +42571,6 @@ values (
   6.5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -44304,7 +42598,6 @@ values (
   null,
   'The Alpine was a compact British sports car, succeeding the earlier Sunbeam-Talbot Alpine. It became famous for its use in the James Bond film ''Dr. No'' and served as the basis for the high-performance Tiger model.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -44328,7 +42621,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -44358,7 +42650,6 @@ values (
   5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -44386,7 +42677,6 @@ values (
   null,
   'The Sunbeam Tiger was a high-performance variant of the Alpine, modified to accept a powerful Ford V8 engine. Designed with input from Carroll Shelby, it offered explosive acceleration but was produced in limited numbers.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -44410,7 +42700,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -44440,7 +42729,6 @@ values (
   7,
   6.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -44468,7 +42756,6 @@ values (
   null,
   'The original Rapier was a popular mid-sized saloon and coupe known for its reliable Rootes mechanicals and stylish design, often used in rallies.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -44496,7 +42783,6 @@ values (
   null,
   'The later Rapier, part of the Rootes Arrow family (along with the Hillman Hunter), adopted a sleek fastback body style.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -44520,7 +42806,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -44532,7 +42817,6 @@ values (
   true,
   '/cars/japan/suzuki'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -44562,7 +42846,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -44590,7 +42873,6 @@ values (
   null,
   'The third generation moved to an integrated body-on-frame structure and featured permanent all-wheel drive with a low-range transfer case, making it a capable off-roader.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -44614,7 +42896,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -44644,7 +42925,6 @@ values (
   8.8,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -44672,7 +42952,6 @@ values (
   null,
   'Designed as a compact crossover, offering AWD and higher ride height than traditional hatchbacks.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -44696,7 +42975,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -44726,7 +43004,6 @@ values (
   9.2,
   7.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -44754,7 +43031,6 @@ values (
   null,
   'Larger and safer than its predecessor, maintaining its reputation as a sporty and reliable supermini.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -44778,7 +43054,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -44790,7 +43065,6 @@ values (
   false,
   'Passenger vehicles/Classic'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -44820,7 +43094,6 @@ values (
   5,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -44848,7 +43121,6 @@ values (
   null,
   'Final and most recognizable iteration. Notable for having conventional front-hinged doors and minor mechanical updates.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -44872,7 +43144,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -44902,7 +43173,6 @@ values (
   4.5,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -44930,7 +43200,6 @@ values (
   null,
   'Introduction of the S-31 three-cylinder engine, marking a significant step up from previous two-cylinder models.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -44954,7 +43223,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -44984,7 +43252,6 @@ values (
   4,
   4.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -45012,7 +43279,6 @@ values (
   null,
   'Minor interior and exterior updates over the 102 model, retaining the two-cylinder engine in most units.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -45036,7 +43302,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -45048,7 +43313,6 @@ values (
   false,
   'Passenger Vehicles/Sports Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -45078,7 +43342,6 @@ values (
   5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -45106,7 +43369,6 @@ values (
   null,
   'The Chimaera was TVR''s biggest selling model, known for its powerful Rover V8 engine and comfortable touring capabilities compared to the Griffith.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -45130,7 +43392,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -45160,7 +43421,6 @@ values (
   4.5,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -45188,7 +43448,6 @@ values (
   null,
   'The model that truly revived TVR in the early 90s. Famous for its raw, unfiltered performance and lack of driver aids.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -45212,7 +43471,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -45242,7 +43500,6 @@ values (
   3.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -45270,7 +43527,6 @@ values (
   null,
   'The first TVR to use their proprietary engines (AJP V8 and Speed Six), offering blistering performance but highly complex mechanics.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -45294,7 +43550,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -45306,7 +43561,6 @@ values (
   false,
   'Historic / Defunct'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -45336,7 +43590,6 @@ values (
   6,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -45364,7 +43617,6 @@ values (
   null,
   'The first major hatchback model released under the Talbot name, developed originally as the Chrysler/Simca C2.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -45388,7 +43640,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -45418,7 +43669,6 @@ values (
   6.8,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -45446,7 +43696,6 @@ values (
   null,
   'A supermini car based on the Peugeot 104 platform, notable for being available as a convertible version (designed by Pininfarina).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -45470,7 +43719,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -45500,7 +43748,6 @@ values (
   6.2,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -45528,7 +43775,6 @@ values (
   null,
   'A four-door sedan derived from the Horizon platform, intended to compete in the mid-size family saloon market.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -45552,7 +43798,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -45564,7 +43809,6 @@ values (
   true,
   'Passenger Car/SUV'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -45594,7 +43838,6 @@ values (
   7.8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -45622,7 +43865,6 @@ values (
   null,
   'First generation of the rugged, retro-styled off-road SUV, primarily focused on the domestic and CIS markets.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -45646,7 +43888,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -45676,7 +43917,6 @@ values (
   8,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -45704,7 +43944,6 @@ values (
   null,
   'Full-size luxury off-road SUV designed to compete with established luxury brands, featuring advanced technology and a powerful V6 engine option.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -45728,7 +43967,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -45758,7 +43996,6 @@ values (
   7.5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -45786,7 +44023,6 @@ values (
   null,
   'Mid-size off-road SUV, positioned between the 300 and 500, distinguished by its mecha-style design and dedicated plug-in hybrid powertrain (Hi4-T).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -45810,7 +44046,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -45822,7 +44057,6 @@ values (
   true,
   'Passenger Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -45852,7 +44086,6 @@ values (
   6.5,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -45880,7 +44113,6 @@ values (
   null,
   'Original generation, basic and rugged city car.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -45908,7 +44140,6 @@ values (
   null,
   'Second generation, significantly improved in ride quality and features.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -45932,7 +44163,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -45962,7 +44192,6 @@ values (
   8,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -45990,7 +44219,6 @@ values (
   null,
   'Subcompact crossover known for its 5-star safety rating (Global NCAP).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -46014,7 +44242,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -46044,7 +44271,6 @@ values (
   7.5,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -46072,7 +44298,6 @@ values (
   null,
   'First generation body-on-frame SUV, known for ruggedness and powerful diesel engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -46100,7 +44325,6 @@ values (
   null,
   'Modern unibody generation based on Omega (Land Rover D8 derived) architecture, repositioned as a premium SUV.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -46124,7 +44348,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -46136,7 +44359,6 @@ values (
   false,
   'Passenger Car'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -46166,7 +44388,6 @@ values (
   6,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -46194,7 +44415,6 @@ values (
   null,
   'A rear-engined, air-cooled V8 luxury car known for its unique aerodynamic design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -46218,7 +44438,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -46248,7 +44467,6 @@ values (
   7,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -46276,7 +44494,6 @@ values (
   null,
   'First generation T613, replacing the T603. Designed by Vignale, retained the rear V8 layout but improved placement.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -46304,7 +44521,6 @@ values (
   null,
   'Modernized version with fuel injection (Mi) and updated styling.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -46328,7 +44544,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -46358,7 +44573,6 @@ values (
   7.5,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -46386,7 +44600,6 @@ values (
   null,
   'The final passenger car produced by Tatra, essentially a heavily modernized and restyled T613, available with 3.5L or 4.3L V8 engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -46410,7 +44623,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -46422,7 +44634,6 @@ values (
   true,
   'Automobiles/Electric Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -46452,7 +44663,6 @@ values (
   8.5,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -46480,7 +44690,6 @@ values (
   null,
   'Initial release, known for competitive pricing and performance.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -46508,7 +44717,6 @@ values (
   null,
   'Refreshed exterior styling, improved range, and updated interior (removed stalks).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -46532,7 +44740,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -46562,7 +44769,6 @@ values (
   8.7,
   9.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -46590,7 +44796,6 @@ values (
   null,
   'A compact crossover SUV version of the Model 3 platform, offering more space and utility.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -46614,7 +44819,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -46644,7 +44848,6 @@ values (
   7,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -46672,7 +44875,6 @@ values (
   null,
   'Pioneering luxury electric vehicle, featuring large vertical screen and free Supercharging (for some units).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -46700,7 +44902,6 @@ values (
   null,
   'Nose cone replaced with streamlined front fascia, HEPA filter introduced.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -46728,7 +44929,6 @@ values (
   null,
   'Major interior overhaul (yoke steering wheel), faster processors, and Plaid powertrain option.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -46752,7 +44952,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -46764,7 +44963,6 @@ values (
   false,
   'City Cars/Electric Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -46794,7 +44992,6 @@ values (
   6,
   3
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -46822,7 +45019,6 @@ values (
   null,
   'The main commercial model, featuring ZEBRA (Sodium-Nickel Chloride) or Lithium-ion battery options.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -46850,7 +45046,6 @@ values (
   null,
   'Minor updates, primarily focused on battery integration and regional compliance.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -46874,7 +45069,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -46904,7 +45098,6 @@ values (
   4.5,
   1.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -46932,7 +45125,6 @@ values (
   null,
   'The first generation produced under Ford ownership, utilizing lead-acid batteries primarily.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -46956,7 +45148,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -46986,7 +45177,6 @@ values (
   5,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -47014,7 +45204,6 @@ values (
   null,
   'A limited-run prototype and concept utility version based on the A306 platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -47038,7 +45227,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -47050,7 +45238,6 @@ values (
   true,
   '/passenger/japan'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -47080,7 +45267,6 @@ values (
   9.8,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -47108,7 +45294,6 @@ values (
   null,
   'The 11th generation, known for its extreme reliability and focus on global market requirements, offering different variants for different regions.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -47136,7 +45321,6 @@ values (
   null,
   'The 12th generation, built on the TNGA platform, bringing improved dynamics, modern safety features, and strong hybrid options.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -47160,7 +45344,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -47190,7 +45373,6 @@ values (
   9.6,
   9.3
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -47218,7 +45400,6 @@ values (
   null,
   'Known for its conservative design, comfort, and exceptional reliability, dominating the business sedan segment in CIS markets.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -47246,7 +45427,6 @@ values (
   null,
   'Built on the TNGA platform, offering a much more expressive design and enhanced driving characteristics compared to its predecessor.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -47270,7 +45450,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -47300,7 +45479,6 @@ values (
   9.7,
   9.7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -47328,7 +45506,6 @@ values (
   null,
   'The fourth generation, shifting towards a more mature design, offering reliable powertrains and practical features.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -47356,7 +45533,6 @@ values (
   null,
   'The current generation, built on the TNGA platform, featuring a rugged, aggressive exterior design and significantly improved efficiency.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -47380,7 +45556,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -47392,7 +45567,6 @@ values (
   false,
   'Passenger Cars/Microcars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -47422,7 +45596,6 @@ values (
   4,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -47450,7 +45623,6 @@ values (
   null,
   'The classic Trabant, featuring a lightweight Duroplast body and the iconic 2-stroke engine. It remained largely unchanged throughout its long production run.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -47474,7 +45646,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -47504,7 +45675,6 @@ values (
   5.5,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -47532,7 +45702,6 @@ values (
   null,
   'The final model, produced briefly after reunification, replacing the 2-stroke engine with a four-stroke 1.1L Volkswagen Polo engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -47556,7 +45725,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -47586,7 +45754,6 @@ values (
   3.5,
   4.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -47614,7 +45781,6 @@ values (
   null,
   'The first mass-produced Trabant model, initiating the brand’s use of the Duroplast body and two-stroke technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -47638,7 +45804,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -47650,7 +45815,6 @@ values (
   false,
   '/passenger-cars/classic-sports-cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -47680,7 +45844,6 @@ values (
   6,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -47708,7 +45871,6 @@ values (
   null,
   'Original model designed by Giovanni Michelotti.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -47736,7 +45898,6 @@ values (
   null,
   'Final version featuring the 1.5L engine and minor styling changes.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -47760,7 +45921,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -47790,7 +45950,6 @@ values (
   7,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -47818,7 +45977,6 @@ values (
   null,
   'Classic British sports car, successor to the TR5, featuring Karmann body styling updates and the powerful 2.5L straight-six engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -47842,7 +46000,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -47872,7 +46029,6 @@ values (
   6.5,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -47900,7 +46056,6 @@ values (
   null,
   'A compact family saloon that gained fame with the high-performance Dolomite Sprint variant, featuring the innovative 16-valve engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -47924,7 +46079,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -47936,7 +46090,6 @@ values (
   true,
   'Automotive/Offroad/Russia'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -47966,7 +46119,6 @@ values (
   6.5,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -47994,7 +46146,6 @@ values (
   null,
   'First generation of the modern Russian SUV, replacing the Simbir (UAZ-3162).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -48022,7 +46173,6 @@ values (
   null,
   'Major update including new interior, climate control, and exterior improvements.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -48050,7 +46200,6 @@ values (
   null,
   'Introduction of airbags and Electronic Stability Program (ESP).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -48078,7 +46227,6 @@ values (
   null,
   'Improved steering system, enhanced suspension, and introduction of automatic transmission options (since 2020).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -48102,7 +46250,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -48132,7 +46279,6 @@ values (
   8,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -48160,7 +46306,6 @@ values (
   null,
   'Modernized version of the legendary UAZ-469, retaining extreme off-road geometry and ruggedness.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -48184,7 +46329,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -48214,7 +46358,6 @@ values (
   8.5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -48242,7 +46385,6 @@ values (
   null,
   'The UAZ-452 family (known as Bukhanka/Loaf) is an iconic, continuously produced utility van. Despite minor upgrades, the core design remains unchanged since the 1960s.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -48266,7 +46408,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -48278,7 +46419,6 @@ values (
   true,
   'Passenger Cars/Mainstream'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -48308,7 +46448,6 @@ values (
   8.8,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -48336,7 +46475,6 @@ values (
   null,
   'The latest generation Corsa, sharing platforms and engines with Stellantis/PSA group vehicles, focusing on efficiency and technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -48360,7 +46498,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -48390,7 +46527,6 @@ values (
   8.5,
   9.2
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -48418,7 +46554,6 @@ values (
   null,
   'The K generation featured significant weight reduction and improved efficiency, focusing heavily on connected services and IntelliLux matrix lights.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -48442,7 +46577,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -48472,7 +46606,6 @@ values (
   8.3,
   8.7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -48500,7 +46633,6 @@ values (
   null,
   'The second generation Insignia (Grand Sport) grew in size, focusing on refinement, technology, and improved efficiency.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -48524,7 +46656,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -48536,7 +46667,6 @@ values (
   true,
   'Sports Cars / Electric Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -48566,7 +46696,6 @@ values (
   5.5,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -48594,7 +46723,6 @@ values (
   null,
   'The successor to the 260, the Atlantique refined the styling and driving characteristics, primarily utilizing updated Renault PRV V6 Turbo engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -48618,7 +46746,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -48648,7 +46775,6 @@ values (
   4.5,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -48676,7 +46802,6 @@ values (
   null,
   'A highly exclusive road-going version of the Venturi 500 Le Mans race car. Known for its aggressive performance and being one of the first cars with standard carbon brakes.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -48700,7 +46825,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -48730,7 +46854,6 @@ values (
   6,
   3
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -48758,7 +46881,6 @@ values (
   null,
   'One of the world''s first modern electric sports cars, featuring a carbon monocoque chassis and pioneering high-performance EV technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -48782,7 +46904,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -48794,7 +46915,6 @@ values (
   false,
   'Executive/Large Family Car'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -48824,7 +46944,6 @@ values (
   4,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -48852,7 +46971,6 @@ values (
   null,
   'The original mass-produced GAZ-24 model, known for its robustness and spaciousness.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -48880,7 +46998,6 @@ values (
   null,
   'Modernized version (GAZ-24-10) with revised exterior and engine upgrades.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -48904,7 +47021,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -48934,7 +47050,6 @@ values (
   4.5,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -48962,7 +47077,6 @@ values (
   null,
   'Executive model, initially produced exclusively for government and state security needs, featuring updated styling and specialized engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -48986,7 +47100,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -49016,7 +47129,6 @@ values (
   5,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -49044,7 +47156,6 @@ values (
   null,
   'The final major iteration of the classic Volga line, incorporating modern headlights, revised suspension, and optionally, foreign engines (Chrysler).'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -49068,7 +47179,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -49080,7 +47190,6 @@ values (
   true,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -49110,7 +47219,6 @@ values (
   8.5,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -49138,7 +47246,6 @@ values (
   null,
   'Built on the flexible MQB platform, known for excellent efficiency, refined handling, and advanced safety features.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -49166,7 +47273,6 @@ values (
   null,
   'Features a heavily digitalized cockpit and mild-hybrid technology, though initial models faced software challenges.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -49190,7 +47296,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -49220,7 +47325,6 @@ values (
   8,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -49248,7 +47352,6 @@ values (
   null,
   'Executive class vehicle built on the MQB platform, offering premium interior quality and technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -49272,7 +47375,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -49302,7 +47404,6 @@ values (
   8.3,
   9.2
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -49330,7 +47431,6 @@ values (
   null,
   'Second-generation Tiguan, based on MQB platform, offering increased space and technology, including a long-wheelbase ''Allspace'' version.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -49354,7 +47454,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -49366,7 +47465,6 @@ values (
   true,
   'Premium Brand'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -49396,7 +47494,6 @@ values (
   8.8,
   9.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -49424,7 +47521,6 @@ values (
   null,
   'The second generation XC90 redefined Volvo''s design language and safety focus, utilizing the Scalable Product Architecture (SPA) platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -49452,7 +47548,6 @@ values (
   null,
   'Mid-cycle refresh introduced updated tech, mild-hybrid options, and minor exterior tweaks.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -49476,7 +47571,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -49506,7 +47600,6 @@ values (
   9,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -49534,7 +47627,6 @@ values (
   null,
   'The second generation XC60 moved to the SPA platform, offering improved technology, efficiency, and a refined driving experience compared to its predecessor.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -49558,7 +47650,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -49588,7 +47679,6 @@ values (
   8.5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -49616,7 +47706,6 @@ values (
   null,
   'The third generation S60, built on the SPA platform, abandoned diesel engines entirely, focusing on gasoline and hybrid powertrains. It features a sleek, sporty design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -49640,7 +47729,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -49652,7 +47740,6 @@ values (
   true,
   'Passenger Cars/Luxury Electric Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -49682,7 +47769,6 @@ values (
   7.5,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -49710,7 +47796,6 @@ values (
   null,
   'First generation luxury EREV/EV SUV, offering competitive range and smart features.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -49738,7 +47823,6 @@ values (
   null,
   'Mid-cycle update bringing performance improvements and updated exterior design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -49762,7 +47846,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -49792,7 +47875,6 @@ values (
   7.2,
   7.8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -49820,7 +47902,6 @@ values (
   null,
   'Luxury electric MPV/minivan aimed at executive transport, offering high comfort and powerful drivetrain options.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -49844,7 +47925,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -49874,7 +47954,6 @@ values (
   7.8,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -49902,7 +47981,6 @@ values (
   null,
   'Flagship luxury electric sedan, competing in the executive D/E segments with high performance and technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -49926,7 +48004,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -49938,7 +48015,6 @@ values (
   false,
   'Cars/Classic'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -49968,7 +48044,6 @@ values (
   4,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -49996,7 +48071,6 @@ values (
   null,
   'The original Polish production based on the Soviet GAZ M20 Pobeda.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -50020,7 +48094,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -50050,7 +48123,6 @@ values (
   5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -50078,7 +48150,6 @@ values (
   null,
   'The final major redesign featuring a new overhead valve engine (M20 V-Type) and a modern aesthetic.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -50102,7 +48173,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -50132,7 +48202,6 @@ values (
   4.5,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -50160,7 +48229,6 @@ values (
   null,
   'Various utility versions including pickups (R) and vans (K) based on the standard chassis.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -50184,7 +48252,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -50196,7 +48263,6 @@ values (
   false,
   'Passenger Car'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -50226,7 +48292,6 @@ values (
   6,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -50254,7 +48319,6 @@ values (
   null,
   'Original squared design, powered by a 1.0L two-stroke engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -50282,7 +48346,6 @@ values (
   null,
   'Updated model (W stands for Weiterentwicklung - further development) featuring safety enhancements and minor visual changes.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -50306,7 +48369,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -50336,7 +48398,6 @@ values (
   5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -50364,7 +48425,6 @@ values (
   null,
   'Classic model featuring curved body lines and a wide range of specialized body styles.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -50388,7 +48448,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -50418,7 +48477,6 @@ values (
   7,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -50446,7 +48504,6 @@ values (
   null,
   'The final model, essentially a 353 chassis fitted with a modern 4-cylinder Volkswagen engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -50470,7 +48527,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -50482,7 +48538,6 @@ values (
   true,
   'Passenger Cars/Electric Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -50512,7 +48567,6 @@ values (
   6.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -50540,7 +48594,6 @@ values (
   null,
   'First mass-produced EV by Weltmeister, known for range and technology features.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -50564,7 +48617,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -50594,7 +48646,6 @@ values (
   6.8,
   5.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -50622,7 +48673,6 @@ values (
   null,
   'Larger, 7-seater version based on the EX platform, aiming for family market.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -50646,7 +48696,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -50676,7 +48725,6 @@ values (
   7.2,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -50704,7 +48752,6 @@ values (
   null,
   'Successor model featuring advanced autonomous parking capabilities (AVP) powered by Baidu Apollo.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -50728,7 +48775,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -50740,7 +48786,6 @@ values (
   true,
   'Cars/Sports/Wiesmann'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -50770,7 +48815,6 @@ values (
   8,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -50798,7 +48842,6 @@ values (
   null,
   'The highly successful MF 3 Roadster utilized the BMW S54 3.2L straight-six engine, known from the E46 M3. It was lightweight and extremely agile, defining the Wiesmann brand image.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -50822,7 +48865,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -50852,7 +48894,6 @@ values (
   7.5,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -50880,7 +48921,6 @@ values (
   null,
   'The GT MF 4 was a larger, more modern model, offering both Coupe and Roadster body styles. It used naturally aspirated and later twin-turbo V8 engines sourced from BMW.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -50904,7 +48944,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -50934,7 +48973,6 @@ values (
   6.5,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -50962,7 +49000,6 @@ values (
   null,
   'The flagship GT MF 5 was powered by the iconic high-revving 5.0L V10 engine from the BMW M5/M6 (E60/E63), offering the highest performance levels in the Wiesmann lineup.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -50986,7 +49023,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -50998,7 +49034,6 @@ values (
   true,
   'Passenger Cars/Electric Vehicles'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -51028,7 +49063,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -51056,7 +49090,6 @@ values (
   null,
   'First generation of XPeng''s flagship sports sedan, known for its long range and advanced technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -51080,7 +49113,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -51110,7 +49142,6 @@ values (
   8.2,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -51138,7 +49169,6 @@ values (
   null,
   'Flagship electric SUV focusing on ultra-fast charging (800V) and luxury features.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -51162,7 +49192,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -51192,7 +49221,6 @@ values (
   7.8,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -51220,7 +49248,6 @@ values (
   null,
   'Compact electric sedan aimed at family use, notable for its integrated lidar technology.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -51244,7 +49271,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -51256,7 +49282,6 @@ values (
   true,
   'Passenger Vehicles / Electric'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -51286,7 +49311,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -51314,7 +49338,6 @@ values (
   null,
   'The first generation P7 established Xpeng''s reputation for smart EV technology and long range.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -51342,7 +49365,6 @@ values (
   null,
   'Mid-cycle refresh (P7i) brought improvements in handling, charging speed, and software integration.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -51366,7 +49388,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -51396,7 +49417,6 @@ values (
   8.5,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -51424,7 +49444,6 @@ values (
   null,
   'Flagship SUV known for its 800V architecture and fast charging capabilities.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -51448,7 +49467,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -51478,7 +49496,6 @@ values (
   8.2,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -51506,7 +49523,6 @@ values (
   null,
   'A high-volume model built on the highly efficient SEPA 2.0 platform, featuring a fastback coupe design.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -51530,7 +49546,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -51542,7 +49557,6 @@ values (
   false,
   'Passenger Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -51572,7 +49586,6 @@ values (
   3,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -51600,7 +49613,6 @@ values (
   null,
   'Original release based heavily on the Fiat 127 platform, featuring 903cc and 1116cc engines.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -51628,7 +49640,6 @@ values (
   null,
   'Revised version with updated trim and engine options (including 1.3L 65hp), sold internationally, including the US market.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -51652,7 +49663,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -51682,7 +49692,6 @@ values (
   4,
   4.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -51710,7 +49719,6 @@ values (
   null,
   'A significantly larger and more modern hatchback designed by Giugiaro, based on Fiat Tipo components. Also known as Zastava Sana.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -51734,7 +49742,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -51764,7 +49771,6 @@ values (
   3.5,
   4
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -51792,7 +49798,6 @@ values (
   null,
   'A localized and often simplified trim level of the Koral, focusing on extreme affordability for the regional market.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -51816,7 +49821,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -51828,7 +49832,6 @@ values (
   false,
   'Passenger Car'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -51858,7 +49861,6 @@ values (
   7,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -51886,7 +49888,6 @@ values (
   null,
   'The ZAZ Lanos/Sens production started after ZAZ purchased the production lines from Daewoo, focusing on simplified construction and cheap maintenance for the CIS market.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -51910,7 +49911,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -51940,7 +49940,6 @@ values (
   5.5,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -51968,7 +49967,6 @@ values (
   null,
   'The original ZAZ Tavria hatchback, designed to replace the Zaporozhets. Known for its compact size and front-wheel drive.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -51996,7 +49994,6 @@ values (
   null,
   'Slavuta and Dana models, featuring liftback bodies and minor technical improvements over the original Tavria.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -52020,7 +50017,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -52050,7 +50046,6 @@ values (
   6.5,
   5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -52078,7 +50073,6 @@ values (
   null,
   'ZAZ Forza is a rebadged version of the Chinese Chery Fulwin 2. It offered a more modern alternative to the aging Lanos platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -52102,7 +50096,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -52114,7 +50107,6 @@ values (
   false,
   '/passenger-cars/luxury/'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -52144,7 +50136,6 @@ values (
   7.5,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -52172,7 +50163,6 @@ values (
   null,
   'First generation of ZIL''s post-war high-luxury limousine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -52200,7 +50190,6 @@ values (
   null,
   'Facelifted version featuring updated styling inspired by US models like the Cadillac Eldorado.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -52224,7 +50213,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -52254,7 +50242,6 @@ values (
   8,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -52282,7 +50269,6 @@ values (
   null,
   'The flagship state limousine of the late Soviet period, featuring a powerful 7.7L V8 engine.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -52310,7 +50296,6 @@ values (
   null,
   'Minor exterior and interior updates, remaining in service well into the Russian Federation era.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -52334,7 +50319,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -52364,7 +50348,6 @@ values (
   7.8,
   6.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -52392,7 +50375,6 @@ values (
   null,
   'The short-wheelbase version of the ZIL-114/115, intended as a chauffeur-driven sedan or fast transport for high-ranking officials.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -52416,7 +50398,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -52428,7 +50409,6 @@ values (
   false,
   'Economy Cars'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -52458,7 +50438,6 @@ values (
   4,
   7
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -52486,7 +50465,6 @@ values (
   null,
   'Initial release, based heavily on the Fiat 127 platform.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -52514,7 +50492,6 @@ values (
   null,
   'Updated models, including electronic fuel injection in later versions.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -52538,7 +50515,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -52568,7 +50544,6 @@ values (
   5,
   8
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -52596,7 +50571,6 @@ values (
   null,
   'Original 5-door liftback version, based on the Fiat 128 components.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -52624,7 +50598,6 @@ values (
   null,
   'Later models (Skala 55/65), mainly sold in Eastern Europe.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -52648,7 +50621,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -52678,7 +50650,6 @@ values (
   7,
   6
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -52706,7 +50677,6 @@ values (
   null,
   'Based on the original Fiat 600, rear-engined setup.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -52734,7 +50704,6 @@ values (
   null,
   'Increased engine size and minor interior/exterior updates.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -52758,7 +50727,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_makes (id, slug, name_en, country, segment_class, is_active, category_path)
 values (
@@ -52770,7 +50738,6 @@ values (
   true,
   'Passenger Cars/Electric Vehicles/Premium'
 )
-on conflict (slug) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -52800,7 +50767,6 @@ values (
   7.8,
   9
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -52828,7 +50794,6 @@ values (
   null,
   'First generation of Zeekr''s flagship model, known for its performance and long range.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -52852,7 +50817,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -52882,7 +50846,6 @@ values (
   8,
   8.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -52910,7 +50873,6 @@ values (
   null,
   'Compact premium electric SUV, sharing SEA platform architecture.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -52934,7 +50896,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 insert into public.vehicle_models (
   id,
@@ -52964,7 +50925,6 @@ values (
   8.2,
   7.5
 )
-on conflict (make_id, slug) do nothing;
 
 insert into public.vehicle_generations (
   id,
@@ -52992,7 +50952,6 @@ values (
   null,
   'Luxury full-size electric MPV designed primarily for executive transport.'
 )
-on conflict do nothing;
 
 insert into public.vehicle_insights (
   model_id,
@@ -53016,6 +50975,6 @@ values (
   null,
   null
 )
-on conflict (model_id) do nothing;
 
 commit;
+
