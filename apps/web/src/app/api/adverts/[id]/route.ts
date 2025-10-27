@@ -1,26 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
-import { VEHICLE_DATA, CURRENT_YEAR } from "@/data/vehicles";
+import type { Tables } from "@dbTypes/database.types";
 
 export const runtime = "nodejs";
 
-type VehicleInput = {
-  make?: string;
-  model?: string;
-  year?: number;
-  mileage?: number;
-  condition?: string;
-};
-
-type ValidationResult =
-  | { valid: true; specifics: Record<string, unknown> | null; condition: string | null }
-  | { valid: false; details: Record<string, unknown> };
-
-const TRANSPORT_PATH_SEGMENT = "transport/legkovye-avtomobili";
 const ALLOWED_STATUSES = new Set(["draft", "active", "archived"]);
-const CONDITION_VALUES = new Set(["new", "excellent", "good", "needs_repair"]);
-const MAX_MILEAGE_KM = 2_000_000;
+const CONDITION_VALUES = new Set(["new", "used", "for_parts"]);
 
 const trimString = (value: unknown): string | null => {
   if (typeof value !== "string") return null;
@@ -31,80 +17,6 @@ const trimString = (value: unknown): string | null => {
 const normalizeFiniteNumber = (value: unknown): number | null => {
   if (typeof value !== "number" || !Number.isFinite(value)) return null;
   return value;
-};
-
-const validateVehicleData = (input: VehicleInput, categoryPath: string): ValidationResult => {
-  const isTransport = categoryPath.includes(TRANSPORT_PATH_SEGMENT);
-  const hasVehiclePayload = input && Object.values(input).some((value) => value !== undefined);
-
-  if (!isTransport) {
-    if (hasVehiclePayload) {
-      return {
-        valid: true,
-        specifics: null,
-        condition: null,
-      };
-    }
-    return { valid: true, specifics: null, condition: null };
-  }
-
-  const make = trimString(input.make);
-  const model = trimString(input.model);
-  const yearValue = normalizeFiniteNumber(input.year);
-  const mileageValue = normalizeFiniteNumber(input.mileage);
-  const condition = trimString(input.condition);
-
-  const details: Record<string, unknown> = {};
-
-  if (!make) details.make = "required";
-  if (!model) details.model = "required";
-  if (yearValue === null) details.year = "required";
-  if (mileageValue === null) details.mileage = "required";
-  if (!condition || !CONDITION_VALUES.has(condition)) details.condition = "invalid";
-
-  if (Object.keys(details).length) {
-    return { valid: false, details };
-  }
-
-  const models = VEHICLE_DATA[make];
-  if (!models) {
-    return { valid: false, details: { make: "unknown" } };
-  }
-
-  const matchedModel = models.find((item) => item.name === model);
-  if (!matchedModel) {
-    return { valid: false, details: { model: "unknown" } };
-  }
-
-  const minYear = matchedModel.yearStart;
-  const maxYear = matchedModel.yearEnd ?? CURRENT_YEAR;
-
-  if (yearValue! < minYear || yearValue! > maxYear) {
-    return {
-      valid: false,
-      details: { year: `allowed range ${minYear}-${maxYear}` },
-    };
-  }
-
-  if (mileageValue! < 0 || mileageValue! > MAX_MILEAGE_KM) {
-    return {
-      valid: false,
-      details: { mileage: `must be between 0 and ${MAX_MILEAGE_KM}` },
-    };
-  }
-
-  return {
-    valid: true,
-    condition,
-    specifics: {
-      vehicle_make: make,
-      vehicle_model: model,
-      vehicle_year: yearValue,
-      vehicle_mileage_km: Math.round(mileageValue!),
-      vehicle_body_type: matchedModel.bodyType,
-      vehicle_country: matchedModel.country,
-    },
-  };
 };
 
 const enforceStatusTransition = (currentStatus: string, nextStatus: string) => {
@@ -193,15 +105,28 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   }
 
   const title = trimString(body.title) ?? advert.title ?? "Черновик объявления";
-  if (title.length < 3) {
+  if (!title || title.length < 3) {
     return NextResponse.json(
-      { error: "invalid_vehicle_data", details: { title: "min_length_3" } },
+      { error: "invalid_data", details: { title: "min_length_3" } },
       { status: 400 },
     );
   }
 
   const description = trimString(body.description);
+  if (!description || description.length < 10) { // Example validation
+    return NextResponse.json(
+      { error: "invalid_data", details: { description: "min_length_10" } },
+      { status: 400 },
+    );
+  }
+
   const location = trimString(body.location);
+  if (!location) {
+    return NextResponse.json(
+      { error: "invalid_data", details: { location: "required" } },
+      { status: 400 },
+    );
+  }
 
   const priceRaw = body.price;
   const price =
@@ -210,14 +135,20 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       : Number.isFinite(priceRaw) && priceRaw >= 0
         ? priceRaw
         : NaN;
-  if (Number.isNaN(price)) {
+  if (Number.isNaN(price) || price === null || price <= 0) {
     return NextResponse.json(
-      { error: "invalid_vehicle_data", details: { price: "must_be_positive_number" } },
+      { error: "invalid_data", details: { price: "must_be_positive_number" } },
       { status: 400 },
     );
   }
 
   const categoryId = trimString(body.category_id) ?? advert.category_id;
+  if (!categoryId) {
+    return NextResponse.json(
+      { error: "invalid_data", details: { category_id: "required" } },
+      { status: 400 },
+    );
+  }
 
   const { data: category, error: categoryError } = await supabase
     .from("categories")
@@ -227,20 +158,21 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
 
   if (categoryError || !category) {
     return NextResponse.json(
-      { error: "invalid_vehicle_data", details: { category_id: "not_found" } },
+      { error: "invalid_data", details: { category_id: "not_found" } },
       { status: 400 },
     );
   }
 
-  const vehicleInput: VehicleInput = body.vehicle ?? {};
-  const vehicleValidation = validateVehicleData(vehicleInput, category.path ?? "");
-  // SECURITY: enforce vehicle-specific fields server-side
-  if (!vehicleValidation.valid) {
+  const condition = trimString(body.condition);
+  if (!condition || !CONDITION_VALUES.has(condition)) {
     return NextResponse.json(
-      { error: "invalid_vehicle_data", details: vehicleValidation.details },
+      { error: "invalid_data", details: { condition: "invalid" } },
       { status: 400 },
     );
   }
+
+  const specifics = (body.specifics && typeof body.specifics === 'object') ? body.specifics : {};
+
 
   const requestedStatus = trimString(body.status) ?? advert.status;
   enforceStatusTransition(advert.status ?? "draft", requestedStatus);
@@ -257,7 +189,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     location,
     category_id: categoryId,
     status: requestedStatus,
-    condition: vehicleValidation.condition,
+    condition: condition,
   };
 
   const { error: updateError } = await supabase
@@ -272,14 +204,15 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     );
   }
 
-  if (vehicleValidation.specifics) {
+  if (Object.keys(specifics).length > 0) {
     await supabase
       .from("ad_item_specifics")
       .upsert({
         advert_id: advertId,
-        specifics: vehicleValidation.specifics,
-      });
+        specifics: specifics,
+      }, { onConflict: 'advert_id' });
   } else {
+    // If no specifics are provided, delete any existing ones
     await supabase.from("ad_item_specifics").delete().eq("advert_id", advertId);
   }
 
@@ -299,7 +232,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       id: advertId,
       status: requestedStatus,
       category_id: categoryId,
-      condition: vehicleValidation.condition,
+      condition: condition,
     },
   });
 }
