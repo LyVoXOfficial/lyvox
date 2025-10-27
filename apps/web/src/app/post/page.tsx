@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { apiFetch } from "@/lib/fetcher";
-import { CURRENT_YEAR, VEHICLE_DATA, VEHICLE_MAKES } from "@/data/vehicles";
 import { Button } from "@/components/ui/button";
 import UploadGallery from "@/components/upload-gallery";
 import type { Category } from "@/lib/types";
@@ -16,11 +15,8 @@ type FormData = {
   price: number | null;
   category_id: string;
   location: string;
-  vehicle_make: string;
-  vehicle_model: string;
-  vehicle_year: string;
-  vehicle_mileage: string;
-  vehicle_condition: string;
+  condition: string;
+  specifics: { [key: string]: string }; // For dynamic key/value pairs
 };
 
 function PostPageInner() {
@@ -32,78 +28,34 @@ function PostPageInner() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [creating, setCreating] = useState(false);
   const [loading, setLoading] = useState<boolean>(!!editId);
+  const [specificsFields, setSpecificsFields] = useState<Array<{ key: string; value: string }>>([]);
 
-  const { register, handleSubmit, reset, setValue, watch } = useForm<FormData>({
+  const { register, handleSubmit, reset, setValue, watch, control } = useForm<FormData>({
     defaultValues: {
       title: "",
       description: "",
       price: null,
       category_id: "",
       location: "",
-      vehicle_make: "",
-      vehicle_model: "",
-      vehicle_year: "",
-      vehicle_mileage: "",
-      vehicle_condition: "",
+      condition: "",
+      specifics: {},
     },
   });
 
   const selectedCategoryId = watch("category_id");
-  const selectedMake = watch("vehicle_make");
-  const selectedModelName = watch("vehicle_model");
-
   const selectedCategory = useMemo(
     () => categories.find((category) => category.id === selectedCategoryId) ?? null,
     [categories, selectedCategoryId],
   );
 
-  const selectedCategoryPath = selectedCategory?.path ?? "";
-  const isTransportCategory = useMemo(
-    () => selectedCategoryPath.startsWith("transport"),
-    [selectedCategoryPath],
-  );
-  const isPassengerVehicleCategory = useMemo(
-    () => selectedCategoryPath.includes("transport/legkovye-avtomobili"),
-    [selectedCategoryPath],
-  );
-
-  const vehicleModels = useMemo(
-    () => (isPassengerVehicleCategory && selectedMake ? VEHICLE_DATA[selectedMake] ?? [] : []),
-    [isPassengerVehicleCategory, selectedMake],
-  );
-
-  const selectedModel = useMemo(
-    () => vehicleModels.find((model) => model.name === selectedModelName) ?? null,
-    [vehicleModels, selectedModelName],
-  );
-
-  const yearOptions = useMemo(() => {
-    if (!isPassengerVehicleCategory || !selectedModel) return [];
-    const end = selectedModel.yearEnd ?? CURRENT_YEAR;
-    const years: string[] = [];
-    for (let y = end; y >= selectedModel.yearStart; y -= 1) {
-      years.push(String(y));
-    }
-    return years;
-  }, [isPassengerVehicleCategory, selectedModel]);
-
-  useEffect(() => {
-    if (!isTransportCategory) {
-      setValue("vehicle_make", "");
-      setValue("vehicle_model", "");
-      setValue("vehicle_year", "");
-      setValue("vehicle_mileage", "");
-      setValue("vehicle_condition", "");
-    }
-  }, [isTransportCategory, setValue]);
-
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
     supabase
       .from("categories")
-      .select("id,name_ru,level,sort,path")
-      .order("level", { ascending: true })
+      .select("id,name_ru,path,is_active")
+      .eq("is_active", true)
       .order("sort", { ascending: true })
+      .order("name_ru", { ascending: true })
       .then(({ data }) => {
         if (data) setCategories(data as Category[]);
       });
@@ -138,7 +90,7 @@ function PostPageInner() {
       setValue("price", ad.price ?? null);
       setValue("category_id", ad.category_id ?? "");
       setValue("location", ad.location ?? "");
-      setValue("vehicle_condition", ad.condition ?? "");
+      setValue("condition", ad.condition ?? "");
 
       const { data: specificsData } = await supabase
         .from("ad_item_specifics")
@@ -146,107 +98,68 @@ function PostPageInner() {
         .eq("advert_id", ad.id)
         .maybeSingle();
 
-      const specifics = specificsData?.specifics as Record<string, unknown> | null;
+      const specifics = specificsData?.specifics as Record<string, string> | null;
       if (specifics) {
-        const vehicleMake =
-          typeof specifics["vehicle_make"] === "string" ? (specifics["vehicle_make"] as string) : "";
-        const vehicleModel =
-          typeof specifics["vehicle_model"] === "string" ? (specifics["vehicle_model"] as string) : "";
-        const vehicleYear =
-          typeof specifics["vehicle_year"] === "number" || typeof specifics["vehicle_year"] === "string"
-            ? String(specifics["vehicle_year"])
-            : "";
-        const vehicleMileage =
-          typeof specifics["vehicle_mileage"] === "number" || typeof specifics["vehicle_mileage"] === "string"
-            ? String(specifics["vehicle_mileage"])
-            : "";
-
-        if (vehicleMake) setValue("vehicle_make", vehicleMake);
-        if (vehicleModel) setValue("vehicle_model", vehicleModel);
-        if (vehicleYear) setValue("vehicle_year", vehicleYear);
-        if (vehicleMileage) setValue("vehicle_mileage", vehicleMileage);
+        const loadedSpecificsFields = Object.entries(specifics).map(([key, value]) => ({ key, value }));
+        setSpecificsFields(loadedSpecificsFields);
+        setValue("specifics", specifics);
       }
       setLoading(false);
     })();
   }, [editId, setValue]);
 
   const createDraft = async () => {
-    if (!userId) return alert("������, �⮡� ᮧ���� �������");
+    if (!userId) return alert("Пожалуйста, войдите, чтобы разместить объявление");
     setCreating(true);
     try {
-      const response = await apiFetch("/api/adverts", { method: "POST" });
+      const response = await apiFetch("/api/adverts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: "Черновик",
+          description: "",
+          price: 0,
+          category_id: categories.find((c) => c.is_active)?.id || "", // Default to first active category
+          location: "",
+          condition: "",
+          status: "draft",
+        }),
+      });
       const payload = await response.json();
       if (!payload.ok) {
         throw new Error(payload.error ?? "CREATE_FAILED");
       }
-      const categoryId: string = payload.advert?.category_id ?? "";
       setAdvertId(payload.advert.id);
       reset({
-        title: "",
+        title: "Черновик",
         description: "",
-        price: null,
-        category_id: categoryId,
+        price: 0,
+        category_id: payload.advert?.category_id ?? "",
         location: "",
-        vehicle_make: "",
-        vehicle_model: "",
-        vehicle_year: "",
-        vehicle_mileage: "",
-        vehicle_condition: "",
+        condition: "",
+        specifics: {},
       });
       const url = new URL(window.location.href);
       url.searchParams.set("edit", payload.advert.id);
       window.history.replaceState(null, "", url.toString());
     } catch (err) {
       console.error("CREATE_DRAFT_ERROR", err);
-      alert("�訡�� ᮧ����� �୮����. ��������");
+      alert("Не удалось создать черновик. Попробуйте снова.");
     } finally {
       setCreating(false);
     }
-  };  const onSubmit = async (values: FormData) => {
-    if (!values.title?.trim()) return alert("?????? ????????");
-    if (!values.category_id) return alert("???? ??????");
+  };
+  const onSubmit = async (values: FormData) => {
+    if (!values.title?.trim()) return alert("Введите название");
+    if (!values.description?.trim()) return alert("Введите описание");
+    if (!values.price || values.price <= 0) return alert("Введите цену");
+    if (!values.category_id) return alert("Выберите категорию");
+    if (!values.condition) return alert("Выберите состояние");
 
     if (!advertId) {
-      alert("????? ????? ?????");
+      alert("Сначала создайте черновик");
       return;
     }
-
-    const normalizedMake = values.vehicle_make.trim();
-    const normalizedModel = values.vehicle_model.trim();
-    const vehicleYear = values.vehicle_year ? Number(values.vehicle_year) : null;
-    const vehicleMileage = values.vehicle_mileage ? Number(values.vehicle_mileage) : null;
-    const transportModels = normalizedMake ? VEHICLE_DATA[normalizedMake] ?? [] : [];
-    const modelMeta = transportModels.find((model) => model.name === normalizedModel) ?? null;
-
-    if (isPassengerVehicleCategory) {
-      if (!normalizedMake) return alert("???? ?????");
-      if (!normalizedModel) return alert("???? ??????");
-      if (!values.vehicle_year) return alert("???? ??? ???????");
-      if (!modelMeta) return alert("??? ?????? ?? ??????");
-      if (vehicleYear === null || Number.isNaN(vehicleYear)) return alert("???????? ??? ???????? ???");
-
-      const maxYear = modelMeta.yearEnd ?? CURRENT_YEAR;
-      if (vehicleYear < modelMeta.yearStart || vehicleYear > maxYear) {
-        return alert(`???? ???????? ?? ${modelMeta.yearStart} ?? ${maxYear}`);
-      }
-
-      if (!values.vehicle_mileage) return alert("???? ?????? ??????? (????)");
-      if (vehicleMileage === null || Number.isNaN(vehicleMileage) || vehicleMileage < 0) {
-        return alert("???????? ???????? ?????????");
-      }
-
-      if (!values.vehicle_condition) return alert("???? ??????? ???????? ?????????");
-    }
-
-    const vehiclePayload = isPassengerVehicleCategory
-      ? {
-          make: normalizedMake,
-          model: normalizedModel,
-          year: vehicleYear,
-          mileage: vehicleMileage,
-          condition: values.vehicle_condition,
-        }
-      : undefined;
 
     try {
       const response = await apiFetch(`/api/adverts/${advertId}`, {
@@ -258,210 +171,210 @@ function PostPageInner() {
           price: values.price,
           category_id: values.category_id,
           location: values.location,
+          condition: values.condition,
           status: "active",
-          vehicle: vehiclePayload,
+          specifics: values.specifics, // Pass specifics directly
         }),
       });
 
       const payload = await response.json();
       if (!payload.ok) {
         console.error("ADVERT_UPDATE_ERROR", payload);
-        alert("???? ???????: " + (payload.error ?? "unknown"));
+        alert("Ошибка при обновлении: " + (payload.error ?? "unknown"));
         return;
       }
 
-      alert("???????? ??????????!");
+      alert("Объявление опубликовано!");
       window.location.href = `/ad/${advertId}`;
     } catch (err) {
       console.error("ADVERT_UPDATE_EXCEPTION", err);
-      alert("������ ������. �������� �����.");
+      alert("Ошибка связи. Попробуйте позже.");
     }
   };
+
+  const addSpecificsField = () => {
+    setSpecificsFields([...specificsFields, { key: "", value: "" }]);
+  };
+
+  const updateSpecificsField = (index: number, field: "key" | "value", newValue: string) => {
+    const updatedFields = specificsFields.map((item, i) =>
+      i === index ? { ...item, [field]: newValue } : item,
+    );
+    setSpecificsFields(updatedFields);
+    const newSpecifics = updatedFields.reduce((acc, item) => {
+      if (item.key.trim() && item.value.trim()) {
+        acc[item.key.trim()] = item.value.trim();
+      }
+      return acc;
+    }, {} as { [key: string]: string });
+    setValue("specifics", newSpecifics, { shouldDirty: true, shouldValidate: true });
+  };
+
+  const removeSpecificsField = (index: number) => {
+    const updatedFields = specificsFields.filter((_, i) => i !== index);
+    setSpecificsFields(updatedFields);
+    const newSpecifics = updatedFields.reduce((acc, item) => {
+      if (item.key.trim() && item.value.trim()) {
+        acc[item.key.trim()] = item.value.trim();
+      }
+      return acc;
+    }, {} as { [key: string]: string });
+    setValue("specifics", newSpecifics, { shouldDirty: true, shouldValidate: true });
+  };
+
+  if (loading) {
+    return <p>Загрузка...</p>;
+  }
+
+  if (!userId && !advertId) {
+    return (
+      <div className="space-y-6 max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
+        <h1 className="text-2xl font-semibold">Подать объявление</h1>
+        <p>Пожалуйста, <a href="/login" className="text-blue-600 hover:underline">войдите</a>, чтобы разместить объявление.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-6 max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h1 className="text-2xl font-semibold">
         {editId ? "Редактировать объявление" : "Создать объявление"}
       </h1>
 
-      {!advertId && !editId ? (
+      {!advertId && !editId && (
         <div>
-          <Button disabled={!userId || creating} onClick={createDraft}>
+          <Button disabled={creating} onClick={createDraft}>
             {creating ? "Создание..." : "Создать черновик"}
           </Button>
         </div>
-      ) : null}
+      )}
 
-      {loading ? (
-        <p>Загрузка...</p>
-      ) : advertId ? (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <label className="block mb-1">Название</label>
-            <input
-              type="text"
-              {...register("title", { required: true })}
-              className="w-full border rounded px-3 py-2"
-            />
-          </div>
-
-          {isTransportCategory ? (
-            <div className="space-y-4 border rounded px-4 py-4">
-              {!isPassengerVehicleCategory ? (
-                <p className="text-sm text-muted-foreground">
-                  Select the "Legkovye avtomobili" subcategory to provide make, model, and year details.
-                </p>
-              ) : null}
-              <div>
-                <label className="block mb-1">?????</label>
-                <select
-                  {...register("vehicle_make", {
-                    onChange: (event) => {
-                      const newMake = event.target.value;
-                      if (!newMake || newMake !== selectedMake) {
-                        setValue("vehicle_model", "");
-                        setValue("vehicle_year", "");
-                      }
-                    },
-                  })}
-                  className="w-full border rounded px-3 py-2"
-                  disabled={!isPassengerVehicleCategory}
-                >
-                  <option value="">????...</option>
-                  {VEHICLE_MAKES.map((make) => (
-                    <option key={make} value={make}>
-                      {make}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block mb-1">??????</label>
-                <select
-                  {...register("vehicle_model", {
-                    onChange: (event) => {
-                      const newModel = event.target.value;
-                      if (!newModel || newModel !== selectedModelName) {
-                        setValue("vehicle_year", "");
-                      }
-                    },
-                  })}
-                  className="w-full border rounded px-3 py-2"
-                  disabled={!isPassengerVehicleCategory || !selectedMake}
-                >
-                  <option value="">{selectedMake ? "????..." : "?????? ?? ?????"}</option>
-                  {vehicleModels.map((model) => (
-                    <option key={model.name} value={model.name}>
-                      {model.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block mb-1">???</label>
-                <select
-                  {...register("vehicle_year")}
-                  className="w-full border rounded px-3 py-2"
-                  disabled={!isPassengerVehicleCategory || !selectedModel}
-                >
-                  <option value="">{selectedModel ? "????..." : "?????? ??????"}</option>
-                  {yearOptions.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block mb-1">??????? (????)</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  {...register("vehicle_mileage")}
-                  className="w-full border rounded px-3 py-2"
-                  disabled={!isPassengerVehicleCategory}
-                />
-              </div>
-
-              <div>
-                <label className="block mb-1">???????? ?????????</label>
-                <select
-                  {...register("vehicle_condition")}
-                  className="w-full border rounded px-3 py-2"
-                  disabled={!isPassengerVehicleCategory}
-                >
-                  <option value="">????...</option>
-                  <option value="new">?????</option>
-                  <option value="excellent">??????</option>
-                  <option value="good">???????</option>
-                  <option value="needs_repair">??????? ????????</option>
-                </select>
-              </div>
-
-              {selectedModel ? (
-                <p className="text-sm text-muted-foreground">
-                  ????? ????: {selectedModel.bodyType}. ??????: {selectedModel.country}.
-                </p>
-              ) : null}
+      {advertId ? (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <section>
+            <h2 className="text-xl font-semibold mb-3">Основная информация</h2>
+            <div>
+              <label htmlFor="title" className="block mb-1">Название</label>
+              <input
+                type="text"
+                id="title"
+                {...register("title", { required: true })}
+                className="w-full border rounded px-3 py-2"
+              />
             </div>
-          ) : null}
+            <div>
+              <label htmlFor="description" className="block mb-1">Описание</label>
+              <textarea
+                id="description"
+                {...register("description", { required: true })}
+                className="w-full border rounded px-3 py-2"
+                rows={6}
+              />
+            </div>
+          </section>
 
-          <div>
-            <label className="block mb-1">Описание</label>
-            <textarea
-              {...register("description")}
-              className="w-full border rounded px-3 py-2"
-              rows={6}
-            />
-          </div>
+          <section>
+            <h2 className="text-xl font-semibold mb-3">Цена и состояние</h2>
+            <div>
+              <label htmlFor="price" className="block mb-1">Цена (€)</label>
+              <input
+                type="number"
+                id="price"
+                step="0.01"
+                {...register("price", { required: true, valueAsNumber: true, min: 0 })}
+                className="w-full border rounded px-3 py-2"
+              />
+            </div>
+            <div>
+              <label htmlFor="condition" className="block mb-1">Состояние</label>
+              <select
+                id="condition"
+                {...register("condition", { required: true })}
+                className="w-full border rounded px-3 py-2"
+              >
+                <option value="">Выберите...</option>
+                <option value="new">Новый</option>
+                <option value="used">Б/у</option>
+                <option value="for_parts">На запчасти</option>
+              </select>
+            </div>
+            <p className="text-sm text-gray-500">Валюта: EUR (фиксировано)</p>
+          </section>
 
-          <div>
-            <label className="block mb-1">Цена (€)</label>
-            <input
-              type="number"
-              step="0.01"
-              {...register("price")}
-              className="w-full border rounded px-3 py-2"
-            />
-          </div>
+          <section>
+            <h2 className="text-xl font-semibold mb-3">Категория</h2>
+            <div>
+              <label htmlFor="category_id" className="block mb-1">Категория</label>
+              <select
+                id="category_id"
+                {...register("category_id", { required: true })}
+                className="w-full border rounded px-3 py-2"
+              >
+                <option value="">Выберите...</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name_ru}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </section>
 
-          <div>
-            <label className="block mb-1">Категория</label>
-            <select
-              {...register("category_id", { required: true })}
-              className="w-full border rounded px-3 py-2"
-            >
-              <option value="">Выберите...</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name_ru}
-                </option>
+          <section>
+            <h2 className="text-xl font-semibold mb-3">Локация</h2>
+            <div>
+              <label htmlFor="location" className="block mb-1">Локация</label>
+              <input
+                type="text"
+                id="location"
+                {...register("location")}
+                placeholder="Например: Brussels"
+                className="w-full border rounded px-3 py-2"
+              />
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-3">Характеристики товара</h2>
+            <div className="space-y-2">
+              {specificsFields.map((field, index) => (
+                <div key={index} className="flex space-x-2">
+                  <input
+                    type="text"
+                    placeholder="Ключ (например, год)"
+                    value={field.key}
+                    onChange={(e) => updateSpecificsField(index, "key", e.target.value)}
+                    className="w-1/2 border rounded px-3 py-2"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Значение (например, 2015)"
+                    value={field.value}
+                    onChange={(e) => updateSpecificsField(index, "value", e.target.value)}
+                    className="w-1/2 border rounded px-3 py-2"
+                  />
+                  <Button type="button" onClick={() => removeSpecificsField(index)} variant="outline">
+                    Удалить
+                  </Button>
+                </div>
               ))}
-            </select>
-          </div>
+              <Button type="button" onClick={addSpecificsField} variant="outline">
+                Добавить характеристику
+              </Button>
+            </div>
+          </section>
 
-          <div>
-            <label className="block mb-1">Локация</label>
-            <input
-              type="text"
-              {...register("location")}
-              placeholder="Например: Brussels"
-              className="w-full border rounded px-3 py-2"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-2">Фото</label>
+          <section>
+            <h2 className="text-xl font-semibold mb-3">Фотографии</h2>
             <UploadGallery advertId={advertId} />
-          </div>
+          </section>
 
-          <Button type="submit">{editId ? "Обновить и опубликовать" : "Опубликовать"}</Button>
+          <Button type="submit" className="w-full">
+            {editId ? "Обновить и опубликовать" : "Опубликовать"}
+          </Button>
         </form>
       ) : (
-        <p>Сначала создайте черновик (или откройте страницу с параметром ?edit=&lt;id&gt;)</p>
+        <p>Сначала создайте черновик (или откройте страницу с параметром ?edit=<id>)</p>
       )}
     </div>
   );

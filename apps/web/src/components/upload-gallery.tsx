@@ -41,7 +41,7 @@ export default function UploadGallery({ advertId }: { advertId: string }) {
       );
     } catch (err) {
       console.error("MEDIA_LIST_ERROR", err);
-      setError("��ࠢ�� 䠩�� ���� ���������.");
+      setError("Не удалось загрузить список файлов.");
     }
   };
 
@@ -54,7 +54,7 @@ export default function UploadGallery({ advertId }: { advertId: string }) {
     const current = items.length;
     const candidates = Array.from(files);
     if (current + candidates.length > MAX_MEDIA_PER_ADVERT) {
-      setError("��ᯮ���� 12 ���������� ��� �������.");
+      setError("Максимум 12 изображений для объявления.");
       return;
     }
 
@@ -63,7 +63,7 @@ export default function UploadGallery({ advertId }: { advertId: string }) {
     try {
       for (const file of candidates) {
         if (file.size > MAX_FILE_SIZE_BYTES) {
-          setError("���� ☦� ��������� �� 5MB.");
+          setError("Размер файла не должен превышать 5MB.");
           continue;
         }
 
@@ -114,7 +114,7 @@ export default function UploadGallery({ advertId }: { advertId: string }) {
       }
     } catch (err) {
       console.error("MEDIA_UPLOAD_ERROR", err);
-      setError("�� ��⮩稢�� ��᫠ �� ��������� ����.");
+      setError("Не удалось загрузить один или несколько файлов.");
     } finally {
       setBusy(false);
     }
@@ -132,7 +132,7 @@ export default function UploadGallery({ advertId }: { advertId: string }) {
       await loadItems();
     } catch (err) {
       console.error("MEDIA_DELETE_ERROR", err);
-      setError("�訡�� �� ��������� ����.");
+      setError("Не удалось удалить файл.");
     } finally {
       setBusy(false);
     }
@@ -164,7 +164,7 @@ export default function UploadGallery({ advertId }: { advertId: string }) {
       await submitOrder(ordered);
     } catch (err) {
       console.error("MEDIA_REORDER_ERROR", err);
-      setError("���� �ணࠬ���� ����� ����.");
+      setError("Не удалось изменить порядок файлов.");
       await loadItems();
     } finally {
       setBusy(false);
@@ -215,7 +215,7 @@ export default function UploadGallery({ advertId }: { advertId: string }) {
                   onClick={() => removeItem(item.id)}
                   disabled={busy}
                 >
-                  �������
+                  Удалить
                 </Button>
               </div>
             </div>
@@ -223,7 +223,7 @@ export default function UploadGallery({ advertId }: { advertId: string }) {
         ))}
       </div>
 
-      {busy && <p>����㦠��...</p>}
+      {busy && <p>Загрузка...</p>}
     </div>
   );
 }
