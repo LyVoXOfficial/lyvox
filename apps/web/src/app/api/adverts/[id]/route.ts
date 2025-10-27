@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
-import type { Tables } from "@dbTypes/database.types";
 
 export const runtime = "nodejs";
 
@@ -306,8 +305,8 @@ export async function DELETE(_request: NextRequest, context: { params: Promise<{
 
   if (mediaRows?.length) {
     const storagePaths = mediaRows
-      .map((row) => row.url)
-      .filter((path) => path && !path.startsWith("http"));
+      .map((row: any) => row.url)
+      .filter((path: any) => path && !path.startsWith("http"));
     if (storagePaths.length) {
       await supabaseService().storage.from("ad-media").remove(storagePaths);
     }
