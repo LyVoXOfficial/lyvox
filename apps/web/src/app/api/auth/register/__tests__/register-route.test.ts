@@ -130,6 +130,7 @@ describe("POST /api/auth/register", () => {
 
   it("propagates profile upsert failures", async () => {
     const upsertError: PostgrestError = {
+      name: "PostgrestError",
       code: "23505",
       message: "duplicate key value violates unique constraint",
       details: "profiles_pkey",

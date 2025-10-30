@@ -1,4 +1,4 @@
-export const supportedLocales = ["en", "fr", "nl", "ru"] as const;
+export const supportedLocales = ["en", "fr", "nl", "ru", "de"] as const;
 export type Locale = (typeof supportedLocales)[number];
 export const defaultLocale: Locale = "en";
 
@@ -13,6 +13,10 @@ const normaliseMap: Record<string, Locale> = {
   "nl-be": "nl",
   ru: "ru",
   "ru-ru": "ru",
+  de: "de",
+  "de-de": "de",
+  "de-at": "de",
+  "de-ch": "de",
 };
 
 export function resolveLocale(input?: string | null): Locale {

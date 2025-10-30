@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Ratelimit, type RatelimitResponse } from "@upstash/ratelimit";
+import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
 type RateLimiterOptions = {
@@ -35,7 +35,9 @@ const disabledLogger = (() => {
   };
 })();
 
-type InternalResult = RatelimitResponse & { reset: number };
+type UpstashLimitResponse = Awaited<ReturnType<InstanceType<typeof Ratelimit>["limit"]>>;
+
+type InternalResult = UpstashLimitResponse & { reset: number };
 
 export function createRateLimiter({
   limit,

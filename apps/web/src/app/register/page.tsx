@@ -8,8 +8,9 @@ type PageProps = {
   };
 };
 
-export default function RegisterPage({ searchParams }: PageProps) {
-  const acceptLanguage = headers().get("accept-language");
+export default async function RegisterPage({ searchParams }: PageProps) {
+  const headerList = await headers();
+  const acceptLanguage = headerList.get("accept-language");
   const fromQuery = searchParams?.lang ? resolveLocale(searchParams.lang) : null;
   const initialLocale: Locale = fromQuery ?? resolveFromAcceptLanguage(acceptLanguage);
 

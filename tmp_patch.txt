@@ -1,0 +1,46 @@
+*** Begin Patch
+*** Update File: scripts/vehicle_i18n_expand.mjs
+@@
+-const GOOGLE_MODEL = process.env.GOOGLE_MODEL || 'gemini-1.5-flash-latest';
+-const GOOGLE_API_VERSION = process.env.GOOGLE_API_VERSION || 'v1';
++const GOOGLE_MODEL = process.env.GOOGLE_MODEL || 'gemini-1.5-flash-latest';
++const GOOGLE_API_VERSION = process.env.GOOGLE_API_VERSION || 'v1';
++
++const BOILERPLATE_HEADERS = [
++  'here is the translation',
++  "here's the translation",
++  'here are the translations',
++  'this is the translation',
++  'translation',
++  'translation output',
++  'voici la traduction',
++  'hier is de vertaling',
++  'hier ist die übersetzung',
++  'hier ist die ubersetzung',
++  'übersetzung',
++  'ubersetzung',
++  'vertaling',
++  'перевод',
++  'перевод текста',
++  'traduzione',
++  'traduction'
++];
++
++function stripBoilerplate(input) {
++  let text = (input ?? '').toString();
++  if (!text) return '';
++  text = text.replace(/^```[\s\S]*?\n/, '').replace(/```\s*$/m, '');
++  text = text.replace(/^\s*[*_`]+/, '').replace(/[*_`]+\s*$/m, '');
++  text = text.replace(/^\s*['"“”`]+/, '').replace(/['"“”`]+\s*$/m, '');
++  for (const header of BOILERPLATE_HEADERS) {
++    const pattern = new RegExp(`^\s*${header.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[:\-]?\s*`, 'i');
++    if (pattern.test(text)) {
++      text = text.replace(pattern, '');
++      break;
++    }
++  }
++  text = text.replace(/(?:^|\n)\s*(?:here|hier|voici|translation|traduction|übersetzung|ubersetzung|vertaling|перевод)[^:\n]*:\s*/gi, '\n');
++  text = text.replace(/\n{3,}/g, '\n\n');
++  return text.trim();
++}
+*** End Patch

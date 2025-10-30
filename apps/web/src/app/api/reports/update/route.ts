@@ -3,6 +3,7 @@ import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { hasAdminRole } from "@/lib/adminRole";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import type { TablesInsert, TablesUpdate } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
 
@@ -40,6 +41,10 @@ const resolveUserId = (req: Request) => getRequestContext(req).then(({ user }) =
 
 const baseHandler = async (req: Request) => {
   const { supabase, user } = await getRequestContext(req);
+
+  if (!user) {
+    return NextResponse.json({ ok: false, error: "UNAUTH" }, { status: 401 });
+  }
 
   if (!hasAdminRole(user)) {
     return NextResponse.json({ ok: false, error: "FORBIDDEN" }, { status: 403 });
@@ -89,22 +94,32 @@ const baseHandler = async (req: Request) => {
   }
 
   if (new_status === "accepted" && report.adverts?.user_id) {
-    await adminClient.rpc("trust_inc", { uid: report.adverts.user_id, pts: -15 }).catch(() => {});
+    const { error: trustError } = await adminClient.rpc("trust_inc", {
+      uid: report.adverts.user_id,
+      pts: -15,
+    });
+    if (trustError) {
+      console.warn("TRUST_INC_FAILED", trustError.message);
+    }
 
     if (unpublish) {
-      await adminClient
+      const advertsUpdate: TablesUpdate<"adverts"> = { status: "inactive" };
+      const { error: advertUpdateError } = await adminClient
         .from("adverts")
-        .update({ status: "inactive" })
-        .eq("id", report.adverts.id)
-        .catch(() => {});
+        .update(advertsUpdate)
+        .eq("id", report.adverts.id);
+      if (advertUpdateError) {
+        console.warn("ADVERT_UNPUBLISH_FAILED", advertUpdateError.message);
+      }
     }
   }
 
-  await supabase.from("logs").insert({
+  const logEntry: TablesInsert<"logs"> = {
     user_id: user.id,
     action: "report_update",
-    details: { id, new_status, unpublish: !!unpublish },
-  });
+    details: { id, new_status, unpublish: Boolean(unpublish) },
+  };
+  await supabase.from("logs").insert(logEntry);
 
   return NextResponse.json({ ok: true });
 };

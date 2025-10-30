@@ -1,7 +1,8 @@
+import { randomBytes, createHmac } from "crypto";
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
-import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import { supabaseServer } from "@/lib/supabaseServer";
+import { createRateLimiter, withRateLimit, getClientIp } from "@/lib/rateLimiter";
+import type { TablesInsert } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
 
@@ -12,7 +13,6 @@ const parsePositiveInt = (value: string | undefined, fallback: number) => {
 
 const OTP_USER_ATTEMPTS = parsePositiveInt(process.env.RATE_LIMIT_OTP_USER_PER_15M, 5);
 const OTP_WINDOW_SEC = 15 * 60;
-const OTP_FALLBACK_ATTEMPTS = OTP_USER_ATTEMPTS;
 const OTP_IP_ATTEMPTS = parsePositiveInt(process.env.RATE_LIMIT_OTP_IP_PER_60M, 20);
 const OTP_IP_WINDOW_SEC = 60 * 60;
 
@@ -22,164 +22,179 @@ const otpUserLimiter = createRateLimiter({
   prefix: "otp:user",
 });
 
+const otpIpLimiter = createRateLimiter({
+  limit: OTP_IP_ATTEMPTS,
+  windowSec: OTP_IP_WINDOW_SEC,
+  prefix: "otp:ip",
+});
+
 const otpFallbackLimiter = createRateLimiter({
-  limit: OTP_FALLBACK_ATTEMPTS,
+  limit: OTP_USER_ATTEMPTS,
   windowSec: OTP_WINDOW_SEC,
   prefix: "otp:ip",
   bucketId: "fallback",
 });
 
-const otpIpLimiter = createRateLimiter({
-  limit: OTP_IP_ATTEMPTS,
-  windowSec: OTP_IP_WINDOW_SEC,
-  prefix: "otp:ip",
-  bucketId: "global",
-});
+const isE164 = (value: string): boolean => /^\+\d{8,15}$/.test(value);
 
-function supaFromRoute() {
-  const cookieStore = cookies();
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-        set(name: string, value: string, options?: Record<string, unknown>) {
-          const opts = options ?? {};
-          cookieStore.set({ name, value, ...opts });
-        },
-        remove(name: string, options?: Record<string, unknown>) {
-          const opts = options ?? {};
-          cookieStore.set({ name, value: "", ...opts, maxAge: 0 });
-        },
-      },
-    },
-  );
-}
-
-type SupabaseClient = ReturnType<typeof supaFromRoute>;
-type SupabaseUser = Awaited<ReturnType<SupabaseClient["auth"]["getUser"]>>["data"]["user"];
-type RequestContext = { supabase: SupabaseClient; user: SupabaseUser };
-
-const contextCache = new WeakMap<Request, Promise<RequestContext>>();
-
-const getRequestContext = (req: Request): Promise<RequestContext> => {
-  let cached = contextCache.get(req);
-  if (!cached) {
-    const supabase = supaFromRoute();
-    cached = supabase.auth.getUser().then(({ data }) => ({ supabase, user: data.user ?? null }));
-    contextCache.set(req, cached);
-  }
-  return cached;
+const getUserId = async (req: Request) => {
+  const supabase = supabaseServer();
+  const { data } = await supabase.auth.getUser();
+  return data.user?.id ?? null;
 };
 
-const resolveUserId = (req: Request) => getRequestContext(req).then(({ user }) => user?.id ?? null);
-
-const e164 = (s: string) => /^\+\d{8,15}$/.test(s);
-
 const baseHandler = async (req: Request) => {
+  let payload: unknown;
+
   try {
-    const body = await req.json();
-    const phone: string = (body?.phone || "").trim();
+    payload = await req.json();
+  } catch {
+    return NextResponse.json({ ok: false, error: "INVALID_JSON" }, { status: 400 });
+  }
 
-    if (!e164(phone)) {
-      return NextResponse.json({ ok: false, error: "INVALID_FORMAT" }, { status: 400 });
-    }
+  const phone = typeof payload === "object" && payload
+    ? String((payload as Record<string, unknown>).phone ?? "").trim()
+    : "";
 
-    const { supabase, user } = await getRequestContext(req);
-    if (!user) {
-      return NextResponse.json({ ok: false, error: "UNAUTH" }, { status: 401 });
-    }
+  if (!isE164(phone)) {
+    return NextResponse.json({ ok: false, error: "INVALID_FORMAT" }, { status: 400 });
+  }
 
-    let lookup: unknown = null;
+  const supabase = supabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ ok: false, error: "UNAUTH" }, { status: 401 });
+  }
+
+  let lookup: Record<string, unknown> | null = null;
+  if (process.env.TWILIO_LOOKUP_URL && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
     try {
-      const url = `${process.env.TWILIO_LOOKUP_URL}/${encodeURIComponent(phone)}?Type=carrier`;
-      const res = await fetch(url, {
-        headers: {
-          Authorization:
-            "Basic " +
-            Buffer.from(`${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`).toString("base64"),
-        },
+      const lookupUrl = `${process.env.TWILIO_LOOKUP_URL}/${encodeURIComponent(phone)}?Type=carrier`;
+      const authToken = Buffer.from(
+        `${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`,
+      ).toString("base64");
+      const response = await fetch(lookupUrl, {
+        headers: { Authorization: `Basic ${authToken}` },
       });
-      lookup = await res.json();
+      lookup = (await response.json()) as Record<string, unknown>;
     } catch {
       // Lookup failures should not block OTP issuance.
     }
+  }
 
-    await supabase.from("phones").upsert({
-      user_id: user.id,
-      e164: phone,
-      verified: false,
-      lookup,
-    });
+  const phoneRecord: TablesInsert<"phones"> = {
+    user_id: user.id,
+    e164: phone,
+    verified: false,
+    lookup: lookup as TablesInsert<"phones">["lookup"],
+  };
 
-    const code = String(Math.floor(100000 + Math.random() * 900000));
-    const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-
-    await supabase.from("phone_otps").insert({
-      user_id: user.id,
-      e164: phone,
-      code,
-      expires_at: expires,
-    });
-
-    try {
-      await fetch(
-        `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`,
-        {
-          method: "POST",
-          headers: {
-            Authorization:
-              "Basic " +
-              Buffer.from(`${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`).toString("base64"),
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: new URLSearchParams({
-            From: process.env.TWILIO_FROM!,
-            To: phone,
-            Body: `LyVoX: ваш код подтверждения ${code}. Действителен 10 минут.`,
-          }),
-        },
-      );
-    } catch {
-      return NextResponse.json({ ok: false, error: "SMS_SEND_FAIL" }, { status: 500 });
-    }
-
-    await supabase.from("logs").insert({
-      user_id: user.id,
-      action: "phone_request",
-      details: { e164: phone, lookup },
-    });
-
-    return NextResponse.json({ ok: true });
-  } catch (error: unknown) {
-    console.error("PHONE_REQUEST_ERROR", error);
+  const upsertPhonesResult = await supabase.from("phones").upsert(phoneRecord);
+  if (upsertPhonesResult.error) {
     return NextResponse.json(
-      {
-        ok: false,
-        error: "INTERNAL_ERROR",
-        detail: error instanceof Error ? error.message : String(error),
-      },
+      { ok: false, error: "PHONE_SAVE_FAILED", message: upsertPhonesResult.error.message },
+      { status: 400 },
+    );
+  }
+
+  // Ensure only one active OTP per user/phone pair
+  const deactivatePrevious = await supabase
+    .from("phone_otps")
+    .update({ used: true })
+    .eq("user_id", user.id)
+    .eq("e164", phone)
+    .eq("used", false);
+  if (deactivatePrevious.error) {
+    return NextResponse.json(
+      { ok: false, error: "OTP_CLEANUP_FAILED", message: deactivatePrevious.error.message },
       { status: 500 },
     );
   }
+
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+  const salt = randomBytes(16).toString("hex");
+  const codeHash = createHmac("sha256", salt).update(code).digest("hex");
+  const codeLastFour = code.slice(-4);
+
+  const otpInsert: TablesInsert<"phone_otps"> = {
+    user_id: user.id,
+    e164: phone,
+    code_hash: codeHash,
+    code_salt: salt,
+    code_last_four: codeLastFour,
+    expires_at: expiresAt,
+    attempts: 0,
+    used: false,
+  };
+
+  const { error: otpError } = await supabase.from("phone_otps").insert(otpInsert);
+  if (otpError) {
+    return NextResponse.json(
+      { ok: false, error: "OTP_CREATE_FAILED", message: otpError.message },
+      { status: 400 },
+    );
+  }
+
+  try {
+    const authToken = Buffer.from(
+      `${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`,
+    ).toString("base64");
+    await fetch(
+      `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${authToken}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          From: process.env.TWILIO_FROM ?? "",
+          To: phone,
+          Body: `LyVoX: ваш код подтверждения ${code}. Срок действия 10 минут.`,
+        }),
+      },
+    );
+  } catch (error) {
+    console.error("TWILIO_SEND_ERROR", error);
+    return NextResponse.json({ ok: false, error: "SMS_SEND_FAIL" }, { status: 500 });
+  }
+
+  const logDetails = {
+    e164: phone,
+    lookup,
+    otp_last_four: codeLastFour,
+  } as TablesInsert<"logs">["details"];
+
+  const logEntry: TablesInsert<"logs"> = {
+    user_id: user.id,
+    action: "phone_request",
+    details: logDetails,
+  };
+  const { error: logError } = await supabase.from("logs").insert(logEntry);
+  if (logError) {
+    console.warn("PHONE_LOG_FAILED", logError.message);
+  }
+
+  return NextResponse.json({ ok: true });
 };
 
 const withFallbackLimit = withRateLimit(baseHandler, {
   limiter: otpFallbackLimiter,
-  getUserId: resolveUserId,
-  makeKey: (_req, userId, ip) => (!userId && ip ? ip : null),
+  getUserId,
+  makeKey: (req, userId) => (!userId ? getClientIp(req) : null),
 });
 
 const withUserLimit = withRateLimit(withFallbackLimit, {
   limiter: otpUserLimiter,
-  getUserId: resolveUserId,
-  makeKey: (_req, userId) => (userId ? userId : null),
+  getUserId,
+  makeKey: (_req, userId) => userId,
 });
 
 export const POST = withRateLimit(withUserLimit, {
   limiter: otpIpLimiter,
-  makeKey: (_req, _userId, ip) => (ip ? ip : null),
+  makeKey: (req) => getClientIp(req),
 });

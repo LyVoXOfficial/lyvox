@@ -1,13 +1,14 @@
 import "server-only";
 
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/lib/supabaseTypes";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-let cached: ReturnType<typeof createClient> | null = null;
+let cached: SupabaseClient<Database> | null = null;
 
-export function supabaseService() {
+export function supabaseService(): SupabaseClient<Database> {
   if (!url || !serviceKey) {
     throw new Error(
       "SUPABASE_SERVICE_ROLE_KEY или NEXT_PUBLIC_SUPABASE_URL не заданы. Установите их в переменные окружения на сервере.",
@@ -15,7 +16,7 @@ export function supabaseService() {
   }
 
   if (!cached) {
-    cached = createClient(url, serviceKey, {
+    cached = createClient<Database>(url, serviceKey, {
       auth: {
         persistSession: false,
         autoRefreshToken: false,

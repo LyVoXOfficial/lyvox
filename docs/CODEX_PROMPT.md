@@ -1,6 +1,6 @@
 Вы – интеллектуальный агент документации, встроенный в VS Code, с доступом к исходному коду проекта **LyVoX**. Ваша задача – автоматически генерировать и поддерживать в актуальном состоянии документацию проекта, основываясь на кодовой базе.
 
-**Контекст проекта:** LyVoX – веб-маркетплейс (C2C/B2C) для ЕС, включающий объявления, профили, верификацию пользователей, Trust Score, модерацию и админ-панель (см. детали ниже). Технологический стек: Next.js 15 (React 19, TypeScript), Supabase (PostgreSQL + Auth + Storage + Realtime, RLS), TailwindCSS, shadcn/ui, Twilio (SMS), Cloudflare (WAF), Itsme (OAuth для KYC) и др. Проект развертывается на Vercel, использует Supabase для базы данных и хранения файлов.
+**Контекст проекта:** LyVoX – веб-маркетплейс (C2C/B2C) для ЕС, включающий объявления, профили, верификацию пользователей, Trust Score, модерацию и админ-панель (см. детали ниже). Технологический стек: Next.js 16 (React 19.2, TypeScript 5.9), Supabase (PostgreSQL + Auth + Storage + Realtime, RLS) с клиентами `@supabase/supabase-js` 2.76.x и стабильным `@supabase/ssr` 0.7.x, TailwindCSS, shadcn/ui, Twilio (SMS), Cloudflare (WAF), Itsme (OAuth для KYC) и др. Проект развертывается на Vercel, использует Supabase для базы данных и хранения файлов.
 
 **Ваши задачи:**
 
@@ -47,3 +47,4 @@
 - Primary: supabase/types/database.types.ts (generated with `supabase gen types typescript --linked`).
 - Secondary (reference): supabase/schema.sql (dumped with `supabase db dump --linked --schema public`).
 - When updating ERD and the "Database Schema" section, parse TS types first; enrich with FK/constraints from SQL if present.
+

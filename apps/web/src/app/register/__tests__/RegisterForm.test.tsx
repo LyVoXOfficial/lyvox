@@ -3,33 +3,27 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import RegisterForm from "../RegisterForm";
 
-vi.mock("sonner", () => {
-  const toast = {
-    success: vi.fn(),
-    error: vi.fn(),
-  };
-  return {
-    __esModule: true,
-    toast,
-  };
-});
+const toast = {
+  success: vi.fn(),
+  error: vi.fn(),
+};
 
-vi.mock("next/navigation", () => {
-  const routerMock = {
-    push: vi.fn(),
-    replace: vi.fn(),
-    prefetch: vi.fn(),
-    refresh: vi.fn(),
-  };
-  return {
-    __esModule: true,
-    useRouter: () => routerMock,
-    routerMock,
-  };
-});
+const routerMock = {
+  push: vi.fn(),
+  replace: vi.fn(),
+  prefetch: vi.fn(),
+  refresh: vi.fn(),
+};
 
-const { toast } = await import("sonner");
-const { routerMock } = await import("next/navigation");
+vi.mock("sonner", () => ({
+  __esModule: true,
+  toast,
+}));
+
+vi.mock("next/navigation", () => ({
+  __esModule: true,
+  useRouter: () => routerMock,
+}));
 
 beforeEach(() => {
   toast.success.mockReset();

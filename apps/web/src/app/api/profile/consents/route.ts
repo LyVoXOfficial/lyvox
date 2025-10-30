@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { coerceConsentSnapshot, composeMarketingSnapshot } from "@/lib/consents";
+import type { TablesInsert, TablesUpdate } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
 
@@ -60,10 +61,11 @@ export async function POST(request: Request) {
   const timestamp = new Date().toISOString();
   const nextSnapshot = composeMarketingSnapshot(currentSnapshot, marketingOptIn, timestamp);
 
-  const updateResult = await supabase
-    .from("profiles")
-    .update({ consents: nextSnapshot })
-    .eq("id", user.id);
+  const updatePayload: TablesUpdate<"profiles"> = {
+    consents: JSON.parse(JSON.stringify(nextSnapshot)),
+  };
+
+  const updateResult = await supabase.from("profiles").update(updatePayload).eq("id", user.id);
 
   if (updateResult.error) {
     return NextResponse.json(
@@ -82,16 +84,20 @@ export async function POST(request: Request) {
     );
   }
 
-  const auditLog = await service.from("logs").insert({
+  const auditDetails = {
+    source: "profile",
+    marketing_opt_in: marketingOptIn,
+    previous: currentSnapshot?.marketing ?? null,
+    next: nextSnapshot.marketing,
+  };
+
+  const logEntry: TablesInsert<"logs"> = {
     user_id: user.id,
     action: "consent_update",
-    details: {
-      source: "profile",
-      marketing_opt_in: marketingOptIn,
-      previous: currentSnapshot?.marketing ?? null,
-      next: nextSnapshot.marketing,
-    },
-  });
+    details: JSON.parse(JSON.stringify(auditDetails)) as TablesInsert<"logs">["details"],
+  };
+
+  const auditLog = await service.from("logs").insert(logEntry);
 
   if (auditLog.error) {
     return NextResponse.json(

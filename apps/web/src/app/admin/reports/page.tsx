@@ -83,6 +83,12 @@ async function updateReport(
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (!user) {
+    await setFlash("Необходимо авторизоваться");
+    revalidatePath("/admin/reports");
+    return;
+  }
+
   if (!hasAdminRole(user)) {
     await setFlash("Недостаточно прав");
     revalidatePath("/admin/reports");
@@ -166,6 +172,10 @@ export default async function AdminReportsPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (!user) {
+    return <main className="p-4 text-sm text-red-600">Необходимо авторизоваться.</main>;
+  }
 
   if (!hasAdminRole(user)) {
     return <main className="p-4 text-sm text-red-600">Доступ запрещён.</main>;

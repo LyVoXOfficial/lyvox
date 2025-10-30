@@ -2,16 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-const items = [
-  { href: "/", label: "Главная" },
-  { href: "/c", label: "Категории" },
-  { href: "/post", label: "Разместить" },
-  { href: "/profile", label: "Профиль" },
-];
+import { useI18n } from "@/i18n";
 
 export default function BottomNav() {
   const path = usePathname();
+  const { t } = useI18n();
+  const items = [
+    { href: "/", label: t("common.home") },
+    { href: "/c", label: t("common.categories") },
+    { href: "/post", label: t("common.place") },
+    { href: "/profile", label: t("common.profile") },
+  ];
   return (
     <div className="fixed bottom-0 inset-x-0 z-40 border-t bg-white h-14 pb-[env(safe-area-inset-bottom)]">
       <nav className="grid grid-cols-4 h-14 text-xs">

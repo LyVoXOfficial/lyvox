@@ -2,8 +2,8 @@
 
 ## Top-Level Topology
 
-- **Frontend** — Next.js 15 (App Router with SSR/ISR), React 19, Tailwind 4, shadcn/ui. Entry point `apps/web/src/app/**`, shared UI and helpers in `apps/web/src/components/**` and `apps/web/src/lib/**`.
-- **Backend** — Next.js Route Handlers under `apps/web/src/app/api/**` (Node runtime). Each handler wraps Supabase clients (`supabaseServer()` for user-scoped work, `supabaseService()` for privileged flows).
+- **Frontend** - Next.js 16 (App Router with SSR/ISR), React 19.2, Tailwind 4, shadcn/ui. Entry point `apps/web/src/app/**`, shared UI and helpers in `apps/web/src/components/**` and `apps/web/src/lib/**`.
+- **Backend** - Next.js Route Handlers under `apps/web/src/app/api/**` (Node runtime). Each handler wraps Supabase clients (`supabaseServer()` for user-scoped work, `supabaseService()` for privileged flows) built on `@supabase/supabase-js` 2.76.x and the latest stable `@supabase/ssr` 0.7.x.
 - **Database** — Supabase Postgres with row-level security. Schema changes live in `supabase/migrations/**`; canonical types are generated to `supabase/types/database.types.ts`.
 - **Storage** — Supabase Storage bucket `ad-media` for advert media assets.
 - **Authentication** — Supabase Auth (magic-link and phone OTP). Itsme OAuth onboarding is planned.
@@ -28,7 +28,8 @@
 
 - **Statuses.** `draft` (owner only), `active` (public), `archived` (owner removed; can be reactivated), `blocked` (moderation takedown; irreversible by owner). `pending_review` is reserved for the future moderated funnel and currently unused in production.
 - **Transitions.** Owners toggle `draft ↔ active ↔ archived`. Moderators/admins alone set `blocked`. When the moderated funnel launches it will route `draft → pending_review → active` after approval.
-- **Reports.** `public.reports` links complaints to `advert_id`, `reporter_id`, stores `reason` (enum-like string), `details`, and `status` (`open` → `reviewing` → `resolved`). Resolution can keep the advert active, block it, or add trust penalties via `trust_inc`. Each report is traceable per reporter for audit and rate limiting.
+- **Reports.** `public.reports` links complaints to `advert_id`, `reporter_id`, stores `reason` (enum-like string), `details`, and `status` (`pending` → `accepted` → `rejected`). Resolution can keep the advert active, block it, or add trust penalties via `trust_inc`. Each report is traceable per reporter for audit and rate limiting.
+- **Vehicle specifics.** Transport listings pull make/model/year data from normalized tables (`vehicle_makes`, `vehicle_models`, `vehicle_generations`). The UI persists the user’s selections in `ad_item_specifics.specifics` (JSON) alongside free-form attributes such as mileage or condition.
 
 ## Media Upload Pipeline
 
@@ -63,4 +64,8 @@
 
 ## Documentation Change Log
 
-- 2025-10-05 — Document governance introduced (`project-rules.yaml`) and duplication audit recorded.
+- 2025-10-05 - Document governance introduced (`project-rules.yaml`) and duplication audit recorded.
+- 2025-10-27 - Stack updated to Next.js 16 / React 19.2 / TypeScript 5.9 / `@supabase/supabase-js` 2.76.x while pinning `@supabase/ssr` to the latest stable 0.7.x. Future upgrades of `@supabase/ssr` are permitted only after:
+  1. `pnpm install` completes without registry errors,
+  2. `pnpm exec tsc -p apps/web/tsconfig.json --noEmit` succeeds, and
+  3. a manual SSR auth smoke-test (server-side `supabaseServer()` fetching the current profile) confirms session handling still works.

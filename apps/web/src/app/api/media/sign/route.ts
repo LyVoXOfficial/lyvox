@@ -121,7 +121,7 @@ export async function POST(request: Request) {
   const storage = supabaseService().storage.from("ad-media");
   const { data: signedUpload, error: signedError } = await storage.createSignedUploadUrl(
     storagePath,
-    SIGNED_UPLOAD_TTL_SECONDS,
+    { upsert: false },
   );
 
   if (signedError || !signedUpload) {

@@ -19,6 +19,8 @@
 
 LyVoX is a C2C/B2C marketplace focused on EU audiences that connects private sellers and businesses. The product allows visitors to browse category hierarchies, view listing details with image galleries, and post new adverts. Authentication relies on Supabase magic links, while trust-and-safety flows include phone verification, trust scoring, buyer complaints, and an admin moderation console.
 
+- Detailed domain guides live under [docs/domains](./domains) (profiles, adverts, moderation, trust_score, phones, consents, devops).
+
 Key capabilities implemented in the codebase:
 
 - Category landing pages with nested navigation and breadcrumbs backed by Supabase `categories`.
@@ -26,13 +28,13 @@ Key capabilities implemented in the codebase:
 - Public advert detail pages displaying pricing, location, and gallery assets.
 - Account area with profile details, trust score display, and phone verification via SMS codes.
 - Complaint submission from advert pages and moderation tooling for administrators.
-- Category **Transport** (cars, motorcycles, parts) must collect structured attributes (make, model, year, mileage, condition) via cascading dropdowns backed by `seed/transport_make_model.csv`, and surface a dedicated EV subcategory for battery vehicles.
+- Category **Transport** (cars, motorcycles, parts) must collect structured attributes (make, model, year, mileage, condition) via cascading dropdowns powered by the normalized Supabase tables `vehicle_makes`, `vehicle_models`, and `vehicle_generations`, and surface a dedicated EV subcategory for battery vehicles.
 
 ## System Architecture
 
 ### Frontend
 
-- Next.js 15 App Router project (React 19, TypeScript) inside `apps/web`.
+- Next.js 16 App Router project (React 19.2, TypeScript 5.9) inside `apps/web`.
 - Client components rely on the `@supabase/ssr` browser client to query Supabase tables in real time.
 - Layout combines `TopBar`, `MainHeader`, `LegalFooter`, `BottomNav`, and `ViewportBottomSpacer` to optimize mobile UX.
 - `middleware.ts` hydrates Supabase sessions on every request so API routes and server components can reuse auth context.
@@ -48,11 +50,19 @@ Key capabilities implemented in the codebase:
 
 ### Database & Storage
 
+## Chat & Conversations (proposed)
+
+- Tables: `public.conversations`, `public.conversation_participants`, `public.messages` with RLS restricting access to dialog participants and admins.
+- Realtime: changes on `public.messages` (INSERT/UPDATE) are broadcast via Supabase Realtime; client-only subscriptions in `use client` components.
+- API: server actions/REST for start/send/read with rate limiting; SSR loads initial history, client subscribes for live updates.
+- Moderation: message-level reports integrate with `public.reports` (target type `message`), auto-mute participants based on confirmed complaints.
+- Retention: messages kept 6 months after deal completion or inactivity; DSAR export and cron cleanup are required.
+
 - Supabase Postgres hosts core tables: `adverts`, `media`, `categories`, `profiles`, `phones`, `phone_otps`, `reports`, `trust_score`, `logs`, plus supporting tables such as `ad_item_specifics`.
 - Supabase migrations `20251004120000` ? `20251004122000` provision the `reports` and `trust_score` tables, attach `updated_at` triggers, seed baseline RLS, and expose the `trust_inc(uid, pts)` helper function.
 - Supabase Storage bucket `ad-media` stores advert images; paths follow `user_id/advert_id/timestamp-filename`.
 - Category taxonomy is seeded via `scripts/seedCategories.ts`, which consumes `seed/categories.ru.yaml`.
-- Transport make/model metadata lives in `seed/transport_make_model.csv`; server-side code must expose dependent dropdown options for make → model and validate EV listings against the EV subcategory rules.
+- Transport make/model metadata lives in the Supabase tables `vehicle_makes`, `vehicle_models`, and `vehicle_generations`; server-side code must expose dependent dropdown options for make → model and validate EV listings against the EV subcategory rules.
 - Authentication data is provided by Supabase Auth (`auth.users`), reused across API handlers and RLS policies.
 
 ### Infrastructure & Integrations
@@ -64,10 +74,10 @@ Key capabilities implemented in the codebase:
 
 ## Technologies & Libraries
 
-- Next.js 15.5 with Turbopack, React 19, TypeScript 5.6.
+- Next.js 16 with Turbopack, React 19.2, TypeScript 5.9.
 - Tailwind CSS 4, `clsx`, `tailwind-merge` for styling utilities.
 - Radix UI primitives wrapped in shadcn/ui components (`button`, `dialog`, `select`, `tabs`, etc.).
-- Supabase client libraries: `@supabase/ssr` for browser/server helpers and `@supabase/supabase-js` for service role usage.
+- Supabase client libraries: `@supabase/ssr` (0.7.x) for browser/server helpers and `@supabase/supabase-js` (2.76.x) for service role usage. Мы удерживаем `@supabase/ssr` на ветке 0.7.x до выхода новой стабильной версии; апгрейд допустим только после успешных `pnpm install`, `pnpm exec tsc --noEmit` и ручного SSR smoke-теста (серверный `supabaseServer()` читает профиль).
 - Form handling and UX: `react-hook-form`, `sonner` toasts, `lucide-react` icons.
 - Turborepo + pnpm workspace for monorepo orchestration; Husky + lint-staged enforce formatting.
 
@@ -179,7 +189,7 @@ _Source of truth: generated types in `supabase/types/database.types.ts`. The lin
 - **public.profiles** — user profile metadata keyed by `id uuid → auth.users.id`. Contains optional `display_name`, `phone`, verification flags (`verified_email`, `verified_phone`), `consents jsonb` (latest GDPR snapshot), and `created_at timestamptz`.
 - **public.phones** — latest verified phone per user. Columns: `user_id uuid → auth.users.id` (PK), unique `e164 text`, `verified boolean`, optional `lookup jsonb` for Twilio carrier metadata, and `updated_at timestamptz`.
 - **public.phone_otps** — OTP tokens with `id bigint`, optional `user_id uuid → auth.users.id`, `e164 text`, `code text`, `attempts int`, `expires_at timestamptz`, `created_at timestamptz`, and `used boolean`.
-- **public.reports** — moderation complaints with `id bigint`, `advert_id uuid → public.adverts.id`, `reporter uuid → auth.users.id`, optional `details text`, `status text`, optional `reviewed_by uuid → auth.users.id`, and audit timestamps.
+- **public.reports** — moderation complaints with `id bigint`, `advert_id uuid → public.adverts.id`, `reporter uuid → auth.users.id`, `reason text`, optional `details text`, `status text`, optional `reviewed_by uuid → auth.users.id`, and audit timestamps.
 - **public.trust_score** — trust reputation ledger keyed by `user_id uuid → auth.users.id` with `score int` and `updated_at timestamptz`.
 - **public.logs** — audit trail capturing `id bigint`, `action text`, optional `details jsonb`, optional `user_id uuid`, and `created_at timestamptz`.
 - Vehicle-specific attributes (e.g. `vehicle_make`, `vehicle_model`, `vehicle_year`, `vehicle_mileage`, `vehicle_engine_type`, `vehicle_region`) are stored in `public.ad_item_specifics.specifics` as validated JSON sourced from the transport make/model dataset.
@@ -248,7 +258,14 @@ erDiagram
 - Instrument Upstash rate limiting metrics and alerting around `/api/phone/*` and `/api/reports/*`.
 - Codify Cloudflare WAF plus Zero Trust configuration as infrastructure-as-code.
 - Configure a Supabase cron (or external trigger) for the `maintenance-cleanup` Edge Function and surface retention knobs via env.
-- Ship dependent make/model/year pickers for Transport listings (EV subcategory, structured mileage/condition capture) powered by `seed/transport_make_model.csv`.
+- Ship dependent make/model/year pickers for Transport listings (EV subcategory, structured mileage/condition capture) backed by Supabase tables `vehicle_makes`, `vehicle_models`, and `vehicle_generations`.
+
+
+
+
+
+
+
 
 
 

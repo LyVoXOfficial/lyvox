@@ -3,6 +3,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { coerceConsentSnapshot } from "@/lib/consents";
 import ConsentSettings from "./ConsentSettings";
+import { getI18nProps } from "@/i18n/server";
+import { formatDate } from "@/i18n/format";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -28,14 +30,17 @@ async function loadProfile(
     .maybeSingle();
 
   if (error) {
-    throw error;
+    console.warn("PROFILE_FETCH_FAILED", error.message);
+    return null;
   }
 
-  return data ?? null;
+  return (data as ProfileRow | null) ?? null;
 }
 
 export default async function ProfilePage() {
   const supabase = supabaseServer();
+  const { locale, messages } = await getI18nProps();
+  const t = (key: string) => key.split('.').reduce<any>((acc, p) => (acc ? acc[p] : undefined), messages) ?? key;
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -44,43 +49,31 @@ export default async function ProfilePage() {
     return (
       <main className="mx-auto max-w-3xl p-4">
         <p>
-          Вы не авторизованы. {" "}
-          <Link href="/login" className="underline">Войти</Link>{" или " }
-          <Link href="/register" className="underline">Зарегистрироваться</Link>
+          {t("profile.not_auth")} {" "}
+          <Link href="/login" className="underline">{t("profile.login")}</Link>{" "}
+          {t("profile.or")}{" "}
+          <Link href="/register" className="underline">{t("profile.register")}</Link>
         </p>
       </main>
     );
   }
 
-  const profile = await loadProfile(supabase, user.id).catch(() => null);
+  const profile = await loadProfile(supabase, user.id);
 
-  const [phoneRow, trust] = await Promise.all([
-    supabase
-      .from("phones")
-      .select("e164, verified")
-      .eq("user_id", user.id)
-      .maybeSingle()
-      .then((res) => res.data)
-      .catch(() => null),
-    supabase
-      .from("trust_score")
-      .select("score")
-      .eq("user_id", user.id)
-      .maybeSingle()
-      .then((res) => res.data)
-      .catch(() => null),
+  const [phoneResult, trustResult] = await Promise.all([
+    supabase.from("phones").select("e164, verified").eq("user_id", user.id).maybeSingle(),
+    supabase.from("trust_score").select("score").eq("user_id", user.id).maybeSingle(),
   ]);
+
+  const phoneRow = phoneResult.error ? null : phoneResult.data;
+  const trust = trustResult.error ? null : trustResult.data;
 
   const displayName = profile?.display_name ?? "—";
   const phoneValue = phoneRow?.e164 ?? profile?.phone ?? "—";
   const phoneVerified = phoneRow?.verified ?? profile?.verified_phone ?? false;
   const emailVerified = profile?.verified_email ?? !!user.email_confirmed_at;
   const createdAt = profile?.created_at ?? user.created_at ?? null;
-  const createdAtText = createdAt
-    ? new Intl.DateTimeFormat("ru-RU", { dateStyle: "medium" }).format(
-        new Date(createdAt),
-      )
-    : "-";
+  const createdAtText = createdAt ? formatDate(createdAt, locale) : "-";
 
   const consentSnapshot = coerceConsentSnapshot(profile?.consents ?? null);
   const marketingOptIn = consentSnapshot?.marketing?.accepted ?? false;
@@ -88,7 +81,7 @@ export default async function ProfilePage() {
 
   return (
     <main className="mx-auto max-w-3xl space-y-4 p-4">
-      <h1 className="text-2xl font-semibold">Профиль</h1>
+      <h1 className="text-2xl font-semibold">{t("profile.title")}</h1>
 
       <div className="rounded-2xl border p-4">
         <div className="text-sm text-muted-foreground">Email</div>
@@ -97,18 +90,18 @@ export default async function ProfilePage() {
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="rounded-2xl border p-4">
-          <div className="text-sm text-muted-foreground">Отображаемое имя</div>
+          <div className="text-sm text-muted-foreground">{t("profile.display_name")}</div>
           <div className="font-medium">{displayName}</div>
         </div>
         <div className="rounded-2xl border p-4">
-          <div className="text-sm text-muted-foreground">Телефон</div>
+          <div className="text-sm text-muted-foreground">{t("profile.phone")}</div>
           <div className="flex flex-wrap items-center gap-2 font-medium">
             <span>{phoneValue}</span>
             {phoneVerified ? (
-              <span className="text-sm text-muted-foreground">📱 Подтверждён</span>
+              <span className="text-sm text-muted-foreground">📱 {t("profile.phone_verified")}</span>
             ) : (
               <Link className="underline" href="/profile/phone">
-                Подтвердить
+                {t("profile.verify")}
               </Link>
             )}
           </div>
@@ -117,9 +110,9 @@ export default async function ProfilePage() {
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="rounded-2xl border p-4">
-          <div className="text-sm text-muted-foreground">Подтверждение email</div>
+          <div className="text-sm text-muted-foreground">{t("profile.email_verification")}</div>
           <div className="font-medium">
-            {emailVerified ? "✅ Подтверждён" : "— (ожидает подтверждения)"}
+            {emailVerified ? "✅ " + t("profile.verified") : "— (" + t("profile.pending") + ")"}
           </div>
         </div>
         <div className="rounded-2xl border p-4">
@@ -129,7 +122,7 @@ export default async function ProfilePage() {
       </div>
 
       <div className="rounded-2xl border p-4">
-        <div className="text-sm text-muted-foreground">Аккаунт создан</div>
+        <div className="text-sm text-muted-foreground">{t("profile.account_created")}</div>
         <div className="font-medium">{createdAtText}</div>
       </div>
 
@@ -138,13 +131,13 @@ export default async function ProfilePage() {
           href="/profile/edit"
           className="rounded-xl border px-3 py-2 hover:bg-muted"
         >
-          Редактировать профиль
+          {t("profile.edit")}
         </Link>
         <Link
           href="/profile/ads"
           className="rounded-xl border px-3 py-2 hover:bg-muted"
         >
-          Мои объявления
+          {t("profile.my_ads")}
         </Link>
       </div>
 

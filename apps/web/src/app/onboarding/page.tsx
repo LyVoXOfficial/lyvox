@@ -55,6 +55,17 @@ const messages: Record<Locale, Messages> = {
     profileCta: "Заполнить профиль",
     phoneCta: "Подтвердить телефон",
   },
+  de: {
+    title: "Willkommen bei LyVoX",
+    lead: "Schließen Sie die Onboarding-Schritte ab, um sicher zu veröffentlichen.",
+    checklist: [
+      "Bestätigen Sie die E-Mail, die wir gerade gesendet haben",
+      "Vervollständigen Sie Ihre Profildaten",
+      "Verifizieren Sie Ihre Telefonnummer",
+    ],
+    profileCta: "Profil aktualisieren",
+    phoneCta: "Telefon verifizieren",
+  },
 };
 
 type PageProps = {
@@ -63,8 +74,9 @@ type PageProps = {
   };
 };
 
-export default function OnboardingPage({ searchParams }: PageProps) {
-  const acceptLanguage = headers().get("accept-language");
+export default async function OnboardingPage({ searchParams }: PageProps) {
+  const headerList = await headers();
+  const acceptLanguage = headerList.get("accept-language");
   const fromQuery = searchParams?.lang ? resolveLocale(searchParams.lang) : null;
   const locale: Locale = fromQuery ?? resolveFromAcceptLanguage(acceptLanguage);
   const t = messages[locale];

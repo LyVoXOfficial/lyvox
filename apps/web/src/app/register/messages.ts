@@ -165,6 +165,40 @@ export const registerMessages: Record<Locale, RegisterMessages> = {
     errorWeakPassword: "Пароль не соответствует требованиям безопасности.",
     errorService: "Регистрация временно недоступна. Попробуйте позже.",
   },
+  de: {
+    title: "Erstellen Sie Ihr LyVoX-Konto",
+    intro: "Geben Sie Ihre Daten ein, um sich zu registrieren. Wir senden Ihnen einen Bestätigungslink per E-Mail, um das Onboarding zu starten.",
+    languageLabel: "Sprache",
+    emailLabel: "E-Mail",
+    emailPlaceholder: "sie@example.com",
+    emailError: "Geben Sie eine gültige E-Mail-Adresse ein.",
+    passwordLabel: "Passwort",
+    passwordHint: "Verwenden Sie mindestens 8 Zeichen mit Groß-/Kleinbuchstaben, Zahlen und Symbolen.",
+    passwordChecklist: [
+      "Mindestens 8 Zeichen",
+      "Groß- und Kleinbuchstaben",
+      "Mindestens eine Zahl",
+      "Sonderzeichen (z. B. ! ? &)",
+    ],
+    passwordError: "Das Passwort erfüllt nicht die Sicherheitsanforderungen.",
+    confirmPasswordLabel: "Passwort bestätigen",
+    confirmPasswordError: "Passwörter stimmen nicht überein.",
+    consentsTitle: "Erforderliche Einwilligungen",
+    consentsError: "Akzeptieren Sie die erforderlichen Richtlinien, um fortzufahren.",
+    legalLinkLabel: "Ansehen",
+    consents: {
+      terms: "Ich akzeptiere die Nutzungsbedingungen",
+      privacy: "Ich habe die Datenschutzhinweise gelesen",
+      marketing: "Senden Sie mir Updates zum Marktplatz (optional)",
+    },
+    submit: "Registrieren",
+    successTitle: "Bitte E-Mail-Postfach prüfen",
+    successBody: "Wir haben eine Bestätigungs-E-Mail gesendet. Folgen Sie dem Link, um Ihre Adresse zu verifizieren und mit dem Onboarding fortzufahren.",
+    errorGeneric: "Registrierung fehlgeschlagen. Bitte erneut versuchen.",
+    errorEmailInUse: "Ein Konto mit dieser E-Mail existiert bereits.",
+    errorWeakPassword: "Das Passwort entspricht nicht den Sicherheitsanforderungen.",
+    errorService: "Registrierung vorübergehend nicht verfügbar. Versuchen Sie es später erneut.",
+  },
 };
 
 export const localeLabels: Record<Locale, string> = {
@@ -172,4 +206,5 @@ export const localeLabels: Record<Locale, string> = {
   fr: "Francais",
   nl: "Nederlands",
   ru: "Русский",
+  de: "Deutsch",
 };

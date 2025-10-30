@@ -1,12 +1,21 @@
-import path from 'path';
-import type { NextConfig } from 'next';
+import path from "path";
+import type { NextConfig } from "next";
 
-const config: NextConfig = {
+type ExtendedNextConfig = NextConfig & {
+  eslint?: {
+    ignoreDuringBuilds?: boolean;
+  };
+  typescript?: {
+    ignoreBuildErrors?: boolean;
+  };
+};
+
+const config: ExtendedNextConfig = {
   webpack: (cfg) => {
     cfg.resolve = cfg.resolve || {};
     cfg.resolve.alias = {
       ...(cfg.resolve.alias || {}),
-      '@': path.resolve(__dirname, 'src'),
+      "@": path.resolve(__dirname, "src"),
     };
     return cfg;
   },
@@ -17,7 +26,7 @@ const config: NextConfig = {
     ignoreBuildErrors: true,
   },
   turbopack: {
-    root: path.resolve(__dirname, '..', '..'),
+    root: path.resolve(__dirname, "..", ".."),
   },
 };
 

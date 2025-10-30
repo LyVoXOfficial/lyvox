@@ -5,7 +5,6 @@ create table if not exists public.trust_score (
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
-
 drop trigger if exists set_updated_at_trust_score on public.trust_score;
 create trigger set_updated_at_trust_score
 before update on public.trust_score

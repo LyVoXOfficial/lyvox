@@ -8,6 +8,7 @@ import { apiFetch } from "@/lib/fetcher";
 import { Button } from "@/components/ui/button";
 import UploadGallery from "@/components/upload-gallery";
 import type { Category } from "@/lib/types";
+import { useI18n } from "@/i18n";
 
 type FormData = {
   title: string;
@@ -20,6 +21,7 @@ type FormData = {
 };
 
 function PostPageInner() {
+  const { t } = useI18n();
   const sp = useSearchParams();
   const editId = useMemo(() => sp.get("edit"), [sp]);
 
@@ -72,14 +74,14 @@ function PostPageInner() {
         .maybeSingle();
 
       if (error || !ad) {
-        alert("Объявление не найдено");
+        alert(t("post.not_found"));
         setLoading(false);
         return;
       }
 
       const { data: u } = await supabase.auth.getUser();
       if (ad.user_id !== u.user?.id) {
-        alert("У вас нет прав редактировать это объявление");
+        alert(t("post.not_owner"));
         window.location.href = "/";
         return;
       }
@@ -109,14 +111,14 @@ function PostPageInner() {
   }, [editId, setValue]);
 
   const createDraft = async () => {
-    if (!userId) return alert("Пожалуйста, войдите, чтобы разместить объявление");
+    if (!userId) return alert(t("post.login_to_post"));
     setCreating(true);
     try {
       const response = await apiFetch("/api/adverts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: "Черновик",
+          title: t("post.draft") as string,
           description: "",
           price: 0,
           category_id: categories.find((c) => c.is_active)?.id || "", // Default to first active category
@@ -131,7 +133,7 @@ function PostPageInner() {
       }
       setAdvertId(payload.advert.id);
       reset({
-        title: "Черновик",
+        title: t("post.draft") as string,
         description: "",
         price: 0,
         category_id: payload.advert?.category_id ?? "",
@@ -144,17 +146,17 @@ function PostPageInner() {
       window.history.replaceState(null, "", url.toString());
     } catch (err) {
       console.error("CREATE_DRAFT_ERROR", err);
-      alert("Не удалось создать черновик. Попробуйте снова.");
+      alert(t("post.create_failed"));
     } finally {
       setCreating(false);
     }
   };
   const onSubmit = async (values: FormData) => {
-    if (!values.title?.trim()) return alert("Введите название");
-    if (!values.description?.trim()) return alert("Введите описание");
-    if (!values.price || values.price <= 0) return alert("Введите цену");
-    if (!values.category_id) return alert("Выберите категорию");
-    if (!values.condition) return alert("Выберите состояние");
+    if (!values.title?.trim()) return alert(t("post.enter_title"));
+    if (!values.description?.trim()) return alert(t("post.enter_description"));
+    if (!values.price || values.price <= 0) return alert(t("post.enter_price"));
+    if (!values.category_id) return alert(t("post.select_category"));
+    if (!values.condition) return alert(t("post.select_condition"));
 
     if (!advertId) {
       alert("Сначала создайте черновик");
@@ -180,15 +182,15 @@ function PostPageInner() {
       const payload = await response.json();
       if (!payload.ok) {
         console.error("ADVERT_UPDATE_ERROR", payload);
-        alert("Ошибка при обновлении: " + (payload.error ?? "unknown"));
+        alert(t("post.update_error") + ": " + (payload.error ?? "unknown"));
         return;
       }
 
-      alert("Объявление опубликовано!");
+      alert(t("post.published"));
       window.location.href = `/ad/${advertId}`;
     } catch (err) {
       console.error("ADVERT_UPDATE_EXCEPTION", err);
-      alert("Ошибка связи. Попробуйте позже.");
+      alert(t("post.network_error"));
     }
   };
 
@@ -223,28 +225,28 @@ function PostPageInner() {
   };
 
   if (loading) {
-    return <p>Загрузка...</p>;
+    return <p>{t("common.loading")}</p>;
   }
 
   if (!userId && !advertId) {
     return (
       <div className="space-y-6 max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-semibold">Подать объявление</h1>
-        <p>Пожалуйста, <a href="/login" className="text-blue-600 hover:underline">войдите</a>, чтобы разместить объявление.</p>
+        <h1 className="text-2xl font-semibold">{t("post.post_ad")}</h1>
+        <p>
+          {t("post.please")} <a href="/login" className="text-blue-600 hover:underline">{t("profile.login")}</a>, {t("post.to_post")}.
+        </p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h1 className="text-2xl font-semibold">
-        {editId ? "Редактировать объявление" : "Создать объявление"}
-      </h1>
+      <h1 className="text-2xl font-semibold">{editId ? t("post.edit_ad") : t("post.create_ad")}</h1>
 
       {!advertId && !editId && (
         <div>
           <Button disabled={creating} onClick={createDraft}>
-            {creating ? "Создание..." : "Создать черновик"}
+            {creating ? t("post.creating") : t("post.create_draft")}
           </Button>
         </div>
       )}
@@ -252,9 +254,9 @@ function PostPageInner() {
       {advertId ? (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <section>
-            <h2 className="text-xl font-semibold mb-3">Основная информация</h2>
+            <h2 className="text-xl font-semibold mb-3">{t("post.main_info")}</h2>
             <div>
-              <label htmlFor="title" className="block mb-1">Название</label>
+              <label htmlFor="title" className="block mb-1">{t("post.title")}</label>
               <input
                 type="text"
                 id="title"
@@ -263,7 +265,7 @@ function PostPageInner() {
               />
             </div>
             <div>
-              <label htmlFor="description" className="block mb-1">Описание</label>
+              <label htmlFor="description" className="block mb-1">{t("post.description")}</label>
               <textarea
                 id="description"
                 {...register("description", { required: true })}
@@ -274,9 +276,9 @@ function PostPageInner() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">Цена и состояние</h2>
+            <h2 className="text-xl font-semibold mb-3">{t("post.price_condition")}</h2>
             <div>
-              <label htmlFor="price" className="block mb-1">Цена (€)</label>
+              <label htmlFor="price" className="block mb-1">{t("post.price")} (€)</label>
               <input
                 type="number"
                 id="price"
@@ -286,31 +288,31 @@ function PostPageInner() {
               />
             </div>
             <div>
-              <label htmlFor="condition" className="block mb-1">Состояние</label>
+              <label htmlFor="condition" className="block mb-1">{t("post.condition")}</label>
               <select
                 id="condition"
                 {...register("condition", { required: true })}
                 className="w-full border rounded px-3 py-2"
               >
-                <option value="">Выберите...</option>
-                <option value="new">Новый</option>
-                <option value="used">Б/у</option>
-                <option value="for_parts">На запчасти</option>
+                <option value="">{t("post.select")}</option>
+                <option value="new">{t("post.new")}</option>
+                <option value="used">{t("post.used")}</option>
+                <option value="for_parts">{t("post.for_parts")}</option>
               </select>
             </div>
-            <p className="text-sm text-gray-500">Валюта: EUR (фиксировано)</p>
+            <p className="text-sm text-gray-500">{t("post.currency_fixed")}</p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">Категория</h2>
+            <h2 className="text-xl font-semibold mb-3">{t("post.category")}</h2>
             <div>
-              <label htmlFor="category_id" className="block mb-1">Категория</label>
+              <label htmlFor="category_id" className="block mb-1">{t("post.category")}</label>
               <select
                 id="category_id"
                 {...register("category_id", { required: true })}
                 className="w-full border rounded px-3 py-2"
               >
-                <option value="">Выберите...</option>
+                <option value="">{t("post.select")}</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name_ru}
@@ -321,60 +323,60 @@ function PostPageInner() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">Локация</h2>
+            <h2 className="text-xl font-semibold mb-3">{t("post.location")}</h2>
             <div>
-              <label htmlFor="location" className="block mb-1">Локация</label>
+              <label htmlFor="location" className="block mb-1">{t("post.location")}</label>
               <input
                 type="text"
                 id="location"
                 {...register("location")}
-                placeholder="Например: Brussels"
+                placeholder={t("post.location_placeholder")}
                 className="w-full border rounded px-3 py-2"
               />
             </div>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">Характеристики товара</h2>
+            <h2 className="text-xl font-semibold mb-3">{t("post.specs")}</h2>
             <div className="space-y-2">
               {specificsFields.map((field, index) => (
                 <div key={index} className="flex space-x-2">
                   <input
                     type="text"
-                    placeholder="Ключ (например, год)"
+                    placeholder={t("post.spec_key_placeholder")}
                     value={field.key}
                     onChange={(e) => updateSpecificsField(index, "key", e.target.value)}
                     className="w-1/2 border rounded px-3 py-2"
                   />
                   <input
                     type="text"
-                    placeholder="Значение (например, 2015)"
+                    placeholder={t("post.spec_value_placeholder")}
                     value={field.value}
                     onChange={(e) => updateSpecificsField(index, "value", e.target.value)}
                     className="w-1/2 border rounded px-3 py-2"
                   />
                   <Button type="button" onClick={() => removeSpecificsField(index)} variant="outline">
-                    Удалить
+                    {t("post.remove")}
                   </Button>
                 </div>
               ))}
               <Button type="button" onClick={addSpecificsField} variant="outline">
-                Добавить характеристику
+                {t("post.add_spec")}
               </Button>
             </div>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">Фотографии</h2>
+            <h2 className="text-xl font-semibold mb-3">{t("post.photos")}</h2>
             <UploadGallery advertId={advertId} />
           </section>
 
           <Button type="submit" className="w-full">
-            {editId ? "Обновить и опубликовать" : "Опубликовать"}
+            {editId ? t("post.update_publish") : t("post.publish")}
           </Button>
         </form>
       ) : (
-        <p>Сначала создайте черновик (или откройте страницу с параметром ?edit=&lt;id&gt;)</p>
+        <p>{t("post.create_draft_hint")}</p>
       )}
     </div>
   );
@@ -382,7 +384,7 @@ function PostPageInner() {
 
 export default function PostPage() {
   return (
-    <Suspense fallback={<p>Загрузка...</p>}>
+    <Suspense fallback={<p>Loading…</p>}>
       <PostPageInner />
     </Suspense>
   );

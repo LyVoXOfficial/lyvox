@@ -18,8 +18,8 @@ function uuidFromSlug(...parts) {
   );
 }
 
-// load enriched data
-const raw = fs.readFileSync("./vehicles_full_enriched2.json", "utf8");
+// load enriched data (moved to /seed/ to avoid tracking large generated files)
+const raw = fs.readFileSync("./seed/vehicles_full_enriched2.json", "utf8");
 const data = JSON.parse(raw);
 
 // We'll accumulate SQL statements here
@@ -43,7 +43,7 @@ values (
   ${make.is_active === false ? "false" : "true"},
   ${escapeTxt(make.category_path || "transport/legkovye-avtomobili")}
 )
-on conflict (slug) do nothing;
+on conflict do nothing;
   `.trim());
 
   // for each model
@@ -117,12 +117,12 @@ values (
   ${toIntOrNull(gen.end_year)},
   ${gen.facelift === true ? "true" : (gen.facelift === false ? "false" : "null")},
   ${toPgTextArray(gen.production_countries)},
-  ${toPgTextArray(gen.body_types)},
-  ${toPgTextArray(gen.fuel_types)},
-  ${toPgTextArray(gen.transmission_types)},
+  ${toPgJson(gen.body_types)},
+  ${toPgJson(gen.fuel_types)},
+  ${toPgJson(gen.transmission_types)},
   ${escapeTxt(gen.summary || "")}
 )
-on conflict do nothing;
+on conflict (model_id, code) do nothing;
         `.trim());
       }
     }
@@ -158,9 +158,21 @@ on conflict (model_id) do nothing;
   }
 }
 
+// Ensure every statement ends with a semicolon (helps if someone strips ON CONFLICT clauses)
+
+// Ensure every statement ends with a semicolon and is separated by a blank line
+sql = sql.map(s => {
+  const t = s.trim();
+  if (t === "") return s;
+  // Add semicolon if missing
+  const withSemicolon = t.endsWith(";") ? t : t + ";";
+  // Add extra newline for clarity between statements
+  return withSemicolon + "\n";
+});
+
 sql.push("commit;");
 
-// write out seed file
+// write out seed file (root so it can be copied into supabase/seed.sql)
 fs.writeFileSync("./vehicles_seed.sql", sql.join("\n\n"), "utf8");
 console.log("✅ Generated vehicles_seed.sql");
 
@@ -187,14 +199,15 @@ function toNumOrNull(v) {
   return String(n);
 }
 
-// convert [1999,2000,...] -> '{1999,2000,...}' OR null
+// convert [1999,2000,...] -> '{1999,2000,...}' (emit empty array literal for missing/empty)
 function toPgIntArray(arr) {
-  if (!Array.isArray(arr) || arr.length === 0) return "null";
+  if (!Array.isArray(arr) || arr.length === 0) return "'{}'::int[]";
   const nums = arr
     .map(y => parseInt(y, 10))
     .filter(y => !Number.isNaN(y));
-  if (!nums.length) return "null";
-  return `'{"${nums.join('","')}"}'::int[]`;
+  if (!nums.length) return "'{}'::int[]";
+  // emit standard PostgreSQL int[] literal without extra quotes around numbers
+  return `'{${nums.join(',')}}'::int[]`;
 }
 
 // convert array or object to jsonb literal
@@ -204,9 +217,9 @@ function toPgJson(v) {
   return `'${json}'::jsonb`;
 }
 
-// convert array of strings -> text[]
+// convert array of strings -> text[] (emit empty array literal for missing/empty)
 function toPgTextArray(arr) {
-  if (!Array.isArray(arr) || arr.length === 0) return "null";
+  if (!Array.isArray(arr) || arr.length === 0) return "'{}'::text[]";
   const escaped = arr.map(x => `"${String(x).replace(/"/g, '\\"')}"`);
   return `'{${
     escaped.join(",")

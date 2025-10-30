@@ -1,71 +1,96 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
+import type { Tables, TablesInsert, TablesUpdate } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
 
-const ALLOWED_STATUSES = new Set(["draft", "active", "archived"]);
-const CONDITION_VALUES = new Set(["new", "used", "for_parts"]);
+type AdvertRow = Tables<"adverts">;
+type AdvertStatus = NonNullable<AdvertRow["status"]>;
+type SpecificsRecord = Record<string, string>;
 
-const trimString = (value: unknown): string | null => {
+const ALLOWED_STATUSES: ReadonlySet<AdvertStatus> = new Set(["draft", "active", "archived"]);
+const ALLOWED_CONDITIONS = new Set(["new", "used", "for_parts"]);
+
+const trim = (value: unknown): string | null => {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
   return trimmed.length ? trimmed : null;
 };
 
-const normalizeFiniteNumber = (value: unknown): number | null => {
-  if (typeof value !== "number" || !Number.isFinite(value)) return null;
+const normalizePrice = (value: unknown): number | null => {
+  if (typeof value !== "number") return null;
+  if (!Number.isFinite(value) || value < 0) return null;
   return value;
 };
 
-const enforceStatusTransition = (currentStatus: string, nextStatus: string) => {
-  if (!ALLOWED_STATUSES.has(nextStatus)) {
-    throw NextResponse.json(
-      { error: "invalid_status", details: { status: nextStatus } },
+const parseSpecifics = (value: unknown): SpecificsRecord | null => {
+  if (!value || typeof value !== "object") return null;
+  const entries = Object.entries(value as Record<string, unknown>)
+    .map(([key, maybe]) => {
+      const sanitizedKey = trim(key);
+      const sanitizedValue = trim(typeof maybe === "string" ? maybe : String(maybe ?? ""));
+      if (!sanitizedKey || !sanitizedValue) return null;
+      return [sanitizedKey, sanitizedValue] as const;
+    })
+    .filter((item): item is readonly [string, string] => Boolean(item));
+
+  if (!entries.length) {
+    return {};
+  }
+  return Object.fromEntries(entries);
+};
+
+const enforceStatusTransition = (current: AdvertStatus, next: AdvertStatus) => {
+  if (!ALLOWED_STATUSES.has(next)) {
+    return NextResponse.json({ error: "INVALID_STATUS", details: { status: next } }, { status: 400 });
+  }
+
+  if (current === next) return null;
+
+  if (current === "draft" && (next === "active" || next === "archived")) return null;
+  if (current === "active" && next === "archived") return null;
+  if (current === "archived" && next === "active") return null;
+
+  return NextResponse.json(
+    { error: "INVALID_TRANSITION", details: { from: current, to: next } },
+    { status: 400 },
+  );
+};
+
+const fetchMediaCount = async (supabase: ReturnType<typeof supabaseServer>, advertId: string) => {
+  const { count, error } = await supabase
+    .from("media")
+    .select("id", { head: true, count: "exact" })
+    .eq("advert_id", advertId);
+
+  if (error) {
+    return NextResponse.json(
+      { error: "MEDIA_CHECK_FAILED", message: error.message },
       { status: 400 },
     );
   }
 
-  if (nextStatus === "blocked") {
-    throw NextResponse.json({ error: "forbidden_status" }, { status: 403 });
+  if (!count) {
+    return NextResponse.json({ error: "MEDIA_REQUIRED" }, { status: 400 });
   }
 
-  if (currentStatus === "draft") {
-    return;
-  }
-
-  if (currentStatus === "active" && nextStatus === "draft") {
-    throw NextResponse.json({ error: "invalid_transition" }, { status: 400 });
-  }
-
-  if (currentStatus === "archived" && nextStatus === "draft") {
-    throw NextResponse.json({ error: "invalid_transition" }, { status: 400 });
-  }
+  return null;
 };
 
-const ensureMediaForPublication = async (advertId: string, supabase: ReturnType<typeof supabaseServer>) => {
-  const { count, error } = await supabase
-    .from("media")
-    .select("id", { count: "exact", head: true })
-    .eq("advert_id", advertId);
-  if (error) {
-    throw NextResponse.json({ error: "media_check_failed", details: error.message }, { status: 400 });
-  }
-  if (!count || count <= 0) {
-    throw NextResponse.json({ error: "media_required" }, { status: 400 });
-  }
-};
-
-export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
   const { id: advertId } = await context.params;
 
   if (!advertId) {
-    return NextResponse.json({ error: "missing_id" }, { status: 400 });
+    return NextResponse.json({ error: "MISSING_ID" }, { status: 400 });
   }
 
   const body = await request.json().catch(() => null);
   if (!body || typeof body !== "object") {
-    return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
+    return NextResponse.json({ error: "INVALID_PAYLOAD" }, { status: 400 });
   }
 
   const supabase = supabaseServer();
@@ -74,171 +99,167 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+    return NextResponse.json({ error: "UNAUTHENTICATED" }, { status: 401 });
   }
 
-  const { data: advert, error: advertError } = await supabase
+  const { data: advert, error: fetchError } = await supabase
     .from("adverts")
-    .select("id,user_id,status,category_id,title,description,price,location,condition")
+    .select(
+      "id,user_id,status,category_id,title,description,price,currency,condition,location",
+    )
     .eq("id", advertId)
     .maybeSingle();
 
-  if (advertError) {
-    return NextResponse.json({ error: "fetch_failed", details: advertError.message }, { status: 400 });
+  if (fetchError) {
+    return NextResponse.json({ error: "FETCH_FAILED", message: fetchError.message }, { status: 400 });
   }
 
   if (!advert) {
-    return NextResponse.json({ error: "not_found" }, { status: 404 });
+    return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });
   }
 
   if (advert.user_id !== user.id) {
-    // SECURITY: log denied attempt to update advert not owned by requester
-    await supabaseService()
-      .from("logs")
-      .insert({
-        user_id: user.id,
-        action: "advert_update_denied",
-        details: { advertId },
-      });
-    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    const audit: TablesInsert<"logs"> = {
+      user_id: user.id,
+      action: "advert_update_denied",
+      details: { advertId },
+    };
+    await supabaseService().from("logs").insert(audit);
+    return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
   }
 
-  const title = trimString(body.title) ?? advert.title ?? "Черновик объявления";
-  if (!title || title.length < 3) {
-    return NextResponse.json(
-      { error: "invalid_data", details: { title: "min_length_3" } },
-      { status: 400 },
-    );
+  const updates: TablesUpdate<"adverts"> = {};
+  const specifics = parseSpecifics((body as Record<string, unknown>).specifics ?? null);
+
+  const title = trim((body as Record<string, unknown>).title);
+  if (title !== null) {
+    if (title.length < 3) {
+      return NextResponse.json(
+        { error: "INVALID_TITLE", details: { minLength: 3 } },
+        { status: 400 },
+      );
+    }
+    updates.title = title;
   }
 
-  const description = trimString(body.description);
-  if (!description || description.length < 10) { // Example validation
-    return NextResponse.json(
-      { error: "invalid_data", details: { description: "min_length_10" } },
-      { status: 400 },
-    );
+  const description = trim((body as Record<string, unknown>).description);
+  if (description !== null) {
+    if (description.length < 10) {
+      return NextResponse.json(
+        { error: "INVALID_DESCRIPTION", details: { minLength: 10 } },
+        { status: 400 },
+      );
+    }
+    updates.description = description;
   }
 
-  const location = trimString(body.location);
-  if (!location) {
-    return NextResponse.json(
-      { error: "invalid_data", details: { location: "required" } },
-      { status: 400 },
-    );
+  const price = normalizePrice((body as Record<string, unknown>).price);
+  if (price !== null) {
+    updates.price = price;
+  } else if ((body as Record<string, unknown>).price === null) {
+    updates.price = null;
   }
 
-  const priceRaw = body.price;
-  const price =
-    priceRaw === null || priceRaw === undefined
-      ? null
-      : Number.isFinite(priceRaw) && priceRaw >= 0
-        ? priceRaw
-        : NaN;
-  if (Number.isNaN(price) || price === null || price <= 0) {
-    return NextResponse.json(
-      { error: "invalid_data", details: { price: "must_be_positive_number" } },
-      { status: 400 },
-    );
+  const location = trim((body as Record<string, unknown>).location);
+  if (location !== null) {
+    updates.location = location;
+  } else if ((body as Record<string, unknown>).location === "") {
+    updates.location = null;
   }
 
-  const categoryId = trimString(body.category_id) ?? advert.category_id;
-  if (!categoryId) {
-    return NextResponse.json(
-      { error: "invalid_data", details: { category_id: "required" } },
-      { status: 400 },
-    );
+  const condition = trim((body as Record<string, unknown>).condition);
+  if (condition) {
+    if (!ALLOWED_CONDITIONS.has(condition)) {
+      return NextResponse.json(
+        { error: "INVALID_CONDITION", details: { condition } },
+        { status: 400 },
+      );
+    }
+    updates.condition = condition as AdvertRow["condition"];
   }
 
-  const { data: category, error: categoryError } = await supabase
-    .from("categories")
-    .select("id,path")
-    .eq("id", categoryId)
-    .maybeSingle();
-
-  if (categoryError || !category) {
-    return NextResponse.json(
-      { error: "invalid_data", details: { category_id: "not_found" } },
-      { status: 400 },
-    );
+  const categoryId = trim((body as Record<string, unknown>).category_id);
+  if (categoryId) {
+    updates.category_id = categoryId;
   }
 
-  const condition = trimString(body.condition);
-  if (!condition || !CONDITION_VALUES.has(condition)) {
-    return NextResponse.json(
-      { error: "invalid_data", details: { condition: "invalid" } },
-      { status: 400 },
-    );
+  const requestedStatusRaw = trim((body as Record<string, unknown>).status);
+  let requestedStatus: AdvertStatus | null = null;
+  if (requestedStatusRaw) {
+    requestedStatus = requestedStatusRaw as AdvertStatus;
+    const transitionError = enforceStatusTransition(advert.status ?? "draft", requestedStatus);
+    if (transitionError) return transitionError;
+
+    if (requestedStatus === "active") {
+      const mediaCheckError = await fetchMediaCount(supabase, advertId);
+      if (mediaCheckError) return mediaCheckError;
+    }
+
+    updates.status = requestedStatus;
   }
 
-  const specifics = (body.specifics && typeof body.specifics === 'object') ? body.specifics : {};
+  if (Object.keys(updates).length > 0) {
+    const { error: updateError } = await supabase
+      .from("adverts")
+      .update(updates)
+      .eq("id", advertId);
 
-
-  const requestedStatus = trimString(body.status) ?? advert.status;
-  enforceStatusTransition(advert.status ?? "draft", requestedStatus);
-
-  if (requestedStatus === "active") {
-    // SECURITY: publishing requires at least one media asset
-    await ensureMediaForPublication(advertId, supabase);
+    if (updateError) {
+      return NextResponse.json(
+        { error: "UPDATE_FAILED", message: updateError.message },
+        { status: 400 },
+      );
+    }
   }
 
-  const updatePayload: Record<string, unknown> = {
-    title,
-    description,
-    price: price ?? null,
-    location,
-    category_id: categoryId,
-    status: requestedStatus,
-    condition: condition,
-  };
-
-  const { error: updateError } = await supabase
-    .from("adverts")
-    .update(updatePayload)
-    .eq("id", advertId);
-
-  if (updateError) {
-    return NextResponse.json(
-      { error: "update_failed", details: updateError.message },
-      { status: 400 },
-    );
-  }
-
-  if (Object.keys(specifics).length > 0) {
-    await supabase
-      .from("ad_item_specifics")
-      .upsert({
+  if (specifics) {
+    if (Object.keys(specifics).length) {
+      const payload: TablesInsert<"ad_item_specifics"> = {
         advert_id: advertId,
-        specifics: specifics,
-      }, { onConflict: 'advert_id' });
-  } else {
-    // If no specifics are provided, delete any existing ones
-    await supabase.from("ad_item_specifics").delete().eq("advert_id", advertId);
+        specifics,
+      };
+      const { error: specificsError } = await supabase
+        .from("ad_item_specifics")
+        .upsert(payload, { onConflict: "advert_id" });
+
+      if (specificsError) {
+        return NextResponse.json(
+          { error: "SPECIFICS_FAILED", message: specificsError.message },
+          { status: 400 },
+        );
+      }
+    } else {
+      const { error: deleteSpecificsError } = await supabase
+        .from("ad_item_specifics")
+        .delete()
+        .eq("advert_id", advertId);
+
+      if (deleteSpecificsError) {
+        return NextResponse.json(
+          { error: "SPECIFICS_DELETE_FAILED", message: deleteSpecificsError.message },
+          { status: 400 },
+        );
+      }
+    }
   }
 
-  if (requestedStatus !== advert.status) {
-    await supabaseService()
-      .from("logs")
-      .insert({
-        user_id: user.id,
-        action: "advert_status_change",
-        details: { advertId, from: advert.status, to: requestedStatus },
-      });
+  if (requestedStatus && requestedStatus !== advert.status) {
+    const audit: TablesInsert<"logs"> = {
+      user_id: user.id,
+      action: "advert_status_change",
+      details: { advertId, from: advert.status, to: requestedStatus },
+    };
+    await supabaseService().from("logs").insert(audit);
   }
 
-  return NextResponse.json({
-    ok: true,
-    advert: {
-      id: advertId,
-      status: requestedStatus,
-      category_id: categoryId,
-      condition: condition,
-    },
-  });
+  return NextResponse.json({ ok: true });
 }
 
-export async function DELETE(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
   const { id: advertId } = await context.params;
-
   if (!advertId) {
     return NextResponse.json({ ok: false, error: "MISSING_ID" }, { status: 400 });
   }
@@ -267,67 +288,58 @@ export async function DELETE(_request: NextRequest, context: { params: Promise<{
   }
 
   if (advert.user_id !== user.id) {
-    await supabaseService()
-      .from("logs")
-      .insert({
-        user_id: user.id,
-        action: "advert_delete_denied",
-        details: { advertId },
-      });
+    const audit: TablesInsert<"logs"> = {
+      user_id: user.id,
+      action: "advert_delete_denied",
+      details: { advertId },
+    };
+    await supabaseService().from("logs").insert(audit);
     return NextResponse.json({ ok: false, error: "FORBIDDEN" }, { status: 403 });
   }
 
-  const { data: mediaRows } = await supabase
+  const { data: mediaRows, error: mediaError } = await supabase
     .from("media")
-    .select("url")
+    .select("id,url")
     .eq("advert_id", advertId);
 
-  const deleteSpecifics = await supabase
+  if (mediaError) {
+    return NextResponse.json({ ok: false, error: mediaError.message }, { status: 400 });
+  }
+
+  const { error: specificsError } = await supabase
     .from("ad_item_specifics")
     .delete()
     .eq("advert_id", advertId);
 
-  if (deleteSpecifics.error) {
-    return NextResponse.json(
-      { ok: false, error: deleteSpecifics.error.message },
-      { status: 400 },
-    );
+  if (specificsError) {
+    return NextResponse.json({ ok: false, error: specificsError.message }, { status: 400 });
   }
 
-  const deleteMedia = await supabase.from("media").delete().eq("advert_id", advertId);
-
-  if (deleteMedia.error) {
-    return NextResponse.json(
-      { ok: false, error: deleteMedia.error.message },
-      { status: 400 },
-    );
+  const { error: mediaDeleteError } = await supabase.from("media").delete().eq("advert_id", advertId);
+  if (mediaDeleteError) {
+    return NextResponse.json({ ok: false, error: mediaDeleteError.message }, { status: 400 });
   }
 
   if (mediaRows?.length) {
     const storagePaths = mediaRows
-      .map((row: any) => row.url)
-      .filter((path: any) => path && !path.startsWith("http"));
+      .map((row) => row.url)
+      .filter((path): path is string => Boolean(path && !path.startsWith("http")));
     if (storagePaths.length) {
       await supabaseService().storage.from("ad-media").remove(storagePaths);
     }
   }
 
   const { error: deleteAdvertError } = await supabase.from("adverts").delete().eq("id", advertId);
-
   if (deleteAdvertError) {
-    return NextResponse.json(
-      { ok: false, error: deleteAdvertError.message },
-      { status: 400 },
-    );
+    return NextResponse.json({ ok: false, error: deleteAdvertError.message }, { status: 400 });
   }
 
-  await supabaseService()
-    .from("logs")
-    .insert({
-      user_id: user.id,
-      action: "advert_delete",
-      details: { advertId },
-    });
+  const audit: TablesInsert<"logs"> = {
+    user_id: user.id,
+    action: "advert_delete",
+    details: { advertId },
+  };
+  await supabaseService().from("logs").insert(audit);
 
   return NextResponse.json({ ok: true });
 }

@@ -45,22 +45,21 @@ export async function GET() {
     });
   }
 
-  const [profileRecord, phoneRecord] = await Promise.all([
+  const [profileResult, phoneResult] = await Promise.all([
     supabase
       .from("profiles")
       .select("display_name, phone, verified_email, verified_phone, consents")
       .eq("id", user.id)
-      .maybeSingle()
-      .then((result) => (result.data as ProfileRecord | null))
-      .catch(() => null),
+      .maybeSingle(),
     supabase
       .from("phones")
       .select("e164, verified")
       .eq("user_id", user.id)
-      .maybeSingle()
-      .then((result) => (result.data as PhoneRecord | null))
-      .catch(() => null),
+      .maybeSingle(),
   ]);
+
+  const profileRecord = profileResult.error ? null : ((profileResult.data ?? null) as ProfileRecord | null);
+  const phoneRecord = phoneResult.error ? null : ((phoneResult.data ?? null) as PhoneRecord | null);
 
   const phoneNumber = phoneRecord?.e164 ?? profileRecord?.phone ?? null;
   const verifiedPhone = phoneRecord?.verified ?? profileRecord?.verified_phone ?? false;

@@ -6,6 +6,7 @@ import CategoriesCarousel from "@/components/categories-carousel";
 import SectionTitle from "@/components/section-title";
 import { supabase } from "@/lib/supabaseClient";
 import AdsGrid from "@/components/ads-grid";
+import { useI18n } from "@/i18n";
 
 type AdListItem = {
   id: string;
@@ -23,6 +24,7 @@ type MediaRow = {
 };
 
 export default function Home() {
+  const { t } = useI18n();
   const [freeAds, setFreeAds] = useState<AdListItem[]>([]);
   const [latest, setLatest] = useState<AdListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -106,18 +108,18 @@ export default function Home() {
       <InfoCarousel />
 
       <section className="space-y-4">
-        <SectionTitle>Категории</SectionTitle>
+        <SectionTitle>{t("common.categories")}</SectionTitle>
         <CategoriesCarousel />
       </section>
 
       <section className="space-y-4">
-        <SectionTitle>Бесплатные объявления</SectionTitle>
-        {loading ? <p>Загрузка…</p> : <AdsGrid items={freeAds} />}
+        <SectionTitle>{t("home.free_ads")}</SectionTitle>
+        {loading ? <p>{t("common.loading")}</p> : <AdsGrid items={freeAds} />}
       </section>
 
       <section className="space-y-4">
-        <SectionTitle>Новые объявления</SectionTitle>
-        {loading ? <p>Загрузка…</p> : <AdsGrid items={latest} />}
+        <SectionTitle>{t("home.latest")}</SectionTitle>
+        {loading ? <p>{t("common.loading")}</p> : <AdsGrid items={latest} />}
       </section>
     </div>
   );

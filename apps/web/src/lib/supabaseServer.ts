@@ -1,24 +1,26 @@
 import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import type { Database } from "@/lib/supabaseTypes";
 
 export function supabaseServer() {
-  const cookieStore = cookies();
-  return createServerClient(
+  return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() {
-          return cookieStore.getAll().map(({ name, value }) => ({ name, value }));
+        async get(name: string) {
+          const store = await cookies();
+          return store.get(name)?.value;
         },
-        setAll(cookies) {
-          const set = (cookieStore as unknown as { set?: Function }).set;
-          if (!set) return;
-          cookies.forEach(({ name, value, options }) => {
-            set.call(cookieStore, { name, value, ...options });
-          });
+        async set(name: string, value: string, options: CookieOptions = {}) {
+          const store = await cookies();
+          await store.set({ name, value, ...options });
+        },
+        async remove(name: string, options: CookieOptions = {}) {
+          const store = await cookies();
+          await store.set({ name, value: "", ...options, maxAge: 0 });
         },
       },
-    }
+    },
   );
 }

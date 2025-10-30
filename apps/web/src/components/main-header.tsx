@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import UserMenu from "@/components/UserMenu";
+import { useI18n } from "@/i18n";
 
 type MeResponse = {
   user: unknown | null;
@@ -19,6 +20,7 @@ const hasUser = (payload: MeResponse | { user?: unknown } | null | undefined) =>
 };
 
 export default function MainHeader() {
+  const { t } = useI18n();
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [hasSession, setHasSession] = useState<boolean | null>(null);
@@ -93,16 +95,16 @@ export default function MainHeader() {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             className="w-full rounded-md border px-3 py-2"
-            placeholder="Поиск объявлений"
-            aria-label="Поиск объявлений"
+            placeholder={t("common.search")}
+            aria-label={t("common.search")}
           />
           <Button type="submit" variant="outline" className="hidden md:inline-flex">
-            Найти
+            {t("common.find")}
           </Button>
         </form>
 
         <div className="flex items-center gap-2">
-          <Button onClick={handlePostClick}>Подать объявление</Button>
+          <Button onClick={handlePostClick}>{t("common.post")}</Button>
           <UserMenu />
         </div>
       </div>
