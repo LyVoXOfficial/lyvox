@@ -67,40 +67,92 @@ export function PostForm({ categories, userId, advertToEdit }: PostFormProps) {
     const endpoint = advertId ? `/api/adverts/${advertId}` : "/api/adverts";
 
     try {
-      // Подготовка данных согласно требованиям API
-      // Преобразуем пустые строки в null для опциональных полей
-      const payload: Record<string, unknown> = {
-        title: values.title,
-        category_id: values.category_id,
-        status: 'draft',
-        currency: values.currency || "EUR",
-      };
+      let response: Response;
 
-      // Опциональные поля - только если не пустые
-      if (values.description && values.description.trim().length >= 10) {
-        payload.description = values.description;
-      }
+      if (advertId) {
+        // PATCH - обновление существующего объявления
+        // Подготовка данных согласно требованиям API
+        // Преобразуем пустые строки в null для опциональных полей
+        const payload: Record<string, unknown> = {
+          title: values.title,
+          category_id: values.category_id,
+          currency: values.currency || "EUR",
+        };
 
-      if (values.price !== null && values.price !== undefined && values.price >= 0) {
-        payload.price = values.price;
+        // Опциональные поля - только если не пустые
+        if (values.description && values.description.trim().length >= 10) {
+          payload.description = values.description;
+        }
+
+        if (values.price !== null && values.price !== undefined && values.price >= 0) {
+          payload.price = values.price;
+        } else {
+          payload.price = null;
+        }
+
+        if (values.location && values.location.trim().length > 0) {
+          payload.location = values.location.trim();
+        } else {
+          payload.location = null;
+        }
+
+        if (values.condition) {
+          payload.condition = values.condition;
+        }
+
+        response = await apiFetch(endpoint, {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+        });
       } else {
-        payload.price = null;
-      }
+        // POST - создание нового черновика (без body согласно API_REFERENCE.md)
+        response = await apiFetch(endpoint, {
+          method: "POST",
+        });
+        
+        const createResult = await response.json();
+        if (!createResult.ok) {
+          throw new Error(createResult.message || createResult.error || "Не удалось создать черновик");
+        }
 
-      if (values.location && values.location.trim().length > 0) {
-        payload.location = values.location.trim();
-      } else {
-        payload.location = null;
-      }
+        const newAdvertId = createResult.data?.advert?.id || createResult.advert?.id;
+        if (!newAdvertId) {
+          throw new Error("Не получен ID созданного объявления");
+        }
+        setAdvertId(newAdvertId);
 
-      if (values.condition) {
-        payload.condition = values.condition;
-      }
+        // Теперь обновляем созданный черновик с данными формы
+        const updatePayload: Record<string, unknown> = {
+          title: values.title,
+          category_id: values.category_id,
+          currency: values.currency || "EUR",
+        };
 
-      const response = await apiFetch(endpoint, {
-        method,
-        body: JSON.stringify(payload),
-      });
+        if (values.description && values.description.trim().length >= 10) {
+          updatePayload.description = values.description;
+        }
+
+        if (values.price !== null && values.price !== undefined && values.price >= 0) {
+          updatePayload.price = values.price;
+        } else {
+          updatePayload.price = null;
+        }
+
+        if (values.location && values.location.trim().length > 0) {
+          updatePayload.location = values.location.trim();
+        } else {
+          updatePayload.location = null;
+        }
+
+        if (values.condition) {
+          updatePayload.condition = values.condition;
+        }
+
+        response = await apiFetch(`/api/adverts/${newAdvertId}`, {
+          method: "PATCH",
+          body: JSON.stringify(updatePayload),
+        });
+      }
       const result = await response.json();
 
       if (!result.ok) {
@@ -108,10 +160,16 @@ export function PostForm({ categories, userId, advertToEdit }: PostFormProps) {
         throw new Error(errorMessage);
       }
       
-      const newAdvertId = result.data?.advert?.id || result.advert?.id;
-      if (newAdvertId) {
-        setAdvertId(newAdvertId);
+      // Для PATCH может вернуться advert в result, но ID уже есть в state
+      // Для POST уже установили setAdvertId выше
+      if (!advertId) {
+        // Если все еще нет ID, попробуем получить из результата
+        const returnedAdvertId = result.data?.advert?.id || result.advert?.id;
+        if (returnedAdvertId) {
+          setAdvertId(returnedAdvertId);
+        }
       }
+      
       toast.success("Черновик сохранен!");
       setStep(STEPS.PHOTOS);
 
