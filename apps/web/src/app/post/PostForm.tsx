@@ -158,8 +158,12 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
 
   // Filter makes based on search
   useEffect(() => {
+    let cancelled = false;
+    
     if (!makeSearchQuery) {
-      setFilteredMakes(makes);
+      if (!cancelled) {
+        setFilteredMakes(makes);
+      }
       return;
     }
 
@@ -169,19 +173,31 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         make.name_en?.toLowerCase().includes(query) ||
         make.vehicle_make_i18n?.some((i18n: any) => i18n.name?.toLowerCase().includes(query))
     );
-    setFilteredMakes(filtered);
+    
+    if (!cancelled) {
+      setFilteredMakes(filtered);
+    }
+    
+    return () => {
+      cancelled = true;
+    };
   }, [makeSearchQuery, makes]);
 
   // Load models when make is selected
   useEffect(() => {
+    let cancelled = false;
+    
     if (!formData.make_id) {
-      setModels([]);
-      setAvailableYears([]);
-      setBodyTypes([]);
-      return;
+      if (!cancelled) {
+        setModels([]);
+        setAvailableYears([]);
+        setBodyTypes([]);
+      }
+      return () => {
+        cancelled = true;
+      };
     }
 
-    let cancelled = false;
     const loadModels = async () => {
       try {
         const { data: mods } = await supabase
@@ -208,14 +224,18 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
 
   // Load years and body types when model is selected
   useEffect(() => {
+    let cancelled = false;
+    
     if (!formData.model_id) {
-      setAvailableYears([]);
-      setBodyTypes([]);
+      if (!cancelled) {
+        setAvailableYears([]);
+        setBodyTypes([]);
+      }
       return;
     }
 
     const model = models.find((m) => m.id === formData.model_id);
-    if (model) {
+    if (!cancelled && model) {
       if (model.years_available) {
         setAvailableYears([...model.years_available].sort((a, b) => b - a));
       }
@@ -223,6 +243,10 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         setBodyTypes(model.body_types_available as string[]);
       }
     }
+    
+    return () => {
+      cancelled = true;
+    };
   }, [formData.model_id, models]);
 
   const handleNext = () => {
@@ -866,14 +890,18 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
 
   // Load transmission and fuel types based on selected model
   useEffect(() => {
+    let cancelled = false;
+    
     if (!formData.model_id) {
-      setAvailableTransmissions([]);
-      setAvailableFuelTypes([]);
+      if (!cancelled) {
+        setAvailableTransmissions([]);
+        setAvailableFuelTypes([]);
+      }
       return;
     }
 
     const model = models.find((m) => m.id === formData.model_id);
-    if (model) {
+    if (!cancelled && model) {
       if (model.transmission_available && Array.isArray(model.transmission_available)) {
         setAvailableTransmissions(model.transmission_available as string[]);
       }
@@ -881,6 +909,10 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         setAvailableFuelTypes(model.fuel_types_available as string[]);
       }
     }
+    
+    return () => {
+      cancelled = true;
+    };
   }, [formData.model_id, models]);
 
   if (currentStep === 4) {
