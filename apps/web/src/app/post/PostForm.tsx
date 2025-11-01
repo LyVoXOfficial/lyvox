@@ -1205,8 +1205,27 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                 <div className="space-y-2 pl-4">
                   {catOptions.map((opt) => {
                     const optionKey = `${opt.category}_${opt.code}`;
-                    const isChecked = formData.options[optionKey] === true;
+                    const optionValue = formData.options[optionKey];
+                    // Checkbox is checked if value is true OR if it's a string (variant selected)
+                    const isChecked = optionValue === true || (typeof optionValue === "string" && optionValue !== "");
                     const hasVariants = opt.variants && Array.isArray(opt.variants) && opt.variants.length > 0;
+                    
+                    // Helper function to translate variant names
+                    const translateVariant = (variant: string): string => {
+                      // Common variant translations
+                      const variantMap: Record<string, Record<string, string>> = {
+                        "Однозонный": { en: "Single zone", nl: "Eén zone", fr: "Une zone", de: "Eine Zone" },
+                        "Двухзонный": { en: "Two zone", nl: "Twee zones", fr: "Deux zones", de: "Zwei Zonen" },
+                        "Трехзонный": { en: "Three zone", nl: "Drie zones", fr: "Trois zones", de: "Drei Zonen" },
+                        "Многозонный": { en: "Multi zone", nl: "Meerdere zones", fr: "Multi zones", de: "Mehrere Zonen" },
+                      };
+                      
+                      if (variantMap[variant] && variantMap[variant][locale]) {
+                        return variantMap[variant][locale];
+                      }
+                      // Fallback: return original if no translation
+                      return variant;
+                    };
 
                     return (
                       <div key={opt.id} className="space-y-1">
@@ -1215,13 +1234,25 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                             id={`option-${opt.id}`}
                             checked={isChecked}
                             onCheckedChange={(checked) => {
-                              setFormData({
-                                ...formData,
-                                options: {
-                                  ...formData.options,
-                                  [optionKey]: checked === true,
-                                },
-                              });
+                              if (checked === false) {
+                                // If unchecking and there's a variant selected, clear it
+                                setFormData({
+                                  ...formData,
+                                  options: {
+                                    ...formData.options,
+                                    [optionKey]: false,
+                                  },
+                                });
+                              } else {
+                                // If checking, set to true (user will select variant if needed)
+                                setFormData({
+                                  ...formData,
+                                  options: {
+                                    ...formData.options,
+                                    [optionKey]: hasVariants ? "" : true,
+                                  },
+                                });
+                              }
                             }}
                           />
                           <Label
@@ -1233,7 +1264,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                         </div>
                         {isChecked && hasVariants && (
                           <Select
-                            value={(formData.options[optionKey] as string) || undefined}
+                            value={typeof optionValue === "string" && optionValue !== "" ? optionValue : undefined}
                             onValueChange={(value) => {
                               setFormData({
                                 ...formData,
@@ -1250,7 +1281,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                             <SelectContent>
                               {opt.variants.map((variant: string) => (
                                 <SelectItem key={variant} value={variant}>
-                                  {variant}
+                                  {translateVariant(variant)}
                                 </SelectItem>
                               ))}
                             </SelectContent>
