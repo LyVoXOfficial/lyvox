@@ -445,6 +445,26 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
     }
   };
 
+  // Progress indicator component
+  const ProgressIndicator = () => (
+    <div className="mb-6">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm text-muted-foreground">
+          {t("post.form.step")} {currentStep} {t("post.form.of")} {TOTAL_STEPS}
+        </span>
+        <span className="text-sm font-medium">
+          {Math.round((currentStep / TOTAL_STEPS) * 100)}%
+        </span>
+      </div>
+      <div className="w-full bg-muted rounded-full h-2">
+        <div
+          className="bg-primary rounded-full h-2 transition-all duration-300"
+          style={{ width: `${(currentStep / TOTAL_STEPS) * 100}%` }}
+        />
+      </div>
+    </div>
+  );
+
   // Step 1: Category selection
   if (currentStep === 1) {
     return (
@@ -453,6 +473,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           <CardTitle>{t("post.form.step_1_title")}</CardTitle>
         </CardHeader>
         <CardContent>
+          <ProgressIndicator />
           <Select
             value={formData.category_id}
             onValueChange={(value) => setFormData({ ...formData, category_id: value })}
@@ -486,6 +507,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           <CardTitle>{t("post.form.step_2_title")}</CardTitle>
         </CardHeader>
         <CardContent>
+          <ProgressIndicator />
           <Select
             value={formData.condition}
             onValueChange={(value) => setFormData({ ...formData, condition: value })}
@@ -520,6 +542,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           <CardTitle>{t("post.form.step_3_title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <ProgressIndicator />
           {/* Make with autocomplete */}
           <div>
             <Label>{t("post.form.make")}</Label>
@@ -743,6 +766,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           <CardTitle>{t("post.form.step_4_title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <ProgressIndicator />
           {/* Power */}
           <div>
             <Label>{t("post.form.power")}</Label>
@@ -887,6 +911,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           <CardTitle>{t("post.form.step_5_title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <ProgressIndicator />
           {/* Mileage */}
           <div>
             <Label>{t("post.form.mileage")}</Label>
@@ -1045,6 +1070,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           <CardTitle>{t("post.form.step_6_title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6 max-h-[600px] overflow-y-auto">
+          <ProgressIndicator />
           {optionCategories.map((cat) => {
             const catOptions = vehicleOptions.filter((opt) => opt.category === cat.key);
             if (catOptions.length === 0) return null;
@@ -1134,6 +1160,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           <CardTitle>{t("post.form.step_7_title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <ProgressIndicator />
           {/* Description */}
           <div>
             <Label>{t("post.form.final_description")}</Label>
@@ -1251,6 +1278,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           <CardTitle>{t("post.form.step_8_title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <ProgressIndicator />
           <div className="border rounded-lg p-4 space-y-2">
             <h3 className="font-bold text-xl">
               {categories.find((c) => c.id === formData.category_id)?.name_ru || t("post.category")}
