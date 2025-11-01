@@ -1,8 +1,14 @@
-import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { resolveLocale } from "@/lib/i18n";
 import { CONSENT_VERSION } from "@/lib/consents";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  handleSupabaseError,
+  safeJsonParse,
+  ApiErrorCode,
+} from "@/lib/apiErrors";
 
 export const runtime = "nodejs";
 
@@ -24,40 +30,40 @@ type ConsentBody = {
   marketing?: boolean;
 };
 
-export async function POST(request: Request) {
-  let body: {
-    email?: string;
-    password?: string;
-    confirmPassword?: string;
-    consents?: ConsentBody;
-    locale?: string;
-  };
+type RegisterBody = {
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  consents?: ConsentBody;
+  locale?: string;
+};
 
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ ok: false, error: "INVALID_JSON" }, { status: 400 });
+export async function POST(request: Request) {
+  const parseResult = await safeJsonParse<RegisterBody>(request);
+  if (!parseResult.success) {
+    return parseResult.response;
   }
 
+  const body = parseResult.data;
   const email = (body.email ?? "").trim().toLowerCase();
   const password = body.password ?? "";
   const confirmPassword = body.confirmPassword ?? "";
   const consents = body.consents ?? {};
 
   if (!emailPattern.test(email)) {
-    return NextResponse.json({ ok: false, error: "INVALID_EMAIL" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.INVALID_EMAIL, { status: 400 });
   }
 
   if (!passwordValidity(password)) {
-    return NextResponse.json({ ok: false, error: "WEAK_PASSWORD" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.WEAK_PASSWORD, { status: 400 });
   }
 
   if (password !== confirmPassword) {
-    return NextResponse.json({ ok: false, error: "PASSWORD_MISMATCH" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.PASSWORD_MISMATCH, { status: 400 });
   }
 
   if (!consents.terms || !consents.privacy) {
-    return NextResponse.json({ ok: false, error: "CONSENT_REQUIRED" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.CONSENT_REQUIRED, { status: 400 });
   }
 
   const locale = resolveLocale(body.locale);
@@ -80,22 +86,19 @@ export async function POST(request: Request) {
   });
 
   if (error) {
-    if (error.code === "user_already_exists" || /already registered/i.test(error.message)) {
-      return NextResponse.json({ ok: false, error: "EMAIL_IN_USE" }, { status: 409 });
-    }
-    return NextResponse.json({ ok: false, error: "SIGNUP_FAILED", detail: error.message }, { status: 400 });
+    return handleSupabaseError(error, ApiErrorCode.SIGNUP_FAILED);
   }
 
   const user = data.user;
   if (!user) {
-    return NextResponse.json({ ok: false, error: "SIGNUP_INCOMPLETE" }, { status: 500 });
+    return createErrorResponse(ApiErrorCode.SIGNUP_INCOMPLETE, { status: 500 });
   }
 
   let service;
   try {
     service = supabaseService();
   } catch {
-    return NextResponse.json({ ok: false, error: "SERVICE_ROLE_MISSING" }, { status: 500 });
+    return createErrorResponse(ApiErrorCode.SERVICE_ROLE_MISSING, { status: 500 });
   }
 
   const timestamp = new Date().toISOString();
@@ -125,7 +128,7 @@ export async function POST(request: Request) {
   });
 
   if (profileUpsert.error) {
-    return NextResponse.json({ ok: false, error: "PROFILE_UPSERT_FAILED", detail: profileUpsert.error.message }, { status: 500 });
+    return handleSupabaseError(profileUpsert.error, ApiErrorCode.PROFILE_UPSERT_FAILED);
   }
 
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
@@ -140,11 +143,10 @@ export async function POST(request: Request) {
     },
   });
 
-  return NextResponse.json(
+  return createSuccessResponse(
     {
-      ok: true,
       verificationRequired: !user.email_confirmed_at,
     },
-    { status: 201 },
+    201,
   );
 }

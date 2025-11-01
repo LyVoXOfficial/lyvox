@@ -1,6 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  handleSupabaseError,
+  safeJsonParse,
+  ApiErrorCode,
+} from "@/lib/apiErrors";
 import type { Tables, TablesInsert, TablesUpdate } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
@@ -43,7 +50,11 @@ const parseSpecifics = (value: unknown): SpecificsRecord | null => {
 
 const enforceStatusTransition = (current: AdvertStatus, next: AdvertStatus) => {
   if (!ALLOWED_STATUSES.has(next)) {
-    return NextResponse.json({ error: "INVALID_STATUS", details: { status: next } }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.INVALID_PAYLOAD, {
+      status: 400,
+      details: { status: next },
+      message: "INVALID_STATUS",
+    });
   }
 
   if (current === next) return null;
@@ -52,10 +63,11 @@ const enforceStatusTransition = (current: AdvertStatus, next: AdvertStatus) => {
   if (current === "active" && next === "archived") return null;
   if (current === "archived" && next === "active") return null;
 
-  return NextResponse.json(
-    { error: "INVALID_TRANSITION", details: { from: current, to: next } },
-    { status: 400 },
-  );
+  return createErrorResponse(ApiErrorCode.INVALID_PAYLOAD, {
+    status: 400,
+    details: { from: current, to: next },
+    message: "INVALID_TRANSITION",
+  });
 };
 
 const fetchMediaCount = async (supabase: ReturnType<typeof supabaseServer>, advertId: string) => {
@@ -65,14 +77,14 @@ const fetchMediaCount = async (supabase: ReturnType<typeof supabaseServer>, adve
     .eq("advert_id", advertId);
 
   if (error) {
-    return NextResponse.json(
-      { error: "MEDIA_CHECK_FAILED", message: error.message },
-      { status: 400 },
-    );
+    return handleSupabaseError(error, ApiErrorCode.FETCH_FAILED);
   }
 
   if (!count) {
-    return NextResponse.json({ error: "MEDIA_REQUIRED" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+      status: 400,
+      message: "MEDIA_REQUIRED",
+    });
   }
 
   return null;
@@ -85,13 +97,14 @@ export async function PATCH(
   const { id: advertId } = await context.params;
 
   if (!advertId) {
-    return NextResponse.json({ error: "MISSING_ID" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.MISSING_ID, { status: 400 });
   }
 
-  const body = await request.json().catch(() => null);
-  if (!body || typeof body !== "object") {
-    return NextResponse.json({ error: "INVALID_PAYLOAD" }, { status: 400 });
+  const parseResult = await safeJsonParse<Record<string, unknown>>(request);
+  if (!parseResult.success) {
+    return parseResult.response;
   }
+  const body = parseResult.data;
 
   const supabase = supabaseServer();
   const {
@@ -99,7 +112,7 @@ export async function PATCH(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: "UNAUTHENTICATED" }, { status: 401 });
+    return createErrorResponse(ApiErrorCode.UNAUTHENTICATED, { status: 401 });
   }
 
   const { data: advert, error: fetchError } = await supabase
@@ -111,11 +124,11 @@ export async function PATCH(
     .maybeSingle();
 
   if (fetchError) {
-    return NextResponse.json({ error: "FETCH_FAILED", message: fetchError.message }, { status: 400 });
+    return handleSupabaseError(fetchError, ApiErrorCode.FETCH_FAILED);
   }
 
   if (!advert) {
-    return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });
+    return createErrorResponse(ApiErrorCode.NOT_FOUND, { status: 404 });
   }
 
   if (advert.user_id !== user.id) {
@@ -125,7 +138,7 @@ export async function PATCH(
       details: { advertId },
     };
     await supabaseService().from("logs").insert(audit);
-    return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+    return createErrorResponse(ApiErrorCode.FORBIDDEN, { status: 403 });
   }
 
   const updates: TablesUpdate<"adverts"> = {};
@@ -134,10 +147,11 @@ export async function PATCH(
   const title = trim((body as Record<string, unknown>).title);
   if (title !== null) {
     if (title.length < 3) {
-      return NextResponse.json(
-        { error: "INVALID_TITLE", details: { minLength: 3 } },
-        { status: 400 },
-      );
+      return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+        status: 400,
+        details: { minLength: 3 },
+        message: "INVALID_TITLE",
+      });
     }
     updates.title = title;
   }
@@ -145,10 +159,11 @@ export async function PATCH(
   const description = trim((body as Record<string, unknown>).description);
   if (description !== null) {
     if (description.length < 10) {
-      return NextResponse.json(
-        { error: "INVALID_DESCRIPTION", details: { minLength: 10 } },
-        { status: 400 },
-      );
+      return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+        status: 400,
+        details: { minLength: 10 },
+        message: "INVALID_DESCRIPTION",
+      });
     }
     updates.description = description;
   }
@@ -170,10 +185,11 @@ export async function PATCH(
   const condition = trim((body as Record<string, unknown>).condition);
   if (condition) {
     if (!ALLOWED_CONDITIONS.has(condition)) {
-      return NextResponse.json(
-        { error: "INVALID_CONDITION", details: { condition } },
-        { status: 400 },
-      );
+      return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+        status: 400,
+        details: { condition },
+        message: "INVALID_CONDITION",
+      });
     }
     updates.condition = condition as AdvertRow["condition"];
   }
@@ -205,10 +221,7 @@ export async function PATCH(
       .eq("id", advertId);
 
     if (updateError) {
-      return NextResponse.json(
-        { error: "UPDATE_FAILED", message: updateError.message },
-        { status: 400 },
-      );
+      return handleSupabaseError(updateError, ApiErrorCode.UPDATE_FAILED);
     }
   }
 
@@ -223,10 +236,7 @@ export async function PATCH(
         .upsert(payload, { onConflict: "advert_id" });
 
       if (specificsError) {
-        return NextResponse.json(
-          { error: "SPECIFICS_FAILED", message: specificsError.message },
-          { status: 400 },
-        );
+        return handleSupabaseError(specificsError, ApiErrorCode.UPDATE_FAILED);
       }
     } else {
       const { error: deleteSpecificsError } = await supabase
@@ -235,10 +245,7 @@ export async function PATCH(
         .eq("advert_id", advertId);
 
       if (deleteSpecificsError) {
-        return NextResponse.json(
-          { error: "SPECIFICS_DELETE_FAILED", message: deleteSpecificsError.message },
-          { status: 400 },
-        );
+        return handleSupabaseError(deleteSpecificsError, ApiErrorCode.UPDATE_FAILED);
       }
     }
   }
@@ -252,7 +259,7 @@ export async function PATCH(
     await supabaseService().from("logs").insert(audit);
   }
 
-  return NextResponse.json({ ok: true });
+  return createSuccessResponse({});
 }
 
 export async function DELETE(
@@ -261,7 +268,7 @@ export async function DELETE(
 ) {
   const { id: advertId } = await context.params;
   if (!advertId) {
-    return NextResponse.json({ ok: false, error: "MISSING_ID" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.MISSING_ID, { status: 400 });
   }
 
   const supabase = supabaseServer();
@@ -270,7 +277,7 @@ export async function DELETE(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ ok: false, error: "UNAUTHENTICATED" }, { status: 401 });
+    return createErrorResponse(ApiErrorCode.UNAUTHENTICATED, { status: 401 });
   }
 
   const { data: advert, error: fetchError } = await supabase
@@ -280,11 +287,11 @@ export async function DELETE(
     .maybeSingle();
 
   if (fetchError) {
-    return NextResponse.json({ ok: false, error: fetchError.message }, { status: 400 });
+    return handleSupabaseError(fetchError, ApiErrorCode.FETCH_FAILED);
   }
 
   if (!advert) {
-    return NextResponse.json({ ok: false, error: "NOT_FOUND" }, { status: 404 });
+    return createErrorResponse(ApiErrorCode.NOT_FOUND, { status: 404 });
   }
 
   if (advert.user_id !== user.id) {
@@ -294,7 +301,7 @@ export async function DELETE(
       details: { advertId },
     };
     await supabaseService().from("logs").insert(audit);
-    return NextResponse.json({ ok: false, error: "FORBIDDEN" }, { status: 403 });
+    return createErrorResponse(ApiErrorCode.FORBIDDEN, { status: 403 });
   }
 
   const { data: mediaRows, error: mediaError } = await supabase
@@ -303,7 +310,7 @@ export async function DELETE(
     .eq("advert_id", advertId);
 
   if (mediaError) {
-    return NextResponse.json({ ok: false, error: mediaError.message }, { status: 400 });
+    return handleSupabaseError(mediaError, ApiErrorCode.FETCH_FAILED);
   }
 
   const { error: specificsError } = await supabase
@@ -312,12 +319,12 @@ export async function DELETE(
     .eq("advert_id", advertId);
 
   if (specificsError) {
-    return NextResponse.json({ ok: false, error: specificsError.message }, { status: 400 });
+    return handleSupabaseError(specificsError, ApiErrorCode.UPDATE_FAILED);
   }
 
   const { error: mediaDeleteError } = await supabase.from("media").delete().eq("advert_id", advertId);
   if (mediaDeleteError) {
-    return NextResponse.json({ ok: false, error: mediaDeleteError.message }, { status: 400 });
+    return handleSupabaseError(mediaDeleteError, ApiErrorCode.UPDATE_FAILED);
   }
 
   if (mediaRows?.length) {
@@ -331,7 +338,7 @@ export async function DELETE(
 
   const { error: deleteAdvertError } = await supabase.from("adverts").delete().eq("id", advertId);
   if (deleteAdvertError) {
-    return NextResponse.json({ ok: false, error: deleteAdvertError.message }, { status: 400 });
+    return handleSupabaseError(deleteAdvertError, ApiErrorCode.UPDATE_FAILED);
   }
 
   const audit: TablesInsert<"logs"> = {
@@ -341,5 +348,5 @@ export async function DELETE(
   };
   await supabaseService().from("logs").insert(audit);
 
-  return NextResponse.json({ ok: true });
+  return createSuccessResponse({});
 }

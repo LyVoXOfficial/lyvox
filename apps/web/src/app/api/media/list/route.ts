@@ -1,7 +1,12 @@
-import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { ensureAdvertOwnership, requireAuthenticatedUser } from "../_shared";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  handleSupabaseError,
+  ApiErrorCode,
+} from "@/lib/apiErrors";
 
 export const runtime = "nodejs";
 
@@ -12,7 +17,7 @@ export async function GET(request: Request) {
   const advertId = url.searchParams.get("advertId");
 
   if (!advertId) {
-    return NextResponse.json({ ok: false, error: "MISSING_ADVERT_ID" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.MISSING_ADVERT_ID, { status: 400 });
   }
 
   const supabase = supabaseServer();
@@ -39,7 +44,7 @@ export async function GET(request: Request) {
     .order("sort", { ascending: true });
 
   if (mediaError) {
-    return NextResponse.json({ ok: false, error: mediaError.message }, { status: 400 });
+    return handleSupabaseError(mediaError, ApiErrorCode.FETCH_FAILED);
   }
 
   const storage = supabaseService().storage.from("ad-media");
@@ -77,8 +82,7 @@ export async function GET(request: Request) {
 
   const resolved = await Promise.all(items);
 
-  return NextResponse.json({
-    ok: true,
+  return createSuccessResponse({
     items: resolved.filter((item) => item.url !== null),
     expiresIn: SIGNED_DOWNLOAD_TTL_SECONDS,
   });

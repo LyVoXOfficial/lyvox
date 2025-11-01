@@ -1,7 +1,12 @@
-import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { ensureAdvertOwnership, requireAuthenticatedUser } from "../_shared";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  handleSupabaseError,
+  ApiErrorCode,
+} from "@/lib/apiErrors";
 
 export const runtime = "nodejs";
 
@@ -12,7 +17,7 @@ export async function DELETE(
   const { id } = await context.params;
 
   if (!id) {
-    return NextResponse.json({ ok: false, error: "MISSING_ID" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.MISSING_ID, { status: 400 });
   }
 
   const supabase = supabaseServer();
@@ -29,11 +34,11 @@ export async function DELETE(
     .maybeSingle();
 
   if (mediaError) {
-    return NextResponse.json({ ok: false, error: mediaError.message }, { status: 400 });
+    return handleSupabaseError(mediaError, ApiErrorCode.FETCH_FAILED);
   }
 
   if (!media) {
-    return NextResponse.json({ ok: false, error: "NOT_FOUND" }, { status: 404 });
+    return createErrorResponse(ApiErrorCode.NOT_FOUND, { status: 404 });
   }
 
   const ownership = await ensureAdvertOwnership({
@@ -53,7 +58,7 @@ export async function DELETE(
   const { error: deleteError } = await supabase.from("media").delete().eq("id", id);
 
   if (deleteError) {
-    return NextResponse.json({ ok: false, error: deleteError.message }, { status: 400 });
+    return handleSupabaseError(deleteError, ApiErrorCode.UPDATE_FAILED);
   }
 
   const { data: remaining } = await supabase
@@ -69,5 +74,5 @@ export async function DELETE(
     await Promise.all(updates);
   }
 
-  return NextResponse.json({ ok: true });
+  return createSuccessResponse({});
 }

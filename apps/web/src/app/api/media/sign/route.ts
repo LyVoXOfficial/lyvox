@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import {
@@ -6,6 +5,13 @@ import {
   requireAuthenticatedUser,
   MEDIA_LIMIT_PER_ADVERT,
 } from "../_shared";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  handleSupabaseError,
+  safeJsonParse,
+  ApiErrorCode,
+} from "@/lib/apiErrors";
 
 export const runtime = "nodejs";
 
@@ -28,35 +34,42 @@ const buildPath = (userId: string, advertId: string, originalName: string) => {
   return `${userId}/${advertId}/${slug}.${ext}`;
 };
 
+type SignRequestBody = {
+  advertId?: string;
+  fileName?: string;
+  contentType?: string;
+  fileSize?: number;
+};
+
 export async function POST(request: Request) {
-  const { advertId, fileName, contentType, fileSize } = (await request.json().catch(() => ({}))) as {
-    advertId?: string;
-    fileName?: string;
-    contentType?: string;
-    fileSize?: number;
-  };
+  const parseResult = await safeJsonParse<SignRequestBody>(request);
+  if (!parseResult.success) {
+    return parseResult.response;
+  }
+
+  const { advertId, fileName, contentType, fileSize } = parseResult.data;
 
   if (!advertId || typeof advertId !== "string") {
-    return NextResponse.json({ ok: false, error: "MISSING_ADVERT_ID" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.MISSING_ADVERT_ID, { status: 400 });
   }
 
   if (!fileName || typeof fileName !== "string") {
-    return NextResponse.json({ ok: false, error: "MISSING_FILE_NAME" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.MISSING_FILE_NAME, { status: 400 });
   }
 
   if (!contentType || typeof contentType !== "string" || !contentType.startsWith("image/")) {
-    return NextResponse.json({ ok: false, error: "UNSUPPORTED_CONTENT_TYPE" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.UNSUPPORTED_CONTENT_TYPE, { status: 400 });
   }
 
   if (!Number.isFinite(fileSize) || fileSize! <= 0) {
-    return NextResponse.json({ ok: false, error: "MISSING_FILE_SIZE" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.MISSING_FILE_SIZE, { status: 400 });
   }
 
   if (fileSize! > MAX_FILE_SIZE_BYTES) {
-    return NextResponse.json(
-      { ok: false, error: "FILE_TOO_LARGE", limitBytes: MAX_FILE_SIZE_BYTES },
-      { status: 413 },
-    );
+    return createErrorResponse(ApiErrorCode.FILE_TOO_LARGE, {
+      status: 413,
+      details: { limitBytes: MAX_FILE_SIZE_BYTES },
+    });
   }
 
   const supabase = supabaseServer();
@@ -83,14 +96,14 @@ export async function POST(request: Request) {
     .eq("advert_id", advertId);
 
   if (countError) {
-    return NextResponse.json({ ok: false, error: countError.message }, { status: 400 });
+    return handleSupabaseError(countError, ApiErrorCode.FETCH_FAILED);
   }
 
   if ((mediaCount ?? 0) >= MEDIA_LIMIT_PER_ADVERT) {
-    return NextResponse.json(
-      { ok: false, error: "LIMIT_REACHED", limit: MEDIA_LIMIT_PER_ADVERT },
-      { status: 409 },
-    );
+    return createErrorResponse(ApiErrorCode.LIMIT_REACHED, {
+      status: 409,
+      details: { limit: MEDIA_LIMIT_PER_ADVERT },
+    });
   }
 
   const { data: lastSort } = await supabase
@@ -112,14 +125,13 @@ export async function POST(request: Request) {
   );
 
   if (signedError || !signedUpload) {
-    return NextResponse.json(
-      { ok: false, error: signedError?.message ?? "SIGNED_URL_FAILED" },
-      { status: 500 },
+    return handleSupabaseError(
+      signedError ?? { message: "SIGNED_URL_FAILED" },
+      ApiErrorCode.SIGNED_URL_FAILED,
     );
   }
 
-  return NextResponse.json({
-    ok: true,
+  return createSuccessResponse({
     path: storagePath,
     token: signedUpload.token,
     expiresIn: SIGNED_UPLOAD_TTL_SECONDS,

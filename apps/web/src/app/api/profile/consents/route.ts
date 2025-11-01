@@ -1,7 +1,13 @@
-import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { coerceConsentSnapshot, composeMarketingSnapshot } from "@/lib/consents";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  handleSupabaseError,
+  safeJsonParse,
+  ApiErrorCode,
+} from "@/lib/apiErrors";
 import type { TablesInsert, TablesUpdate } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
@@ -23,16 +29,15 @@ function parseBoolean(value: unknown): boolean | null {
 }
 
 export async function POST(request: Request) {
-  let body: PostBody;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ ok: false, error: "INVALID_JSON" }, { status: 400 });
+  const parseResult = await safeJsonParse<PostBody>(request);
+  if (!parseResult.success) {
+    return parseResult.response;
   }
 
+  const body = parseResult.data;
   const marketingOptIn = parseBoolean(body.marketingOptIn);
   if (marketingOptIn === null) {
-    return NextResponse.json({ ok: false, error: "INVALID_PAYLOAD" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.INVALID_PAYLOAD, { status: 400 });
   }
 
   const supabase = supabaseServer();
@@ -41,7 +46,7 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ ok: false, error: "UNAUTH" }, { status: 401 });
+    return createErrorResponse(ApiErrorCode.UNAUTH, { status: 401 });
   }
 
   const profileResult = await supabase
@@ -51,10 +56,7 @@ export async function POST(request: Request) {
     .maybeSingle();
 
   if (profileResult.error) {
-    return NextResponse.json(
-      { ok: false, error: "PROFILE_LOOKUP_FAILED", detail: profileResult.error.message },
-      { status: 500 },
-    );
+    return handleSupabaseError(profileResult.error, ApiErrorCode.FETCH_FAILED);
   }
 
   const currentSnapshot = coerceConsentSnapshot(profileResult.data?.consents ?? null);
@@ -68,20 +70,14 @@ export async function POST(request: Request) {
   const updateResult = await supabase.from("profiles").update(updatePayload).eq("id", user.id);
 
   if (updateResult.error) {
-    return NextResponse.json(
-      { ok: false, error: "CONSENT_UPDATE_FAILED", detail: updateResult.error.message },
-      { status: 500 },
-    );
+    return handleSupabaseError(updateResult.error, ApiErrorCode.UPDATE_FAILED);
   }
 
   let service;
   try {
     service = supabaseService();
   } catch {
-    return NextResponse.json(
-      { ok: false, error: "SERVICE_ROLE_MISSING" },
-      { status: 500 },
-    );
+    return createErrorResponse(ApiErrorCode.SERVICE_ROLE_MISSING, { status: 500 });
   }
 
   const auditDetails = {
@@ -100,13 +96,10 @@ export async function POST(request: Request) {
   const auditLog = await service.from("logs").insert(logEntry);
 
   if (auditLog.error) {
-    return NextResponse.json(
-      { ok: false, error: "CONSENT_LOG_FAILED", detail: auditLog.error.message },
-      { status: 500 },
-    );
+    return handleSupabaseError(auditLog.error, ApiErrorCode.INTERNAL_ERROR);
   }
 
-  return NextResponse.json({ ok: true, consents: nextSnapshot });
+  return createSuccessResponse({ consents: nextSnapshot });
 }
 
 export async function GET(request: Request) {
@@ -116,7 +109,7 @@ export async function GET(request: Request) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ ok: false, error: "UNAUTH" }, { status: 401 });
+    return createErrorResponse(ApiErrorCode.UNAUTH, { status: 401 });
   }
 
   const profile = await supabase
@@ -126,10 +119,7 @@ export async function GET(request: Request) {
     .maybeSingle();
 
   if (profile.error) {
-    return NextResponse.json(
-      { ok: false, error: "PROFILE_LOOKUP_FAILED", detail: profile.error.message },
-      { status: 500 },
-    );
+    return handleSupabaseError(profile.error, ApiErrorCode.FETCH_FAILED);
   }
 
   const snapshot = coerceConsentSnapshot(profile.data?.consents ?? null);
@@ -138,10 +128,7 @@ export async function GET(request: Request) {
   try {
     service = supabaseService();
   } catch {
-    return NextResponse.json(
-      { ok: false, error: "SERVICE_ROLE_MISSING" },
-      { status: 500 },
-    );
+    return createErrorResponse(ApiErrorCode.SERVICE_ROLE_MISSING, { status: 500 });
   }
 
   const logs = await service
@@ -152,10 +139,7 @@ export async function GET(request: Request) {
     .order("created_at", { ascending: true });
 
   if (logs.error) {
-    return NextResponse.json(
-      { ok: false, error: "CONSENT_LOG_FETCH_FAILED", detail: logs.error.message },
-      { status: 500 },
-    );
+    return handleSupabaseError(logs.error, ApiErrorCode.FETCH_FAILED);
   }
 
   const history = (logs.data ?? []).map((entry) => ({
@@ -174,7 +158,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const format = url.searchParams.get("format");
 
-  const response = NextResponse.json(payload);
+  const response = createSuccessResponse(payload);
 
   if (format === "download") {
     const filename = `lyvox-consent-history-${new Date().toISOString()}.json`;

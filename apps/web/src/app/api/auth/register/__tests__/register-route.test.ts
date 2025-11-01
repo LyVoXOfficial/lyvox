@@ -150,7 +150,7 @@ describe("POST /api/auth/register", () => {
       }),
     );
 
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(400);
     await expect(response.json()).resolves.toMatchObject({ error: "PROFILE_UPSERT_FAILED" });
     expect(logInsertMock).not.toHaveBeenCalled();
   });

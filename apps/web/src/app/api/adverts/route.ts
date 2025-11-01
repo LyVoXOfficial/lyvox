@@ -1,5 +1,10 @@
-import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  handleSupabaseError,
+  ApiErrorCode,
+} from "@/lib/apiErrors";
 import type { TablesInsert } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
@@ -11,7 +16,7 @@ export async function POST() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ ok: false, error: "UNAUTHENTICATED" }, { status: 401 });
+    return createErrorResponse(ApiErrorCode.UNAUTHENTICATED, { status: 401 });
   }
 
   const { data: defaultCategory, error: categoryError } = await supabase
@@ -24,18 +29,15 @@ export async function POST() {
     .maybeSingle();
 
   if (categoryError) {
-    return NextResponse.json(
-      { ok: false, error: "CATEGORY_LOOKUP_FAILED", message: categoryError.message },
-      { status: 500 },
-    );
+    return handleSupabaseError(categoryError, ApiErrorCode.CATEGORY_LOOKUP_FAILED);
   }
 
   const categoryId = defaultCategory?.id;
   if (!categoryId) {
-    return NextResponse.json(
-      { ok: false, error: "NO_DEFAULT_CATEGORY", message: "Active default category is not configured" },
-      { status: 500 },
-    );
+    return createErrorResponse(ApiErrorCode.CATEGORY_LOOKUP_FAILED, {
+      status: 500,
+      message: "Active default category is not configured",
+    });
   }
 
   const draft: TablesInsert<"adverts"> = {
@@ -53,14 +55,10 @@ export async function POST() {
     .single();
 
   if (error || !data) {
-    return NextResponse.json(
-      { ok: false, error: "CREATE_FAILED", message: error?.message ?? "Failed to create advert draft" },
-      { status: 400 },
-    );
+    return handleSupabaseError(error, ApiErrorCode.CREATE_FAILED);
   }
 
-  return NextResponse.json({
-    ok: true,
+  return createSuccessResponse({
     advert: {
       id: data.id,
       status: data.status,

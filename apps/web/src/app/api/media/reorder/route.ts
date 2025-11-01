@@ -1,6 +1,12 @@
-import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { ensureAdvertOwnership, requireAuthenticatedUser } from "../_shared";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  handleSupabaseError,
+  safeJsonParse,
+  ApiErrorCode,
+} from "@/lib/apiErrors";
 
 export const runtime = "nodejs";
 
@@ -10,16 +16,21 @@ type Payload = {
 };
 
 export async function POST(request: Request) {
-  const body = (await request.json().catch(() => ({}))) as Payload;
+  const parseResult = await safeJsonParse<Payload>(request);
+  if (!parseResult.success) {
+    return parseResult.response;
+  }
+
+  const body = parseResult.data;
   const advertId = body.advertId;
   const orderedIds = body.orderedIds;
 
   if (!advertId || typeof advertId !== "string") {
-    return NextResponse.json({ ok: false, error: "MISSING_ADVERT_ID" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.MISSING_ADVERT_ID, { status: 400 });
   }
 
   if (!Array.isArray(orderedIds) || orderedIds.some((id) => typeof id !== "string")) {
-    return NextResponse.json({ ok: false, error: "INVALID_ORDER" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.INVALID_ORDER, { status: 400 });
   }
 
   const supabase = supabaseServer();
@@ -46,12 +57,12 @@ export async function POST(request: Request) {
     .eq("advert_id", advertId);
 
   if (mediaError) {
-    return NextResponse.json({ ok: false, error: mediaError.message }, { status: 400 });
+    return handleSupabaseError(mediaError, ApiErrorCode.FETCH_FAILED);
   }
 
   const mediaIds = new Set(media?.map((item) => item.id) ?? []);
   if (!orderedIds.every((id) => mediaIds.has(id))) {
-    return NextResponse.json({ ok: false, error: "UNKNOWN_MEDIA_ID" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.UNKNOWN_MEDIA_ID, { status: 400 });
   }
 
   const updates = orderedIds.map((id, index) =>
@@ -59,5 +70,5 @@ export async function POST(request: Request) {
   );
   await Promise.all(updates);
 
-  return NextResponse.json({ ok: true });
+  return createSuccessResponse({});
 }

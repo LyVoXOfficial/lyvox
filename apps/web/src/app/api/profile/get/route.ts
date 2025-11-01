@@ -1,5 +1,10 @@
-import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  handleSupabaseError,
+  ApiErrorCode,
+} from "@/lib/apiErrors";
 
 export const runtime = "nodejs";
 
@@ -10,7 +15,7 @@ export async function GET() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({}, { status: 200 });
+    return createSuccessResponse({});
   }
 
   const { data, error } = await supabase
@@ -20,8 +25,8 @@ export async function GET() {
     .maybeSingle();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return handleSupabaseError(error, ApiErrorCode.FETCH_FAILED);
   }
 
-  return NextResponse.json(data ?? {});
+  return createSuccessResponse(data ?? {});
 }

@@ -1,8 +1,13 @@
-import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { hasAdminRole } from "@/lib/adminRole";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  handleSupabaseError,
+  ApiErrorCode,
+} from "@/lib/apiErrors";
 
 export const runtime = "nodejs";
 
@@ -42,21 +47,17 @@ const baseHandler = async (request: Request) => {
   const { user } = await getRequestContext(request);
 
   if (!hasAdminRole(user)) {
-    return NextResponse.json({ ok: false, error: "FORBIDDEN" }, { status: 403 });
+    return createErrorResponse(ApiErrorCode.FORBIDDEN, { status: 403 });
   }
 
   let adminClient;
   try {
     adminClient = supabaseService();
   } catch {
-    return NextResponse.json(
-      {
-        ok: false,
-        error:
-          "SUPABASE_SERVICE_ROLE_KEY is not configured. Set SUPABASE_SERVICE_ROLE_KEY on the server to view complaints.",
-      },
-      { status: 500 },
-    );
+    return createErrorResponse(ApiErrorCode.SERVICE_ROLE_MISSING, {
+      status: 500,
+      message: "SUPABASE_SERVICE_ROLE_KEY is not configured. Set SUPABASE_SERVICE_ROLE_KEY on the server to view complaints.",
+    });
   }
 
   const url = new URL(request.url);
@@ -71,10 +72,10 @@ const baseHandler = async (request: Request) => {
     .order("created_at", { ascending: false });
 
   if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 400 });
+    return handleSupabaseError(error, ApiErrorCode.FETCH_FAILED);
   }
 
-  return NextResponse.json({ ok: true, items: data ?? [] });
+  return createSuccessResponse({ items: data ?? [] });
 };
 
 export const GET = withRateLimit(baseHandler, {

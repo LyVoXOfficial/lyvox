@@ -1,7 +1,13 @@
 import { randomBytes, createHmac } from "crypto";
-import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { createRateLimiter, withRateLimit, getClientIp } from "@/lib/rateLimiter";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  handleSupabaseError,
+  safeJsonParse,
+  ApiErrorCode,
+} from "@/lib/apiErrors";
 import type { TablesInsert } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
@@ -44,20 +50,17 @@ const getUserId = async (req: Request) => {
 };
 
 const baseHandler = async (req: Request) => {
-  let payload: unknown;
-
-  try {
-    payload = await req.json();
-  } catch {
-    return NextResponse.json({ ok: false, error: "INVALID_JSON" }, { status: 400 });
+  const parseResult = await safeJsonParse<{ phone?: unknown }>(req);
+  if (!parseResult.success) {
+    return parseResult.response;
   }
 
-  const phone = typeof payload === "object" && payload
-    ? String((payload as Record<string, unknown>).phone ?? "").trim()
+  const phone = typeof parseResult.data === "object" && parseResult.data
+    ? String((parseResult.data as Record<string, unknown>).phone ?? "").trim()
     : "";
 
   if (!isE164(phone)) {
-    return NextResponse.json({ ok: false, error: "INVALID_FORMAT" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.INVALID_FORMAT, { status: 400 });
   }
 
   const supabase = supabaseServer();
@@ -66,7 +69,7 @@ const baseHandler = async (req: Request) => {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ ok: false, error: "UNAUTH" }, { status: 401 });
+    return createErrorResponse(ApiErrorCode.UNAUTH, { status: 401 });
   }
 
   let lookup: Record<string, unknown> | null = null;
@@ -94,10 +97,7 @@ const baseHandler = async (req: Request) => {
 
   const upsertPhonesResult = await supabase.from("phones").upsert(phoneRecord);
   if (upsertPhonesResult.error) {
-    return NextResponse.json(
-      { ok: false, error: "PHONE_SAVE_FAILED", message: upsertPhonesResult.error.message },
-      { status: 400 },
-    );
+    return handleSupabaseError(upsertPhonesResult.error, ApiErrorCode.PHONE_SAVE_FAILED);
   }
 
   // Ensure only one active OTP per user/phone pair
@@ -108,10 +108,7 @@ const baseHandler = async (req: Request) => {
     .eq("e164", phone)
     .eq("used", false);
   if (deactivatePrevious.error) {
-    return NextResponse.json(
-      { ok: false, error: "OTP_CLEANUP_FAILED", message: deactivatePrevious.error.message },
-      { status: 500 },
-    );
+    return handleSupabaseError(deactivatePrevious.error, ApiErrorCode.OTP_CLEANUP_FAILED);
   }
 
   const code = String(Math.floor(100000 + Math.random() * 900000));
@@ -133,10 +130,7 @@ const baseHandler = async (req: Request) => {
 
   const { error: otpError } = await supabase.from("phone_otps").insert(otpInsert);
   if (otpError) {
-    return NextResponse.json(
-      { ok: false, error: "OTP_CREATE_FAILED", message: otpError.message },
-      { status: 400 },
-    );
+    return handleSupabaseError(otpError, ApiErrorCode.OTP_CREATE_FAILED);
   }
 
   try {
@@ -160,7 +154,7 @@ const baseHandler = async (req: Request) => {
     );
   } catch (error) {
     console.error("TWILIO_SEND_ERROR", error);
-    return NextResponse.json({ ok: false, error: "SMS_SEND_FAIL" }, { status: 500 });
+    return createErrorResponse(ApiErrorCode.SMS_SEND_FAIL, { status: 500 });
   }
 
   const logDetails = {
@@ -179,7 +173,7 @@ const baseHandler = async (req: Request) => {
     console.warn("PHONE_LOG_FAILED", logError.message);
   }
 
-  return NextResponse.json({ ok: true });
+  return createSuccessResponse({});
 };
 
 const withFallbackLimit = withRateLimit(baseHandler, {

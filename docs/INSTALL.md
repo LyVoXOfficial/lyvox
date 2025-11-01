@@ -6,6 +6,7 @@
 - Supabase CLI (`npm install -g supabase`), configured with project credentials.
 - Access to the Supabase project (database + storage) and Twilio account for OTPs.
 - Optional: Upstash (or compatible Redis with REST API) for rate limiting.
+- Optional: MCP сервисы настроены для работы с Supabase и Vercel (см. `docs/MCP_SERVICES.md`).
 
 ## Local Development
 1. **Clone repository**

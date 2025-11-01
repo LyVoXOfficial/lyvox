@@ -1,5 +1,11 @@
-import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  handleSupabaseError,
+  safeJsonParse,
+  ApiErrorCode,
+} from "@/lib/apiErrors";
 
 export const runtime = "nodejs";
 
@@ -10,10 +16,15 @@ export async function POST(req: Request) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ ok: false, error: "UNAUTH" }, { status: 401 });
+    return createErrorResponse(ApiErrorCode.UNAUTH, { status: 401 });
   }
 
-  const { display_name } = await req.json();
+  const parseResult = await safeJsonParse<{ display_name?: unknown }>(req);
+  if (!parseResult.success) {
+    return parseResult.response;
+  }
+
+  const { display_name } = parseResult.data;
 
   const payload = {
     id: user.id,
@@ -25,8 +36,8 @@ export async function POST(req: Request) {
   });
 
   if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 400 });
+    return handleSupabaseError(error, ApiErrorCode.UPDATE_FAILED);
   }
 
-  return NextResponse.json({ ok: true });
+  return createSuccessResponse({});
 }

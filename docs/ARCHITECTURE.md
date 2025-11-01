@@ -70,6 +70,7 @@ It uses a modular architecture with reusable components located in `apps/web/src
 ## Reference Documents
 
 - Detailed ER diagrams, RLS policy listings, and environment matrices live in `docs/requirements.md`.
+- MCP services integration and usage: `docs/MCP_SERVICES.md`.
 
 ## Documentation Change Log
 

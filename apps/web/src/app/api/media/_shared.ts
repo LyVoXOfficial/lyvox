@@ -1,17 +1,23 @@
-import { NextResponse } from "next/server";
+import type { NextResponse } from "next/server";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { supabaseService } from "@/lib/supabaseService";
+import {
+  createErrorResponse,
+  handleSupabaseError,
+  ApiErrorCode,
+} from "@/lib/apiErrors";
 import type { Database, Tables, TablesInsert } from "@/lib/supabaseTypes";
 
 export const MEDIA_LIMIT_PER_ADVERT = 12;
 
 type ServerClient = SupabaseClient<Database>;
-type ResponseResult = { response: NextResponse };
+type ResponseResult = { response: NextResponse<unknown> };
 
 const unauthenticated = () =>
-  NextResponse.json({ ok: false, error: "UNAUTHENTICATED" }, { status: 401 });
+  createErrorResponse(ApiErrorCode.UNAUTHENTICATED, { status: 401 });
 
-const forbidden = () => NextResponse.json({ ok: false, error: "FORBIDDEN" }, { status: 403 });
+const forbidden = () =>
+  createErrorResponse(ApiErrorCode.FORBIDDEN, { status: 403 });
 
 type LogDetails = TablesInsert<"logs">["details"];
 
@@ -24,7 +30,7 @@ export async function requireAuthenticatedUser(
   } = await supabase.auth.getUser();
 
   if (error) {
-    return { response: NextResponse.json({ ok: false, error: error.message }, { status: 400 }) };
+    return { response: handleSupabaseError(error, ApiErrorCode.INTERNAL_ERROR) };
   }
 
   if (!user) {
@@ -72,24 +78,27 @@ export async function ensureAdvertOwnership({
     .maybeSingle();
 
   if (error) {
-    return { response: NextResponse.json({ ok: false, error: error.message }, { status: 400 }) };
+    return { response: handleSupabaseError(error, ApiErrorCode.FETCH_FAILED) };
   }
 
   if (!advert) {
-    return { response: NextResponse.json({ ok: false, error: "NOT_FOUND" }, { status: 404 }) };
+    return { response: createErrorResponse(ApiErrorCode.NOT_FOUND, { status: 404 }) };
   }
 
-  if (advert.user_id !== userId) {
+  // Type assertion is safe because we ensure id, user_id, and status are selected
+  const advertRecord = advert as unknown as AdvertRecord;
+  if (advertRecord.user_id !== userId) {
     if (denyLogAction) {
-      await logMediaEvent(denyLogAction, userId, {
+      const logDetails: LogDetails = {
+        ...(typeof denyLogDetails === "object" && denyLogDetails !== null ? denyLogDetails : {}),
         advertId,
-        ...(denyLogDetails ?? {}),
-      });
+      } as LogDetails;
+      await logMediaEvent(denyLogAction, userId, logDetails);
     }
     return { response: forbidden() };
   }
 
-  return { advert: advert as AdvertRecord };
+  return { advert: advertRecord };
 }
 
 export async function logMediaEvent(action: string, userId: string, details: LogDetails): Promise<void> {

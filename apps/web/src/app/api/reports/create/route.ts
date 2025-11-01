@@ -1,6 +1,12 @@
-import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  handleSupabaseError,
+  safeJsonParse,
+  ApiErrorCode,
+} from "@/lib/apiErrors";
 
 export const runtime = "nodejs";
 
@@ -49,13 +55,18 @@ const baseHandler = async (req: Request) => {
   const { supabase, user } = await getRequestContext(req);
 
   if (!user) {
-    return NextResponse.json({ ok: false, error: "UNAUTH" }, { status: 401 });
+    return createErrorResponse(ApiErrorCode.UNAUTH, { status: 401 });
   }
 
-  const { advert_id, reason, details } = await req.json();
+  const parseResult = await safeJsonParse<{ advert_id?: unknown; reason?: unknown; details?: unknown }>(req);
+  if (!parseResult.success) {
+    return parseResult.response;
+  }
 
-  if (!advert_id || !reason) {
-    return NextResponse.json({ ok: false, error: "BAD_INPUT" }, { status: 400 });
+  const { advert_id, reason, details } = parseResult.data;
+
+  if (!advert_id || typeof advert_id !== "string" || !reason || typeof reason !== "string") {
+    return createErrorResponse(ApiErrorCode.BAD_INPUT, { status: 400 });
   }
 
   const { data: exists } = await supabase
@@ -67,27 +78,27 @@ const baseHandler = async (req: Request) => {
     .limit(1);
 
   if (exists && exists.length) {
-    return NextResponse.json({ ok: false, error: "ALREADY_REPORTED" }, { status: 409 });
+    return createErrorResponse(ApiErrorCode.ALREADY_REPORTED, { status: 409 });
   }
 
   const { error } = await supabase.from("reports").insert({
     advert_id,
     reporter: user.id,
     reason,
-    details,
-  });
+    details: details ?? null,
+  } as never);
 
   if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 400 });
+    return handleSupabaseError(error, ApiErrorCode.CREATE_FAILED);
   }
 
   await supabase.from("logs").insert({
     user_id: user.id,
     action: "report_create",
-    details: { advert_id, reason },
+    details: { advert_id, reason } as never,
   });
 
-  return NextResponse.json({ ok: true });
+  return createSuccessResponse({});
 };
 
 const withUserLimit = withRateLimit(baseHandler, {

@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import {
@@ -6,6 +5,13 @@ import {
   requireAuthenticatedUser,
   MEDIA_LIMIT_PER_ADVERT,
 } from "../_shared";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  handleSupabaseError,
+  safeJsonParse,
+  ApiErrorCode,
+} from "@/lib/apiErrors";
 
 export const runtime = "nodejs";
 
@@ -21,16 +27,21 @@ type Payload = {
 const isValidPath = (path: string) => /^[a-z0-9/-]+\.[a-z0-9]+$/i.test(path);
 
 export async function POST(request: Request) {
-  const body = (await request.json().catch(() => ({}))) as Payload;
+  const parseResult = await safeJsonParse<Payload>(request);
+  if (!parseResult.success) {
+    return parseResult.response;
+  }
+
+  const body = parseResult.data;
   const advertId = body.advertId;
   const storagePath = body.storagePath;
 
   if (!advertId || typeof advertId !== "string") {
-    return NextResponse.json({ ok: false, error: "MISSING_ADVERT_ID" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.MISSING_ADVERT_ID, { status: 400 });
   }
 
   if (!storagePath || typeof storagePath !== "string" || !isValidPath(storagePath)) {
-    return NextResponse.json({ ok: false, error: "INVALID_PATH" }, { status: 400 });
+    return createErrorResponse(ApiErrorCode.INVALID_PATH, { status: 400 });
   }
 
   const supabase = supabaseServer();
@@ -49,7 +60,7 @@ export async function POST(request: Request) {
         action: "media_complete_denied",
         details: { advertId, storagePath },
       });
-    return NextResponse.json({ ok: false, error: "FORBIDDEN" }, { status: 403 });
+    return createErrorResponse(ApiErrorCode.FORBIDDEN, { status: 403 });
   }
 
   const ownership = await ensureAdvertOwnership({
@@ -69,14 +80,14 @@ export async function POST(request: Request) {
     .eq("advert_id", advertId);
 
   if (countError) {
-    return NextResponse.json({ ok: false, error: countError.message }, { status: 400 });
+    return handleSupabaseError(countError, ApiErrorCode.FETCH_FAILED);
   }
 
   if ((mediaCount ?? 0) >= MEDIA_LIMIT_PER_ADVERT) {
-    return NextResponse.json(
-      { ok: false, error: "LIMIT_REACHED", limit: MEDIA_LIMIT_PER_ADVERT },
-      { status: 409 },
-    );
+    return createErrorResponse(ApiErrorCode.LIMIT_REACHED, {
+      status: 409,
+      details: { limit: MEDIA_LIMIT_PER_ADVERT },
+    });
   }
 
   const { data: existingPath } = await supabase
@@ -87,7 +98,7 @@ export async function POST(request: Request) {
     .maybeSingle();
 
   if (existingPath) {
-    return NextResponse.json({ ok: true, reused: true });
+    return createSuccessResponse({ reused: true });
   }
 
   const { data: lastSort } = await supabase
@@ -115,9 +126,9 @@ export async function POST(request: Request) {
     .single();
 
   if (insertError || !inserted) {
-    return NextResponse.json(
-      { ok: false, error: insertError?.message ?? "INSERT_FAILED" },
-      { status: 400 },
+    return handleSupabaseError(
+      insertError ?? { message: "INSERT_FAILED" },
+      ApiErrorCode.CREATE_FAILED,
     );
   }
 
@@ -126,14 +137,13 @@ export async function POST(request: Request) {
     .createSignedUrl(storagePath, SIGNED_DOWNLOAD_TTL_SECONDS);
 
   if (signedError || !signedDownload) {
-    return NextResponse.json(
-      { ok: false, error: signedError?.message ?? "SIGNED_DOWNLOAD_FAILED" },
-      { status: 500 },
+    return handleSupabaseError(
+      signedError ?? { message: "SIGNED_DOWNLOAD_FAILED" },
+      ApiErrorCode.SIGNED_URL_FAILED,
     );
   }
 
-  return NextResponse.json({
-    ok: true,
+  return createSuccessResponse({
     media: {
       id: inserted.id,
       url: signedDownload.signedUrl,

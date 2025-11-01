@@ -40,5 +40,6 @@
   "codex.model_reasoning_effort": "medium",
 
   // Терминал/команды всегда стартуют из корня проекта
-  "terminal.integrated.cwd": "${workspaceFolder}"
+  "terminal.integrated.cwd": "${workspaceFolder}",
+  "chatgpt.openOnStartup": true
 }

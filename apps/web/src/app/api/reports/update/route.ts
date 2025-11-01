@@ -1,8 +1,14 @@
-import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { hasAdminRole } from "@/lib/adminRole";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  handleSupabaseError,
+  safeJsonParse,
+  ApiErrorCode,
+} from "@/lib/apiErrors";
 import type { TablesInsert, TablesUpdate } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
@@ -39,35 +45,48 @@ const getRequestContext = (req: Request): Promise<RequestContext> => {
 
 const resolveUserId = (req: Request) => getRequestContext(req).then(({ user }) => user?.id ?? null);
 
+type UpdateRequestBody = {
+  id?: unknown;
+  new_status?: unknown;
+  unpublish?: unknown;
+};
+
 const baseHandler = async (req: Request) => {
   const { supabase, user } = await getRequestContext(req);
 
   if (!user) {
-    return NextResponse.json({ ok: false, error: "UNAUTH" }, { status: 401 });
+    return createErrorResponse(ApiErrorCode.UNAUTH, { status: 401 });
   }
 
   if (!hasAdminRole(user)) {
-    return NextResponse.json({ ok: false, error: "FORBIDDEN" }, { status: 403 });
+    return createErrorResponse(ApiErrorCode.FORBIDDEN, { status: 403 });
   }
 
-  const { id, new_status, unpublish } = await req.json();
+  const parseResult = await safeJsonParse<UpdateRequestBody>(req);
+  if (!parseResult.success) {
+    return parseResult.response;
+  }
 
-  if (!id || !["accepted", "rejected"].includes(new_status)) {
-    return NextResponse.json({ ok: false, error: "BAD_INPUT" }, { status: 400 });
+  const { id, new_status, unpublish } = parseResult.data;
+
+  if (
+    !id ||
+    typeof id !== "number" ||
+    !new_status ||
+    typeof new_status !== "string" ||
+    !["accepted", "rejected"].includes(new_status)
+  ) {
+    return createErrorResponse(ApiErrorCode.BAD_INPUT, { status: 400 });
   }
 
   let adminClient;
   try {
     adminClient = supabaseService();
   } catch {
-    return NextResponse.json(
-      {
-        ok: false,
-        error:
-          "SUPABASE_SERVICE_ROLE_KEY is not configured. Set SUPABASE_SERVICE_ROLE_KEY on the server to enable moderation actions.",
-      },
-      { status: 500 },
-    );
+    return createErrorResponse(ApiErrorCode.SERVICE_ROLE_MISSING, {
+      status: 500,
+      message: "SUPABASE_SERVICE_ROLE_KEY is not configured. Set SUPABASE_SERVICE_ROLE_KEY on the server to enable moderation actions.",
+    });
   }
 
   const { data: report, error: fetchError } = await adminClient
@@ -77,7 +96,7 @@ const baseHandler = async (req: Request) => {
     .single();
 
   if (fetchError || !report) {
-    return NextResponse.json({ ok: false, error: fetchError?.message ?? "NOT_FOUND" }, { status: 404 });
+    return handleSupabaseError(fetchError, ApiErrorCode.NOT_FOUND);
   }
 
   const { error: updateError } = await adminClient
@@ -90,7 +109,7 @@ const baseHandler = async (req: Request) => {
     .eq("id", id);
 
   if (updateError) {
-    return NextResponse.json({ ok: false, error: updateError.message }, { status: 400 });
+    return handleSupabaseError(updateError, ApiErrorCode.UPDATE_FAILED);
   }
 
   if (new_status === "accepted" && report.adverts?.user_id) {
@@ -117,11 +136,11 @@ const baseHandler = async (req: Request) => {
   const logEntry: TablesInsert<"logs"> = {
     user_id: user.id,
     action: "report_update",
-    details: { id, new_status, unpublish: Boolean(unpublish) },
+    details: { id, new_status, unpublish: Boolean(unpublish) } as never,
   };
   await supabase.from("logs").insert(logEntry);
 
-  return NextResponse.json({ ok: true });
+  return createSuccessResponse({});
 };
 
 export const POST = withRateLimit(baseHandler, {
