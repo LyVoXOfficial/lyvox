@@ -7,7 +7,7 @@
 - [x] Add a scheduled job (Edge Function or cron) to delete expired `phone_otps` rows and anonymise stale `logs` entries beyond retention windows.
 - [ ] Expand automated API tests to cover happy/error-paths described in `docs/API_REFERENCE.md`.
 - [ ] Capture and validate Recupel membership IDs for commercial sellers before allowing electronic listings (WEEE compliance, 2025-03-29).
-- [ ] Implement cascading make/model/year selectors for Transport listings using `seed/transport_make_model.csv`, require mileage & condition inputs, and surface a dedicated EV subcategory.
+- [x] Implement cascading make/model/year selectors for Transport listings using `seed/transport_make_model.csv`, require mileage & condition inputs, and surface a dedicated EV subcategory. (2025-01-XX: Полностью переработана форма создания объявлений с 8 шагами, включая автокомплит марки, каскадные селекторы модели/года/кузова, технические параметры, опции, верификацию телефона)
 - [ ] Ship migrations for `conversations`, `conversation_participants`, `messages`, refresh `supabase/types/database.types.ts`, and sync domain docs for realtime chat.
 - [ ] Expose chat server actions or `/api/chat/*` endpoints that enforce participant membership, rely on `supabaseService()` server-side only, and apply rate limiting on send.
 - [ ] Deliver client-only chat UI (`ChatWindow.tsx`) with Supabase Realtime subscription lifecycle (subscribe/retry/unsubscribe) and optimistic message handling.

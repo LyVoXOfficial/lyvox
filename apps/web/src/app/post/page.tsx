@@ -47,6 +47,23 @@ async function getAdvertForEdit(id: string, userId: string) {
   return null;
 }
 
+async function getUserPhone(userId: string): Promise<string | null> {
+  const supabase = supabaseServer();
+  const { data: phone, error } = await supabase
+    .from("phones")
+    .select("e164")
+    .eq("user_id", userId)
+    .eq("verified", true)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Failed to fetch user phone:", error);
+    return null;
+  }
+
+  return phone?.e164 || null;
+}
+
 export default async function PostPage({
   searchParams,
 }: {
@@ -77,6 +94,7 @@ export default async function PostPage({
   const categories = await getCategories();
   const editId = typeof searchParams.edit === 'string' ? searchParams.edit : null;
   const advertToEdit = editId ? await getAdvertForEdit(editId, user.id) : null;
+  const userPhone = await getUserPhone(user.id);
 
   if (editId && !advertToEdit) {
      return (
@@ -86,12 +104,16 @@ export default async function PostPage({
     );
   }
 
+  const { locale } = await getI18nProps();
+
   return (
     <main className="container mx-auto max-w-3xl p-4">
        <PostForm
         categories={categories}
         userId={user.id}
         advertToEdit={advertToEdit}
+        locale={locale}
+        userPhone={userPhone}
       />
     </main>
   );

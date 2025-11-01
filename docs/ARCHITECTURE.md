@@ -20,10 +20,10 @@ It uses a modular architecture with reusable components located in `apps/web/src
 
 ## Key User Journeys
 
-- Create advert → save draft → upload media → publish.
-- Verify phone → request OTP (rate limited) → confirm → mark number verified.
-- Moderation pipeline → user submits report → moderator triages → resolve and optionally adjusts trust score.
-- Account creation → Supabase sign-up → consent logging → onboarding checklist.
+- **Create advert:** Multi-step form (8 steps) → select category → choose condition → enter vehicle details (make/model/year with autocomplete, technical specs, options) → add description/photos/location → verify additional phone → preview → save draft or publish.
+- **Verify phone:** Request OTP (rate limited) → confirm → mark number verified.
+- **Moderation pipeline:** User submits report → moderator triages → resolve and optionally adjusts trust score.
+- **Account creation:** Supabase sign-up → consent logging → onboarding checklist.
 
 ## Auth & Identity Flow
 
@@ -38,7 +38,15 @@ It uses a modular architecture with reusable components located in `apps/web/src
 - **Statuses.** `draft` (owner only), `active` (public), `archived` (owner removed; can be reactivated), `blocked` (moderation takedown; irreversible by owner). `pending_review` is reserved for the future moderated funnel and currently unused in production.
 - **Transitions.** Owners toggle `draft ↔ active ↔ archived`. Moderators/admins alone set `blocked`. When the moderated funnel launches it will route `draft → pending_review → active` after approval.
 - **Reports.** `public.reports` links complaints to `advert_id`, `reporter_id`, stores `reason` (enum-like string), `details`, and `status` (`pending` → `accepted` → `rejected`). Resolution can keep the advert active, block it, or add trust penalties via `trust_inc`. Each report is traceable per reporter for audit and rate limiting.
-- **Vehicle specifics.** Transport listings pull make/model/year data from normalized tables (`vehicle_makes`, `vehicle_models`, `vehicle_generations`). The UI persists the user’s selections in `ad_item_specifics.specifics` (JSON) alongside free-form attributes such as mileage or condition.
+- **Vehicle specifics.** Transport listings use a comprehensive 8-step form with:
+  - Category and condition selection
+  - Vehicle details: make (with autocomplete), model (cascading from make), year (from model data), steering wheel, body type, doors, color with optional hex code
+  - Technical specs: power, engine type/volume (from model or manual), transmission (from model or manual), drive type
+  - Condition details: mileage, vehicle condition (damaged/repaired/not damaged), customs cleared, warranty status, owners count, VIN
+  - Options: 8 categories (comfort, interior, security, exterior, assistance, visibility, safety, multimedia) with checkbox selection and variant support (e.g., climate control zones)
+  - Final details: description, photos (via UploadGallery), location, contact phone (from profile + additional with +32 verification)
+  - Preview and publish/save/delete actions
+  - All vehicle-specific data is stored in `ad_item_specifics.specifics` (JSON) with normalized references to `vehicle_makes`, `vehicle_models`, and reference tables (`steering_wheel`, `vehicle_colors`, `vehicle_doors`, `vehicle_conditions`, `engine_types`, `drive_types`, `vehicle_options`).
 
 ## Media Upload Pipeline
 

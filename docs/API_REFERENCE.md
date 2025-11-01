@@ -450,20 +450,17 @@ curl -X POST https://localhost:3000/api/adverts \
   "type": "object",
   "properties": {
     "title": { "type": "string", "minLength": 3 },
-    "description": { "type": "string" },
+    "description": { "type": "string", "minLength": 10 },
     "price": { "type": ["number", "null"], "minimum": 0 },
     "location": { "type": "string" },
     "category_id": { "type": "string", "format": "uuid" },
+    "condition": { "type": "string", "enum": ["new", "used", "for_parts"] },
+    "currency": { "type": "string", "enum": ["EUR", "USD", "GBP", "RUB"] },
     "status": { "type": "string", "enum": ["draft", "active", "archived"] },
-    "vehicle": {
+    "specifics": {
       "type": "object",
-      "properties": {
-        "make": { "type": "string" },
-        "model": { "type": "string" },
-        "year": { "type": "number" },
-        "mileage": { "type": "number" },
-        "condition": { "type": "string", "enum": ["new", "excellent", "good", "needs_repair"] }
-      }
+      "description": "Vehicle-specific attributes stored as key-value pairs (strings). Includes make_id, model_id, year, steering_wheel, body_type, doors, color_id, color_code, power, engine_type, engine_volume, transmission, drive, mileage, vehicle_condition, customs_cleared, under_warranty, owners_count, vin, additional_phone, and option_* keys for selected vehicle options.",
+      "additionalProperties": { "type": "string" }
     }
   },
   "additionalProperties": false

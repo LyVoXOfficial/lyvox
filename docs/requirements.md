@@ -58,7 +58,7 @@ Key capabilities implemented in the codebase:
 - Moderation: message-level reports integrate with `public.reports` (target type `message`), auto-mute participants based on confirmed complaints.
 - Retention: messages kept 6 months after deal completion or inactivity; DSAR export and cron cleanup are required.
 
-- Supabase Postgres hosts core tables: `adverts`, `media`, `categories`, `profiles`, `phones`, `phone_otps`, `reports`, `trust_score`, `logs`, plus supporting tables such as `ad_item_specifics`.
+- Supabase Postgres hosts core tables: `adverts`, `media`, `categories`, `profiles`, `phones`, `phone_otps`, `reports`, `trust_score`, `logs`, plus supporting tables such as `ad_item_specifics`, `vehicle_makes`, `vehicle_models`, `vehicle_generations`, `steering_wheel`, `vehicle_colors`, `vehicle_doors`, `vehicle_conditions`, `engine_types`, `drive_types`, `vehicle_options`.
 - Supabase migrations `20251004120000` ? `20251004122000` provision the `reports` and `trust_score` tables, attach `updated_at` triggers, seed baseline RLS, and expose the `trust_inc(uid, pts)` helper function.
 - Supabase Storage bucket `ad-media` stores advert images; paths follow `user_id/advert_id/timestamp-filename`.
 - Category taxonomy is seeded via `scripts/seedCategories.ts`, which consumes `seed/categories.ru.yaml`.
