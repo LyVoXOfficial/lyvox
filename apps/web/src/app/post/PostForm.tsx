@@ -158,12 +158,8 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
 
   // Filter makes based on search
   useEffect(() => {
-    let cancelled = false;
-    
     if (!makeSearchQuery) {
-      if (!cancelled) {
-        setFilteredMakes(makes);
-      }
+      setFilteredMakes(makes);
       return;
     }
 
@@ -173,31 +169,19 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         make.name_en?.toLowerCase().includes(query) ||
         make.vehicle_make_i18n?.some((i18n: any) => i18n.name?.toLowerCase().includes(query))
     );
-    
-    if (!cancelled) {
-      setFilteredMakes(filtered);
-    }
-    
-    return () => {
-      cancelled = true;
-    };
+    setFilteredMakes(filtered);
   }, [makeSearchQuery, makes]);
 
   // Load models when make is selected
   useEffect(() => {
-    let cancelled = false;
-    
     if (!formData.make_id) {
-      if (!cancelled) {
-        setModels([]);
-        setAvailableYears([]);
-        setBodyTypes([]);
-      }
-      return () => {
-        cancelled = true;
-      };
+      setModels([]);
+      setAvailableYears([]);
+      setBodyTypes([]);
+      return;
     }
 
+    let cancelled = false;
     const loadModels = async () => {
       try {
         const { data: mods } = await supabase
@@ -224,18 +208,15 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
 
   // Load years and body types when model is selected
   useEffect(() => {
-    let cancelled = false;
-    
     if (!formData.model_id) {
-      if (!cancelled) {
-        setAvailableYears([]);
-        setBodyTypes([]);
-      }
+      setAvailableYears([]);
+      setBodyTypes([]);
       return;
     }
 
+    let cancelled = false;
     const model = models.find((m) => m.id === formData.model_id);
-    if (!cancelled && model) {
+    if (model) {
       if (model.years_available) {
         setAvailableYears([...model.years_available].sort((a, b) => b - a));
       }
@@ -890,18 +871,14 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
 
   // Load transmission and fuel types based on selected model
   useEffect(() => {
-    let cancelled = false;
-    
     if (!formData.model_id) {
-      if (!cancelled) {
-        setAvailableTransmissions([]);
-        setAvailableFuelTypes([]);
-      }
+      setAvailableTransmissions([]);
+      setAvailableFuelTypes([]);
       return;
     }
 
     const model = models.find((m) => m.id === formData.model_id);
-    if (!cancelled && model) {
+    if (model) {
       if (model.transmission_available && Array.isArray(model.transmission_available)) {
         setAvailableTransmissions(model.transmission_available as string[]);
       }
@@ -909,10 +886,6 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         setAvailableFuelTypes(model.fuel_types_available as string[]);
       }
     }
-    
-    return () => {
-      cancelled = true;
-    };
   }, [formData.model_id, models]);
 
   if (currentStep === 4) {
