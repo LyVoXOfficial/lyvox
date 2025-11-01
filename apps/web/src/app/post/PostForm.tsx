@@ -15,6 +15,8 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import UploadGallery from "@/components/upload-gallery";
+import { getCategoryIcon } from "@/lib/categoryIcons";
+import * as Icons from "lucide-react";
 
 type PostFormProps = {
   categories: Category[];
@@ -465,6 +467,52 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
     </div>
   );
 
+  // Helper function to get localized category name
+  const getCategoryName = (cat: Category): string => {
+    const nameKey = `name_${locale}` as keyof Category;
+    return (cat[nameKey] as string) || cat.name_ru;
+  };
+
+  // Group categories: main categories (level 1) with their subcategories (level 2)
+  const groupedCategories = categories.reduce((acc, cat) => {
+    if (cat.level === 1) {
+      acc.push({
+        main: cat,
+        subcategories: categories.filter((c) => c.parent_id === cat.id && c.level === 2),
+      });
+    }
+    return acc;
+  }, [] as Array<{ main: Category; subcategories: Category[] }>);
+
+  // Color scheme for category blocks
+  const categoryColors = [
+    { bg: "bg-blue-50", border: "border-blue-200", hover: "hover:bg-blue-100", text: "text-blue-700", icon: "text-blue-600" },
+    { bg: "bg-green-50", border: "border-green-200", hover: "hover:bg-green-100", text: "text-green-700", icon: "text-green-600" },
+    { bg: "bg-purple-50", border: "border-purple-200", hover: "hover:bg-purple-100", text: "text-purple-700", icon: "text-purple-600" },
+    { bg: "bg-orange-50", border: "border-orange-200", hover: "hover:bg-orange-100", text: "text-orange-700", icon: "text-orange-600" },
+    { bg: "bg-pink-50", border: "border-pink-200", hover: "hover:bg-pink-100", text: "text-pink-700", icon: "text-pink-600" },
+    { bg: "bg-indigo-50", border: "border-indigo-200", hover: "hover:bg-indigo-100", text: "text-indigo-700", icon: "text-indigo-600" },
+    { bg: "bg-teal-50", border: "border-teal-200", hover: "hover:bg-teal-100", text: "text-teal-700", icon: "text-teal-600" },
+    { bg: "bg-amber-50", border: "border-amber-200", hover: "hover:bg-amber-100", text: "text-amber-700", icon: "text-amber-600" },
+  ];
+
+  const handleCategorySelect = (mainCat: Category, subCat?: Category) => {
+    if (subCat) {
+      // If subcategory clicked, select it immediately
+      setFormData({ ...formData, category_id: subCat.id });
+      setSelectedMainCategory(null);
+    } else if (mainCat) {
+      // If main category clicked and has subcategories, show subcategories
+      const subcats = categories.filter((c) => c.parent_id === mainCat.id && c.level === 2);
+      if (subcats.length > 0) {
+        setSelectedMainCategory(mainCat.id);
+      } else {
+        // No subcategories, select main category directly
+        setFormData({ ...formData, category_id: mainCat.id });
+      }
+    }
+  };
+
   // Step 1: Category selection
   if (currentStep === 1) {
     return (
@@ -474,21 +522,84 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         </CardHeader>
         <CardContent>
           <ProgressIndicator />
-          <Select
-            value={formData.category_id}
-            onValueChange={(value) => setFormData({ ...formData, category_id: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t("post.select_category")} />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map((cat) => (
-                <SelectItem key={cat.id} value={cat.id}>
-                  {cat.name_ru}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+            {groupedCategories.map((group, index) => {
+              const Icon = getCategoryIcon(group.main.icon, group.main.level);
+              const colors = categoryColors[index % categoryColors.length];
+              const hasSubcategories = group.subcategories.length > 0;
+              const isMainSelected = formData.category_id === group.main.id;
+              const isSubSelected = group.subcategories.some(sub => sub.id === formData.category_id);
+              const showSubcategories = selectedMainCategory === group.main.id;
+
+              return (
+                <div
+                  key={group.main.id}
+                  className={`${colors.bg} ${colors.border} border-2 rounded-lg p-4 transition-all ${
+                    (isMainSelected || isSubSelected) ? "ring-2 ring-primary" : ""
+                  }`}
+                >
+                  <div 
+                    className="flex items-start gap-3 cursor-pointer"
+                    onClick={() => handleCategorySelect(group.main)}
+                  >
+                    <div className={`${colors.icon} flex-shrink-0`}>
+                      <Icon className="w-8 h-8" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className={`${colors.text} font-semibold text-lg`}>
+                          {getCategoryName(group.main)}
+                        </h3>
+                        {hasSubcategories && (
+                          <Icons.ChevronDown 
+                            className={`w-5 h-5 ${colors.icon} transition-transform ${showSubcategories ? "rotate-180" : ""}`}
+                          />
+                        )}
+                        {isMainSelected && !hasSubcategories && (
+                          <Icons.Check className="w-5 h-5 text-primary" />
+                        )}
+                      </div>
+                      {hasSubcategories && !showSubcategories && (
+                        <p className="text-sm text-muted-foreground">
+                          {group.subcategories.length} {t("post.form.subcategories_count")}
+                        </p>
+                      )}
+                      {!hasSubcategories && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {t("post.form.click_to_select")}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {showSubcategories && group.subcategories.length > 0 && (
+                    <div className="space-y-2 mt-4 pt-4 border-t border-current/20">
+                      {group.subcategories.map((subCat) => {
+                        const SubIcon = getCategoryIcon(subCat.icon, subCat.level);
+                        const isSubCatSelected = formData.category_id === subCat.id;
+                        return (
+                          <div
+                            key={subCat.id}
+                            onClick={() => handleCategorySelect(group.main, subCat)}
+                            className={`${colors.bg} ${colors.border} border rounded-md p-3 ${colors.hover} flex items-center gap-3 cursor-pointer transition-all ${
+                              isSubCatSelected ? "ring-2 ring-primary" : ""
+                            }`}
+                          >
+                            <SubIcon className={`w-5 h-5 ${colors.icon}`} />
+                            <span className={`${colors.text} text-sm font-medium flex-1`}>
+                              {getCategoryName(subCat)}
+                            </span>
+                            {isSubCatSelected && (
+                              <Icons.Check className="w-5 h-5 text-primary" />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </CardContent>
         <CardFooter className="flex justify-end">
           <Button onClick={handleNext} disabled={!formData.category_id}>

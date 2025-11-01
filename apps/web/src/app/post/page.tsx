@@ -11,7 +11,7 @@ async function getCategories(): Promise<Category[]> {
   const supabase = supabaseServer();
   const { data, error } = await supabase
     .from("categories")
-    .select("id, name_ru, path, is_active")
+    .select("id, name_ru, path, is_active, level, parent_id, icon, sort, name_en, name_nl, name_fr")
     .eq("is_active", true)
     .order("sort", { ascending: true })
     .order("name_ru", { ascending: true });

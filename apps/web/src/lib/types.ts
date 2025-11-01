@@ -4,6 +4,9 @@ export type Category = {
   slug: string;
   level: number;
   name_ru: string;
+  name_en?: string | null;
+  name_nl?: string | null;
+  name_fr?: string | null;
   path: string;
   sort: number | null;
   icon: string | null;
