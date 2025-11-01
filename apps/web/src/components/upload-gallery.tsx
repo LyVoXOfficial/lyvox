@@ -173,13 +173,34 @@ export default function UploadGallery({ advertId }: { advertId: string }) {
 
   return (
     <div className="space-y-3">
-      <input
-        type="file"
-        accept="image/*"
-        multiple
-        onChange={(event) => handleFiles(event.target.files)}
-        disabled={busy || items.length >= MAX_MEDIA_PER_ADVERT}
-      />
+      <div className="flex items-center gap-3">
+        <div className="relative">
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(event) => handleFiles(event.target.files)}
+            disabled={busy || items.length >= MAX_MEDIA_PER_ADVERT}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+            id="upload-photos-input"
+          />
+          <label
+            htmlFor="upload-photos-input"
+            className={`inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium border ${
+              busy || items.length >= MAX_MEDIA_PER_ADVERT
+                ? "cursor-not-allowed opacity-50"
+                : "cursor-pointer hover:bg-accent"
+            }`}
+          >
+            {busy ? "Загрузка..." : items.length >= MAX_MEDIA_PER_ADVERT ? "Максимум 12 фото" : "Выбрать фото"}
+          </label>
+        </div>
+        {items.length > 0 && items.length < MAX_MEDIA_PER_ADVERT && (
+          <span className="text-sm text-muted-foreground">
+            ({items.length} / {MAX_MEDIA_PER_ADVERT})
+          </span>
+        )}
+      </div>
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 

@@ -148,31 +148,31 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
     const loadReferenceData = async () => {
       try {
         // Load steering wheels
-        const { data: sw } = await supabase.from("steering_wheel").select("*").order("name_ru");
+        const { data: sw } = await supabase.from("steering_wheel" as any).select("*").order("name_ru");
         if (!cancelled && sw) setSteeringWheels(sw);
 
         // Load colors
-        const { data: cols } = await supabase.from("vehicle_colors").select("*").order("name_ru");
+        const { data: cols } = await supabase.from("vehicle_colors" as any).select("*").order("name_ru");
         if (!cancelled && cols) setColors(cols);
 
         // Load doors
-        const { data: drs } = await supabase.from("vehicle_doors").select("*").order("count");
+        const { data: drs } = await supabase.from("vehicle_doors" as any).select("*").order("count");
         if (!cancelled && drs) setDoors(drs);
 
         // Load vehicle conditions
-        const { data: vc } = await supabase.from("vehicle_conditions").select("*").order("name_ru");
+        const { data: vc } = await supabase.from("vehicle_conditions" as any).select("*").order("name_ru");
         if (!cancelled && vc) setVehicleConditions(vc);
 
         // Load engine types
-        const { data: et } = await supabase.from("engine_types").select("*").order("name_ru");
+        const { data: et } = await supabase.from("engine_types" as any).select("*").order("name_ru");
         if (!cancelled && et) setEngineTypes(et);
 
         // Load drive types
-        const { data: dt } = await supabase.from("drive_types").select("*").order("name_ru");
+        const { data: dt } = await supabase.from("drive_types" as any).select("*").order("name_ru");
         if (!cancelled && dt) setDriveTypes(dt);
 
         // Load vehicle options
-        const { data: vo } = await supabase.from("vehicle_options").select("*").order("category, name_ru");
+        const { data: vo } = await supabase.from("vehicle_options" as any).select("*").order("category, name_ru");
         if (!cancelled && vo) setVehicleOptions(vo);
 
         // Load makes (initially all)
@@ -711,7 +711,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         <CardContent>
           <ProgressIndicator />
           <Select
-            value={formData.condition}
+            value={formData.condition || ""}
             onValueChange={(value) => setFormData({ ...formData, condition: value })}
           >
             <SelectTrigger>
@@ -804,10 +804,10 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           {formData.model_id && availableYears.length > 0 && (
             <div>
               <Label>{t("post.form.year")}</Label>
-              <Select
-                value={formData.year?.toString() || undefined}
-                onValueChange={(value) => setFormData({ ...formData, year: parseInt(value) })}
-              >
+            <Select
+              value={formData.year?.toString() || ""}
+              onValueChange={(value) => setFormData({ ...formData, year: value ? parseInt(value) : null })}
+            >
                 <SelectTrigger>
                   <SelectValue placeholder={t("post.form.year_placeholder")} />
                 </SelectTrigger>
@@ -826,7 +826,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           <div>
             <Label>{t("post.form.steering_wheel")}</Label>
             <Select
-              value={formData.steering_wheel}
+              value={formData.steering_wheel || ""}
               onValueChange={(value) => setFormData({ ...formData, steering_wheel: value })}
             >
               <SelectTrigger>
@@ -846,10 +846,10 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           {formData.model_id && bodyTypes.length > 0 && (
             <div>
               <Label>{t("post.form.body_type")}</Label>
-              <Select
-                value={formData.body_type}
-                onValueChange={(value) => setFormData({ ...formData, body_type: value })}
-              >
+            <Select
+              value={formData.body_type || ""}
+              onValueChange={(value) => setFormData({ ...formData, body_type: value })}
+            >
                 <SelectTrigger>
                   <SelectValue placeholder={t("post.form.body_type")} />
                 </SelectTrigger>
@@ -878,8 +878,8 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                 className="flex-1"
               />
               <Select
-                value={formData.doors?.toString() || undefined}
-                onValueChange={(value) => setFormData({ ...formData, doors: parseInt(value) })}
+                value={formData.doors?.toString() || ""}
+                onValueChange={(value) => setFormData({ ...formData, doors: value ? parseInt(value) : null })}
               >
                 <SelectTrigger className="w-32">
                   <SelectValue />
@@ -899,7 +899,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           <div>
             <Label>{t("post.form.color")}</Label>
             <Select
-              value={formData.color_id}
+              value={formData.color_id || ""}
               onValueChange={(value) => setFormData({ ...formData, color_id: value })}
             >
               <SelectTrigger>
@@ -959,11 +959,15 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             <div className="flex gap-2">
               <Input
                 type="number"
+                min="0"
                 placeholder={t("post.form.power_placeholder")}
                 value={formData.power || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, power: e.target.value ? parseInt(e.target.value) : null })
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "" || (parseInt(value) >= 0)) {
+                    setFormData({ ...formData, power: value ? parseInt(value) : null });
+                  }
+                }}
                 className="flex-1"
               />
               <span className="self-center text-sm text-muted-foreground">{formatUnit("hp")}</span>
@@ -975,7 +979,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             <Label>{t("post.form.engine_type")}</Label>
             {availableFuelTypes.length > 0 ? (
               <Select
-                value={formData.engine_type}
+                value={formData.engine_type || ""}
                 onValueChange={(value) => setFormData({ ...formData, engine_type: value })}
               >
                               <SelectTrigger>
@@ -991,7 +995,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                           </Select>
             ) : (
               <Select
-                value={formData.engine_type}
+                value={formData.engine_type || ""}
                 onValueChange={(value) => setFormData({ ...formData, engine_type: value })}
               >
                 <SelectTrigger>
@@ -1014,15 +1018,19 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             <div className="flex gap-2">
               <Input
                 type="number"
+                min="0"
                 step="0.1"
                 placeholder={t("post.form.engine_volume_placeholder")}
                 value={formData.engine_volume || ""}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    engine_volume: e.target.value ? parseFloat(e.target.value) : null,
-                  })
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "" || (parseFloat(value) >= 0)) {
+                    setFormData({
+                      ...formData,
+                      engine_volume: value ? parseFloat(value) : null,
+                    });
+                  }
+                }}
                 className="flex-1"
               />
               <span className="self-center text-sm text-muted-foreground">{formatUnit("L")}</span>
@@ -1033,10 +1041,10 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           <div>
             <Label>{t("post.form.transmission")}</Label>
             {availableTransmissions.length > 0 ? (
-              <Select
-                value={formData.transmission}
-                onValueChange={(value) => setFormData({ ...formData, transmission: value })}
-              >
+            <Select
+              value={formData.transmission || ""}
+              onValueChange={(value) => setFormData({ ...formData, transmission: value })}
+            >
                 <SelectTrigger>
                   <SelectValue placeholder={t("post.form.transmission")} />
                 </SelectTrigger>
@@ -1049,11 +1057,24 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                 </SelectContent>
               </Select>
             ) : (
-              <Input
-                placeholder={t("post.form.transmission")}
-                value={formData.transmission}
-                onChange={(e) => setFormData({ ...formData, transmission: e.target.value })}
-              />
+              <Select
+                value={formData.transmission || ""}
+                onValueChange={(value) => setFormData({ ...formData, transmission: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("post.form.transmission")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Manual">Manual</SelectItem>
+                  <SelectItem value="Automatic">Automatic</SelectItem>
+                  <SelectItem value="Robotized">Robotized</SelectItem>
+                  <SelectItem value="CVT">CVT</SelectItem>
+                  <SelectItem value="Dual Clutch">Dual Clutch</SelectItem>
+                  <SelectItem value="Semi-automatic">Semi-automatic</SelectItem>
+                  <SelectItem value="Sequential">Sequential</SelectItem>
+                  <SelectItem value="Single-Speed">Single-Speed</SelectItem>
+                </SelectContent>
+              </Select>
             )}
           </div>
 
@@ -1061,7 +1082,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
               <div>
             <Label>{t("post.form.drive")}</Label>
             <Select
-              value={formData.drive}
+              value={formData.drive || ""}
               onValueChange={(value) => setFormData({ ...formData, drive: value })}
             >
               <SelectTrigger>
@@ -1120,7 +1141,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           <div>
             <Label>{t("post.form.vehicle_condition")}</Label>
             <Select
-              value={formData.vehicle_condition}
+              value={formData.vehicle_condition || ""}
               onValueChange={(value) => setFormData({ ...formData, vehicle_condition: value })}
             >
               <SelectTrigger>
@@ -1185,17 +1206,20 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           {/* Owners count */}
           <div>
             <Label>{t("post.form.owners_count")}</Label>
-            <Input
-              type="number"
-              min="1"
-              value={formData.owners_count || ""}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  owners_count: e.target.value ? parseInt(e.target.value) : null,
-                })
-              }
-            />
+              <Input
+                type="number"
+                min="0"
+                value={formData.owners_count || ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "" || (parseInt(value) >= 0)) {
+                    setFormData({
+                      ...formData,
+                      owners_count: value ? parseInt(value) : null,
+                    });
+                  }
+                }}
+              />
           </div>
 
           {/* VIN */}
@@ -1205,7 +1229,12 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
               placeholder={t("post.form.vin_placeholder")}
               maxLength={17}
               value={formData.vin}
-              onChange={(e) => setFormData({ ...formData, vin: e.target.value.toUpperCase() })}
+              onChange={(e) => {
+                const value = e.target.value.toUpperCase();
+                // Only allow alphanumeric characters
+                const cleaned = value.replace(/[^A-Z0-9]/g, "");
+                setFormData({ ...formData, vin: cleaned });
+              }}
             />
           </div>
 
@@ -1214,14 +1243,13 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             <Label>{t("post.form.final_price")}</Label>
             <div className="flex gap-2">
               <Input
-                type="number"
-                min="0"
+                type="text"
                 placeholder={t("post.price")}
-                value={formData.price || ""}
+                value={formatNumber(formData.price)}
                 onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === "" || (parseFloat(value) >= 0)) {
-                    setFormData({ ...formData, price: value ? parseFloat(value) : null });
+                  const parsed = parseFormattedNumber(e.target.value);
+                  if (parsed === null || parsed >= 0) {
+                    setFormData({ ...formData, price: parsed });
                   }
                 }}
                 className="flex-1"
@@ -1315,7 +1343,8 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                                   },
                                 });
                               } else {
-                                // If checking, set to empty string if has variants, true otherwise
+                                // If checking, set to true for options without variants
+                                // For options with variants, set to "" to show the Select
                                 setFormData({
                                   ...formData,
                                   options: {
@@ -1335,7 +1364,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                         </div>
                         {isChecked && hasVariants && (
                           <Select
-                            value={typeof optionValue === "string" && optionValue !== "" ? optionValue : undefined}
+                            value={typeof optionValue === "string" && optionValue !== "" ? optionValue : ""}
                             onValueChange={(value) => {
                               setFormData({
                                 ...formData,
