@@ -47,7 +47,7 @@ export default function UploadGallery({ advertId }: { advertId: string }) {
 
   useEffect(() => {
     loadItems();
-  }, [advertId]);
+  }, [advertId, loadItems]);
 
   const handleFiles = async (files: FileList | null) => {
     if (!files?.length) return;

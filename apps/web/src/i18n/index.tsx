@@ -1,3 +1,5 @@
+"use client";
+
 import { createContext, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
 import { supportedLocales, type Locale, defaultLocale } from "@/lib/i18n";

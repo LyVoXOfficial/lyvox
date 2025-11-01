@@ -17,13 +17,15 @@
 - [ ] Moderation integration: message-level reports, auto-mute rules, admin review surfaces.
 
 _No undocumented or deprecated API routes were detected during the 2025-10-05 audit._
+
 - [x] Add consent management UI in profile settings (toggle marketing opt-in, export history).
-- [x] Add automated tests for  `/api/auth/register` and onboarding redirects. 
+- [x] Add automated tests for `/api/auth/register` and onboarding redirects.
 - [ ] Revisit @supabase/ssr once a stable release >0.7.x is published; upgrade only after successful 'pnpm install', 'pnpm exec tsc --noEmit', and manual SSR auth smoke-test via 'supabaseServer()'.
 - [ ] Review OTP TTL and resend UX; confirm 10-minute expiry and audit logging satisfy product requirements.
 - [ ] Evaluate rate limiting strategy for media upload/complete endpoints once production traffic increases.
- 
+
 ## Internationalization (i18n)
+
 - [ ] Audit UI strings and replace hardcoded text with `t()` across pages (ad detail, profile, posting, auth, admin).
 - [ ] Add hreflang and SEO meta for alternates; per-locale OG tags.
 - [ ] Localise email/push templates (terms/privacy links per locale).
@@ -31,15 +33,23 @@ _No undocumented or deprecated API routes were detected during the 2025-10-05 au
 - [ ] Language switcher: remember last choice; add footer and settings entry.
 
 ## Vehicle catalog i18n
+
 - [ ] Populate `vehicle_make_i18n`, `vehicle_model_i18n`, `vehicle_generation_i18n` from curated CSVs in `seed/i18n/` (avoid machine translation of proper names).
 - [ ] Update API/queries to join i18n tables by cookie locale; add graceful fallback to EN.
 - [ ] Keep `body/fuel/transmission` as codes in UI dictionaries; map existing EN values to codes where needed.
 - [ ] Neutralise `vehicle_makes.category_path` to a slug (e.g., `transport/cars`) and translate labels in UI.
 
 ## German (de) rollout
+
 - [ ] Verify and QA auto-translated vehicle summaries (spot-check technical accuracy).
 - [ ] Add missing German translations in seed CSVs under `seed/i18n/*`.
 - [ ] Check SEO hreflang coverage after adding `de` (alternates and OG `alternateLocale`).
 
 ## Vehicle deep content i18n
+
 - [ ] Render localized `inspection_tips` / `pros` / `cons` / `common_issues` from `vehicle_generation_i18n` in listing cards and detail views.
+
+## Known Issues
+
+- ESLint configuration is currently facing a circular dependency issue and is partially disabled.
+- Pre-commit hooks are failing due to a test failure in `RegisterForm.test.tsx`.

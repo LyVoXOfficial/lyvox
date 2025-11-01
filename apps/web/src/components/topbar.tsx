@@ -5,13 +5,10 @@ import { useI18n, supportedLocales, type Locale } from "@/i18n";
 export default function TopBar() {
   const { t } = useI18n();
 
-  const setLocale = async (code: Locale) => {
-    try {
-      document.cookie = `locale=${code}; path=/; max-age=${60 * 60 * 24 * 365}`;
-      window.location.reload();
-    } catch {
-      // noop
-    }
+  const setLocale = (code: Locale) => {
+    // eslint-disable-next-line react-hooks/immutability
+    document.cookie = `locale=${code}; path=/; max-age=${60 * 60 * 24 * 365}`;
+    window.location.reload();
   };
 
   return (

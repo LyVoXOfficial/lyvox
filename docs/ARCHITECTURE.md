@@ -9,6 +9,15 @@
 - **Authentication** — Supabase Auth (magic-link and phone OTP). Itsme OAuth onboarding is planned.
 - **Integrations** — Twilio (OTP), Upstash Redis (rate limiting), Cloudflare WAF (planned rollout), hosting via Vercel.
 
+### Next-Gen Profile (apps/web/src/app/(protected)/profile)
+
+The new user profile page is implemented in `apps/web/src/app/(protected)/profile/page.tsx`.
+It uses a modular architecture with reusable components located in `apps/web/src/components/profile/`.
+
+- `ProfileAdvertsList.tsx`: Displays a user's listings.
+- `ProfileReviewsList.tsx`: Displays reviews for a user.
+  Data is fetched server-side using a consolidated Supabase query for security and performance.
+
 ## Key User Journeys
 
 - Create advert → save draft → upload media → publish.

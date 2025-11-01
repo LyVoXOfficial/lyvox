@@ -3,27 +3,24 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import RegisterForm from "../RegisterForm";
 
-const toast = {
-  success: vi.fn(),
-  error: vi.fn(),
-};
-
-const routerMock = {
-  push: vi.fn(),
-  replace: vi.fn(),
-  prefetch: vi.fn(),
-  refresh: vi.fn(),
-};
-
-vi.mock("sonner", () => ({
-  __esModule: true,
-  toast,
+const { toast } = vi.hoisted(() => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
-vi.mock("next/navigation", () => ({
-  __esModule: true,
-  useRouter: () => routerMock,
+const { routerMock } = vi.hoisted(() => ({
+  routerMock: {
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+    refresh: vi.fn(),
+  },
 }));
+
+vi.mock("sonner", () => ({ toast }));
+vi.mock("next/navigation", () => ({ useRouter: () => routerMock }));
 
 beforeEach(() => {
   toast.success.mockReset();
@@ -37,7 +34,7 @@ describe("<RegisterForm />", () => {
       ok: true,
       json: () => Promise.resolve({ ok: true, verificationRequired: true }),
     });
-    global.fetch = fetchMock as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchMock);
 
     render(<RegisterForm initialLocale="en" />);
 
@@ -79,7 +76,7 @@ describe("<RegisterForm />", () => {
       ok: false,
       json: () => Promise.resolve({ ok: false, error: "CONSENT_REQUIRED" }),
     });
-    global.fetch = fetchMock as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchMock);
 
     render(<RegisterForm initialLocale="en" />);
 
