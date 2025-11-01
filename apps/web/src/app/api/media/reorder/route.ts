@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
-import { supabaseService } from "@/lib/supabaseService";
+import { ensureAdvertOwnership, requireAuthenticatedUser } from "../_shared";
 
 export const runtime = "nodejs";
 
@@ -23,33 +23,21 @@ export async function POST(request: Request) {
   }
 
   const supabase = supabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ ok: false, error: "UNAUTHENTICATED" }, { status: 401 });
+  const authResult = await requireAuthenticatedUser(supabase);
+  if ("response" in authResult) {
+    return authResult.response;
   }
+  const { user } = authResult;
 
-  const { data: advert, error: advertError } = await supabase
-    .from("adverts")
-    .select("id,user_id")
-    .eq("id", advertId)
-    .maybeSingle();
-
-  if (advertError) {
-    return NextResponse.json({ ok: false, error: advertError.message }, { status: 400 });
-  }
-
-  if (!advert || advert.user_id !== user.id) {
-    await supabaseService()
-      .from("logs")
-      .insert({
-        user_id: user.id,
-        action: "media_reorder_denied",
-        details: { advertId, orderedIds },
-      });
-    return NextResponse.json({ ok: false, error: "FORBIDDEN" }, { status: 403 });
+  const ownership = await ensureAdvertOwnership({
+    supabase,
+    advertId,
+    userId: user.id,
+    denyLogAction: "media_reorder_denied",
+    denyLogDetails: { orderedIds },
+  });
+  if ("response" in ownership) {
+    return ownership.response;
   }
 
   const { data: media, error: mediaError } = await supabase

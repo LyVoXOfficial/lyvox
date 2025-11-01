@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
+import {
+  ensureAdvertOwnership,
+  requireAuthenticatedUser,
+  MEDIA_LIMIT_PER_ADVERT,
+} from "../_shared";
 
 export const runtime = "nodejs";
 
-const MAX_MEDIA_PER_ADVERT = 12;
 const SIGNED_DOWNLOAD_TTL_SECONDS = 15 * 60;
 
 type Payload = {
@@ -30,13 +34,11 @@ export async function POST(request: Request) {
   }
 
   const supabase = supabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ ok: false, error: "UNAUTHENTICATED" }, { status: 401 });
+  const authResult = await requireAuthenticatedUser(supabase);
+  if ("response" in authResult) {
+    return authResult.response;
   }
+  const { user } = authResult;
 
   if (!storagePath.startsWith(`${user.id}/${advertId}/`)) {
     // SECURITY: log unexpected storage path usage
@@ -50,29 +52,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "FORBIDDEN" }, { status: 403 });
   }
 
-  const { data: advert, error: advertError } = await supabase
-    .from("adverts")
-    .select("id,user_id,status")
-    .eq("id", advertId)
-    .maybeSingle();
-
-  if (advertError) {
-    return NextResponse.json({ ok: false, error: advertError.message }, { status: 400 });
-  }
-
-  if (!advert) {
-    return NextResponse.json({ ok: false, error: "NOT_FOUND" }, { status: 404 });
-  }
-
-  if (advert.user_id !== user.id) {
-    await supabaseService()
-      .from("logs")
-      .insert({
-        user_id: user.id,
-        action: "media_complete_denied_owner",
-        details: { advertId, storagePath },
-      });
-    return NextResponse.json({ ok: false, error: "FORBIDDEN" }, { status: 403 });
+  const ownership = await ensureAdvertOwnership({
+    supabase,
+    advertId,
+    userId: user.id,
+    denyLogAction: "media_complete_denied_owner",
+    denyLogDetails: { storagePath },
+  });
+  if ("response" in ownership) {
+    return ownership.response;
   }
 
   const { count: mediaCount, error: countError } = await supabase
@@ -84,9 +72,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: countError.message }, { status: 400 });
   }
 
-  if ((mediaCount ?? 0) >= MAX_MEDIA_PER_ADVERT) {
+  if ((mediaCount ?? 0) >= MEDIA_LIMIT_PER_ADVERT) {
     return NextResponse.json(
-      { ok: false, error: "LIMIT_REACHED", limit: MAX_MEDIA_PER_ADVERT },
+      { ok: false, error: "LIMIT_REACHED", limit: MEDIA_LIMIT_PER_ADVERT },
       { status: 409 },
     );
   }
