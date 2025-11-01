@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useI18n } from "@/i18n";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,8 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   const [isLoading, setIsLoading] = useState(false);
   const [advertId, setAdvertId] = useState<string | null>(advertToEdit?.id ?? null);
   const [selectedMainCategory, setSelectedMainCategory] = useState<string | null>(null);
+  const [showMakeDropdown, setShowMakeDropdown] = useState(false);
+  const makeDropdownRef = useRef<HTMLDivElement>(null);
 
   // Initialize form data from advertToEdit if editing
   const initializeFormData = () => {
@@ -100,6 +102,46 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   const [availableTransmissions, setAvailableTransmissions] = useState<string[]>([]);
   const [availableFuelTypes, setAvailableFuelTypes] = useState<string[]>([]);
 
+  // Calculate form completion percentage
+  const calculateProgress = (): number => {
+    if (currentStep === 1) return formData.category_id ? 12.5 : 0;
+    if (currentStep === 2) return formData.condition ? 25 : 12.5;
+    if (currentStep === 3) {
+      let filled = 0;
+      if (formData.category_id) filled += 1;
+      if (formData.condition) filled += 1;
+      if (formData.make_id) filled += 1;
+      if (formData.model_id) filled += 1;
+      return Math.min(37.5 + (filled * 2), 37.5);
+    }
+    if (currentStep === 4) return 50;
+    if (currentStep === 5) return 62.5;
+    if (currentStep === 6) return 75;
+    if (currentStep === 7) return 87.5;
+    if (currentStep === 8) return 100;
+    return (currentStep / TOTAL_STEPS) * 100;
+  };
+
+  // Helper functions
+  const formatNumber = (value: number | null | undefined): string => {
+    if (value === null || value === undefined) return "";
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  };
+
+  const parseFormattedNumber = (value: string): number | null => {
+    const cleaned = value.replace(/\s/g, "");
+    return cleaned ? parseInt(cleaned) : null;
+  };
+
+  const formatUnit = (unitKey: string): string => {
+    const unitMap: Record<string, Record<string, string>> = {
+      hp: { en: "hp", ru: "л.с.", nl: "pk", fr: "ch", de: "PS" },
+      L: { en: "L", ru: "л", nl: "L", fr: "L", de: "L" },
+      km: { en: "km", ru: "км", nl: "km", fr: "km", de: "km" },
+    };
+    return unitMap[unitKey]?.[locale] || unitKey;
+  };
+
   // Load reference data
   useEffect(() => {
     let cancelled = false;
@@ -160,6 +202,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   useEffect(() => {
     if (!makeSearchQuery) {
       setFilteredMakes(makes);
+      setShowMakeDropdown(false);
       return;
     }
 
@@ -170,7 +213,20 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         make.vehicle_make_i18n?.some((i18n: any) => i18n.name?.toLowerCase().includes(query))
     );
     setFilteredMakes(filtered);
+    setShowMakeDropdown(filtered.length > 0);
   }, [makeSearchQuery, makes]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (makeDropdownRef.current && !makeDropdownRef.current.contains(event.target as Node)) {
+        setShowMakeDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Load models when make is selected
   useEffect(() => {
@@ -480,24 +536,27 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   };
 
   // Progress indicator component
-  const ProgressIndicator = () => (
-    <div className="mb-6">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm text-muted-foreground">
-          {t("post.form.step")} {currentStep} {t("post.form.of")} {TOTAL_STEPS}
-        </span>
-        <span className="text-sm font-medium">
-          {Math.round((currentStep / TOTAL_STEPS) * 100)}%
-        </span>
+  const ProgressIndicator = () => {
+    const progress = calculateProgress();
+    return (
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm text-muted-foreground">
+            {t("post.form.step")} {currentStep} {t("post.form.of")} {TOTAL_STEPS}
+          </span>
+          <span className="text-sm font-medium">
+            {Math.round(progress)}%
+          </span>
+        </div>
+        <div className="w-full bg-muted rounded-full h-2">
+          <div
+            className="bg-primary rounded-full h-2 transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
       </div>
-      <div className="w-full bg-muted rounded-full h-2">
-        <div
-          className="bg-primary rounded-full h-2 transition-all duration-300"
-          style={{ width: `${(currentStep / TOTAL_STEPS) * 100}%` }}
-        />
-      </div>
-    </div>
-  );
+    );
+  };
 
   // Helper function to get localized category name
   const getCategoryName = (cat: Category): string => {
@@ -687,32 +746,35 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         <CardContent className="space-y-4">
           <ProgressIndicator />
           {/* Make with autocomplete */}
-          <div>
+          <div className="relative" ref={makeDropdownRef}>
             <Label>{t("post.form.make")}</Label>
             <Input
               placeholder={t("post.form.make_placeholder")}
               value={makeSearchQuery}
-              onChange={(e) => setMakeSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setMakeSearchQuery(e.target.value);
+                setShowMakeDropdown(true);
+              }}
+              onFocus={() => {
+                if (filteredMakes.length > 0) setShowMakeDropdown(true);
+              }}
             />
-            {filteredMakes.length > 0 && (
-              <Select
-                value={formData.make_id}
-                onValueChange={(value) => {
-                  setFormData({ ...formData, make_id: value, model_id: "" });
-                  setMakeSearchQuery("");
-                }}
-              >
-                <SelectTrigger className="mt-2">
-                  <SelectValue placeholder={t("post.form.make")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {filteredMakes.map((make) => (
-                    <SelectItem key={make.id} value={make.id}>
-                      {make.name_en}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {showMakeDropdown && filteredMakes.length > 0 && (
+              <div className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-lg max-h-60 overflow-auto">
+                {filteredMakes.slice(0, 10).map((make) => (
+                  <div
+                    key={make.id}
+                    className="px-3 py-2 cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                    onClick={() => {
+                      setFormData({ ...formData, make_id: make.id, model_id: "" });
+                      setMakeSearchQuery(make.name_en);
+                      setShowMakeDropdown(false);
+                    }}
+                  >
+                    {make.name_en}
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 
@@ -904,7 +966,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                 }
                 className="flex-1"
               />
-              <span className="self-center text-sm text-muted-foreground">л.с.</span>
+              <span className="self-center text-sm text-muted-foreground">{formatUnit("hp")}</span>
             </div>
           </div>
 
@@ -963,7 +1025,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                 }
                 className="flex-1"
               />
-              <span className="self-center text-sm text-muted-foreground">л</span>
+              <span className="self-center text-sm text-muted-foreground">{formatUnit("L")}</span>
                 </div>
           </div>
 
@@ -1041,15 +1103,16 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             <Label>{t("post.form.mileage")}</Label>
             <div className="flex gap-2">
               <Input
-                type="number"
+                type="text"
                 placeholder={t("post.form.mileage_placeholder")}
-                value={formData.mileage || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, mileage: e.target.value ? parseInt(e.target.value) : null })
-                }
+                value={formatNumber(formData.mileage)}
+                onChange={(e) => {
+                  const parsed = parseFormattedNumber(e.target.value);
+                  setFormData({ ...formData, mileage: parsed });
+                }}
                 className="flex-1"
               />
-              <span className="self-center text-sm text-muted-foreground">км</span>
+              <span className="self-center text-sm text-muted-foreground">{formatUnit("km")}</span>
             </div>
           </div>
 
@@ -1152,11 +1215,15 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             <div className="flex gap-2">
               <Input
                 type="number"
+                min="0"
                 placeholder={t("post.price")}
                 value={formData.price || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, price: e.target.value ? parseFloat(e.target.value) : null })
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "" || (parseFloat(value) >= 0)) {
+                    setFormData({ ...formData, price: value ? parseFloat(value) : null });
+                  }
+                }}
                 className="flex-1"
               />
               <span className="self-center text-sm text-muted-foreground">EUR</span>
@@ -1218,6 +1285,10 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                         "Двухзонный": { en: "Two zone", nl: "Twee zones", fr: "Deux zones", de: "Zwei Zonen" },
                         "Трехзонный": { en: "Three zone", nl: "Drie zones", fr: "Trois zones", de: "Drei Zonen" },
                         "Многозонный": { en: "Multi zone", nl: "Meerdere zones", fr: "Multi zones", de: "Mehrere Zonen" },
+                        "Передние": { en: "Front", nl: "Voor", fr: "Avant", de: "Vorne" },
+                        "Передние + Задние": { en: "Front + Rear", nl: "Voor + Achter", fr: "Avant + Arrière", de: "Vorne + Hinten" },
+                        "Электронная": { en: "Electronic", nl: "Elektronisch", fr: "Électronique", de: "Elektronisch" },
+                        "Гидравлическая": { en: "Hydraulic", nl: "Hydraulisch", fr: "Hydraulique", de: "Hydraulisch" },
                       };
                       
                       if (variantMap[variant] && variantMap[variant][locale]) {
@@ -1244,7 +1315,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                                   },
                                 });
                               } else {
-                                // If checking, set to true (user will select variant if needed)
+                                // If checking, set to empty string if has variants, true otherwise
                                 setFormData({
                                   ...formData,
                                   options: {
@@ -1334,7 +1405,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
               <UploadGallery advertId={advertId} />
             ) : (
               <div className="border-2 border-dashed rounded-lg p-8 text-center text-muted-foreground">
-                <p>{t("post.create_draft_hint")}</p>
+                <p>{t("post.form.save_draft")} {t("post.form.final_photos").toLowerCase()}</p>
                 <Button
                   variant="outline"
                   className="mt-2"
@@ -1497,4 +1568,3 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
 
   return null;
 }
-
