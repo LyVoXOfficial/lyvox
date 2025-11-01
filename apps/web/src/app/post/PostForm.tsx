@@ -17,14 +17,15 @@ import type { Category } from "@/lib/types";
 import { apiFetch } from "@/lib/fetcher";
 import UploadGallery from "@/components/upload-gallery";
 
-// Schema for validation
+// Schema for validation - соответствует требованиям API из docs/API_REFERENCE.md
 const formSchema = z.object({
-  title: z.string().min(5, "Слишком короткое название").max(100),
-  description: z.string().min(20, "Слишком короткое описание").max(4000),
-  price: z.number().positive("Цена должна быть положительной"),
-  category_id: z.string().min(1, "Нужно выбрать категорию"),
-  condition: z.enum(["new", "used", "for_parts"]),
-  location: z.string().min(3, "Укажите местоположение").max(100),
+  title: z.string().min(3, "Название должно содержать минимум 3 символа").max(100),
+  description: z.string().min(10, "Описание должно содержать минимум 10 символов").max(4000).optional().or(z.literal("")),
+  price: z.coerce.number().nonnegative("Цена должна быть положительной или 0").nullable().optional(),
+  category_id: z.string().uuid("Нужно выбрать категорию"),
+  condition: z.enum(["new", "used", "for_parts"]).optional(),
+  location: z.string().max(100).optional().or(z.literal("")),
+  currency: z.enum(["EUR", "USD", "GBP", "RUB"]).default("EUR"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -52,10 +53,11 @@ export function PostForm({ categories, userId, advertToEdit }: PostFormProps) {
     defaultValues: {
       title: advertToEdit?.title ?? "",
       description: advertToEdit?.description ?? "",
-      price: advertToEdit?.price ?? undefined, // Allow undefined for price
+      price: advertToEdit?.price ?? null,
       category_id: advertToEdit?.category_id ?? "",
-      condition: advertToEdit?.condition ?? "used",
+      condition: advertToEdit?.condition ?? undefined,
       location: advertToEdit?.location ?? "",
+      currency: advertToEdit?.currency ?? "EUR",
     },
   });
   
@@ -65,9 +67,39 @@ export function PostForm({ categories, userId, advertToEdit }: PostFormProps) {
     const endpoint = advertId ? `/api/adverts/${advertId}` : "/api/adverts";
 
     try {
+      // Подготовка данных согласно требованиям API
+      // Преобразуем пустые строки в null для опциональных полей
+      const payload: Record<string, unknown> = {
+        title: values.title,
+        category_id: values.category_id,
+        status: 'draft',
+        currency: values.currency || "EUR",
+      };
+
+      // Опциональные поля - только если не пустые
+      if (values.description && values.description.trim().length >= 10) {
+        payload.description = values.description;
+      }
+
+      if (values.price !== null && values.price !== undefined && values.price >= 0) {
+        payload.price = values.price;
+      } else {
+        payload.price = null;
+      }
+
+      if (values.location && values.location.trim().length > 0) {
+        payload.location = values.location.trim();
+      } else {
+        payload.location = null;
+      }
+
+      if (values.condition) {
+        payload.condition = values.condition;
+      }
+
       const response = await apiFetch(endpoint, {
         method,
-        body: JSON.stringify({ ...values, status: 'draft' }), // Save as draft initially
+        body: JSON.stringify(payload),
       });
       const result = await response.json();
 
@@ -76,8 +108,10 @@ export function PostForm({ categories, userId, advertToEdit }: PostFormProps) {
         throw new Error(errorMessage);
       }
       
-      const newAdvertId = result.advert.id;
-      setAdvertId(newAdvertId);
+      const newAdvertId = result.data?.advert?.id || result.advert?.id;
+      if (newAdvertId) {
+        setAdvertId(newAdvertId);
+      }
       toast.success("Черновик сохранен!");
       setStep(STEPS.PHOTOS);
 
@@ -164,23 +198,39 @@ export function PostForm({ categories, userId, advertToEdit }: PostFormProps) {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Описание</FormLabel>
+                      <FormLabel>Описание (опционально, минимум 10 символов)</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Расскажите подробнее о товаре..." {...field} rows={5} />
+                        <Textarea 
+                          placeholder="Расскажите подробнее о товаре..." 
+                          {...field} 
+                          value={field.value ?? ""}
+                          rows={5} 
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <div className="grid grid-cols-2 gap-4">
-                   <FormField
+                  <FormField
                     control={form.control}
                     name="price"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Цена (€)</FormLabel>
+                        <FormLabel>Цена (опционально)</FormLabel>
                         <FormControl>
-                          <Input type="number" placeholder="999" {...field} />
+                          <Input 
+                            type="number" 
+                            placeholder="0 или пусто" 
+                            min="0"
+                            step="0.01"
+                            {...field}
+                            value={field.value ?? ""}
+                            onChange={(e) => {
+                              const val = e.target.value === "" ? null : parseFloat(e.target.value);
+                              field.onChange(isNaN(val as number) ? null : val);
+                            }}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -188,40 +238,65 @@ export function PostForm({ categories, userId, advertToEdit }: PostFormProps) {
                   />
                   <FormField
                     control={form.control}
-                    name="condition"
+                    name="currency"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Состояние</FormLabel>
-                         <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Выберите состояние" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="new">Новое</SelectItem>
-                              <SelectItem value="used">Б/у</SelectItem>
-                              <SelectItem value="for_parts">На запчасти</SelectItem>
-                            </SelectContent>
-                          </Select>
+                        <FormLabel>Валюта</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value || "EUR"}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="EUR" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="EUR">EUR (€)</SelectItem>
+                            <SelectItem value="USD">USD ($)</SelectItem>
+                            <SelectItem value="GBP">GBP (£)</SelectItem>
+                            <SelectItem value="RUB">RUB (₽)</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
-                 <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Местоположение</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Город или адрес" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="condition"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Состояние (опционально)</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value || undefined}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Выберите состояние" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="new">Новое</SelectItem>
+                            <SelectItem value="used">Б/у</SelectItem>
+                            <SelectItem value="for_parts">На запчасти</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Местоположение (опционально)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Город или адрес" {...field} value={field.value ?? ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </>
             )}
 
