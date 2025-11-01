@@ -214,7 +214,6 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
       return;
     }
 
-    let cancelled = false;
     const model = models.find((m) => m.id === formData.model_id);
     if (model) {
       if (model.years_available) {
@@ -224,10 +223,25 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         setBodyTypes(model.body_types_available as string[]);
       }
     }
-    
-    return () => {
-      cancelled = true;
-    };
+  }, [formData.model_id, models]);
+
+  // Load transmission and fuel types based on selected model
+  useEffect(() => {
+    if (!formData.model_id) {
+      setAvailableTransmissions([]);
+      setAvailableFuelTypes([]);
+      return;
+    }
+
+    const model = models.find((m) => m.id === formData.model_id);
+    if (model) {
+      if (model.transmission_available && Array.isArray(model.transmission_available)) {
+        setAvailableTransmissions(model.transmission_available as string[]);
+      }
+      if (model.fuel_types_available && Array.isArray(model.fuel_types_available)) {
+        setAvailableFuelTypes(model.fuel_types_available as string[]);
+      }
+    }
   }, [formData.model_id, models]);
 
   const handleNext = () => {
@@ -868,25 +882,6 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
       </Card>
     );
   }
-
-  // Load transmission and fuel types based on selected model
-  useEffect(() => {
-    if (!formData.model_id) {
-      setAvailableTransmissions([]);
-      setAvailableFuelTypes([]);
-      return;
-    }
-
-    const model = models.find((m) => m.id === formData.model_id);
-    if (model) {
-      if (model.transmission_available && Array.isArray(model.transmission_available)) {
-        setAvailableTransmissions(model.transmission_available as string[]);
-      }
-      if (model.fuel_types_available && Array.isArray(model.fuel_types_available)) {
-        setAvailableFuelTypes(model.fuel_types_available as string[]);
-      }
-    }
-  }, [formData.model_id, models]);
 
   if (currentStep === 4) {
     return (
