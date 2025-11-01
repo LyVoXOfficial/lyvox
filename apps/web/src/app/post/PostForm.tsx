@@ -102,35 +102,36 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
 
   // Load reference data
   useEffect(() => {
+    let cancelled = false;
     const loadReferenceData = async () => {
       try {
         // Load steering wheels
         const { data: sw } = await supabase.from("steering_wheel").select("*").order("name_ru");
-        if (sw) setSteeringWheels(sw);
+        if (!cancelled && sw) setSteeringWheels(sw);
 
         // Load colors
         const { data: cols } = await supabase.from("vehicle_colors").select("*").order("name_ru");
-        if (cols) setColors(cols);
+        if (!cancelled && cols) setColors(cols);
 
         // Load doors
         const { data: drs } = await supabase.from("vehicle_doors").select("*").order("count");
-        if (drs) setDoors(drs);
+        if (!cancelled && drs) setDoors(drs);
 
         // Load vehicle conditions
         const { data: vc } = await supabase.from("vehicle_conditions").select("*").order("name_ru");
-        if (vc) setVehicleConditions(vc);
+        if (!cancelled && vc) setVehicleConditions(vc);
 
         // Load engine types
         const { data: et } = await supabase.from("engine_types").select("*").order("name_ru");
-        if (et) setEngineTypes(et);
+        if (!cancelled && et) setEngineTypes(et);
 
         // Load drive types
         const { data: dt } = await supabase.from("drive_types").select("*").order("name_ru");
-        if (dt) setDriveTypes(dt);
+        if (!cancelled && dt) setDriveTypes(dt);
 
         // Load vehicle options
         const { data: vo } = await supabase.from("vehicle_options").select("*").order("category, name_ru");
-        if (vo) setVehicleOptions(vo);
+        if (!cancelled && vo) setVehicleOptions(vo);
 
         // Load makes (initially all)
         const { data: mk } = await supabase
@@ -138,17 +139,22 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           .select("*, vehicle_make_i18n(name)")
           .eq("is_active", true)
           .order("name_en");
-        if (mk) {
+        if (!cancelled && mk) {
           setMakes(mk);
           setFilteredMakes(mk);
         }
       } catch (error) {
-        console.error("Failed to load reference data:", error);
+        if (!cancelled) {
+          console.error("Failed to load reference data:", error);
+        }
       }
     };
 
     loadReferenceData();
-  }, [supabase]);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Filter makes based on search
   useEffect(() => {
@@ -175,6 +181,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
       return;
     }
 
+    let cancelled = false;
     const loadModels = async () => {
       try {
         const { data: mods } = await supabase
@@ -183,16 +190,21 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           .eq("make_id", formData.make_id)
           .order("name_en");
 
-        if (mods) {
+        if (!cancelled && mods) {
           setModels(mods);
         }
       } catch (error) {
-        console.error("Failed to load models:", error);
+        if (!cancelled) {
+          console.error("Failed to load models:", error);
+        }
       }
     };
 
     loadModels();
-  }, [formData.make_id, supabase]);
+    return () => {
+      cancelled = true;
+    };
+  }, [formData.make_id]);
 
   // Load years and body types when model is selected
   useEffect(() => {
