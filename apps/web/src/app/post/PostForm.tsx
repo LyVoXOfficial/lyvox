@@ -743,7 +743,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             <div>
               <Label>{t("post.form.year")}</Label>
               <Select
-                value={formData.year?.toString() || ""}
+                value={formData.year?.toString() || undefined}
                 onValueChange={(value) => setFormData({ ...formData, year: parseInt(value) })}
               >
                 <SelectTrigger>
@@ -816,7 +816,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                 className="flex-1"
               />
               <Select
-                value={formData.doors?.toString() || ""}
+                value={formData.doors?.toString() || undefined}
                 onValueChange={(value) => setFormData({ ...formData, doors: parseInt(value) })}
               >
                 <SelectTrigger className="w-32">
@@ -1077,11 +1077,11 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           <div className="flex items-center gap-2">
             <Label>{t("post.form.customs_cleared")}</Label>
             <Select
-              value={formData.customs_cleared === null ? "" : formData.customs_cleared ? "yes" : "no"}
+              value={formData.customs_cleared === null ? "none" : formData.customs_cleared ? "yes" : "no"}
               onValueChange={(value) =>
                 setFormData({
                   ...formData,
-                  customs_cleared: value === "" ? null : value === "yes",
+                  customs_cleared: value === "none" ? null : value === "yes",
                 })
               }
             >
@@ -1089,7 +1089,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">-</SelectItem>
+                <SelectItem value="none">-</SelectItem>
                 <SelectItem value="yes">{t("post.form.yes")}</SelectItem>
                 <SelectItem value="no">{t("post.form.no")}</SelectItem>
               </SelectContent>
@@ -1100,11 +1100,11 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           <div className="flex items-center gap-2">
             <Label>{t("post.form.under_warranty")}</Label>
             <Select
-              value={formData.under_warranty === null ? "" : formData.under_warranty ? "yes" : "no"}
+              value={formData.under_warranty === null ? "none" : formData.under_warranty ? "yes" : "no"}
               onValueChange={(value) =>
                 setFormData({
                   ...formData,
-                  under_warranty: value === "" ? null : value === "yes",
+                  under_warranty: value === "none" ? null : value === "yes",
                 })
               }
             >
@@ -1112,7 +1112,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">-</SelectItem>
+                <SelectItem value="none">-</SelectItem>
                 <SelectItem value="yes">{t("post.form.yes")}</SelectItem>
                 <SelectItem value="no">{t("post.form.no")}</SelectItem>
               </SelectContent>
@@ -1233,7 +1233,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                         </div>
                         {isChecked && hasVariants && (
                           <Select
-                            value={(formData.options[optionKey] as string) || ""}
+                            value={(formData.options[optionKey] as string) || undefined}
                             onValueChange={(value) => {
                               setFormData({
                                 ...formData,
