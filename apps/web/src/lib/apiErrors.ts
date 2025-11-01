@@ -130,14 +130,89 @@ export function handleSupabaseError(
     return createErrorResponse(fallbackCode);
   }
 
-  // Специальная обработка известных ошибок Supabase
-  if (error.code === "user_already_exists" || /already registered/i.test(error.message || "")) {
+  const errorMessage = error.message || "";
+  const errorCode = error.code || "";
+
+  // Специальная обработка известных ошибок Supabase Auth
+  if (errorCode === "user_already_exists" || /already registered/i.test(errorMessage)) {
     return createErrorResponse(ApiErrorCode.EMAIL_IN_USE);
   }
 
+  // Обработка ошибок PostgreSQL через Supabase
+  // 23502 = NOT NULL violation
+  // 23503 = FOREIGN KEY violation
+  // 23505 = UNIQUE violation
+  // 23514 = CHECK violation
+  // 22P02 = Invalid text representation (например, неправильный UUID)
+  // PGRST116 = Resource not found (Supabase PostgREST)
+  // PGRST301 = RLS policy violation
+  if (errorCode === "23502" || /null value in column/i.test(errorMessage)) {
+    return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+      status: 400,
+      message: "Обязательное поле не заполнено",
+      detail: errorCode,
+      details: { message: errorMessage },
+    });
+  }
+
+  if (errorCode === "23503" || /foreign key constraint/i.test(errorMessage)) {
+    return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+      status: 400,
+      message: "Ссылка на несуществующую запись",
+      detail: errorCode,
+      details: { message: errorMessage },
+    });
+  }
+
+  if (errorCode === "23505" || /unique constraint/i.test(errorMessage)) {
+    return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+      status: 409,
+      message: "Дублирование данных",
+      detail: errorCode,
+      details: { message: errorMessage },
+    });
+  }
+
+  if (errorCode === "23514" || /check constraint/i.test(errorMessage)) {
+    return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+      status: 400,
+      message: "Нарушение ограничений данных",
+      detail: errorCode,
+      details: { message: errorMessage },
+    });
+  }
+
+  if (errorCode === "22P02" || /invalid input syntax/i.test(errorMessage)) {
+    return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+      status: 400,
+      message: "Неверный формат данных",
+      detail: errorCode,
+      details: { message: errorMessage },
+    });
+  }
+
+  if (errorCode === "PGRST301" || /policy violation/i.test(errorMessage)) {
+    return createErrorResponse(ApiErrorCode.FORBIDDEN, {
+      status: 403,
+      message: "Операция запрещена политиками безопасности",
+      detail: errorCode,
+      details: { message: errorMessage },
+    });
+  }
+
+  // Обработка общих ошибок Supabase
+  if (errorCode === "invalid_data" || /invalid data/i.test(errorMessage.toLowerCase())) {
+    return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+      status: 400,
+      message: "Неверные данные запроса",
+      detail: errorCode,
+      details: { message: errorMessage },
+    });
+  }
+
   return createErrorResponse(fallbackCode, {
-    message: error.message || "Unknown error",
-    detail: error.code,
+    message: errorMessage || "Unknown error",
+    detail: errorCode,
   });
 }
 

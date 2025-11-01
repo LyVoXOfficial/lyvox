@@ -199,6 +199,15 @@ export async function PATCH(
     updates.category_id = categoryId;
   }
 
+  const currency = trim((body as Record<string, unknown>).currency);
+  if (currency) {
+    // Валидация валюты - только допустимые значения
+    const allowedCurrencies = ["EUR", "USD", "GBP", "RUB"];
+    if (allowedCurrencies.includes(currency.toUpperCase())) {
+      updates.currency = currency.toUpperCase();
+    }
+  }
+
   const requestedStatusRaw = trim((body as Record<string, unknown>).status);
   let requestedStatus: AdvertStatus | null = null;
   if (requestedStatusRaw) {

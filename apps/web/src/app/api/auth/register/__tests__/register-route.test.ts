@@ -150,8 +150,9 @@ describe("POST /api/auth/register", () => {
       }),
     );
 
-    expect(response.status).toBe(400);
-    await expect(response.json()).resolves.toMatchObject({ error: "PROFILE_UPSERT_FAILED" });
+    // UNIQUE constraint violation (23505) теперь возвращает 409 с BAD_INPUT кодом
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toMatchObject({ error: "BAD_INPUT" });
     expect(logInsertMock).not.toHaveBeenCalled();
   });
 });

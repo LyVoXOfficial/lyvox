@@ -72,7 +72,8 @@ export function PostForm({ categories, userId, advertToEdit }: PostFormProps) {
       const result = await response.json();
 
       if (!result.ok) {
-        throw new Error(result.error || "Не удалось сохранить черновик");
+        const errorMessage = result.message || result.error || "Не удалось сохранить черновик";
+        throw new Error(errorMessage);
       }
       
       const newAdvertId = result.advert.id;
@@ -97,7 +98,8 @@ export function PostForm({ categories, userId, advertToEdit }: PostFormProps) {
       });
       const result = await response.json();
        if (!result.ok) {
-        throw new Error(result.error || "Не удалось опубликовать");
+        const errorMessage = result.message || result.error || "Не удалось опубликовать";
+        throw new Error(errorMessage);
       }
       toast.success("Объявление опубликовано!");
       router.push(`/ad/${advertId}`);
