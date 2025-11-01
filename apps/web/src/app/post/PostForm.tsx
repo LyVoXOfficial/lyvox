@@ -34,6 +34,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [advertId, setAdvertId] = useState<string | null>(advertToEdit?.id ?? null);
+  const [selectedMainCategory, setSelectedMainCategory] = useState<string | null>(null);
 
   // Initialize form data from advertToEdit if editing
   const initializeFormData = () => {
