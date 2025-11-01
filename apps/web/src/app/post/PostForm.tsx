@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import UploadGallery from "@/components/upload-gallery";
 import { getCategoryIcon } from "@/lib/categoryIcons";
-import * as Icons from "lucide-react";
+import { ChevronDown, Check } from "lucide-react";
 
 type PostFormProps = {
   categories: Category[];
@@ -264,9 +264,9 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
     if (advertId) return advertId;
     
     const response = await apiFetch("/api/adverts", { method: "POST" });
-    const result = await response.json();
-    
-    if (!result.ok) {
+      const result = await response.json();
+
+      if (!result.ok) {
       throw new Error(result.error || t("post.create_failed"));
     }
     
@@ -332,7 +332,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
       setIsLoading(false);
     }
   };
-
+  
   const handlePublish = async () => {
     setIsLoading(true);
     try {
@@ -387,7 +387,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
       });
 
       const result = await response.json();
-      if (!result.ok) {
+       if (!result.ok) {
         throw new Error(result.message || result.error || t("post.update_error"));
       }
 
@@ -515,11 +515,11 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
 
   // Step 1: Category selection
   if (currentStep === 1) {
-    return (
-      <Card>
-        <CardHeader>
+  return (
+    <Card>
+      <CardHeader>
           <CardTitle>{t("post.form.step_1_title")}</CardTitle>
-        </CardHeader>
+      </CardHeader>
         <CardContent>
           <ProgressIndicator />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
@@ -551,12 +551,12 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                           {getCategoryName(group.main)}
                         </h3>
                         {hasSubcategories && (
-                          <Icons.ChevronDown 
+                          <ChevronDown 
                             className={`w-5 h-5 ${colors.icon} transition-transform ${showSubcategories ? "rotate-180" : ""}`}
                           />
                         )}
                         {isMainSelected && !hasSubcategories && (
-                          <Icons.Check className="w-5 h-5 text-primary" />
+                          <Check className="w-5 h-5 text-primary" />
                         )}
                       </div>
                       {hasSubcategories && !showSubcategories && (
@@ -589,7 +589,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                               {getCategoryName(subCat)}
                             </span>
                             {isSubCatSelected && (
-                              <Icons.Check className="w-5 h-5 text-primary" />
+                              <Check className="w-5 h-5 text-primary" />
                             )}
                           </div>
                         );
@@ -692,17 +692,17 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                 value={formData.model_id}
                 onValueChange={(value) => setFormData({ ...formData, model_id: value, year: null })}
               >
-                <SelectTrigger>
+                          <SelectTrigger>
                   <SelectValue placeholder={t("post.form.model_placeholder")} />
-                </SelectTrigger>
-                <SelectContent>
+                          </SelectTrigger>
+                        <SelectContent>
                   {models.map((model) => (
                     <SelectItem key={model.id} value={model.id}>
                       {model.name_en}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
             </div>
           )}
 
@@ -903,17 +903,17 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                 value={formData.engine_type}
                 onValueChange={(value) => setFormData({ ...formData, engine_type: value })}
               >
-                <SelectTrigger>
+                              <SelectTrigger>
                   <SelectValue placeholder={t("post.form.engine_type")} />
-                </SelectTrigger>
-                <SelectContent>
+                              </SelectTrigger>
+                            <SelectContent>
                   {availableFuelTypes.map((ft) => (
                     <SelectItem key={ft} value={ft}>
                       {ft}
                     </SelectItem>
                   ))}
-                </SelectContent>
-              </Select>
+                            </SelectContent>
+                          </Select>
             ) : (
               <Select
                 value={formData.engine_type}
@@ -951,7 +951,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                 className="flex-1"
               />
               <span className="self-center text-sm text-muted-foreground">л</span>
-            </div>
+                </div>
           </div>
 
           {/* Transmission */}
@@ -983,7 +983,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           </div>
 
           {/* Drive */}
-          <div>
+              <div>
             <Label>{t("post.form.drive")}</Label>
             <Select
               value={formData.drive}
@@ -1000,7 +1000,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                 ))}
               </SelectContent>
             </Select>
-          </div>
+              </div>
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button variant="outline" onClick={handleBack}>
@@ -1273,7 +1273,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         <CardContent className="space-y-4">
           <ProgressIndicator />
           {/* Description */}
-          <div>
+               <div>
             <Label>{t("post.form.final_description")}</Label>
             <Textarea
               placeholder={t("post.enter_description")}
@@ -1368,18 +1368,18 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
               <p className="text-sm text-green-600 mt-1">✓ {t("profile.verified")}</p>
             )}
           </div>
-        </CardContent>
-        <CardFooter className="flex justify-between">
+          </CardContent>
+          <CardFooter className="flex justify-between">
           <Button variant="outline" onClick={handleBack}>
             {t("post.form.back")}
           </Button>
           <Button onClick={handleNext}>
             {t("post.form.next")}
           </Button>
-        </CardFooter>
-      </Card>
-    );
-  }
+          </CardFooter>
+    </Card>
+  );
+}
 
   // Step 8: Preview
   if (currentStep === 8) {
