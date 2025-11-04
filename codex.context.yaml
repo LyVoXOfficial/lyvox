@@ -1,0 +1,19 @@
+description: "LyVoX — marketplace for Belgium/EU (Next.js, Supabase, Upstash)"
+globs:
+  alwaysApply: true
+
+context:
+  baseDir: "."
+  include:
+    - "apps/**"
+    - "supabase/**"
+    - "docs/**"
+    - "scripts/**"
+    - "seed/**"
+  exclude:
+    - "node_modules/**"
+    - ".turbo/**"
+    - ".next/**"
+    - "dist/**"
+    - "out/**"
+    - "tmp/**"

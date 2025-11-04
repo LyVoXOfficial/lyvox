@@ -1,0 +1,380 @@
+# 3-уровневая иерархия категорий (LyVoX)
+- name_ru: Транспорт
+  icon: Car
+  children:
+    - name_ru: Легковые автомобили
+      icon: CarFront
+      children:
+        - name_ru: Новые автомобили
+          icon: BadgeCheck
+        - name_ru: Автомобили с пробегом
+          icon: Gauge
+    - name_ru: Мотоциклы и спецтехника
+      icon: Bike
+      children:
+        - name_ru: Мототехника (мотоциклы, скутеры, мопеды)
+          icon: Bike
+        - name_ru: Грузовики и автобусы
+          icon: Truck
+        - name_ru: Спецтехника
+          icon: Hammer
+        - name_ru: Водный транспорт (лодки, катера, яхты)
+          icon: Ship
+    - name_ru: Запчасти и аксессуары
+      icon: Wrench
+      children:
+        - name_ru: Шины, диски и колёса
+          icon: LifeBuoy
+        - name_ru: Автохимия и масла
+          icon: FlaskConical
+        - name_ru: Аудио-, видео- и навигация
+          icon: Speaker
+        - name_ru: Багажники и фаркопы
+          icon: Package
+        - name_ru: Аксессуары (чехлы, коврики и т.д.)
+          icon: ShoppingBag
+
+- name_ru: Недвижимость
+  icon: Home
+  children:
+    - name_ru: Продажа недвижимости
+      icon: Handshake
+      children:
+        - name_ru: Квартиры
+          icon: Building2
+        - name_ru: Комнаты
+          icon: DoorOpen
+        - name_ru: Дома, дачи, коттеджи
+          icon: House
+        - name_ru: Участки
+          icon: Trees
+        - name_ru: Коммерческая недвижимость
+          icon: Factory
+        - name_ru: Гаражи и машиноместа
+          icon: Home
+    - name_ru: Аренда недвижимости
+      icon: KeyRound
+      children:
+        - name_ru: Аренда квартир
+          icon: KeySquare
+        - name_ru: Аренда домов
+          icon: Home
+        - name_ru: Аренда коммерческой недвижимости
+          icon: Building
+
+- name_ru: Личные вещи
+  icon: Shirt
+  children:
+    - name_ru: Женский гардероб
+      icon: Heart
+      children:
+        - name_ru: Верхняя одежда
+          icon: Shirt
+        - name_ru: Платья и юбки
+          icon: Shirt
+        - name_ru: Блузы и рубашки
+          icon: Shirt
+        - name_ru: Штаны и шорты
+          icon: Shirt
+        - name_ru: Свитеры и толстовки
+          icon: Shirt
+        - name_ru: Футболки и топы
+          icon: Shirt
+        - name_ru: Спортивная одежда
+          icon: Dumbbell
+        - name_ru: Домашняя одежда
+          icon: Bed
+        - name_ru: Нижнее бельё
+          icon: Layers
+        - name_ru: Купальники
+          icon: Waves
+        - name_ru: Обувь
+          icon: ShoppingBag
+        - name_ru: Аксессуары (сумки, ремни, шарфы)
+          icon: ShoppingBag
+        - name_ru: Головные уборы
+          icon: Crown
+    - name_ru: Мужской гардероб
+      icon: UserRound
+      children:
+        - name_ru: Верхняя одежда
+          icon: Shirt
+        - name_ru: Пиджаки и костюмы
+          icon: Briefcase
+        - name_ru: Рубашки
+          icon: Shirt
+        - name_ru: Штаны и шорты
+          icon: Shirt
+        - name_ru: Свитеры и толстовки
+          icon: Shirt
+        - name_ru: Футболки и майки
+          icon: Shirt
+        - name_ru: Спортивная одежда
+          icon: Dumbbell
+        - name_ru: Домашняя одежда
+          icon: Bed
+        - name_ru: Нижнее бельё
+          icon: Layers
+        - name_ru: Обувь
+          icon: ShoppingBag
+        - name_ru: Аксессуары (галстуки, ремни, портмоне)
+          icon: Wallet
+        - name_ru: Головные уборы
+          icon: Crown
+    - name_ru: Детский гардероб
+      icon: Baby
+      children:
+        - name_ru: Одежда для новорождённых
+          icon: Baby
+        - name_ru: Верхняя одежда
+          icon: Shirt
+        - name_ru: Комбинезоны и боди
+          icon: Baby
+        - name_ru: Платья и юбки
+          icon: Shirt
+        - name_ru: Штаны и шорты
+          icon: Shirt
+        - name_ru: Футболки
+          icon: Shirt
+        - name_ru: Свитеры и толстовки
+          icon: Shirt
+        - name_ru: Спортивная одежда
+          icon: Dumbbell
+        - name_ru: Обувь
+          icon: ShoppingBag
+        - name_ru: Аксессуары
+          icon: ShoppingBag
+        - name_ru: Головные уборы
+          icon: Crown
+
+- name_ru: Электроника и техника
+  icon: Smartphone
+  children:
+    - name_ru: Телефоны и планшеты
+      icon: Smartphone
+      children:
+        - name_ru: Мобильные телефоны
+          icon: Smartphone
+        - name_ru: Планшеты
+          icon: Tablet
+        - name_ru: Умные часы и браслеты
+          icon: Watch
+        - name_ru: Наушники и гарнитуры
+          icon: Headphones
+        - name_ru: Аксессуары (чехлы, зарядные устройства)
+          icon: Plug
+    - name_ru: Компьютеры и оргтехника
+      icon: Monitor
+      children:
+        - name_ru: Ноутбуки
+          icon: Laptop
+        - name_ru: Компьютеры и моноблоки
+          icon: Monitor
+        - name_ru: Комплектующие
+          icon: Cpu
+        - name_ru: Игровые приставки и аксессуары
+          icon: Gamepad2
+        - name_ru: Оргтехника (принтеры, МФУ)
+          icon: Printer
+        - name_ru: Сетевое оборудование
+          icon: Server
+        - name_ru: Программное обеспечение
+          icon: Code
+    - name_ru: Фото- и видеотехника
+      icon: Camera
+      children:
+        - name_ru: Фотоаппараты
+          icon: Camera
+        - name_ru: Видеокамеры
+          icon: Video
+        - name_ru: Объективы
+          icon: Camera
+        - name_ru: Экшн-камеры
+          icon: CameraOff
+    - name_ru: ТВ, аудио и видео
+      icon: Tv
+      children:
+        - name_ru: Телевизоры
+          icon: Tv
+        - name_ru: Аудиотехника
+          icon: Speaker
+        - name_ru: Медиаплееры
+          icon: PlaySquare
+    - name_ru: Бытовая техника
+      icon: Lamp
+      children:
+        - name_ru: Техника для кухни
+          icon: UtensilsCrossed
+        - name_ru: Техника для дома
+          icon: Plug
+        - name_ru: Климатическая техника
+          icon: CloudSun
+        - name_ru: Техника для красоты и здоровья
+          icon: Sparkles
+
+- name_ru: Для дома, хобби и детей
+  icon: Sofa
+  children:
+    - name_ru: Для дома и дачи
+      icon: Armchair
+      children:
+        - name_ru: Мебель
+          icon: Armchair
+        - name_ru: Текстиль и ковры
+          icon: Layers
+        - name_ru: Посуда и кухонные принадлежности
+          icon: UtensilsCrossed
+        - name_ru: Освещение
+          icon: Lamp
+        - name_ru: Интерьер и декор
+          icon: Gem
+        - name_ru: Сад и огород
+          icon: Sprout
+        - name_ru: Хозяйственные товары
+          icon: Broom
+    - name_ru: Детские товары
+      icon: Blocks
+      children:
+        - name_ru: Игрушки и игры
+          icon: Blocks
+        - name_ru: Детские коляски
+          icon: Baby
+        - name_ru: Автокресла
+          icon: Baby
+        - name_ru: Товары для кормления
+          icon: BabyBottle
+        - name_ru: Мебель для детской
+          icon: Blocks
+        - name_ru: Товары для мам
+          icon: Heart
+        - name_ru: Гигиена и уход
+          icon: Soap
+    - name_ru: Хобби и отдых
+      icon: Palette
+      children:
+        - name_ru: Спортивные товары
+          icon: Dumbbell
+        - name_ru: Книги и журналы
+          icon: BookOpen
+        - name_ru: Музыкальные инструменты
+          icon: Guitar
+        - name_ru: Коллекционирование
+          icon: Gem
+        - name_ru: Настольные игры
+          icon: Dice6
+        - name_ru: Туризм и рыбалка
+          icon: Tent
+        - name_ru: Билеты
+          icon: Ticket
+    - name_ru: Хэндмейд и творчество
+      icon: PenTool
+      children:
+        - name_ru: Украшения ручной работы
+          icon: Sparkles
+        - name_ru: Подарки и сувениры
+          icon: Gift
+        - name_ru: Товары для творчества
+          icon: Paintbrush
+        - name_ru: Куклы и игрушки ручной работы
+          icon: Blocks
+
+- name_ru: Услуги и бизнес
+  icon: BriefcaseBusiness
+  children:
+    - name_ru: Услуги
+      icon: BriefcaseBusiness
+      children:
+        - name_ru: Ремонт и строительство
+          icon: Hammer
+        - name_ru: Отделочные работы
+          icon: Paintbrush
+        - name_ru: Грузоперевозки
+          icon: Truck
+        - name_ru: Красота и здоровье
+          icon: Sparkles
+        - name_ru: Ремонт техники
+          icon: Wrench
+        - name_ru: Обучение и курсы
+          icon: GraduationCap
+        - name_ru: Уборка
+          icon: Broom
+        - name_ru: Уход за животными
+          icon: PawPrint
+        - name_ru: Организация праздников
+          icon: PartyPopper
+    - name_ru: Заявки на услуги
+      icon: ClipboardList
+      children:
+        - name_ru: Ищу мастера
+          icon: Users
+        - name_ru: Ищу обучение
+          icon: GraduationCap
+        - name_ru: Ищу перевозку
+          icon: Truck
+
+- name_ru: Животные
+  icon: PawPrint
+  children:
+    - name_ru: Домашние питомцы
+      icon: PawPrint
+      children:
+        - name_ru: Собаки
+          icon: Dog
+        - name_ru: Кошки
+          icon: Cat
+        - name_ru: Грызуны
+          icon: Squirrel
+        - name_ru: Птицы
+          icon: Bird
+        - name_ru: Аквариумистика
+          icon: Fish
+    - name_ru: Товары для животных
+      icon: Bone
+      children:
+        - name_ru: Корм и лакомства
+          icon: Bone
+        - name_ru: Переноски и клетки
+          icon: Package
+        - name_ru: Игрушки и аксессуары
+          icon: Puzzle
+
+- name_ru: Работа и карьера
+  icon: BriefcaseBusiness
+  children:
+    - name_ru: Вакансии
+      icon: BriefcaseBusiness
+      children:
+        - name_ru: Полная занятость
+          icon: Clock
+        - name_ru: Частичная занятость
+          icon: Hourglass
+        - name_ru: Временная/подработка
+          icon: Calendar
+    - name_ru: Резюме
+      icon: Users
+      children:
+        - name_ru: Специалисты
+          icon: UserRound
+        - name_ru: Рабочие профессии
+          icon: Hammer
+        - name_ru: Студенты и стажёры
+          icon: GraduationCap
+
+- name_ru: Особые категории
+  icon: Sparkles
+  children:
+    - name_ru: Отдам даром
+      icon: HandHeart
+      children:
+        - name_ru: Бесплатно
+          icon: HandHeart
+        - name_ru: На обмен
+          icon: RefreshCw
+    - name_ru: Поиск и обмен
+      icon: Search
+      children:
+        - name_ru: Ищу вещь
+          icon: Search
+        - name_ru: Предлагаю обмен
+          icon: RefreshCw
+

@@ -1,0 +1,41 @@
+{
+  "generated_at": "2025-11-03T21:24:02.314Z",
+  "summary": {
+    "makes_count": "202",
+    "models_count": "904",
+    "generations_count": "1775",
+    "insights_count": "904"
+  },
+  "issues": {
+    "models_without_insights": [],
+    "empty_arrays": {},
+    "missing_scores": [],
+    "missing_translations": {
+      "summary": {
+        "makes": {
+          "de": 188,
+          "en": 188,
+          "fr": 188,
+          "nl": 188,
+          "ru": 188
+        },
+        "models": {
+          "de": 904,
+          "en": 904,
+          "fr": 904,
+          "nl": 904,
+          "ru": 904
+        },
+        "generations": {
+          "de": 724,
+          "en": 724,
+          "fr": 724,
+          "nl": 724,
+          "ru": 724
+        }
+      },
+      "models_without_any_translation": []
+    },
+    "duplicates": []
+  }
+}

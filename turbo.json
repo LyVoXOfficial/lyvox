@@ -1,0 +1,11 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "typegen": { "cache": false, "outputs": ["supabase/types/database.types.ts"] },
+    "dev": { "cache": false, "persistent": true, "dependsOn": ["typegen"] },
+    "build": { "dependsOn": ["typegen", "^build"], "outputs": ["dist/**", ".next/**"] },
+    "typecheck": { "dependsOn": ["typegen"] },
+    "lint": {},
+    "format": {}
+  }
+}

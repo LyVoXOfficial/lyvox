@@ -1,0 +1,45 @@
+{
+  "deno.enablePaths": ["supabase/functions"],
+  "deno.lint": true,
+  "deno.unstable": [
+    "bare-node-builtins",
+    "byonm",
+    "sloppy-imports",
+    "unsafe-proto",
+    "webgpu",
+    "broadcast-channel",
+    "worker-options",
+    "cron",
+    "kv",
+    "ffi",
+    "fs",
+    "http",
+    "net"
+  ],
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+
+  // === Codex/ChatGPT: жёстко ограничаем контекст проектом ===
+  "chatgpt.enableProjectContext": true,
+  "chatgpt.workspaceRoot": "${workspaceFolder}",
+  "chatgpt.contextFolders": [
+    "${workspaceFolder}/apps",
+    "${workspaceFolder}/supabase",
+    "${workspaceFolder}/docs",
+    "${workspaceFolder}/scripts",
+    "${workspaceFolder}/seed"
+  ],
+  "chatgpt.contextDepth": 4,
+  "chatgpt.maxFileTokens": 12000,
+  "chatgpt.defaultModel": "gpt-5-codex",
+  "chatgpt.replyLanguage": "ru",
+  "chatgpt.saveSession": true,
+
+  // Чуть скромнее «усилие», чтобы не закапывался и не просил слишком много подтверждений
+  "codex.model_reasoning_effort": "medium",
+
+  // Терминал/команды всегда стартуют из корня проекта
+  "terminal.integrated.cwd": "${workspaceFolder}",
+  "chatgpt.openOnStartup": true
+}

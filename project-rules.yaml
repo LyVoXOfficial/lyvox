@@ -1,0 +1,55 @@
+ description: Основные правила и архитектура сервиса (governance)
+ globs:
+   alwaysApply: true
+
+ references:
+   archRules: "@docs/ARCH_RULES.md"
+   architecture: "@docs/ARCHITECTURE.md"
+   requirements: "@docs/requirements.md"
+   apiReference: "@docs/API_REFERENCE.md"
+   plan: "@docs/PLAN.md"
+   todo: "@docs/TODO.md"
+
+ policies:
+   - name: "Docs must reflect code/db changes"
+     appliesTo:
+-      - "apps/web/src/app/**"
++      - "apps/web/src/app/**"
++      - "apps/web/src/app/api/**"
+       - "apps/web/src/lib/**"
+       - "supabase/migrations/**"
++      - "supabase/types/**"
++      - "supabase/schema.sql"
+     requireUpdates:
+       - "@docs/API_REFERENCE.md"
+       - "@docs/ARCHITECTURE.md"
+       - "@docs/requirements.md"
++      - "@docs/PLAN.md"
+
++  - name: "PLAN must stay in sync with requirements, rules and TODO"
++    appliesTo:
++      - "@docs/requirements.md"
++      - "@docs/ARCH_RULES.md"
++      - "@docs/TODO.md"
++    requireUpdates:
++      - "@docs/PLAN.md"
++
++  - name: "No duplication across docs"
++    rule: |
++      - Ограничения/версии → только @docs/ARCH_RULES.md
++      - ERD/RLS/ENV/Roadmap → только @docs/requirements.md
++      - Фактическая архитектура и журнал → только @docs/ARCHITECTURE.md
++      - API-контракты → только @docs/API_REFERENCE.md
++      - Этапы/сроки/критерии → только @docs/PLAN.md
++    requireUpdates:
++      - "@docs/ARCHITECTURE.md"
++      - "@docs/requirements.md"
++      - "@docs/API_REFERENCE.md"
++      - "@docs/PLAN.md"
++
++  - name: "RLS required for new tables"
++    appliesTo:
++      - "supabase/migrations/**"
++    rule: "Любая новая таблица должна иметь RLS = ON и минимум политики SELECT/INSERT. Если нет — сгенерировать SQL-правки и добавить описание в @docs/requirements.md."
++    requireUpdates:
++      - "@docs/requirements.md"

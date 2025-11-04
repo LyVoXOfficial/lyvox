@@ -1,0 +1,29 @@
+
+> web@0.1.0 lint C:\Users\power\lyvox\apps\web
+> eslint
+
+
+C:\Users\power\lyvox\apps\web\src\app\post\PostForm.tsx
+  237:107  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  237:120  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\power\lyvox\apps\web\src\components\topbar.tsx
+  10:7  error  Error: This value cannot be modified
+
+Modifying a variable defined outside a component or hook is not allowed. Consider using an effect.
+
+C:\Users\power\lyvox\apps\web\src\components\topbar.tsx:10:7
+   8 |   const setLocale = async (code: Locale) => {
+   9 |     try {
+> 10 |       document.cookie = `locale=${code}; path=/; max-age=${60 * 60 * 24 * 365}`;
+     |       ^^^^^^^^ value cannot be modified
+  11 |       window.location.reload();
+  12 |     } catch {
+  13 |       // noop  react-hooks/immutability
+
+C:\Users\power\lyvox\apps\web\src\components\upload-gallery.tsx
+  50:6  warning  React Hook useEffect has a missing dependency: 'loadItems'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+✖ 4 problems (3 errors, 1 warning)
+
+ ELIFECYCLE  Command failed with exit code 1.

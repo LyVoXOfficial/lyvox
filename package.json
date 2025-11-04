@@ -1,0 +1,48 @@
+{
+  "name": "lyvox",
+  "private": true,
+  "packageManager": "pnpm@10.17.0",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "format": "turbo run format",
+    "prepare": "husky",
+    "typegen": "pnpm exec supabase gen types typescript --linked > supabase/types/database.types.ts",
+    "gen:types": "pnpm run typegen",
+    "typecheck": "pnpm exec tsc -p apps/web/tsconfig.json --noEmit",
+    "prune": "pnpm dlx ts-prune",
+    "depcheck": "pnpm dlx depcheck",
+    "test": "vitest run",
+    "checklist:update": "node scripts/update-checklist-progress.js"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,css,md,json}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.76.0",
+    "@testing-library/jest-dom": "^6.5.0",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/user-event": "^14.5.2",
+    "dotenv": "^17.2.3",
+    "eslint": "^9.38.0",
+    "husky": "^9.1.7",
+    "js-yaml": "^4.1.0",
+    "jsdom": "^24.1.3",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.6",
+    "turbo": "^2.0.0",
+    "typescript": "^5.9.0",
+    "vite": "^5.4.10",
+    "vitest": "^2.1.4"
+  },
+  "dependencies": {
+    "csv-parse": "^6.1.0",
+    "pg": "^8.16.3"
+  }
+}
