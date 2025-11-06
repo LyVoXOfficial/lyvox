@@ -273,6 +273,8 @@ export default function AdvertPage() {
                   ? parseInt(String(loadedAdvert.specifics.year))
                   : null;
                 
+                let detectedGeneration: VehicleGeneration | null = null;
+                
                 if (advertYear) {
                   const matchingGen = generationsData.find((gen) => {
                     const startMatch = gen.start_year ? gen.start_year <= advertYear : true;
@@ -281,14 +283,43 @@ export default function AdvertPage() {
                   });
                   
                   if (matchingGen) {
-                    setSelectedGeneration(matchingGen as VehicleGeneration);
+                    detectedGeneration = matchingGen as VehicleGeneration;
                   } else if (generationsData.length === 1) {
                     // If only one generation exists, show it even if year doesn't match
-                    setSelectedGeneration(generationsData[0] as VehicleGeneration);
+                    detectedGeneration = generationsData[0] as VehicleGeneration;
                   }
                 } else if (generationsData.length === 1) {
                   // If no year specified but only one generation, show it
-                  setSelectedGeneration(generationsData[0] as VehicleGeneration);
+                  detectedGeneration = generationsData[0] as VehicleGeneration;
+                }
+
+                if (detectedGeneration) {
+                  setSelectedGeneration(detectedGeneration);
+
+                  // Load insights for the detected generation (if not already loaded above)
+                  if (!insights && detectedGeneration.id) {
+                    const { data: insightsData } = await supabase
+                      .from("vehicle_generation_insights")
+                      .select("*")
+                      .eq("generation_id", detectedGeneration.id)
+                      .maybeSingle();
+
+                    if (!cancelled && insightsData) {
+                      // Load translations separately
+                      const { data: i18nData } = await supabase
+                        .from("vehicle_generation_insights_i18n")
+                        .select("locale, pros, cons, inspection_tips, notable_features, engine_examples, common_issues")
+                        .eq("generation_id", detectedGeneration.id);
+
+                      // Combine data
+                      const combinedInsights = {
+                        ...insightsData,
+                        vehicle_generation_insights_i18n: i18nData || [],
+                      } as VehicleInsights;
+
+                      setInsights(combinedInsights);
+                    }
+                  }
                 }
               }
             }
