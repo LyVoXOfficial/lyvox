@@ -113,11 +113,9 @@ CREATE INDEX property_listings_sale_search_idx
 ON public.property_listings(listing_type, property_type_id, area_sqm, rooms, postcode)
 WHERE listing_type = 'sale';
 
--- Active listings only (join with adverts table)
-CREATE INDEX property_listings_active_idx ON public.property_listings(listing_type, postcode)
-WHERE advert_id IN (
-  SELECT id FROM public.adverts WHERE status = 'active' AND moderation_status = 'approved'
-);
+-- Index for active listings (simplified - can't use subquery in WHERE clause)
+-- Note: Actual filtering by advert status should be done in queries, not in index
+CREATE INDEX property_listings_type_postcode_idx ON public.property_listings(listing_type, postcode);
 
 -- =============================================================================
 -- VALIDATION FUNCTIONS
@@ -237,7 +235,7 @@ USING (
   advert_id IN (
     SELECT id FROM public.adverts 
     WHERE auth.uid() = user_id 
-    OR (status = 'active' AND moderation_status = 'approved')
+    OR status = 'active'
   )
 );
 
@@ -309,7 +307,7 @@ SELECT
 FROM public.property_listings pl
 WHERE pl.advert_id IN (
   SELECT id FROM public.adverts 
-  WHERE status = 'active' AND moderation_status = 'approved'
+  WHERE status = 'active'
 );
 
 -- =============================================================================

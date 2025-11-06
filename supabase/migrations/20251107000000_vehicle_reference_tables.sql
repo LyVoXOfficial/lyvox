@@ -63,6 +63,17 @@ CREATE TABLE IF NOT EXISTS public.engine_types (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
+-- Add category column if table already exists without it
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                 WHERE table_schema = 'public' 
+                 AND table_name = 'engine_types' 
+                 AND column_name = 'category') THEN
+    ALTER TABLE public.engine_types ADD COLUMN category text;
+  END IF;
+END$$;
+
 -- 6. Drive Types Table
 CREATE TABLE IF NOT EXISTS public.drive_types (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

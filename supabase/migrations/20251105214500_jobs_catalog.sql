@@ -90,11 +90,9 @@ CREATE INDEX job_listings_experience_idx ON public.job_listings(experience_years
 CREATE INDEX job_listings_languages_idx ON public.job_listings USING GIN (languages_required);
 
 -- Composite search index
+-- Composite search index (simplified - can't use subquery in WHERE clause)
 CREATE INDEX job_listings_search_idx 
-ON public.job_listings(employment_type, contract_type_id, remote_option, job_category_id)
-WHERE advert_id IN (
-  SELECT id FROM public.adverts WHERE status = 'active' AND moderation_status = 'approved'
-);
+ON public.job_listings(employment_type, contract_type_id, remote_option, job_category_id);
 
 -- Active listings deadline index (for cleanup jobs)
 CREATE INDEX job_listings_deadline_idx ON public.job_listings(application_deadline)
@@ -224,7 +222,7 @@ USING (
   advert_id IN (
     SELECT id FROM public.adverts 
     WHERE auth.uid() = user_id 
-    OR (status = 'active' AND moderation_status = 'approved')
+    OR status = 'active'
   )
 );
 
@@ -296,7 +294,7 @@ SELECT
 FROM public.job_listings jl
 WHERE jl.advert_id IN (
   SELECT id FROM public.adverts 
-  WHERE status = 'active' AND moderation_status = 'approved'
+  WHERE status = 'active'
 );
 
 -- =============================================================================

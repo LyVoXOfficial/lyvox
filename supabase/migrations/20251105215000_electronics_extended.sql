@@ -51,20 +51,20 @@ CREATE TABLE IF NOT EXISTS public.storage_options (
 -- Insert common storage options
 INSERT INTO public.storage_options (value, value_bytes, sort_order, category, obsolete) VALUES
   -- Phone/Tablet storage
-  ('16GB', 16 * 1024 * 1024 * 1024::BIGINT, 1, 'phone', true),
-  ('32GB', 32 * 1024 * 1024 * 1024::BIGINT, 2, 'phone', false),
-  ('64GB', 64 * 1024 * 1024 * 1024::BIGINT, 3, 'phone', false),
-  ('128GB', 128 * 1024 * 1024 * 1024::BIGINT, 4, 'phone', false),
-  ('256GB', 256 * 1024 * 1024 * 1024::BIGINT, 5, 'phone', false),
-  ('512GB', 512 * 1024 * 1024 * 1024::BIGINT, 6, 'phone', false),
-  ('1TB', 1024 * 1024 * 1024 * 1024::BIGINT, 7, 'phone', false),
+  ('16GB', 16::BIGINT * 1024 * 1024 * 1024, 1, 'phone', true),
+  ('32GB', 32::BIGINT * 1024 * 1024 * 1024, 2, 'phone', false),
+  ('64GB', 64::BIGINT * 1024 * 1024 * 1024, 3, 'phone', false),
+  ('128GB', 128::BIGINT * 1024 * 1024 * 1024, 4, 'phone', false),
+  ('256GB', 256::BIGINT * 1024 * 1024 * 1024, 5, 'phone', false),
+  ('512GB', 512::BIGINT * 1024 * 1024 * 1024, 6, 'phone', false),
+  ('1TB', 1024::BIGINT * 1024 * 1024 * 1024, 7, 'phone', false),
   -- Laptop/Desktop storage
-  ('128GB', 128 * 1024 * 1024 * 1024::BIGINT, 1, 'laptop', false),
-  ('256GB', 256 * 1024 * 1024 * 1024::BIGINT, 2, 'laptop', false),
-  ('512GB', 512 * 1024 * 1024 * 1024::BIGINT, 3, 'laptop', false),
-  ('1TB', 1024 * 1024 * 1024 * 1024::BIGINT, 4, 'laptop', false),
-  ('2TB', 2 * 1024 * 1024 * 1024 * 1024::BIGINT, 5, 'laptop', false),
-  ('4TB', 4 * 1024 * 1024 * 1024 * 1024::BIGINT, 6, 'laptop', false)
+  ('128GB', 128::BIGINT * 1024 * 1024 * 1024, 1, 'laptop', false),
+  ('256GB', 256::BIGINT * 1024 * 1024 * 1024, 2, 'laptop', false),
+  ('512GB', 512::BIGINT * 1024 * 1024 * 1024, 3, 'laptop', false),
+  ('1TB', 1024::BIGINT * 1024 * 1024 * 1024, 4, 'laptop', false),
+  ('2TB', 2048::BIGINT * 1024 * 1024 * 1024, 5, 'laptop', false),
+  ('4TB', 4096::BIGINT * 1024 * 1024 * 1024, 6, 'laptop', false)
 ON CONFLICT (value) DO NOTHING;
 
 -- =============================================================================
