@@ -28,7 +28,9 @@ async function callGoogleAI(prompt, retries = 3) {
         );
 
         if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
           console.warn(`Model ${model} failed: ${response.status}`);
+          console.warn(`Error details:`, JSON.stringify(errorData, null, 2));
           continue;
         }
 
@@ -47,8 +49,8 @@ async function callGoogleAI(prompt, retries = 3) {
     }
 
     if (attempt < retries - 1) {
-      console.log(`Retry ${attempt + 1}/${retries} in 2s...`);
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log(`Retry ${attempt + 1}/${retries} in 5s...`);
+      await new Promise(resolve => setTimeout(resolve, 5000));
     }
   }
 
@@ -108,14 +110,14 @@ async function main() {
         vg.fuel_types,
         vg.transmission_types,
         vm.name_en as model_name,
-        vmk.name as make_name,
+        vmk.name_en as make_name,
         vm.id as model_id
       FROM vehicle_generations vg
       JOIN vehicle_models vm ON vm.id = vg.model_id
       JOIN vehicle_makes vmk ON vmk.id = vm.make_id
       WHERE vg.code IS NOT NULL
         AND vg.code != ''
-      ORDER BY vmk.name, vm.name_en, vg.start_year
+      ORDER BY vmk.name_en, vm.name_en, vg.start_year
     `);
 
     console.log(`Found ${generations.length} generations to process\n`);
@@ -168,8 +170,8 @@ async function main() {
           console.log(`\n📊 Progress: ${processed}/${generations.length} (${Math.round(processed/generations.length*100)}%)\n`);
         }
 
-        // Rate limiting
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Rate limiting - increased for new API key
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
       } catch (error) {
         console.error(`❌ Error for ${gen.make_name} ${gen.model_name} ${gen.code}:`, error.message);

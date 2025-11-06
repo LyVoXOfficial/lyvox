@@ -32,7 +32,9 @@
     "of": "sur",
     "page": "Page",
     "cancel": "Annuler",
-    "save": "Enregistrer"
+    "save": "Enregistrer",
+    "user": "Utilisateur",
+    "free": "Gratuit"
   },
   "search": {
     "results": "Résultats de recherche",
@@ -58,7 +60,13 @@
   },
   "home": {
     "free_ads": "Annonces gratuites",
-    "latest": "Dernières annonces"
+    "latest": "Dernières annonces",
+    "top_sellers_and_adverts": "Top Vendeurs & Annonces",
+    "top_seller": "TOP #1 Vendeur",
+    "top_advert": "TOP Annonce",
+    "deals": "transactions",
+    "adverts": "annonces",
+    "seller": "Vendeur"
   },
   "post": {
     "not_found": "Annonce introuvable",

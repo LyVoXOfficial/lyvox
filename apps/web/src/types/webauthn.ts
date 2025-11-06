@@ -230,3 +230,5 @@ export type ExtractData<T> = T extends { ok: true; data: infer D } ? D : never;
 export type ExtractError<T> = T extends { ok: false; error: infer E } ? E : never;
 
 
+
+

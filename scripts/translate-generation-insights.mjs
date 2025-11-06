@@ -59,13 +59,13 @@ async function main() {
         vgi.engine_examples,
         vgi.common_issues,
         vg.code,
-        vm.name_en,
-        vmk.name
+        vm.name_en as model_name,
+        vmk.name_en as make_name
       FROM vehicle_generation_insights vgi
       JOIN vehicle_generations vg ON vg.id = vgi.generation_id
       JOIN vehicle_models vm ON vm.id = vg.model_id
       JOIN vehicle_makes vmk ON vmk.id = vm.make_id
-      ORDER BY vmk.name, vm.name_en, vg.start_year
+      ORDER BY vmk.name_en, vm.name_en, vg.start_year
     `);
 
     console.log(`Found ${insights.length} generations to translate\n`);
@@ -83,11 +83,11 @@ async function main() {
           );
 
           if (existing.length > 0) {
-            console.log(`⏭️  ${insight.name} ${insight.name_en} ${insight.code} [${locale}] exists`);
+            console.log(`⏭️  ${insight.make_name} ${insight.model_name} ${insight.code} [${locale}] exists`);
             continue;
           }
 
-          console.log(`🔄 Translating: ${insight.name} ${insight.name_en} ${insight.code} → ${locale}`);
+          console.log(`🔄 Translating: ${insight.make_name} ${insight.model_name} ${insight.code} → ${locale}`);
 
           const translated = await translateInsights(insight, locale);
 
@@ -108,10 +108,10 @@ async function main() {
           ]);
 
           console.log(`✅ ${locale} done`);
-          await new Promise(resolve => setTimeout(resolve, 800));
+          await new Promise(resolve => setTimeout(resolve, 1500));
 
         } catch (error) {
-          console.error(`❌ Error translating ${insight.name} ${insight.name_en} ${insight.code} to ${locale}:`, error.message);
+          console.error(`❌ Error translating ${insight.make_name} ${insight.model_name} ${insight.code} to ${locale}:`, error.message);
         }
       }
 

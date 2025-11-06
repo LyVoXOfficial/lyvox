@@ -32,7 +32,9 @@
     "of": "van",
     "page": "Pagina",
     "cancel": "Annuleren",
-    "save": "Opslaan"
+    "save": "Opslaan",
+    "user": "Gebruiker",
+    "free": "Gratis"
   },
   "search": {
     "results": "Zoekresultaten",
@@ -58,7 +60,13 @@
   },
   "home": {
     "free_ads": "Gratis advertenties",
-    "latest": "Nieuwste advertenties"
+    "latest": "Nieuwste advertenties",
+    "top_sellers_and_adverts": "Top Verkopers & Advertenties",
+    "top_seller": "TOP #1 Verkoper",
+    "top_advert": "TOP Advertentie",
+    "deals": "deals",
+    "adverts": "advertenties",
+    "seller": "Verkoper"
   },
   "post": {
     "not_found": "Advertentie niet gevonden",

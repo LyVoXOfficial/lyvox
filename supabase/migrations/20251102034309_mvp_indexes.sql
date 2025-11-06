@@ -49,3 +49,5 @@ comment on index public.adverts_category_status_created_at_idx is 'Composite ind
 comment on index public.categories_parent_active_sort_idx is 'Composite partial index for active category tree queries by parent with sorting';
 
 
+
+

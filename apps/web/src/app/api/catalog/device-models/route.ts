@@ -1,0 +1,54 @@
+/**
+ * API Endpoint: Search Device Models
+ * GET /api/catalog/device-models
+ * 
+ * Returns device models filtered by brand and type (for autocomplete)
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabaseServer';
+
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: NextRequest) {
+  try {
+    const supabase = createClient();
+    const { searchParams } = new URL(request.url);
+    const brandSlug = searchParams.get('brand');
+    const deviceType = searchParams.get('device_type');
+    const search = searchParams.get('search');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    
+    if (!brandSlug || !deviceType) {
+      return NextResponse.json(
+        { error: 'brand and device_type parameters are required' },
+        { status: 400 }
+      );
+    }
+    
+    // Use the PostgreSQL function for efficient search
+    const { data, error } = await supabase.rpc('search_device_models', {
+      p_brand_slug: brandSlug,
+      p_device_type: deviceType,
+      p_search_term: search,
+      p_limit: limit,
+    });
+    
+    if (error) {
+      console.error('Error fetching device models:', error);
+      return NextResponse.json(
+        { error: 'Failed to fetch device models' },
+        { status: 500 }
+      );
+    }
+    
+    return NextResponse.json(data || []);
+  } catch (error) {
+    console.error('Device models API error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+

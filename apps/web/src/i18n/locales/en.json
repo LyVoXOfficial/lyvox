@@ -32,7 +32,9 @@
     "of": "of",
     "page": "Page",
     "cancel": "Cancel",
-    "save": "Save"
+    "save": "Save",
+    "user": "User",
+    "free": "Free"
   },
   "search": {
     "results": "Search results",
@@ -58,7 +60,13 @@
   },
   "home": {
     "free_ads": "Free adverts",
-    "latest": "Latest adverts"
+    "latest": "Latest adverts",
+    "top_sellers_and_adverts": "Top Sellers & Adverts",
+    "top_seller": "TOP #1 Seller",
+    "top_advert": "TOP Advert",
+    "deals": "deals",
+    "adverts": "adverts",
+    "seller": "Seller"
   },
   "post": {
     "not_found": "Advert not found",
