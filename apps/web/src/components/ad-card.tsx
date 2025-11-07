@@ -11,6 +11,7 @@ const priceFormatter = new Intl.NumberFormat("ru-RU", {
 
 const dateFormatter = new Intl.DateTimeFormat("ru-RU", {
   dateStyle: "medium",
+  timeZone: "UTC", // Use UTC to prevent hydration mismatch
 });
 
 type Props = {
