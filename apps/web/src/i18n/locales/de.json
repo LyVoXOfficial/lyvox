@@ -127,6 +127,8 @@
       "step_4_title": "Technische Parameter",
       "no_specialized_fields": "Keine spezialisierten Felder für diese Kategorie",
       "skip_to_next": "Sie können zum nächsten Schritt übergehen",
+      "no_vehicle_fields": "Dieser Schritt ist nur für Fahrzeuge",
+      "click_next_for_specifics": "Klicken Sie auf Weiter, um zu kategoriespezifischen Feldern zu gelangen",
       "step_5_title": "Zustand und Preis",
       "step_6_title": "Optionen",
       "step_7_title": "Beschreibung und Kontakte",

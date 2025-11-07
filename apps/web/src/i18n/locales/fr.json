@@ -127,6 +127,8 @@
       "step_4_title": "Paramètres techniques",
       "no_specialized_fields": "Aucun champ spécialisé pour cette catégorie",
       "skip_to_next": "Vous pouvez passer à l'étape suivante",
+      "no_vehicle_fields": "Cette étape est réservée aux véhicules",
+      "click_next_for_specifics": "Cliquez sur Suivant pour accéder aux champs spécifiques de la catégorie",
       "step_5_title": "État et prix",
       "step_6_title": "Options",
       "step_7_title": "Description et contacts",

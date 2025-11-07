@@ -840,7 +840,35 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   }
 
   // Step 3: Basic parameters (make, model, year, steering wheel, body, doors, color)
+  // Only for vehicles - other categories skip to step 4
   if (currentStep === 3) {
+    // For non-vehicle categories, show a message and allow skipping
+    if (categoryType !== 'vehicle') {
+      return (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("post.form.step_3_title")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <ProgressIndicator />
+            <div className="text-center py-12 text-muted-foreground">
+              <p className="text-lg mb-2">{t("post.form.no_vehicle_fields")}</p>
+              <p className="text-sm">{t("post.form.click_next_for_specifics")}</p>
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <Button variant="outline" onClick={handleBack}>
+              {t("post.form.back")}
+            </Button>
+            <Button onClick={handleNext}>
+              {t("post.form.next")}
+            </Button>
+          </CardFooter>
+        </Card>
+      );
+    }
+    
+    // Vehicle-specific fields
     return (
       <Card>
         <CardHeader>
