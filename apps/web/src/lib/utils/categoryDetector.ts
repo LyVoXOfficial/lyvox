@@ -19,6 +19,11 @@ export type CategoryType =
  * Detects category type based on category slug or parent hierarchy
  */
 export function detectCategoryType(categorySlug: string): CategoryType {
+  // Safety check: return generic if categorySlug is undefined or null
+  if (!categorySlug) {
+    return 'generic';
+  }
+  
   const slug = categorySlug.toLowerCase();
 
   // Vehicle categories (Транспорт)

@@ -213,9 +213,12 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   useEffect(() => {
     if (formData.category_id && categories.length > 0) {
       const category = categories.find(c => c.id === formData.category_id);
-      if (category) {
+      if (category && category.slug) {
         const detectedType = detectCategoryType(category.slug);
         setCategoryType(detectedType);
+      } else {
+        // Fallback to generic if category or slug not found
+        setCategoryType('generic');
       }
     }
   }, [formData.category_id, categories]);
