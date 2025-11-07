@@ -8,6 +8,7 @@ import type { Category } from "@/lib/types";
 import CategoryList from "@/components/category-list";
 import AdsGrid from "@/components/ads-grid";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import CategoryFilters from "@/components/category/CategoryFilters";
 import { buildCategoryBreadcrumbs, getLocalizedCategoryName } from "@/lib/breadcrumbs";
 import { getI18nProps } from "@/i18n/server";
 
@@ -22,9 +23,10 @@ type AdvertItem = {
 
 type Props = {
   params: { path: string[] };
+  searchParams: { sort?: string };
 };
 
-export default async function CategoryPage({ params }: Props) {
+export default async function CategoryPage({ params, searchParams }: Props) {
   const slugPath = Array.isArray(params.path) ? params.path.join("/") : "";
   if (!slugPath) {
     notFound();
@@ -75,13 +77,32 @@ export default async function CategoryPage({ params }: Props) {
 
   const children = (childData as Category[] | null) ?? [];
 
+  // Handle sorting
+  const sort = searchParams.sort || "date-desc";
+  let orderBy: { column: string; ascending: boolean };
+  
+  switch (sort) {
+    case "date-asc":
+      orderBy = { column: "created_at", ascending: true };
+      break;
+    case "price-asc":
+      orderBy = { column: "price", ascending: true };
+      break;
+    case "price-desc":
+      orderBy = { column: "price", ascending: false };
+      break;
+    case "date-desc":
+    default:
+      orderBy = { column: "created_at", ascending: false };
+  }
+
   const adverts: AdvertItem[] = [];
   const { data: advertsRaw } = await supabase
     .from("adverts")
     .select("id,title,price,location,created_at")
     .eq("category_id", typedCurrent.id)
     .eq("status", "active")
-    .order("created_at", { ascending: false })
+    .order(orderBy.column, { ascending: orderBy.ascending })
     .limit(24);
 
   if (advertsRaw?.length) {
@@ -152,18 +173,24 @@ export default async function CategoryPage({ params }: Props) {
         </p>
       </header>
 
-      {children.length ? (
+      {children.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-lg font-medium text-зinc-900">Подкатегории</h2>
+          <h2 className="text-lg font-medium text-zinc-900">Подкатегории</h2>
           <CategoryList items={children} base="/c" />
         </section>
-      ) : (
-        <p className="text-sm text-muted-foreground">Подкатегории отсутствуют.</p>
       )}
 
       <section className="space-y-3">
-        <h2 className="text-lg font-medium text-зinc-900">Объявления</h2>
-        <AdsGrid items={adverts} />
+        <h2 className="text-lg font-medium text-zinc-900">Объявления</h2>
+        <CategoryFilters />
+        {adverts.length > 0 ? (
+          <AdsGrid items={adverts} />
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            В данной категории пока нет активных объявлений. 
+            Станьте первым, кто разместит объявление!
+          </p>
+        )}
       </section>
     </div>
   );

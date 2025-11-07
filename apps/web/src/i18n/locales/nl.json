@@ -36,6 +36,13 @@
     "user": "Gebruiker",
     "free": "Gratis"
   },
+  "filters": {
+    "sort_by": "Sorteren op",
+    "newest_first": "Nieuwste eerst",
+    "oldest_first": "Oudste eerst",
+    "price_low_high": "Prijs: Laag naar Hoog",
+    "price_high_low": "Prijs: Hoog naar Laag"
+  },
   "search": {
     "results": "Zoekresultaten",
     "resultsFor": "Resultaten voor \"{query}\"",

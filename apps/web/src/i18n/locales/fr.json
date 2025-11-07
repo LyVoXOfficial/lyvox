@@ -36,6 +36,13 @@
     "user": "Utilisateur",
     "free": "Gratuit"
   },
+  "filters": {
+    "sort_by": "Trier par",
+    "newest_first": "Les plus récentes",
+    "oldest_first": "Les plus anciennes",
+    "price_low_high": "Prix: Croissant",
+    "price_high_low": "Prix: Décroissant"
+  },
   "search": {
     "results": "Résultats de recherche",
     "resultsFor": "Résultats pour \"{query}\"",
