@@ -129,6 +129,8 @@
       "skip_to_next": "Je kunt naar de volgende stap gaan",
       "no_vehicle_fields": "Deze stap is alleen voor voertuigen",
       "click_next_for_specifics": "Klik op Volgende om door te gaan naar categorie-specifieke velden",
+      "no_vehicle_options": "Voertuigopties zijn alleen voor voertuigcategorieën",
+      "skip_to_description": "Klik op Volgende om door te gaan naar de beschrijving",
       "step_5_title": "Staat en prijs",
       "step_6_title": "Opties",
       "step_7_title": "Beschrijving en contacten",

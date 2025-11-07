@@ -1324,6 +1324,10 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         </CardHeader>
         <CardContent className="space-y-4">
           <ProgressIndicator />
+          
+          {/* Vehicle-specific fields */}
+          {categoryType === 'vehicle' && (
+            <>
           {/* Mileage */}
           <div>
             <Label>{t("post.form.mileage")}</Label>
@@ -1445,8 +1449,10 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
               {t("post.form.vin_placeholder")} (letters and numbers only)
             </p>
           </div>
-
-          {/* Price */}
+          </>
+          )}
+          
+          {/* Price - for all categories */}
           <div>
             <Label>{t("post.form.final_price")}</Label>
             <div className="flex gap-2">
@@ -1478,8 +1484,35 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
     );
   }
 
-  // Step 6: Options
+  // Step 6: Options (only for vehicles)
   if (currentStep === 6) {
+    // For non-vehicle categories, show skip message
+    if (categoryType !== 'vehicle') {
+      return (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("post.form.step_6_title")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <ProgressIndicator />
+            <div className="text-center py-12 text-muted-foreground">
+              <p className="text-lg mb-2">{t("post.form.no_vehicle_options")}</p>
+              <p className="text-sm">{t("post.form.skip_to_description")}</p>
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <Button variant="outline" onClick={handleBack}>
+              {t("post.form.back")}
+            </Button>
+            <Button onClick={handleNext}>
+              {t("post.form.next")}
+            </Button>
+          </CardFooter>
+        </Card>
+      );
+    }
+    
+    // Vehicle options
     const optionCategories = [
       { key: "comfort", label: t("post.form.options_comfort") },
       { key: "interior", label: t("post.form.options_interior") },

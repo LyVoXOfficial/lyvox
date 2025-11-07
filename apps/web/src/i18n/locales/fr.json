@@ -129,6 +129,8 @@
       "skip_to_next": "Vous pouvez passer à l'étape suivante",
       "no_vehicle_fields": "Cette étape est réservée aux véhicules",
       "click_next_for_specifics": "Cliquez sur Suivant pour accéder aux champs spécifiques de la catégorie",
+      "no_vehicle_options": "Les options de véhicule sont réservées aux catégories de véhicules",
+      "skip_to_description": "Cliquez sur Suivant pour passer à la description",
       "step_5_title": "État et prix",
       "step_6_title": "Options",
       "step_7_title": "Description et contacts",
