@@ -34,7 +34,8 @@
     "cancel": "Annuleren",
     "save": "Opslaan",
     "user": "Gebruiker",
-    "free": "Gratis"
+    "free": "Gratis",
+    "delete": "Verwijderen"
   },
   "filters": {
     "sort_by": "Sorteren op",
@@ -124,6 +125,8 @@
       "step_2_title": "Selecteer type",
       "step_3_title": "Basisparameters",
       "step_4_title": "Technische parameters",
+      "no_specialized_fields": "Geen gespecialiseerde velden voor deze categorie",
+      "skip_to_next": "Je kunt naar de volgende stap gaan",
       "step_5_title": "Staat en prijs",
       "step_6_title": "Opties",
       "step_7_title": "Beschrijving en contacten",
@@ -216,7 +219,8 @@
     "favorites": "Favorieten",
     "favorites_coming_soon": "Binnenkort beschikbaar",
     "settings": "Instellingen",
-    "edit": "Profiel bewerken",
+    "edit": "Bewerken",
+    "edit_profile": "Profiel bewerken",
     "member": "Lid",
     "reload_page": "Pagina herladen",
     "login_again": "Opnieuw inloggen",
@@ -225,7 +229,11 @@
     "status": "Status",
     "all_statuses": "Alle statussen",
     "price_not_set": "Prijs niet ingesteld",
-    "page": "Pagina"
+    "page": "Pagina",
+    "delete_advert_title": "Advertentie verwijderen?",
+    "delete_advert_description": "Deze actie kan niet ongedaan worden gemaakt. De advertentie wordt permanent verwijderd.",
+    "no_adverts_found": "U heeft nog geen advertenties",
+    "post_first_ad": "Plaats uw eerste advertentie"
   },
   "upload": {
     "select_photos": "Selecteer foto's",

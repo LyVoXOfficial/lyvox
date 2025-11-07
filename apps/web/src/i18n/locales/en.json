@@ -34,7 +34,8 @@
     "cancel": "Cancel",
     "save": "Save",
     "user": "User",
-    "free": "Free"
+    "free": "Free",
+    "delete": "Delete"
   },
   "filters": {
     "sort_by": "Sort by",
@@ -124,6 +125,8 @@
       "step_2_title": "Select type",
       "step_3_title": "Basic parameters",
       "step_4_title": "Technical parameters",
+      "no_specialized_fields": "No specialized fields for this category",
+      "skip_to_next": "You can skip to the next step",
       "step_5_title": "Condition and price",
       "step_6_title": "Options",
       "step_7_title": "Description and contacts",
@@ -216,7 +219,8 @@
     "favorites": "Favorites",
     "favorites_coming_soon": "Coming soon",
     "settings": "Settings",
-    "edit": "Edit profile",
+    "edit": "Edit",
+    "edit_profile": "Edit profile",
     "member": "Member",
     "reload_page": "Reload page",
     "login_again": "Sign in again",
@@ -225,7 +229,11 @@
     "status": "Status",
     "all_statuses": "All statuses",
     "price_not_set": "Price not set",
-    "page": "Page"
+    "page": "Page",
+    "delete_advert_title": "Delete advert?",
+    "delete_advert_description": "This action cannot be undone. The advert will be permanently deleted.",
+    "no_adverts_found": "You don't have any adverts yet",
+    "post_first_ad": "Post your first advert"
   },
   "upload": {
     "select_photos": "Select photos",

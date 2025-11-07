@@ -34,7 +34,8 @@
     "cancel": "Abbrechen",
     "save": "Speichern",
     "user": "Benutzer",
-    "free": "Kostenlos"
+    "free": "Kostenlos",
+    "delete": "Löschen"
   },
   "filters": {
     "sort_by": "Sortieren nach",
@@ -124,6 +125,8 @@
       "step_2_title": "Typ auswählen",
       "step_3_title": "Grundparameter",
       "step_4_title": "Technische Parameter",
+      "no_specialized_fields": "Keine spezialisierten Felder für diese Kategorie",
+      "skip_to_next": "Sie können zum nächsten Schritt übergehen",
       "step_5_title": "Zustand und Preis",
       "step_6_title": "Optionen",
       "step_7_title": "Beschreibung und Kontakte",
@@ -215,8 +218,9 @@
     "user_reviews": "Benutzerbewertungen",
     "favorites": "Favoriten",
     "favorites_coming_soon": "Demnächst verfügbar",
-    "settings": "Einstellingen",
-    "edit": "Profil bearbeiten",
+    "settings": "Einstellungen",
+    "edit": "Bearbeiten",
+    "edit_profile": "Profil bearbeiten",
     "member": "Mitglied",
     "reload_page": "Seite neu laden",
     "login_again": "Erneut anmelden",
@@ -225,7 +229,11 @@
     "status": "Status",
     "all_statuses": "Alle Status",
     "price_not_set": "Preis nicht angegeben",
-    "page": "Seite"
+    "page": "Seite",
+    "delete_advert_title": "Anzeige löschen?",
+    "delete_advert_description": "Diese Aktion kann nicht rückgängig gemacht werden. Die Anzeige wird dauerhaft gelöscht.",
+    "no_adverts_found": "Sie haben noch keine Anzeigen",
+    "post_first_ad": "Ihre erste Anzeige veröffentlichen"
   },
   "upload": {
     "select_photos": "Fotos auswählen",

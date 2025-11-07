@@ -17,6 +17,11 @@ import { supabase } from "@/lib/supabaseClient";
 import UploadGallery from "@/components/upload-gallery";
 import { getCategoryIcon } from "@/lib/categoryIcons";
 import { ChevronDown, Check } from "lucide-react";
+import { detectCategoryType, getCategoryTypeName } from "@/lib/utils/categoryDetector";
+import { ElectronicsFields } from "@/components/catalog/ElectronicsFields";
+import { RealEstateFields } from "@/components/catalog/RealEstateFields";
+import { FashionFields } from "@/components/catalog/FashionFields";
+import { JobsFields } from "@/components/catalog/JobsFields";
 
 type PostFormProps = {
   categories: Category[];
@@ -84,6 +89,9 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
 
   // Form data state
   const [formData, setFormData] = useState(initializeFormData());
+  
+  // Category type detection state
+  const [categoryType, setCategoryType] = useState<string>('generic');
 
   // Data fetching states
   const [makes, setMakes] = useState<any[]>([]);
@@ -200,6 +208,17 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
       cancelled = true;
     };
   }, []);
+  
+  // Detect category type when category changes
+  useEffect(() => {
+    if (formData.category_id && categories.length > 0) {
+      const category = categories.find(c => c.id === formData.category_id);
+      if (category) {
+        const detectedType = detectCategoryType(category.slug);
+        setCategoryType(detectedType);
+      }
+    }
+  }, [formData.category_id, categories]);
 
   // Filter makes based on search
   useEffect(() => {
@@ -1040,9 +1059,16 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
       <Card>
         <CardHeader>
           <CardTitle>{t("post.form.step_4_title")}</CardTitle>
+          <CardDescription>
+            {getCategoryTypeName(categoryType as any)}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <ProgressIndicator />
+          
+          {/* Vehicle-specific fields */}
+          {categoryType === 'vehicle' && (
+          <>
           {/* Power */}
           <div>
             <Label>{t("post.form.power")}</Label>
@@ -1199,6 +1225,52 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
               </SelectContent>
             </Select>
               </div>
+          </>
+          )}
+          
+          {/* Real Estate fields */}
+          {categoryType === 'real_estate' && (
+            <RealEstateFields
+              formData={formData}
+              onChange={(field: any, value: any) => setFormData(prev => ({ ...prev, [field]: value }))}
+              locale={locale}
+            />
+          )}
+          
+          {/* Electronics fields */}
+          {categoryType === 'electronics' && (
+            <ElectronicsFields
+              formData={formData}
+              onChange={(field: any, value: any) => setFormData(prev => ({ ...prev, [field]: value }))}
+              locale={locale}
+            />
+          )}
+          
+          {/* Fashion fields */}
+          {categoryType === 'fashion' && (
+            <FashionFields
+              formData={formData}
+              onChange={(field: any, value: any) => setFormData(prev => ({ ...prev, [field]: value }))}
+              locale={locale}
+            />
+          )}
+          
+          {/* Jobs fields */}
+          {categoryType === 'jobs' && (
+            <JobsFields
+              formData={formData}
+              onChange={(field: any, value: any) => setFormData(prev => ({ ...prev, [field]: value }))}
+              locale={locale}
+            />
+          )}
+          
+          {/* Generic category - no specialized fields */}
+          {!['vehicle', 'real_estate', 'electronics', 'fashion', 'jobs'].includes(categoryType) && (
+            <div className="text-center py-12 text-muted-foreground">
+              <p className="text-lg mb-2">{t("post.form.no_specialized_fields")}</p>
+              <p className="text-sm">{t("post.form.skip_to_next")}</p>
+            </div>
+          )}
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button variant="outline" onClick={handleBack}>

@@ -34,7 +34,8 @@
     "cancel": "Annuler",
     "save": "Enregistrer",
     "user": "Utilisateur",
-    "free": "Gratuit"
+    "free": "Gratuit",
+    "delete": "Supprimer"
   },
   "filters": {
     "sort_by": "Trier par",
@@ -124,6 +125,8 @@
       "step_2_title": "Sélectionner le type",
       "step_3_title": "Paramètres de base",
       "step_4_title": "Paramètres techniques",
+      "no_specialized_fields": "Aucun champ spécialisé pour cette catégorie",
+      "skip_to_next": "Vous pouvez passer à l'étape suivante",
       "step_5_title": "État et prix",
       "step_6_title": "Options",
       "step_7_title": "Description et contacts",
@@ -216,7 +219,8 @@
     "favorites": "Favoris",
     "favorites_coming_soon": "Bientôt disponible",
     "settings": "Paramètres",
-    "edit": "Modifier le profil",
+    "edit": "Modifier",
+    "edit_profile": "Modifier le profil",
     "member": "Membre",
     "reload_page": "Recharger la page",
     "login_again": "Se reconnecter",
@@ -225,7 +229,11 @@
     "status": "Statut",
     "all_statuses": "Tous les statuts",
     "price_not_set": "Prix non indiqué",
-    "page": "Page"
+    "page": "Page",
+    "delete_advert_title": "Supprimer l'annonce?",
+    "delete_advert_description": "Cette action est irréversible. L'annonce sera définitivement supprimée.",
+    "no_adverts_found": "Vous n'avez pas encore d'annonces",
+    "post_first_ad": "Publier votre première annonce"
   },
   "upload": {
     "select_photos": "Sélectionner des photos",
