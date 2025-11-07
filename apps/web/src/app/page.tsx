@@ -4,8 +4,8 @@ import InfoCarousel from "@/components/info-carousel";
 import CategoriesCarousel from "@/components/categories-carousel";
 import SectionTitle from "@/components/section-title";
 import AdsGrid from "@/components/ads-grid";
-import TopSellersCarousel from "@/components/home/TopSellersCarousel";
-import TopAdvertCard from "@/components/home/TopAdvertCard";
+// import TopSellersCarousel from "@/components/home/TopSellersCarousel";
+// import TopAdvertCard from "@/components/home/TopAdvertCard";
 import { getI18nProps } from "@/i18n/server";
 import { logger } from "@/lib/errorLogger";
 
@@ -199,14 +199,15 @@ export default async function Home() {
         <CategoriesCarousel />
       </section>
 
-      {/* Top Sellers and Top Advert - side by side on desktop */}
-      <section className="space-y-4">
-        <SectionTitle>{t("home.top_sellers_and_adverts") || "Топ продавцов и объявлений"}</SectionTitle>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <TopSellersCarousel />
-          <TopAdvertCard />
-        </div>
-      </section>
+            {/* Top Sellers and Top Advert - temporarily disabled until we have data
+            <section className="space-y-4">
+              <SectionTitle>{t("home.top_sellers_and_adverts") || "Топ продавцов и объявлений"}</SectionTitle>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <TopSellersCarousel />
+                <TopAdvertCard />
+              </div>
+            </section>
+            */}
 
       <section className="space-y-4">
         <SectionTitle>{t("home.free_ads")}</SectionTitle>
