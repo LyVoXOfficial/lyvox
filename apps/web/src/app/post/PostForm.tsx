@@ -375,13 +375,49 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
 
   const handleNext = () => {
     if (currentStep < TOTAL_STEPS) {
-      setCurrentStep(currentStep + 1);
+      let targetStep = currentStep + 1;
+      
+      // For jobs: special navigation
+      if (categoryType === 'jobs') {
+        if (currentStep === 1) targetStep = 4; // Skip 2, 3
+        if (currentStep === 4) targetStep = 7; // Skip 5, 6
+      } else {
+        // Skip step 3 for non-vehicles when going forward from step 2
+        if (currentStep === 2 && categoryType !== 'vehicle' && targetStep === 3) {
+          targetStep = 4;
+        }
+        
+        // Skip step 6 for non-vehicles when going forward from step 5
+        if (currentStep === 5 && categoryType !== 'vehicle' && targetStep === 6) {
+          targetStep = 7;
+        }
+      }
+      
+      setCurrentStep(targetStep);
     }
   };
 
   const handleBack = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      let targetStep = currentStep - 1;
+      
+      // For jobs: special navigation
+      if (categoryType === 'jobs') {
+        if (currentStep === 4) targetStep = 1; // Skip 3, 2
+        if (currentStep === 7) targetStep = 4; // Skip 6, 5
+      } else {
+        // Skip step 3 for non-vehicles when going back from step 4
+        if (currentStep === 4 && categoryType !== 'vehicle' && targetStep === 3) {
+          targetStep = 2;
+        }
+        
+        // Skip step 6 for non-vehicles when going back from step 7
+        if (currentStep === 7 && categoryType !== 'vehicle' && targetStep === 6) {
+          targetStep = 5;
+        }
+      }
+      
+      setCurrentStep(targetStep);
     }
   };
 
@@ -806,6 +842,20 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
 
   // Step 2: Condition selection
   if (currentStep === 2) {
+    // For jobs, this step is skipped via handleNext/handleBack
+    if (categoryType === 'jobs') {
+      // Auto-advance to step 4 (step 3 will also be skipped)
+      // Set default condition for jobs
+      if (formData.condition !== 'used') {
+        setFormData({ ...formData, condition: 'used' });
+      }
+      setCurrentStep(4);
+      return null;
+    }
+    
+    // Determine which conditions are available based on category type
+    const showForParts = ['vehicle', 'electronics', 'generic'].includes(categoryType);
+    
     return (
       <Card>
         <CardHeader>
@@ -823,7 +873,9 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             <SelectContent>
               <SelectItem value="new">{t("post.new")}</SelectItem>
               <SelectItem value="used">{t("post.used")}</SelectItem>
-              <SelectItem value="for_parts">{t("post.for_parts")}</SelectItem>
+              {showForParts && (
+                <SelectItem value="for_parts">{t("post.for_parts")}</SelectItem>
+              )}
             </SelectContent>
           </Select>
         </CardContent>
@@ -840,32 +892,12 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   }
 
   // Step 3: Basic parameters (make, model, year, steering wheel, body, doors, color)
-  // Only for vehicles - other categories skip to step 4
+  // Only for vehicles - other categories auto-skip to step 4
   if (currentStep === 3) {
-    // For non-vehicle categories, show a message and allow skipping
+    // For non-vehicle categories, automatically skip to step 4
     if (categoryType !== 'vehicle') {
-      return (
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("post.form.step_3_title")}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <ProgressIndicator />
-            <div className="text-center py-12 text-muted-foreground">
-              <p className="text-lg mb-2">{t("post.form.no_vehicle_fields")}</p>
-              <p className="text-sm">{t("post.form.click_next_for_specifics")}</p>
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button variant="outline" onClick={handleBack}>
-              {t("post.form.back")}
-            </Button>
-            <Button onClick={handleNext}>
-              {t("post.form.next")}
-            </Button>
-          </CardFooter>
-        </Card>
-      );
+      setCurrentStep(4);
+      return null;
     }
     
     // Vehicle-specific fields
@@ -1317,6 +1349,13 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
 
   // Step 5: Condition and price
   if (currentStep === 5) {
+    // For jobs, skip this step (no price, salary is in step 4)
+    if (categoryType === 'jobs') {
+      // Skip to step 7 since step 6 is also skipped for jobs
+      setCurrentStep(7);
+      return null;
+    }
+    
     return (
       <Card>
         <CardHeader>
@@ -1486,30 +1525,10 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
 
   // Step 6: Options (only for vehicles)
   if (currentStep === 6) {
-    // For non-vehicle categories, show skip message
+    // For non-vehicle categories, automatically skip to step 7
     if (categoryType !== 'vehicle') {
-      return (
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("post.form.step_6_title")}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <ProgressIndicator />
-            <div className="text-center py-12 text-muted-foreground">
-              <p className="text-lg mb-2">{t("post.form.no_vehicle_options")}</p>
-              <p className="text-sm">{t("post.form.skip_to_description")}</p>
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button variant="outline" onClick={handleBack}>
-              {t("post.form.back")}
-            </Button>
-            <Button onClick={handleNext}>
-              {t("post.form.next")}
-            </Button>
-          </CardFooter>
-        </Card>
-      );
+      setCurrentStep(7);
+      return null;
     }
     
     // Vehicle options
