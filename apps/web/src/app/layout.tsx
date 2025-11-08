@@ -35,10 +35,13 @@ export async function generateMetadata(): Promise<Metadata> {
     icons: {
       icon: [
         { url: "/favico.svg", type: "image/svg+xml" },
-        { url: "/lyvox.svg", rel: "mask-icon" },
+        { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+        { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+        { url: "/favicon.ico", type: "image/x-icon" },
       ],
-      shortcut: ["/favico.svg"],
-      apple: [{ url: "/favico.svg" }],
+      shortcut: ["/favicon.ico"],
+      apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+      other: [{ rel: "mask-icon", url: "/lyvox.svg", color: "#11bdf9" }],
     },
     openGraph: {
       title,
@@ -62,7 +65,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     alternates: {
       languages: languageAlternates,
-      icon: "/favico.svg",
+      icon: ["/favico.svg", "/favicon.ico"],
     },
   };
 }
