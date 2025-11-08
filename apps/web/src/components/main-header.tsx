@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -149,8 +150,16 @@ export default function MainHeader() {
     <div className="sticky top-0 z-40 border-b bg-white/95 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
         {/* Logo */}
-        <Link href="/" className="text-lg font-semibold shrink-0">
-          LyVoX
+        <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="LyVoX home">
+          <Image
+            src="/lyvox.svg"
+            alt="LyVoX"
+            width={32}
+            height={32}
+            priority
+            className="h-8 w-8"
+          />
+          <span className="text-lg font-semibold">LyVoX</span>
         </Link>
 
         {/* Categories Dropdown - Desktop */}

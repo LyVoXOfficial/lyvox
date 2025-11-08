@@ -1,4 +1,5 @@
 import "./globals.css";
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { FavoritesProvider } from "@/components/favorites/FavoritesProvider";
 import TopBar from "@/components/topbar";
@@ -9,29 +10,59 @@ import ViewportBottomSpacer from "@/components/viewport-bottom-spacer";
 import { I18nProvider } from "@/i18n";
 import { getI18nProps } from "@/i18n/server";
 
-export async function generateMetadata() {
+export async function generateMetadata(): Promise<Metadata> {
   const { locale, messages } = await getI18nProps();
   const title = messages?.app?.title ?? "LyVoX";
   const description = messages?.app?.description ?? "";
   const locales = ["en", "fr", "nl", "ru", "de"] as const;
   const alternateLocale = locales.filter((l) => l !== locale);
+
+  const languageAlternates = {
+    en: "https://lyvox.be/?lang=en",
+    nl: "https://lyvox.be/?lang=nl",
+    fr: "https://lyvox.be/?lang=fr",
+    ru: "https://lyvox.be/?lang=ru",
+    de: "https://lyvox.be/?lang=de",
+  } satisfies Record<(typeof locales)[number], string>;
+
+  const localizedOgCodes = alternateLocale.map((l) =>
+    l === "en" ? "en_US" : l === "nl" ? "nl_BE" : l === "fr" ? "fr_BE" : l === "ru" ? "ru_RU" : l === "de" ? "de_DE" : l,
+  );
+
   return {
     title,
     description,
+    icons: {
+      icon: [
+        { url: "/favico.svg", type: "image/svg+xml" },
+        { url: "/lyvox.svg", rel: "mask-icon" },
+      ],
+      shortcut: ["/favico.svg"],
+      apple: [{ url: "/favico.svg" }],
+    },
     openGraph: {
       title,
       description,
       locale,
-      alternateLocale: alternateLocale.map((l) => (l === "en" ? "en_US" : l === "nl" ? "nl_BE" : l === "fr" ? "fr_BE" : l === "ru" ? "ru_RU" : l === "de" ? "de_DE" : l)),
+      alternateLocale: localizedOgCodes,
+      images: [
+        {
+          url: "/lyvox.svg",
+          width: 1024,
+          height: 1024,
+          alt: "LyVoX",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/lyvox.svg"],
     },
     alternates: {
-      languages: {
-        en: "https://lyvox.be/?lang=en",
-        nl: "https://lyvox.be/?lang=nl",
-        fr: "https://lyvox.be/?lang=fr",
-        ru: "https://lyvox.be/?lang=ru",
-        de: "https://lyvox.be/?lang=de",
-      },
+      languages: languageAlternates,
+      icon: "/favico.svg",
     },
   };
 }

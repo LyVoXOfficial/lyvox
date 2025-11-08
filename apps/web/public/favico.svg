@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1024" height="1024" viewBox="384 -88.5 1024 1024" xml:space="preserve">
+<desc>Created with Fabric.js 4.6.0</desc>
+<defs>
+</defs>
+<g transform="matrix(2.59 0 0 2.59 895.76 423.32)"  >
+<linearGradient id="SVGID_SVGID_3847_3" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1 0 0 1 277.54 338.18)"  x1="98.32904143620159" y1="22.283332748195285" x2="294.9871243086048" y2="296.04999222602305">
+<stop offset="0%" style="stop-color:rgb(163,230,53);stop-opacity: 1"/>
+<stop offset="76%" style="stop-color:rgb(17,189,249);stop-opacity: 1"/>
+</linearGradient>
+<path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: url(#SVGID_SVGID_3847_3); fill-rule: nonzero; opacity: 1;"  transform=" translate(-474.2, -497.34)" d="M 587.177 557.914 C 584.584 561.243 580.13 570.893 577.727 575.153 C 565.607 596.641 555.971 626.418 536.837 642.293 C 522.619 654.089 504.386 657.953 486.475 656.049 C 479.065 655.26 462.166 651.313 456.537 646.832 C 428.241 624.305 402.185 591.199 377.49 564.616 C 351.456 536.257 325.155 507.906 300.533 478.361 C 268.848 440.341 268.384 389.735 308.692 357.707 C 334.045 337.561 363.954 336.045 395.069 339.81 C 428.918 343.906 449.115 358.496 469.281 385.096 C 476.604 398.102 490.134 434.44 474.923 446.503 C 444.499 470.631 435.808 421.01 407.286 422.553 C 397.226 423.097 389.113 425.085 381.389 432.627 C 375.692 438.146 372.588 445.814 372.841 453.742 C 373.108 463.324 377.205 470.485 384.024 476.986 C 391.87 484.465 405.504 482.236 415.753 481.802 C 427.724 488.873 455.791 520.347 465.334 532.494 C 472.703 522.968 484.428 497.256 490.727 485.423 C 510.108 449.013 527.96 410.245 547.811 374.18 C 560.551 356.43 577.549 344.171 599.423 340.441 C 627.762 335.608 665.307 342.211 670.549 376.218 C 670.64 376.397 670.731 376.577 670.822 376.756 C 671.655 399.356 656.039 423.581 645.682 443.677 L 607.463 517.606 C 601.164 529.863 592.596 545.541 587.177 557.914 z" stroke-linecap="round" />
+</g>
+</svg>
