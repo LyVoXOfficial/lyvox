@@ -315,7 +315,7 @@ export default function SearchFilters({
       return;
     }
 
-    const categoryType = detectCategoryType(selectedCategory.slug || "");
+    const categoryType = detectCategoryType(selectedCategory.path || selectedCategory.slug || "");
     if (SCHEMA_EXCLUDED_TYPES.has(categoryType)) {
       setFilterSchemaState({
         loading: false,
@@ -777,7 +777,7 @@ export default function SearchFilters({
       </div>
 
     {/* Category-specific filters */}
-    {selectedCategory && !SCHEMA_EXCLUDED_TYPES.has(detectCategoryType(selectedCategory.slug || "")) && (
+    {selectedCategory && !SCHEMA_EXCLUDED_TYPES.has(detectCategoryType(selectedCategory.path || selectedCategory.slug || "")) && (
       <div className="space-y-4">
         <Label className="text-sm font-semibold block">
           {t("search.filters")}

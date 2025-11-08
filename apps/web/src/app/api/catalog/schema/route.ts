@@ -74,20 +74,53 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ ok: false, error: "Category not found" }, { status: 404 });
     }
 
-    const { data: schemaRows, error: schemaError } = await supabase
-      .from("catalog_subcategory_schema")
-      .select("id, version, is_active, steps")
-      .eq("category_id", category.id)
-      .eq("is_active", true)
-      .order("version", { ascending: false })
-      .limit(1);
+    let schemaCategory = category;
+    let schemaRow: { id: string; version: number; is_active: boolean; steps: any } | null = null;
+    const visitedCategoryIds = new Set<string>();
 
-    if (schemaError) {
-      console.error("catalog/schema load error:", schemaError);
-      return NextResponse.json({ ok: false, error: "Failed to load schema" }, { status: 500 });
+    while (schemaCategory && !schemaRow) {
+      if (visitedCategoryIds.has(schemaCategory.id)) {
+        break;
+      }
+      visitedCategoryIds.add(schemaCategory.id);
+
+      const { data: schemaRows, error: schemaError } = await supabase
+        .from("catalog_subcategory_schema")
+        .select("id, version, is_active, steps")
+        .eq("category_id", schemaCategory.id)
+        .eq("is_active", true)
+        .order("version", { ascending: false })
+        .limit(1);
+
+      if (schemaError) {
+        console.error("catalog/schema load error:", schemaError);
+        return NextResponse.json({ ok: false, error: "Failed to load schema" }, { status: 500 });
+      }
+
+      if (schemaRows && schemaRows[0]) {
+        schemaRow = schemaRows[0];
+        break;
+      }
+
+      if (!schemaCategory.parent_id) {
+        break;
+      }
+
+      const { data: parentRows, error: parentError } = await supabase
+        .from("categories")
+        .select("id, slug, name_ru, name_en, name_fr, name_nl, path, icon, parent_id, level, is_active")
+        .eq("id", schemaCategory.parent_id)
+        .eq("is_active", true)
+        .limit(1);
+
+      if (parentError) {
+        console.error("catalog/schema parent lookup error:", parentError);
+        return NextResponse.json({ ok: false, error: "Failed to resolve schema hierarchy" }, { status: 500 });
+      }
+
+      schemaCategory = parentRows?.[0] ?? null;
     }
 
-    const schemaRow = schemaRows?.[0];
     if (!schemaRow) {
       return NextResponse.json(
         {
@@ -190,6 +223,7 @@ export async function GET(request: NextRequest) {
       ok: true,
       data: {
         category,
+        resolved_category_id: schemaCategory?.id ?? category.id,
         schema: {
           id: schemaRow.id,
           version: schemaRow.version,
