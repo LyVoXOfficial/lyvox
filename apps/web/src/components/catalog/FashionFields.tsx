@@ -6,11 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { FashionItem } from "@/lib/types/catalog";
+
+type FashionFormData = Record<string, any>;
 
 interface FashionFieldsProps {
-  formData: Partial<FashionItem>;
-  onChange: (field: keyof FashionItem, value: any) => void;
+  formData: FashionFormData;
+  onChange: (field: string, value: any) => void;
   locale?: string;
 }
 

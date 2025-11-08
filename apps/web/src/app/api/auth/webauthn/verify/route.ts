@@ -9,7 +9,6 @@
  * Response: { ok: true, data: { verified: true } }
  */
 
-import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { createErrorResponse, createSuccessResponse, ApiErrorCode } from "@/lib/apiErrors";
 import type { WebAuthnVerifyRequest, WebAuthnVerifyResponse } from "@/types/webauthn";
@@ -48,9 +47,10 @@ export async function POST(request: Request) {
     // 2. Валидация входных данных
     const validation = verifySchema.safeParse(body);
     if (!validation.success) {
+      const firstIssue = validation.error.issues[0];
       return createErrorResponse(ApiErrorCode.BAD_INPUT, {
         status: 400,
-        detail: validation.error.errors[0].message,
+        detail: firstIssue?.message ?? "Validation failed",
       });
     }
 
@@ -110,10 +110,12 @@ export async function POST(request: Request) {
     }
 
     // 6. Верифицируем с помощью WebAuthn
-    const { data: verifyData, error: verifyError } = await supabase.auth.mfa.verify({
-      factorId: targetFactorId,
-      challengeId: challengeData.id,
-    });
+    const { error: verifyError } = await supabase.auth.mfa.verify(
+      {
+        factorId: targetFactorId,
+        challengeId: challengeData.id,
+      } as Parameters<typeof supabase.auth.mfa.verify>[0],
+    );
 
     if (verifyError) {
       return createErrorResponse(ApiErrorCode.INTERNAL_ERROR, {

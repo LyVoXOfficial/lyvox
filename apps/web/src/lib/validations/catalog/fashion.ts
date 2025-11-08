@@ -33,9 +33,9 @@ export const clothingTypeSchema = z.enum([
 
 export const seasonSchema = z.enum(['spring_summer', 'autumn_winter', 'all_season']);
 
-export const conditionSchema = z.enum(['new', 'like_new', 'good', 'fair', 'for_parts']);
+const conditionSchema = z.enum(['new', 'like_new', 'good', 'fair', 'for_parts']);
 
-export const deliveryOptionSchema = z.enum([
+const deliveryOptionSchema = z.enum([
   'pickup_only',
   'delivery_available',
   'shipping_national',

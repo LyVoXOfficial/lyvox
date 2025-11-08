@@ -1,44 +1,66 @@
-import { NextRequest } from "next/server";
+import { z } from "zod";
 import { supabaseServer } from "@/lib/supabaseServer";
-import { createSuccessResponse, createErrorResponse, ApiErrorCode } from "@/lib/apiErrors";
-import { withRateLimit } from "@/lib/rateLimiter";
+import {
+  createSuccessResponse,
+  createErrorResponse,
+  handleSupabaseError,
+  ApiErrorCode,
+} from "@/lib/apiErrors";
+import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 
-// DELETE /api/favorites/[advertId] - Remove from favorites
-async function DELETE(
-  request: NextRequest,
-  context: { params: Promise<{ advertId: string }> }
+type SupabaseClient = ReturnType<typeof supabaseServer>;
+type SupabaseUser = Awaited<ReturnType<SupabaseClient["auth"]["getUser"]>>["data"]["user"];
+
+const uuidSchema = z.string().uuid();
+
+const contextCache = new WeakMap<Request, Promise<{ supabase: SupabaseClient; user: SupabaseUser }>>();
+
+const getRequestContext = (req: Request) => {
+  let cached = contextCache.get(req);
+  if (!cached) {
+    const supabase = supabaseServer();
+    cached = supabase.auth.getUser().then(({ data }) => ({
+      supabase,
+      user: data.user ?? null,
+    }));
+    contextCache.set(req, cached);
+  }
+  return cached;
+};
+
+const resolveUserId = (req: Request) => getRequestContext(req).then(({ user }) => user?.id ?? null);
+
+const deleteLimiter = createRateLimiter({
+  limit: 30,
+  windowSec: 60,
+  prefix: "favorites:delete",
+});
+
+const buildRateLimitKey = (_req: Request, userId: string | null, ip: string | null) =>
+  userId ?? ip ?? "anonymous";
+
+async function removeFavorite(
+  request: Request,
+  context: { params: Promise<{ advertId: string }> },
 ) {
-  const supabase = supabaseServer();
-  
-  // Get current user
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getRequestContext(request);
 
-  if (authError || !user) {
-    return createErrorResponse(
-      ApiErrorCode.UNAUTHORIZED,
-      "Authentication required",
-      401
-    );
+  if (!user) {
+    return createErrorResponse(ApiErrorCode.UNAUTH, {
+      status: 401,
+      detail: "Authentication required",
+    });
   }
 
-  // Get advertId from params
-  const params = await context.params;
-  const { advertId } = params;
-
-  // Validate UUID format
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if (!uuidRegex.test(advertId)) {
-    return createErrorResponse(
-      ApiErrorCode.INVALID_INPUT,
-      "Invalid advert ID format",
-      400
-    );
+  const { advertId } = await context.params;
+  const uuidValidation = uuidSchema.safeParse(advertId);
+  if (!uuidValidation.success) {
+    return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+      status: 400,
+      detail: "Invalid advert ID format",
+    });
   }
 
-  // Delete from favorites
   const { error: deleteError, count } = await supabase
     .from("favorites")
     .delete({ count: "exact" })
@@ -46,19 +68,14 @@ async function DELETE(
     .eq("advert_id", advertId);
 
   if (deleteError) {
-    return createErrorResponse(
-      ApiErrorCode.DB_ERROR,
-      `Failed to remove favorite: ${deleteError.message}`,
-      500
-    );
+    return handleSupabaseError(deleteError, ApiErrorCode.INTERNAL_ERROR);
   }
 
-  if (count === 0) {
-    return createErrorResponse(
-      ApiErrorCode.NOT_FOUND,
-      "Favorite not found",
-      404
-    );
+  if (!count) {
+    return createErrorResponse(ApiErrorCode.NOT_FOUND, {
+      status: 404,
+      detail: "Favorite not found",
+    });
   }
 
   return createSuccessResponse({
@@ -67,12 +84,9 @@ async function DELETE(
   });
 }
 
-// Apply rate limiting
-export const DELETE_HANDLER = withRateLimit(DELETE, {
-  maxRequests: 30,
-  windowMs: 60 * 1000,
-  keyType: "user",
+export const DELETE = withRateLimit(removeFavorite, {
+  limiter: deleteLimiter,
+  getUserId: resolveUserId,
+  makeKey: buildRateLimitKey,
 });
-
-export { DELETE_HANDLER as DELETE };
 

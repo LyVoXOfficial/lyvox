@@ -25,17 +25,9 @@ export const updateAdvertSchema = z
       .nullable()
       .optional(),
     
-    currency: z
-      .enum(["EUR", "USD", "GBP", "RUB"], {
-        errorMap: () => ({ message: "Currency must be one of: EUR, USD, GBP, RUB" }),
-      })
-      .optional(),
+    currency: z.enum(["EUR", "USD", "GBP", "RUB"]).optional(),
     
-    condition: z
-      .enum(["new", "used", "for_parts"], {
-        errorMap: () => ({ message: "Condition must be one of: new, used, for_parts" }),
-      })
-      .optional(),
+    condition: z.enum(["new", "used", "for_parts"]).optional(),
     
     location: z
       .string()
@@ -49,11 +41,7 @@ export const updateAdvertSchema = z
       .uuid("Category ID must be a valid UUID")
       .optional(),
     
-    status: z
-      .enum(["draft", "active", "archived"], {
-        errorMap: () => ({ message: "Status must be one of: draft, active, archived" }),
-      })
-      .optional(),
+    status: z.enum(["draft", "active", "archived"]).optional(),
     
     specifics: z
       .record(z.string(), z.string())

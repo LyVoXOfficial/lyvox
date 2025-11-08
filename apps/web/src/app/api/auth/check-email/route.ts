@@ -26,7 +26,7 @@ export async function GET(request: Request) {
         {
           ok: false,
           error: "INVALID_EMAIL",
-          detail: validation.error.errors[0]?.message || "Invalid email format",
+          detail: validation.error.issues[0]?.message || "Invalid email format",
         },
         { status: 400 }
       );

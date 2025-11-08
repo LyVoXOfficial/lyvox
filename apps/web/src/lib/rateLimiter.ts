@@ -115,10 +115,13 @@ type WithRateLimitOptions = {
   }) => void | Promise<void>;
 };
 
-type RouteHandler = (req: Request) => Promise<Response>;
+type RouteHandler<TArgs extends unknown[] = []> = (req: Request, ...rest: TArgs) => Promise<Response>;
 
-export function withRateLimit(handler: RouteHandler, options: WithRateLimitOptions): RouteHandler {
-  return async (req: Request) => {
+export function withRateLimit<TArgs extends unknown[] = []>(
+  handler: RouteHandler<TArgs>,
+  options: WithRateLimitOptions,
+): RouteHandler<TArgs> {
+  return async (req: Request, ...rest: TArgs) => {
     const ip = getClientIp(req);
     const userId = options.getUserId ? await options.getUserId(req) : null;
     const keys = toKeyArray(options.makeKey(req, userId, ip));
@@ -134,7 +137,7 @@ export function withRateLimit(handler: RouteHandler, options: WithRateLimitOptio
       headerResult = pickStricterResult(headerResult, result);
     }
 
-    const response = await handler(req);
+    const response = await handler(req, ...rest);
     if (headerResult) {
       response.headers.set("RateLimit-Limit", String(headerResult.limit));
       response.headers.set("RateLimit-Remaining", String(Math.max(headerResult.remaining, 0)));

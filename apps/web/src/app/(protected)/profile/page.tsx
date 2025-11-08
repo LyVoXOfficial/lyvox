@@ -72,7 +72,15 @@ async function loadProfileData(userId: string): Promise<(ProfileData & {
     .select("id, title, price, status, created_at, location")
     .eq("user_id", userId);
 
-  const adverts = advertsData || [];
+  const adverts = (advertsData || []).map((advert) => ({
+    id: advert.id,
+    title: advert.title,
+    price: advert.price ?? null,
+    status: advert.status ?? null,
+    created_at: advert.created_at ?? "",
+    location: advert.location ?? null,
+    media: [] as Array<{ url: string | null; sort: number | null }>,
+  }));
 
   // Fetch media for all adverts in a single query
   if (adverts.length > 0) {
@@ -93,7 +101,7 @@ async function loadProfileData(userId: string): Promise<(ProfileData & {
         return acc;
       }, {});
 
-      adverts.forEach((advert: any) => {
+      adverts.forEach((advert) => {
         advert.media = mediaByAdvert[advert.id] || [];
       });
     }
@@ -354,10 +362,18 @@ export default async function ProfilePage() {
             <CardHeader>
               <CardTitle>{t('profile.favorites')}</CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-center text-muted-foreground py-10">
-                {t('profile.favorites_coming_soon')}
+            <CardContent className="space-y-4 text-center">
+              <p className="text-muted-foreground">
+                {t('favorites.empty_state')}
               </p>
+              <p className="text-sm text-muted-foreground">
+                {t('favorites.empty_action')}
+              </p>
+              <Button asChild className="inline-flex">
+                <Link href="/profile/favorites">
+                  {t('favorites.title')}
+                </Link>
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>

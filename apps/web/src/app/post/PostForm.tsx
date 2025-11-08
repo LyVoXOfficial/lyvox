@@ -33,6 +33,7 @@ type PostFormProps = {
 };
 
 const TOTAL_STEPS = 8;
+const AUTO_SAVE_INTERVAL_MS = 30_000;
 
 export function PostForm({ categories, userId, advertToEdit, locale, userPhone }: PostFormProps) {
   const { t } = useI18n();
@@ -133,9 +134,15 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   const [filteredMakes, setFilteredMakes] = useState<any[]>([]);
   const [availableTransmissions, setAvailableTransmissions] = useState<string[]>([]);
   const [availableFuelTypes, setAvailableFuelTypes] = useState<string[]>([]);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "pending" | "saving" | "saved" | "error">("idle");
+  const [autoSaveError, setAutoSaveError] = useState<string | null>(null);
+  const [lastAutoSaveAt, setLastAutoSaveAt] = useState<number | null>(null);
   
   // Ref to track if draft creation is in progress
   const draftCreationInProgress = useRef(false);
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSavedSnapshotRef = useRef<string | null>(null);
+  const initialSnapshotCapturedRef = useRef(false);
 
   // Calculate form completion percentage
   const calculateProgress = (): number => {
@@ -697,59 +704,286 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
     return specifics;
   };
 
-  const handleSaveDraft = async () => {
-    setIsLoading(true);
-    try {
-      const id = await ensureAdvertId();
-      
-      // Generate title from vehicle data if available
-      let title = "Черновик объявления";
-      if (formData.make_id && formData.model_id && formData.year) {
-        const makeName = makes.find((m) => m.id === formData.make_id)?.name_en || "";
-        const modelName = models.find((m) => m.id === formData.model_id)?.name_en || "";
-        title = `${makeName} ${modelName} ${formData.year}`;
-      } else if (formData.category_id) {
-        const categoryName = categories.find((c) => c.id === formData.category_id)?.name_ru || "";
-        title = `${categoryName} - Черновик`;
-      }
+  const hasMeaningfulChanges = useCallback(() => {
+    if (formData.category_id) return true;
+    if (formData.condition) return true;
+    if (formData.description && formData.description.trim().length > 0) return true;
+    if (formData.location && formData.location.trim().length > 0) return true;
+    if (formData.price !== null && formData.price !== undefined) return true;
+    if (formData.additional_phone && formData.additional_phone.trim().length > 0) return true;
 
-      const payload: Record<string, unknown> = {
-        title,
-        category_id: formData.category_id || undefined,
-        condition: formData.condition || undefined,
-        description: formData.description || undefined,
-        price: formData.price !== null ? formData.price : undefined,
-        location: formData.location || undefined,
-        currency: "EUR",
-        status: "draft",
-        specifics: prepareSpecifics(),
-      };
+    if (formData.catalog_fields && Object.keys(formData.catalog_fields).length > 0) return true;
+    if (formData.options && Object.values(formData.options).some((value) => Boolean(value))) return true;
 
-      // Remove undefined values
-      Object.keys(payload).forEach((key) => {
-        if (payload[key] === undefined) {
-          delete payload[key];
-        }
-      });
+    const specifics = prepareSpecifics();
+    if (Object.keys(specifics).length > 0) return true;
 
-      const response = await apiFetch(`/api/adverts/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+    return false;
+  }, [formData, prepareSpecifics]);
 
-      const result = await response.json();
-      if (!result.ok) {
-        throw new Error(result.message || result.error || t("post.update_error"));
-      }
-
-      toast.success(t("post.form.save_draft"));
-    } catch (error: any) {
-      toast.error(t("post.update_error"), { description: error.message });
-    } finally {
-      setIsLoading(false);
+  const createDraftSnapshot = useCallback(() => {
+    if (!hasMeaningfulChanges()) {
+      return null;
     }
-  };
+
+    const toSortedObject = (source: Record<string, unknown>) =>
+      Object.fromEntries(Object.entries(source).sort(([a], [b]) => a.localeCompare(b)));
+
+    const specifics = toSortedObject(prepareSpecifics());
+
+    const normalizedOptions: Record<string, unknown> = {};
+    Object.entries(formData.options ?? {}).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== false && value !== "") {
+        normalizedOptions[key] = value;
+      }
+    });
+
+    return JSON.stringify({
+      category_id: formData.category_id || "",
+      condition: formData.condition || "",
+      description: formData.description || "",
+      price: formData.price,
+      location: formData.location || "",
+      additional_phone: formData.additional_phone || "",
+      additional_phone_verified: formData.additional_phone_verified || false,
+      options: toSortedObject(normalizedOptions),
+      catalog_fields: toSortedObject(formData.catalog_fields ?? {}),
+      specifics,
+    });
+  }, [formData, hasMeaningfulChanges, prepareSpecifics]);
+
+  useEffect(() => {
+    if (initialSnapshotCapturedRef.current) {
+      return;
+    }
+
+    const snapshot = createDraftSnapshot();
+    if (snapshot) {
+      lastSavedSnapshotRef.current = snapshot;
+      if (advertToEdit) {
+        setAutoSaveStatus("saved");
+        setLastAutoSaveAt(Date.now());
+      }
+    } else {
+      lastSavedSnapshotRef.current = null;
+    }
+
+    initialSnapshotCapturedRef.current = true;
+  }, [advertToEdit, createDraftSnapshot]);
+
+  const saveDraftMutation = useCallback(
+    async ({ auto = false }: { auto?: boolean } = {}) => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+        autoSaveTimerRef.current = null;
+      }
+
+      const snapshotBeforeSave = createDraftSnapshot();
+
+      if (auto) {
+        if (!hasMeaningfulChanges() || !snapshotBeforeSave) {
+          setAutoSaveStatus("idle");
+          setAutoSaveError(null);
+          return false;
+        }
+      }
+
+      if (auto) {
+        setAutoSaveStatus("saving");
+      } else {
+        setIsLoading(true);
+        setAutoSaveStatus("saving");
+      }
+      setAutoSaveError(null);
+
+      try {
+        const id = await ensureAdvertId();
+
+        const draftLabel = t("post.draft");
+        const fallbackDraftLabel = draftLabel && draftLabel !== "post.draft" ? draftLabel : "Draft";
+
+        const makeName = formData.make_id ? makes.find((m) => m.id === formData.make_id)?.name_en ?? "" : "";
+        const modelName = formData.model_id ? models.find((m) => m.id === formData.model_id)?.name_en ?? "" : "";
+        const yearValue = formData.year ? String(formData.year) : "";
+        const vehicleTitleParts = [makeName, modelName, yearValue].filter((part) => part && part.length > 0);
+        let title = vehicleTitleParts.join(" ").trim();
+
+        if (!title) {
+          if (formData.category_id) {
+            const category = categories.find((c) => c.id === formData.category_id);
+            const localized =
+              (category?.[`name_${locale}` as keyof Category] as string) ??
+              category?.name_ru ??
+              category?.name_en ??
+              "";
+            title = localized ? `${localized} - ${fallbackDraftLabel}`.trim() : fallbackDraftLabel;
+          } else {
+            title = fallbackDraftLabel;
+          }
+        }
+
+        const payload: Record<string, unknown> = {
+          title,
+          category_id: formData.category_id || undefined,
+          condition: formData.condition || undefined,
+          description: formData.description || undefined,
+          price: formData.price !== null ? formData.price : undefined,
+          location: formData.location || undefined,
+          currency: "EUR",
+          status: "draft",
+          specifics: prepareSpecifics(),
+        };
+
+        Object.keys(payload).forEach((key) => {
+          if (payload[key] === undefined) {
+            delete payload[key];
+          }
+        });
+
+        const response = await apiFetch(`/api/adverts/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const result = await response.json();
+        if (!result.ok) {
+          throw new Error(result.message || result.error || t("post.update_error"));
+        }
+
+        const snapshotAfterSave = snapshotBeforeSave ?? createDraftSnapshot();
+        if (snapshotAfterSave) {
+          lastSavedSnapshotRef.current = snapshotAfterSave;
+        } else {
+          lastSavedSnapshotRef.current = null;
+        }
+
+        setLastAutoSaveAt(Date.now());
+        setAutoSaveStatus("saved");
+        setAutoSaveError(null);
+
+        if (!auto) {
+          toast.success(t("post.form.save_draft"));
+        }
+
+        return true;
+      } catch (error: any) {
+        const message = error?.message || t("post.update_error");
+        setAutoSaveStatus("error");
+        setAutoSaveError(message);
+        if (!auto) {
+          toast.error(t("post.update_error"), { description: message });
+        } else {
+          console.error("[PostForm] Auto-save error:", error);
+        }
+        return false;
+      } finally {
+        if (!auto) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [
+      categories,
+      createDraftSnapshot,
+      ensureAdvertId,
+      formData,
+      hasMeaningfulChanges,
+      locale,
+      makes,
+      models,
+      prepareSpecifics,
+      t,
+    ],
+  );
+
+  useEffect(() => {
+    if (!initialSnapshotCapturedRef.current) {
+      return;
+    }
+
+    if (autoSaveStatus === "saving") {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+        autoSaveTimerRef.current = null;
+      }
+      return;
+    }
+
+    const snapshot = createDraftSnapshot();
+
+    if (!snapshot) {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+        autoSaveTimerRef.current = null;
+      }
+      if (lastSavedSnapshotRef.current !== null) {
+        lastSavedSnapshotRef.current = null;
+      }
+      if (autoSaveStatus !== "idle") {
+        setAutoSaveStatus("idle");
+      }
+      setAutoSaveError(null);
+      return;
+    }
+
+    if (lastSavedSnapshotRef.current && lastSavedSnapshotRef.current === snapshot) {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+        autoSaveTimerRef.current = null;
+      }
+      setAutoSaveStatus((prev) => {
+        if (prev === "saved") return prev;
+        if (prev === "pending" || prev === "error") {
+          return "saved";
+        }
+        return prev;
+      });
+      return;
+    }
+
+    setAutoSaveError(null);
+
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+
+    autoSaveTimerRef.current = setTimeout(() => {
+      autoSaveTimerRef.current = null;
+      saveDraftMutation({ auto: true }).catch(() => undefined);
+    }, AUTO_SAVE_INTERVAL_MS);
+
+    setAutoSaveStatus((prev) => {
+      if (prev === "saving" || prev === "pending") {
+        return prev;
+      }
+      return "pending";
+    });
+
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+        autoSaveTimerRef.current = null;
+      }
+    };
+  }, [autoSaveStatus, createDraftSnapshot, saveDraftMutation]);
+
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+        autoSaveTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  const handleSaveDraft = useCallback(async () => {
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = null;
+    }
+    await saveDraftMutation({ auto: false });
+  }, [saveDraftMutation]);
   
   const handlePublish = async () => {
     const schemaErrors = validateSchemaFields();
@@ -916,6 +1150,60 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   // Progress indicator component
   const ProgressIndicator = () => {
     const progress = calculateProgress();
+    const localeMap: Record<string, string> = {
+      ru: "ru-RU",
+      nl: "nl-NL",
+      fr: "fr-FR",
+      de: "de-DE",
+    };
+    const renderAutoSaveStatus = () => {
+      if (autoSaveStatus === "idle") {
+        return null;
+      }
+
+      let messageKey = "post.auto_save.pending";
+      let toneClass = "text-muted-foreground";
+
+      if (autoSaveStatus === "saving") {
+        messageKey = "post.auto_save.saving";
+        toneClass = "text-amber-600";
+      } else if (autoSaveStatus === "saved") {
+        messageKey = "post.auto_save.saved";
+        toneClass = "text-green-600";
+      } else if (autoSaveStatus === "error") {
+        messageKey = "post.auto_save.error";
+        toneClass = "text-destructive";
+      } else if (autoSaveStatus === "pending") {
+        toneClass = "text-amber-600";
+      }
+
+      let message = t(messageKey);
+      if (message === messageKey) {
+        // Fallback to English if translation missing
+        const fallbacks: Record<string, string> = {
+          "post.auto_save.pending": "Unsaved changes",
+          "post.auto_save.saving": "Saving draft...",
+          "post.auto_save.saved": "Draft saved",
+          "post.auto_save.error": "Auto-save failed",
+        };
+        message = fallbacks[messageKey] ?? messageKey;
+      }
+
+      if (autoSaveStatus === "saved" && lastAutoSaveAt) {
+        const formatter = new Intl.DateTimeFormat(localeMap[locale] ?? "en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        message = `${message} · ${formatter.format(new Date(lastAutoSaveAt))}`;
+      }
+
+      if (autoSaveStatus === "error" && autoSaveError) {
+        message = `${message}: ${autoSaveError}`;
+      }
+
+      return <p className={`mt-2 text-xs ${toneClass}`}>{message}</p>;
+    };
+
     return (
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
@@ -932,6 +1220,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             style={{ width: `${progress}%` }}
           />
         </div>
+        {renderAutoSaveStatus()}
       </div>
     );
   };

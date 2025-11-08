@@ -56,7 +56,8 @@ const baseHandler = async (request: Request) => {
   } catch {
     return createErrorResponse(ApiErrorCode.SERVICE_ROLE_MISSING, {
       status: 500,
-      message: "SUPABASE_SERVICE_ROLE_KEY is not configured. Set SUPABASE_SERVICE_ROLE_KEY on the server to view complaints.",
+      detail:
+        "SUPABASE_SERVICE_ROLE_KEY is not configured. Set SUPABASE_SERVICE_ROLE_KEY on the server to view complaints.",
     });
   }
 

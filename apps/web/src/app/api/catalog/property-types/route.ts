@@ -18,8 +18,8 @@ export async function GET(request: NextRequest) {
     
     const { data, error } = await supabase
       .from('property_types')
-      .select('*')
-      .order('sort_order');
+      .select('id, slug, category, name_en, name_fr, name_nl, name_de, name_ru, is_active')
+      .order('name_en');
     
     if (error) {
       console.error('Error fetching property types:', error);
@@ -30,12 +30,31 @@ export async function GET(request: NextRequest) {
     }
     
     // Return data with requested language
-    const formatted = data.map((type) => ({
+    const SUPPORTED_LANGUAGES = ['en', 'fr', 'nl', 'de', 'ru'] as const;
+    type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
+    type PropertyNameField = 'name_en' | 'name_fr' | 'name_nl' | 'name_de' | 'name_ru';
+
+    const resolveLang = (value: string | null): SupportedLanguage =>
+      (SUPPORTED_LANGUAGES as readonly string[]).includes(value ?? '')
+        ? ((value as SupportedLanguage) ?? 'en')
+        : 'en';
+
+    const resolvedLang = resolveLang(lang);
+
+    const nameField: Record<SupportedLanguage, PropertyNameField> = {
+      en: 'name_en',
+      fr: 'name_fr',
+      nl: 'name_nl',
+      de: 'name_de',
+      ru: 'name_ru',
+    };
+
+    const formatted = (data ?? []).map((type) => ({
       id: type.id,
       slug: type.slug,
-      name: type[`name_${lang}`] || type.name_en,
       category: type.category,
-      sort_order: type.sort_order,
+      is_active: type.is_active,
+      name: type[nameField[resolvedLang]] ?? type.name_en,
     }));
     
     return NextResponse.json(formatted);

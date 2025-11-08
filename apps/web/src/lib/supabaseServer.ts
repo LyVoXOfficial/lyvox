@@ -154,23 +154,17 @@ export async function requireAuth() {
 
 /**
  * Проверяет, является ли пользователь администратором
- * 
- * @param userId - ID пользователя для проверки
  * @returns true если пользователь - администратор
  */
-export async function isAdmin(userId?: string): Promise<boolean> {
+export async function isAdmin(): Promise<boolean> {
   const supabase = supabaseServer();
   
-  // Если userId не указан, берем текущего пользователя
-  if (!userId) {
-    const session = await getServerSession();
-    if (!session) return false;
-    userId = session.user.id;
-  }
+  const session = await getServerSession();
+  if (!session) return false;
 
   try {
     // Используем функцию is_admin из базы данных
-    const { data, error } = await supabase.rpc("is_admin", { user_id: userId });
+    const { data, error } = await supabase.rpc("is_admin");
     
     if (error) {
       console.error("Error checking admin status:", error);

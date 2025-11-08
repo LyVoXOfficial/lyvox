@@ -86,6 +86,10 @@ export default function AuthDebugPage() {
 
       const hasCookies = navigator.cookieEnabled;
 
+      const appMetadata = (session?.user?.app_metadata ?? {}) as Record<string, unknown>;
+      const userAal =
+        typeof appMetadata.aal === "string" ? (appMetadata.aal as string) : null;
+
       const diagnostics: DiagnosticInfo = {
         session: {
           exists: !!session,
@@ -93,7 +97,7 @@ export default function AuthDebugPage() {
           email: session?.user?.email,
           expiresAt: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : undefined,
           provider: session?.user?.app_metadata?.provider,
-          aal: session?.user?.aal,
+          aal: userAal ?? undefined,
         },
         environment: {
           supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || 'Not set',

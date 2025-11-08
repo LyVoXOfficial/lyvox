@@ -1,42 +1,81 @@
-import { NextRequest } from "next/server";
-import { supabaseServer } from "@/lib/supabaseServer";
-import { createSuccessResponse, createErrorResponse, ApiErrorCode } from "@/lib/apiErrors";
-import { withRateLimit } from "@/lib/rateLimiter";
 import { z } from "zod";
+import { supabaseServer } from "@/lib/supabaseServer";
+import {
+  createSuccessResponse,
+  createErrorResponse,
+  handleSupabaseError,
+  ApiErrorCode,
+} from "@/lib/apiErrors";
+import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import type { Tables } from "@/lib/supabaseTypes";
 
-// Schema for POST request
 const addFavoriteSchema = z.object({
   advert_id: z.string().uuid(),
 });
 
-// GET /api/favorites - Get user's favorites
-async function GET(request: NextRequest) {
-  const supabase = supabaseServer();
-  
-  // Get current user
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+type SupabaseClient = ReturnType<typeof supabaseServer>;
+type SupabaseUser = Awaited<ReturnType<SupabaseClient["auth"]["getUser"]>>["data"]["user"];
 
-  if (authError || !user) {
-    return createErrorResponse(
-      ApiErrorCode.UNAUTHORIZED,
-      "Authentication required",
-      401
-    );
+type FavoriteRow = {
+  advert_id: string;
+  created_at: string;
+  adverts: Pick<
+    Tables<"adverts">,
+    "id" | "title" | "price" | "currency" | "location" | "status" | "created_at" | "user_id"
+  > | null;
+};
+
+const contextCache = new WeakMap<Request, Promise<{ supabase: SupabaseClient; user: SupabaseUser }>>();
+
+const getRequestContext = (req: Request) => {
+  let cached = contextCache.get(req);
+  if (!cached) {
+    const supabase = supabaseServer();
+    cached = supabase.auth.getUser().then(({ data }) => ({
+      supabase,
+      user: data.user ?? null,
+    }));
+    contextCache.set(req, cached);
+  }
+  return cached;
+};
+
+const resolveUserId = (req: Request) => getRequestContext(req).then(({ user }) => user?.id ?? null);
+
+const favoritesGetLimiter = createRateLimiter({
+  limit: 60,
+  windowSec: 60,
+  prefix: "favorites:get",
+});
+
+const favoritesPostLimiter = createRateLimiter({
+  limit: 30,
+  windowSec: 60,
+  prefix: "favorites:post",
+});
+
+const buildRateLimitKey = (_req: Request, userId: string | null, ip: string | null) =>
+  userId ?? ip ?? "anonymous";
+
+async function getFavorites(request: Request) {
+  const { supabase, user } = await getRequestContext(request);
+
+  if (!user) {
+    return createErrorResponse(ApiErrorCode.UNAUTH, {
+      status: 401,
+      detail: "Authentication required",
+    });
   }
 
-  // Get query parameters for pagination
   const url = new URL(request.url);
-  const page = parseInt(url.searchParams.get("page") || "0");
-  const limit = Math.min(parseInt(url.searchParams.get("limit") || "24"), 100);
+  const page = Number.parseInt(url.searchParams.get("page") ?? "0", 10);
+  const limit = Math.min(Number.parseInt(url.searchParams.get("limit") ?? "24", 10), 100);
   const offset = page * limit;
 
-  // Fetch user's favorites with advert details
-  const { data: favorites, error } = await supabase
+  const { data: favoritesData, error: favoritesError } = await supabase
     .from("favorites")
-    .select(`
+    .select(
+      `
       advert_id,
       created_at,
       adverts:advert_id (
@@ -46,141 +85,158 @@ async function GET(request: NextRequest) {
         currency,
         location,
         status,
-        created_at
+        created_at,
+        user_id
       )
-    `)
+    `,
+    )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
-  if (error) {
-    return createErrorResponse(
-      ApiErrorCode.FETCH_FAILED,
-      `Failed to fetch favorites: ${error.message}`,
-      500
-    );
+  if (favoritesError) {
+    return handleSupabaseError(favoritesError, ApiErrorCode.FETCH_FAILED);
   }
 
-  // Get total count
-  const { count } = await supabase
+  const favorites = (favoritesData ?? []) as FavoriteRow[];
+
+  const { count, error: countError } = await supabase
     .from("favorites")
     .select("*", { count: "exact", head: true })
     .eq("user_id", user.id);
 
-  // Get first image for each advert
-  const advertIds = favorites?.map(f => (f.adverts as any)?.id).filter(Boolean) || [];
-  
-  let mediaMap: Record<string, string> = {};
+  if (countError) {
+    return handleSupabaseError(countError, ApiErrorCode.FETCH_FAILED);
+  }
+
+  const advertIds = favorites
+    .map((favorite) => favorite.adverts?.id ?? null)
+    .filter((value): value is string => typeof value === "string");
+
+  const sellerIds = favorites
+    .map((favorite) => favorite.adverts?.user_id ?? null)
+    .filter((value): value is string => typeof value === "string");
+
+  const mediaMap = new Map<string, string>();
   if (advertIds.length > 0) {
-    const { data: mediaData } = await supabase
+    const { data: mediaData, error: mediaError } = await supabase
       .from("media")
       .select("advert_id, url")
       .in("advert_id", advertIds)
       .order("sort", { ascending: true });
 
-    if (mediaData) {
-      mediaMap = mediaData.reduce((acc, m) => {
-        if (!acc[m.advert_id]) {
-          acc[m.advert_id] = m.url;
-        }
-        return acc;
-      }, {} as Record<string, string>);
+    if (mediaError) {
+      return handleSupabaseError(mediaError, ApiErrorCode.FETCH_FAILED);
+    }
+
+    for (const media of mediaData ?? []) {
+      if (!mediaMap.has(media.advert_id)) {
+        mediaMap.set(media.advert_id, media.url);
+      }
     }
   }
 
-  // Format response
-  const items = favorites?.map(fav => ({
-    advert_id: fav.advert_id,
-    favorited_at: fav.created_at,
-    advert: {
-      ...(fav.adverts as any),
-      image: mediaMap[(fav.adverts as any)?.id] || null,
-    },
-  })) || [];
+  const sellerVerifiedMap = new Map<string, boolean>();
+  if (sellerIds.length > 0) {
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .select("id, verified_email, verified_phone")
+      .in("id", sellerIds);
+
+    if (profileError) {
+      return handleSupabaseError(profileError, ApiErrorCode.FETCH_FAILED);
+    }
+
+    for (const profile of profileData ?? []) {
+      sellerVerifiedMap.set(
+        profile.id,
+        Boolean(profile.verified_email) && Boolean(profile.verified_phone),
+      );
+    }
+  }
+
+  const items = favorites.map((favorite) => {
+    const advert = favorite.adverts;
+    const advertId = advert?.id ?? favorite.advert_id;
+    return {
+      advert_id: favorite.advert_id,
+      favorited_at: favorite.created_at,
+      advert: advert
+        ? {
+            ...advert,
+            image: mediaMap.get(advertId) ?? null,
+            seller_verified: sellerVerifiedMap.get(advert.user_id ?? "") ?? false,
+          }
+        : null,
+    };
+  });
 
   return createSuccessResponse({
     items,
-    total: count || 0,
+    total: count ?? 0,
     page,
     limit,
-    hasMore: (count || 0) > offset + items.length,
+    hasMore: (count ?? 0) > offset + items.length,
   });
 }
 
-// POST /api/favorites - Add to favorites
-async function POST(request: NextRequest) {
-  const supabase = supabaseServer();
-  
-  // Get current user
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+async function addFavorite(request: Request) {
+  const { supabase, user } = await getRequestContext(request);
 
-  if (authError || !user) {
-    return createErrorResponse(
-      ApiErrorCode.UNAUTHORIZED,
-      "Authentication required",
-      401
-    );
+  if (!user) {
+    return createErrorResponse(ApiErrorCode.UNAUTH, {
+      status: 401,
+      detail: "Authentication required",
+    });
   }
 
-  // Parse and validate request body
-  let body;
+  let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return createErrorResponse(
-      ApiErrorCode.INVALID_INPUT,
-      "Invalid JSON body",
-      400
-    );
+    return createErrorResponse(ApiErrorCode.INVALID_JSON, {
+      status: 400,
+      detail: "Invalid JSON body",
+    });
   }
 
   const validation = addFavoriteSchema.safeParse(body);
   if (!validation.success) {
-    return createErrorResponse(
-      ApiErrorCode.INVALID_INPUT,
-      `Validation error: ${validation.error.errors[0].message}`,
-      400
-    );
+    const firstIssue = validation.error.issues[0];
+    return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+      status: 400,
+      detail: firstIssue?.message ?? "Validation failed",
+    });
   }
 
   const { advert_id } = validation.data;
 
-  // Check if advert exists and is active
   const { data: advert, error: advertError } = await supabase
     .from("adverts")
     .select("id, status")
     .eq("id", advert_id)
-    .single();
+    .maybeSingle();
 
   if (advertError || !advert) {
-    return createErrorResponse(
-      ApiErrorCode.NOT_FOUND,
-      "Advert not found",
-      404
-    );
+    return createErrorResponse(ApiErrorCode.NOT_FOUND, {
+      status: 404,
+      detail: "Advert not found",
+    });
   }
 
   if (advert.status !== "active") {
-    return createErrorResponse(
-      ApiErrorCode.INVALID_INPUT,
-      "Cannot favorite inactive advert",
-      400
-    );
+    return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+      status: 400,
+      detail: "Cannot favorite inactive advert",
+    });
   }
 
-  // Add to favorites (ON CONFLICT DO NOTHING to handle duplicates)
-  const { error: insertError } = await supabase
-    .from("favorites")
-    .insert({
-      user_id: user.id,
-      advert_id,
-    });
+  const { error: insertError } = await supabase.from("favorites").insert({
+    user_id: user.id,
+    advert_id,
+  });
 
   if (insertError) {
-    // Check if it's a duplicate key error
     if (insertError.code === "23505") {
       return createSuccessResponse({
         message: "Already in favorites",
@@ -188,11 +244,7 @@ async function POST(request: NextRequest) {
       });
     }
 
-    return createErrorResponse(
-      ApiErrorCode.DB_ERROR,
-      `Failed to add favorite: ${insertError.message}`,
-      500
-    );
+    return handleSupabaseError(insertError, ApiErrorCode.INTERNAL_ERROR);
   }
 
   return createSuccessResponse(
@@ -200,22 +252,19 @@ async function POST(request: NextRequest) {
       message: "Added to favorites",
       advert_id,
     },
-    201
+    201,
   );
 }
 
-// Apply rate limiting
-export const GET_HANDLER = withRateLimit(GET, {
-  maxRequests: 60,
-  windowMs: 60 * 1000,
-  keyType: "user",
+export const GET = withRateLimit(getFavorites, {
+  limiter: favoritesGetLimiter,
+  getUserId: resolveUserId,
+  makeKey: buildRateLimitKey,
 });
 
-export const POST_HANDLER = withRateLimit(POST, {
-  maxRequests: 30,
-  windowMs: 60 * 1000,
-  keyType: "user",
+export const POST = withRateLimit(addFavorite, {
+  limiter: favoritesPostLimiter,
+  getUserId: resolveUserId,
+  makeKey: buildRateLimitKey,
 });
-
-export { GET_HANDLER as GET, POST_HANDLER as POST };
 

@@ -8,10 +8,10 @@
  * Response: { ok: true, data: { credentials: [...] } }
  */
 
-import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { createErrorResponse, createSuccessResponse, ApiErrorCode } from "@/lib/apiErrors";
-import type { WebAuthnListResponse, BiometricCredential } from "@/types/webauthn";
+import type { WebAuthnListResponse } from "@/types/webauthn";
+import type { BiometricCredential } from "@/lib/webauthn";
 
 export const runtime = "nodejs";
 

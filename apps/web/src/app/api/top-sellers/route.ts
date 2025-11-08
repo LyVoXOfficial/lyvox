@@ -1,10 +1,15 @@
-import { NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { createSuccessResponse, createErrorResponse, ApiErrorCode } from "@/lib/apiErrors";
-import { withRateLimit } from "@/lib/rateLimiter";
+import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+
+const limiter = createRateLimiter({
+  limit: 60,
+  windowSec: 60,
+  prefix: "top-sellers",
+});
 
 // GET /api/top-sellers - Get top sellers from materialized view
-async function GET(request: NextRequest) {
+async function baseHandler(request: Request) {
   const supabase = supabaseServer();
   
   // Get query parameters
@@ -20,11 +25,10 @@ async function GET(request: NextRequest) {
 
   if (error) {
     console.error("Failed to fetch top sellers:", error);
-    return createErrorResponse(
-      ApiErrorCode.FETCH_FAILED,
-      `Failed to fetch top sellers: ${error.message}`,
-      500
-    );
+    return createErrorResponse(ApiErrorCode.FETCH_FAILED, {
+      status: 500,
+      detail: `Failed to fetch top sellers: ${error.message}`,
+    });
   }
 
   // Get total count from materialized view
@@ -41,11 +45,8 @@ async function GET(request: NextRequest) {
 }
 
 // Apply rate limiting (this is public data, so generous limits)
-export const GET_HANDLER = withRateLimit(GET, {
-  maxRequests: 60,
-  windowMs: 60 * 1000,
-  keyType: "ip",
+export const GET = withRateLimit(baseHandler, {
+  limiter,
+  makeKey: (_req, _userId, ip) => ip ?? "anonymous",
 });
-
-export { GET_HANDLER as GET };
 

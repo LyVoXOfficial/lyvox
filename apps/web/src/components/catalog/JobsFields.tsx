@@ -8,12 +8,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { JobListing } from "@/lib/types/catalog";
 import { apiFetch } from "@/lib/fetcher";
 
+type JobsFormData = Record<string, any>;
+
 interface JobsFieldsProps {
-  formData: Partial<JobListing>;
-  onChange: (field: keyof JobListing, value: any) => void;
+  formData: JobsFormData;
+  onChange: (field: string, value: any) => void;
   locale?: string;
 }
 

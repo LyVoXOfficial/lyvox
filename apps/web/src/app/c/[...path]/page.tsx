@@ -16,9 +16,11 @@ type AdvertItem = {
   id: string;
   title: string;
   price?: number | null;
+  currency?: string | null;
   location?: string | null;
   image?: string | null;
   createdAt?: string | null;
+  sellerVerified?: boolean;
 };
 
 type Props = {
@@ -99,7 +101,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const adverts: AdvertItem[] = [];
   const { data: advertsRaw } = await supabase
     .from("adverts")
-    .select("id,title,price,location,created_at")
+    .select("id,title,price,currency,location,created_at,user_id")
     .eq("category_id", typedCurrent.id)
     .eq("status", "active")
     .order(orderBy.column, { ascending: orderBy.ascending })
@@ -107,6 +109,26 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
   if (advertsRaw?.length) {
     const ids = advertsRaw.map((a) => a.id);
+    const userIds = advertsRaw
+      .map((a) => a.user_id)
+      .filter((value): value is string => typeof value === "string");
+
+    let verifiedMap = new Map<string, boolean>();
+    if (userIds.length) {
+      const { data: profilesData } = await supabase
+        .from("profiles")
+        .select("id,verified_email,verified_phone")
+        .in("id", userIds);
+
+      if (profilesData) {
+        verifiedMap = new Map(
+          profilesData.map((profile) => [
+            profile.id,
+            Boolean(profile.verified_email) && Boolean(profile.verified_phone),
+          ]),
+        );
+      }
+    }
     const { data: media } = await supabase
       .from("media")
       .select("advert_id,url,sort")
@@ -149,9 +171,11 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         id: row.id,
         title: row.title,
         price: row.price,
+        currency: row.currency ?? null,
         location: row.location,
         createdAt: (row as { created_at?: string | null }).created_at ?? null,
         image: firstMedia.get(row.id) ?? null,
+        sellerVerified: verifiedMap.get(row.user_id ?? "") ?? false,
       });
     });
   }

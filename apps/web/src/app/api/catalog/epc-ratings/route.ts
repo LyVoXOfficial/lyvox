@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     
     const { data, error } = await supabase
       .from('epc_ratings')
-      .select('*')
+      .select('code,label,color,description_en,description_fr,description_nl,max_kwh_per_sqm_year,sort_order')
       .order('sort_order');
     
     if (error) {
@@ -30,11 +30,23 @@ export async function GET(request: NextRequest) {
     }
     
     // Return data with requested language
-    const formatted = data.map((rating) => ({
+    type DescriptionField = 'description_en' | 'description_fr' | 'description_nl';
+    const descriptionField: Record<'en' | 'fr' | 'nl', DescriptionField> = {
+      en: 'description_en',
+      fr: 'description_fr',
+      nl: 'description_nl',
+    };
+
+    const normalizedLang = (['en', 'fr', 'nl'] as const).includes(lang as 'en' | 'fr' | 'nl')
+      ? ((lang as 'en' | 'fr' | 'nl') ?? 'en')
+      : 'en';
+
+    const formatted = (data ?? []).map((rating) => ({
       code: rating.code,
-      name: rating[`name_${lang}`] || rating.name_en,
+      name: rating.label,
+      description: rating[descriptionField[normalizedLang]] ?? rating.description_en,
       max_kwh_per_sqm_year: rating.max_kwh_per_sqm_year,
-      color: rating.color_hex,
+      color: rating.color,
       sort_order: rating.sort_order,
     }));
     

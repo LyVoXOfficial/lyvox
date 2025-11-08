@@ -9,6 +9,7 @@ import { getCategoryIcon } from "@/lib/categoryIcons";
 import { ChevronRight, ChevronDown, X, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -36,6 +37,7 @@ export type SearchFiltersState = {
   price_max: number | null;
   location: string | null;
   catalog_fields: Record<string, unknown>;
+  verified_only: boolean;
 };
 
 type CategoryWithChildren = Category & {
@@ -166,6 +168,7 @@ export default function SearchFilters({
     fields: {},
   });
   const [dynamicFilters, setDynamicFilters] = useState<Record<string, unknown>>({});
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
 
   // Initialize from URL params
   useEffect(() => {
@@ -173,6 +176,7 @@ export default function SearchFilters({
     const priceMin = searchParams.get("price_min");
     const priceMax = searchParams.get("price_max");
     const locationParam = searchParams.get("location");
+    const verifiedOnlyParam = searchParams.get("verified_only");
 
     if (categoryId) {
       // Find category in loaded categories
@@ -195,6 +199,13 @@ export default function SearchFilters({
 
     if (locationParam) {
       setLocation(locationParam);
+    }
+
+    if (verifiedOnlyParam) {
+      const normalized = verifiedOnlyParam.trim().toLowerCase();
+      setVerifiedOnly(["true", "1", "yes"].includes(normalized));
+    } else {
+      setVerifiedOnly(false);
     }
   }, [searchParams, categories]);
 
@@ -435,6 +446,7 @@ export default function SearchFilters({
       price_max: priceRange[1] < 10000 ? priceRange[1] : null,
       location: location || null,
       catalog_fields: {},
+      verified_only: verifiedOnly,
     });
   };
 
@@ -447,6 +459,7 @@ export default function SearchFilters({
       price_max: priceRange[1] < 10000 ? priceRange[1] : null,
       location: location || null,
       catalog_fields: {},
+      verified_only: verifiedOnly,
     });
   };
 
@@ -463,6 +476,7 @@ export default function SearchFilters({
       price_max: priceRange[1] < 10000 ? priceRange[1] : null,
       location: selectedLocation || null,
       catalog_fields: dynamicFilters,
+      verified_only: verifiedOnly,
     });
   };
 
@@ -478,6 +492,7 @@ export default function SearchFilters({
       price_max: filters.price_max,
       location: filters.location,
       catalog_fields: filters.catalog_fields ?? dynamicFilters,
+      verified_only: filters.verified_only ?? verifiedOnly,
     };
 
     onFiltersChange?.(mergedFilters);
@@ -507,6 +522,12 @@ export default function SearchFilters({
       params.set("location", mergedFilters.location);
     } else {
       params.delete("location");
+    }
+
+    if (mergedFilters.verified_only) {
+      params.set("verified_only", "true");
+    } else {
+      params.delete("verified_only");
     }
 
     Array.from(params.keys())
@@ -555,6 +576,7 @@ export default function SearchFilters({
           price_max: priceRange[1] < 10000 ? priceRange[1] : null,
           location: location || null,
           catalog_fields: next,
+          verified_only: verifiedOnly,
         });
 
         return next;
@@ -570,6 +592,7 @@ export default function SearchFilters({
       price_max: priceRange[1] < 10000 ? priceRange[1] : null,
       location: location || null,
       catalog_fields: dynamicFilters,
+      verified_only: verifiedOnly,
     });
   };
 
@@ -578,12 +601,14 @@ export default function SearchFilters({
     setPriceRange([0, 10000]);
     setLocation("");
     setDynamicFilters({});
+    setVerifiedOnly(false);
     applyFilters({
       category_id: null,
       price_min: null,
       price_max: null,
       location: null,
       catalog_fields: {},
+      verified_only: false,
     });
   };
 
@@ -735,6 +760,34 @@ export default function SearchFilters({
               placeholder="Max"
             />
           </div>
+        </div>
+      </div>
+
+      {/* Verified Sellers Filter */}
+      <div>
+        <Label className="text-sm font-semibold mb-3 block">
+          {t("search.verifiedOnly") || "Только проверенные продавцы"}
+        </Label>
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id="verified-only"
+            checked={verifiedOnly}
+            onCheckedChange={(checked) => {
+              const value = checked === true;
+              setVerifiedOnly(value);
+              applyFilters({
+                category_id: selectedCategory?.id || null,
+                price_min: priceRange[0] > 0 ? priceRange[0] : null,
+                price_max: priceRange[1] < 10000 ? priceRange[1] : null,
+                location: location || null,
+                catalog_fields: dynamicFilters,
+                verified_only: value,
+              });
+            }}
+          />
+          <Label htmlFor="verified-only" className="text-sm text-muted-foreground leading-none font-normal">
+            {t("search.verifiedOnlyHelper") || "Показывать объявления только от верифицированных продавцов"}
+          </Label>
         </div>
       </div>
 

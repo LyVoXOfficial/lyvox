@@ -1,10 +1,15 @@
-import { NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { createSuccessResponse, createErrorResponse, ApiErrorCode } from "@/lib/apiErrors";
-import { withRateLimit } from "@/lib/rateLimiter";
+import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+
+const limiter = createRateLimiter({
+  limit: 60,
+  windowSec: 60,
+  prefix: "top-adverts",
+});
 
 // GET /api/top-adverts - Get top adverts by views + favorites
-async function GET(request: NextRequest) {
+async function baseHandler(request: Request) {
   const supabase = supabaseServer();
   
   // Get query parameters
@@ -31,11 +36,10 @@ async function GET(request: NextRequest) {
 
   if (error) {
     console.error("Failed to fetch adverts:", error);
-    return createErrorResponse(
-      ApiErrorCode.FETCH_FAILED,
-      `Failed to fetch adverts: ${error.message}`,
-      500
-    );
+    return createErrorResponse(ApiErrorCode.FETCH_FAILED, {
+      status: 500,
+      detail: `Failed to fetch adverts: ${error.message}`,
+    });
   }
 
   if (!adverts || adverts.length === 0) {
@@ -45,7 +49,7 @@ async function GET(request: NextRequest) {
     });
   }
 
-  const advertIds = adverts.map(a => a.id);
+  const advertIds = adverts.map((a) => a.id);
 
   // Get view counts for adverts (last 30 days)
   const { data: viewCounts } = await supabase
@@ -64,16 +68,16 @@ async function GET(request: NextRequest) {
   const viewCountMap: Record<string, number> = {};
   const favoriteCountMap: Record<string, number> = {};
 
-  viewCounts?.forEach(v => {
+  viewCounts?.forEach((v) => {
     viewCountMap[v.advert_id] = (viewCountMap[v.advert_id] || 0) + 1;
   });
 
-  favoriteCounts?.forEach(f => {
+  favoriteCounts?.forEach((f) => {
     favoriteCountMap[f.advert_id] = (favoriteCountMap[f.advert_id] || 0) + 1;
   });
 
   // Calculate popularity score and sort
-  const advertsWithScores = adverts.map(advert => {
+  const advertsWithScores = adverts.map((advert) => {
     const views = viewCountMap[advert.id] || 0;
     const favorites = favoriteCountMap[advert.id] || 0;
     
@@ -95,7 +99,7 @@ async function GET(request: NextRequest) {
   const topAdverts = advertsWithScores.slice(0, limit);
 
   // Get first image for each advert
-  const topAdvertIds = topAdverts.map(a => a.id);
+  const topAdvertIds = topAdverts.map((a) => a.id);
   const { data: mediaData } = await supabase
     .from("media")
     .select("advert_id, url")
@@ -103,14 +107,14 @@ async function GET(request: NextRequest) {
     .order("sort", { ascending: true });
 
   const mediaMap: Record<string, string> = {};
-  mediaData?.forEach(m => {
+  mediaData?.forEach((m) => {
     if (!mediaMap[m.advert_id]) {
       mediaMap[m.advert_id] = m.url;
     }
   });
 
   // Add images to adverts
-  const result = topAdverts.map(advert => ({
+  const result = topAdverts.map((advert) => ({
     ...advert,
     image: mediaMap[advert.id] || null,
   }));
@@ -122,11 +126,8 @@ async function GET(request: NextRequest) {
 }
 
 // Apply rate limiting (this is public data, so generous limits)
-export const GET_HANDLER = withRateLimit(GET, {
-  maxRequests: 60,
-  windowMs: 60 * 1000,
-  keyType: "ip",
+export const GET = withRateLimit(baseHandler, {
+  limiter,
+  makeKey: (_req, _userId, ip) => ip ?? "anonymous",
 });
-
-export { GET_HANDLER as GET };
 

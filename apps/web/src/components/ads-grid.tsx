@@ -6,9 +6,11 @@ type Item = {
   id: string;
   title: string;
   price?: number | null;
+  currency?: string | null;
   location?: string | null;
   image?: string | null;
   createdAt?: string | null;
+  sellerVerified?: boolean;
 };
 
 export default function AdsGrid({ items }: { items: Item[] }) {

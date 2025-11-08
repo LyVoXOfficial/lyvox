@@ -7,12 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { ElectronicsItem } from "@/lib/types/catalog";
 import { apiFetch } from "@/lib/fetcher";
 
+type ElectronicsFormData = Record<string, any>;
+
 interface ElectronicsFieldsProps {
-  formData: Partial<ElectronicsItem>;
-  onChange: (field: keyof ElectronicsItem, value: any) => void;
+  formData: ElectronicsFormData;
+  onChange: (field: string, value: any) => void;
   locale?: string;
 }
 

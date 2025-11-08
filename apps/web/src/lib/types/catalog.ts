@@ -606,6 +606,17 @@ export const CATEGORY_TYPE_MAP = {
   'services-home': 'services',
   'services-beauty': 'services',
   'services-tutoring': 'services',
+
+  // Vehicles (Specialized table)
+  'transport': 'vehicle',
+  'transport-cars': 'vehicle',
+  'transport-cars-new': 'vehicle',
+  'transport-cars-used': 'vehicle',
+  'transport-motorcycles': 'vehicle',
+  'transport-trucks': 'vehicle',
+  'transport-special-equipment': 'vehicle',
+  'transport-water': 'vehicle',
+  'transport-parts': 'vehicle',
 } as const;
 
 export type CategoryTypeKey = keyof typeof CATEGORY_TYPE_MAP;

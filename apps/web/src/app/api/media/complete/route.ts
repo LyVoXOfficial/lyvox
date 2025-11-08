@@ -79,7 +79,7 @@ export async function POST(request: Request) {
   if ((mediaCount ?? 0) >= MEDIA_LIMIT_PER_ADVERT) {
     return createErrorResponse(ApiErrorCode.LIMIT_REACHED, {
       status: 409,
-      details: { limit: MEDIA_LIMIT_PER_ADVERT },
+      detail: `Media limit of ${MEDIA_LIMIT_PER_ADVERT} items reached for this advert`,
     });
   }
 

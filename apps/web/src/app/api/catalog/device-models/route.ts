@@ -14,12 +14,12 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = supabaseServer();
     const { searchParams } = new URL(request.url);
-    const brandSlug = searchParams.get('brand');
+    const brandParam = searchParams.get('brand') ?? searchParams.get('brand_id');
     const deviceType = searchParams.get('device_type');
     const search = searchParams.get('search');
     const limit = parseInt(searchParams.get('limit') || '20');
     
-    if (!brandSlug || !deviceType) {
+    if (!brandParam || !deviceType) {
       return NextResponse.json(
         { error: 'brand and device_type parameters are required' },
         { status: 400 }
@@ -28,9 +28,9 @@ export async function GET(request: NextRequest) {
     
     // Use the PostgreSQL function for efficient search
     const { data, error } = await supabase.rpc('search_device_models', {
-      p_brand_slug: brandSlug,
+      p_brand_slug: brandParam,
       p_device_type: deviceType,
-      p_search_term: search,
+      p_search_term: search ?? undefined,
       p_limit: limit,
     });
     

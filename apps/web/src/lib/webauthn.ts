@@ -366,10 +366,12 @@ export async function verifyBiometric(
     }
 
     // Верифицируем с помощью WebAuthn
-    const verifyResponse: AuthMFAVerifyResponse = await supabase.auth.mfa.verify({
-      factorId: targetFactorId,
-      challengeId,
-    });
+    const verifyResponse: AuthMFAVerifyResponse = await supabase.auth.mfa.verify(
+      {
+        factorId: targetFactorId,
+        challengeId,
+      } as Parameters<typeof supabase.auth.mfa.verify>[0],
+    );
 
     if (verifyResponse.error) {
       return {

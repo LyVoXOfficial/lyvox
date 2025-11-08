@@ -7,6 +7,7 @@ export type Category = {
   name_en?: string | null;
   name_nl?: string | null;
   name_fr?: string | null;
+  name_de?: string | null;
   path: string;
   sort: number | null;
   icon: string | null;

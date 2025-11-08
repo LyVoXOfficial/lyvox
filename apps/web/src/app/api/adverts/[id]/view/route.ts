@@ -1,91 +1,95 @@
-import { NextRequest } from "next/server";
+import { z } from "zod";
 import { supabaseServer } from "@/lib/supabaseServer";
-import { createSuccessResponse, createErrorResponse, ApiErrorCode } from "@/lib/apiErrors";
-import { withRateLimit } from "@/lib/rateLimiter";
+import {
+  createSuccessResponse,
+  createErrorResponse,
+  handleSupabaseError,
+  ApiErrorCode,
+} from "@/lib/apiErrors";
+import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+
+const uuidSchema = z.string().uuid();
+
+const viewLimiter = createRateLimiter({
+  limit: 100,
+  windowSec: 60,
+  prefix: "adverts:view",
+});
 
 // POST /api/adverts/[id]/view - Track advert view
-async function POST(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+async function trackView(
+  request: Request,
+  context: { params: Promise<{ id: string }> },
 ) {
   const supabase = supabaseServer();
-  
-  // Get advertId from params
-  const params = await context.params;
-  const { id: advertId } = params;
+  const { id: advertId } = await context.params;
 
-  // Validate UUID format
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if (!uuidRegex.test(advertId)) {
-    return createErrorResponse(
-      ApiErrorCode.INVALID_INPUT,
-      "Invalid advert ID format",
-      400
-    );
+  const uuidValidation = uuidSchema.safeParse(advertId);
+  if (!uuidValidation.success) {
+    return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+      status: 400,
+      detail: "Invalid advert ID format",
+    });
   }
 
-  // Check if advert exists and is active
   const { data: advert, error: advertError } = await supabase
     .from("adverts")
     .select("id, status")
     .eq("id", advertId)
-    .single();
+    .maybeSingle();
 
-  if (advertError || !advert) {
-    return createErrorResponse(
-      ApiErrorCode.NOT_FOUND,
-      "Advert not found",
-      404
-    );
+  if (advertError) {
+    return handleSupabaseError(advertError, ApiErrorCode.FETCH_FAILED);
   }
 
-  // Get user (if authenticated)
+  if (!advert) {
+    return createErrorResponse(ApiErrorCode.NOT_FOUND, {
+      status: 404,
+      detail: "Advert not found",
+    });
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Get IP address and user agent from request
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() || 
-             request.headers.get("x-real-ip") || 
-             "unknown";
-  const userAgent = request.headers.get("user-agent") || "unknown";
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  const ip =
+    forwardedFor?.split(",")[0].trim() ?? request.headers.get("x-real-ip") ?? "unknown";
+  const userAgent = request.headers.get("user-agent") ?? "unknown";
 
-  // Insert view record
-  const { error: insertError } = await supabase
-    .from("advert_views")
-    .insert({
-      advert_id: advertId,
-      user_id: user?.id || null,
-      ip_address: ip,
-      user_agent: userAgent,
-    });
+  const { error: insertError } = await supabase.from("advert_views").insert({
+    advert_id: advertId,
+    user_id: user?.id ?? null,
+    ip_address: ip,
+    user_agent: userAgent,
+  });
 
   if (insertError) {
     console.error("Failed to track view:", insertError);
-    // Don't fail the request if we can't track the view
     return createSuccessResponse({
       message: "View tracking failed (non-critical)",
       advert_id: advertId,
     });
   }
 
-  // Get updated view count
-  const { data: viewCount } = await supabase
-    .rpc("get_advert_view_count", { advert_id_param: advertId });
+  const { data: viewCount, error: viewCountError } = await supabase.rpc("get_advert_view_count", {
+    advert_id_param: advertId,
+  });
+
+  if (viewCountError) {
+    return handleSupabaseError(viewCountError, ApiErrorCode.FETCH_FAILED);
+  }
 
   return createSuccessResponse({
     message: "View tracked",
     advert_id: advertId,
-    view_count: viewCount || 0,
+    view_count: viewCount ?? 0,
   });
 }
 
-// Apply rate limiting (generous limits for view tracking)
-export const POST_HANDLER = withRateLimit(POST, {
-  maxRequests: 100,
-  windowMs: 60 * 1000,
-  keyType: "ip",
+export const POST = withRateLimit(trackView, {
+  limiter: viewLimiter,
+  makeKey: (_req, _userId, ip) => ip ?? "anonymous",
 });
-
-export { POST_HANDLER as POST };
 

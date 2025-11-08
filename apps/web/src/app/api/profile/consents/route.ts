@@ -55,7 +55,9 @@ export async function POST(request: Request) {
 
   const currentSnapshot = coerceConsentSnapshot(profileResult.data?.consents ?? null);
   const timestamp = new Date().toISOString();
-  const nextSnapshot = composeMarketingSnapshot(currentSnapshot, marketingOptIn, timestamp);
+  const effectiveMarketingOptIn =
+    marketingOptIn ?? currentSnapshot?.marketing?.accepted ?? false;
+  const nextSnapshot = composeMarketingSnapshot(currentSnapshot, effectiveMarketingOptIn, timestamp);
 
   const updatePayload: TablesUpdate<"profiles"> = {
     consents: JSON.parse(JSON.stringify(nextSnapshot)),
@@ -76,7 +78,7 @@ export async function POST(request: Request) {
 
   const auditDetails = {
     source: "profile",
-    marketing_opt_in: marketingOptIn,
+    marketing_opt_in: effectiveMarketingOptIn,
     previous: currentSnapshot?.marketing ?? null,
     next: nextSnapshot.marketing,
   };

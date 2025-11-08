@@ -18,9 +18,9 @@ export const sportTypeSchema = z.enum([
   'other',
 ]);
 
-export const conditionSchema = z.enum(['new', 'like_new', 'good', 'fair', 'for_parts']);
+const conditionSchema = z.enum(['new', 'like_new', 'good', 'fair', 'for_parts']);
 
-export const deliveryOptionSchema = z.enum([
+const deliveryOptionSchema = z.enum([
   'pickup_only',
   'delivery_available',
   'shipping_national',

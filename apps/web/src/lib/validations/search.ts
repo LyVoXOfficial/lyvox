@@ -53,6 +53,17 @@ export const searchAdvertsQuerySchema = z
       .nullable()
       .transform((val) => val || null),
 
+    // Verified sellers filter
+    verified_only: z
+      .string()
+      .optional()
+      .nullable()
+      .transform((val) => {
+        if (!val) return false;
+        const normalized = val.trim().toLowerCase();
+        return normalized === "true" || normalized === "1" || normalized === "yes";
+      }),
+
     // Geospatial search coordinates
     lat: z
       .string()
@@ -84,12 +95,7 @@ export const searchAdvertsQuerySchema = z
 
     // Sort option
     sort_by: z
-      .enum(["relevance", "price_asc", "price_desc", "created_at_asc", "created_at_desc"], {
-        errorMap: () => ({
-          message:
-            "Sort option must be one of: relevance, price_asc, price_desc, created_at_asc, created_at_desc",
-        }),
-      })
+      .enum(["relevance", "price_asc", "price_desc", "created_at_asc", "created_at_desc"])
       .default("created_at_desc"),
 
     // Pagination

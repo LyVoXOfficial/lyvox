@@ -3,14 +3,14 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export interface SliderProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type"> {
+export interface SliderProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "defaultValue" | "value"> {
   value?: [number, number];
   defaultValue?: [number, number];
   onValueChange?: (value: [number, number]) => void;
   min?: number;
   max?: number;
   step?: number;
-  className?: string;
 }
 
 /**
@@ -25,7 +25,7 @@ export function Slider({
   max = 10000,
   step = 1,
   className,
-  ...props
+  ...rest
 }: SliderProps) {
   const [internalValue, setInternalValue] = React.useState<[number, number]>(
     value || defaultValue
@@ -55,7 +55,7 @@ export function Slider({
   const maxPercent = ((maxValue - min) / (max - min)) * 100;
 
   return (
-    <div className={cn("relative w-full", className)} {...props}>
+    <div className={cn("relative w-full", className)} {...rest}>
       {/* Track */}
       <div className="relative h-2 w-full rounded-full bg-muted">
         {/* Active range */}

@@ -34,7 +34,8 @@ create or replace function public.search_adverts(
   radius_km numeric default 50,
   sort_by text default 'created_at_desc',
   page_offset int default 0,
-  page_limit int default 24
+  page_limit int default 24,
+  verified_only boolean default false
 )
 returns table (
   id uuid,
@@ -50,6 +51,7 @@ returns table (
   location text,
   created_at timestamptz,
   updated_at timestamptz,
+  seller_verified boolean,
   total_count bigint,
   relevance_rank numeric
 )
@@ -86,6 +88,7 @@ begin
       a.location,
       a.created_at,
       a.updated_at,
+      coalesce(p.verified_email, false) and coalesce(p.verified_phone, false) as seller_verified,
       -- Calculate relevance rank for full-text search
       case
         when query_tsvector is not null then
@@ -96,6 +99,7 @@ begin
         else 0.0
       end as relevance_rank
     from public.adverts a
+    left join public.profiles p on p.id = a.user_id
     left join public.locations loc on a.location_id = loc.id
     where
       -- Only show active adverts
@@ -132,6 +136,13 @@ begin
           )
         )
       )
+      and (
+        not verified_only
+        or (
+          coalesce(p.verified_email, false)
+          and coalesce(p.verified_phone, false)
+        )
+      )
   ),
   total as (
     select count(*) as total_count
@@ -151,6 +162,7 @@ begin
     f.location,
     f.created_at,
     f.updated_at,
+    f.seller_verified,
     t.total_count,
     f.relevance_rank
   from filtered f
@@ -184,6 +196,7 @@ Parameters:
 - sort_by: Sort option (created_at_desc, created_at_asc, price_asc, price_desc, relevance, distance)
 - page_offset: Pagination offset (default: 0)
 - page_limit: Results per page (default: 24)
+- verified_only: When true, return only adverts from sellers with verified email and phone
 Returns: Table of adverts with total_count and relevance_rank';
 
 -- Handle PostGIS availability gracefully

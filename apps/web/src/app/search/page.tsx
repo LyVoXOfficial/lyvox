@@ -30,9 +30,11 @@ type SearchResult = {
   id: string;
   title: string;
   price?: number | null;
+  currency?: string | null;
   location?: string | null;
   image?: string | null;
   createdAt?: string | null;
+  sellerVerified?: boolean;
 };
 
 type SearchResponse = {
@@ -45,6 +47,8 @@ type SearchResponse = {
       currency?: string | null;
       location?: string | null;
       created_at?: string | null;
+      seller_verified?: boolean;
+      user_id?: string;
     }>;
     total: number;
     page: number;
@@ -73,6 +77,12 @@ export default function SearchPage() {
   const sortBy = searchParams.get("sort_by") || "created_at_desc";
   const page = Number.parseInt(searchParams.get("page") || "0", 10);
   const limit = 24;
+  const verifiedOnlyFilter = (() => {
+    const raw = searchParams.get("verified_only");
+    if (!raw) return false;
+    const normalized = raw.trim().toLowerCase();
+    return normalized === "true" || normalized === "1" || normalized === "yes";
+  })();
 
   // State
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -109,6 +119,7 @@ export default function SearchPage() {
       params.set("sort_by", sortBy);
       params.set("page", page.toString());
       params.set("limit", limit.toString());
+      if (verifiedOnlyFilter) params.set("verified_only", "true");
 
       searchParams.forEach((value, key) => {
         if (key.startsWith("catalog_field_")) {
@@ -184,10 +195,12 @@ export default function SearchPage() {
       const formattedResults: SearchResult[] = data.data.items.map((item) => ({
         id: item.id,
         title: item.title,
-        price: item.price,
-        location: item.location,
+        price: item.price ?? null,
+        currency: item.currency ?? null,
+        location: item.location ?? null,
         image: firstMedia.get(item.id) ?? null,
         createdAt: item.created_at ?? null,
+        sellerVerified: Boolean(item.seller_verified),
       }));
 
       setResults(formattedResults);
@@ -212,7 +225,7 @@ export default function SearchPage() {
     } finally {
       setLoading(false);
     }
-  }, [query, categoryId, priceMin, priceMax, location, sortBy, page, limit, t, searchParams]);
+  }, [query, categoryId, priceMin, priceMax, location, sortBy, page, limit, t, searchParams, verifiedOnlyFilter]);
 
   // Fetch results when params change
   useEffect(() => {
@@ -247,6 +260,12 @@ export default function SearchPage() {
       params.set("location", filters.location);
     } else {
       params.delete("location");
+    }
+
+    if (filters.verified_only) {
+      params.set("verified_only", "true");
+    } else {
+      params.delete("verified_only");
     }
 
     Array.from(params.keys())
@@ -300,7 +319,7 @@ export default function SearchPage() {
   // Reset accumulated results when search params change (except page)
   useEffect(() => {
     setAllResults([]);
-  }, [query, categoryId, priceMin, priceMax, location, sortBy]);
+  }, [query, categoryId, priceMin, priceMax, location, sortBy, verifiedOnlyFilter]);
 
   // Accumulate results for infinite scroll
   useEffect(() => {

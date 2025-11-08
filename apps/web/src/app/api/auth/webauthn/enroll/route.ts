@@ -9,7 +9,6 @@
  * Response: { ok: true, data: { factorId: "...", friendlyName: "My iPhone" } }
  */
 
-import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { createErrorResponse, createSuccessResponse, ApiErrorCode } from "@/lib/apiErrors";
 import type { WebAuthnEnrollRequest, WebAuthnEnrollResponse } from "@/types/webauthn";
@@ -50,9 +49,10 @@ export async function POST(request: Request) {
     // 2. Валидация входных данных
     const validation = enrollSchema.safeParse(body);
     if (!validation.success) {
+      const firstIssue = validation.error.issues[0];
       return createErrorResponse(ApiErrorCode.BAD_INPUT, {
         status: 400,
-        detail: validation.error.errors[0].message,
+        detail: firstIssue?.message ?? "Validation failed",
       });
     }
 

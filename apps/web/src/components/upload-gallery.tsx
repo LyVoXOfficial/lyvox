@@ -3,9 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { readImageSize } from "@/lib/image";
 import { apiFetch } from "@/lib/fetcher";
 import { useI18n } from "@/i18n";
+import { Eye, GripVertical, Loader2, Star, Trash2 } from "lucide-react";
 
 type MediaItem = {
   id: string;
@@ -25,6 +28,10 @@ export default function UploadGallery({ advertId, locale }: { advertId: string; 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [statusKey, setStatusKey] = useState<"uploading" | "reordering" | "deleting" | null>(null);
+  const [previewItem, setPreviewItem] = useState<MediaItem | null>(null);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const loadItems = useCallback(async () => {
     try {
@@ -63,6 +70,7 @@ export default function UploadGallery({ advertId, locale }: { advertId: string; 
 
     setError(null);
     setBusy(true);
+    setStatusKey("uploading");
     try {
       for (const file of candidates) {
         if (file.size > MAX_FILE_SIZE_BYTES) {
@@ -192,6 +200,7 @@ export default function UploadGallery({ advertId, locale }: { advertId: string; 
       setError(t("upload.error.upload_failed") || "Failed to upload one or more files");
     } finally {
       setBusy(false);
+      setStatusKey(null);
     }
   };
 
@@ -216,6 +225,7 @@ export default function UploadGallery({ advertId, locale }: { advertId: string; 
 
   const removeItem = async (id: string) => {
     setBusy(true);
+    setStatusKey("deleting");
     setError(null);
     try {
       const response = await apiFetch(`/api/media/${id}`, { method: "DELETE" });
@@ -229,41 +239,167 @@ export default function UploadGallery({ advertId, locale }: { advertId: string; 
       setError(t("upload.error.delete_failed") || "Failed to delete file");
     } finally {
       setBusy(false);
+      setStatusKey(null);
     }
   };
 
-  const submitOrder = async (ordered: MediaItem[]) => {
-    await apiFetch("/api/media/reorder", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        advertId,
-        orderedIds: ordered.map((item) => item.id),
-      }),
-    });
-    setItems(ordered);
-  };
+  const submitOrder = useCallback(
+    async (ordered: MediaItem[]) => {
+      const response = await apiFetch("/api/media/reorder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          advertId,
+          orderedIds: ordered.map((item) => item.id),
+        }),
+      });
 
-  const move = async (index: number, direction: -1 | 1) => {
-    const targetIndex = index + direction;
-    if (targetIndex < 0 || targetIndex >= items.length) return;
-    const ordered = [...items];
-    const [current] = ordered.splice(index, 1);
-    ordered.splice(targetIndex, 0, current);
-    ordered.forEach((item, idx) => {
-      item.sort = idx;
-    });
-    setBusy(true);
-    try {
-      await submitOrder(ordered);
-    } catch (err) {
-      console.error("MEDIA_REORDER_ERROR", err);
-      setError(t("upload.error.reorder_failed") || "Failed to reorder files");
-      await loadItems();
-    } finally {
-      setBusy(false);
+      let payload: any = null;
+      try {
+        payload = await response.json();
+      } catch {
+        payload = null;
+      }
+
+      if (!response.ok || (payload && payload.ok === false)) {
+        const message = payload?.error ?? "MEDIA_REORDER_FAILED";
+        throw new Error(message);
+      }
+    },
+    [advertId],
+  );
+
+  const handleReorder = useCallback(
+    async (sourceIndex: number, targetIndex: number) => {
+      if (sourceIndex === targetIndex) {
+        return;
+      }
+
+      const previous = [...items];
+      const next = [...items];
+      const [moved] = next.splice(sourceIndex, 1);
+      next.splice(targetIndex, 0, moved);
+      next.forEach((item, idx) => {
+        item.sort = idx;
+      });
+
+      setItems(next);
+      setBusy(true);
+      setStatusKey("reordering");
+      setError(null);
+      try {
+        await submitOrder(next);
+      } catch (err) {
+        console.error("MEDIA_REORDER_ERROR", err);
+        setError(t("upload.error.reorder_failed") || "Failed to reorder files");
+        setItems(previous);
+        await loadItems();
+      } finally {
+        setBusy(false);
+        setStatusKey(null);
+      }
+    },
+    [items, submitOrder, t, loadItems],
+  );
+
+  const handleSetCover = useCallback(
+    async (index: number) => {
+      if (index === 0 || busy) {
+        return;
+      }
+      await handleReorder(index, 0);
+    },
+    [handleReorder, busy],
+  );
+
+  const handleDragStart = useCallback(
+    (event: React.DragEvent<HTMLDivElement>, index: number) => {
+      if (busy) {
+        event.preventDefault();
+        return;
+      }
+      setDraggedIndex(index);
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", String(index));
+    },
+    [busy],
+  );
+
+  const handleDragEnter = useCallback(
+    (event: React.DragEvent<HTMLDivElement>, index: number) => {
+      if (draggedIndex === null || busy) {
+        return;
+      }
+      event.preventDefault();
+      if (index !== draggedIndex) {
+        setDragOverIndex(index);
+      }
+    },
+    [draggedIndex, busy],
+  );
+
+  const handleDragOverItem = useCallback(
+    (event: React.DragEvent<HTMLDivElement>, index: number) => {
+      if (draggedIndex === null || busy) {
+        return;
+      }
+      event.preventDefault();
+      if (dragOverIndex !== index) {
+        setDragOverIndex(index);
+      }
+      event.dataTransfer.dropEffect = "move";
+    },
+    [draggedIndex, dragOverIndex, busy],
+  );
+
+  const handleDragLeave = useCallback(() => {
+    if (draggedIndex !== null) {
+      setDragOverIndex(null);
     }
-  };
+  }, [draggedIndex]);
+
+  const handleDropItem = useCallback(
+    (event: React.DragEvent<HTMLDivElement>, index: number) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (draggedIndex === null) {
+        return;
+      }
+      handleReorder(draggedIndex, index);
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+    },
+    [draggedIndex, handleReorder],
+  );
+
+  const handleDragEnd = useCallback(() => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  }, []);
+
+  const handleContainerDrop = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      if (draggedIndex === null || busy) {
+        return;
+      }
+      handleReorder(draggedIndex, items.length - 1);
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+    },
+    [draggedIndex, busy, handleReorder, items.length],
+  );
+
+  const handleContainerDragOver = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      if (draggedIndex === null || busy) {
+        return;
+      }
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+    },
+    [draggedIndex, busy],
+  );
 
   return (
     <div className="space-y-3">
@@ -318,53 +454,123 @@ export default function UploadGallery({ advertId, locale }: { advertId: string; 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       {items.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {items.map((item, index) => (
-            <div key={item.id} className="border rounded-lg p-2 relative group">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={item.url} alt="" className="aspect-square object-cover w-full rounded" />
-              <div className="mt-2 space-y-1">
-                <div className="text-xs text-muted-foreground text-center">
-                  {item.w ?? "?"} × {item.h ?? "?"}
+        <div
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"
+          onDragOver={handleContainerDragOver}
+          onDrop={handleContainerDrop}
+        >
+          {items.map((item, index) => {
+            const isDragged = draggedIndex === index;
+            const isDropTarget = dragOverIndex === index && draggedIndex !== null && draggedIndex !== index;
+            return (
+              <div
+                key={item.id}
+                className={`group relative rounded-lg border p-2 transition-all ${
+                  isDropTarget ? "border-primary ring-2 ring-primary/40" : "border-border"
+                } ${isDragged ? "opacity-60" : ""}`}
+                draggable={!busy}
+                onDragStart={(event) => handleDragStart(event, index)}
+                onDragEnter={(event) => handleDragEnter(event, index)}
+                onDragOver={(event) => handleDragOverItem(event, index)}
+                onDragLeave={handleDragLeave}
+                onDrop={(event) => handleDropItem(event, index)}
+                onDragEnd={handleDragEnd}
+              >
+                {index === 0 ? (
+                  <Badge className="absolute top-2 left-2 z-20 uppercase">
+                    {t("upload.cover") || "Cover"}
+                  </Badge>
+                ) : null}
+                <div className="absolute top-2 left-2 z-20 text-muted-foreground/70">
+                  <GripVertical className="h-4 w-4" />
+                  <span className="sr-only">{t("upload.drag_to_reorder") || "Drag to reorder"}</span>
                 </div>
-                <div className="flex justify-center gap-1">
+                <div className="absolute top-2 right-2 z-20 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 w-7 p-0"
-                    onClick={() => move(index, -1)}
-                    disabled={busy || index === 0}
-                    title={t("upload.move_up") || "Move up"}
-                  >
-                    ↑
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 w-7 p-0"
-                    onClick={() => move(index, 1)}
-                    disabled={busy || index === items.length - 1}
-                    title={t("upload.move_down") || "Move down"}
-                  >
-                    ↓
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    className="h-7 px-2 text-xs"
-                    onClick={() => removeItem(item.id)}
+                    size="icon"
+                    variant="secondary"
+                    className="h-8 w-8"
+                    onClick={() => setPreviewItem(item)}
                     disabled={busy}
+                    title={t("upload.preview") || "Preview"}
                   >
-                    {t("upload.delete") || "Delete"}
+                    <Eye className="h-4 w-4" />
+                    <span className="sr-only">{t("upload.preview") || "Preview"}</span>
                   </Button>
+                  {index > 0 && (
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      className="h-8 w-8"
+                      onClick={() => handleSetCover(index)}
+                      disabled={busy}
+                      title={t("upload.set_cover") || "Set as cover"}
+                    >
+                      <Star className="h-4 w-4" />
+                      <span className="sr-only">{t("upload.set_cover") || "Set as cover"}</span>
+                    </Button>
+                  )}
+                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.url}
+                  alt=""
+                  className="aspect-square w-full rounded object-cover"
+                />
+                <div className="mt-2 space-y-2">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>
+                      {(item.w ?? "—")}{item.w && item.h ? " × " : ""}{item.h ?? ""}
+                    </span>
+                    <span>{t("upload.drag_to_reorder") || "Drag to reorder"}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="flex-1"
+                      onClick={() => removeItem(item.id)}
+                      disabled={busy}
+                    >
+                      <Trash2 className="mr-1 h-4 w-4" />
+                      {t("upload.delete") || "Delete"}
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
-      {busy && <p className="text-sm text-muted-foreground text-center">{t("upload.uploading") || "Uploading..."}</p>}
+      {busy && (
+        <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          {statusKey && t(`upload.${statusKey}` as any)
+            ? t(`upload.${statusKey}` as any)
+            : statusKey === "reordering"
+              ? "Reordering..."
+              : statusKey === "deleting"
+                ? "Deleting photo..."
+                : t("upload.uploading") || "Uploading..."}
+        </p>
+      )}
+
+      <Dialog open={Boolean(previewItem)} onOpenChange={(open) => !open && setPreviewItem(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{t("upload.preview") || "Preview"}</DialogTitle>
+          </DialogHeader>
+          {previewItem ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={previewItem.url}
+              alt=""
+              className="w-full rounded object-contain"
+            />
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

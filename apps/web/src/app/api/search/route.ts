@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import {
   createErrorResponse,
@@ -7,7 +6,7 @@ import {
   ApiErrorCode,
 } from "@/lib/apiErrors";
 import { validateRequest, searchAdvertsQuerySchema } from "@/lib/validations";
-import { createRateLimiter, withRateLimit, getClientIp } from "@/lib/rateLimiter";
+import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 
 export const runtime = "nodejs";
 
@@ -47,7 +46,7 @@ const searchIpLimiter = createRateLimiter({
  * 
  * Returns: Array of adverts with total_count and relevance_rank
  */
-const baseHandler = async (request: NextRequest) => {
+const baseHandler = async (request: Request) => {
   // Parse query parameters from URL
   const url = new URL(request.url);
   const queryParams: Record<string, string | undefined> = {};
@@ -70,17 +69,18 @@ const baseHandler = async (request: NextRequest) => {
 
   // Prepare parameters for PostgreSQL function
   const searchParams = {
-    search_query: params.q ?? null,
-    category_id_filter: params.category_id ?? null,
-    price_min_filter: params.price_min ?? null,
-    price_max_filter: params.price_max ?? null,
-    location_filter: params.location ?? null,
-    location_lat: params.lat ?? null,
-    location_lng: params.lng ?? null,
+    search_query: params.q ?? undefined,
+    category_id_filter: params.category_id ?? undefined,
+    price_min_filter: params.price_min ?? undefined,
+    price_max_filter: params.price_max ?? undefined,
+    location_filter: params.location ?? undefined,
+    location_lat: params.lat ?? undefined,
+    location_lng: params.lng ?? undefined,
     radius_km: params.radius_km ?? 50,
-    sort_by: params.sort_by,
+    sort_by: params.sort_by ?? undefined,
     page_offset: pageOffset,
     page_limit: params.limit,
+    verified_only: params.verified_only ?? false,
   };
 
   const supabase = supabaseServer();
@@ -96,7 +96,16 @@ const baseHandler = async (request: NextRequest) => {
   const totalCount = data && data.length > 0 ? (data[0]?.total_count ?? data.length) : 0;
 
   // Remove total_count from each result (it's duplicated in every row)
-  const results = data?.map(({ total_count: _, ...rest }) => rest) ?? [];
+  const results =
+    data?.map((row) => {
+      const { total_count: _discard, seller_verified, ...rest } = row as typeof row & {
+        seller_verified?: boolean | null;
+      };
+      return {
+        ...rest,
+        seller_verified: Boolean(seller_verified),
+      };
+    }) ?? [];
 
   return createSuccessResponse({
     items: results,

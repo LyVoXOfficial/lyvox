@@ -46,7 +46,7 @@ function LoginPageInner() {
 
     const validationResult = loginSchema.safeParse({ email: email.trim() });
     if (!validationResult.success) {
-      const firstError = validationResult.error.errors[0];
+      const firstError = validationResult.error.issues[0];
       setValidationError(firstError.message);
     } else {
       setValidationError(null);
@@ -64,7 +64,7 @@ function LoginPageInner() {
       const validationResult = loginSchema.safeParse({ email: email.trim() });
       
       if (!validationResult.success) {
-        const firstError = validationResult.error.errors[0];
+        const firstError = validationResult.error.issues[0];
         setValidationError(firstError.message);
         toast.error(firstError.message);
         return;
@@ -128,7 +128,7 @@ function LoginPageInner() {
       const validationResult = loginSchema.safeParse({ email: email.trim() });
       
       if (!validationResult.success) {
-        const firstError = validationResult.error.errors[0];
+        const firstError = validationResult.error.issues[0];
         setValidationError(firstError.message);
         toast.error(firstError.message);
         return;

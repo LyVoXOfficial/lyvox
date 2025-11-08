@@ -40,7 +40,7 @@ export async function GET(request: Request) {
   if (advert.status !== "active") {
     return createErrorResponse(ApiErrorCode.FORBIDDEN, { 
       status: 403,
-      message: "Media is only available for active adverts"
+      detail: "Media is only available for active adverts",
     });
   }
 

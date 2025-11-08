@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabaseClient";
 
 export interface TOTPFactor {
   id: string;
-  friendly_name: string;
+  friendly_name: string | null;
   factor_type: "totp";
   status: "verified" | "unverified";
   created_at: string;
@@ -78,7 +78,11 @@ export function useTOTP(options: UseTOTPOptions = {}): UseTOTPReturn {
       }
 
       if (data) {
-        setFactors(data.totp || []);
+        const normalizedFactors = (data.totp ?? []).map((factor) => ({
+          ...factor,
+          friendly_name: factor.friendly_name ?? null,
+        }));
+        setFactors(normalizedFactors);
       }
     } catch (err: any) {
       const errorMsg = err.message || "Unexpected error loading factors";

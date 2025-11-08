@@ -194,6 +194,11 @@ export async function GET(request: NextRequest) {
       }
 
       fieldsPayload = (fieldRows ?? []).reduce<typeof fieldsPayload>((acc, field) => {
+        const normalizedFieldMetadata =
+          field.metadata && typeof field.metadata === "object" && !Array.isArray(field.metadata)
+            ? (field.metadata as Record<string, unknown>)
+            : {};
+
         acc[field.field_key] = {
           field_key: field.field_key,
           label_i18n_key: field.label_i18n_key,
@@ -207,13 +212,20 @@ export async function GET(request: NextRequest) {
           pattern: field.pattern,
           group_key: field.group_key,
           sort: field.sort,
-          metadata: field.metadata ?? {},
-          options: (optionsByField[field.id] ?? []).map((opt) => ({
-            code: opt.code,
-            name_i18n_key: opt.name_i18n_key,
-            sort: opt.sort,
-            metadata: opt.metadata ?? {},
-          })),
+          metadata: normalizedFieldMetadata,
+          options: (optionsByField[field.id] ?? []).map((opt) => {
+            const normalizedOptionMetadata =
+              opt.metadata && typeof opt.metadata === "object" && !Array.isArray(opt.metadata)
+                ? (opt.metadata as Record<string, unknown>)
+                : {};
+
+            return {
+              code: opt.code,
+              name_i18n_key: opt.name_i18n_key,
+              sort: opt.sort,
+              metadata: normalizedOptionMetadata,
+            };
+          }),
         };
         return acc;
       }, {});

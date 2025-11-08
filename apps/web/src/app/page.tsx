@@ -1,5 +1,3 @@
-import { supabaseServer } from "@/lib/supabaseServer";
-import { supabaseService } from "@/lib/supabaseService";
 import InfoCarousel from "@/components/info-carousel";
 import CategoriesCarousel from "@/components/categories-carousel";
 import SectionTitle from "@/components/section-title";
@@ -8,16 +6,23 @@ import AdsGrid from "@/components/ads-grid";
 // import TopAdvertCard from "@/components/home/TopAdvertCard";
 import { getI18nProps } from "@/i18n/server";
 import { logger } from "@/lib/errorLogger";
+import { getJsonLdScriptProps } from "@/lib/seo";
+import { supabaseServer } from "@/lib/supabaseServer";
+import { supabaseService } from "@/lib/supabaseService";
 
 export const revalidate = 60;
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://lyvox.be";
 
 type AdListItem = {
   id: string;
   title: string;
   price?: number | null;
+  currency?: string | null;
   location?: string | null;
   image?: string | null;
   createdAt?: string | null;
+  sellerVerified?: boolean;
 };
 
 type MediaRow = {
@@ -32,7 +37,7 @@ async function getFreeAds(): Promise<AdListItem[]> {
   // Get free ads (price = 0 or null)
   const { data: free, error: freeError } = await supabase
     .from("adverts")
-    .select("id,title,price,location,created_at")
+    .select("id,title,price,currency,location,created_at,user_id")
     .eq("status", "active")
     .or("price.eq.0,price.is.null")
     .order("created_at", { ascending: false })
@@ -48,6 +53,26 @@ async function getFreeAds(): Promise<AdListItem[]> {
   }
 
   const freeIds = (free ?? []).map((ad) => ad.id);
+  const userIds = (free ?? [])
+    .map((ad) => ad.user_id)
+    .filter((value): value is string => typeof value === "string");
+
+  let verifiedMap = new Map<string, boolean>();
+  if (userIds.length > 0) {
+    const { data: profilesData } = await supabase
+      .from("profiles")
+      .select("id,verified_email,verified_phone")
+      .in("id", userIds);
+
+    if (profilesData) {
+      verifiedMap = new Map(
+        profilesData.map((profile) => [
+          profile.id,
+          Boolean(profile.verified_email) && Boolean(profile.verified_phone),
+        ]),
+      );
+    }
+  }
 
   // Get first image for each ad
   const firstImageByAdvert = new Map<string, string>();
@@ -93,9 +118,11 @@ async function getFreeAds(): Promise<AdListItem[]> {
     id: ad.id,
     title: ad.title,
     price: ad.price,
+    currency: ad.currency ?? null,
     location: ad.location,
     createdAt: ad.created_at ?? null,
     image: firstImageByAdvert.get(ad.id) ?? null,
+    sellerVerified: verifiedMap.get(ad.user_id ?? "") ?? false,
   }));
 }
 
@@ -105,7 +132,7 @@ async function getLatestAds(): Promise<AdListItem[]> {
   // Get latest ads
   const { data: ads, error: adsError } = await supabase
     .from("adverts")
-    .select("id,title,price,location,created_at")
+    .select("id,title,price,currency,location,created_at,user_id")
     .eq("status", "active")
     .order("created_at", { ascending: false })
     .limit(24);
@@ -120,6 +147,26 @@ async function getLatestAds(): Promise<AdListItem[]> {
   }
 
   const adIds = (ads ?? []).map((ad) => ad.id);
+  const userIds = (ads ?? [])
+    .map((ad) => ad.user_id)
+    .filter((value): value is string => typeof value === "string");
+
+  let verifiedMap = new Map<string, boolean>();
+  if (userIds.length > 0) {
+    const { data: profilesData } = await supabase
+      .from("profiles")
+      .select("id,verified_email,verified_phone")
+      .in("id", userIds);
+
+    if (profilesData) {
+      verifiedMap = new Map(
+        profilesData.map((profile) => [
+          profile.id,
+          Boolean(profile.verified_email) && Boolean(profile.verified_phone),
+        ]),
+      );
+    }
+  }
 
   // Get first image for each ad
   const firstImageByAdvert = new Map<string, string>();
@@ -165,9 +212,11 @@ async function getLatestAds(): Promise<AdListItem[]> {
     id: ad.id,
     title: ad.title,
     price: ad.price,
+    currency: ad.currency ?? null,
     location: ad.location,
     createdAt: ad.created_at ?? null,
     image: firstImageByAdvert.get(ad.id) ?? null,
+    sellerVerified: verifiedMap.get(ad.user_id ?? "") ?? false,
   }));
 }
 
@@ -190,8 +239,19 @@ export default async function Home() {
     return value ?? key;
   };
 
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: messages?.app?.title ?? "LyVoX",
+    description: messages?.app?.description ?? undefined,
+    url: BASE_URL,
+    logo: `${BASE_URL}/favicon.ico`,
+  };
+
   return (
-    <div className="space-y-8">
+    <>
+      <script {...getJsonLdScriptProps(organizationJsonLd)} />
+      <div className="space-y-8">
       <InfoCarousel />
 
       <section className="space-y-4">
@@ -214,10 +274,11 @@ export default async function Home() {
         <AdsGrid items={freeAds} />
       </section>
 
-      <section className="space-y-4">
-        <SectionTitle>{t("home.latest")}</SectionTitle>
-        <AdsGrid items={latestAds} />
-      </section>
-    </div>
+        <section className="space-y-4">
+          <SectionTitle>{t("home.latest")}</SectionTitle>
+          <AdsGrid items={latestAds} />
+        </section>
+      </div>
+    </>
   );
 }

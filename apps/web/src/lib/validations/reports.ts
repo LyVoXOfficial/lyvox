@@ -33,10 +33,7 @@ export const updateReportSchema = z.object({
     .int("Report ID must be an integer")
     .positive("Report ID must be positive"),
   
-  new_status: z
-    .enum(["accepted", "rejected"], {
-      errorMap: () => ({ message: "Status must be either 'accepted' or 'rejected'" }),
-    }),
+  new_status: z.enum(["accepted", "rejected"]),
   
   unpublish: z
     .boolean()
