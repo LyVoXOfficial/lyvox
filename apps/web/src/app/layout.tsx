@@ -65,7 +65,6 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     alternates: {
       languages: languageAlternates,
-      icon: ["/favico.svg", "/favicon.ico"],
     },
   };
 }
