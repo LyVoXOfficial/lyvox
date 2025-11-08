@@ -329,5 +329,170 @@
       "present": "présent",
       "production_countries": "Pays de production"
     }
+  },
+  "catalog": {
+    "common": {
+      "select_placeholder": "Sélectionnez une option",
+      "schema_loading": "Chargement des champs de la catégorie…",
+      "schema_missing": "Cette catégorie ne possède pas encore de champs configurables.",
+      "no_schema_defined": "Aucun schéma défini pour cette catégorie.",
+      "required_indicator": "Obligatoire",
+      "field_missing": "Le champ {{field}} n'est pas enregistré dans le schéma du catalogue.",
+      "condition": {
+        "new": "Neuf",
+        "excellent": "Excellent",
+        "good": "Bon",
+        "needs_repair": "À réparer",
+        "usable": "En état d’usage",
+        "for_parts": "Pour pièces",
+        "used": "Occasion"
+      },
+      "validation": {
+        "required": "Veuillez renseigner « {field} ».",
+        "number_min": "« {field} » doit être supérieur ou égal à {min}.",
+        "number_max": "« {field} » doit être inférieur ou égal à {max}.",
+        "option_invalid": "Sélectionnez une valeur valide pour « {field} »."
+      }
+    },
+    "furniture": {
+      "material": "Matériau principal",
+      "style": "Style",
+      "condition": "État",
+      "condition_hint": "Décrivez l'état général du meuble.",
+      "length_cm": "Longueur",
+      "width_cm": "Largeur",
+      "height_cm": "Hauteur",
+      "brand": "Marque",
+      "color": "Couleur",
+      "step": {
+        "details": "Détails du meuble",
+        "extras": "Informations complémentaires"
+      },
+      "group": {
+        "basic": "Informations essentielles",
+        "dimensions": "Dimensions",
+        "extra": "Détails supplémentaires"
+      },
+      "material_option": {
+        "wood": "Bois",
+        "metal": "Métal",
+        "plastic": "Plastique",
+        "glass": "Verre",
+        "fabric": "Tissu",
+        "leather": "Cuir",
+        "rattan": "Rotin",
+        "other": "Autre"
+      },
+      "style_option": {
+        "modern": "Moderne",
+        "classic": "Classique",
+        "scandinavian": "Scandinave",
+        "loft": "Loft",
+        "minimalism": "Minimaliste",
+        "provence": "Provençal",
+        "vintage": "Vintage",
+        "other": "Autre"
+      }
+    },
+    "auto_parts": {
+      "type": "Type de pièce",
+      "condition": "État",
+      "season": "Saison",
+      "diameter_inch": "Diamètre",
+      "width_mm": "Largeur",
+      "bolt_pattern": "Entraxe",
+      "bolt_pattern_hint": "Exemple : 5x112 ou 4x100.",
+      "step": {
+        "details": "Détails de la pièce"
+      },
+      "group": {
+        "core": "Informations principales",
+        "spec": "Caractéristiques"
+      },
+      "type_option": {
+        "tires": "Pneus",
+        "wheels": "Roues",
+        "rims": "Jantes",
+        "accessories": "Accessoires"
+      },
+      "season_option": {
+        "summer": "Été",
+        "winter": "Hiver",
+        "all_season": "Toutes saisons"
+      }
+    },
+    "services": {
+      "scope": "Description du service",
+      "scope_hint": "Indiquez les prestations et vos compétences clés.",
+      "rate_type": "Mode de facturation",
+      "rate_amount": "Montant",
+      "location_type": "Mode d’intervention",
+      "area": "Zone d'intervention",
+      "area_hint": "Villes ou régions où vous travaillez.",
+      "experience_years": "Expérience (années)",
+      "license": "Licence / assurance",
+      "available_from": "Disponible à partir du",
+      "step": {
+        "details": "Détails du service",
+        "pricing": "Tarification"
+      },
+      "group": {
+        "scope": "Champ d'action",
+        "experience": "Expérience & disponibilité",
+        "pricing": "Options de tarification"
+      },
+      "rate_type_option": {
+        "hourly": "Tarif horaire",
+        "daily": "Tarif journalier",
+        "project": "Forfait projet",
+        "free_quote": "Devis gratuit"
+      },
+      "location_type_option": {
+        "on_site": "Sur place",
+        "remote": "À distance",
+        "hybrid": "Hybride"
+      }
+    },
+    "pets": {
+      "breed": "Race",
+      "gender": "Sexe",
+      "age_months": "Âge (mois)",
+      "weight_kg": "Poids (kg)",
+      "vaccinated": "Vacciné",
+      "sterilized": "Stérilisé / castré",
+      "microchip": "Puce électronique",
+      "pedigree": "Pédigrée",
+      "character": "Tempérament",
+      "character_hint": "Décrivez son comportement, ses habitudes, sa compatibilité avec enfants et animaux.",
+      "step": {
+        "details": "Informations sur l’animal",
+        "extra": "Informations supplémentaires"
+      },
+      "group": {
+        "basic": "Informations de base",
+        "health": "Santé",
+        "character": "Tempérament"
+      },
+      "gender_option": {
+        "male": "Mâle",
+        "female": "Femelle"
+      }
+    },
+    "giveaway": {
+      "reason": "Raison du don",
+      "reason_hint": "Expliquez pourquoi vous donnez cet objet.",
+      "condition": "État",
+      "pickup": "Modalités de retrait",
+      "pickup_hint": "Précisez l’adresse, les horaires ou les options de livraison.",
+      "available_until": "Disponible jusqu’au",
+      "requirements": "Conditions pour le bénéficiaire",
+      "step": {
+        "details": "Détails du don"
+      },
+      "group": {
+        "core": "Informations principales",
+        "timing": "Délais & remarques"
+      }
+    }
   }
 }

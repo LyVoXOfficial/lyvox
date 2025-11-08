@@ -329,5 +329,170 @@
       "present": "present",
       "production_countries": "Production countries"
     }
+  },
+  "catalog": {
+    "common": {
+      "select_placeholder": "Select an option",
+      "schema_loading": "Loading category fields…",
+      "schema_missing": "This category does not have configurable fields yet.",
+      "no_schema_defined": "No schema defined for this category.",
+      "required_indicator": "Required",
+      "field_missing": "Field {{field}} is not registered in the catalog schema.",
+      "condition": {
+        "new": "New",
+        "excellent": "Excellent",
+        "good": "Good",
+        "needs_repair": "Needs repair",
+        "usable": "Usable",
+        "for_parts": "For parts",
+        "used": "Used"
+      },
+      "validation": {
+        "required": "Please fill in \"{field}\".",
+        "number_min": "\"{field}\" must be at least {min}.",
+        "number_max": "\"{field}\" must be at most {max}.",
+        "option_invalid": "Select a valid value for \"{field}\"."
+      }
+    },
+    "furniture": {
+      "material": "Main material",
+      "style": "Style",
+      "condition": "Condition",
+      "condition_hint": "Describe the overall state of the furniture.",
+      "length_cm": "Length",
+      "width_cm": "Width",
+      "height_cm": "Height",
+      "brand": "Brand",
+      "color": "Color",
+      "step": {
+        "details": "Furniture details",
+        "extras": "Additional information"
+      },
+      "group": {
+        "basic": "Basics",
+        "dimensions": "Dimensions",
+        "extra": "Additional details"
+      },
+      "material_option": {
+        "wood": "Wood",
+        "metal": "Metal",
+        "plastic": "Plastic",
+        "glass": "Glass",
+        "fabric": "Fabric",
+        "leather": "Leather",
+        "rattan": "Rattan",
+        "other": "Other"
+      },
+      "style_option": {
+        "modern": "Modern",
+        "classic": "Classic",
+        "scandinavian": "Scandinavian",
+        "loft": "Loft",
+        "minimalism": "Minimalism",
+        "provence": "Provence",
+        "vintage": "Vintage",
+        "other": "Other"
+      }
+    },
+    "auto_parts": {
+      "type": "Part type",
+      "condition": "Condition",
+      "season": "Season",
+      "diameter_inch": "Diameter",
+      "width_mm": "Width",
+      "bolt_pattern": "Bolt pattern",
+      "bolt_pattern_hint": "Example: 5x112 or 4x100.",
+      "step": {
+        "details": "Auto part details"
+      },
+      "group": {
+        "core": "Main information",
+        "spec": "Specifications"
+      },
+      "type_option": {
+        "tires": "Tires",
+        "wheels": "Wheels",
+        "rims": "Rims",
+        "accessories": "Accessories"
+      },
+      "season_option": {
+        "summer": "Summer",
+        "winter": "Winter",
+        "all_season": "All-season"
+      }
+    },
+    "services": {
+      "scope": "Service description",
+      "scope_hint": "List the work you perform and key competencies.",
+      "rate_type": "Pricing model",
+      "rate_amount": "Rate amount",
+      "location_type": "Work format",
+      "area": "Service area",
+      "area_hint": "Cities or regions where you can help.",
+      "experience_years": "Experience (years)",
+      "license": "Licensed / insured",
+      "available_from": "Available from",
+      "step": {
+        "details": "Service details",
+        "pricing": "Pricing"
+      },
+      "group": {
+        "scope": "Scope",
+        "experience": "Experience & availability",
+        "pricing": "Pricing options"
+      },
+      "rate_type_option": {
+        "hourly": "Hourly rate",
+        "daily": "Daily rate",
+        "project": "Project quote",
+        "free_quote": "Free estimate"
+      },
+      "location_type_option": {
+        "on_site": "On-site",
+        "remote": "Remote",
+        "hybrid": "Hybrid"
+      }
+    },
+    "pets": {
+      "breed": "Breed",
+      "gender": "Gender",
+      "age_months": "Age (months)",
+      "weight_kg": "Weight (kg)",
+      "vaccinated": "Vaccinated",
+      "sterilized": "Neutered / spayed",
+      "microchip": "Microchip",
+      "pedigree": "Pedigree",
+      "character": "Temperament",
+      "character_hint": "Describe behaviour, habits, compatibility with children or other pets.",
+      "step": {
+        "details": "Pet details",
+        "extra": "Additional information"
+      },
+      "group": {
+        "basic": "Basic information",
+        "health": "Health",
+        "character": "Temperament"
+      },
+      "gender_option": {
+        "male": "Male",
+        "female": "Female"
+      }
+    },
+    "giveaway": {
+      "reason": "Reason for giveaway",
+      "reason_hint": "Explain why you are giving this item away.",
+      "condition": "Condition",
+      "pickup": "Pickup instructions",
+      "pickup_hint": "Specify address, schedule or delivery options.",
+      "available_until": "Available until",
+      "requirements": "Requirements for recipient",
+      "step": {
+        "details": "Giveaway details"
+      },
+      "group": {
+        "core": "Main information",
+        "timing": "Timing & notes"
+      }
+    }
   }
 }

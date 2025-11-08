@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useI18n } from "@/i18n";
 import { supabase } from "@/lib/supabaseClient";
@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { logger } from "@/lib/errorLogger";
+import { FormRenderer, type CatalogSchema, type CatalogFieldDefinition, type CatalogSchemaField } from "@/catalog/renderer";
+import { detectCategoryType } from "@/lib/utils/categoryDetector";
 import {
   Sheet,
   SheetContent,
@@ -33,11 +35,21 @@ export type SearchFiltersState = {
   price_min: number | null;
   price_max: number | null;
   location: string | null;
+  catalog_fields: Record<string, unknown>;
 };
 
 type CategoryWithChildren = Category & {
   children?: CategoryWithChildren[];
 };
+
+type CatalogSchemaState = {
+  loading: boolean;
+  error: string | null;
+  schema: CatalogSchema | null;
+  fields: Record<string, CatalogFieldDefinition>;
+};
+
+const SCHEMA_EXCLUDED_TYPES = new Set(["vehicle", "real_estate", "electronics", "fashion", "jobs"]);
 
 function getLocalizedCategoryName(cat: Category, locale: string): string {
   const localeMap: Record<string, keyof Category> = {
@@ -147,6 +159,13 @@ export default function SearchFilters({
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
   const locationInputRef = useRef<HTMLInputElement>(null);
   const locationSuggestionsRef = useRef<HTMLDivElement>(null);
+  const [filterSchemaState, setFilterSchemaState] = useState<CatalogSchemaState>({
+    loading: false,
+    error: null,
+    schema: null,
+    fields: {},
+  });
+  const [dynamicFilters, setDynamicFilters] = useState<Record<string, unknown>>({});
 
   // Initialize from URL params
   useEffect(() => {
@@ -282,6 +301,119 @@ export default function SearchFilters({
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!selectedCategory) {
+      setFilterSchemaState({
+        loading: false,
+        error: null,
+        schema: null,
+        fields: {},
+      });
+      setDynamicFilters({});
+      return;
+    }
+
+    const categoryType = detectCategoryType(selectedCategory.slug || "");
+    if (SCHEMA_EXCLUDED_TYPES.has(categoryType)) {
+      setFilterSchemaState({
+        loading: false,
+        error: null,
+        schema: null,
+        fields: {},
+      });
+      setDynamicFilters({});
+      return;
+    }
+
+    const loadSchema = async () => {
+      setFilterSchemaState((prev) => ({
+        ...prev,
+        loading: true,
+        error: null,
+      }));
+
+      try {
+        const response = await fetch(`/api/catalog/schema?category_id=${selectedCategory.id}`);
+        if (cancelled) return;
+
+        if (!response.ok) {
+          setFilterSchemaState({
+            loading: false,
+            error: t("catalog.common.schema_missing"),
+            schema: null,
+            fields: {},
+          });
+          setDynamicFilters({});
+          return;
+        }
+
+        const payload = await response.json();
+        if (!payload?.ok || !payload?.data) {
+          setFilterSchemaState({
+            loading: false,
+            error: t("catalog.common.schema_missing"),
+            schema: null,
+            fields: {},
+          });
+          setDynamicFilters({});
+          return;
+        }
+
+        const schema: CatalogSchema = {
+          version: payload.data.schema.version,
+          steps: payload.data.schema.steps,
+        };
+        const fieldMap = payload.data.fields as Record<string, CatalogFieldDefinition>;
+
+        const initialFilters: Record<string, unknown> = {};
+        searchParams.forEach((value, key) => {
+          if (!key.startsWith("catalog_field_")) return;
+          const fieldKey = key.replace("catalog_field_", "");
+          const fieldDef = fieldMap[fieldKey];
+          if (!fieldDef) return;
+
+          let parsed: unknown = value;
+          if (fieldDef.field_type === "number") {
+            const numericValue = Number(value);
+            if (Number.isNaN(numericValue)) {
+              return;
+            }
+            parsed = numericValue;
+          } else if (fieldDef.field_type === "boolean") {
+            parsed = value === "true";
+          }
+
+          initialFilters[fieldKey] = parsed;
+        });
+
+        setFilterSchemaState({
+          loading: false,
+          error: null,
+          schema,
+          fields: fieldMap,
+        });
+        setDynamicFilters(initialFilters);
+      } catch (error) {
+        if (cancelled) return;
+        setFilterSchemaState({
+          loading: false,
+          error: t("catalog.common.schema_missing"),
+          schema: null,
+          fields: {},
+        });
+        setDynamicFilters({});
+      }
+    };
+
+    loadSchema();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCategory, searchParams, t]);
+
   const toggleExpand = (id: string) => {
     setExpanded((prev) => {
       const next = new Set(prev);
@@ -296,21 +428,25 @@ export default function SearchFilters({
 
   const handleCategorySelect = (category: Category) => {
     setSelectedCategory(category);
+    setDynamicFilters({});
     applyFilters({
       category_id: category.id,
       price_min: priceRange[0] > 0 ? priceRange[0] : null,
       price_max: priceRange[1] < 10000 ? priceRange[1] : null,
       location: location || null,
+      catalog_fields: {},
     });
   };
 
   const handleClearCategory = () => {
     setSelectedCategory(null);
+    setDynamicFilters({});
     applyFilters({
       category_id: null,
       price_min: priceRange[0] > 0 ? priceRange[0] : null,
       price_max: priceRange[1] < 10000 ? priceRange[1] : null,
       location: location || null,
+      catalog_fields: {},
     });
   };
 
@@ -326,6 +462,7 @@ export default function SearchFilters({
       price_min: priceRange[0] > 0 ? priceRange[0] : null,
       price_max: priceRange[1] < 10000 ? priceRange[1] : null,
       location: selectedLocation || null,
+      catalog_fields: dynamicFilters,
     });
   };
 
@@ -335,37 +472,96 @@ export default function SearchFilters({
   };
 
   const applyFilters = (filters: SearchFiltersState) => {
-    onFiltersChange?.(filters);
+    const mergedFilters: SearchFiltersState = {
+      category_id: filters.category_id,
+      price_min: filters.price_min,
+      price_max: filters.price_max,
+      location: filters.location,
+      catalog_fields: filters.catalog_fields ?? dynamicFilters,
+    };
+
+    onFiltersChange?.(mergedFilters);
 
     // Update URL params
     const params = new URLSearchParams(searchParams.toString());
-    
-    if (filters.category_id) {
-      params.set("category_id", filters.category_id);
+
+    if (mergedFilters.category_id) {
+      params.set("category_id", mergedFilters.category_id);
     } else {
       params.delete("category_id");
     }
 
-    if (filters.price_min !== null && filters.price_min > 0) {
-      params.set("price_min", filters.price_min.toString());
+    if (mergedFilters.price_min !== null && mergedFilters.price_min > 0) {
+      params.set("price_min", mergedFilters.price_min.toString());
     } else {
       params.delete("price_min");
     }
 
-    if (filters.price_max !== null && filters.price_max < 10000) {
-      params.set("price_max", filters.price_max.toString());
+    if (mergedFilters.price_max !== null && mergedFilters.price_max < 10000) {
+      params.set("price_max", mergedFilters.price_max.toString());
     } else {
       params.delete("price_max");
     }
 
-    if (filters.location) {
-      params.set("location", filters.location);
+    if (mergedFilters.location) {
+      params.set("location", mergedFilters.location);
     } else {
       params.delete("location");
     }
 
+    Array.from(params.keys())
+      .filter((key) => key.startsWith("catalog_field_"))
+      .forEach((key) => params.delete(key));
+
+    Object.entries(mergedFilters.catalog_fields).forEach(([key, value]) => {
+      if (
+        value === null ||
+        value === undefined ||
+        (typeof value === "string" && value.trim() === "") ||
+        (typeof value === "number" && Number.isNaN(value))
+      ) {
+        return;
+      }
+      const paramKey = `catalog_field_${key}`;
+      if (typeof value === "boolean") {
+        params.set(paramKey, value ? "true" : "false");
+      } else {
+        params.set(paramKey, String(value));
+      }
+    });
+
     router.push(`/search?${params.toString()}`);
   };
+
+  const handleDynamicFieldChange = useCallback(
+    (fieldKey: string, value: unknown) => {
+      setDynamicFilters((prev) => {
+        const next = { ...prev };
+        const isEmpty =
+          value === null ||
+          value === undefined ||
+          (typeof value === "string" && value.trim() === "") ||
+          (typeof value === "number" && Number.isNaN(value));
+
+        if (isEmpty) {
+          delete next[fieldKey];
+        } else {
+          next[fieldKey] = value;
+        }
+
+        applyFilters({
+          category_id: selectedCategory?.id || null,
+          price_min: priceRange[0] > 0 ? priceRange[0] : null,
+          price_max: priceRange[1] < 10000 ? priceRange[1] : null,
+          location: location || null,
+          catalog_fields: next,
+        });
+
+        return next;
+      });
+    },
+    [applyFilters, selectedCategory?.id, priceRange, location],
+  );
 
   const handleApplyFilters = () => {
     applyFilters({
@@ -373,6 +569,7 @@ export default function SearchFilters({
       price_min: priceRange[0] > 0 ? priceRange[0] : null,
       price_max: priceRange[1] < 10000 ? priceRange[1] : null,
       location: location || null,
+      catalog_fields: dynamicFilters,
     });
   };
 
@@ -380,15 +577,33 @@ export default function SearchFilters({
     setSelectedCategory(null);
     setPriceRange([0, 10000]);
     setLocation("");
+    setDynamicFilters({});
     applyFilters({
       category_id: null,
       price_min: null,
       price_max: null,
       location: null,
+      catalog_fields: {},
     });
   };
 
   const tree = buildCategoryTree(categories);
+  const filterSchema = useMemo(() => {
+    if (!filterSchemaState.schema) return null;
+    return {
+      version: filterSchemaState.schema.version,
+      steps: (filterSchemaState.schema.steps ?? []).map((step) => ({
+        ...step,
+        groups: step.groups?.map((group) => ({
+          ...group,
+          fields: group.fields?.map((field) => ({
+            ...field,
+            optional: true,
+          })),
+        })),
+      })),
+    } as CatalogSchema;
+  }, [filterSchemaState.schema]);
 
   const renderCategory = (cat: CategoryWithChildren, level: number = 0): React.ReactNode => {
     const hasChildren = cat.children && cat.children.length > 0;
@@ -560,6 +775,34 @@ export default function SearchFilters({
           )}
         </div>
       </div>
+
+    {/* Category-specific filters */}
+    {selectedCategory && !SCHEMA_EXCLUDED_TYPES.has(detectCategoryType(selectedCategory.slug || "")) && (
+      <div className="space-y-4">
+        <Label className="text-sm font-semibold block">
+          {t("search.filters")}
+        </Label>
+        {filterSchemaState.loading && (
+          <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+            {t("catalog.common.schema_loading")}
+          </div>
+        )}
+        {!filterSchemaState.loading && filterSchemaState.error && (
+          <div className="rounded-md border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+            {filterSchemaState.error}
+          </div>
+        )}
+        {!filterSchemaState.loading && !filterSchemaState.error && filterSchema && (
+          <FormRenderer
+            schema={filterSchema}
+            fields={filterSchemaState.fields}
+            values={dynamicFilters}
+            onChange={handleDynamicFieldChange}
+            locale={locale}
+          />
+        )}
+      </div>
+    )}
 
       {/* Action Buttons */}
       <div className="flex gap-2 pt-4 border-t">

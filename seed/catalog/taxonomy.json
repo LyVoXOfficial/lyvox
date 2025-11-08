@@ -1,0 +1,1212 @@
+[
+  {
+    "name_ru": "Транспорт",
+    "slug": "transport",
+    "path": "transport",
+    "icon": "Car",
+    "children": [
+      {
+        "name_ru": "Легковые автомобили",
+        "slug": "legkovye-avtomobili",
+        "path": "transport/legkovye-avtomobili",
+        "icon": "CarFront",
+        "children": [
+          {
+            "name_ru": "Новые автомобили",
+            "slug": "novye-avtomobili",
+            "path": "transport/legkovye-avtomobili/novye-avtomobili",
+            "icon": "BadgeCheck",
+            "children": []
+          },
+          {
+            "name_ru": "Автомобили с пробегом",
+            "slug": "avtomobili-s-probegom",
+            "path": "transport/legkovye-avtomobili/avtomobili-s-probegom",
+            "icon": "Gauge",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name_ru": "Мотоциклы и спецтехника",
+        "slug": "motocikly-i-spectehnika",
+        "path": "transport/motocikly-i-spectehnika",
+        "icon": "Bike",
+        "children": [
+          {
+            "name_ru": "Мототехника (мотоциклы, скутеры, мопеды)",
+            "slug": "mototehnika-motocikly-skutery-mopedy",
+            "path": "transport/motocikly-i-spectehnika/mototehnika-motocikly-skutery-mopedy",
+            "icon": "Bike",
+            "children": []
+          },
+          {
+            "name_ru": "Грузовики и автобусы",
+            "slug": "gruzoviki-i-avtobusy",
+            "path": "transport/motocikly-i-spectehnika/gruzoviki-i-avtobusy",
+            "icon": "Truck",
+            "children": []
+          },
+          {
+            "name_ru": "Спецтехника",
+            "slug": "spectehnika",
+            "path": "transport/motocikly-i-spectehnika/spectehnika",
+            "icon": "Hammer",
+            "children": []
+          },
+          {
+            "name_ru": "Водный транспорт (лодки, катера, яхты)",
+            "slug": "vodnyy-transport-lodki-katera-yahty",
+            "path": "transport/motocikly-i-spectehnika/vodnyy-transport-lodki-katera-yahty",
+            "icon": "Ship",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name_ru": "Запчасти и аксессуары",
+        "slug": "zapchasti-i-aksessuary",
+        "path": "transport/zapchasti-i-aksessuary",
+        "icon": "Wrench",
+        "children": [
+          {
+            "name_ru": "Шины, диски и колёса",
+            "slug": "shiny-diski-i-kolyosa",
+            "path": "transport/zapchasti-i-aksessuary/shiny-diski-i-kolyosa",
+            "icon": "LifeBuoy",
+            "children": []
+          },
+          {
+            "name_ru": "Автохимия и масла",
+            "slug": "avtohimiya-i-masla",
+            "path": "transport/zapchasti-i-aksessuary/avtohimiya-i-masla",
+            "icon": "FlaskConical",
+            "children": []
+          },
+          {
+            "name_ru": "Аудио-, видео- и навигация",
+            "slug": "audio-video-i-navigaciya",
+            "path": "transport/zapchasti-i-aksessuary/audio-video-i-navigaciya",
+            "icon": "Speaker",
+            "children": []
+          },
+          {
+            "name_ru": "Багажники и фаркопы",
+            "slug": "bagazhniki-i-farkopy",
+            "path": "transport/zapchasti-i-aksessuary/bagazhniki-i-farkopy",
+            "icon": "Package",
+            "children": []
+          },
+          {
+            "name_ru": "Аксессуары (чехлы, коврики и т.д.)",
+            "slug": "aksessuary-chehly-kovriki-i-td",
+            "path": "transport/zapchasti-i-aksessuary/aksessuary-chehly-kovriki-i-td",
+            "icon": "ShoppingBag",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name_ru": "Недвижимость",
+    "slug": "nedvizhimost",
+    "path": "nedvizhimost",
+    "icon": "Home",
+    "children": [
+      {
+        "name_ru": "Продажа недвижимости",
+        "slug": "prodazha-nedvizhimosti",
+        "path": "nedvizhimost/prodazha-nedvizhimosti",
+        "icon": "Handshake",
+        "children": [
+          {
+            "name_ru": "Квартиры",
+            "slug": "kvartiry",
+            "path": "nedvizhimost/prodazha-nedvizhimosti/kvartiry",
+            "icon": "Building2",
+            "children": []
+          },
+          {
+            "name_ru": "Комнаты",
+            "slug": "komnaty",
+            "path": "nedvizhimost/prodazha-nedvizhimosti/komnaty",
+            "icon": "DoorOpen",
+            "children": []
+          },
+          {
+            "name_ru": "Дома, дачи, коттеджи",
+            "slug": "doma-dachi-kottedzhi",
+            "path": "nedvizhimost/prodazha-nedvizhimosti/doma-dachi-kottedzhi",
+            "icon": "House",
+            "children": []
+          },
+          {
+            "name_ru": "Участки",
+            "slug": "uchastki",
+            "path": "nedvizhimost/prodazha-nedvizhimosti/uchastki",
+            "icon": "Trees",
+            "children": []
+          },
+          {
+            "name_ru": "Коммерческая недвижимость",
+            "slug": "kommercheskaya-nedvizhimost",
+            "path": "nedvizhimost/prodazha-nedvizhimosti/kommercheskaya-nedvizhimost",
+            "icon": "Factory",
+            "children": []
+          },
+          {
+            "name_ru": "Гаражи и машиноместа",
+            "slug": "garazhi-i-mashinomesta",
+            "path": "nedvizhimost/prodazha-nedvizhimosti/garazhi-i-mashinomesta",
+            "icon": "Home",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name_ru": "Аренда недвижимости",
+        "slug": "arenda-nedvizhimosti",
+        "path": "nedvizhimost/arenda-nedvizhimosti",
+        "icon": "KeyRound",
+        "children": [
+          {
+            "name_ru": "Аренда квартир",
+            "slug": "arenda-kvartir",
+            "path": "nedvizhimost/arenda-nedvizhimosti/arenda-kvartir",
+            "icon": "KeySquare",
+            "children": []
+          },
+          {
+            "name_ru": "Аренда домов",
+            "slug": "arenda-domov",
+            "path": "nedvizhimost/arenda-nedvizhimosti/arenda-domov",
+            "icon": "Home",
+            "children": []
+          },
+          {
+            "name_ru": "Аренда коммерческой недвижимости",
+            "slug": "arenda-kommercheskoy-nedvizhimosti",
+            "path": "nedvizhimost/arenda-nedvizhimosti/arenda-kommercheskoy-nedvizhimosti",
+            "icon": "Building",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name_ru": "Личные вещи",
+    "slug": "lichnye-veshchi",
+    "path": "lichnye-veshchi",
+    "icon": "Shirt",
+    "children": [
+      {
+        "name_ru": "Женский гардероб",
+        "slug": "zhenskiy-garderob",
+        "path": "lichnye-veshchi/zhenskiy-garderob",
+        "icon": "Heart",
+        "children": [
+          {
+            "name_ru": "Верхняя одежда",
+            "slug": "verhnyaya-odezhda",
+            "path": "lichnye-veshchi/zhenskiy-garderob/verhnyaya-odezhda",
+            "icon": "Shirt",
+            "children": []
+          },
+          {
+            "name_ru": "Платья и юбки",
+            "slug": "platya-i-yubki",
+            "path": "lichnye-veshchi/zhenskiy-garderob/platya-i-yubki",
+            "icon": "Shirt",
+            "children": []
+          },
+          {
+            "name_ru": "Блузы и рубашки",
+            "slug": "bluzy-i-rubashki",
+            "path": "lichnye-veshchi/zhenskiy-garderob/bluzy-i-rubashki",
+            "icon": "Shirt",
+            "children": []
+          },
+          {
+            "name_ru": "Штаны и шорты",
+            "slug": "shtany-i-shorty",
+            "path": "lichnye-veshchi/zhenskiy-garderob/shtany-i-shorty",
+            "icon": "Shirt",
+            "children": []
+          },
+          {
+            "name_ru": "Свитеры и толстовки",
+            "slug": "svitery-i-tolstovki",
+            "path": "lichnye-veshchi/zhenskiy-garderob/svitery-i-tolstovki",
+            "icon": "Shirt",
+            "children": []
+          },
+          {
+            "name_ru": "Футболки и топы",
+            "slug": "futbolki-i-topy",
+            "path": "lichnye-veshchi/zhenskiy-garderob/futbolki-i-topy",
+            "icon": "Shirt",
+            "children": []
+          },
+          {
+            "name_ru": "Спортивная одежда",
+            "slug": "sportivnaya-odezhda",
+            "path": "lichnye-veshchi/zhenskiy-garderob/sportivnaya-odezhda",
+            "icon": "Dumbbell",
+            "children": []
+          },
+          {
+            "name_ru": "Домашняя одежда",
+            "slug": "domashnyaya-odezhda",
+            "path": "lichnye-veshchi/zhenskiy-garderob/domashnyaya-odezhda",
+            "icon": "Bed",
+            "children": []
+          },
+          {
+            "name_ru": "Нижнее бельё",
+            "slug": "nizhnee-belyo",
+            "path": "lichnye-veshchi/zhenskiy-garderob/nizhnee-belyo",
+            "icon": "Layers",
+            "children": []
+          },
+          {
+            "name_ru": "Купальники",
+            "slug": "kupalniki",
+            "path": "lichnye-veshchi/zhenskiy-garderob/kupalniki",
+            "icon": "Waves",
+            "children": []
+          },
+          {
+            "name_ru": "Обувь",
+            "slug": "obuv",
+            "path": "lichnye-veshchi/zhenskiy-garderob/obuv",
+            "icon": "ShoppingBag",
+            "children": []
+          },
+          {
+            "name_ru": "Аксессуары (сумки, ремни, шарфы)",
+            "slug": "aksessuary-sumki-remni-sharfy",
+            "path": "lichnye-veshchi/zhenskiy-garderob/aksessuary-sumki-remni-sharfy",
+            "icon": "ShoppingBag",
+            "children": []
+          },
+          {
+            "name_ru": "Головные уборы",
+            "slug": "golovnye-ubory",
+            "path": "lichnye-veshchi/zhenskiy-garderob/golovnye-ubory",
+            "icon": "Crown",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name_ru": "Мужской гардероб",
+        "slug": "muzhskoy-garderob",
+        "path": "lichnye-veshchi/muzhskoy-garderob",
+        "icon": "UserRound",
+        "children": [
+          {
+            "name_ru": "Верхняя одежда",
+            "slug": "verhnyaya-odezhda",
+            "path": "lichnye-veshchi/muzhskoy-garderob/verhnyaya-odezhda",
+            "icon": "Shirt",
+            "children": []
+          },
+          {
+            "name_ru": "Пиджаки и костюмы",
+            "slug": "pidzhaki-i-kostyumy",
+            "path": "lichnye-veshchi/muzhskoy-garderob/pidzhaki-i-kostyumy",
+            "icon": "Briefcase",
+            "children": []
+          },
+          {
+            "name_ru": "Рубашки",
+            "slug": "rubashki",
+            "path": "lichnye-veshchi/muzhskoy-garderob/rubashki",
+            "icon": "Shirt",
+            "children": []
+          },
+          {
+            "name_ru": "Штаны и шорты",
+            "slug": "shtany-i-shorty",
+            "path": "lichnye-veshchi/muzhskoy-garderob/shtany-i-shorty",
+            "icon": "Shirt",
+            "children": []
+          },
+          {
+            "name_ru": "Свитеры и толстовки",
+            "slug": "svitery-i-tolstovki",
+            "path": "lichnye-veshchi/muzhskoy-garderob/svitery-i-tolstovki",
+            "icon": "Shirt",
+            "children": []
+          },
+          {
+            "name_ru": "Футболки и майки",
+            "slug": "futbolki-i-mayki",
+            "path": "lichnye-veshchi/muzhskoy-garderob/futbolki-i-mayki",
+            "icon": "Shirt",
+            "children": []
+          },
+          {
+            "name_ru": "Спортивная одежда",
+            "slug": "sportivnaya-odezhda",
+            "path": "lichnye-veshchi/muzhskoy-garderob/sportivnaya-odezhda",
+            "icon": "Dumbbell",
+            "children": []
+          },
+          {
+            "name_ru": "Домашняя одежда",
+            "slug": "domashnyaya-odezhda",
+            "path": "lichnye-veshchi/muzhskoy-garderob/domashnyaya-odezhda",
+            "icon": "Bed",
+            "children": []
+          },
+          {
+            "name_ru": "Нижнее бельё",
+            "slug": "nizhnee-belyo",
+            "path": "lichnye-veshchi/muzhskoy-garderob/nizhnee-belyo",
+            "icon": "Layers",
+            "children": []
+          },
+          {
+            "name_ru": "Обувь",
+            "slug": "obuv",
+            "path": "lichnye-veshchi/muzhskoy-garderob/obuv",
+            "icon": "ShoppingBag",
+            "children": []
+          },
+          {
+            "name_ru": "Аксессуары (галстуки, ремни, портмоне)",
+            "slug": "aksessuary-galstuki-remni-portmone",
+            "path": "lichnye-veshchi/muzhskoy-garderob/aksessuary-galstuki-remni-portmone",
+            "icon": "Wallet",
+            "children": []
+          },
+          {
+            "name_ru": "Головные уборы",
+            "slug": "golovnye-ubory",
+            "path": "lichnye-veshchi/muzhskoy-garderob/golovnye-ubory",
+            "icon": "Crown",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name_ru": "Детский гардероб",
+        "slug": "detskiy-garderob",
+        "path": "lichnye-veshchi/detskiy-garderob",
+        "icon": "Baby",
+        "children": [
+          {
+            "name_ru": "Одежда для новорождённых",
+            "slug": "odezhda-dlya-novorozhdyonnyh",
+            "path": "lichnye-veshchi/detskiy-garderob/odezhda-dlya-novorozhdyonnyh",
+            "icon": "Baby",
+            "children": []
+          },
+          {
+            "name_ru": "Верхняя одежда",
+            "slug": "verhnyaya-odezhda",
+            "path": "lichnye-veshchi/detskiy-garderob/verhnyaya-odezhda",
+            "icon": "Shirt",
+            "children": []
+          },
+          {
+            "name_ru": "Комбинезоны и боди",
+            "slug": "kombinezony-i-bodi",
+            "path": "lichnye-veshchi/detskiy-garderob/kombinezony-i-bodi",
+            "icon": "Baby",
+            "children": []
+          },
+          {
+            "name_ru": "Платья и юбки",
+            "slug": "platya-i-yubki",
+            "path": "lichnye-veshchi/detskiy-garderob/platya-i-yubki",
+            "icon": "Shirt",
+            "children": []
+          },
+          {
+            "name_ru": "Штаны и шорты",
+            "slug": "shtany-i-shorty",
+            "path": "lichnye-veshchi/detskiy-garderob/shtany-i-shorty",
+            "icon": "Shirt",
+            "children": []
+          },
+          {
+            "name_ru": "Футболки",
+            "slug": "futbolki",
+            "path": "lichnye-veshchi/detskiy-garderob/futbolki",
+            "icon": "Shirt",
+            "children": []
+          },
+          {
+            "name_ru": "Свитеры и толстовки",
+            "slug": "svitery-i-tolstovki",
+            "path": "lichnye-veshchi/detskiy-garderob/svitery-i-tolstovki",
+            "icon": "Shirt",
+            "children": []
+          },
+          {
+            "name_ru": "Спортивная одежда",
+            "slug": "sportivnaya-odezhda",
+            "path": "lichnye-veshchi/detskiy-garderob/sportivnaya-odezhda",
+            "icon": "Dumbbell",
+            "children": []
+          },
+          {
+            "name_ru": "Обувь",
+            "slug": "obuv",
+            "path": "lichnye-veshchi/detskiy-garderob/obuv",
+            "icon": "ShoppingBag",
+            "children": []
+          },
+          {
+            "name_ru": "Аксессуары",
+            "slug": "aksessuary",
+            "path": "lichnye-veshchi/detskiy-garderob/aksessuary",
+            "icon": "ShoppingBag",
+            "children": []
+          },
+          {
+            "name_ru": "Головные уборы",
+            "slug": "golovnye-ubory",
+            "path": "lichnye-veshchi/detskiy-garderob/golovnye-ubory",
+            "icon": "Crown",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name_ru": "Электроника и техника",
+    "slug": "elektronika-i-tehnika",
+    "path": "elektronika-i-tehnika",
+    "icon": "Smartphone",
+    "children": [
+      {
+        "name_ru": "Телефоны и планшеты",
+        "slug": "telefony-i-planshety",
+        "path": "elektronika-i-tehnika/telefony-i-planshety",
+        "icon": "Smartphone",
+        "children": [
+          {
+            "name_ru": "Мобильные телефоны",
+            "slug": "mobilnye-telefony",
+            "path": "elektronika-i-tehnika/telefony-i-planshety/mobilnye-telefony",
+            "icon": "Smartphone",
+            "children": []
+          },
+          {
+            "name_ru": "Планшеты",
+            "slug": "planshety",
+            "path": "elektronika-i-tehnika/telefony-i-planshety/planshety",
+            "icon": "Tablet",
+            "children": []
+          },
+          {
+            "name_ru": "Умные часы и браслеты",
+            "slug": "umnye-chasy-i-braslety",
+            "path": "elektronika-i-tehnika/telefony-i-planshety/umnye-chasy-i-braslety",
+            "icon": "Watch",
+            "children": []
+          },
+          {
+            "name_ru": "Наушники и гарнитуры",
+            "slug": "naushniki-i-garnitury",
+            "path": "elektronika-i-tehnika/telefony-i-planshety/naushniki-i-garnitury",
+            "icon": "Headphones",
+            "children": []
+          },
+          {
+            "name_ru": "Аксессуары (чехлы, зарядные устройства)",
+            "slug": "aksessuary-chehly-zaryadnye-ustroystva",
+            "path": "elektronika-i-tehnika/telefony-i-planshety/aksessuary-chehly-zaryadnye-ustroystva",
+            "icon": "Plug",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name_ru": "Компьютеры и оргтехника",
+        "slug": "kompyutery-i-orgtehnika",
+        "path": "elektronika-i-tehnika/kompyutery-i-orgtehnika",
+        "icon": "Monitor",
+        "children": [
+          {
+            "name_ru": "Ноутбуки",
+            "slug": "noutbuki",
+            "path": "elektronika-i-tehnika/kompyutery-i-orgtehnika/noutbuki",
+            "icon": "Laptop",
+            "children": []
+          },
+          {
+            "name_ru": "Компьютеры и моноблоки",
+            "slug": "kompyutery-i-monobloki",
+            "path": "elektronika-i-tehnika/kompyutery-i-orgtehnika/kompyutery-i-monobloki",
+            "icon": "Monitor",
+            "children": []
+          },
+          {
+            "name_ru": "Комплектующие",
+            "slug": "komplektuyushchie",
+            "path": "elektronika-i-tehnika/kompyutery-i-orgtehnika/komplektuyushchie",
+            "icon": "Cpu",
+            "children": []
+          },
+          {
+            "name_ru": "Игровые приставки и аксессуары",
+            "slug": "igrovye-pristavki-i-aksessuary",
+            "path": "elektronika-i-tehnika/kompyutery-i-orgtehnika/igrovye-pristavki-i-aksessuary",
+            "icon": "Gamepad2",
+            "children": []
+          },
+          {
+            "name_ru": "Оргтехника (принтеры, МФУ)",
+            "slug": "orgtehnika-printery-mfu",
+            "path": "elektronika-i-tehnika/kompyutery-i-orgtehnika/orgtehnika-printery-mfu",
+            "icon": "Printer",
+            "children": []
+          },
+          {
+            "name_ru": "Сетевое оборудование",
+            "slug": "setevoe-oborudovanie",
+            "path": "elektronika-i-tehnika/kompyutery-i-orgtehnika/setevoe-oborudovanie",
+            "icon": "Server",
+            "children": []
+          },
+          {
+            "name_ru": "Программное обеспечение",
+            "slug": "programmnoe-obespechenie",
+            "path": "elektronika-i-tehnika/kompyutery-i-orgtehnika/programmnoe-obespechenie",
+            "icon": "Code",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name_ru": "Фото- и видеотехника",
+        "slug": "foto-i-videotehnika",
+        "path": "elektronika-i-tehnika/foto-i-videotehnika",
+        "icon": "Camera",
+        "children": [
+          {
+            "name_ru": "Фотоаппараты",
+            "slug": "fotoapparaty",
+            "path": "elektronika-i-tehnika/foto-i-videotehnika/fotoapparaty",
+            "icon": "Camera",
+            "children": []
+          },
+          {
+            "name_ru": "Видеокамеры",
+            "slug": "videokamery",
+            "path": "elektronika-i-tehnika/foto-i-videotehnika/videokamery",
+            "icon": "Video",
+            "children": []
+          },
+          {
+            "name_ru": "Объективы",
+            "slug": "obektivy",
+            "path": "elektronika-i-tehnika/foto-i-videotehnika/obektivy",
+            "icon": "Camera",
+            "children": []
+          },
+          {
+            "name_ru": "Экшн-камеры",
+            "slug": "ekshnkamery",
+            "path": "elektronika-i-tehnika/foto-i-videotehnika/ekshnkamery",
+            "icon": "CameraOff",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name_ru": "ТВ, аудио и видео",
+        "slug": "tv-audio-i-video",
+        "path": "elektronika-i-tehnika/tv-audio-i-video",
+        "icon": "Tv",
+        "children": [
+          {
+            "name_ru": "Телевизоры",
+            "slug": "televizory",
+            "path": "elektronika-i-tehnika/tv-audio-i-video/televizory",
+            "icon": "Tv",
+            "children": []
+          },
+          {
+            "name_ru": "Аудиотехника",
+            "slug": "audiotehnika",
+            "path": "elektronika-i-tehnika/tv-audio-i-video/audiotehnika",
+            "icon": "Speaker",
+            "children": []
+          },
+          {
+            "name_ru": "Медиаплееры",
+            "slug": "mediapleery",
+            "path": "elektronika-i-tehnika/tv-audio-i-video/mediapleery",
+            "icon": "PlaySquare",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name_ru": "Бытовая техника",
+        "slug": "bytovaya-tehnika",
+        "path": "elektronika-i-tehnika/bytovaya-tehnika",
+        "icon": "Lamp",
+        "children": [
+          {
+            "name_ru": "Техника для кухни",
+            "slug": "tehnika-dlya-kuhni",
+            "path": "elektronika-i-tehnika/bytovaya-tehnika/tehnika-dlya-kuhni",
+            "icon": "UtensilsCrossed",
+            "children": []
+          },
+          {
+            "name_ru": "Техника для дома",
+            "slug": "tehnika-dlya-doma",
+            "path": "elektronika-i-tehnika/bytovaya-tehnika/tehnika-dlya-doma",
+            "icon": "Plug",
+            "children": []
+          },
+          {
+            "name_ru": "Климатическая техника",
+            "slug": "klimaticheskaya-tehnika",
+            "path": "elektronika-i-tehnika/bytovaya-tehnika/klimaticheskaya-tehnika",
+            "icon": "CloudSun",
+            "children": []
+          },
+          {
+            "name_ru": "Техника для красоты и здоровья",
+            "slug": "tehnika-dlya-krasoty-i-zdorovya",
+            "path": "elektronika-i-tehnika/bytovaya-tehnika/tehnika-dlya-krasoty-i-zdorovya",
+            "icon": "Sparkles",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name_ru": "Для дома, хобби и детей",
+    "slug": "dlya-doma-hobbi-i-detey",
+    "path": "dlya-doma-hobbi-i-detey",
+    "icon": "Sofa",
+    "children": [
+      {
+        "name_ru": "Для дома и дачи",
+        "slug": "dlya-doma-i-dachi",
+        "path": "dlya-doma-hobbi-i-detey/dlya-doma-i-dachi",
+        "icon": "Armchair",
+        "children": [
+          {
+            "name_ru": "Мебель",
+            "slug": "mebel",
+            "path": "dlya-doma-hobbi-i-detey/dlya-doma-i-dachi/mebel",
+            "icon": "Armchair",
+            "children": []
+          },
+          {
+            "name_ru": "Текстиль и ковры",
+            "slug": "tekstil-i-kovry",
+            "path": "dlya-doma-hobbi-i-detey/dlya-doma-i-dachi/tekstil-i-kovry",
+            "icon": "Layers",
+            "children": []
+          },
+          {
+            "name_ru": "Посуда и кухонные принадлежности",
+            "slug": "posuda-i-kuhonnye-prinadlezhnosti",
+            "path": "dlya-doma-hobbi-i-detey/dlya-doma-i-dachi/posuda-i-kuhonnye-prinadlezhnosti",
+            "icon": "UtensilsCrossed",
+            "children": []
+          },
+          {
+            "name_ru": "Освещение",
+            "slug": "osveshchenie",
+            "path": "dlya-doma-hobbi-i-detey/dlya-doma-i-dachi/osveshchenie",
+            "icon": "Lamp",
+            "children": []
+          },
+          {
+            "name_ru": "Интерьер и декор",
+            "slug": "interer-i-dekor",
+            "path": "dlya-doma-hobbi-i-detey/dlya-doma-i-dachi/interer-i-dekor",
+            "icon": "Gem",
+            "children": []
+          },
+          {
+            "name_ru": "Сад и огород",
+            "slug": "sad-i-ogorod",
+            "path": "dlya-doma-hobbi-i-detey/dlya-doma-i-dachi/sad-i-ogorod",
+            "icon": "Sprout",
+            "children": []
+          },
+          {
+            "name_ru": "Хозяйственные товары",
+            "slug": "hozyaystvennye-tovary",
+            "path": "dlya-doma-hobbi-i-detey/dlya-doma-i-dachi/hozyaystvennye-tovary",
+            "icon": "Broom",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name_ru": "Детские товары",
+        "slug": "detskie-tovary",
+        "path": "dlya-doma-hobbi-i-detey/detskie-tovary",
+        "icon": "Blocks",
+        "children": [
+          {
+            "name_ru": "Игрушки и игры",
+            "slug": "igrushki-i-igry",
+            "path": "dlya-doma-hobbi-i-detey/detskie-tovary/igrushki-i-igry",
+            "icon": "Blocks",
+            "children": []
+          },
+          {
+            "name_ru": "Детские коляски",
+            "slug": "detskie-kolyaski",
+            "path": "dlya-doma-hobbi-i-detey/detskie-tovary/detskie-kolyaski",
+            "icon": "Baby",
+            "children": []
+          },
+          {
+            "name_ru": "Автокресла",
+            "slug": "avtokresla",
+            "path": "dlya-doma-hobbi-i-detey/detskie-tovary/avtokresla",
+            "icon": "Baby",
+            "children": []
+          },
+          {
+            "name_ru": "Товары для кормления",
+            "slug": "tovary-dlya-kormleniya",
+            "path": "dlya-doma-hobbi-i-detey/detskie-tovary/tovary-dlya-kormleniya",
+            "icon": "BabyBottle",
+            "children": []
+          },
+          {
+            "name_ru": "Мебель для детской",
+            "slug": "mebel-dlya-detskoy",
+            "path": "dlya-doma-hobbi-i-detey/detskie-tovary/mebel-dlya-detskoy",
+            "icon": "Blocks",
+            "children": []
+          },
+          {
+            "name_ru": "Товары для мам",
+            "slug": "tovary-dlya-mam",
+            "path": "dlya-doma-hobbi-i-detey/detskie-tovary/tovary-dlya-mam",
+            "icon": "Heart",
+            "children": []
+          },
+          {
+            "name_ru": "Гигиена и уход",
+            "slug": "gigiena-i-uhod",
+            "path": "dlya-doma-hobbi-i-detey/detskie-tovary/gigiena-i-uhod",
+            "icon": "Soap",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name_ru": "Хобби и отдых",
+        "slug": "hobbi-i-otdyh",
+        "path": "dlya-doma-hobbi-i-detey/hobbi-i-otdyh",
+        "icon": "Palette",
+        "children": [
+          {
+            "name_ru": "Спортивные товары",
+            "slug": "sportivnye-tovary",
+            "path": "dlya-doma-hobbi-i-detey/hobbi-i-otdyh/sportivnye-tovary",
+            "icon": "Dumbbell",
+            "children": []
+          },
+          {
+            "name_ru": "Книги и журналы",
+            "slug": "knigi-i-zhurnaly",
+            "path": "dlya-doma-hobbi-i-detey/hobbi-i-otdyh/knigi-i-zhurnaly",
+            "icon": "BookOpen",
+            "children": []
+          },
+          {
+            "name_ru": "Музыкальные инструменты",
+            "slug": "muzykalnye-instrumenty",
+            "path": "dlya-doma-hobbi-i-detey/hobbi-i-otdyh/muzykalnye-instrumenty",
+            "icon": "Guitar",
+            "children": []
+          },
+          {
+            "name_ru": "Коллекционирование",
+            "slug": "kollekcionirovanie",
+            "path": "dlya-doma-hobbi-i-detey/hobbi-i-otdyh/kollekcionirovanie",
+            "icon": "Gem",
+            "children": []
+          },
+          {
+            "name_ru": "Настольные игры",
+            "slug": "nastolnye-igry",
+            "path": "dlya-doma-hobbi-i-detey/hobbi-i-otdyh/nastolnye-igry",
+            "icon": "Dice6",
+            "children": []
+          },
+          {
+            "name_ru": "Туризм и рыбалка",
+            "slug": "turizm-i-rybalka",
+            "path": "dlya-doma-hobbi-i-detey/hobbi-i-otdyh/turizm-i-rybalka",
+            "icon": "Tent",
+            "children": []
+          },
+          {
+            "name_ru": "Билеты",
+            "slug": "bilety",
+            "path": "dlya-doma-hobbi-i-detey/hobbi-i-otdyh/bilety",
+            "icon": "Ticket",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name_ru": "Хэндмейд и творчество",
+        "slug": "hendmeyd-i-tvorchestvo",
+        "path": "dlya-doma-hobbi-i-detey/hendmeyd-i-tvorchestvo",
+        "icon": "PenTool",
+        "children": [
+          {
+            "name_ru": "Украшения ручной работы",
+            "slug": "ukrasheniya-ruchnoy-raboty",
+            "path": "dlya-doma-hobbi-i-detey/hendmeyd-i-tvorchestvo/ukrasheniya-ruchnoy-raboty",
+            "icon": "Sparkles",
+            "children": []
+          },
+          {
+            "name_ru": "Подарки и сувениры",
+            "slug": "podarki-i-suveniry",
+            "path": "dlya-doma-hobbi-i-detey/hendmeyd-i-tvorchestvo/podarki-i-suveniry",
+            "icon": "Gift",
+            "children": []
+          },
+          {
+            "name_ru": "Товары для творчества",
+            "slug": "tovary-dlya-tvorchestva",
+            "path": "dlya-doma-hobbi-i-detey/hendmeyd-i-tvorchestvo/tovary-dlya-tvorchestva",
+            "icon": "Paintbrush",
+            "children": []
+          },
+          {
+            "name_ru": "Куклы и игрушки ручной работы",
+            "slug": "kukly-i-igrushki-ruchnoy-raboty",
+            "path": "dlya-doma-hobbi-i-detey/hendmeyd-i-tvorchestvo/kukly-i-igrushki-ruchnoy-raboty",
+            "icon": "Blocks",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name_ru": "Услуги и бизнес",
+    "slug": "uslugi-i-biznes",
+    "path": "uslugi-i-biznes",
+    "icon": "BriefcaseBusiness",
+    "children": [
+      {
+        "name_ru": "Услуги",
+        "slug": "uslugi",
+        "path": "uslugi-i-biznes/uslugi",
+        "icon": "BriefcaseBusiness",
+        "children": [
+          {
+            "name_ru": "Ремонт и строительство",
+            "slug": "remont-i-stroitelstvo",
+            "path": "uslugi-i-biznes/uslugi/remont-i-stroitelstvo",
+            "icon": "Hammer",
+            "children": []
+          },
+          {
+            "name_ru": "Отделочные работы",
+            "slug": "otdelochnye-raboty",
+            "path": "uslugi-i-biznes/uslugi/otdelochnye-raboty",
+            "icon": "Paintbrush",
+            "children": []
+          },
+          {
+            "name_ru": "Грузоперевозки",
+            "slug": "gruzoperevozki",
+            "path": "uslugi-i-biznes/uslugi/gruzoperevozki",
+            "icon": "Truck",
+            "children": []
+          },
+          {
+            "name_ru": "Красота и здоровье",
+            "slug": "krasota-i-zdorove",
+            "path": "uslugi-i-biznes/uslugi/krasota-i-zdorove",
+            "icon": "Sparkles",
+            "children": []
+          },
+          {
+            "name_ru": "Ремонт техники",
+            "slug": "remont-tehniki",
+            "path": "uslugi-i-biznes/uslugi/remont-tehniki",
+            "icon": "Wrench",
+            "children": []
+          },
+          {
+            "name_ru": "Обучение и курсы",
+            "slug": "obuchenie-i-kursy",
+            "path": "uslugi-i-biznes/uslugi/obuchenie-i-kursy",
+            "icon": "GraduationCap",
+            "children": []
+          },
+          {
+            "name_ru": "Уборка",
+            "slug": "uborka",
+            "path": "uslugi-i-biznes/uslugi/uborka",
+            "icon": "Broom",
+            "children": []
+          },
+          {
+            "name_ru": "Уход за животными",
+            "slug": "uhod-za-zhivotnymi",
+            "path": "uslugi-i-biznes/uslugi/uhod-za-zhivotnymi",
+            "icon": "PawPrint",
+            "children": []
+          },
+          {
+            "name_ru": "Организация праздников",
+            "slug": "organizaciya-prazdnikov",
+            "path": "uslugi-i-biznes/uslugi/organizaciya-prazdnikov",
+            "icon": "PartyPopper",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name_ru": "Заявки на услуги",
+        "slug": "zayavki-na-uslugi",
+        "path": "uslugi-i-biznes/zayavki-na-uslugi",
+        "icon": "ClipboardList",
+        "children": [
+          {
+            "name_ru": "Ищу мастера",
+            "slug": "ishchu-mastera",
+            "path": "uslugi-i-biznes/zayavki-na-uslugi/ishchu-mastera",
+            "icon": "Users",
+            "children": []
+          },
+          {
+            "name_ru": "Ищу обучение",
+            "slug": "ishchu-obuchenie",
+            "path": "uslugi-i-biznes/zayavki-na-uslugi/ishchu-obuchenie",
+            "icon": "GraduationCap",
+            "children": []
+          },
+          {
+            "name_ru": "Ищу перевозку",
+            "slug": "ishchu-perevozku",
+            "path": "uslugi-i-biznes/zayavki-na-uslugi/ishchu-perevozku",
+            "icon": "Truck",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name_ru": "Животные",
+    "slug": "zhivotnye",
+    "path": "zhivotnye",
+    "icon": "PawPrint",
+    "children": [
+      {
+        "name_ru": "Домашние питомцы",
+        "slug": "domashnie-pitomcy",
+        "path": "zhivotnye/domashnie-pitomcy",
+        "icon": "PawPrint",
+        "children": [
+          {
+            "name_ru": "Собаки",
+            "slug": "sobaki",
+            "path": "zhivotnye/domashnie-pitomcy/sobaki",
+            "icon": "Dog",
+            "children": []
+          },
+          {
+            "name_ru": "Кошки",
+            "slug": "koshki",
+            "path": "zhivotnye/domashnie-pitomcy/koshki",
+            "icon": "Cat",
+            "children": []
+          },
+          {
+            "name_ru": "Грызуны",
+            "slug": "gryzuny",
+            "path": "zhivotnye/domashnie-pitomcy/gryzuny",
+            "icon": "Squirrel",
+            "children": []
+          },
+          {
+            "name_ru": "Птицы",
+            "slug": "pticy",
+            "path": "zhivotnye/domashnie-pitomcy/pticy",
+            "icon": "Bird",
+            "children": []
+          },
+          {
+            "name_ru": "Аквариумистика",
+            "slug": "akvariumistika",
+            "path": "zhivotnye/domashnie-pitomcy/akvariumistika",
+            "icon": "Fish",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name_ru": "Товары для животных",
+        "slug": "tovary-dlya-zhivotnyh",
+        "path": "zhivotnye/tovary-dlya-zhivotnyh",
+        "icon": "Bone",
+        "children": [
+          {
+            "name_ru": "Корм и лакомства",
+            "slug": "korm-i-lakomstva",
+            "path": "zhivotnye/tovary-dlya-zhivotnyh/korm-i-lakomstva",
+            "icon": "Bone",
+            "children": []
+          },
+          {
+            "name_ru": "Переноски и клетки",
+            "slug": "perenoski-i-kletki",
+            "path": "zhivotnye/tovary-dlya-zhivotnyh/perenoski-i-kletki",
+            "icon": "Package",
+            "children": []
+          },
+          {
+            "name_ru": "Игрушки и аксессуары",
+            "slug": "igrushki-i-aksessuary",
+            "path": "zhivotnye/tovary-dlya-zhivotnyh/igrushki-i-aksessuary",
+            "icon": "Puzzle",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name_ru": "Работа и карьера",
+    "slug": "rabota-i-karera",
+    "path": "rabota-i-karera",
+    "icon": "BriefcaseBusiness",
+    "children": [
+      {
+        "name_ru": "Вакансии",
+        "slug": "vakansii",
+        "path": "rabota-i-karera/vakansii",
+        "icon": "BriefcaseBusiness",
+        "children": [
+          {
+            "name_ru": "Полная занятость",
+            "slug": "polnaya-zanyatost",
+            "path": "rabota-i-karera/vakansii/polnaya-zanyatost",
+            "icon": "Clock",
+            "children": []
+          },
+          {
+            "name_ru": "Частичная занятость",
+            "slug": "chastichnaya-zanyatost",
+            "path": "rabota-i-karera/vakansii/chastichnaya-zanyatost",
+            "icon": "Hourglass",
+            "children": []
+          },
+          {
+            "name_ru": "Временная/подработка",
+            "slug": "vremennaya-podrabotka",
+            "path": "rabota-i-karera/vakansii/vremennaya-podrabotka",
+            "icon": "Calendar",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name_ru": "Резюме",
+        "slug": "rezyume",
+        "path": "rabota-i-karera/rezyume",
+        "icon": "Users",
+        "children": [
+          {
+            "name_ru": "Специалисты",
+            "slug": "specialisty",
+            "path": "rabota-i-karera/rezyume/specialisty",
+            "icon": "UserRound",
+            "children": []
+          },
+          {
+            "name_ru": "Рабочие профессии",
+            "slug": "rabochie-professii",
+            "path": "rabota-i-karera/rezyume/rabochie-professii",
+            "icon": "Hammer",
+            "children": []
+          },
+          {
+            "name_ru": "Студенты и стажёры",
+            "slug": "studenty-i-stazhyory",
+            "path": "rabota-i-karera/rezyume/studenty-i-stazhyory",
+            "icon": "GraduationCap",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name_ru": "Особые категории",
+    "slug": "osobye-kategorii",
+    "path": "osobye-kategorii",
+    "icon": "Sparkles",
+    "children": [
+      {
+        "name_ru": "Отдам даром",
+        "slug": "otdam-darom",
+        "path": "osobye-kategorii/otdam-darom",
+        "icon": "HandHeart",
+        "children": [
+          {
+            "name_ru": "Бесплатно",
+            "slug": "besplatno",
+            "path": "osobye-kategorii/otdam-darom/besplatno",
+            "icon": "HandHeart",
+            "children": []
+          },
+          {
+            "name_ru": "На обмен",
+            "slug": "na-obmen",
+            "path": "osobye-kategorii/otdam-darom/na-obmen",
+            "icon": "RefreshCw",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name_ru": "Поиск и обмен",
+        "slug": "poisk-i-obmen",
+        "path": "osobye-kategorii/poisk-i-obmen",
+        "icon": "Search",
+        "children": [
+          {
+            "name_ru": "Ищу вещь",
+            "slug": "ishchu-veshch",
+            "path": "osobye-kategorii/poisk-i-obmen/ishchu-veshch",
+            "icon": "Search",
+            "children": []
+          },
+          {
+            "name_ru": "Предлагаю обмен",
+            "slug": "predlagayu-obmen",
+            "path": "osobye-kategorii/poisk-i-obmen/predlagayu-obmen",
+            "icon": "RefreshCw",
+            "children": []
+          }
+        ]
+      }
+    ]
+  }
+]

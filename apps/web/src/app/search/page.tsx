@@ -110,6 +110,12 @@ export default function SearchPage() {
       params.set("page", page.toString());
       params.set("limit", limit.toString());
 
+      searchParams.forEach((value, key) => {
+        if (key.startsWith("catalog_field_")) {
+          params.set(key, value);
+        }
+      });
+
       let response: Response;
       try {
         response = await fetch(`/api/search?${params.toString()}`);
@@ -206,7 +212,7 @@ export default function SearchPage() {
     } finally {
       setLoading(false);
     }
-  }, [query, categoryId, priceMin, priceMax, location, sortBy, page, limit, t]);
+  }, [query, categoryId, priceMin, priceMax, location, sortBy, page, limit, t, searchParams]);
 
   // Fetch results when params change
   useEffect(() => {
@@ -242,6 +248,29 @@ export default function SearchPage() {
     } else {
       params.delete("location");
     }
+
+    Array.from(params.keys())
+      .filter((key) => key.startsWith("catalog_field_"))
+      .forEach((key) => params.delete(key));
+
+    Object.entries(filters.catalog_fields || {}).forEach(([key, value]) => {
+      const paramKey = `catalog_field_${key}`;
+      if (
+        value === null ||
+        value === undefined ||
+        (typeof value === "string" && value.trim() === "") ||
+        (typeof value === "number" && Number.isNaN(value))
+      ) {
+        params.delete(paramKey);
+        return;
+      }
+
+      if (typeof value === "boolean") {
+        params.set(paramKey, value ? "true" : "false");
+      } else {
+        params.set(paramKey, String(value));
+      }
+    });
 
     // Reset to page 0 when filters change
     params.set("page", "0");

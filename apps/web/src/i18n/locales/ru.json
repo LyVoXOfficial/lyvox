@@ -329,5 +329,170 @@
       "present": "н.в.",
       "production_countries": "Страны производства"
     }
+  },
+  "catalog": {
+    "common": {
+      "select_placeholder": "Выберите вариант",
+      "schema_loading": "Загружаем поля категории…",
+      "schema_missing": "Для этой категории пока нет настраиваемых полей.",
+      "no_schema_defined": "Для этой категории не задана схема.",
+      "required_indicator": "Обязательно",
+      "field_missing": "Поле {{field}} не зарегистрировано в схеме каталога.",
+      "condition": {
+        "new": "Новое",
+        "excellent": "Отличное",
+        "good": "Хорошее",
+        "needs_repair": "Требует ремонта",
+        "usable": "Рабочее",
+        "for_parts": "На запчасти",
+        "used": "Б/у"
+      },
+      "validation": {
+        "required": "Заполните поле «{field}».",
+        "number_min": "Значение «{field}» должно быть не меньше {min}.",
+        "number_max": "Значение «{field}» должно быть не больше {max}.",
+        "option_invalid": "Выберите корректное значение для «{field}»."
+      }
+    },
+    "furniture": {
+      "material": "Основной материал",
+      "style": "Стиль",
+      "condition": "Состояние",
+      "condition_hint": "Опишите общее состояние предмета.",
+      "length_cm": "Длина",
+      "width_cm": "Ширина",
+      "height_cm": "Высота",
+      "brand": "Бренд",
+      "color": "Цвет",
+      "step": {
+        "details": "Характеристики мебели",
+        "extras": "Дополнительная информация"
+      },
+      "group": {
+        "basic": "Основное",
+        "dimensions": "Габариты",
+        "extra": "Дополнительно"
+      },
+      "material_option": {
+        "wood": "Дерево",
+        "metal": "Металл",
+        "plastic": "Пластик",
+        "glass": "Стекло",
+        "fabric": "Ткань",
+        "leather": "Кожа",
+        "rattan": "Ротанг",
+        "other": "Другое"
+      },
+      "style_option": {
+        "modern": "Современный",
+        "classic": "Классический",
+        "scandinavian": "Скандинавский",
+        "loft": "Лофт",
+        "minimalism": "Минимализм",
+        "provence": "Прованс",
+        "vintage": "Винтаж",
+        "other": "Другой"
+      }
+    },
+    "auto_parts": {
+      "type": "Тип запчасти",
+      "condition": "Состояние",
+      "season": "Сезон",
+      "diameter_inch": "Диаметр",
+      "width_mm": "Ширина",
+      "bolt_pattern": "Разболтовка",
+      "bolt_pattern_hint": "Например: 5x112 или 4x100.",
+      "step": {
+        "details": "Параметры запчасти"
+      },
+      "group": {
+        "core": "Основная информация",
+        "spec": "Характеристики"
+      },
+      "type_option": {
+        "tires": "Шины",
+        "wheels": "Колёса",
+        "rims": "Диски",
+        "accessories": "Аксессуары"
+      },
+      "season_option": {
+        "summer": "Летние",
+        "winter": "Зимние",
+        "all_season": "Всесезонные"
+      }
+    },
+    "services": {
+      "scope": "Описание услуги",
+      "scope_hint": "Укажите виды работ и ключевые компетенции.",
+      "rate_type": "Модель оплаты",
+      "rate_amount": "Ставка",
+      "location_type": "Формат работы",
+      "area": "Зона обслуживания",
+      "area_hint": "Города или регионы, где вы работаете.",
+      "experience_years": "Опыт (лет)",
+      "license": "Есть лицензия / страховка",
+      "available_from": "Доступен с",
+      "step": {
+        "details": "Описание услуги",
+        "pricing": "Стоимость"
+      },
+      "group": {
+        "scope": "Объём",
+        "experience": "Опыт и график",
+        "pricing": "Варианты оплаты"
+      },
+      "rate_type_option": {
+        "hourly": "Почасовая",
+        "daily": "Подневная",
+        "project": "За проект",
+        "free_quote": "Бесплатная оценка"
+      },
+      "location_type_option": {
+        "on_site": "На выезде",
+        "remote": "Удалённо",
+        "hybrid": "Гибридно"
+      }
+    },
+    "pets": {
+      "breed": "Порода",
+      "gender": "Пол",
+      "age_months": "Возраст (месяцы)",
+      "weight_kg": "Вес (кг)",
+      "vaccinated": "Привит",
+      "sterilized": "Стерилизован / кастрирован",
+      "microchip": "Микрочип",
+      "pedigree": "Родословная",
+      "character": "Характер",
+      "character_hint": "Опишите поведение, привычки, совместимость с детьми и другими животными.",
+      "step": {
+        "details": "Информация о питомце",
+        "extra": "Дополнительные сведения"
+      },
+      "group": {
+        "basic": "Основное",
+        "health": "Здоровье",
+        "character": "Характер"
+      },
+      "gender_option": {
+        "male": "Мальчик",
+        "female": "Девочка"
+      }
+    },
+    "giveaway": {
+      "reason": "Причина отдачи",
+      "reason_hint": "Расскажите, почему отдаёте этот предмет.",
+      "condition": "Состояние",
+      "pickup": "Условия передачи",
+      "pickup_hint": "Укажите адрес, время или возможности доставки.",
+      "available_until": "Доступно до",
+      "requirements": "Требования к получателю",
+      "step": {
+        "details": "Детали раздачи"
+      },
+      "group": {
+        "core": "Основная информация",
+        "timing": "Сроки и примечания"
+      }
+    }
   }
 }

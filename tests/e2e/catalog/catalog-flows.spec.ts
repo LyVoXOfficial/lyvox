@@ -339,6 +339,71 @@ test.describe('Fashion Advert Creation Flow', () => {
   });
 });
 
+test.describe('Schema-driven Category Forms', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('input[type="email"]', testUser.email);
+    await page.fill('input[type="password"]', testUser.password);
+    await page.click('button[type="submit"]');
+    await page.goto('/post');
+  });
+
+  test('auto parts schema renders dynamic fields', async ({ page }) => {
+    await page.waitForSelector('[data-testid="category-transport"]');
+    await page.click('[data-testid="category-transport"]');
+    await page.click('[data-testid="subcategory-zapchasti-i-aksessuary"]');
+    await page.click('button:has-text("Next")');
+    await page.click('text=/New/i');
+    await page.click('button:has-text("Next")');
+    await expect(page.getByText(/Auto part details/i)).toBeVisible();
+    await expect(page.getByText(/Part type/i)).toBeVisible();
+  });
+
+  test('home & garden schema renders dynamic fields', async ({ page }) => {
+    await page.waitForSelector('[data-testid="category-dlya-doma-hobbi-i-detey"]');
+    await page.click('[data-testid="category-dlya-doma-hobbi-i-detey"]');
+    await page.click('[data-testid="subcategory-dlya-doma-i-dachi"]');
+    await page.click('button:has-text("Next")');
+    await page.click('text=/New/i');
+    await page.click('button:has-text("Next")');
+    await expect(page.getByText(/Furniture details/i)).toBeVisible();
+    await expect(page.getByText(/Main material/i)).toBeVisible();
+  });
+
+  test('services schema renders dynamic fields', async ({ page }) => {
+    await page.waitForSelector('[data-testid="category-uslugi-i-biznes"]');
+    await page.click('[data-testid="category-uslugi-i-biznes"]');
+    await page.click('[data-testid="subcategory-uslugi"]');
+    await page.click('button:has-text("Next")');
+    await page.click('text=/New/i');
+    await page.click('button:has-text("Next")');
+    await expect(page.getByText(/Service details/i)).toBeVisible();
+    await expect(page.getByText(/Pricing/i)).toBeVisible();
+  });
+
+  test('pets schema renders dynamic fields', async ({ page }) => {
+    await page.waitForSelector('[data-testid="category-zhivotnye"]');
+    await page.click('[data-testid="category-zhivotnye"]');
+    await page.click('[data-testid="subcategory-domashnie-pitomcy"]');
+    await page.click('button:has-text("Next")');
+    await page.click('text=/New/i');
+    await page.click('button:has-text("Next")');
+    await expect(page.getByText(/Pet details/i)).toBeVisible();
+    await expect(page.getByText(/Breed/i)).toBeVisible();
+  });
+
+  test('giveaway schema renders dynamic fields', async ({ page }) => {
+    await page.waitForSelector('[data-testid="category-osobye-kategorii"]');
+    await page.click('[data-testid="category-osobye-kategorii"]');
+    await page.click('[data-testid="subcategory-otdam-darom"]');
+    await page.click('button:has-text("Next")');
+    await page.click('text=/New/i');
+    await page.click('button:has-text("Next")');
+    await expect(page.getByText(/Giveaway details/i)).toBeVisible();
+    await expect(page.getByText(/Pickup instructions/i)).toBeVisible();
+  });
+});
+
 test.describe('Jobs Advert Creation Flow', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/login');

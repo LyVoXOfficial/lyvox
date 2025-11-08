@@ -329,5 +329,170 @@
       "present": "heden",
       "production_countries": "Productielanden"
     }
+  },
+  "catalog": {
+    "common": {
+      "select_placeholder": "Kies een optie",
+      "schema_loading": "Categorievelden worden geladen…",
+      "schema_missing": "Deze categorie heeft nog geen configureerbare velden.",
+      "no_schema_defined": "Er is geen schema voor deze categorie.",
+      "required_indicator": "Verplicht",
+      "field_missing": "Veld {{field}} is niet geregistreerd in het catalogusschema.",
+      "condition": {
+        "new": "Nieuw",
+        "excellent": "Uitstekend",
+        "good": "Goed",
+        "needs_repair": "Moet worden gerepareerd",
+        "usable": "Bruikbaar",
+        "for_parts": "Voor onderdelen",
+        "used": "Gebruikt"
+      },
+      "validation": {
+        "required": "Vul \"{field}\" in.",
+        "number_min": "\"{field}\" moet minimaal {min} zijn.",
+        "number_max": "\"{field}\" mag maximaal {max} zijn.",
+        "option_invalid": "Kies een geldige waarde voor \"{field}\"."
+      }
+    },
+    "furniture": {
+      "material": "Belangrijkste materiaal",
+      "style": "Stijl",
+      "condition": "Staat",
+      "condition_hint": "Beschrijf de algemene staat van het meubel.",
+      "length_cm": "Lengte",
+      "width_cm": "Breedte",
+      "height_cm": "Hoogte",
+      "brand": "Merk",
+      "color": "Kleur",
+      "step": {
+        "details": "Meubeldetails",
+        "extras": "Aanvullende informatie"
+      },
+      "group": {
+        "basic": "Basisinformatie",
+        "dimensions": "Afmetingen",
+        "extra": "Extra details"
+      },
+      "material_option": {
+        "wood": "Hout",
+        "metal": "Metaal",
+        "plastic": "Kunststof",
+        "glass": "Glas",
+        "fabric": "Textiel",
+        "leather": "Leer",
+        "rattan": "Rotan",
+        "other": "Overig"
+      },
+      "style_option": {
+        "modern": "Modern",
+        "classic": "Klassiek",
+        "scandinavian": "Scandinavisch",
+        "loft": "Loft",
+        "minimalism": "Minimalistisch",
+        "provence": "Provence",
+        "vintage": "Vintage",
+        "other": "Overig"
+      }
+    },
+    "auto_parts": {
+      "type": "Onderdelentype",
+      "condition": "Staat",
+      "season": "Seizoen",
+      "diameter_inch": "Diameter",
+      "width_mm": "Breedte",
+      "bolt_pattern": "Steekmaat",
+      "bolt_pattern_hint": "Bijv. 5x112 of 4x100.",
+      "step": {
+        "details": "Details van het onderdeel"
+      },
+      "group": {
+        "core": "Belangrijkste informatie",
+        "spec": "Specificaties"
+      },
+      "type_option": {
+        "tires": "Banden",
+        "wheels": "Wielen",
+        "rims": "Velgen",
+        "accessories": "Accessoires"
+      },
+      "season_option": {
+        "summer": "Zomer",
+        "winter": "Winter",
+        "all_season": "All-season"
+      }
+    },
+    "services": {
+      "scope": "Beschrijving van de dienst",
+      "scope_hint": "Beschrijf de werkzaamheden en belangrijkste vaardigheden.",
+      "rate_type": "Prijsmodel",
+      "rate_amount": "Tarief",
+      "location_type": "Werkvorm",
+      "area": "Werkgebied",
+      "area_hint": "Steden of regio's waar u actief bent.",
+      "experience_years": "Ervaring (jaren)",
+      "license": "Licentie / verzekering",
+      "available_from": "Beschikbaar vanaf",
+      "step": {
+        "details": "Dienstdetails",
+        "pricing": "Prijzen"
+      },
+      "group": {
+        "scope": "Werkveld",
+        "experience": "Ervaring en beschikbaarheid",
+        "pricing": "Prijsopties"
+      },
+      "rate_type_option": {
+        "hourly": "Uurtarief",
+        "daily": "Dagprijs",
+        "project": "Projectprijs",
+        "free_quote": "Gratis offerte"
+      },
+      "location_type_option": {
+        "on_site": "Op locatie",
+        "remote": "Op afstand",
+        "hybrid": "Hybride"
+      }
+    },
+    "pets": {
+      "breed": "Ras",
+      "gender": "Geslacht",
+      "age_months": "Leeftijd (maanden)",
+      "weight_kg": "Gewicht (kg)",
+      "vaccinated": "Gevaccineerd",
+      "sterilized": "Gesteriliseerd / gecastreerd",
+      "microchip": "Microchip",
+      "pedigree": "Stamboom",
+      "character": "Karakter",
+      "character_hint": "Beschrijf gedrag, gewoonten en geschiktheid voor kinderen of andere dieren.",
+      "step": {
+        "details": "Gegevens van het huisdier",
+        "extra": "Aanvullende informatie"
+      },
+      "group": {
+        "basic": "Basisinformatie",
+        "health": "Gezondheid",
+        "character": "Karakter"
+      },
+      "gender_option": {
+        "male": "Mannetje",
+        "female": "Vrouwtje"
+      }
+    },
+    "giveaway": {
+      "reason": "Reden van weggeven",
+      "reason_hint": "Leg uit waarom u dit item weggeeft.",
+      "condition": "Staat",
+      "pickup": "Ophaalinstructies",
+      "pickup_hint": "Vermeld adres, tijden of leveringsopties.",
+      "available_until": "Beschikbaar tot",
+      "requirements": "Voorwaarden voor ontvanger",
+      "step": {
+        "details": "Details van de weggever"
+      },
+      "group": {
+        "core": "Belangrijkste informatie",
+        "timing": "Tijd & opmerkingen"
+      }
+    }
   }
 }

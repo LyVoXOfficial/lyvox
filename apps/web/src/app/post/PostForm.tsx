@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useI18n } from "@/i18n";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ import { ElectronicsFields } from "@/components/catalog/ElectronicsFields";
 import { RealEstateFields } from "@/components/catalog/RealEstateFields";
 import { FashionFields } from "@/components/catalog/FashionFields";
 import { JobsFields } from "@/components/catalog/JobsFields";
+import { FormRenderer, type CatalogFieldDefinition, type CatalogSchema, type CatalogSchemaField } from "@/catalog/renderer";
 
 type PostFormProps = {
   categories: Category[];
@@ -47,12 +48,19 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   const initializeFormData = () => {
     const specifics = advertToEdit?.specifics || {};
     const options: Record<string, boolean | string> = {};
+    const catalogFields: Record<string, unknown> = {};
     
-    // Extract options from specifics
+    // Extract options and catalog field values from specifics
     Object.entries(specifics).forEach(([key, value]) => {
       if (key.startsWith("option_")) {
         const optionKey = key.replace("option_", "");
         options[optionKey] = typeof value === "string" ? value : true;
+        return;
+      }
+
+      if (key.startsWith("catalog_field_")) {
+        const fieldKey = key.replace("catalog_field_", "");
+        catalogFields[fieldKey] = value;
       }
     });
 
@@ -84,6 +92,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
       location: advertToEdit?.location ?? "",
       additional_phone: (specifics as Record<string, unknown>).additional_phone as string || "",
       additional_phone_verified: false, // Always reset - needs re-verification
+      catalog_fields: catalogFields,
     };
   };
 
@@ -92,6 +101,21 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   
   // Category type detection state
   const [categoryType, setCategoryType] = useState<string>('generic');
+  const schemaExcludedTypes = useRef(new Set(["vehicle", "real_estate", "electronics", "fashion", "jobs"]));
+
+  type CatalogSchemaState = {
+    loading: boolean;
+    error: string | null;
+    schema: CatalogSchema | null;
+    fields: Record<string, CatalogFieldDefinition>;
+  };
+
+  const [catalogSchemaState, setCatalogSchemaState] = useState<CatalogSchemaState>({
+    loading: false,
+    error: null,
+    schema: null,
+    fields: {},
+  });
 
   // Data fetching states
   const [makes, setMakes] = useState<any[]>([]);
@@ -222,6 +246,94 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
       }
     }
   }, [formData.category_id, categories]);
+
+  // Load catalog schema for non-bespoke categories
+  useEffect(() => {
+    let cancelled = false;
+
+    const shouldLoadSchema =
+      formData.category_id &&
+      !schemaExcludedTypes.current.has(categoryType);
+
+    if (!shouldLoadSchema) {
+      if (!cancelled) {
+        setCatalogSchemaState({
+          loading: false,
+          error: null,
+          schema: null,
+          fields: {},
+        });
+      }
+      return;
+    }
+
+    const loadSchema = async () => {
+      setCatalogSchemaState((prev) => ({
+        ...prev,
+        loading: true,
+        error: null,
+      }));
+
+      try {
+        const response = await apiFetch(`/api/catalog/schema?category_id=${formData.category_id}`);
+        if (cancelled) return;
+
+        if (!response.ok) {
+          let message = "Failed to load schema";
+          try {
+            const problem = await response.json();
+            message = problem?.error || problem?.message || message;
+          } catch {
+            // ignore
+          }
+          setCatalogSchemaState({
+            loading: false,
+            error: message,
+            schema: null,
+            fields: {},
+          });
+          return;
+        }
+
+        const payload = await response.json();
+        if (cancelled) return;
+
+        if (!payload?.ok || !payload?.data) {
+          setCatalogSchemaState({
+            loading: false,
+            error: "Schema not available",
+            schema: null,
+            fields: {},
+          });
+          return;
+        }
+
+        setCatalogSchemaState({
+          loading: false,
+          error: null,
+          schema: {
+            version: payload.data.schema.version,
+            steps: payload.data.schema.steps,
+          },
+          fields: payload.data.fields as Record<string, CatalogFieldDefinition>,
+        });
+      } catch (error: any) {
+        if (cancelled) return;
+        setCatalogSchemaState({
+          loading: false,
+          error: error?.message || "Schema request failed",
+          schema: null,
+          fields: {},
+        });
+      }
+    };
+
+    loadSchema();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [formData.category_id, categoryType]);
 
   // Filter makes based on search
   useEffect(() => {
@@ -421,38 +533,162 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
     }
   };
 
+  const handleSchemaFieldChange = useCallback((fieldKey: string, value: unknown) => {
+    setFormData((prev) => {
+      const next = { ...prev.catalog_fields };
+      const isEmpty =
+        value === null ||
+        value === undefined ||
+        value === "" ||
+        (typeof value === "number" && Number.isNaN(value));
+
+      if (isEmpty) {
+        delete next[fieldKey];
+      } else {
+        next[fieldKey] = value;
+      }
+
+      return {
+        ...prev,
+        catalog_fields: next,
+      };
+    });
+  }, []);
+
+  const resolveCatalogFieldLabel = useCallback(
+    (fieldDef: CatalogFieldDefinition | undefined, schemaField: CatalogSchemaField) => {
+      if (!fieldDef) return schemaField.field_key;
+      const labelKey =
+        schemaField.label_i18n_key ??
+        fieldDef.label_i18n_key ??
+        `catalog.field.${fieldDef.field_key}.label`;
+      return t(labelKey);
+    },
+    [t],
+  );
+
+  const validateSchemaFields = useCallback((): string[] => {
+    if (schemaExcludedTypes.current.has(categoryType)) {
+      return [];
+    }
+
+    const schema = catalogSchemaState.schema;
+    if (!schema || !Array.isArray(schema.steps) || schema.steps.length === 0) {
+      return [];
+    }
+
+    const fieldMap = catalogSchemaState.fields;
+    const values = formData.catalog_fields ?? {};
+    const errors: string[] = [];
+
+    const steps = Array.isArray(schema.steps) ? schema.steps : [];
+
+    for (const step of steps) {
+      const groups = Array.isArray(step.groups) ? step.groups : [];
+      for (const group of groups) {
+        const fields = Array.isArray(group.fields) ? group.fields : [];
+        for (const schemaField of fields) {
+          const fieldDef = fieldMap[schemaField.field_key];
+          if (!fieldDef) continue;
+
+          const label = resolveCatalogFieldLabel(fieldDef, schemaField);
+          const value = values[schemaField.field_key];
+          const required = schemaField.optional === true ? false : fieldDef.is_required;
+          const hasValue =
+            value !== undefined &&
+            value !== null &&
+            !(typeof value === "string" && value.trim() === "");
+
+          if (required && !hasValue) {
+            errors.push(t("catalog.common.validation.required", { field: label }));
+            continue;
+          }
+
+          if (!hasValue) {
+            continue;
+          }
+
+          if (fieldDef.field_type === "number") {
+            const numericValue = typeof value === "number" ? value : Number(value);
+            if (Number.isNaN(numericValue)) {
+              errors.push(t("catalog.common.validation.required", { field: label }));
+              continue;
+            }
+
+            const min = schemaField.min_value ?? fieldDef.min_value;
+            if (typeof min === "number" && numericValue < min) {
+              errors.push(t("catalog.common.validation.number_min", { field: label, min }));
+            }
+
+            const max = schemaField.max_value ?? fieldDef.max_value;
+            if (typeof max === "number" && numericValue > max) {
+              errors.push(t("catalog.common.validation.number_max", { field: label, max }));
+            }
+          }
+
+          if (fieldDef.field_type === "select") {
+            const options = fieldDef.options ?? [];
+            if (!options.some((opt) => opt.code === value)) {
+              errors.push(t("catalog.common.validation.option_invalid", { field: label }));
+            }
+          }
+        }
+      }
+    }
+
+    return errors;
+  }, [categoryType, catalogSchemaState, formData.catalog_fields, resolveCatalogFieldLabel, t]);
+
   // Prepare vehicle specifics from form data
-  const prepareVehicleSpecifics = () => {
+  const prepareSpecifics = () => {
     const specifics: Record<string, string> = {};
-    
-    if (formData.make_id) specifics.make_id = formData.make_id;
-    if (formData.model_id) specifics.model_id = formData.model_id;
-    if (formData.year) specifics.year = formData.year.toString();
-    if (formData.steering_wheel) specifics.steering_wheel = formData.steering_wheel;
-    if (formData.body_type) specifics.body_type = formData.body_type;
-    if (formData.doors) specifics.doors = formData.doors.toString();
-    if (formData.color_id) specifics.color_id = formData.color_id;
-    if (formData.color_code) specifics.color_code = formData.color_code;
-    if (formData.power) specifics.power = formData.power.toString();
-    if (formData.engine_type) specifics.engine_type = formData.engine_type;
-    if (formData.engine_volume) specifics.engine_volume = formData.engine_volume.toString();
-    if (formData.transmission) specifics.transmission = formData.transmission;
-    if (formData.drive) specifics.drive = formData.drive;
-    if (formData.mileage) specifics.mileage = formData.mileage.toString();
-    if (formData.vehicle_condition) specifics.vehicle_condition = formData.vehicle_condition;
-    if (formData.customs_cleared !== null) specifics.customs_cleared = formData.customs_cleared ? "yes" : "no";
-    if (formData.under_warranty !== null) specifics.under_warranty = formData.under_warranty ? "yes" : "no";
-    if (formData.owners_count) specifics.owners_count = formData.owners_count.toString();
-    if (formData.vin) specifics.vin = formData.vin;
-    if (formData.additional_phone) specifics.additional_phone = formData.additional_phone;
-    
-    // Add all options
-    Object.entries(formData.options).forEach(([key, value]) => {
-      if (value) {
-        specifics[`option_${key}`] = typeof value === "string" ? value : "true";
+
+    if (categoryType === "vehicle") {
+      if (formData.make_id) specifics.make_id = formData.make_id;
+      if (formData.model_id) specifics.model_id = formData.model_id;
+      if (formData.year) specifics.year = formData.year.toString();
+      if (formData.steering_wheel) specifics.steering_wheel = formData.steering_wheel;
+      if (formData.body_type) specifics.body_type = formData.body_type;
+      if (formData.doors) specifics.doors = formData.doors.toString();
+      if (formData.color_id) specifics.color_id = formData.color_id;
+      if (formData.color_code) specifics.color_code = formData.color_code;
+      if (formData.power) specifics.power = formData.power.toString();
+      if (formData.engine_type) specifics.engine_type = formData.engine_type;
+      if (formData.engine_volume) specifics.engine_volume = formData.engine_volume.toString();
+      if (formData.transmission) specifics.transmission = formData.transmission;
+      if (formData.drive) specifics.drive = formData.drive;
+      if (formData.mileage) specifics.mileage = formData.mileage.toString();
+      if (formData.vehicle_condition) specifics.vehicle_condition = formData.vehicle_condition;
+      if (formData.customs_cleared !== null) specifics.customs_cleared = formData.customs_cleared ? "yes" : "no";
+      if (formData.under_warranty !== null) specifics.under_warranty = formData.under_warranty ? "yes" : "no";
+      if (formData.owners_count !== null && formData.owners_count !== undefined) {
+        specifics.owners_count = formData.owners_count.toString();
+      }
+      if (formData.vin) specifics.vin = formData.vin;
+
+      // Add all options
+      Object.entries(formData.options).forEach(([key, value]) => {
+        if (value) {
+          specifics[`option_${key}`] = typeof value === "string" ? value : "true";
+        }
+      });
+    }
+
+    // Add dynamic schema-driven values for non-bespoke categories (or in addition)
+    const dynamicFields = formData.catalog_fields ?? {};
+    Object.entries(dynamicFields).forEach(([key, rawValue]) => {
+      if (rawValue === null || rawValue === undefined || rawValue === "") {
+        return;
+      }
+      if (typeof rawValue === "boolean") {
+        specifics[`catalog_field_${key}`] = rawValue ? "true" : "false";
+      } else {
+        specifics[`catalog_field_${key}`] = String(rawValue);
       }
     });
-    
+
+    if (formData.additional_phone) specifics.additional_phone = formData.additional_phone;
+
     return specifics;
   };
 
@@ -481,7 +717,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         location: formData.location || undefined,
         currency: "EUR",
         status: "draft",
-        specifics: prepareVehicleSpecifics(),
+        specifics: prepareSpecifics(),
       };
 
       // Remove undefined values
@@ -511,6 +747,12 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   };
   
   const handlePublish = async () => {
+    const schemaErrors = validateSchemaFields();
+    if (schemaErrors.length > 0) {
+      toast.error(t("post.update_error"), { description: schemaErrors.join("\n") });
+      return;
+    }
+
     setIsLoading(true);
     try {
       const id = await ensureAdvertId();
@@ -572,7 +814,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         location: formData.location || undefined,
         currency: "EUR",
         status: "active",
-        specifics: prepareVehicleSpecifics(),
+        specifics: prepareSpecifics(),
       };
 
       // Remove undefined values
@@ -729,7 +971,11 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   const handleCategorySelect = (mainCat: Category, subCat?: Category) => {
     if (subCat) {
       // If subcategory clicked, select it immediately
-      setFormData({ ...formData, category_id: subCat.id });
+      setFormData((prev) => ({
+        ...prev,
+        category_id: subCat.id,
+        catalog_fields: {},
+      }));
       setSelectedMainCategory(null);
     } else if (mainCat) {
       // If main category clicked and has subcategories, show subcategories
@@ -738,7 +984,11 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         setSelectedMainCategory(mainCat.id);
       } else {
         // No subcategories, select main category directly
-        setFormData({ ...formData, category_id: mainCat.id });
+        setFormData((prev) => ({
+          ...prev,
+          category_id: mainCat.id,
+          catalog_fields: {},
+        }));
       }
     }
   };
@@ -769,6 +1019,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                   }`}
                 >
                   <div 
+                    data-testid={`category-${group.main.slug}`}
                     className="flex items-start gap-3 cursor-pointer"
                     onClick={() => handleCategorySelect(group.main)}
                   >
@@ -809,6 +1060,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                         return (
                           <div
                             key={subCat.id}
+                            data-testid={`subcategory-${subCat.slug}`}
                             onClick={() => handleCategorySelect(group.main, subCat)}
                             className={`${colors.bg} ${colors.border} border rounded-md p-3 ${colors.hover} flex items-center gap-3 cursor-pointer transition-all ${
                               isSubCatSelected ? "ring-2 ring-primary" : ""
@@ -1118,6 +1370,10 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   }
 
   if (currentStep === 4) {
+    const isSchemaCategory = !schemaExcludedTypes.current.has(categoryType);
+    const { loading: schemaLoading, error: schemaError, schema, fields } = catalogSchemaState;
+    const hasSchema = Boolean(schema?.steps?.length);
+
     return (
       <Card>
         <CardHeader>
@@ -1327,11 +1583,36 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             />
           )}
           
-          {/* Generic category - no specialized fields */}
-          {!['vehicle', 'real_estate', 'electronics', 'fashion', 'jobs'].includes(categoryType) && (
-            <div className="text-center py-12 text-muted-foreground">
-              <p className="text-lg mb-2">{t("post.form.no_specialized_fields")}</p>
-              <p className="text-sm">{t("post.form.skip_to_next")}</p>
+          {/* Schema-driven categories */}
+          {isSchemaCategory && (
+            <div className="space-y-4">
+              {schemaLoading && (
+                <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+                  {t("catalog.common.schema_loading")}
+                </div>
+              )}
+
+              {!schemaLoading && schemaError && (
+                <div className="rounded-md border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+                  {schemaError}
+                </div>
+              )}
+
+              {!schemaLoading && !schemaError && hasSchema && (
+                <FormRenderer
+                  schema={schema!}
+                  fields={fields}
+                  values={formData.catalog_fields ?? {}}
+                  onChange={handleSchemaFieldChange}
+                  locale={locale}
+                />
+              )}
+
+              {!schemaLoading && !schemaError && !hasSchema && (
+                <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+                  {t("catalog.common.schema_missing")}
+                </div>
+              )}
             </div>
           )}
         </CardContent>
