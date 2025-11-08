@@ -19,131 +19,142 @@ export type CategoryType =
  * Detects category type based on category slug or parent hierarchy
  */
 export function detectCategoryType(categorySlug: string): CategoryType {
-  // Safety check: return generic if categorySlug is undefined or null
   if (!categorySlug) {
-    return 'generic';
+    return "generic";
   }
-  
+
   const slug = categorySlug.toLowerCase();
+  const [rootSegment = "", secondSegment = ""] = slug.split("/");
 
-  // Vehicle categories (Транспорт)
-  if (
-    slug.includes('transport') ||
-    slug.includes('avtomobil') ||
-    slug.includes('mototekhn') ||
-    slug.includes('motorcycle') ||
-    slug.includes('truck') ||
-    slug.includes('car') ||
-    slug.includes('vehicle')
-  ) {
-    return 'vehicle';
+  const includesAny = (value: string, needles: string[]) =>
+    needles.some((needle) => value.includes(needle));
+
+  switch (rootSegment) {
+    case "transport":
+      return "vehicle";
+    case "nedvizhimost":
+      return "real_estate";
+    case "lichnye-veshchi":
+      if (includesAny(secondSegment, ["detsk", "baby", "kid"])) {
+        return "baby_kids";
+      }
+      return "fashion";
+    case "elektronika-i-tehnika":
+      return "electronics";
+    case "dlya-doma-hobbi-i-detey":
+      if (includesAny(secondSegment, ["detsk", "baby", "kid"])) {
+        return "baby_kids";
+      }
+      if (includesAny(secondSegment, ["hobbi", "hobby", "sport"])) {
+        return "sports";
+      }
+      return "home";
+    case "uslugi-i-biznes":
+      return "services";
+    case "zhivotnye":
+      return "pets";
+    case "rabota-i-karera":
+      return "jobs";
+    case "osobye-kategorii":
+      return "generic";
+    default:
+      break;
   }
 
-  // Real Estate categories (Недвижимость)
+  // Fallback heuristics for legacy slugs and special cases
   if (
-    slug.includes('nedvizhimost') ||
-    slug.includes('real-estate') ||
-    slug.includes('kvartir') ||
-    slug.includes('apartment') ||
-    slug.includes('house') ||
-    slug.includes('prodazha') ||
-    slug.includes('arenda')
+    includesAny(slug, [
+      "transport",
+      "avtomobil",
+      "mototekhn",
+      "motorcycle",
+      "truck",
+      "car",
+      "vehicle",
+    ])
   ) {
-    return 'real_estate';
+    return "vehicle";
   }
 
-  // Electronics categories (Электроника)
   if (
-    slug.includes('elektronika') ||
-    slug.includes('electronics') ||
-    slug.includes('phone') ||
-    slug.includes('computer') ||
-    slug.includes('laptop') ||
-    slug.includes('tv') ||
-    slug.includes('audio') ||
-    slug.includes('photo') ||
-    slug.includes('appliance')
+    includesAny(slug, [
+      "nedvizhimost",
+      "real-estate",
+      "kvartir",
+      "apartment",
+      "house",
+      "prodazha",
+      "arenda",
+    ])
   ) {
-    return 'electronics';
+    return "real_estate";
   }
 
-  // Fashion categories (Личные вещи / Одежда)
   if (
-    slug.includes('lichnye-veshchi') ||
-    slug.includes('fashion') ||
-    slug.includes('odezhda') ||
-    slug.includes('clothing') ||
-    slug.includes('garderob') ||
-    slug.includes('obuv') ||
-    slug.includes('shoes') ||
-    slug.includes('aksessuar')
+    includesAny(slug, [
+      "elektronika",
+      "electronics",
+      "phone",
+      "computer",
+      "laptop",
+      "tv",
+      "audio",
+      "photo",
+      "appliance",
+    ])
   ) {
-    return 'fashion';
+    return "electronics";
   }
 
-  // Jobs categories (Работа)
   if (
-    slug.includes('rabota') ||
-    slug.includes('jobs') ||
-    slug.includes('career') ||
-    slug.includes('vacancy')
+    includesAny(slug, [
+      "fashion",
+      "odezhda",
+      "clothing",
+      "garderob",
+      "obuv",
+      "shoes",
+      "aksessuar",
+      "lichnye-veshchi",
+    ])
   ) {
-    return 'jobs';
+    return "fashion";
   }
 
-  // Home & Living categories (Дом и сад)
-  if (
-    slug.includes('dom-i-sad') ||
-    slug.includes('home-living') ||
-    slug.includes('furniture') ||
-    slug.includes('mebel') ||
-    slug.includes('garden') ||
-    slug.includes('sad')
-  ) {
-    return 'home';
+  if (includesAny(slug, ["rabota", "jobs", "career", "vacancy"])) {
+    return "jobs";
   }
 
-  // Baby & Kids categories (Товары для детей)
   if (
-    slug.includes('deti') ||
-    slug.includes('baby') ||
-    slug.includes('kids') ||
-    slug.includes('children') ||
-    slug.includes('detskie')
+    includesAny(slug, [
+      "dom-i-sad",
+      "home-living",
+      "furniture",
+      "mebel",
+      "garden",
+      "sad",
+    ])
   ) {
-    return 'baby_kids';
+    return "home";
   }
 
-  // Pets categories (Животные)
-  if (
-    slug.includes('zhivotnye') ||
-    slug.includes('pets') ||
-    slug.includes('animals')
-  ) {
-    return 'pets';
+  if (includesAny(slug, ["deti", "baby", "kids", "children", "detskie"])) {
+    return "baby_kids";
   }
 
-  // Sports & Hobbies categories (Хобби и спорт)
-  if (
-    slug.includes('hobbi') ||
-    slug.includes('sport') ||
-    slug.includes('hobby') ||
-    slug.includes('fitness')
-  ) {
-    return 'sports';
+  if (includesAny(slug, ["zhivotnye", "pets", "animals"])) {
+    return "pets";
   }
 
-  // Services categories (Услуги)
-  if (
-    slug.includes('uslugi') ||
-    slug.includes('services') ||
-    slug.includes('service')
-  ) {
-    return 'services';
+  if (includesAny(slug, ["hobbi", "sport", "hobby", "fitness"])) {
+    return "sports";
   }
 
-  // Default: generic JSONB-based category
-  return 'generic';
+  if (includesAny(slug, ["uslugi", "services", "service"])) {
+    return "services";
+  }
+
+  return "generic";
 }
 
 /**

@@ -1106,7 +1106,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
     }
     
     // Determine which conditions are available based on category type
-    const showForParts = ['vehicle', 'electronics', 'generic'].includes(categoryType);
+    const showForParts = ['vehicle', 'electronics'].includes(categoryType);
     
     return (
       <Card>
