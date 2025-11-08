@@ -478,6 +478,43 @@
         "female": "Weiblich"
       }
     },
+    "baby": {
+      "product_category": "Produkttyp",
+      "age_group": "Altersgruppe",
+      "condition": "Zustand",
+      "brand": "Marke",
+      "color": "Farbe",
+      "material": "Material",
+      "quantity": "Menge",
+      "safety_certified": "Sicherheitszertifiziert",
+      "expiration_date": "Ablaufdatum",
+      "step": {
+        "details": "Details Baby & Kinder",
+        "safety": "Sicherheit und Pflege"
+      },
+      "group": {
+        "product": "Produktinformationen",
+        "details": "Zusätzliche Angaben",
+        "safety": "Sicherheit"
+      },
+      "product_category_option": {
+        "toys": "Spielzeug & Spiele",
+        "strollers": "Kinderwagen",
+        "car_seats": "Kindersitze",
+        "feeding": "Stillen & Füttern",
+        "nursery": "Kinderzimmer & Möbel",
+        "care": "Pflege & Hygiene",
+        "safety": "Sicherheitszubehör",
+        "other": "Sonstiges"
+      },
+      "age_group_option": {
+        "0_6_months": "0-6 Monate",
+        "6_12_months": "6-12 Monate",
+        "1_3_years": "1-3 Jahre",
+        "3_5_years": "3-5 Jahre",
+        "5_plus": "5+ Jahre"
+      }
+    },
     "giveaway": {
       "reason": "Grund für die Abgabe",
       "reason_hint": "Erklären Sie, warum Sie den Artikel abgeben.",

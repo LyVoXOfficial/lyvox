@@ -57,6 +57,17 @@ values
   ('pet_pedigree', 'catalog.pets.pedigree', null, 'boolean', 'zhivotnye', false, null, null, null, null, 'pets_health', 50, '{}'::jsonb),
   ('pet_character', 'catalog.pets.character', 'catalog.pets.character.hint', 'textarea', 'zhivotnye', false, null, null, null, null, 'pets_extra', 10, '{"rows":3}'::jsonb),
 
+  -- Baby & Kids (Для дома, хобби и детей → Детские товары)
+  ('baby_product_category', 'catalog.baby.product_category', null, 'select', 'dlya-doma-hobbi-i-detey', true, null, null, null, null, 'baby_product', 10, '{"widget":"select"}'::jsonb),
+  ('baby_age_group', 'catalog.baby.age_group', null, 'select', 'dlya-doma-hobbi-i-detey', true, null, null, null, null, 'baby_product', 20, '{"widget":"select"}'::jsonb),
+  ('baby_condition_grade', 'catalog.baby.condition', null, 'select', 'dlya-doma-hobbi-i-detey', true, null, null, null, null, 'baby_condition', 10, '{"widget":"select"}'::jsonb),
+  ('baby_brand', 'catalog.baby.brand', null, 'text', 'dlya-doma-hobbi-i-detey', false, null, null, null, null, 'baby_details', 10, '{"maxLength":120}'::jsonb),
+  ('baby_color', 'catalog.baby.color', null, 'text', 'dlya-doma-hobbi-i-detey', false, null, null, null, null, 'baby_details', 20, '{"maxLength":60}'::jsonb),
+  ('baby_material', 'catalog.baby.material', null, 'text', 'dlya-doma-hobbi-i-detey', false, null, null, null, null, 'baby_details', 30, '{"maxLength":120}'::jsonb),
+  ('baby_quantity', 'catalog.baby.quantity', null, 'number', 'dlya-doma-hobbi-i-detey', false, null, 1, 10, null, 'baby_details', 40, '{"step":1}'::jsonb),
+  ('baby_safety_certified', 'catalog.baby.safety_certified', null, 'boolean', 'dlya-doma-hobbi-i-detey', false, null, null, null, null, 'baby_safety', 10, '{}'::jsonb),
+  ('baby_expiration_date', 'catalog.baby.expiration_date', null, 'date', 'dlya-doma-hobbi-i-detey', false, null, null, null, null, 'baby_safety', 20, '{}'::jsonb),
+
   -- Giveaway (Особые категории)
   ('giveaway_reason', 'catalog.giveaway.reason', 'catalog.giveaway.reason.hint', 'textarea', 'osobye-kategorii', false, null, null, null, null, 'giveaway_details', 10, '{"rows":2}'::jsonb),
   ('giveaway_condition_grade', 'catalog.giveaway.condition', null, 'select', 'osobye-kategorii', true, null, null, null, null, 'giveaway_details', 20, '{"widget":"select"}'::jsonb),
@@ -90,6 +101,9 @@ with
   service_rate_type_field as (select id from public.catalog_fields where field_key = 'service_rate_type'),
   service_location_field as (select id from public.catalog_fields where field_key = 'service_location_type'),
   pet_gender_field as (select id from public.catalog_fields where field_key = 'pet_gender'),
+  baby_product_category_field as (select id from public.catalog_fields where field_key = 'baby_product_category'),
+  baby_age_group_field as (select id from public.catalog_fields where field_key = 'baby_age_group'),
+  baby_condition_field as (select id from public.catalog_fields where field_key = 'baby_condition_grade'),
   giveaway_condition_field as (select id from public.catalog_fields where field_key = 'giveaway_condition_grade')
 
 insert into public.catalog_field_options (field_id, code, name_i18n_key, sort)
@@ -206,6 +220,47 @@ select * from (
 
   union all
 
+  -- baby product category
+  select baby_product_category_field.id, v.code, v.name_i18n_key, v.sort
+  from baby_product_category_field
+  cross join (values
+    ('toys', 'catalog.baby.product_category_option.toys', 10),
+    ('strollers', 'catalog.baby.product_category_option.strollers', 20),
+    ('car_seats', 'catalog.baby.product_category_option.car_seats', 30),
+    ('feeding', 'catalog.baby.product_category_option.feeding', 40),
+    ('nursery', 'catalog.baby.product_category_option.nursery', 50),
+    ('care', 'catalog.baby.product_category_option.care', 60),
+    ('safety', 'catalog.baby.product_category_option.safety', 70),
+    ('other', 'catalog.baby.product_category_option.other', 90)
+  ) as v(code, name_i18n_key, sort)
+
+  union all
+
+  -- baby age group
+  select baby_age_group_field.id, v.code, v.name_i18n_key, v.sort
+  from baby_age_group_field
+  cross join (values
+    ('0_6_months', 'catalog.baby.age_group_option.0_6_months', 10),
+    ('6_12_months', 'catalog.baby.age_group_option.6_12_months', 20),
+    ('1_3_years', 'catalog.baby.age_group_option.1_3_years', 30),
+    ('3_5_years', 'catalog.baby.age_group_option.3_5_years', 40),
+    ('5_plus', 'catalog.baby.age_group_option.5_plus', 50)
+  ) as v(code, name_i18n_key, sort)
+
+  union all
+
+  -- baby condition
+  select baby_condition_field.id, v.code, v.name_i18n_key, v.sort
+  from baby_condition_field
+  cross join (values
+    ('new', 'catalog.common.condition.new', 10),
+    ('excellent', 'catalog.common.condition.excellent', 20),
+    ('good', 'catalog.common.condition.good', 30),
+    ('used', 'catalog.common.condition.used', 40)
+  ) as v(code, name_i18n_key, sort)
+
+  union all
+
   -- giveaway condition
   select giveaway_condition_field.id, v.code, v.name_i18n_key, v.sort
   from giveaway_condition_field
@@ -228,6 +283,7 @@ with
   auto_parts_cat as (select id from public.categories where slug = 'zapchasti-i-aksessuary'),
   services_cat as (select id from public.categories where slug = 'uslugi'),
   pets_cat as (select id from public.categories where slug = 'domashnie-pitomcy'),
+  baby_cat as (select id from public.categories where slug = 'detskie-tovary'),
   giveaway_cat as (select id from public.categories where slug = 'otdam-darom')
 
 -- Furniture schema
@@ -408,6 +464,56 @@ select pets_cat.id, 1, true,
     )
   )
 from pets_cat
+on conflict (category_id, version) do update
+set steps = excluded.steps,
+    is_active = excluded.is_active,
+    updated_at = now();
+
+-- Baby & kids schema
+insert into public.catalog_subcategory_schema (category_id, version, is_active, steps)
+select baby_cat.id, 1, true,
+  jsonb_build_array(
+    jsonb_build_object(
+      'key', 'details',
+      'title_i18n_key', 'catalog.baby.step.details',
+      'groups', jsonb_build_array(
+        jsonb_build_object(
+          'key', 'product',
+          'title_i18n_key', 'catalog.baby.group.product',
+          'fields', jsonb_build_array(
+            jsonb_build_object('field_key', 'baby_product_category'),
+            jsonb_build_object('field_key', 'baby_age_group'),
+            jsonb_build_object('field_key', 'baby_condition_grade')
+          )
+        ),
+        jsonb_build_object(
+          'key', 'details',
+          'title_i18n_key', 'catalog.baby.group.details',
+          'fields', jsonb_build_array(
+            jsonb_build_object('field_key', 'baby_brand', 'optional', true),
+            jsonb_build_object('field_key', 'baby_color', 'optional', true),
+            jsonb_build_object('field_key', 'baby_material', 'optional', true),
+            jsonb_build_object('field_key', 'baby_quantity', 'optional', true)
+          )
+        )
+      )
+    ),
+    jsonb_build_object(
+      'key', 'safety',
+      'title_i18n_key', 'catalog.baby.step.safety',
+      'groups', jsonb_build_array(
+        jsonb_build_object(
+          'key', 'safety',
+          'title_i18n_key', 'catalog.baby.group.safety',
+          'fields', jsonb_build_array(
+            jsonb_build_object('field_key', 'baby_safety_certified', 'optional', true),
+            jsonb_build_object('field_key', 'baby_expiration_date', 'optional', true)
+          )
+        )
+      )
+    )
+  )
+from baby_cat
 on conflict (category_id, version) do update
 set steps = excluded.steps,
     is_active = excluded.is_active,

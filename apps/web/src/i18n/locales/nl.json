@@ -478,6 +478,43 @@
         "female": "Vrouwtje"
       }
     },
+    "baby": {
+      "product_category": "Producttype",
+      "age_group": "Leeftijdsgroep",
+      "condition": "Staat",
+      "brand": "Merk",
+      "color": "Kleur",
+      "material": "Materiaal",
+      "quantity": "Aantal",
+      "safety_certified": "Met veiligheidskeurmerk",
+      "expiration_date": "Houdbaarheidsdatum",
+      "step": {
+        "details": "Details baby & kind",
+        "safety": "Veiligheid en verzorging"
+      },
+      "group": {
+        "product": "Productinformatie",
+        "details": "Aanvullende details",
+        "safety": "Veiligheid"
+      },
+      "product_category_option": {
+        "toys": "Speelgoed & spelletjes",
+        "strollers": "Kinderwagens",
+        "car_seats": "Autostoeltjes",
+        "feeding": "Voeding & borstvoeding",
+        "nursery": "Kinderkamer & meubels",
+        "care": "Verzorging & hygiëne",
+        "safety": "Veiligheidsaccessoires",
+        "other": "Overig"
+      },
+      "age_group_option": {
+        "0_6_months": "0-6 maanden",
+        "6_12_months": "6-12 maanden",
+        "1_3_years": "1-3 jaar",
+        "3_5_years": "3-5 jaar",
+        "5_plus": "5+ jaar"
+      }
+    },
     "giveaway": {
       "reason": "Reden van weggeven",
       "reason_hint": "Leg uit waarom u dit item weggeeft.",

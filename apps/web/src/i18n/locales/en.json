@@ -478,6 +478,43 @@
         "female": "Female"
       }
     },
+    "baby": {
+      "product_category": "Product type",
+      "age_group": "Age group",
+      "condition": "Condition",
+      "brand": "Brand",
+      "color": "Color",
+      "material": "Material",
+      "quantity": "Quantity",
+      "safety_certified": "Safety certified",
+      "expiration_date": "Expiry date",
+      "step": {
+        "details": "Baby & kids details",
+        "safety": "Safety & care"
+      },
+      "group": {
+        "product": "Product information",
+        "details": "Additional details",
+        "safety": "Safety"
+      },
+      "product_category_option": {
+        "toys": "Toys & games",
+        "strollers": "Strollers & buggies",
+        "car_seats": "Car seats",
+        "feeding": "Feeding & nursing",
+        "nursery": "Nursery furniture & decor",
+        "care": "Care & hygiene",
+        "safety": "Safety accessories",
+        "other": "Other"
+      },
+      "age_group_option": {
+        "0_6_months": "0-6 months",
+        "6_12_months": "6-12 months",
+        "1_3_years": "1-3 years",
+        "3_5_years": "3-5 years",
+        "5_plus": "5+ years"
+      }
+    },
     "giveaway": {
       "reason": "Reason for giveaway",
       "reason_hint": "Explain why you are giving this item away.",
