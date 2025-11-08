@@ -150,14 +150,14 @@ export default function MainHeader() {
     <div className="sticky top-0 z-40 border-b bg-white/95 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center shrink-0" aria-label="LyVoX home">
+        <Link href="/" className="flex items-center shrink-0 py-1" aria-label="LyVoX home">
           <Image
             src="/lyvox.svg"
             alt="LyVoX"
-            width={128}
-            height={32}
+            width={168}
+            height={48}
             priority
-            className="h-8 w-auto"
+            className="h-10 w-auto"
           />
         </Link>
 
