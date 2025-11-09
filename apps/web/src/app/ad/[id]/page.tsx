@@ -897,7 +897,7 @@ async function loadAdvertData(
   }
 
   try {
-    const { data: advert, error: advertError } = await db
+    const { data: advert, error: advertError } = await svc
       .from("adverts")
       .select(
         "id,user_id,category_id,title,description,price,currency,location,created_at,status",
@@ -922,7 +922,7 @@ async function loadAdvertData(
   let categoryBreadcrumbs: CategorySummary[] = [];
 
   if (advert.category_id) {
-    const { data: categoryRecord } = await db
+    const { data: categoryRecord } = await svc
       .from("categories")
       .select(
         "path, slug, level, name_en, name_nl, name_fr, name_de, name_ru",
@@ -940,7 +940,7 @@ async function loadAdvertData(
           .map((_, idx, arr) => arr.slice(0, idx + 1).join("/"));
 
         if (crumbPaths.length) {
-          const { data: breadcrumbRecords } = await db
+          const { data: breadcrumbRecords } = await svc
             .from("categories")
             .select(
               "path, slug, level, name_en, name_nl, name_fr, name_de, name_ru",
@@ -957,7 +957,7 @@ async function loadAdvertData(
     }
   }
 
-  const { data: specificsRecord, error: specificsError } = await db
+  const { data: specificsRecord, error: specificsError } = await svc
     .from("ad_item_specifics")
     .select("specifics")
     .eq("advert_id", advertId)
@@ -972,7 +972,7 @@ async function loadAdvertData(
 
   const specifics = (specificsRecord?.specifics ?? {}) as Record<string, any>;
 
-  const { data: mediaRows, error: mediaError } = await db
+  const { data: mediaRows, error: mediaError } = await svc
     .from("media")
     .select("id,url,sort,w,h")
     .eq("advert_id", advertId)
@@ -1041,7 +1041,7 @@ async function loadAdvertData(
   let make: VehicleMake | null = null;
   const makeId = specifics.make_id ? String(specifics.make_id) : null;
   if (makeId) {
-    const { data: makeData } = await db
+    const { data: makeData } = await svc
       .from("vehicle_makes")
       .select("id, name_en, vehicle_make_i18n(name)")
       .eq("id", makeId)
@@ -1052,7 +1052,7 @@ async function loadAdvertData(
   let model: VehicleModel | null = null;
   const modelId = specifics.model_id ? String(specifics.model_id) : null;
   if (modelId) {
-    const { data: modelData } = await db
+    const { data: modelData } = await svc
       .from("vehicle_models")
       .select("id, name_en, vehicle_model_i18n(name)")
       .eq("id", modelId)
@@ -1063,7 +1063,7 @@ async function loadAdvertData(
   let color: VehicleColor | null = null;
   const colorId = specifics.color_id ? String(specifics.color_id) : null;
   if (colorId) {
-    const { data: colorData } = await db
+    const { data: colorData } = await svc
       .from("vehicle_colors")
       .select("id, name_en, name_nl, name_fr, name_de, name_ru")
       .eq("id", colorId)
@@ -1073,7 +1073,7 @@ async function loadAdvertData(
 
   let generations: VehicleGeneration[] = [];
   if (modelId) {
-    const { data: generationsData, error: generationsError } = await db
+    const { data: generationsData, error: generationsError } = await svc
       .from("vehicle_generations")
       .select(
         "id, model_id, code, start_year, end_year, facelift, summary, production_countries, vehicle_generation_i18n(locale, summary, pros, cons, inspection_tips)",
@@ -1102,7 +1102,7 @@ async function loadAdvertData(
     insights = await loadVehicleInsights(svc, String(insightsGenerationId));
   }
 
-  const { data: optionsData, error: optionsError } = await db
+  const { data: optionsData, error: optionsError } = await svc
     .from("vehicle_options")
     .select("id, category, code, name_en, name_nl, name_fr, name_de, name_ru")
     .order("category", { ascending: true })
@@ -1117,19 +1117,19 @@ async function loadAdvertData(
 
   const vehicleOptions = (optionsData ?? []) as VehicleOption[];
 
-  const { data: profile } = await db
+  const { data: profile } = await svc
     .from("profiles")
     .select("display_name, verified_email, verified_phone, created_at")
     .eq("id", advert.user_id)
     .maybeSingle();
 
-  const { data: trust } = await db
+  const { data: trust } = await svc
     .from("trust_score")
     .select("score")
     .eq("user_id", advert.user_id)
     .maybeSingle();
 
-  const { count: activeAdvertsCount } = await db
+  const { count: activeAdvertsCount } = await svc
     .from("adverts")
     .select("id", { head: true, count: "exact" })
     .eq("user_id", advert.user_id)
