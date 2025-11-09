@@ -151,7 +151,7 @@ export default function MainHeader() {
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center shrink-0 py-1" aria-label="LyVoX home">
-          <LogoWordmark className="h-10 w-auto md:h-12" />
+          <LogoWordmark />
         </Link>
 
         {/* Categories Dropdown - Desktop */}

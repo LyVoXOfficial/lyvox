@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 type LogoWordmarkProps = {
@@ -6,12 +7,13 @@ type LogoWordmarkProps = {
 
 export default function LogoWordmark({ className }: LogoWordmarkProps) {
   return (
-    <img
+    <Image
       src="/lyvox.svg"
       alt="LyVoX"
-      className={cn("h-12 w-auto", className)}
-      loading="eager"
-      decoding="async"
+      width={120}
+      height={32}
+      priority
+      className={cn("h-8 w-auto", className)}
     />
   );
 }
