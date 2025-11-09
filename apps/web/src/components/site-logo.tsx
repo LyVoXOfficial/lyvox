@@ -6,7 +6,7 @@ export function SiteLogo() {
       <img
         src="/lyvox.svg"
         alt="LyVoX"
-        className="h-24 w-auto"
+        style={{ height: '96px', width: '378px', objectFit: 'contain' }}
         loading="eager"
       />
     </Link>
