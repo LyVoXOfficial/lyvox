@@ -34,14 +34,11 @@ export async function generateMetadata(): Promise<Metadata> {
     description,
     icons: {
       icon: [
-        { url: "/favico.svg", type: "image/svg+xml" },
-        { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-        { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+        { url: "/icon.svg", type: "image/svg+xml" },
         { url: "/favicon.ico", type: "image/x-icon" },
       ],
       shortcut: ["/favicon.ico"],
-      apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
-      other: [{ rel: "mask-icon", url: "/lyvox.svg", color: "#11bdf9" }],
+      other: [{ rel: "mask-icon", url: "/icon.svg", color: "#11bdf9" }],
     },
     openGraph: {
       title,
