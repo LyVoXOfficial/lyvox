@@ -837,9 +837,11 @@ async function loadVehicleInsights(
     .from("vehicle_generation_insights")
     .select("*")
     .eq("generation_id", generationId)
-    .maybeSingle();
+    .limit(1);
 
-  if (error || !data) {
+  const base = Array.isArray(data) ? data[0] : null;
+
+  if (error || !base) {
     if (error) {
       console.warn("Failed to load vehicle insights", { generationId, error });
     }
@@ -861,7 +863,7 @@ async function loadVehicleInsights(
   }
 
   return {
-    ...(data as VehicleInsights),
+    ...(base as VehicleInsights),
     vehicle_generation_insights_i18n: translations ?? [],
   };
 }
@@ -928,13 +930,14 @@ async function loadAdvertData(
   }
 
   try {
-    const { data: advert, error: advertError } = await svc
+    const { data: advertRows, error: advertError } = await svc
       .from("adverts")
       .select(
         "id,user_id,category_id,title,description,price,currency,location,created_at,status",
       )
       .eq("id", advertId)
-      .maybeSingle();
+      .limit(1);
+    const advert = Array.isArray(advertRows) ? (advertRows[0] as AdvertRecord | undefined) : undefined;
 
     if (advertError) {
       console.error("Failed to load advert record", { advertId, error: advertError });
@@ -952,17 +955,18 @@ async function loadAdvertData(
   let category: CategorySummary | null = null;
   let categoryBreadcrumbs: CategorySummary[] = [];
 
-  if (advert.category_id) {
-    const { data: categoryRecord } = await svc
+  if (advert?.category_id) {
+    const { data: categoryRows } = await svc
       .from("categories")
       .select(
         "path, slug, level, name_en, name_nl, name_fr, name_de, name_ru",
       )
       .eq("id", advert.category_id)
-      .maybeSingle();
+      .limit(1);
 
+    const categoryRecord = Array.isArray(categoryRows) ? (categoryRows[0] as CategorySummary | undefined) : undefined;
     if (categoryRecord) {
-      category = categoryRecord as CategorySummary;
+      category = categoryRecord;
 
       if (categoryRecord.path) {
         const crumbPaths = categoryRecord.path
@@ -988,11 +992,11 @@ async function loadAdvertData(
     }
   }
 
-  const { data: specificsRecord, error: specificsError } = await svc
+  const { data: specificsRows, error: specificsError } = await svc
     .from("ad_item_specifics")
     .select("specifics")
     .eq("advert_id", advertId)
-    .maybeSingle();
+    .limit(1);
 
   if (specificsError) {
     console.warn("Failed to load advert specifics, using empty object", {
@@ -1001,7 +1005,8 @@ async function loadAdvertData(
     });
   }
 
-  const specifics = (specificsRecord?.specifics ?? {}) as Record<string, any>;
+  const specificsRecord = Array.isArray(specificsRows) ? specificsRows[0] : null;
+  const specifics = ((specificsRecord as any)?.specifics ?? {}) as Record<string, any>;
 
   const { data: mediaRows, error: mediaError } = await svc
     .from("media")
@@ -1072,34 +1077,34 @@ async function loadAdvertData(
   let make: VehicleMake | null = null;
   const makeId = specifics.make_id ? String(specifics.make_id) : null;
   if (makeId) {
-    const { data: makeData } = await svc
+    const { data: makeRows } = await svc
       .from("vehicle_makes")
       .select("id, name_en, vehicle_make_i18n(name)")
       .eq("id", makeId)
-      .maybeSingle();
-    make = (makeData as VehicleMake) ?? null;
+      .limit(1);
+    make = (Array.isArray(makeRows) ? (makeRows[0] as VehicleMake) : null) ?? null;
   }
 
   let model: VehicleModel | null = null;
   const modelId = specifics.model_id ? String(specifics.model_id) : null;
   if (modelId) {
-    const { data: modelData } = await svc
+    const { data: modelRows } = await svc
       .from("vehicle_models")
       .select("id, name_en, vehicle_model_i18n(name)")
       .eq("id", modelId)
-      .maybeSingle();
-    model = (modelData as VehicleModel) ?? null;
+      .limit(1);
+    model = (Array.isArray(modelRows) ? (modelRows[0] as VehicleModel) : null) ?? null;
   }
 
   let color: VehicleColor | null = null;
   const colorId = specifics.color_id ? String(specifics.color_id) : null;
   if (colorId) {
-    const { data: colorData } = await svc
+    const { data: colorRows } = await svc
       .from("vehicle_colors")
       .select("id, name_en, name_nl, name_fr, name_de, name_ru")
       .eq("id", colorId)
-      .maybeSingle();
-    color = (colorData as VehicleColor) ?? null;
+      .limit(1);
+    color = (Array.isArray(colorRows) ? (colorRows[0] as VehicleColor) : null) ?? null;
   }
 
   let generations: VehicleGeneration[] = [];
@@ -1148,17 +1153,20 @@ async function loadAdvertData(
 
   const vehicleOptions = (optionsData ?? []) as VehicleOption[];
 
-  const { data: profile } = await svc
+  const { data: profileRows } = await svc
     .from("profiles")
     .select("display_name, verified_email, verified_phone, created_at")
     .eq("id", advert.user_id)
-    .maybeSingle();
+    .limit(1);
 
-  const { data: trust } = await svc
+  const profile = Array.isArray(profileRows) ? profileRows[0] : null;
+
+  const { data: trustRows } = await svc
     .from("trust_score")
     .select("score")
     .eq("user_id", advert.user_id)
-    .maybeSingle();
+    .limit(1);
+  const trust = Array.isArray(trustRows) ? trustRows[0] : null;
 
   const { count: activeAdvertsCount } = await svc
     .from("adverts")
