@@ -7,10 +7,10 @@ export function SiteLogo() {
       <Image
         src="/lyvox.svg"
         alt="LyVoX"
-        width={180}
-        height={48}
+        width={240}
+        height={64}
         priority
-        className="h-12 w-auto"
+        className="h-16 w-auto"
       />
     </Link>
   );

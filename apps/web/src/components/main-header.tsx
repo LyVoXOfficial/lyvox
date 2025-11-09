@@ -147,7 +147,7 @@ export default function MainHeader() {
 
   return (
     <div className="sticky top-0 z-40 border-b bg-white/95 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
+      <div className="mx-auto flex h-20 max-w-6xl items-center gap-3 px-4">
         {/* Logo */}
         <div className="shrink-0">
           <SiteLogo />
