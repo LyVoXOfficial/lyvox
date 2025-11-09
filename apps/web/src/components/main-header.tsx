@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,7 @@ import { useI18n } from "@/i18n";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabaseClient";
-import LogoWordmark from "@/components/logo-wordmark";
+import { SiteLogo } from "@/components/site-logo";
 
 type MeResponse = {
   user: unknown | null;
@@ -150,9 +149,9 @@ export default function MainHeader() {
     <div className="sticky top-0 z-40 border-b bg-white/95 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center shrink-0 py-1" aria-label="LyVoX home">
-          <LogoWordmark />
-        </Link>
+        <div className="shrink-0">
+          <SiteLogo />
+        </div>
 
         {/* Categories Dropdown - Desktop */}
         <div ref={categoriesDropdownRef} className="relative hidden md:block">
