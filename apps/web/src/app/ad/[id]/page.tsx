@@ -886,10 +886,18 @@ async function loadAdvertData(
   advertId: string,
   currentUserId: string | null,
 ): Promise<AdvertData | null> {
-  const client = supabaseService();
+  // Prefer anon-scoped server client for reading (RLS-safe),
+  // while still attempting to use service client for storage signing.
+  const db = supabaseServer();
+  let svc = db;
+  try {
+    svc = supabaseService();
+  } catch {
+    // Fallback to anon client; signing may fail but is handled below.
+  }
 
   try {
-    const { data: advert, error: advertError } = await client
+    const { data: advert, error: advertError } = await db
       .from("adverts")
       .select(
         "id,user_id,category_id,title,description,price,currency,location,created_at,status",
@@ -914,7 +922,7 @@ async function loadAdvertData(
   let categoryBreadcrumbs: CategorySummary[] = [];
 
   if (advert.category_id) {
-    const { data: categoryRecord } = await client
+    const { data: categoryRecord } = await db
       .from("categories")
       .select(
         "path, slug, level, name_en, name_nl, name_fr, name_de, name_ru",
@@ -932,7 +940,7 @@ async function loadAdvertData(
           .map((_, idx, arr) => arr.slice(0, idx + 1).join("/"));
 
         if (crumbPaths.length) {
-          const { data: breadcrumbRecords } = await client
+          const { data: breadcrumbRecords } = await db
             .from("categories")
             .select(
               "path, slug, level, name_en, name_nl, name_fr, name_de, name_ru",
@@ -949,7 +957,7 @@ async function loadAdvertData(
     }
   }
 
-  const { data: specificsRecord, error: specificsError } = await client
+  const { data: specificsRecord, error: specificsError } = await db
     .from("ad_item_specifics")
     .select("specifics")
     .eq("advert_id", advertId)
@@ -964,7 +972,7 @@ async function loadAdvertData(
 
   const specifics = (specificsRecord?.specifics ?? {}) as Record<string, any>;
 
-  const { data: mediaRows, error: mediaError } = await client
+  const { data: mediaRows, error: mediaError } = await db
     .from("media")
     .select("id,url,sort,w,h")
     .eq("advert_id", advertId)
@@ -977,7 +985,7 @@ async function loadAdvertData(
     });
   }
 
-  const storage = client.storage.from("ad-media");
+  const storage = svc.storage.from("ad-media");
   const media: MediaItem[] = [];
 
   if (mediaRows) {
@@ -1033,7 +1041,7 @@ async function loadAdvertData(
   let make: VehicleMake | null = null;
   const makeId = specifics.make_id ? String(specifics.make_id) : null;
   if (makeId) {
-    const { data: makeData } = await client
+    const { data: makeData } = await db
       .from("vehicle_makes")
       .select("id, name_en, vehicle_make_i18n(name)")
       .eq("id", makeId)
@@ -1044,7 +1052,7 @@ async function loadAdvertData(
   let model: VehicleModel | null = null;
   const modelId = specifics.model_id ? String(specifics.model_id) : null;
   if (modelId) {
-    const { data: modelData } = await client
+    const { data: modelData } = await db
       .from("vehicle_models")
       .select("id, name_en, vehicle_model_i18n(name)")
       .eq("id", modelId)
@@ -1055,7 +1063,7 @@ async function loadAdvertData(
   let color: VehicleColor | null = null;
   const colorId = specifics.color_id ? String(specifics.color_id) : null;
   if (colorId) {
-    const { data: colorData } = await client
+    const { data: colorData } = await db
       .from("vehicle_colors")
       .select("id, name_en, name_nl, name_fr, name_de, name_ru")
       .eq("id", colorId)
@@ -1065,7 +1073,7 @@ async function loadAdvertData(
 
   let generations: VehicleGeneration[] = [];
   if (modelId) {
-    const { data: generationsData, error: generationsError } = await client
+    const { data: generationsData, error: generationsError } = await db
       .from("vehicle_generations")
       .select(
         "id, model_id, code, start_year, end_year, facelift, summary, production_countries, vehicle_generation_i18n(locale, summary, pros, cons, inspection_tips)",
@@ -1091,10 +1099,10 @@ async function loadAdvertData(
     selectedGeneration?.id ??
     null;
   if (insightsGenerationId) {
-    insights = await loadVehicleInsights(client, String(insightsGenerationId));
+    insights = await loadVehicleInsights(svc, String(insightsGenerationId));
   }
 
-  const { data: optionsData, error: optionsError } = await client
+  const { data: optionsData, error: optionsError } = await db
     .from("vehicle_options")
     .select("id, category, code, name_en, name_nl, name_fr, name_de, name_ru")
     .order("category", { ascending: true })
@@ -1109,19 +1117,19 @@ async function loadAdvertData(
 
   const vehicleOptions = (optionsData ?? []) as VehicleOption[];
 
-  const { data: profile } = await client
+  const { data: profile } = await db
     .from("profiles")
     .select("display_name, verified_email, verified_phone, created_at")
     .eq("id", advert.user_id)
     .maybeSingle();
 
-  const { data: trust } = await client
+  const { data: trust } = await db
     .from("trust_score")
     .select("score")
     .eq("user_id", advert.user_id)
     .maybeSingle();
 
-  const { count: activeAdvertsCount } = await client
+  const { count: activeAdvertsCount } = await db
     .from("adverts")
     .select("id", { head: true, count: "exact" })
     .eq("user_id", advert.user_id)
