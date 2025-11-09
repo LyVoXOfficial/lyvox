@@ -512,6 +512,21 @@ export default async function AdvertPage({ params }: PageProps) {
     ) ||
     showScores;
 
+  const sellerCardLabels = {
+    unknownSellerLabel: t("advert.seller.unknown") || "Продавец",
+    memberSinceLabel: t("advert.seller.member_since") || "На платформе с",
+    verifiedSellerLabel: t("advert.verified_seller") || "Проверенный продавец",
+    verifiedSellerTooltip: t("advert.verified_seller_tooltip") || "Продавец подтвердил email и телефон",
+    emailLabel: t("advert.seller.email") || "Email",
+    emailVerifiedLabel: t("advert.seller.email_verified") || "Подтвержден",
+    emailUnverifiedLabel: t("advert.seller.email_unverified") || "Не подтвержден",
+    phoneLabel: t("advert.seller.phone") || "Телефон",
+    phoneVerifiedLabel: t("advert.seller.phone_verified") || "Подтвержден",
+    phoneUnverifiedLabel: t("advert.seller.phone_unverified") || "Не подтвержден",
+    trustScoreLabel: t("advert.seller.trust_score") || "Уровень доверия",
+    activeAdvertsLabel: t("advert.seller.active_listings") || "Активные объявления",
+  };
+
   return (
     <>
       <script {...getJsonLdScriptProps(productJsonLd)} />
@@ -537,7 +552,7 @@ export default async function AdvertPage({ params }: PageProps) {
         </aside>
       </div>
 
-      <SellerCard seller={data.seller} locale={locale} t={t} />
+      <SellerCard seller={data.seller} locale={locale} {...sellerCardLabels} />
 
       {showDetails ? (
         <AdvertDetails

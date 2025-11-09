@@ -16,10 +16,36 @@ type SellerInfo = {
 type SellerCardProps = {
   seller: SellerInfo;
   locale: Locale;
-  t: (key: string) => string;
+  unknownSellerLabel: string;
+  memberSinceLabel: string;
+  verifiedSellerLabel: string;
+  verifiedSellerTooltip: string;
+  emailLabel: string;
+  emailVerifiedLabel: string;
+  emailUnverifiedLabel: string;
+  phoneLabel: string;
+  phoneVerifiedLabel: string;
+  phoneUnverifiedLabel: string;
+  trustScoreLabel: string;
+  activeAdvertsLabel: string;
 };
 
-export default function SellerCard({ seller, locale, t }: SellerCardProps) {
+export default function SellerCard({
+  seller,
+  locale,
+  unknownSellerLabel,
+  memberSinceLabel,
+  verifiedSellerLabel,
+  verifiedSellerTooltip,
+  emailLabel,
+  emailVerifiedLabel,
+  emailUnverifiedLabel,
+  phoneLabel,
+  phoneVerifiedLabel,
+  phoneUnverifiedLabel,
+  trustScoreLabel,
+  activeAdvertsLabel,
+}: SellerCardProps) {
   const memberSince = seller.createdAt ? formatDate(seller.createdAt, locale) : null;
 
   return (
@@ -27,19 +53,19 @@ export default function SellerCard({ seller, locale, t }: SellerCardProps) {
       <header className="mb-3 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">
-            {seller.displayName ?? t("advert.seller.unknown") ?? "Продавец"}
+            {seller.displayName ?? unknownSellerLabel}
           </h2>
           {memberSince ? (
             <p className="text-xs text-muted-foreground">
-              {(t("advert.seller.member_since") || "На платформе с")} {memberSince}
+              {memberSinceLabel} {memberSince}
             </p>
           ) : null}
         </div>
         <VerificationBadge
           verified={seller.verifiedEmail && seller.verifiedPhone}
           icon={ShieldCheck}
-          label={t("advert.verified_seller") || "Проверенный продавец"}
-          tooltip={t("advert.verified_seller_tooltip") || "Продавец подтвердил email и телефон"}
+          label={verifiedSellerLabel}
+          tooltip={verifiedSellerTooltip}
         />
       </header>
 
@@ -47,37 +73,33 @@ export default function SellerCard({ seller, locale, t }: SellerCardProps) {
         <div>
           <dt className="flex items-center gap-2 text-xs uppercase text-muted-foreground">
             <Mail className="h-3.5 w-3.5" aria-hidden="true" />
-            {t("advert.seller.email") || "Email"}
+            {emailLabel}
           </dt>
           <dd className="text-sm font-medium text-foreground">
-            {seller.verifiedEmail
-              ? t("advert.seller.email_verified") || "Подтвержден"
-              : t("advert.seller.email_unverified") || "Не подтвержден"}
+            {seller.verifiedEmail ? emailVerifiedLabel : emailUnverifiedLabel}
           </dd>
         </div>
 
         <div>
           <dt className="flex items-center gap-2 text-xs uppercase text-muted-foreground">
             <Phone className="h-3.5 w-3.5" aria-hidden="true" />
-            {t("advert.seller.phone") || "Телефон"}
+            {phoneLabel}
           </dt>
           <dd className="text-sm font-medium text-foreground">
-            {seller.verifiedPhone
-              ? t("advert.seller.phone_verified") || "Подтвержден"
-              : t("advert.seller.phone_unverified") || "Не подтвержден"}
+            {seller.verifiedPhone ? phoneVerifiedLabel : phoneUnverifiedLabel}
           </dd>
         </div>
 
         <div>
           <dt className="text-xs uppercase text-muted-foreground">
-            {t("advert.seller.trust_score") || "Уровень доверия"}
+            {trustScoreLabel}
           </dt>
           <dd className="text-sm font-medium text-foreground">{seller.trustScore}</dd>
         </div>
 
         <div>
           <dt className="text-xs uppercase text-muted-foreground">
-            {t("advert.seller.active_listings") || "Активные объявления"}
+            {activeAdvertsLabel}
           </dt>
           <dd className="text-sm font-medium text-foreground">{seller.activeAdverts}</dd>
         </div>
