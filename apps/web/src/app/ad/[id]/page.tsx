@@ -260,7 +260,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function AdvertPage({ params }: PageProps) {
   try {
-    const { id } = params;
+    const resolvedParams = await params;
+    const rawId = resolvedParams?.id;
+    const idCandidate = Array.isArray(rawId) ? rawId[0] : rawId;
+    const id = typeof idCandidate === "string" ? idCandidate : "";
 
     if (!isValidUuid(id)) {
       return (
