@@ -953,11 +953,10 @@ async function loadAdvertData(
     .maybeSingle();
 
   if (specificsError) {
-    console.error("Failed to load advert specifics", {
+    console.warn("Failed to load advert specifics, using empty object", {
       advertId,
       error: specificsError,
     });
-    return null;
   }
 
   const specifics = (specificsRecord?.specifics ?? {}) as Record<string, any>;
@@ -969,8 +968,10 @@ async function loadAdvertData(
     .order("sort", { ascending: true });
 
   if (mediaError) {
-    console.error("Failed to load advert media", { advertId, error: mediaError });
-    return null;
+    console.warn("Failed to load advert media, continuing with empty list", {
+      advertId,
+      error: mediaError,
+    });
   }
 
   const storage = client.storage.from("ad-media");
