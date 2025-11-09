@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import AdvertGallery from "@/components/AdvertGallery";
@@ -264,7 +263,14 @@ export default async function AdvertPage({ params }: PageProps) {
     const { id } = params;
 
     if (!isValidUuid(id)) {
-      notFound();
+      return (
+        <div className="space-y-8">
+          <h1 className="text-2xl font-semibold">Некорректный адрес</h1>
+          <p className="text-sm text-muted-foreground">
+            Указан неверный идентификатор объявления. Проверьте ссылку и попробуйте снова.
+          </p>
+        </div>
+      );
     }
 
     let currentUserId: string | null = null;
@@ -280,12 +286,19 @@ export default async function AdvertPage({ params }: PageProps) {
       data = await loadAdvertData(id, currentUserId);
     } catch (error) {
       console.error("AdvertPage load error", { id, error });
-      notFound();
+      return (
+        <div className="space-y-8">
+          <h1 className="text-2xl font-semibold">Не удалось загрузить страницу</h1>
+          <p className="text-sm text-muted-foreground">
+            Возникла ошибка при загрузке объявления. Попробуйте обновить страницу позже.
+          </p>
+        </div>
+      );
     }
 
     if (!data) {
       // Graceful fallback instead of 404: show "not found" content,
-      // avoids masking upstream data-loading issues and helps diagnosis.
+      // avoids masking upstream data-loading issues and больше не мешает отладке.
       return (
         <div className="space-y-8">
           <h1 className="text-2xl font-semibold">Объявление не найдено</h1>
