@@ -8,7 +8,6 @@ import { getI18nProps } from "@/i18n/server";
 import { logger } from "@/lib/errorLogger";
 import { getJsonLdScriptProps } from "@/lib/seo";
 import { supabaseServer } from "@/lib/supabaseServer";
-import { supabaseService } from "@/lib/supabaseService";
 
 export const revalidate = 60;
 
@@ -83,7 +82,7 @@ async function getFreeAds(): Promise<AdListItem[]> {
       .in("advert_id", freeIds)
       .order("sort", { ascending: true });
 
-    const storage = supabaseService().storage.from("ad-media");
+    const storage = supabase.storage.from("ad-media");
     const SIGNED_DOWNLOAD_TTL_SECONDS = 10 * 60;
 
     if (media && media.length > 0) {
@@ -177,7 +176,7 @@ async function getLatestAds(): Promise<AdListItem[]> {
       .in("advert_id", adIds)
       .order("sort", { ascending: true });
 
-    const storage = supabaseService().storage.from("ad-media");
+    const storage = supabase.storage.from("ad-media");
     const SIGNED_DOWNLOAD_TTL_SECONDS = 10 * 60;
 
     if (media && media.length > 0) {
