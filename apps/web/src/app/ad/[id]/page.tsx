@@ -284,7 +284,16 @@ export default async function AdvertPage({ params }: PageProps) {
     }
 
     if (!data) {
-      notFound();
+      // Graceful fallback instead of 404: show "not found" content,
+      // avoids masking upstream data-loading issues and helps diagnosis.
+      return (
+        <div className="space-y-8">
+          <h1 className="text-2xl font-semibold">Объявление не найдено</h1>
+          <p className="text-sm text-muted-foreground">
+            Мы не смогли загрузить объявление. Возможно, оно было удалено или временно недоступно.
+          </p>
+        </div>
+      );
     }
 
   const t = createTranslator(messages);
@@ -748,7 +757,14 @@ export default async function AdvertPage({ params }: PageProps) {
   );
   } catch (error) {
     console.error("AdvertPage render error (unhandled)", { id: params?.id, error });
-    notFound();
+    return (
+      <div className="space-y-8">
+        <h1 className="text-2xl font-semibold">Не удалось загрузить страницу</h1>
+        <p className="text-sm text-muted-foreground">
+          Произошла ошибка при загрузке объявления. Попробуйте обновить страницу позже.
+        </p>
+      </div>
+    );
   }
 }
 
