@@ -15,7 +15,7 @@ type AdvertGalleryProps = {
   images: GalleryImage[];
 };
 
-const PLACEHOLDER_IMAGE = "/placeholder.png";
+const PLACEHOLDER_IMAGE = "/placeholder.svg";
 
 export default function AdvertGallery({ images }: AdvertGalleryProps) {
   const normalized = images?.length ? images : [];

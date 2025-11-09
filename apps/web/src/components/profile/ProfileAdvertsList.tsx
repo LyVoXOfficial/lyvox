@@ -18,9 +18,9 @@ type ProfileAdvertsListProps = {
 };
 
 function pickImage(media: ProfileAdvert["media"]): string {
-  if (!media?.length) return "/placeholder.png";
+  if (!media?.length) return "/placeholder.svg";
   const sorted = [...media].sort((a, b) => (a.sort ?? 99) - (b.sort ?? 99));
-  return sorted[0]?.url ?? "/placeholder.png";
+  return sorted[0]?.url ?? "/placeholder.svg";
 }
 
 export function ProfileAdvertsList({ adverts }: ProfileAdvertsListProps) {
@@ -54,7 +54,7 @@ export function ProfileAdvertsList({ adverts }: ProfileAdvertsListProps) {
                          unoptimized
                          onError={(e) => {
                            const target = e.target as HTMLImageElement;
-                           target.src = "/placeholder.png";
+                           target.src = "/placeholder.svg";
                          }}
                        />
                     <div className="absolute top-2 right-2">

@@ -208,10 +208,10 @@ export default function MyAdvertsPage() {
 
   const pickImage = (media: Advert["media"]): string => {
     if (!media?.length) {
-      return "/placeholder.png";
+      return "/placeholder.svg";
     }
     const sorted = [...media].sort((a, b) => (a.sort ?? 99) - (b.sort ?? 99));
-    return sorted[0]?.url ?? "/placeholder.png";
+    return sorted[0]?.url ?? "/placeholder.svg";
   };
 
   const getStatusBadgeVariant = (status: string | null): "default" | "secondary" | "destructive" | "outline" => {
@@ -299,7 +299,7 @@ export default function MyAdvertsPage() {
                       unoptimized
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.src = "/placeholder.png";
+                        target.src = "/placeholder.svg";
                       }}
                     />
                     <div className="absolute top-2 right-2">

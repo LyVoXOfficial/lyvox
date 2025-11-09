@@ -60,7 +60,7 @@ export default function AdCard({
       <Link href={`/ad/${id}`} className="block">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={image ?? "/placeholder.png"}
+          src={image ?? "/placeholder.svg"}
           alt={title}
           loading="lazy"
           className="aspect-square w-full bg-muted object-cover transition group-hover:opacity-95"
