@@ -1132,8 +1132,11 @@ async function loadAdvertData(
 
 async function loadSimilarAdverts(
   advertId: string,
-  categoryId: string,
+  categoryId: string | null,
 ): Promise<SimilarAdvertItem[]> {
+  if (!categoryId) {
+    return [];
+  }
   const client = supabaseService();
 
   const { data, error } = await client

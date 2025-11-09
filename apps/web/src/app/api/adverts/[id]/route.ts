@@ -157,6 +157,30 @@ export async function PATCH(
     if (transitionError) return transitionError;
 
     if (requestedStatus === "active") {
+      const resolvedDescription = body.description ?? advert.description ?? "";
+      if (resolvedDescription.trim().length < 10) {
+        return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+          status: 400,
+          detail: "DESCRIPTION_TOO_SHORT",
+        });
+      }
+
+      const resolvedCategoryId = body.category_id ?? advert.category_id;
+      if (!resolvedCategoryId) {
+        return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+          status: 400,
+          detail: "CATEGORY_REQUIRED",
+        });
+      }
+
+      const resolvedCondition = body.condition ?? advert.condition;
+      if (!resolvedCondition) {
+        return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+          status: 400,
+          detail: "CONDITION_REQUIRED",
+        });
+      }
+
       const mediaCheckError = await fetchMediaCount(supabase, advertId);
       if (mediaCheckError) return mediaCheckError;
     }
