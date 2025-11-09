@@ -204,51 +204,56 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {};
   }
 
-  const [currentUserId, locale] = await Promise.all([loadCurrentUserId(), getInitialLocale()]);
-  const advertData = await loadAdvertData(id, currentUserId);
+  try {
+    const [currentUserId, locale] = await Promise.all([loadCurrentUserId(), getInitialLocale()]);
+    const advertData = await loadAdvertData(id, currentUserId);
 
-  if (!advertData) {
+    if (!advertData) {
+      return {};
+    }
+
+    const slug = generateSlug(advertData.advert.title);
+    const canonical = `${BASE_URL}/ad/${advertData.advert.id}/${slug}`;
+    const description = advertData.advert.description
+      ? truncateDescription(advertData.advert.description, 160)
+      : "";
+    const primaryImage = advertData.media[0];
+    const localeTag = resolveLocaleTag(locale);
+
+    return {
+      title: advertData.advert.title,
+      description,
+      alternates: {
+        canonical,
+      },
+      openGraph: {
+        title: advertData.advert.title,
+        description,
+        url: canonical,
+        type: "article",
+        locale: localeTag,
+        images: primaryImage
+          ? [
+              {
+                url: primaryImage.url,
+                width: primaryImage.w ?? undefined,
+                height: primaryImage.h ?? undefined,
+                alt: advertData.advert.title,
+              },
+            ]
+          : undefined,
+      },
+      twitter: {
+        card: primaryImage ? "summary_large_image" : "summary",
+        title: advertData.advert.title,
+        description,
+        images: primaryImage ? [primaryImage.url] : undefined,
+      },
+    };
+  } catch (error) {
+    console.error("generateMetadata error", { id, error });
     return {};
   }
-
-  const slug = generateSlug(advertData.advert.title);
-  const canonical = `${BASE_URL}/ad/${advertData.advert.id}/${slug}`;
-  const description = advertData.advert.description
-    ? truncateDescription(advertData.advert.description, 160)
-    : "";
-  const primaryImage = advertData.media[0];
-  const localeTag = resolveLocaleTag(locale);
-
-  return {
-    title: advertData.advert.title,
-    description,
-    alternates: {
-      canonical,
-    },
-    openGraph: {
-      title: advertData.advert.title,
-      description,
-      url: canonical,
-      type: "article",
-      locale: localeTag,
-      images: primaryImage
-        ? [
-            {
-              url: primaryImage.url,
-              width: primaryImage.w ?? undefined,
-              height: primaryImage.h ?? undefined,
-              alt: advertData.advert.title,
-            },
-          ]
-        : undefined,
-    },
-    twitter: {
-      card: primaryImage ? "summary_large_image" : "summary",
-      title: advertData.advert.title,
-      description,
-      images: primaryImage ? [primaryImage.url] : undefined,
-    },
-  };
 }
 
 export default async function AdvertPage({ params }: PageProps) {
@@ -258,12 +263,21 @@ export default async function AdvertPage({ params }: PageProps) {
     notFound();
   }
 
-  const [currentUserId, { locale, messages }] = await Promise.all([
-    loadCurrentUserId(),
-    getI18nProps(),
-  ]);
+  let currentUserId: string | null = null;
+  let locale: Locale = "en";
+  let messages: Messages = {};
+  let data: AdvertData | null = null;
 
-  const data = await loadAdvertData(id, currentUserId);
+  try {
+    const [resolvedUserId, i18n] = await Promise.all([loadCurrentUserId(), getI18nProps()]);
+    currentUserId = resolvedUserId;
+    locale = i18n.locale;
+    messages = i18n.messages;
+    data = await loadAdvertData(id, currentUserId);
+  } catch (error) {
+    console.error("AdvertPage load error", { id, error });
+    notFound();
+  }
 
   if (!data) {
     notFound();
@@ -866,26 +880,27 @@ async function loadAdvertData(
 ): Promise<AdvertData | null> {
   const client = supabaseService();
 
-  const { data: advert, error: advertError } = await client
-    .from("adverts")
-    .select(
-      "id,user_id,category_id,title,description,price,currency,location,created_at,status",
-    )
-    .eq("id", advertId)
-    .maybeSingle();
+  try {
+    const { data: advert, error: advertError } = await client
+      .from("adverts")
+      .select(
+        "id,user_id,category_id,title,description,price,currency,location,created_at,status",
+      )
+      .eq("id", advertId)
+      .maybeSingle();
 
-  if (advertError) {
-    console.error("Failed to load advert record", { advertId, error: advertError });
-    return null;
-  }
+    if (advertError) {
+      console.error("Failed to load advert record", { advertId, error: advertError });
+      return null;
+    }
 
-  if (!advert) {
-    return null;
-  }
+    if (!advert) {
+      return null;
+    }
 
-  if (advert.status !== "active" && advert.user_id !== currentUserId) {
-    return null;
-  }
+    if (advert.status !== "active" && advert.user_id !== currentUserId) {
+      return null;
+    }
 
   let category: CategorySummary | null = null;
   let categoryBreadcrumbs: CategorySummary[] = [];
@@ -1128,6 +1143,10 @@ async function loadAdvertData(
     category,
     categoryBreadcrumbs,
   };
+  } catch (error) {
+    console.error("loadAdvertData unexpected error", { advertId, error });
+    return null;
+  }
 }
 
 async function loadSimilarAdverts(
@@ -1137,72 +1156,78 @@ async function loadSimilarAdverts(
   if (!categoryId) {
     return [];
   }
+
   const client = supabaseService();
 
-  const { data, error } = await client
-    .from("adverts")
-    .select(
-      `
-      id,
-      title,
-      price,
-      currency,
-      location,
-      created_at,
-      user_id,
-      media(url, sort)
-    `,
-    )
-    .eq("category_id", categoryId)
-    .eq("status", "active")
-    .neq("id", advertId)
-    .order("created_at", { ascending: false })
-    .limit(8);
+  try {
+    const { data, error } = await client
+      .from("adverts")
+      .select(
+        `
+        id,
+        title,
+        price,
+        currency,
+        location,
+        created_at,
+        user_id,
+        media(url, sort)
+      `,
+      )
+      .eq("category_id", categoryId)
+      .eq("status", "active")
+      .neq("id", advertId)
+      .order("created_at", { ascending: false })
+      .limit(8);
 
-  if (error || !data) {
-    if (error) {
-      console.warn("Failed to load similar adverts", { advertId, error });
+    if (error || !data) {
+      if (error) {
+        console.warn("Failed to load similar adverts", { advertId, error });
+      }
+      return [];
     }
+
+    const userIds = data
+      .map((row) => row.user_id)
+      .filter((value): value is string => typeof value === "string");
+
+    let verifiedMap = new Map<string, boolean>();
+    if (userIds.length) {
+      const { data: profilesData } = await client
+        .from("profiles")
+        .select("id,verified_email,verified_phone")
+        .in("id", userIds);
+
+      if (profilesData) {
+        verifiedMap = new Map(
+          profilesData.map((profile) => [
+            profile.id,
+            Boolean(profile.verified_email) && Boolean(profile.verified_phone),
+          ]),
+        );
+      }
+    }
+
+    return data.map((row) => {
+      const media = Array.isArray(row.media) ? [...row.media] : [];
+      media.sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
+      const image = media.find((item) => item.url)?.url ?? null;
+
+      return {
+        id: row.id,
+        title: row.title,
+        price: row.price ? Number(row.price) : null,
+        currency: row.currency ?? "EUR",
+        location: row.location,
+        createdAt: row.created_at ?? null,
+        image,
+        sellerVerified: verifiedMap.get(row.user_id ?? "") ?? false,
+      };
+    });
+  } catch (error) {
+    console.warn("Failed to load similar adverts (unexpected)", { advertId, error });
     return [];
   }
-
-  const userIds = data
-    .map((row) => row.user_id)
-    .filter((value): value is string => typeof value === "string");
-
-  let verifiedMap = new Map<string, boolean>();
-  if (userIds.length) {
-    const { data: profilesData } = await client
-      .from("profiles")
-      .select("id,verified_email,verified_phone")
-      .in("id", userIds);
-
-    if (profilesData) {
-      verifiedMap = new Map(
-        profilesData.map((profile) => [
-          profile.id,
-          Boolean(profile.verified_email) && Boolean(profile.verified_phone),
-        ]),
-      );
-    }
-  }
-
-  return data.map((row) => {
-    const media = Array.isArray(row.media) ? [...row.media] : [];
-    media.sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
-    const image = media.find((item) => item.url)?.url ?? null;
-
-    return {
-      id: row.id,
-      title: row.title,
-      price: row.price ? Number(row.price) : null,
-      currency: row.currency ?? "EUR",
-      location: row.location,
-      createdAt: row.created_at ?? null,
-      image,
-      sellerVerified: verifiedMap.get(row.user_id ?? "") ?? false,
-    };
-  });
 }
 
 function getMakeName(make: VehicleMake | null): string | null {
