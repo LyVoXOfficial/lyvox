@@ -19,6 +19,18 @@ export const revalidate = 0;
 
 const MEDIA_SIGNED_URL_TTL = 600;
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://lyvox.be";
+const isDevEnvironment = process.env.NODE_ENV !== "production";
+
+function advertDebug(message: string, context?: Record<string, unknown>) {
+  if (!isDevEnvironment) {
+    return;
+  }
+  if (context) {
+    console.info(`[AdvertPage] ${message}`, context);
+  } else {
+    console.info(`[AdvertPage] ${message}`);
+  }
+}
 
 type AdvertRecord = Pick<
   Tables<"adverts">,
@@ -266,8 +278,10 @@ export default async function AdvertPage({ params }: PageProps) {
     const idCandidate = Array.isArray(rawId) ? rawId[0] : rawId;
     const id = typeof idCandidate === "string" ? idCandidate : "";
     resolvedId = id;
+    advertDebug("Render start", { rawId, resolvedId: id });
 
     if (!isValidUuid(id)) {
+      advertDebug("Invalid advert id", { resolvedId: id });
       return (
         <div className="space-y-8">
           <h1 className="text-2xl font-semibold">Некорректный адрес</h1>
@@ -289,8 +303,18 @@ export default async function AdvertPage({ params }: PageProps) {
       locale = i18n.locale;
       messages = i18n.messages;
       data = await loadAdvertData(id, currentUserId);
+      advertDebug("Data load completed", {
+        advertId: id,
+        hasData: Boolean(data),
+        locale,
+        currentUserId,
+      });
     } catch (error) {
       console.error("AdvertPage load error", { id, error });
+      advertDebug("AdvertPage data load error", {
+        advertId: id,
+        error: error instanceof Error ? error.message : String(error),
+      });
       return (
         <div className="space-y-8">
           <h1 className="text-2xl font-semibold">Не удалось загрузить страницу</h1>
@@ -302,6 +326,7 @@ export default async function AdvertPage({ params }: PageProps) {
     }
 
     if (!data) {
+      advertDebug("Advert data not found", { advertId: id });
       // Graceful fallback instead of 404: show "not found" content,
       // avoids masking upstream data-loading issues and больше не мешает отладке.
       return (
@@ -316,10 +341,9 @@ export default async function AdvertPage({ params }: PageProps) {
 
   const t = createTranslator(messages);
 
-  const priceValue =
-    data.advert.price !== null ? Number(data.advert.price) : null;
+  const priceValue = normalizeNullableNumber(data.advert.price);
   const priceText =
-    priceValue !== null && !Number.isNaN(priceValue)
+    priceValue !== null
       ? formatCurrency(priceValue, locale, data.advert.currency ?? "EUR")
       : t("advert.price_not_specified") || "Цена не указана";
 
@@ -367,10 +391,18 @@ export default async function AdvertPage({ params }: PageProps) {
     ? getGenerationLocaleData(data.selectedGeneration, locale)
     : null;
 
+  const reliabilityScoreDisplay = formatScore(data.insights?.reliability_score);
+  const popularityScoreDisplay = formatScore(data.insights?.popularity_score);
+  const showScores = reliabilityScoreDisplay !== null || popularityScoreDisplay !== null;
+
   const similarAdverts = await loadSimilarAdverts(
     data.advert.id,
     data.advert.category_id,
   );
+  advertDebug("Similar adverts loaded", {
+    advertId: data.advert.id,
+    count: similarAdverts.length,
+  });
 
   const slug = generateSlug(data.advert.title);
   const canonicalUrl = `${BASE_URL}/ad/${data.advert.id}/${slug}`;
@@ -447,10 +479,10 @@ export default async function AdvertPage({ params }: PageProps) {
     image: imageUrls,
     brand: brandName ? { "@type": "Brand", name: brandName } : undefined,
     color: colorName ?? undefined,
-    offers: data.advert.price
+    offers: priceValue !== null
       ? {
           "@type": "Offer",
-          price: data.advert.price,
+          price: priceValue,
           priceCurrency: data.advert.currency ?? "EUR",
           availability: "https://schema.org/InStock",
           url: canonicalUrl,
@@ -478,8 +510,7 @@ export default async function AdvertPage({ params }: PageProps) {
           translatedInsights.engineExamples.length ||
           translatedInsights.commonIssues.length),
     ) ||
-    (data.insights?.reliability_score !== null ||
-      data.insights?.popularity_score !== null);
+    showScores;
 
   return (
     <>
@@ -724,26 +755,25 @@ export default async function AdvertPage({ params }: PageProps) {
               </div>
             ) : null}
 
-            {data.insights.reliability_score !== null ||
-            data.insights.popularity_score !== null ? (
+            {showScores ? (
               <div className="flex gap-4 border-t pt-2">
-                {data.insights.reliability_score !== null ? (
+                {reliabilityScoreDisplay !== null ? (
                   <div>
                     <span className="text-xs text-muted-foreground">
                       {t("advert.insights.reliability") || "Надежность"}:{" "}
                     </span>
                     <span className="text-sm font-medium">
-                      {data.insights.reliability_score.toFixed(1)}/10
+                      {reliabilityScoreDisplay}
                     </span>
                   </div>
                 ) : null}
-                {data.insights.popularity_score !== null ? (
+                {popularityScoreDisplay !== null ? (
                   <div>
                     <span className="text-xs text-muted-foreground">
                       {t("advert.insights.popularity") || "Популярность"}:{" "}
                     </span>
                     <span className="text-sm font-medium">
-                      {data.insights.popularity_score.toFixed(1)}/10
+                      {popularityScoreDisplay}
                     </span>
                   </div>
                 ) : null}
@@ -783,14 +813,19 @@ export default async function AdvertPage({ params }: PageProps) {
           : "Unknown error";
     const stack =
       typeof err?.stack === "string" ? String(err.stack).split("\n").slice(0, 3).join("\n") : undefined;
-    console.error("AdvertPage render error (unhandled)", { id: resolvedId, message, stack });
+    console.error("AdvertPage render error (unhandled)", { id: resolvedId, error: err, message, stack });
+    advertDebug("Render failure", {
+      advertId: resolvedId,
+      message,
+      stack,
+    });
     return (
       <div className="space-y-8">
         <h1 className="text-2xl font-semibold">Не удалось загрузить страницу</h1>
         <p className="text-sm text-muted-foreground">
           Произошла ошибка при загрузке объявления. Попробуйте обновить страницу позже.
         </p>
-        {message ? (
+        {isDevEnvironment && message ? (
           <pre className="mt-2 whitespace-pre-wrap rounded-md bg-muted p-3 text-xs text-muted-foreground">
             {message}
             {stack ? `\n${stack}` : ""}
@@ -812,10 +847,16 @@ function resolveLocaleTag(locale: Locale): string {
 }
 
 function createTranslator(messages: Messages): TFunction {
+  const source = isPlainObject(messages) ? messages : {};
   return (key, params) => {
     const translation = key
       .split(".")
-      .reduce<any>((acc, part) => (acc && acc[part] !== undefined ? acc[part] : undefined), messages);
+      .reduce<any>((acc, part) => {
+        if (acc && typeof acc === "object" && acc !== null && Object.prototype.hasOwnProperty.call(acc, part)) {
+          return acc[part];
+        }
+        return undefined;
+      }, source);
 
     let result =
       typeof translation === "string"
@@ -851,6 +892,7 @@ async function loadVehicleInsights(
   client: Awaited<ReturnType<typeof supabaseService>>,
   generationId: string,
 ): Promise<VehicleInsights | null> {
+  advertDebug("loadVehicleInsights:start", { generationId });
   const { data, error } = await client
     .from("vehicle_generation_insights")
     .select("*")
@@ -862,9 +904,19 @@ async function loadVehicleInsights(
   if (error || !base) {
     if (error) {
       console.warn("Failed to load vehicle insights", { generationId, error });
+      advertDebug("loadVehicleInsights:query error", {
+        generationId,
+        error: error.message,
+      });
     }
     return null;
   }
+
+  const normalizedBase: VehicleInsights = {
+    ...(base as VehicleInsights),
+    reliability_score: normalizeNullableNumber((base as VehicleInsights).reliability_score),
+    popularity_score: normalizeNullableNumber((base as VehicleInsights).popularity_score),
+  };
 
   const { data: translations, error: translationsError } = await client
     .from("vehicle_generation_insights_i18n")
@@ -878,12 +930,21 @@ async function loadVehicleInsights(
       generationId,
       error: translationsError,
     });
+    advertDebug("loadVehicleInsights:translations error", {
+      generationId,
+      error: translationsError.message,
+    });
   }
 
-  return {
-    ...(base as VehicleInsights),
+  const result = {
+    ...normalizedBase,
     vehicle_generation_insights_i18n: translations ?? [],
   };
+  advertDebug("loadVehicleInsights:completed", {
+    generationId,
+    hasTranslations: Boolean(translations?.length),
+  });
+  return result;
 }
 
 function determineGeneration(
@@ -943,9 +1004,18 @@ async function loadAdvertData(
   let svc = db;
   try {
     svc = await supabaseService();
-  } catch {
+  } catch (error) {
     // Fallback to anon client; signing may fail but is handled below.
+    advertDebug("Falling back to anon Supabase client", {
+      advertId,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
+  advertDebug("loadAdvertData:start", {
+    advertId,
+    currentUserId,
+    usingServiceClient: svc !== db,
+  });
 
   try {
     const { data: advertRows, error: advertError } = await svc
@@ -959,16 +1029,30 @@ async function loadAdvertData(
 
     if (advertError) {
       console.error("Failed to load advert record", { advertId, error: advertError });
+      advertDebug("loadAdvertData:advert query error", {
+        advertId,
+        error: advertError.message,
+      });
       return null;
     }
 
     if (!advert) {
+      advertDebug("loadAdvertData:advert not found", { advertId });
       return null;
     }
 
     if (advert.status !== "active" && advert.user_id !== currentUserId) {
+      advertDebug("loadAdvertData:advert hidden for current user", {
+        advertId,
+        status: advert.status,
+        currentUserId,
+      });
       return null;
     }
+    advertDebug("loadAdvertData:advert found", {
+      advertId,
+      status: advert.status,
+    });
 
   let category: CategorySummary | null = null;
   let categoryBreadcrumbs: CategorySummary[] = [];
@@ -1021,10 +1105,18 @@ async function loadAdvertData(
       advertId,
       error: specificsError,
     });
+    advertDebug("loadAdvertData:specifics query error", {
+      advertId,
+      error: specificsError.message,
+    });
   }
 
   const specificsRecord = Array.isArray(specificsRows) ? specificsRows[0] : null;
   const specifics = ((specificsRecord as any)?.specifics ?? {}) as Record<string, any>;
+  advertDebug("loadAdvertData:specifics resolved", {
+    advertId,
+    keys: Object.keys(specifics).length,
+  });
 
   const { data: mediaRows, error: mediaError } = await svc
     .from("media")
@@ -1036,6 +1128,10 @@ async function loadAdvertData(
     console.warn("Failed to load advert media, continuing with empty list", {
       advertId,
       error: mediaError,
+    });
+    advertDebug("loadAdvertData:media query error", {
+      advertId,
+      error: mediaError.message,
     });
   }
 
@@ -1079,6 +1175,11 @@ async function loadAdvertData(
           path: record.url,
           error: signedError,
         });
+        advertDebug("loadAdvertData:signed url failure", {
+          advertId,
+          path: record.url,
+          error: signedError?.message,
+        });
         continue;
       }
 
@@ -1091,6 +1192,10 @@ async function loadAdvertData(
       });
     }
   }
+  advertDebug("loadAdvertData:media resolved", {
+    advertId,
+    mediaCount: media.length,
+  });
 
   let make: VehicleMake | null = null;
   const makeId = specifics.make_id ? String(specifics.make_id) : null;
@@ -1167,9 +1272,17 @@ async function loadAdvertData(
       advertId,
       error: optionsError,
     });
+    advertDebug("loadAdvertData:vehicle options query error", {
+      advertId,
+      error: optionsError.message,
+    });
   }
 
   const vehicleOptions = (optionsData ?? []) as VehicleOption[];
+  advertDebug("loadAdvertData:vehicle options loaded", {
+    advertId,
+    count: vehicleOptions.length,
+  });
 
   const { data: profileRows } = await svc
     .from("profiles")
@@ -1202,6 +1315,14 @@ async function loadAdvertData(
     activeAdverts: activeAdvertsCount ?? 0,
   };
 
+  advertDebug("loadAdvertData:completed", {
+    advertId,
+    mediaCount: media.length,
+    categoryResolved: Boolean(category),
+    breadcrumbs: categoryBreadcrumbs.length,
+    vehicleOptions: vehicleOptions.length,
+  });
+
   return {
     advert,
     specifics,
@@ -1219,6 +1340,10 @@ async function loadAdvertData(
   };
   } catch (error) {
     console.error("loadAdvertData unexpected error", { advertId, error });
+    advertDebug("loadAdvertData:unexpected error", {
+      advertId,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return null;
   }
 }
@@ -1232,6 +1357,7 @@ async function loadSimilarAdverts(
   }
 
   const client = await supabaseService();
+  advertDebug("loadSimilarAdverts:start", { advertId, categoryId });
 
   try {
     const { data, error } = await client
@@ -1257,6 +1383,11 @@ async function loadSimilarAdverts(
     if (error || !data) {
       if (error) {
         console.warn("Failed to load similar adverts", { advertId, error });
+        advertDebug("loadSimilarAdverts:query error", {
+          advertId,
+          categoryId,
+          error: error.message,
+        });
       }
       return [];
     }
@@ -1282,7 +1413,7 @@ async function loadSimilarAdverts(
       }
     }
 
-    return data.map((row) => {
+    const mapped = data.map((row) => {
       const media = Array.isArray(row.media) ? [...row.media] : [];
       media.sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
       const image = media.find((item) => item.url)?.url ?? null;
@@ -1290,7 +1421,7 @@ async function loadSimilarAdverts(
       return {
         id: row.id,
         title: row.title,
-        price: row.price ? Number(row.price) : null,
+        price: normalizeNullableNumber(row.price),
         currency: row.currency ?? "EUR",
         location: row.location,
         createdAt: row.created_at ?? null,
@@ -1298,8 +1429,19 @@ async function loadSimilarAdverts(
         sellerVerified: verifiedMap.get(row.user_id ?? "") ?? false,
       };
     });
+    advertDebug("loadSimilarAdverts:completed", {
+      advertId,
+      categoryId,
+      count: mapped.length,
+    });
+    return mapped;
   } catch (error) {
     console.warn("Failed to load similar adverts (unexpected)", { advertId, error });
+    advertDebug("loadSimilarAdverts:unexpected error", {
+      advertId,
+      categoryId,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return [];
   }
 }
@@ -1626,5 +1768,33 @@ function translateSpecValue(value: string, t: TFunction): string {
   }
 
   return value;
+}
+
+function normalizeNullableNumber(value: unknown): number | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  const numberValue =
+    typeof value === "number"
+      ? value
+      : typeof value === "string"
+        ? Number(value)
+        : Number.NaN;
+  if (!Number.isFinite(numberValue)) {
+    return null;
+  }
+  return numberValue;
+}
+
+function formatScore(score: unknown): string | null {
+  const numeric = normalizeNullableNumber(score);
+  if (numeric === null) {
+    return null;
+  }
+  return `${numeric.toFixed(1)}/10`;
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return Object.prototype.toString.call(value) === "[object Object]";
 }
 

@@ -18,7 +18,9 @@ type AdvertGalleryProps = {
 const PLACEHOLDER_IMAGE = "/placeholder.svg";
 
 export default function AdvertGallery({ images }: AdvertGalleryProps) {
-  const normalized = images?.length ? images : [];
+  const normalized = Array.isArray(images)
+    ? images.filter((item): item is GalleryImage => Boolean(item && (item.url || PLACEHOLDER_IMAGE)))
+    : [];
   const [activeIndex, setActiveIndex] = useState(0);
   const activeImage = normalized[activeIndex];
 
