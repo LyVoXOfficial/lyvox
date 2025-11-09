@@ -6,9 +6,9 @@ export function SiteLogo() {
       <img
         src="/lyvox.svg?v=3"
         alt="LyVoX"
-        width="400"
-        height="101"
-        className="h-24 w-auto"
+        width="220"
+        height="56"
+        className="h-14 w-auto"
         loading="eager"
       />
     </Link>
