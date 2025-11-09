@@ -756,13 +756,28 @@ export default async function AdvertPage({ params }: PageProps) {
     </>
   );
   } catch (error) {
-    console.error("AdvertPage render error (unhandled)", { id: params?.id, error });
+    const err = error as any;
+    const message =
+      typeof err?.message === "string"
+        ? err.message
+        : typeof err === "string"
+          ? err
+          : "Unknown error";
+    const stack =
+      typeof err?.stack === "string" ? String(err.stack).split("\n").slice(0, 3).join("\n") : undefined;
+    console.error("AdvertPage render error (unhandled)", { id: params?.id, message, stack });
     return (
       <div className="space-y-8">
         <h1 className="text-2xl font-semibold">Не удалось загрузить страницу</h1>
         <p className="text-sm text-muted-foreground">
           Произошла ошибка при загрузке объявления. Попробуйте обновить страницу позже.
         </p>
+        {message ? (
+          <pre className="mt-2 whitespace-pre-wrap rounded-md bg-muted p-3 text-xs text-muted-foreground">
+            {message}
+            {stack ? `\n${stack}` : ""}
+          </pre>
+        ) : null}
       </div>
     );
   }
