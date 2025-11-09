@@ -184,7 +184,7 @@ type DetailItem = {
 };
 
 type PageProps = {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 };
 
 const LOCALE_TAGS: Record<Locale, string> = {
@@ -198,7 +198,7 @@ const LOCALE_TAGS: Record<Locale, string> = {
 const SPEC_KEY_EXCLUSIONS = new Set(["make_id", "model_id", "color_id", "additional_phone", "generation_id"]);
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { id } = await params;
+  const { id } = params;
 
   if (!isValidUuid(id)) {
     return {};
@@ -257,31 +257,32 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function AdvertPage({ params }: PageProps) {
-  const { id } = await params;
-
-  if (!isValidUuid(id)) {
-    notFound();
-  }
-
-  let currentUserId: string | null = null;
-  let locale: Locale = "en";
-  let messages: Messages = {};
-  let data: AdvertData | null = null;
-
   try {
-    const [resolvedUserId, i18n] = await Promise.all([loadCurrentUserId(), getI18nProps()]);
-    currentUserId = resolvedUserId;
-    locale = i18n.locale;
-    messages = i18n.messages;
-    data = await loadAdvertData(id, currentUserId);
-  } catch (error) {
-    console.error("AdvertPage load error", { id, error });
-    notFound();
-  }
+    const { id } = params;
 
-  if (!data) {
-    notFound();
-  }
+    if (!isValidUuid(id)) {
+      notFound();
+    }
+
+    let currentUserId: string | null = null;
+    let locale: Locale = "en";
+    let messages: Messages = {};
+    let data: AdvertData | null = null;
+
+    try {
+      const [resolvedUserId, i18n] = await Promise.all([loadCurrentUserId(), getI18nProps()]);
+      currentUserId = resolvedUserId;
+      locale = i18n.locale;
+      messages = i18n.messages;
+      data = await loadAdvertData(id, currentUserId);
+    } catch (error) {
+      console.error("AdvertPage load error", { id, error });
+      notFound();
+    }
+
+    if (!data) {
+      notFound();
+    }
 
   const t = createTranslator(messages);
 
@@ -742,6 +743,10 @@ export default async function AdvertPage({ params }: PageProps) {
     </div>
     </>
   );
+  } catch (error) {
+    console.error("AdvertPage render error (unhandled)", { id: params?.id, error });
+    notFound();
+  }
 }
 
 function isValidUuid(value: string): boolean {
