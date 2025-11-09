@@ -15,6 +15,9 @@ import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import type { Tables } from "@/lib/supabaseTypes";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const MEDIA_SIGNED_URL_TTL = 600;
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://lyvox.be";
 
