@@ -45,7 +45,7 @@ type PublicProfileData = {
 };
 
 async function loadPublicProfileData(userId: string): Promise<PublicProfileData | null> {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   
   // Load public profile fields only (RLS will enforce this)
   // Note: We explicitly select only public fields - phone and consents are excluded

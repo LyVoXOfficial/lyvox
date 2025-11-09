@@ -148,7 +148,7 @@ export async function GET(request: NextRequest) {
   const { locale } = validationResult.data;
   const resolvedLocale = resolveLocale(locale);
 
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
 
   // Fetch all active categories from database
   // Categories are public data, so no authentication required

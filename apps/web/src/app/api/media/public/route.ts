@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     return createErrorResponse(ApiErrorCode.MISSING_ADVERT_ID, { status: 400 });
   }
 
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
 
   // Check if advert is active (public access)
   const { data: advert, error: advertError } = await supabase
@@ -62,7 +62,8 @@ export async function GET(request: Request) {
   }
 
   // Generate signed URLs using service role
-  const storage = supabaseService().storage.from("ad-media");
+  const service = await supabaseService();
+  const storage = service.storage.from("ad-media");
   const items =
     records?.map(async (record) => {
       const path = record.url;

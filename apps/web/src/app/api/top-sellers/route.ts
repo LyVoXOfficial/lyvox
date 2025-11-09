@@ -10,7 +10,7 @@ const limiter = createRateLimiter({
 
 // GET /api/top-sellers - Get top sellers from materialized view
 async function baseHandler(request: Request) {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   
   // Get query parameters
   const url = new URL(request.url);

@@ -46,7 +46,7 @@ const otpFallbackLimiter = createRateLimiter({
 });
 
 const getUserId = async (req: Request) => {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const { data } = await supabase.auth.getUser();
   return data.user?.id ?? null;
 };
@@ -64,7 +64,7 @@ const baseHandler = async (req: Request) => {
 
   const { code, phone } = validationResult.data;
 
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();

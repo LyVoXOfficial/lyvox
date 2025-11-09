@@ -37,7 +37,7 @@ export async function GET(request: Request) {
     // Use service role to check auth.users table
     let supabase;
     try {
-      supabase = supabaseService();
+      supabase = await supabaseService();
     } catch {
       // If service role is not available, return generic success
       // This prevents revealing infrastructure issues

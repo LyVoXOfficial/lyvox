@@ -14,7 +14,7 @@ export const metadata = {
 };
 
 export default async function ProfileEditPage() {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();

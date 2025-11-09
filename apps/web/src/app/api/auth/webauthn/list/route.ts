@@ -22,7 +22,7 @@ export const runtime = "nodejs";
 export async function GET() {
   try {
     // 1. Проверка авторизации
-    const supabase = supabaseServer();
+    const supabase = await supabaseServer();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {

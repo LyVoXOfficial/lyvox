@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     const { factorId } = validation.data;
 
     // 3. Проверка авторизации
-    const supabase = supabaseServer();
+    const supabase = await supabaseServer();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {

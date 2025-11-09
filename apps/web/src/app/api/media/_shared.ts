@@ -103,7 +103,7 @@ export async function ensureAdvertOwnership({
 
 export async function logMediaEvent(action: string, userId: string, details: LogDetails): Promise<void> {
   try {
-    const service = supabaseService();
+    const service = await supabaseService();
     await service.from("logs").insert({
       user_id: userId,
       action,

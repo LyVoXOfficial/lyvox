@@ -8,7 +8,7 @@ export const fetchCache = "force-no-store";
 export const revalidate = 0;
 
 async function getCategories(): Promise<Category[]> {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const { data, error } = await supabase
     .from("categories")
     .select("id, name_ru, path, is_active, level, parent_id, icon, sort, name_en, name_nl, name_fr")
@@ -24,7 +24,7 @@ async function getCategories(): Promise<Category[]> {
 }
 
 async function getAdvertForEdit(id: string, userId: string) {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const { data: ad, error } = await supabase
     .from("adverts")
     .select("*, media(id, url, sort), ad_item_specifics(specifics)")
@@ -48,7 +48,7 @@ async function getAdvertForEdit(id: string, userId: string) {
 }
 
 async function getUserPhone(userId: string): Promise<string | null> {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const { data: phone, error } = await supabase
     .from("phones")
     .select("e164")
@@ -69,9 +69,10 @@ export default async function PostPage({
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
+  const supabase = await supabaseServer();
   const {
     data: { user },
-  } = await supabaseServer().auth.getUser();
+  } = await supabase.auth.getUser();
   const { messages } = await getI18nProps();
   const t = (key: string) => key.split('.').reduce<any>((acc, p) => (acc ? acc[p] : undefined), messages) ?? key;
 
@@ -92,7 +93,7 @@ export default async function PostPage({
   }
 
   // Check verification status
-  const { data: profile } = await supabaseServer()
+  const { data: profile } = await supabase
     .from("profiles")
     .select("verified_email, verified_phone")
     .eq("id", user.id)

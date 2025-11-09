@@ -12,7 +12,7 @@ import { updateProfileSchema } from "@/lib/validations/profile";
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();

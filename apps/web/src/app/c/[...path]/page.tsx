@@ -34,7 +34,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     notFound();
   }
 
-  const supabase = supabaseService();
+  const supabase = await supabaseService();
 
   const { data: current, error } = await supabase
     .from("categories")
@@ -136,7 +136,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       .order("sort", { ascending: true });
 
     const firstMedia = new Map<string, string>();
-    const storage = supabaseService().storage.from("ad-media");
+    const service = await supabaseService();
+    const storage = service.storage.from("ad-media");
     const SIGNED_DOWNLOAD_TTL_SECONDS = 10 * 60;
 
     if (media && media.length > 0) {

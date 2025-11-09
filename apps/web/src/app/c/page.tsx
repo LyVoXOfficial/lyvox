@@ -7,7 +7,7 @@ import type { Category } from "@/lib/types";
 import CategoryList from "@/components/category-list";
 
 export default async function CategoriesIndex() {
-  const supabase = supabaseService();
+  const supabase = await supabaseService();
   const { data, error } = await supabase
     .from("categories")
     .select("*")

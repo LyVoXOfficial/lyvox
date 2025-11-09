@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
   const { marketingOptIn } = validationResult.data;
 
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
 
   let service;
   try {
-    service = supabaseService();
+    service = await supabaseService();
   } catch {
     return createErrorResponse(ApiErrorCode.SERVICE_ROLE_MISSING, { status: 500 });
   }
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -122,7 +122,7 @@ export async function GET(request: Request) {
 
   let service;
   try {
-    service = supabaseService();
+    service = await supabaseService();
   } catch {
     return createErrorResponse(ApiErrorCode.SERVICE_ROLE_MISSING, { status: 500 });
   }

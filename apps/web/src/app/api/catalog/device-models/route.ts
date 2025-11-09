@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = supabaseServer();
+    const supabase = await supabaseServer();
     const { searchParams } = new URL(request.url);
     const brandParam = searchParams.get('brand') ?? searchParams.get('brand_id');
     const deviceType = searchParams.get('device_type');

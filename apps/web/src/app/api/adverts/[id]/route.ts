@@ -39,7 +39,10 @@ const enforceStatusTransition = (current: AdvertStatus, next: AdvertStatus) => {
   });
 };
 
-const fetchMediaCount = async (supabase: ReturnType<typeof supabaseServer>, advertId: string) => {
+const fetchMediaCount = async (
+  supabase: Awaited<ReturnType<typeof supabaseServer>>,
+  advertId: string,
+) => {
   const { count, error } = await supabase
     .from("media")
     .select("id", { head: true, count: "exact" })
@@ -81,7 +84,7 @@ export async function PATCH(
   }
   const body = validationResult.data;
 
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -106,13 +109,15 @@ export async function PATCH(
     return createErrorResponse(ApiErrorCode.NOT_FOUND, { status: 404 });
   }
 
+  const service = await supabaseService();
+
   if (advert.user_id !== user.id) {
     const audit: TablesInsert<"logs"> = {
       user_id: user.id,
       action: "advert_update_denied",
       details: { advertId },
     };
-    await supabaseService().from("logs").insert(audit);
+    await service.from("logs").insert(audit);
     return createErrorResponse(ApiErrorCode.FORBIDDEN, { status: 403 });
   }
 
@@ -230,7 +235,7 @@ export async function PATCH(
       action: "advert_status_change",
       details: { advertId, from: advert.status, to: requestedStatus },
     };
-    await supabaseService().from("logs").insert(audit);
+    await service.from("logs").insert(audit);
   }
 
   return createSuccessResponse({});
@@ -254,8 +259,8 @@ export async function GET(
 
   // Use service role for public access to avoid RLS issues
   // We'll check status manually to enforce access control
-  const supabaseServiceClient = supabaseService();
-  const supabaseUserClient = supabaseServer();
+  const supabaseServiceClient = await supabaseService();
+  const supabaseUserClient = await supabaseServer();
 
   // Load advert with specifics - use service role to bypass RLS for public access
   const { data: advert, error: fetchError } = await supabaseServiceClient
@@ -320,7 +325,7 @@ export async function DELETE(
     return createErrorResponse(ApiErrorCode.MISSING_ID, { status: 400 });
   }
 
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -343,13 +348,15 @@ export async function DELETE(
     return createErrorResponse(ApiErrorCode.NOT_FOUND, { status: 404 });
   }
 
+  const service = await supabaseService();
+
   if (advert.user_id !== user.id) {
     const audit: TablesInsert<"logs"> = {
       user_id: user.id,
       action: "advert_delete_denied",
       details: { advertId },
     };
-    await supabaseService().from("logs").insert(audit);
+    await service.from("logs").insert(audit);
     return createErrorResponse(ApiErrorCode.FORBIDDEN, { status: 403 });
   }
 
@@ -381,7 +388,7 @@ export async function DELETE(
       .map((row) => row.url)
       .filter((path): path is string => Boolean(path && !path.startsWith("http")));
     if (storagePaths.length) {
-      await supabaseService().storage.from("ad-media").remove(storagePaths);
+      await service.storage.from("ad-media").remove(storagePaths);
     }
   }
 
@@ -395,7 +402,7 @@ export async function DELETE(
     action: "advert_delete",
     details: { advertId },
   };
-  await supabaseService().from("logs").insert(audit);
+  await service.from("logs").insert(audit);
 
   return createSuccessResponse({});
 }

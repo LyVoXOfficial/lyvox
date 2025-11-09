@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     return createErrorResponse(ApiErrorCode.MISSING_ADVERT_ID, { status: 400 });
   }
 
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const authResult = await requireAuthenticatedUser(supabase);
   if ("response" in authResult) {
     return authResult.response;
@@ -47,7 +47,8 @@ export async function GET(request: Request) {
     return handleSupabaseError(mediaError, ApiErrorCode.FETCH_FAILED);
   }
 
-  const storage = supabaseService().storage.from("ad-media");
+  const service = await supabaseService();
+  const storage = service.storage.from("ad-media");
   const items =
     records?.map(async (record) => {
       const path = record.url;

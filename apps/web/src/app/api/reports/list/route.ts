@@ -25,17 +25,22 @@ const reportAdminLimiter = createRateLimiter({
   prefix: "report:admin",
 });
 
-type SupabaseClient = ReturnType<typeof supabaseServer>;
-type SupabaseUser = Awaited<ReturnType<SupabaseClient["auth"]["getUser"]>>["data"]["user"];
-type RequestContext = { supabase: SupabaseClient; user: SupabaseUser };
+type SupabaseServerClient = Awaited<ReturnType<typeof supabaseServer>>;
+type SupabaseUser = Awaited<ReturnType<SupabaseServerClient["auth"]["getUser"]>>["data"]["user"];
+type RequestContext = { supabase: SupabaseServerClient; user: SupabaseUser };
 
 const contextCache = new WeakMap<Request, Promise<RequestContext>>();
 
-const getRequestContext = (req: Request): Promise<RequestContext> => {
+const getRequestContext = async (req: Request): Promise<RequestContext> => {
   let cached = contextCache.get(req);
   if (!cached) {
-    const supabase = supabaseServer();
-    cached = supabase.auth.getUser().then(({ data }) => ({ supabase, user: data.user ?? null }));
+    cached = (async () => {
+      const supabase = await supabaseServer();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      return { supabase, user: user ?? null };
+    })();
     contextCache.set(req, cached);
   }
   return cached;
@@ -52,7 +57,7 @@ const baseHandler = async (request: Request) => {
 
   let adminClient;
   try {
-    adminClient = supabaseService();
+    adminClient = await supabaseService();
   } catch {
     return createErrorResponse(ApiErrorCode.SERVICE_ROLE_MISSING, {
       status: 500,

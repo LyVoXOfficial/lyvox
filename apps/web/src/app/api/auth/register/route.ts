@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 
   const { email, password, consents } = validationResult.data;
   const locale = resolveLocale(validationResult.data.locale);
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const origin = new URL(request.url).origin;
   const redirect = new URL("/auth/callback", origin);
   redirect.searchParams.set("next", "/onboarding");
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
 
   let service;
   try {
-    service = supabaseService();
+    service = await supabaseService();
   } catch {
     return createErrorResponse(ApiErrorCode.SERVICE_ROLE_MISSING, { status: 500 });
   }

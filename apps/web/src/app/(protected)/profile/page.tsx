@@ -21,7 +21,7 @@ export const revalidate = 0;
 async function loadProfileData(userId: string): Promise<(ProfileData & { 
   advertsStats: { active: number; draft: number; archived: number; total: number };
 }) | null> {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   
   // Fetch profile data (adverts linked to auth.users, not profiles - must query separately)
   const { data: profileData, error: profileError } = await supabase
@@ -126,9 +126,10 @@ async function loadProfileData(userId: string): Promise<(ProfileData & {
 }
 
 export default async function ProfilePage() {
+  const supabase = await supabaseServer();
   const {
     data: { user },
-  } = await supabaseServer().auth.getUser();
+  } = await supabase.auth.getUser();
   const { locale, messages } = await getI18nProps();
   const t = (key: string) => key.split('.').reduce<any>((acc, p) => (acc ? acc[p] : undefined), messages) ?? key;
 

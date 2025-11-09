@@ -186,7 +186,7 @@ type DetailItem = {
 };
 
 type PageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 const LOCALE_TAGS: Record<Locale, string> = {
@@ -200,7 +200,7 @@ const LOCALE_TAGS: Record<Locale, string> = {
 const SPEC_KEY_EXCLUSIONS = new Set(["make_id", "model_id", "color_id", "additional_phone", "generation_id"]);
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { id } = params;
+  const { id } = await params;
 
   if (!isValidUuid(id)) {
     return {};
@@ -259,11 +259,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function AdvertPage({ params }: PageProps) {
+  let resolvedId: string | null = null;
   try {
     const resolvedParams = await params;
     const rawId = resolvedParams?.id;
     const idCandidate = Array.isArray(rawId) ? rawId[0] : rawId;
     const id = typeof idCandidate === "string" ? idCandidate : "";
+    resolvedId = id;
 
     if (!isValidUuid(id)) {
       return (
@@ -781,7 +783,7 @@ export default async function AdvertPage({ params }: PageProps) {
           : "Unknown error";
     const stack =
       typeof err?.stack === "string" ? String(err.stack).split("\n").slice(0, 3).join("\n") : undefined;
-    console.error("AdvertPage render error (unhandled)", { id: params?.id, message, stack });
+    console.error("AdvertPage render error (unhandled)", { id: resolvedId, message, stack });
     return (
       <div className="space-y-8">
         <h1 className="text-2xl font-semibold">Не удалось загрузить страницу</h1>
@@ -834,7 +836,7 @@ function createTranslator(messages: Messages): TFunction {
 
 async function loadCurrentUserId(): Promise<string | null> {
   try {
-    const supabase = supabaseServer();
+    const supabase = await supabaseServer();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -846,7 +848,7 @@ async function loadCurrentUserId(): Promise<string | null> {
 }
 
 async function loadVehicleInsights(
-  client: ReturnType<typeof supabaseService>,
+  client: Awaited<ReturnType<typeof supabaseService>>,
   generationId: string,
 ): Promise<VehicleInsights | null> {
   const { data, error } = await client
@@ -937,10 +939,10 @@ async function loadAdvertData(
 ): Promise<AdvertData | null> {
   // Prefer anon-scoped server client for reading (RLS-safe),
   // while still attempting to use service client for storage signing.
-  const db = supabaseServer();
+  const db = await supabaseServer();
   let svc = db;
   try {
-    svc = supabaseService();
+    svc = await supabaseService();
   } catch {
     // Fallback to anon client; signing may fail but is handled below.
   }
@@ -1229,7 +1231,7 @@ async function loadSimilarAdverts(
     return [];
   }
 
-  const client = supabaseService();
+  const client = await supabaseService();
 
   try {
     const { data, error } = await client

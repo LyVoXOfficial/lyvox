@@ -14,8 +14,8 @@ import type { Database } from "@/lib/supabaseTypes";
  * const supabase = supabaseServer();
  * const { data } = await supabase.from('profiles').select('*');
  */
-export function supabaseServer() {
-  const cookieStore = cookies();
+export async function supabaseServer() {
+  const cookieStore = await cookies();
 
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,13 +23,11 @@ export function supabaseServer() {
     {
       cookies: {
         async get(name: string) {
-          const store = await cookieStore;
-          return store.get(name)?.value;
+          return cookieStore.get(name)?.value;
         },
         async set(name: string, value: string, options: CookieOptions = {}) {
           try {
-            const store = await cookieStore;
-            await store.set({ 
+            await cookieStore.set({
               name, 
               value, 
               ...options,
@@ -46,8 +44,7 @@ export function supabaseServer() {
         },
         async remove(name: string, options: CookieOptions = {}) {
           try {
-            const store = await cookieStore;
-            await store.set({ 
+            await cookieStore.set({
               name, 
               value: "", 
               ...options, 
@@ -79,7 +76,7 @@ export function supabaseServer() {
  * @returns Session object или null если сессия невалидна
  */
 export async function getServerSession() {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   
   try {
     const { data: { session }, error } = await supabase.auth.getSession();
@@ -157,7 +154,7 @@ export async function requireAuth() {
  * @returns true если пользователь - администратор
  */
 export async function isAdmin(): Promise<boolean> {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   
   const session = await getServerSession();
   if (!session) return false;

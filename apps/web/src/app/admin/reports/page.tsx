@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabaseServer";
+type ServiceClient = Awaited<ReturnType<typeof supabaseService>>;
 import { supabaseService } from "@/lib/supabaseService";
 import { hasAdminRole } from "@/lib/adminRole";
 
@@ -101,7 +102,7 @@ async function setFlash(message: string | null) {
 }
 
 async function moderateReport(
-  service: ReturnType<typeof supabaseService>,
+  service: ServiceClient,
   actorId: string,
   id: number,
   newStatus: "accepted" | "rejected",
@@ -165,7 +166,7 @@ async function updateReport(
 ) {
   "use server";
 
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -182,9 +183,9 @@ async function updateReport(
     return;
   }
 
-  let service;
+  let service: ServiceClient;
   try {
-    service = supabaseService();
+    service = await supabaseService();
   } catch {
     await setFlash(
       "SUPABASE_SERVICE_ROLE_KEY не настроен. Укажите переменную окружения SUPABASE_SERVICE_ROLE_KEY на сервере.",
@@ -242,7 +243,7 @@ async function bulkUpdateReports(formData: FormData) {
       return;
   }
 
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -259,9 +260,9 @@ async function bulkUpdateReports(formData: FormData) {
     return;
   }
 
-  let service;
+  let service: ServiceClient;
   try {
-    service = supabaseService();
+    service = await supabaseService();
   } catch {
     await setFlash(
       "SUPABASE_SERVICE_ROLE_KEY не настроен. Укажите переменную окружения SUPABASE_SERVICE_ROLE_KEY на сервере.",
@@ -299,7 +300,7 @@ export default async function AdminReportsPage({
 }: {
   searchParams?: Record<string, string | string[]>;
 }) {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -312,9 +313,9 @@ export default async function AdminReportsPage({
     return <main className="p-4 text-sm text-red-600">Доступ запрещён.</main>;
   }
 
-  let service;
+  let service: ServiceClient;
   try {
-    service = supabaseService();
+    service = await supabaseService();
   } catch {
     return (
       <main className="p-4 text-sm text-red-600">

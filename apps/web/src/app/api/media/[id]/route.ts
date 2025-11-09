@@ -20,7 +20,7 @@ export async function DELETE(
     return createErrorResponse(ApiErrorCode.MISSING_ID, { status: 400 });
   }
 
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const authResult = await requireAuthenticatedUser(supabase);
   if ("response" in authResult) {
     return authResult.response;
@@ -52,7 +52,7 @@ export async function DELETE(
     return ownership.response;
   }
 
-  const service = supabaseService();
+  const service = await supabaseService();
   await service.storage.from("ad-media").remove([media.url]);
 
   const { error: deleteError } = await supabase.from("media").delete().eq("id", id);

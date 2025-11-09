@@ -53,7 +53,7 @@ export async function POST(request: Request) {
 
   const { advertId, fileName, contentType, fileSize } = validationResult.data;
 
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const authResult = await requireAuthenticatedUser(supabase);
   if ("response" in authResult) {
     return authResult.response;
@@ -99,7 +99,8 @@ export async function POST(request: Request) {
 
   const storagePath = buildPath(user.id, advertId, fileName);
 
-  const storage = supabaseService().storage.from("ad-media");
+  const service = await supabaseService();
+  const storage = service.storage.from("ad-media");
   const { data: signedUpload, error: signedError } = await storage.createSignedUploadUrl(
     storagePath,
     { upsert: false },

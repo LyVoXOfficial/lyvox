@@ -37,16 +37,18 @@ export async function POST(request: Request) {
 
   const { advertId, storagePath, width, height } = validationResult.data;
 
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const authResult = await requireAuthenticatedUser(supabase);
   if ("response" in authResult) {
     return authResult.response;
   }
   const { user } = authResult;
 
+  const service = await supabaseService();
+
   if (!storagePath.startsWith(`${user.id}/${advertId}/`)) {
     // SECURITY: log unexpected storage path usage
-    await supabaseService()
+    await service
       .from("logs")
       .insert({
         user_id: user.id,
@@ -125,8 +127,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const { data: signedDownload, error: signedError } = await supabaseService()
-    .storage.from("ad-media")
+  const { data: signedDownload, error: signedError } = await service.storage
+    .from("ad-media")
     .createSignedUrl(storagePath, SIGNED_DOWNLOAD_TTL_SECONDS);
 
   if (signedError || !signedDownload) {

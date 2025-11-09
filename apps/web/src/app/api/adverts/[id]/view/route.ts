@@ -21,7 +21,7 @@ async function trackView(
   request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const { id: advertId } = await context.params;
 
   const uuidValidation = uuidSchema.safeParse(advertId);

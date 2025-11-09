@@ -10,7 +10,7 @@ const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 let cached: SupabaseClient<Database> | null = null;
 let warnedAboutFallback = false;
 
-export function supabaseService(): SupabaseClient<Database> {
+export async function supabaseService(): Promise<SupabaseClient<Database>> {
   if (url && serviceKey) {
     if (!cached) {
       cached = createClient<Database>(url, serviceKey, {

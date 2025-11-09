@@ -31,7 +31,7 @@ type MediaRow = {
 };
 
 async function getFreeAds(): Promise<AdListItem[]> {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
 
   // Get free ads (price = 0 or null)
   const { data: free, error: freeError } = await supabase
@@ -126,7 +126,7 @@ async function getFreeAds(): Promise<AdListItem[]> {
 }
 
 async function getLatestAds(): Promise<AdListItem[]> {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
 
   // Get latest ads
   const { data: ads, error: adsError } = await supabase

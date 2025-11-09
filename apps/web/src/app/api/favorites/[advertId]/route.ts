@@ -8,21 +8,23 @@ import {
 } from "@/lib/apiErrors";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 
-type SupabaseClient = ReturnType<typeof supabaseServer>;
-type SupabaseUser = Awaited<ReturnType<SupabaseClient["auth"]["getUser"]>>["data"]["user"];
+type SupabaseServerClient = Awaited<ReturnType<typeof supabaseServer>>;
+type SupabaseUser = Awaited<ReturnType<SupabaseServerClient["auth"]["getUser"]>>["data"]["user"];
 
 const uuidSchema = z.string().uuid();
 
-const contextCache = new WeakMap<Request, Promise<{ supabase: SupabaseClient; user: SupabaseUser }>>();
+const contextCache = new WeakMap<Request, Promise<{ supabase: SupabaseServerClient; user: SupabaseUser }>>();
 
-const getRequestContext = (req: Request) => {
+const getRequestContext = async (req: Request) => {
   let cached = contextCache.get(req);
   if (!cached) {
-    const supabase = supabaseServer();
-    cached = supabase.auth.getUser().then(({ data }) => ({
-      supabase,
-      user: data.user ?? null,
-    }));
+    cached = (async () => {
+      const supabase = await supabaseServer();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      return { supabase, user: user ?? null };
+    })();
     contextCache.set(req, cached);
   }
   return cached;

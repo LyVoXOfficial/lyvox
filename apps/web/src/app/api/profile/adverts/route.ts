@@ -23,7 +23,7 @@ export const runtime = "nodejs";
  * - status: Filter by status (all, active, draft, archived) (default: all)
  */
 export async function GET(request: NextRequest) {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -83,7 +83,8 @@ export async function GET(request: NextRequest) {
       console.error("Failed to fetch media for adverts:", mediaError);
     } else if (mediaData) {
       // Transform storage paths to signed URLs
-      const storage = supabaseService().storage.from("ad-media");
+      const service = await supabaseService();
+      const storage = service.storage.from("ad-media");
       const SIGNED_TTL = 15 * 60; // 15 minutes
       
       const mediaWithSignedUrls = await Promise.all(

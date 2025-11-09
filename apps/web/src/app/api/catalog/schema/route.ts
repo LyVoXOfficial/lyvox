@@ -34,7 +34,7 @@ function collectFieldKeys(steps: unknown): string[] {
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = supabaseServer();
+    const supabase = await supabaseServer();
     const { searchParams } = new URL(request.url);
     const categoryIdParam = searchParams.get("category_id");
     const categorySlug = searchParams.get("category_slug");

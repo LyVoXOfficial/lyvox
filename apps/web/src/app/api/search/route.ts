@@ -83,7 +83,7 @@ const baseHandler = async (request: Request) => {
     verified_only: params.verified_only ?? false,
   };
 
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
 
   // Call PostgreSQL function search_adverts via RPC
   const { data, error } = await supabase.rpc("search_adverts", searchParams);

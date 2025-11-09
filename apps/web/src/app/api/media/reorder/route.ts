@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
   const { advertId, orderedIds } = validationResult.data;
 
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const authResult = await requireAuthenticatedUser(supabase);
   if ("response" in authResult) {
     return authResult.response;
