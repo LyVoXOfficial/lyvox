@@ -122,10 +122,13 @@ export async function GET(request: NextRequest) {
     }
 
     if (!schemaRow) {
-      return NextResponse.json({
-        ok: false,
-        error: "Schema not found for category",
-      });
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Schema not found for category",
+        },
+        { status: 404 },
+      );
     }
 
     const steps = schemaRow.steps ?? [];
