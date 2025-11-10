@@ -228,6 +228,7 @@
     "quick_actions": "Snelle acties",
     "post_new_ad": "Nieuwe advertentie plaatsen",
     "view_all_adverts": "Alle advertenties bekijken",
+    "view_all": "Alles bekijken",
     "dashboard": "Dashboard",
     "my_adverts": "Mijn advertenties",
     "reviews": "Beoordelingen",
@@ -265,6 +266,9 @@
   },
   "comparison": {
     "title": "Advertenties vergelijken",
+    "instructions_title": "Hoe vergelijken?",
+    "instructions_body": "Selecteer 2-4 advertenties met de vinkjes en klik vervolgens op Vergelijken om ze naast elkaar te zien.",
+    "instructions_dismiss": "Begrepen",
     "summary_title": "Highlights",
     "summary_best_overall": "Beste prijs-kwaliteit: {advert}",
     "summary_best_price": "Laagste prijs: {advert} ({price})",
@@ -296,6 +300,10 @@
     "clear_selection": "Wissen",
     "compare_button": "Vergelijken ({count})",
     "select_for_compare": "Selecteer voor vergelijking",
+    "tooltip_select": "Selecteer voor vergelijking",
+    "tooltip_limit_reached": "Maximaal 4 advertenties",
+    "tooltip_near_limit": "Nog {remaining} te kiezen",
+    "help_tip": "💡 Tip: Vergelijk prijs, staat en betrouwbaarheid van de verkoper",
     "loading": "Vergelijken...",
     "error_generic": "Vergelijken mislukt. Probeer het later opnieuw.",
     "error_code": {

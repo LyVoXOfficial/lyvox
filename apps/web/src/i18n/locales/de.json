@@ -228,6 +228,7 @@
     "quick_actions": "Schnellaktionen",
     "post_new_ad": "Neue Anzeige erstellen",
     "view_all_adverts": "Alle Anzeigen ansehen",
+    "view_all": "Alle anzeigen",
     "dashboard": "Dashboard",
     "my_adverts": "Meine Anzeigen",
     "reviews": "Bewertungen",
@@ -265,6 +266,9 @@
   },
   "comparison": {
     "title": "Anzeigen vergleichen",
+    "instructions_title": "So vergleichen Sie",
+    "instructions_body": "Wählen Sie 2–4 Anzeigen über die Checkboxen aus und klicken Sie anschließend auf „Vergleichen“, um sie nebeneinander zu sehen.",
+    "instructions_dismiss": "Verstanden",
     "summary_title": "Highlights",
     "summary_best_overall": "Bestes Preis-Leistungs-Verhältnis: {advert}",
     "summary_best_price": "Bester Preis: {advert} ({price})",
@@ -296,6 +300,10 @@
     "clear_selection": "Zurücksetzen",
     "compare_button": "Vergleichen ({count})",
     "select_for_compare": "Zum Vergleichen auswählen",
+    "tooltip_select": "Zum Vergleichen auswählen",
+    "tooltip_limit_reached": "Maximal 4 Anzeigen",
+    "tooltip_near_limit": "Noch {remaining} auswählbar",
+    "help_tip": "💡 Tipp: Vergleichen Sie Preis, Zustand und Vertrauensscore des Verkäufers",
     "loading": "Vergleich läuft...",
     "error_generic": "Vergleich fehlgeschlagen. Bitte später erneut versuchen.",
     "error_code": {

@@ -228,6 +228,7 @@
     "quick_actions": "Quick actions",
     "post_new_ad": "Post new advert",
     "view_all_adverts": "View all adverts",
+    "view_all": "View all",
     "dashboard": "Dashboard",
     "my_adverts": "My adverts",
     "reviews": "Reviews",
@@ -265,6 +266,9 @@
   },
   "comparison": {
     "title": "Compare adverts",
+    "instructions_title": "How to compare",
+    "instructions_body": "Select 2-4 adverts by clicking the checkboxes, then click Compare to see them side-by-side.",
+    "instructions_dismiss": "Got it",
     "summary_title": "Highlights",
     "summary_best_overall": "Best overall value: {advert}",
     "summary_best_price": "Best price: {advert} ({price})",
@@ -296,6 +300,10 @@
     "clear_selection": "Clear",
     "compare_button": "Compare ({count})",
     "select_for_compare": "Select for comparison",
+    "tooltip_select": "Select to compare",
+    "tooltip_limit_reached": "Maximum 4 adverts",
+    "tooltip_near_limit": "Select up to {remaining} more",
+    "help_tip": "💡 Tip: Compare prices, condition, and seller trust scores",
     "loading": "Comparing...",
     "error_generic": "Could not compare adverts. Please try again later.",
     "error_code": {

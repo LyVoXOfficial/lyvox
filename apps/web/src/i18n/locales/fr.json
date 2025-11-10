@@ -228,6 +228,7 @@
     "quick_actions": "Actions rapides",
     "post_new_ad": "Publier une nouvelle annonce",
     "view_all_adverts": "Voir toutes les annonces",
+    "view_all": "Voir tout",
     "dashboard": "Tableau de bord",
     "my_adverts": "Mes annonces",
     "reviews": "Avis",
@@ -265,6 +266,9 @@
   },
   "comparison": {
     "title": "Comparer les annonces",
+    "instructions_title": "Comment comparer",
+    "instructions_body": "Sélectionnez 2 à 4 annonces en cochant les cases, puis cliquez sur Comparer pour les afficher côte à côte.",
+    "instructions_dismiss": "Compris",
     "summary_title": "Points clés",
     "summary_best_overall": "Meilleur rapport qualité/prix : {advert}",
     "summary_best_price": "Prix le plus bas : {advert} ({price})",
@@ -296,6 +300,10 @@
     "clear_selection": "Effacer",
     "compare_button": "Comparer ({count})",
     "select_for_compare": "Ajouter à la comparaison",
+    "tooltip_select": "Ajouter à la comparaison",
+    "tooltip_limit_reached": "Maximum 4 annonces",
+    "tooltip_near_limit": "Encore {remaining} à choisir",
+    "help_tip": "💡 Astuce : comparez le prix, l'état et la fiabilité du vendeur",
     "loading": "Comparaison en cours...",
     "error_generic": "La comparaison a échoué. Réessayez plus tard.",
     "error_code": {

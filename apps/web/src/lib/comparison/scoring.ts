@@ -24,9 +24,11 @@ function clampScore(value: number): number {
 }
 
 export function calculatePriceScore(price: number | null, allPrices: (number | null)[]): number {
-  const numericPrices = allPrices.filter((value): value is number => typeof value === "number" && !Number.isNaN(value));
+  const numericPrices = allPrices.filter(
+    (value): value is number => typeof value === "number" && Number.isFinite(value),
+  );
 
-  if (!numericPrices.length || price === null || Number.isNaN(price)) {
+  if (!numericPrices.length || price === null || !Number.isFinite(price)) {
     return DEFAULT_SCORE;
   }
 
@@ -56,7 +58,7 @@ export function calculateConditionScore(condition: string | null): number {
 }
 
 export function calculateTrustScore(trustScore: number | null | undefined): number {
-  if (trustScore === null || trustScore === undefined) {
+  if (trustScore === null || trustScore === undefined || !Number.isFinite(trustScore)) {
     return DEFAULT_SCORE;
   }
 

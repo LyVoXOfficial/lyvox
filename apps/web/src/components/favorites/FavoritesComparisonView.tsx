@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 
 import SelectableAdsGrid, { type SelectableAd } from "@/components/comparison/SelectableAdsGrid";
 import ComparisonTable from "@/components/comparison/ComparisonTable";
+import ComparisonInstructions from "@/components/comparison/ComparisonInstructions";
 import { useI18n } from "@/i18n";
 import type { ComparableAdvert } from "@/lib/types/comparison";
 import { cn } from "@/lib/utils";
@@ -75,6 +76,10 @@ export default function FavoritesComparisonView({ items, isLoading = false, clas
         <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {comparisonError}
         </div>
+      ) : null}
+
+      {items.length ? (
+        <ComparisonInstructions className="border-primary/40 bg-primary/5 dark:border-primary/30 dark:bg-primary/10" />
       ) : null}
 
       <SelectableAdsGrid

@@ -120,14 +120,7 @@ export default function ComparisonTable({ open, onOpenChange, adverts }: Props) 
     {
       id: "condition",
       label: t("comparison.table_condition"),
-      render: (result) => {
-        if (!result.advert.condition) {
-          return t("comparison.condition_unknown");
-        }
-        const conditionKey = `comparison.condition.${result.advert.condition}`;
-        const translated = t(conditionKey);
-        return translated === conditionKey ? result.advert.condition : translated;
-      },
+      render: (result) => resolveConditionLabel(result.advert.condition),
     },
     {
       id: "trust",

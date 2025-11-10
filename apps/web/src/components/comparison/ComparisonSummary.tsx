@@ -43,7 +43,7 @@ export default function ComparisonSummary({ results }: Props) {
     }
 
     if (bestPrice) {
-      const hasPrice = typeof bestPrice.advert.price === "number" && !Number.isNaN(bestPrice.advert.price);
+      const hasPrice = typeof bestPrice.advert.price === "number" && Number.isFinite(bestPrice.advert.price);
       const priceString = hasPrice
         ? formatCurrency(bestPrice.advert.price as number, locale, bestPrice.advert.currency ?? "EUR")
         : t("comparison.price_unknown");
@@ -58,9 +58,12 @@ export default function ComparisonSummary({ results }: Props) {
     }
 
     if (mostTrusted) {
+      const trustScore = typeof mostTrusted.advert.sellerTrustScore === "number"
+        ? Math.round(mostTrusted.advert.sellerTrustScore)
+        : 0;
       const trustLabel = t("comparison.summary_most_trusted", {
         advert: mostTrusted.advert.title,
-        score: Math.round(mostTrusted.advert.sellerTrustScore).toString(),
+        score: trustScore.toString(),
         status: mostTrusted.advert.sellerVerified
           ? t("comparison.seller_verified")
           : t("comparison.seller_unverified"),
