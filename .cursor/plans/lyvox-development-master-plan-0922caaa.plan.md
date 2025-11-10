@@ -136,7 +136,7 @@ $$ LANGUAGE plpgsql;
 
 ### Current State
 
-- Таблица `categories` с 3 уровнями, поддерживает RU/NL/FR/EN
+- Таблица `categories` с 3 уровнями, поддерживает RU/NL/FR/EN/DE
 - Path-based routing: `/c/transport/legkovye-avtomobili`
 
 ### MVP Enhancements

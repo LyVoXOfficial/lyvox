@@ -26,20 +26,59 @@ async function loadProfileData(userId: string): Promise<(ProfileData & {
 }) | null> {
   const supabase = await supabaseServer();
   
-  // Fetch profile data (adverts linked to auth.users, not profiles - must query separately)
-  const { data: profileData, error: profileError } = await supabase
+  const profilePromise = supabase
     .from("profiles")
     .select(
       `
-      id,
-      display_name,
-      created_at,
-      verified_email,
-      verified_phone
-    `
+        id,
+        display_name,
+        created_at,
+        verified_email,
+        verified_phone
+      `,
     )
     .eq("id", userId)
     .maybeSingle();
+
+  const trustScorePromise = supabase
+    .from("trust_score")
+    .select("score")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  const advertsPromise = supabase
+    .from("adverts")
+    .select("id, title, price, status, created_at, location")
+    .eq("user_id", userId);
+
+  const favoritesPromise = supabase
+    .from("favorites")
+    .select(
+      `
+        advert_id,
+        created_at,
+        adverts:advert_id (
+          id,
+          title,
+          price,
+          currency,
+          location,
+          created_at,
+          user_id,
+          status
+        )
+      `,
+    )
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  const [
+    { data: profileData, error: profileError },
+    { data: trustScoreData },
+    { data: advertsData, error: advertsError },
+    { data: favoritesData, error: favoritesError },
+  ] = await Promise.all([profilePromise, trustScorePromise, advertsPromise, favoritesPromise]);
 
   if (profileError) {
     logger.error("Failed to fetch profile data", {
@@ -51,6 +90,15 @@ async function loadProfileData(userId: string): Promise<(ProfileData & {
     return null;
   }
 
+  if (advertsError) {
+    logger.error("Failed to fetch profile adverts", {
+      component: "ProfilePage",
+      action: "loadProfileAdverts",
+      metadata: { userId, errorMessage: advertsError.message, errorDetails: advertsError.details },
+      error: advertsError,
+    });
+  }
+
   if (!profileData) {
     logger.warn("Profile data not found", {
       component: "ProfilePage",
@@ -60,20 +108,7 @@ async function loadProfileData(userId: string): Promise<(ProfileData & {
     return null;
   }
 
-  // Fetch trust score separately
-  const { data: trustScoreData } = await supabase
-    .from("trust_score")
-    .select("score")
-    .eq("user_id", userId)
-    .maybeSingle();
-
   const trustScore = trustScoreData?.score ?? 0;
-
-  // Fetch adverts separately (they're linked to auth.users, not profiles)
-  const { data: advertsData } = await supabase
-    .from("adverts")
-    .select("id, title, price, status, created_at, location")
-    .eq("user_id", userId);
 
   const adverts = (advertsData || []).map((advert) => ({
     id: advert.id,
@@ -85,82 +120,8 @@ async function loadProfileData(userId: string): Promise<(ProfileData & {
     media: [] as Array<{ url: string | null; sort: number | null }>,
   }));
 
-  // Fetch media for all adverts in a single query
+  // Fetch media for adverts and favorites plus seller verification in parallel
   let mediaByAdvert: Record<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>> = {};
-  if (adverts && adverts.length > 0) {
-    const advertIds = adverts.map((ad) => ad.id);
-    const { data: mediaData, error: mediaError } = await supabase
-      .from("media")
-      .select("advert_id, url, sort")
-      .in("advert_id", advertIds);
- 
-    if (mediaError) {
-      // Log error but don't fail the request - adverts can exist without media
-      console.error("Failed to fetch media for adverts:", mediaError);
-    } else if (mediaData) {
-      const signedMedia = await signMediaUrls(mediaData);
-
-      mediaByAdvert = signedMedia.reduce(
-        (acc, media) => {
-          const advertId = media.advert_id;
-          if (!acc[advertId]) {
-            acc[advertId] = [];
-          }
-
-          const resolvedUrl = media.signedUrl ?? null;
-          acc[advertId].push({
-            url: resolvedUrl,
-            signedUrl: resolvedUrl,
-            sort: media.sort ?? null,
-          });
-
-          return acc;
-        },
-        {} as Record<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>>,
-      );
-    }
-  }
- 
-  // Transform media data structure - attach media to their adverts
-  const transformedAdverts = (adverts ?? []).map((advert) => ({
-    id: advert.id,
-    title: advert.title,
-    price: advert.price ? Number(advert.price) : null,
-    status: advert.status,
-    created_at: advert.created_at ?? "",
-    location: advert.location,
-    media: mediaByAdvert[advert.id] ?? [],
-  }));
-
-  // Calculate adverts statistics
-  const advertsStats = {
-    active: adverts.filter((a) => a.status === "active").length,
-    draft: adverts.filter((a) => a.status === "draft").length,
-    archived: adverts.filter((a) => a.status === "archived").length,
-    total: adverts.length,
-  };
-
-  const { data: favoritesData, error: favoritesError } = await supabase
-    .from("favorites")
-    .select(
-      `
-      advert_id,
-      created_at,
-      adverts:advert_id (
-        id,
-        title,
-        price,
-        currency,
-        location,
-        created_at,
-        user_id,
-        status
-      )
-    `,
-    )
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(50);
 
   if (favoritesError) {
     logger.warn("Failed to load profile favorites", {
@@ -180,65 +141,128 @@ async function loadProfileData(userId: string): Promise<(ProfileData & {
     .map((favorite) => favorite.adverts?.user_id ?? null)
     .filter((value): value is string => typeof value === "string");
 
-  const favoriteMediaMap = new Map<string, string>();
-  if (favoriteAdvertIds.length) {
-    const { data: favoriteMediaRows, error: favoriteMediaError } = await supabase
-      .from("media")
-      .select("advert_id, url, sort")
-      .in("advert_id", favoriteAdvertIds)
-      .order("sort", { ascending: true });
+  const advertMediaPromise =
+    adverts.length > 0
+      ? supabase.from("media").select("advert_id, url, sort").in("advert_id", adverts.map((ad) => ad.id))
+      : Promise.resolve({ data: null, error: null });
 
-    if (favoriteMediaError) {
-      logger.warn("Failed to load favorites media", {
-        component: "ProfilePage",
-        action: "loadFavoritesMedia",
-        metadata: { userId },
-        error: favoriteMediaError,
-      });
-    } else if (favoriteMediaRows?.length) {
-      const signedFavoriteMedia = await signMediaUrls(favoriteMediaRows);
-      const groupedFavorites = signedFavoriteMedia.reduce(
-        (acc, media) => {
-          if (!acc.has(media.advert_id)) {
-            acc.set(media.advert_id, []);
-          }
+  const favoriteMediaPromise =
+    favoriteAdvertIds.length > 0
+      ? supabase
+          .from("media")
+          .select("advert_id, url, sort")
+          .in("advert_id", favoriteAdvertIds)
+          .order("sort", { ascending: true })
+      : Promise.resolve({ data: null, error: null });
 
-          acc.get(media.advert_id)!.push({
-            url: media.url ?? null,
-            signedUrl: media.signedUrl,
-            sort: media.sort ?? null,
-          });
+  const favoriteProfilesPromise =
+    favoriteSellerIds.length > 0
+      ? supabase.from("profiles").select("id, verified_email, verified_phone").in("id", favoriteSellerIds)
+      : Promise.resolve({ data: null });
 
-          return acc;
-        },
-        new Map<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>>(),
-      );
+  const [
+    { data: mediaData, error: mediaError },
+    { data: favoriteMediaRows, error: favoriteMediaError },
+    { data: favoriteProfiles },
+  ] = await Promise.all([advertMediaPromise, favoriteMediaPromise, favoriteProfilesPromise]);
 
-      for (const [advertId, items] of groupedFavorites.entries()) {
-        const first = getFirstImage(items);
-        if (first) {
-          favoriteMediaMap.set(advertId, first);
+  if (mediaError) {
+    console.error("Failed to fetch media for adverts:", mediaError);
+  }
+
+  if (favoriteMediaError) {
+    logger.warn("Failed to load favorites media", {
+      component: "ProfilePage",
+      action: "loadFavoritesMedia",
+      metadata: { userId },
+      error: favoriteMediaError,
+    });
+  }
+
+  const mediaDataList = !mediaError && Array.isArray(mediaData) ? mediaData : [];
+  const favoriteMediaList =
+    !favoriteMediaError && Array.isArray(favoriteMediaRows) ? favoriteMediaRows : [];
+
+  const [signedMedia, signedFavoriteMedia] = await Promise.all([
+    mediaDataList.length ? signMediaUrls(mediaDataList) : Promise.resolve([]),
+    favoriteMediaList.length ? signMediaUrls(favoriteMediaList) : Promise.resolve([]),
+  ]);
+
+  if (signedMedia.length) {
+    mediaByAdvert = signedMedia.reduce(
+      (acc, media) => {
+        const advertId = media.advert_id;
+        if (!acc[advertId]) {
+          acc[advertId] = [];
         }
+
+        const resolvedUrl = media.signedUrl ?? null;
+        acc[advertId].push({
+          url: resolvedUrl,
+          signedUrl: resolvedUrl,
+          sort: media.sort ?? null,
+        });
+
+        return acc;
+      },
+      {} as Record<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>>,
+    );
+  }
+
+  const favoriteMediaMap = new Map<string, string>();
+  if (signedFavoriteMedia.length) {
+    const groupedFavorites = signedFavoriteMedia.reduce(
+      (acc, media) => {
+        if (!acc.has(media.advert_id)) {
+          acc.set(media.advert_id, []);
+        }
+
+        acc.get(media.advert_id)!.push({
+          advert_id: media.advert_id,
+          url: media.url ?? null,
+          signedUrl: media.signedUrl,
+          sort: media.sort ?? null,
+        });
+
+        return acc;
+      },
+      new Map<string, Array<{ advert_id: string; url: string | null; signedUrl: string | null; sort: number | null }>>(),
+    );
+
+    for (const [advertId, items] of groupedFavorites.entries()) {
+      const first = getFirstImage(items);
+      if (first) {
+        favoriteMediaMap.set(advertId, first);
       }
     }
   }
 
   let favoriteVerifiedMap = new Map<string, boolean>();
-  if (favoriteSellerIds.length) {
-    const { data: favoriteProfiles } = await supabase
-      .from("profiles")
-      .select("id, verified_email, verified_phone")
-      .in("id", favoriteSellerIds);
-
-    if (favoriteProfiles) {
-      favoriteVerifiedMap = new Map(
-        favoriteProfiles.map((profile) => [
-          profile.id,
-          Boolean(profile.verified_email) && Boolean(profile.verified_phone),
-        ]),
-      );
-    }
+  if (favoriteProfiles) {
+    favoriteVerifiedMap = new Map(
+      favoriteProfiles.map((profile) => [
+        profile.id,
+        Boolean(profile.verified_email) && Boolean(profile.verified_phone),
+      ]),
+    );
   }
+
+  const hydratedAdverts = adverts.map((advert) => ({
+    id: advert.id,
+    title: advert.title,
+    price: advert.price ? Number(advert.price) : null,
+    status: advert.status,
+    created_at: advert.created_at ?? "",
+    location: advert.location,
+    media: mediaByAdvert[advert.id] ?? [],
+  }));
+
+  const advertsStats = {
+    active: hydratedAdverts.filter((a) => a.status === "active").length,
+    draft: hydratedAdverts.filter((a) => a.status === "draft").length,
+    archived: hydratedAdverts.filter((a) => a.status === "archived").length,
+    total: hydratedAdverts.length,
+  };
 
   const favorites: ProfileFavorite[] = favoritesRows.map((favorite) => {
     const advert = favorite.adverts;
@@ -271,7 +295,7 @@ async function loadProfileData(userId: string): Promise<(ProfileData & {
     ...profileData,
     trust_score: trustScore,
     reviews: [], // Reviews table doesn't exist yet, return empty array
-    adverts,
+    adverts: hydratedAdverts,
     favorites,
     advertsStats,
   };
@@ -363,28 +387,28 @@ export default async function ProfilePage() {
 
       {/* Navigation Tabs */}
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
-          <TabsTrigger value="dashboard" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('profile.dashboard')}</span>
+        <TabsList className="flex w-full flex-nowrap gap-2 overflow-x-auto rounded-lg bg-muted/60 p-1 sm:grid sm:grid-cols-5 sm:gap-0">
+          <TabsTrigger value="dashboard" className="flex flex-none min-w-[120px] items-center gap-2 sm:min-w-0 sm:flex-1">
+            <BarChart3 className="h-4 w-4 shrink-0" />
+            <span className="text-xs font-medium sm:text-sm">{t('profile.dashboard')}</span>
           </TabsTrigger>
-          <TabsTrigger value="adverts" className="flex items-center gap-2">
-            <Package className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('profile.my_adverts')}</span>
-            <Badge variant="secondary" className="ml-1">{advertsStats.total}</Badge>
+          <TabsTrigger value="adverts" className="flex flex-none min-w-[140px] items-center gap-2 sm:min-w-0 sm:flex-1">
+            <Package className="h-4 w-4 shrink-0" />
+            <span className="text-xs font-medium sm:text-sm">{t('profile.my_adverts')}</span>
+            <Badge variant="secondary" className="ml-1 shrink-0">{advertsStats.total}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="reviews" className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('profile.reviews')}</span>
-            <Badge variant="secondary" className="ml-1">{reviews?.length ?? 0}</Badge>
+          <TabsTrigger value="reviews" className="flex flex-none min-w-[140px] items-center gap-2 sm:min-w-0 sm:flex-1">
+            <MessageSquare className="h-4 w-4 shrink-0" />
+            <span className="text-xs font-medium sm:text-sm">{t('profile.reviews')}</span>
+            <Badge variant="secondary" className="ml-1 shrink-0">{reviews?.length ?? 0}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="favorites" className="flex items-center gap-2">
-            <Heart className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('profile.favorites')}</span>
+          <TabsTrigger value="favorites" className="flex flex-none min-w-[140px] items-center gap-2 sm:min-w-0 sm:flex-1">
+            <Heart className="h-4 w-4 shrink-0" />
+            <span className="text-xs font-medium sm:text-sm">{t('profile.favorites')}</span>
           </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('profile.settings')}</span>
+          <TabsTrigger value="settings" className="flex flex-none min-w-[140px] items-center gap-2 sm:min-w-0 sm:flex-1">
+            <Settings className="h-4 w-4 shrink-0" />
+            <span className="text-xs font-medium sm:text-sm">{t('profile.settings')}</span>
           </TabsTrigger>
         </TabsList>
 

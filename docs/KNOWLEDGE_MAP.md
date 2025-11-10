@@ -169,3 +169,11 @@ The **entire `/docs` directory (including this file and `PROMPT_MAIN.md`) must r
 
 📚 For full navigation instructions, see the “Knowledge Context” section inside `PROMPT_MAIN.md`.
 
+
+## 🤖 AI Enrichment & Cross-Reference System
+
+This workspace maintains AI-generated links between domain, development, and catalog documents.
+
+See `docs/AI_LINKS_INDEX.md` for the full matrix of relationships.
+
+

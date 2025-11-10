@@ -87,9 +87,7 @@ async function resolveFirstImages(
   return map;
 }
 
-async function getFreeAds(): Promise<AdListItem[]> {
-  const supabase = await supabaseServer();
-
+async function getFreeAds(supabase: SupabaseClient): Promise<AdListItem[]> {
   // Get free ads (price = 0 or null)
   const { data: free, error: freeError } = await supabase
     .from("adverts")
@@ -113,33 +111,32 @@ async function getFreeAds(): Promise<AdListItem[]> {
     .map((ad) => ad.user_id)
     .filter((value): value is string => typeof value === "string");
 
-  let verifiedMap = new Map<string, boolean>();
-  if (userIds.length > 0) {
-    const { data: profilesData } = await supabase
-      .from("profiles")
-      .select("id,verified_email,verified_phone")
-      .in("id", userIds);
+  const profilesPromise =
+    userIds.length > 0
+      ? supabase.from("profiles").select("id,verified_email,verified_phone").in("id", userIds)
+      : Promise.resolve({ data: null });
 
-    if (profilesData) {
-      verifiedMap = new Map(
-        profilesData.map((profile) => [
-          profile.id,
-          Boolean(profile.verified_email) && Boolean(profile.verified_phone),
-        ]),
+  const mediaPromise =
+    freeIds.length > 0
+      ? resolveFirstImages(
+          supabase,
+          freeIds,
+          {
+            component: "HomePage",
+            action: "getFreeAds:media",
+          },
+        )
+      : Promise.resolve(new Map<string, string>());
+
+  const [{ data: profilesData }, mediaMap] = await Promise.all([profilesPromise, mediaPromise]);
+
+  const verifiedMap = new Map<string, boolean>();
+  if (profilesData) {
+    for (const profile of profilesData) {
+      verifiedMap.set(
+        profile.id,
+        Boolean(profile.verified_email) && Boolean(profile.verified_phone),
       );
-    }
-  }
-
-  // Get first image for each ad
-  const firstImageByAdvert = new Map<string, string>();
-  if (freeIds.length) {
-    const mediaMap = await resolveFirstImages(supabase, freeIds, {
-      component: "HomePage",
-      action: "getFreeAds:media",
-    });
-
-    for (const [advertId, url] of mediaMap.entries()) {
-      firstImageByAdvert.set(advertId, url);
     }
   }
 
@@ -150,14 +147,12 @@ async function getFreeAds(): Promise<AdListItem[]> {
     currency: ad.currency ?? null,
     location: ad.location,
     createdAt: ad.created_at ?? null,
-    image: firstImageByAdvert.get(ad.id) ?? null,
+    image: mediaMap.get(ad.id) ?? null,
     sellerVerified: verifiedMap.get(ad.user_id ?? "") ?? false,
   }));
 }
 
-async function getLatestAds(): Promise<AdListItem[]> {
-  const supabase = await supabaseServer();
-
+async function getLatestAds(supabase: SupabaseClient): Promise<AdListItem[]> {
   // Get latest ads
   const { data: ads, error: adsError } = await supabase
     .from("adverts")
@@ -180,33 +175,32 @@ async function getLatestAds(): Promise<AdListItem[]> {
     .map((ad) => ad.user_id)
     .filter((value): value is string => typeof value === "string");
 
-  let verifiedMap = new Map<string, boolean>();
-  if (userIds.length > 0) {
-    const { data: profilesData } = await supabase
-      .from("profiles")
-      .select("id,verified_email,verified_phone")
-      .in("id", userIds);
+  const profilesPromise =
+    userIds.length > 0
+      ? supabase.from("profiles").select("id,verified_email,verified_phone").in("id", userIds)
+      : Promise.resolve({ data: null });
 
-    if (profilesData) {
-      verifiedMap = new Map(
-        profilesData.map((profile) => [
-          profile.id,
-          Boolean(profile.verified_email) && Boolean(profile.verified_phone),
-        ]),
+  const mediaPromise =
+    adIds.length > 0
+      ? resolveFirstImages(
+          supabase,
+          adIds,
+          {
+            component: "HomePage",
+            action: "getLatestAds:media",
+          },
+        )
+      : Promise.resolve(new Map<string, string>());
+
+  const [{ data: profilesData }, mediaMap] = await Promise.all([profilesPromise, mediaPromise]);
+
+  const verifiedMap = new Map<string, boolean>();
+  if (profilesData) {
+    for (const profile of profilesData) {
+      verifiedMap.set(
+        profile.id,
+        Boolean(profile.verified_email) && Boolean(profile.verified_phone),
       );
-    }
-  }
-
-  // Get first image for each ad
-  const firstMedia = new Map<string, string>();
-  if (adIds.length) {
-    const mediaMap = await resolveFirstImages(supabase, adIds, {
-      component: "HomePage",
-      action: "getLatestAds:media",
-    });
-
-    for (const [advertId, url] of mediaMap.entries()) {
-      firstMedia.set(advertId, url);
     }
   }
 
@@ -217,18 +211,19 @@ async function getLatestAds(): Promise<AdListItem[]> {
     currency: ad.currency ?? null,
     location: ad.location,
     createdAt: ad.created_at ?? null,
-    image: firstMedia.get(ad.id) ?? null,
+    image: mediaMap.get(ad.id) ?? null,
     sellerVerified: verifiedMap.get(ad.user_id ?? "") ?? false,
   }));
 }
 
 export default async function Home() {
   const { locale, messages } = await getI18nProps();
-  
+  const supabase = await supabaseServer();
+
   // Fetch data in parallel
   const [freeAds, latestAds] = await Promise.all([
-    getFreeAds(),
-    getLatestAds(),
+    getFreeAds(supabase),
+    getLatestAds(supabase),
   ]);
 
   // Helper function for translations

@@ -1,6 +1,5 @@
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 300;
 
 import { supabaseService } from "@/lib/supabaseService";
 import type { Category } from "@/lib/types";

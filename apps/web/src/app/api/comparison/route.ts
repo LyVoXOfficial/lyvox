@@ -177,13 +177,14 @@ export async function POST(request: NextRequest) {
           acc.set(media.advert_id, []);
         }
         acc.get(media.advert_id)!.push({
+          advert_id: media.advert_id,
           url: media.url ?? null,
           signedUrl: media.signedUrl,
           sort: media.sort ?? null,
         });
         return acc;
       },
-      new Map<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>>(),
+      new Map<string, Array<{ advert_id: string; url: string | null; signedUrl: string | null; sort: number | null }>>(),
     );
 
     for (const [advertId, items] of grouped.entries()) {

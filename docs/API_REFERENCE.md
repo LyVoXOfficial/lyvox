@@ -683,3 +683,11 @@ If `SUPABASE_SERVICE_ROLE_KEY` is absent, the endpoint returns:
 ---
 
 _All endpoints declare `export const runtime = "nodejs";` to ensure compatibility with Supabase libraries and Upstash clients._
+
+---
+
+## 🔗 Related Docs
+
+**Domains:** [adverts.md](./domains/adverts.md)
+**Development:** [security-compliance.md](./development/security-compliance.md) • [deep-audit-20251108.md](./development/deep-audit-20251108.md) • [MASTER_CHECKLIST.md](./development/MASTER_CHECKLIST.md)
+**Catalog:** [CATALOG_MASTER.md](./catalog/CATALOG_MASTER.md)

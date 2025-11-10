@@ -790,3 +790,11 @@
 3. **Проверяйте зависимости** перед началом задачи
 4. **Обновляйте статус** в этом файле регулярно
 5. **Создавайте issues/PR** с ссылкой на номер задачи (например, `DB-001`)
+
+---
+
+## 🔗 Related Docs
+
+**Domains:** [auth.md](../domains/auth.md)
+**Development:** [deep-audit-20251108.md](./deep-audit-20251108.md) • [user-profile.md](./user-profile.md) • [README.md](./README.md)
+**Catalog:** [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md)
