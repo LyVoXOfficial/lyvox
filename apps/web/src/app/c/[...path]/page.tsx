@@ -11,6 +11,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import CategoryFilters from "@/components/category/CategoryFilters";
 import { buildCategoryBreadcrumbs, getLocalizedCategoryName } from "@/lib/breadcrumbs";
 import { getI18nProps } from "@/i18n/server";
+import { signMediaUrls } from "@/lib/media/signMediaUrls";
+import { getFirstImage } from "@/lib/media/getFirstImage";
 
 type AdvertItem = {
   id: string;
@@ -129,42 +131,41 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         );
       }
     }
-    const { data: media } = await supabase
+    const { data: mediaRows, error: mediaError } = await supabase
       .from("media")
       .select("advert_id,url,sort")
       .in("advert_id", ids)
       .order("sort", { ascending: true });
 
     const firstMedia = new Map<string, string>();
-    const service = await supabaseService();
-    const storage = service.storage.from("ad-media");
-    const SIGNED_DOWNLOAD_TTL_SECONDS = 10 * 60;
 
-    if (media && media.length > 0) {
-      // Process media in parallel to generate signed URLs where needed
-      const imagePromises = media.map(async (row: { advert_id: string; url: string }) => {
-        if (!firstMedia.has(row.advert_id)) {
-          const url = row.url;
-          
-          // If it's already an HTTP URL (legacy), use it as-is
-          if (url.startsWith("http://") || url.startsWith("https://")) {
-            firstMedia.set(row.advert_id, url);
-            return;
+    if (mediaError) {
+      console.warn("Failed to fetch category media", mediaError);
+    } else if (mediaRows?.length) {
+      const signedMedia = await signMediaUrls(mediaRows);
+      const grouped = signedMedia.reduce(
+        (acc, media) => {
+          if (!acc.has(media.advert_id)) {
+            acc.set(media.advert_id, []);
           }
 
-          // Generate signed URL for storage path
-          const { data, error } = await storage.createSignedUrl(
-            url,
-            SIGNED_DOWNLOAD_TTL_SECONDS,
-          );
-          
-          if (!error && data?.signedUrl) {
-            firstMedia.set(row.advert_id, data.signedUrl);
-          }
+          acc.get(media.advert_id)!.push({
+            url: media.url ?? null,
+            signedUrl: media.signedUrl,
+            sort: media.sort ?? null,
+          });
+
+          return acc;
+        },
+        new Map<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>>(),
+      );
+
+      for (const [advertId, items] of grouped.entries()) {
+        const first = getFirstImage(items);
+        if (first) {
+          firstMedia.set(advertId, first);
         }
-      });
-
-      await Promise.all(imagePromises);
+      }
     }
 
     advertsRaw.forEach((row) => {

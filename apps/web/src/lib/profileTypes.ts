@@ -1,3 +1,9 @@
+export type ProfileAdvertMedia = {
+  url: string | null;
+  signedUrl: string | null;
+  sort: number | null;
+};
+
 export type ProfileAdvert = {
   id: string;
   title: string;
@@ -5,7 +11,22 @@ export type ProfileAdvert = {
   status: string | null;
   created_at: string;
   location: string | null;
-  media: { url: string | null; sort: number | null }[] | null;
+  media: ProfileAdvertMedia[] | null;
+};
+
+export type ProfileFavorite = {
+  advertId: string;
+  favoritedAt: string | null;
+  advert: {
+    id: string;
+    title: string;
+    price: number | null;
+    currency: string | null;
+    location: string | null;
+    createdAt: string | null;
+    image: string | null;
+    sellerVerified: boolean;
+  } | null;
 };
 
 export type ProfileReview = {
@@ -26,5 +47,6 @@ export type ProfileData = {
   verified_phone: boolean | null;
   trust_score: number;
   adverts: ProfileAdvert[] | null;
+  favorites: ProfileFavorite[] | null;
   reviews: ProfileReview[] | null;
 };

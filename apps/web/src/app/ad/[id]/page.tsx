@@ -12,12 +12,13 @@ import { getJsonLdScriptProps } from "@/lib/seo";
 import { generateSlug, truncateDescription } from "@/lib/seo/catalog/common";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
+import { signMediaUrls } from "@/lib/media/signMediaUrls";
+import { getFirstImage } from "@/lib/media/getFirstImage";
 import type { Tables } from "@/lib/supabaseTypes";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const MEDIA_SIGNED_URL_TTL = 600;
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://lyvox.be";
 const isDevEnvironment = process.env.NODE_ENV !== "production";
 
@@ -1152,60 +1153,34 @@ async function loadAdvertData(
     });
   }
 
-  const storage = svc.storage.from("ad-media");
   const media: MediaItem[] = [];
 
-  if (mediaRows) {
-    for (const record of mediaRows as Array<{
+  if (mediaRows?.length) {
+    const typedRows = mediaRows as Array<{
       id: string;
       url: string | null;
       sort: number | null;
       w: number | null;
       h: number | null;
-    }>) {
-      if (!record.url) {
-        continue;
-      }
+    }>;
 
-      if (
-        record.url.startsWith("http://") ||
-        record.url.startsWith("https://")
-      ) {
-        media.push({
-          id: record.id,
-          url: record.url,
-          sort: record.sort ?? null,
-          w: record.w ?? null,
-          h: record.h ?? null,
-        });
-        continue;
-      }
+    const signedMediaRows = await signMediaUrls(typedRows);
 
-      const { data: signed, error: signedError } = await storage.createSignedUrl(
-        record.url,
-        MEDIA_SIGNED_URL_TTL,
-      );
-
-      if (signedError || !signed?.signedUrl) {
-        console.warn("Failed to create signed URL for media file", {
+    for (const record of signedMediaRows) {
+      if (!record.signedUrl) {
+        advertDebug("loadAdvertData:media signed url missing", {
           advertId,
-          path: record.url,
-          error: signedError,
-        });
-        advertDebug("loadAdvertData:signed url failure", {
-          advertId,
-          path: record.url,
-          error: signedError?.message,
+          mediaId: record.id,
         });
         continue;
       }
 
       media.push({
         id: record.id,
-        url: signed.signedUrl,
-        sort: record.sort ?? null,
-        w: record.w ?? null,
-        h: record.h ?? null,
+        url: record.signedUrl,
+        width: record.w ?? undefined,
+        height: record.h ?? undefined,
+        sort: record.sort ?? undefined,
       });
     }
   }
@@ -1430,56 +1405,49 @@ async function loadSimilarAdverts(
       }
     }
 
-    const storage = client.storage.from("ad-media");
-    const mapped = await Promise.all(
-      data.map(async (row) => {
-        const media = Array.isArray(row.media) ? [...row.media] : [];
-        media.sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
-        const primaryMedia = media.find((item) => item.url) ?? null;
+    const flatMedia = data.flatMap((row) =>
+      Array.isArray(row.media)
+        ? row.media.map((item) => ({
+            advert_id: row.id,
+            url: item?.url ?? null,
+            sort: item?.sort ?? null,
+          }))
+        : [],
+    );
 
-        let image: string | null = null;
-        if (primaryMedia?.url) {
-          if (
-            primaryMedia.url.startsWith("http://") ||
-            primaryMedia.url.startsWith("https://")
-          ) {
-            image = primaryMedia.url;
-          } else {
-            const { data: signed, error: signedError } = await storage.createSignedUrl(
-              primaryMedia.url,
-              MEDIA_SIGNED_URL_TTL,
-            );
-            if (signedError) {
-              console.warn("Failed to create signed URL for similar advert media", {
-                advertId,
-                categoryId,
-                mediaPath: primaryMedia.url,
-                error: signedError,
-              });
-              advertDebug("loadSimilarAdverts:signed-url-error", {
-                advertId,
-                categoryId,
-                path: primaryMedia.url,
-                error: signedError.message,
-              });
-            } else if (signed?.signedUrl) {
-              image = signed.signedUrl;
-            }
-          }
+    const signedSimilarMedia = await signMediaUrls(flatMedia);
+    const mediaByAdvert = signedSimilarMedia.reduce(
+      (acc, media) => {
+        if (!acc.has(media.advert_id)) {
+          acc.set(media.advert_id, []);
         }
 
-        return {
-          id: row.id,
-          title: row.title,
-          price: normalizeNullableNumber(row.price),
-          currency: row.currency ?? "EUR",
-          location: row.location,
-          createdAt: row.created_at ?? null,
-          image,
-          sellerVerified: verifiedMap.get(row.user_id ?? "") ?? false,
-        };
-      }),
+        acc.get(media.advert_id)!.push({
+          url: media.url ?? null,
+          signedUrl: media.signedUrl,
+          sort: media.sort ?? null,
+        });
+
+        return acc;
+      },
+      new Map<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>>(),
     );
+
+    const mapped = data.map((row) => {
+      const mediaItems = mediaByAdvert.get(row.id) ?? [];
+      const image = getFirstImage(mediaItems);
+
+      return {
+        id: row.id,
+        title: row.title,
+        price: normalizeNullableNumber(row.price),
+        currency: row.currency ?? "EUR",
+        location: row.location,
+        createdAt: row.created_at ?? null,
+        image,
+        sellerVerified: verifiedMap.get(row.user_id ?? "") ?? false,
+      };
+    });
     advertDebug("loadSimilarAdverts:completed", {
       advertId,
       categoryId,

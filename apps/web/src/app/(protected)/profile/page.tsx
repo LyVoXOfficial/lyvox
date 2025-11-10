@@ -11,8 +11,11 @@ import Link from "next/link";
 import { formatDate } from "@/i18n/format";
 import { ProfileAdvertsList } from "@/components/profile/ProfileAdvertsList";
 import { ProfileReviewsList } from "@/components/profile/ProfileReviewsList";
-import { type ProfileData } from "@/lib/profileTypes";
+import { type ProfileData, type ProfileFavorite } from "@/lib/profileTypes";
 import { logger } from "@/lib/errorLogger";
+import { signMediaUrls } from "@/lib/media/signMediaUrls";
+import { getFirstImage } from "@/lib/media/getFirstImage";
+import FavoritesComparisonView from "@/components/favorites/FavoritesComparisonView";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -83,29 +86,51 @@ async function loadProfileData(userId: string): Promise<(ProfileData & {
   }));
 
   // Fetch media for all adverts in a single query
-  if (adverts.length > 0) {
-    const advertIds = adverts.map((a: any) => a.id);
-    const { data: mediaData } = await supabase
+  let mediaByAdvert: Record<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>> = {};
+  if (adverts && adverts.length > 0) {
+    const advertIds = adverts.map((ad) => ad.id);
+    const { data: mediaData, error: mediaError } = await supabase
       .from("media")
       .select("advert_id, url, sort")
-      .in("advert_id", advertIds)
-      .order("sort", { ascending: true });
+      .in("advert_id", advertIds);
+ 
+    if (mediaError) {
+      // Log error but don't fail the request - adverts can exist without media
+      console.error("Failed to fetch media for adverts:", mediaError);
+    } else if (mediaData) {
+      const signedMedia = await signMediaUrls(mediaData);
 
-    // Attach media to each advert
-    if (mediaData) {
-      const mediaByAdvert = mediaData.reduce((acc: Record<string, any[]>, media: any) => {
-        if (!acc[media.advert_id]) {
-          acc[media.advert_id] = [];
-        }
-        acc[media.advert_id].push({ url: media.url, sort: media.sort });
-        return acc;
-      }, {});
+      mediaByAdvert = signedMedia.reduce(
+        (acc, media) => {
+          const advertId = media.advert_id;
+          if (!acc[advertId]) {
+            acc[advertId] = [];
+          }
 
-      adverts.forEach((advert) => {
-        advert.media = mediaByAdvert[advert.id] || [];
-      });
+          const resolvedUrl = media.signedUrl ?? null;
+          acc[advertId].push({
+            url: resolvedUrl,
+            signedUrl: resolvedUrl,
+            sort: media.sort ?? null,
+          });
+
+          return acc;
+        },
+        {} as Record<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>>,
+      );
     }
   }
+ 
+  // Transform media data structure - attach media to their adverts
+  const transformedAdverts = (adverts ?? []).map((advert) => ({
+    id: advert.id,
+    title: advert.title,
+    price: advert.price ? Number(advert.price) : null,
+    status: advert.status,
+    created_at: advert.created_at ?? "",
+    location: advert.location,
+    media: mediaByAdvert[advert.id] ?? [],
+  }));
 
   // Calculate adverts statistics
   const advertsStats = {
@@ -115,11 +140,139 @@ async function loadProfileData(userId: string): Promise<(ProfileData & {
     total: adverts.length,
   };
 
+  const { data: favoritesData, error: favoritesError } = await supabase
+    .from("favorites")
+    .select(
+      `
+      advert_id,
+      created_at,
+      adverts:advert_id (
+        id,
+        title,
+        price,
+        currency,
+        location,
+        created_at,
+        user_id,
+        status
+      )
+    `,
+    )
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  if (favoritesError) {
+    logger.warn("Failed to load profile favorites", {
+      component: "ProfilePage",
+      action: "loadProfileFavorites",
+      metadata: { userId },
+      error: favoritesError,
+    });
+  }
+
+  const favoritesRows = favoritesData ?? [];
+  const favoriteAdvertIds = favoritesRows
+    .map((favorite) => favorite.adverts?.id ?? null)
+    .filter((value): value is string => typeof value === "string");
+
+  const favoriteSellerIds = favoritesRows
+    .map((favorite) => favorite.adverts?.user_id ?? null)
+    .filter((value): value is string => typeof value === "string");
+
+  const favoriteMediaMap = new Map<string, string>();
+  if (favoriteAdvertIds.length) {
+    const { data: favoriteMediaRows, error: favoriteMediaError } = await supabase
+      .from("media")
+      .select("advert_id, url, sort")
+      .in("advert_id", favoriteAdvertIds)
+      .order("sort", { ascending: true });
+
+    if (favoriteMediaError) {
+      logger.warn("Failed to load favorites media", {
+        component: "ProfilePage",
+        action: "loadFavoritesMedia",
+        metadata: { userId },
+        error: favoriteMediaError,
+      });
+    } else if (favoriteMediaRows?.length) {
+      const signedFavoriteMedia = await signMediaUrls(favoriteMediaRows);
+      const groupedFavorites = signedFavoriteMedia.reduce(
+        (acc, media) => {
+          if (!acc.has(media.advert_id)) {
+            acc.set(media.advert_id, []);
+          }
+
+          acc.get(media.advert_id)!.push({
+            url: media.url ?? null,
+            signedUrl: media.signedUrl,
+            sort: media.sort ?? null,
+          });
+
+          return acc;
+        },
+        new Map<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>>(),
+      );
+
+      for (const [advertId, items] of groupedFavorites.entries()) {
+        const first = getFirstImage(items);
+        if (first) {
+          favoriteMediaMap.set(advertId, first);
+        }
+      }
+    }
+  }
+
+  let favoriteVerifiedMap = new Map<string, boolean>();
+  if (favoriteSellerIds.length) {
+    const { data: favoriteProfiles } = await supabase
+      .from("profiles")
+      .select("id, verified_email, verified_phone")
+      .in("id", favoriteSellerIds);
+
+    if (favoriteProfiles) {
+      favoriteVerifiedMap = new Map(
+        favoriteProfiles.map((profile) => [
+          profile.id,
+          Boolean(profile.verified_email) && Boolean(profile.verified_phone),
+        ]),
+      );
+    }
+  }
+
+  const favorites: ProfileFavorite[] = favoritesRows.map((favorite) => {
+    const advert = favorite.adverts;
+    const advertId = advert?.id ?? favorite.advert_id;
+
+    return {
+      advertId: favorite.advert_id,
+      favoritedAt: favorite.created_at ?? null,
+      advert: advert
+        ? {
+            id: advert.id,
+            title: advert.title ?? "",
+            price:
+              typeof advert.price === "number"
+                ? advert.price
+                : advert.price
+                  ? Number(advert.price)
+                  : null,
+            currency: advert.currency ?? null,
+            location: advert.location ?? null,
+            createdAt: advert.created_at ?? null,
+            image: favoriteMediaMap.get(advertId) ?? null,
+            sellerVerified: favoriteVerifiedMap.get(advert.user_id ?? "") ?? false,
+          }
+        : null,
+    };
+  });
+ 
   const profile: ProfileData & { advertsStats: typeof advertsStats } = {
     ...profileData,
     trust_score: trustScore,
     reviews: [], // Reviews table doesn't exist yet, return empty array
     adverts,
+    favorites,
     advertsStats,
   };
   return profile;
@@ -169,7 +322,21 @@ export default async function ProfilePage() {
     );
   }
 
-  const { display_name, created_at, verified_email, verified_phone, trust_score, adverts, reviews, advertsStats } = profile;
+  const { display_name, created_at, verified_email, verified_phone, trust_score, adverts, favorites, reviews, advertsStats } = profile;
+
+  const favoriteItems: SelectableAd[] = (favorites ?? [])
+    .map((favorite) => favorite.advert)
+    .filter((advert): advert is NonNullable<typeof advert> => Boolean(advert))
+    .map((advert) => ({
+      id: advert.id,
+      title: advert.title,
+      price: advert.price,
+      currency: advert.currency,
+      location: advert.location,
+      image: advert.image,
+      createdAt: advert.createdAt,
+      sellerVerified: advert.sellerVerified,
+    }));
 
   return (
     <main className="container mx-auto max-w-5xl space-y-8 p-4 md:p-8">
@@ -359,24 +526,34 @@ export default async function ProfilePage() {
 
         {/* Favorites Tab */}
         <TabsContent value="favorites" className="pt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('profile.favorites')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-center">
-              <p className="text-muted-foreground">
-                {t('favorites.empty_state')}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {t('favorites.empty_action')}
-              </p>
-              <Button asChild className="inline-flex">
-                <Link href="/profile/favorites">
-                  {t('favorites.title')}
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+          {favoriteItems.length === 0 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('profile.favorites')}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-center text-muted-foreground">
+                <p>{t('favorites.empty_state')}</p>
+                <p className="text-sm">{t('favorites.empty_action')}</p>
+                <Button asChild>
+                  <Link href="/search">{t('common.search') || 'Поиск объявлений'}</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>{t('profile.favorites')}</CardTitle>
+                  <Button asChild variant="outline">
+                    <Link href="/profile/favorites">{t('profile.view_all')} →</Link>
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <FavoritesComparisonView items={favoriteItems} />
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* Settings Tab */}

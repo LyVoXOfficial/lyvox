@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { supabaseServer } from "@/lib/supabaseServer";
+import { signMediaUrls } from "@/lib/media/signMediaUrls";
 import {
   createSuccessResponse,
   createErrorResponse,
@@ -123,7 +124,7 @@ async function getFavorites(request: Request) {
   if (advertIds.length > 0) {
     const { data: mediaData, error: mediaError } = await supabase
       .from("media")
-      .select("advert_id, url")
+      .select("advert_id, url, sort")
       .in("advert_id", advertIds)
       .order("sort", { ascending: true });
 
@@ -131,9 +132,11 @@ async function getFavorites(request: Request) {
       return handleSupabaseError(mediaError, ApiErrorCode.FETCH_FAILED);
     }
 
-    for (const media of mediaData ?? []) {
-      if (!mediaMap.has(media.advert_id)) {
-        mediaMap.set(media.advert_id, media.url);
+    const signedMedia = await signMediaUrls(mediaData ?? []);
+
+    for (const media of signedMedia) {
+      if (media.signedUrl && !mediaMap.has(media.advert_id)) {
+        mediaMap.set(media.advert_id, media.signedUrl);
       }
     }
   }

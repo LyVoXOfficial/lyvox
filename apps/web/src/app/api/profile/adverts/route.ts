@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
-import { supabaseService } from "@/lib/supabaseService";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -9,6 +8,7 @@ import {
 } from "@/lib/apiErrors";
 import { validateRequest } from "@/lib/validations";
 import { getUserAdvertsQuerySchema } from "@/lib/validations/profile";
+import { signMediaUrls } from "@/lib/media/signMediaUrls";
 
 export const runtime = "nodejs";
 
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Fetch media for all adverts in a separate query
-  let allMedia: Array<{ advert_id: string; url: string; sort: number | null }> = [];
+  let mediaByAdvert: Record<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>> = {};
   if (adverts && adverts.length > 0) {
     const advertIds = adverts.map((ad) => ad.id);
     const { data: mediaData, error: mediaError } = await supabase
@@ -82,40 +82,23 @@ export async function GET(request: NextRequest) {
       // Log error but don't fail the request - adverts can exist without media
       console.error("Failed to fetch media for adverts:", mediaError);
     } else if (mediaData) {
-      // Transform storage paths to signed URLs
-      const service = await supabaseService();
-      const storage = service.storage.from("ad-media");
-      const SIGNED_TTL = 15 * 60; // 15 minutes
-      
-      const mediaWithSignedUrls = await Promise.all(
-        mediaData.map(async (item) => {
-          const path = item.url;
-          
-          // If already a full URL (legacy), return as-is
-          if (path.startsWith("http://") || path.startsWith("https://")) {
-            return item;
+      const signedMedia = await signMediaUrls(mediaData);
+      mediaByAdvert = signedMedia.reduce(
+        (acc, media) => {
+          if (!acc[media.advert_id]) {
+            acc[media.advert_id] = [];
           }
-          
-          // Otherwise, create signed URL
-          const { data: signedData, error: signedError } = await storage.createSignedUrl(
-            path,
-            SIGNED_TTL,
-          );
-          
-          if (signedError || !signedData) {
-            console.error("Failed to create signed URL for:", path, signedError);
-            return null;
-          }
-          
-          return {
-            ...item,
-            url: signedData.signedUrl,
-          };
-        })
+
+          acc[media.advert_id].push({
+            url: media.signedUrl ?? null,
+            signedUrl: media.signedUrl ?? null,
+            sort: media.sort ?? null,
+          });
+
+          return acc;
+        },
+        {} as Record<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>>,
       );
-      
-      // Filter out failed signed URLs
-      allMedia = mediaWithSignedUrls.filter((m): m is NonNullable<typeof m> => m !== null);
     }
   }
 
@@ -127,7 +110,7 @@ export async function GET(request: NextRequest) {
     status: advert.status,
     created_at: advert.created_at ?? "",
     location: advert.location,
-    media: allMedia.filter((m) => m.advert_id === advert.id),
+    media: mediaByAdvert[advert.id] ?? [],
   }));
 
   return createSuccessResponse({

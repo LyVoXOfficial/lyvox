@@ -2,11 +2,26 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import AdsGrid from "@/components/ads-grid";
-import { useFavorites } from "@/components/favorites/FavoritesProvider";
-import { useI18n } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useFavorites } from "@/components/favorites/FavoritesProvider";
+import { useI18n } from "@/i18n";
+import FavoritesComparisonView from "@/components/favorites/FavoritesComparisonView";
+
+function mapSelectableItems(ordered: ReturnType<typeof useFavorites>["ordered"]) {
+  return ordered
+    .filter((favorite) => favorite.advert)
+    .map((favorite) => ({
+      id: favorite.advert.id,
+      title: favorite.advert.title,
+      price: favorite.advert.price ?? null,
+      currency: favorite.advert.currency ?? null,
+      location: favorite.advert.location ?? null,
+      image: favorite.advert.image ?? null,
+      createdAt: favorite.advert.createdAt ?? null,
+      sellerVerified: favorite.advert.sellerVerified ?? false,
+    }));
+}
 
 export default function FavoritesPage() {
   const { t } = useI18n();
@@ -16,16 +31,7 @@ export default function FavoritesPage() {
     void refresh();
   }, [refresh]);
 
-  const items = ordered.map((favorite) => ({
-    id: favorite.advert.id,
-    title: favorite.advert.title,
-    price: favorite.advert.price ?? null,
-    currency: favorite.advert.currency ?? null,
-    location: favorite.advert.location ?? null,
-    image: favorite.advert.image ?? null,
-    createdAt: favorite.advert.createdAt ?? null,
-    sellerVerified: favorite.advert.sellerVerified ?? false,
-  }));
+  const items = mapSelectableItems(ordered);
 
   return (
     <main className="space-y-6">
@@ -55,9 +61,7 @@ export default function FavoritesPage() {
           </CardContent>
         </Card>
       ) : (
-        <section className="space-y-4">
-          <AdsGrid items={items} />
-        </section>
+        <FavoritesComparisonView items={items} isLoading={isLoading} />
       )}
     </main>
   );

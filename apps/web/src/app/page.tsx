@@ -8,6 +8,8 @@ import { getI18nProps } from "@/i18n/server";
 import { logger } from "@/lib/errorLogger";
 import { getJsonLdScriptProps } from "@/lib/seo";
 import { supabaseServer } from "@/lib/supabaseServer";
+import { signMediaUrls } from "@/lib/media/signMediaUrls";
+import { getFirstImage } from "@/lib/media/getFirstImage";
 
 export const revalidate = 60;
 
@@ -24,11 +26,66 @@ type AdListItem = {
   sellerVerified?: boolean;
 };
 
-type MediaRow = {
-  advert_id: string;
-  url: string;
-  sort: number | null;
-};
+type SupabaseClient = Awaited<ReturnType<typeof supabaseServer>>;
+
+async function resolveFirstImages(
+  supabase: SupabaseClient,
+  advertIds: string[],
+  logContext: { component: string; action: string },
+): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+
+  if (advertIds.length === 0) {
+    return map;
+  }
+
+  const { data: mediaData, error: mediaError } = await supabase
+    .from("media")
+    .select("advert_id,url,sort")
+    .in("advert_id", advertIds)
+    .order("sort", { ascending: true });
+
+  if (mediaError) {
+    logger.warn("Failed to fetch media rows", {
+      component: logContext.component,
+      action: logContext.action,
+      error: mediaError,
+    });
+    return map;
+  }
+
+  if (!mediaData?.length) {
+    return map;
+  }
+
+  const signedMedia = await signMediaUrls(mediaData);
+  const grouped = signedMedia.reduce(
+    (acc, media) => {
+      const advertId = media.advert_id;
+      if (!acc.has(advertId)) {
+        acc.set(advertId, []);
+      }
+
+      acc.get(advertId)!.push({
+        url: media.url ?? null,
+        signedUrl: media.signedUrl,
+        sort: media.sort ?? null,
+      });
+
+      return acc;
+    },
+    new Map<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>>(),
+  );
+
+  for (const [advertId, items] of grouped.entries()) {
+    const first = getFirstImage(items);
+    if (first) {
+      map.set(advertId, first);
+    }
+  }
+
+  return map;
+}
 
 async function getFreeAds(): Promise<AdListItem[]> {
   const supabase = await supabaseServer();
@@ -76,40 +133,13 @@ async function getFreeAds(): Promise<AdListItem[]> {
   // Get first image for each ad
   const firstImageByAdvert = new Map<string, string>();
   if (freeIds.length) {
-    const { data: media } = await supabase
-      .from("media")
-      .select("advert_id,url,sort")
-      .in("advert_id", freeIds)
-      .order("sort", { ascending: true });
+    const mediaMap = await resolveFirstImages(supabase, freeIds, {
+      component: "HomePage",
+      action: "getFreeAds:media",
+    });
 
-    const storage = supabase.storage.from("ad-media");
-    const SIGNED_DOWNLOAD_TTL_SECONDS = 10 * 60;
-
-    if (media && media.length > 0) {
-      // Process media in parallel to generate signed URLs where needed
-      const imagePromises = media.map(async (row) => {
-        if (!firstImageByAdvert.has(row.advert_id)) {
-          const url = row.url;
-          
-          // If it's already an HTTP URL (legacy), use it as-is
-          if (url.startsWith("http://") || url.startsWith("https://")) {
-            firstImageByAdvert.set(row.advert_id, url);
-            return;
-          }
-
-          // Generate signed URL for storage path
-          const { data, error } = await storage.createSignedUrl(
-            url,
-            SIGNED_DOWNLOAD_TTL_SECONDS,
-          );
-          
-          if (!error && data?.signedUrl) {
-            firstImageByAdvert.set(row.advert_id, data.signedUrl);
-          }
-        }
-      });
-
-      await Promise.all(imagePromises);
+    for (const [advertId, url] of mediaMap.entries()) {
+      firstImageByAdvert.set(advertId, url);
     }
   }
 
@@ -168,42 +198,15 @@ async function getLatestAds(): Promise<AdListItem[]> {
   }
 
   // Get first image for each ad
-  const firstImageByAdvert = new Map<string, string>();
+  const firstMedia = new Map<string, string>();
   if (adIds.length) {
-    const { data: media } = await supabase
-      .from("media")
-      .select("advert_id,url,sort")
-      .in("advert_id", adIds)
-      .order("sort", { ascending: true });
+    const mediaMap = await resolveFirstImages(supabase, adIds, {
+      component: "HomePage",
+      action: "getLatestAds:media",
+    });
 
-    const storage = supabase.storage.from("ad-media");
-    const SIGNED_DOWNLOAD_TTL_SECONDS = 10 * 60;
-
-    if (media && media.length > 0) {
-      // Process media in parallel to generate signed URLs where needed
-      const imagePromises = media.map(async (row) => {
-        if (!firstImageByAdvert.has(row.advert_id)) {
-          const url = row.url;
-          
-          // If it's already an HTTP URL (legacy), use it as-is
-          if (url.startsWith("http://") || url.startsWith("https://")) {
-            firstImageByAdvert.set(row.advert_id, url);
-            return;
-          }
-
-          // Generate signed URL for storage path
-          const { data, error } = await storage.createSignedUrl(
-            url,
-            SIGNED_DOWNLOAD_TTL_SECONDS,
-          );
-          
-          if (!error && data?.signedUrl) {
-            firstImageByAdvert.set(row.advert_id, data.signedUrl);
-          }
-        }
-      });
-
-      await Promise.all(imagePromises);
+    for (const [advertId, url] of mediaMap.entries()) {
+      firstMedia.set(advertId, url);
     }
   }
 
@@ -214,7 +217,7 @@ async function getLatestAds(): Promise<AdListItem[]> {
     currency: ad.currency ?? null,
     location: ad.location,
     createdAt: ad.created_at ?? null,
-    image: firstImageByAdvert.get(ad.id) ?? null,
+    image: firstMedia.get(ad.id) ?? null,
     sellerVerified: verifiedMap.get(ad.user_id ?? "") ?? false,
   }));
 }

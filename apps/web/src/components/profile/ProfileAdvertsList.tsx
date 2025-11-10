@@ -12,15 +12,15 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { type ProfileAdvert } from "@/lib/profileTypes";
+import { getFirstImage } from "@/lib/media/getFirstImage";
 
 type ProfileAdvertsListProps = {
   adverts: ProfileAdvert[];
 };
 
 function pickImage(media: ProfileAdvert["media"]): string {
-  if (!media?.length) return "/placeholder.svg";
-  const sorted = [...media].sort((a, b) => (a.sort ?? 99) - (b.sort ?? 99));
-  return sorted[0]?.url ?? "/placeholder.svg";
+  const resolved = media ? getFirstImage(media) : null;
+  return resolved ?? "/placeholder.svg";
 }
 
 export function ProfileAdvertsList({ adverts }: ProfileAdvertsListProps) {
