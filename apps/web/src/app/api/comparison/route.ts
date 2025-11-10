@@ -122,11 +122,23 @@ export async function POST(request: NextRequest) {
   }
 
   const filteredAdverts = (advertsData ?? []).filter((advert) => advert.status === "active");
+  const totalRequested = uniqueIds.length;
+  const totalFound = advertsData?.length ?? 0;
+  const totalActive = filteredAdverts.length;
 
-  if (filteredAdverts.length < 2) {
+  if (totalFound < totalRequested) {
+    const missing = totalRequested - totalFound;
     return createErrorResponse(ApiErrorCode.BAD_INPUT, {
       status: 400,
-      detail: "Only active adverts can be compared",
+      detail: `Some adverts were not found. Found ${totalFound} out of ${totalRequested} requested.`,
+    });
+  }
+
+  if (totalActive < 2) {
+    const inactiveCount = totalFound - totalActive;
+    return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+      status: 400,
+      detail: `Not enough active adverts for comparison. Found ${totalActive} active out of ${totalFound} total. ${inactiveCount > 0 ? `${inactiveCount} advert(s) are not active.` : ""}`,
     });
   }
 
@@ -255,7 +267,7 @@ export async function POST(request: NextRequest) {
   if (comparableAdverts.length < 2) {
     return createErrorResponse(ApiErrorCode.BAD_INPUT, {
       status: 400,
-      detail: "Unable to load enough adverts for comparison",
+      detail: `Unable to load enough adverts for comparison. Processed ${comparableAdverts.length} out of ${totalActive} active adverts.`,
     });
   }
 

@@ -24,6 +24,7 @@ function mapSelectableItems(ordered: ReturnType<typeof useFavorites>["ordered"])
     image: favorite.advert.image ?? null,
     createdAt: favorite.advert.createdAt ?? null,
     sellerVerified: favorite.advert.sellerVerified ?? false,
+    status: favorite.advert.status ?? "active",
   }));
 }
 

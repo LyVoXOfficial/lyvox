@@ -203,7 +203,7 @@ export default function UserMenu() {
             Профиль
           </Link>
           <Link
-            href="/profile/ads"
+            href="/profile/adverts"
             onClick={closeMenu}
             className="block rounded-lg px-3 py-2 text-sm hover:bg-muted"
             role="menuitem"

@@ -28,6 +28,25 @@ export default function FavoritesComparisonView({ items, isLoading = false, clas
     setComparisonError(null);
     setComparisonLoading(true);
     try {
+      // Validate that all selected items are active before sending request
+      const selectedItems = items.filter((item) => selectedIds.includes(item.id));
+      const inactiveItems = selectedItems.filter((item) => item.status !== "active");
+      
+      if (inactiveItems.length > 0) {
+        const inactiveTitles = inactiveItems.map((item) => item.title || item.id).join(", ");
+        throw new Error(
+          t("comparison.error_inactive") || 
+          `Some selected adverts are not active: ${inactiveTitles}. Only active adverts can be compared.`
+        );
+      }
+
+      if (selectedItems.length < 2) {
+        throw new Error(
+          t("comparison.error_min_items") || 
+          "Please select at least 2 active adverts to compare."
+        );
+      }
+
       const response = await fetch(COMPARISON_ENDPOINT, {
         method: "POST",
         headers: {
@@ -68,7 +87,7 @@ export default function FavoritesComparisonView({ items, isLoading = false, clas
     } finally {
       setComparisonLoading(false);
     }
-  }, [t]);
+  }, [t, items]);
 
   return (
     <section className={cn("space-y-4", className)}>

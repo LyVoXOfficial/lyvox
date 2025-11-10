@@ -17,6 +17,7 @@ export type SelectableAd = {
   image?: string | null;
   createdAt?: string | null;
   sellerVerified?: boolean;
+  status?: string | null;
 };
 
 type Props = {
