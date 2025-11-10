@@ -44,11 +44,9 @@ export default function MainHeader() {
         
         if (active) {
           const hasUser = !!user;
-          console.log("Header: User check:", hasUser, user?.email);
           setHasSession(hasUser);
         }
       } catch (error) {
-        console.error("Header: Error checking session:", error);
         if (active) {
           setHasSession(false);
         }
@@ -58,32 +56,8 @@ export default function MainHeader() {
     // Check session immediately on mount
     checkSession();
 
-    // Listen for custom auth events (fired from auth callback)
-    const handleAuthChange = () => {
-      if (active) {
-        console.log("Auth state changed event received, updating header...");
-        checkSession();
-      }
-    };
-
-    window.addEventListener("auth-state-change", handleAuthChange);
-
-    // Also check on visibility change (when user returns to tab)
-    const handleVisibilityChange = () => {
-      if (!document.hidden && active) {
-        console.log("Visibility changed, checking session...");
-        checkSession();
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    // Check more frequently (every 5 seconds)
-    const intervalId = setInterval(checkSession, 5000);
-
     // Listen to Supabase auth state changes directly
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Supabase auth event in header:", event, "Has session:", !!session);
       if (active) {
         // Update immediately for any auth event
         const hasUser = !!session?.user;
@@ -93,9 +67,6 @@ export default function MainHeader() {
 
     return () => {
       active = false;
-      window.removeEventListener("auth-state-change", handleAuthChange);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      clearInterval(intervalId);
       authListener.subscription.unsubscribe();
     };
   }, []);

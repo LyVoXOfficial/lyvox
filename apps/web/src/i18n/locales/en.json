@@ -262,7 +262,8 @@
     "remove_failed": "Failed to remove from favorites",
     "login_required": "Sign in to manage favorites",
     "add": "Add to favorites",
-    "remove": "Remove from favorites"
+    "remove": "Remove from favorites",
+    "hidden_inactive": "{count} favorites hidden because the advert is no longer active."
   },
   "comparison": {
     "title": "Compare adverts",

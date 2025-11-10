@@ -262,7 +262,8 @@
     "remove_failed": "Konnte nicht aus Favoriten entfernen",
     "login_required": "Melde dich an, um Favoriten zu verwalten",
     "add": "Zu Favoriten hinzufügen",
-    "remove": "Aus Favoriten entfernen"
+    "remove": "Aus Favoriten entfernen",
+    "hidden_inactive": "{count} Favoriten ausgeblendet, weil die Anzeige nicht mehr aktiv ist."
   },
   "comparison": {
     "title": "Anzeigen vergleichen",

@@ -286,6 +286,7 @@ async function loadProfileData(userId: string): Promise<(ProfileData & {
             createdAt: advert.created_at ?? null,
             image: favoriteMediaMap.get(advertId) ?? null,
             sellerVerified: favoriteVerifiedMap.get(advert.user_id ?? "") ?? false,
+            status: advert.status ?? null,
           }
         : null,
     };

@@ -26,6 +26,7 @@ export type ProfileFavorite = {
     createdAt: string | null;
     image: string | null;
     sellerVerified: boolean;
+    status: string | null;
   } | null;
 };
 

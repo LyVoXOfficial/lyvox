@@ -113,8 +113,6 @@ if (typeof window !== "undefined") {
 
   // Слушаем изменения auth state
   supabase.auth.onAuthStateChange((event, session) => {
-    console.log("Auth state change:", event);
-    
     if (event === "SIGNED_IN" && session?.expires_at) {
       scheduleRefresh(session.expires_at);
       // Notify other components (like header) about auth state change

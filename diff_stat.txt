@@ -1,0 +1,25 @@
+ .../src/app/(protected)/profile/favorites/page.tsx |  36 +--
+ apps/web/src/app/(protected)/profile/page.tsx      | 251 +++++++++++++++---
+ apps/web/src/app/ad/[id]/page.tsx                  | 140 ++++------
+ apps/web/src/app/api/comparison/route.ts           | 262 +++++++++++++++++++
+ apps/web/src/app/api/favorites/route.ts            |  11 +-
+ apps/web/src/app/api/profile/adverts/route.ts      |  53 ++--
+ apps/web/src/app/c/[...path]/page.tsx              |  55 ++--
+ apps/web/src/app/page.tsx                          | 149 +++++------
+ .../components/comparison/ComparisonSummary.tsx    | 107 ++++++++
+ .../src/components/comparison/ComparisonTable.tsx  | 287 +++++++++++++++++++++
+ .../components/comparison/SelectableAdsGrid.tsx    | 126 +++++++++
+ .../favorites/FavoritesComparisonView.tsx          |  94 +++++++
+ .../src/components/profile/ProfileAdvertsList.tsx  |   6 +-
+ apps/web/src/i18n/locales/de.json                  |  56 +++-
+ apps/web/src/i18n/locales/en.json                  |  52 ++++
+ apps/web/src/i18n/locales/fr.json                  |  60 ++++-
+ apps/web/src/i18n/locales/nl.json                  |  70 ++++-
+ apps/web/src/i18n/locales/ru.json                  |  52 ++++
+ apps/web/src/lib/comparison/index.ts               |   1 +
+ apps/web/src/lib/comparison/scoring.ts             | 135 ++++++++++
+ apps/web/src/lib/media/getFirstImage.ts            |  34 +++
+ apps/web/src/lib/media/signMediaUrls.ts            | 100 +++++++
+ apps/web/src/lib/profileTypes.ts                   |  24 +-
+ apps/web/src/lib/types/comparison.ts               |  28 ++
+ 24 files changed, 1892 insertions(+), 297 deletions(-)

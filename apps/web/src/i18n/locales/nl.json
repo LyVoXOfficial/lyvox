@@ -262,7 +262,8 @@
     "remove_failed": "Kon niet uit favorieten verwijderen",
     "login_required": "Log in om favorieten te beheren",
     "add": "Aan favorieten toevoegen",
-    "remove": "Uit favorieten verwijderen"
+    "remove": "Uit favorieten verwijderen",
+    "hidden_inactive": "{count} favorieten verborgen omdat de advertentie niet meer actief is."
   },
   "comparison": {
     "title": "Advertenties vergelijken",

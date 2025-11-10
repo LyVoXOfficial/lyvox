@@ -1,0 +1,120 @@
+
+    Directory: C:\Users\power\lyvox\scripts
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----          08.11.2025     0:13                catalog
+-a---          09.11.2025    22:22          15194 ai-doc-linker.mj
+                                                  s
+-a---          03.11.2025    21:22          13170 analyze-vehicle-
+                                                  sync.mjs
+-a---          03.11.2025    21:42           6613 audit-full-cover
+                                                  age.mjs
+-a---          03.11.2025    21:42           6272 backfill-insight
+                                                  -arrays.mjs
+-a---          03.11.2025    21:22           1226 check-5series-e6
+                                                  1.mjs
+-a---          04.11.2025    17:08           2333 check-bmw-5serie
+                                                  s.mjs
+-a---          03.11.2025    21:22           1639 check-bmw-in-db.
+                                                  mjs
+-a---          03.11.2025    21:22           1602 check-bmw-models
+                                                  .mjs
+-a---          03.11.2025    21:22           1170 check-constraint
+                                                  s.mjs
+-a---          04.11.2025    21:26            753 check-db-simple.
+                                                  sql
+-a---          09.11.2025    22:22            945 check-db-structu
+                                                  re.mjs
+-a---          03.11.2025    21:22           2249 check-enriched-d
+                                                  ata.mjs
+-a---          03.11.2025    21:22            916 check-generation
+                                                  s.mjs
+-a---          03.11.2025    21:22           1142 check-i18n-count
+                                                  s.mjs
+-a---          09.11.2025    22:21           5192 check-i18n-keys.
+                                                  js
+-a---          03.11.2025    21:22           1895 check-insight-co
+                                                  verage.mjs
+-a---          09.11.2025    22:22           3696 check-insights-l
+                                                  inkage.mjs
+-a---          04.11.2025    17:09           1764 check-insights-t
+                                                  ranslation-progr
+                                                  ess.mjs
+-a---          03.11.2025    21:22            696 check-json-model
+                                                  .mjs
+-a---          03.11.2025    21:22            741 check-specific-m
+                                                  akes.mjs
+-a---          04.11.2025    17:17           1863 check-table-stat
+                                                  us.mjs
+-a---          03.11.2025    21:22          12228 check-vehicle-du
+                                                  plicates.mjs
+-a---          03.11.2025    21:42           8276 complete-vehicle
+                                                  -catalog.mjs
+-a---          03.11.2025    21:22           5693 csv-import-maste
+                                                  r.mjs
+-a---          03.11.2025    21:22           1206 debug-model.mjs
+-a---          03.11.2025    21:22            682 dump-model-field
+                                                  s.mjs
+-a---          03.11.2025    21:42           9106 fill-missing-ins
+                                                  ights.mjs
+-a---          03.11.2025    21:42           5502 fill-model-score
+                                                  s.mjs
+-a---          03.11.2025    21:22           1922 find-duplicate-m
+                                                  odels.mjs
+-a---          04.11.2025    17:08           4714 fix-missing-scor
+                                                  es.mjs
+-a---          01.11.2025    21:12           3134 generate_vehicle
+                                                  _i18n_sync.py
+-a---          09.11.2025    22:22           6614 generate-generat
+                                                  ion-insights.mjs
+-a---          03.11.2025    21:22           9341 generateVehicleS
+                                                  eed.mjs
+-a---          04.11.2025    21:26            786 get-db-url.mjs
+-a---          03.11.2025    21:22           7978 import-csv-batch
+                                                  .mjs
+-a---          03.11.2025    21:22           5899 import-csv-from-
+                                                  enriched.mjs
+-a---          03.11.2025    21:22          10339 import-from-csv.
+                                                  mjs
+-a---          03.11.2025    21:22            883 list-bmw-models.
+                                                  mjs
+-a---          03.11.2025    21:22            874 list-models-with
+                                                  out-insights.mjs
+-a---          03.11.2025    21:22           9498 merge-duplicate-
+                                                  models.mjs
+-a---          04.11.2025    21:26           6941 monitor-continuo
+                                                  us.mjs
+-a---          04.11.2025    21:33           5343 monitor-insights
+                                                  -translation.ps1
+-a---          04.11.2025    21:26            884 monitor-loop.bat
+-a---          04.11.2025    21:26           4108 monitor-progress
+                                                  .mjs
+-a---          04.11.2025    21:26            895 monitor-via-cli.
+                                                  sh
+-a---          09.11.2025    22:22           1792 quick-check-insi
+                                                  ghts.mjs
+-a---          03.11.2025    21:22           1449 quick-stats.mjs
+-a---          03.11.2025    21:42          14974 README.md
+-a---          01.11.2025    21:12           1267 runSeed.mjs
+-a---          20.10.2025     2:17           3851 seedCategories.t
+                                                  s
+-a---          03.11.2025    21:22           7423 sync-vehicles-ma
+                                                  ster.mjs
+-a---          04.11.2025    17:09           6767 translate-all-in
+                                                  sights.mjs
+-a---          09.11.2025    22:22           4512 translate-genera
+                                                  tion-insights.mj
+                                                  s
+-a---          04.11.2025    17:08           5347 translate-missin
+                                                  g-models.mjs
+-a---          09.11.2025    22:21           2122 update-checklist
+                                                  -progress.js
+-a---          03.11.2025    21:42           4593 update-i18n.mjs
+-a---          03.11.2025    21:42           5141 update-model-agg
+                                                  regates.mjs
+-a---          01.11.2025    21:12          12617 vehicle_i18n_exp
+                                                  and.mjs
+-a---          01.11.2025    21:12           9989 vehicle_i18n_nor
+                                                  malize.mjs
+

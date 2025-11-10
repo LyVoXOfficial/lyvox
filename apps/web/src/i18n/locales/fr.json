@@ -262,7 +262,8 @@
     "remove_failed": "Impossible de retirer des favoris",
     "login_required": "Connectez-vous pour gérer vos favoris",
     "add": "Ajouter aux favoris",
-    "remove": "Retirer des favoris"
+    "remove": "Retirer des favoris",
+    "hidden_inactive": "{count} favoris masqués car l'annonce n'est plus active."
   },
   "comparison": {
     "title": "Comparer les annonces",

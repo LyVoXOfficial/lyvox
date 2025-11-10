@@ -14,6 +14,7 @@ type FavoriteAdvertSummary = {
   createdAt?: string | null;
   image?: string | null;
   sellerVerified?: boolean;
+  status?: string | null;
 };
 
 export type FavoriteItem = {
@@ -100,6 +101,7 @@ export function FavoritesProvider({ children }: Props) {
           createdAt: item.advert?.created_at ?? null,
           image: item.advert?.image ?? null,
           sellerVerified: item.advert?.seller_verified ?? false,
+          status: item.advert?.status ?? null,
         },
       })) as FavoriteItem[];
 

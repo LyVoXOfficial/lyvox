@@ -1,0 +1,54 @@
+ M .cursor/plans/lyvox-development-master-plan-0922caaa.plan.md
+ M .cursor/rules/lyvoxpromt.mdc
+ M .github/workflows/README.md
+ M API_KEY_PROBLEM.txt
+ M CI_FIX_STATUS.md
+ M FINAL_STATUS.txt
+ M FIXED_AND_RUNNING.txt
+ M KEY_FIXED_NOW.txt
+ M NIGHT_WORK_STATUS.md
+ M STATUS_NOW.txt
+ M UPDATE_KEY_INSTRUCTION.txt
+ M URGENT_FIX_NOW.txt
+ M apps/web/next-env.d.ts
+ M apps/web/src/components/BiometricEnrollButton.tsx
+ M apps/web/src/components/BiometricLoginButton.tsx
+ M apps/web/src/components/BiometricSettings.tsx
+ M apps/web/src/components/catalog/DynamicFieldRenderer.tsx
+ M apps/web/src/components/catalog/index.ts
+ M apps/web/src/hooks/useDebounce.ts
+ M apps/web/src/hooks/useWebAuthn.ts
+ M apps/web/src/i18n/locales/CATALOG_I18N_README.md
+ M apps/web/src/i18n/locales/catalog-de.json
+ M apps/web/src/i18n/locales/catalog-en.json
+ M apps/web/src/i18n/locales/catalog-fr.json
+ M apps/web/src/i18n/locales/catalog-nl.json
+ M apps/web/src/i18n/locales/catalog-ru.json
+ M apps/web/src/lib/errorLogger.ts
+ M apps/web/src/lib/i18n/formatCurrency.ts
+ M apps/web/src/lib/i18n/formatDate.ts
+ M apps/web/src/lib/i18n/getCategoryName.ts
+ M apps/web/src/lib/i18n/index.ts
+ M apps/web/src/types/webauthn.ts
+ M check-db.bat
+ M check-progress.bat
+ M check-progress.mjs
+ M check-quota.bat
+ M docs/API_REFERENCE.md
+ M docs/CURSOR_KNOWLEDGE_BASE.md
+ M docs/KNOWLEDGE_MAP.md
+ M docs/development/MASTER_CHECKLIST.md
+ M scripts/check-db-structure.mjs
+ M scripts/check-i18n-keys.js
+ M scripts/update-checklist-progress.js
+ M supabase/migrations/20251102034309_mvp_indexes.sql
+ M supabase/migrations/20251102034546_mvp_rls_complete.sql
+ M test-api-proper.bat
+ M test-new-key.bat
+ M test-real-prompt.bat
+ M test-real-prompt.mjs
+?? .cursor/plans/fix-a-6ddb040f.plan.md
+?? diff_stat.txt
+?? scripts/ai-doc-linker.mjs
+?? scripts_list.txt
+?? status_tmp.txt

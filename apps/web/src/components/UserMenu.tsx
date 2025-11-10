@@ -20,6 +20,43 @@ export default function UserMenu() {
 
   useEffect(() => {
     let cancelled = false;
+    let lastEmail: string | null = null;
+    let phoneVerificationFetched = false;
+
+    const fetchPhoneVerification = async (userEmail: string | null) => {
+      // Only fetch phone verification if email changed
+      if (userEmail === lastEmail && phoneVerificationFetched) {
+        return;
+      }
+      lastEmail = userEmail ?? null;
+      phoneVerificationFetched = false;
+
+      if (!userEmail) {
+        if (!cancelled) {
+          setPhoneVerified(null);
+        }
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/me", {
+          cache: "no-store",
+          credentials: "include",
+        });
+        const data: MeResponse = await response.json().catch(() => ({ user: null, phone: null }));
+        const verifiedFromPhone = typeof data?.phone?.verified === "boolean" ? data.phone.verified : null;
+        const verifiedFallback = typeof data?.verifiedPhone === "boolean" ? data.verifiedPhone : null;
+        if (!cancelled) {
+          setPhoneVerified(verifiedFromPhone ?? verifiedFallback);
+          phoneVerificationFetched = true;
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setPhoneVerified(null);
+          phoneVerificationFetched = true;
+        }
+      }
+    };
 
     const checkUser = async () => {
       try {
@@ -28,37 +65,25 @@ export default function UserMenu() {
         
         if (!cancelled) {
           if (user) {
-            console.log("UserMenu: User found:", user.email);
-            setEmail(user.email ?? null);
+            const userEmail = user.email ?? null;
+            setEmail(userEmail);
             setIsAdmin(hasAdminRole(user as SupabaseUserLike));
-            
-            // Get phone verification from API
-            try {
-              const response = await fetch("/api/me", {
-                cache: "no-store",
-                credentials: "include",
-              });
-              const data: MeResponse = await response.json().catch(() => ({ user: null, phone: null }));
-              const verifiedFromPhone = typeof data?.phone?.verified === "boolean" ? data.phone.verified : null;
-              const verifiedFallback = typeof data?.verifiedPhone === "boolean" ? data.verifiedPhone : null;
-              setPhoneVerified(verifiedFromPhone ?? verifiedFallback);
-            } catch (error) {
-              console.error("UserMenu: Error fetching phone verification:", error);
-              setPhoneVerified(null);
-            }
+            // Fetch phone verification only if email changed
+            await fetchPhoneVerification(userEmail);
           } else {
-            console.log("UserMenu: No user found");
             setEmail(null);
             setIsAdmin(false);
             setPhoneVerified(null);
+            lastEmail = null;
+            phoneVerificationFetched = false;
           }
         }
       } catch (error) {
-        console.error("UserMenu: Error checking user:", error);
         if (!cancelled) {
           setEmail(null);
           setIsAdmin(false);
           setPhoneVerified(null);
+          lastEmail = null;
         }
       }
     };
@@ -68,39 +93,25 @@ export default function UserMenu() {
 
     // Listen for auth state changes from Supabase
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("UserMenu: Auth event:", event, "Has session:", !!session);
       if (!cancelled) {
         if (session?.user) {
-          setEmail(session.user.email ?? null);
+          const userEmail = session.user.email ?? null;
+          setEmail(userEmail);
           setIsAdmin(hasAdminRole(session.user as SupabaseUserLike));
-          // Re-fetch phone verification
-          checkUser();
+          // Fetch phone verification only if email changed
+          fetchPhoneVerification(userEmail);
         } else {
           setEmail(null);
           setIsAdmin(false);
           setPhoneVerified(null);
+          lastEmail = null;
         }
       }
     });
 
-    // Listen for custom auth-state-change events
-    const handleCustomAuthChange = () => {
-      if (!cancelled) {
-        console.log("UserMenu: Custom auth-state-change event received");
-        checkUser();
-      }
-    };
-
-    window.addEventListener("auth-state-change", handleCustomAuthChange);
-
-    // Check periodically (every 10 seconds)
-    const intervalId = setInterval(checkUser, 10000);
-
     return () => {
       cancelled = true;
       authListener.subscription.unsubscribe();
-      window.removeEventListener("auth-state-change", handleCustomAuthChange);
-      clearInterval(intervalId);
     };
   }, []);
 
