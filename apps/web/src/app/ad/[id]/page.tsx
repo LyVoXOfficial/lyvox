@@ -513,18 +513,20 @@ export default async function AdvertPage({ params }: PageProps) {
     showScores;
 
   const sellerCardLabels = {
-    unknownSellerLabel: t("advert.seller.unknown") || "Продавец",
-    memberSinceLabel: t("advert.seller.member_since") || "На платформе с",
+    unknownSellerLabel: t("advert.seller_labels.unknown") || "Продавец",
+    memberSinceLabel: t("advert.seller_labels.member_since") || "На платформе с",
     verifiedSellerLabel: t("advert.verified_seller") || "Проверенный продавец",
     verifiedSellerTooltip: t("advert.verified_seller_tooltip") || "Продавец подтвердил email и телефон",
-    emailLabel: t("advert.seller.email") || "Email",
-    emailVerifiedLabel: t("advert.seller.email_verified") || "Подтвержден",
-    emailUnverifiedLabel: t("advert.seller.email_unverified") || "Не подтвержден",
-    phoneLabel: t("advert.seller.phone") || "Телефон",
-    phoneVerifiedLabel: t("advert.seller.phone_verified") || "Подтвержден",
-    phoneUnverifiedLabel: t("advert.seller.phone_unverified") || "Не подтвержден",
-    trustScoreLabel: t("advert.seller.trust_score") || "Уровень доверия",
-    activeAdvertsLabel: t("advert.seller.active_listings") || "Активные объявления",
+    emailLabel: t("advert.seller_labels.email") || "Email",
+    emailVerifiedLabel: t("advert.seller_labels.email_verified") || "Подтвержден",
+    emailUnverifiedLabel: t("advert.seller_labels.email_unverified") || "Не подтвержден",
+    phoneLabel: t("advert.seller_labels.phone") || "Телефон",
+    phoneVerifiedLabel: t("advert.seller_labels.phone_verified") || "Подтвержден",
+    phoneUnverifiedLabel: t("advert.seller_labels.phone_unverified") || "Не подтвержден",
+    trustScoreLabel: t("advert.seller_labels.trust_score") || "Уровень доверия",
+    activeAdvertsLabel: t("advert.seller_labels.active_listings") || "Активных объявлений",
+    sellerTypePrivateLabel: t("advert.seller_labels.type_private") || "Частный продавец",
+    sellerTypeProfessionalLabel: t("advert.seller_labels.type_professional") || "Профессиональный продавец",
   };
 
   return (
@@ -1428,22 +1430,56 @@ async function loadSimilarAdverts(
       }
     }
 
-    const mapped = data.map((row) => {
-      const media = Array.isArray(row.media) ? [...row.media] : [];
-      media.sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
-      const image = media.find((item) => item.url)?.url ?? null;
+    const storage = client.storage.from("ad-media");
+    const mapped = await Promise.all(
+      data.map(async (row) => {
+        const media = Array.isArray(row.media) ? [...row.media] : [];
+        media.sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
+        const primaryMedia = media.find((item) => item.url) ?? null;
 
-      return {
-        id: row.id,
-        title: row.title,
-        price: normalizeNullableNumber(row.price),
-        currency: row.currency ?? "EUR",
-        location: row.location,
-        createdAt: row.created_at ?? null,
-        image,
-        sellerVerified: verifiedMap.get(row.user_id ?? "") ?? false,
-      };
-    });
+        let image: string | null = null;
+        if (primaryMedia?.url) {
+          if (
+            primaryMedia.url.startsWith("http://") ||
+            primaryMedia.url.startsWith("https://")
+          ) {
+            image = primaryMedia.url;
+          } else {
+            const { data: signed, error: signedError } = await storage.createSignedUrl(
+              primaryMedia.url,
+              MEDIA_SIGNED_URL_TTL,
+            );
+            if (signedError) {
+              console.warn("Failed to create signed URL for similar advert media", {
+                advertId,
+                categoryId,
+                mediaPath: primaryMedia.url,
+                error: signedError,
+              });
+              advertDebug("loadSimilarAdverts:signed-url-error", {
+                advertId,
+                categoryId,
+                path: primaryMedia.url,
+                error: signedError.message,
+              });
+            } else if (signed?.signedUrl) {
+              image = signed.signedUrl;
+            }
+          }
+        }
+
+        return {
+          id: row.id,
+          title: row.title,
+          price: normalizeNullableNumber(row.price),
+          currency: row.currency ?? "EUR",
+          location: row.location,
+          createdAt: row.created_at ?? null,
+          image,
+          sellerVerified: verifiedMap.get(row.user_id ?? "") ?? false,
+        };
+      }),
+    );
     advertDebug("loadSimilarAdverts:completed", {
       advertId,
       categoryId,

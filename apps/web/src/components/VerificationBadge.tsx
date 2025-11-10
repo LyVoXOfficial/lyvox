@@ -23,7 +23,7 @@ export default function VerificationBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200",
+        "inline-flex items-center gap-1 rounded-full bg-emerald-50/90 px-1.5 py-0.5 text-[11px] font-medium text-emerald-600 shadow-sm ring-0 backdrop-blur",
         className,
       )}
       title={tooltip}

@@ -28,6 +28,8 @@ type SellerCardProps = {
   phoneUnverifiedLabel: string;
   trustScoreLabel: string;
   activeAdvertsLabel: string;
+  sellerTypePrivateLabel: string;
+  sellerTypeProfessionalLabel: string;
 };
 
 export default function SellerCard({
@@ -45,16 +47,22 @@ export default function SellerCard({
   phoneUnverifiedLabel,
   trustScoreLabel,
   activeAdvertsLabel,
+  sellerTypePrivateLabel,
+  sellerTypeProfessionalLabel,
 }: SellerCardProps) {
   const memberSince = seller.createdAt ? formatDate(seller.createdAt, locale) : null;
+  const isVerified = seller.verifiedEmail && seller.verifiedPhone;
+  const sellerTypeLabel =
+    (seller.activeAdverts ?? 0) > 5 ? sellerTypeProfessionalLabel : sellerTypePrivateLabel;
 
   return (
-    <section className="rounded-2xl border p-4">
-      <header className="mb-3 flex items-center justify-between gap-3">
+    <section className="rounded-2xl border p-4 shadow-sm">
+      <header className="mb-4 flex items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">
             {seller.displayName ?? unknownSellerLabel}
           </h2>
+          <p className="text-xs text-muted-foreground">{sellerTypeLabel}</p>
           {memberSince ? (
             <p className="text-xs text-muted-foreground">
               {memberSinceLabel} {memberSince}
@@ -62,7 +70,7 @@ export default function SellerCard({
           ) : null}
         </div>
         <VerificationBadge
-          verified={seller.verifiedEmail && seller.verifiedPhone}
+          verified={isVerified}
           icon={ShieldCheck}
           label={verifiedSellerLabel}
           tooltip={verifiedSellerTooltip}

@@ -57,15 +57,32 @@ export default function AdCard({
 
   return (
     <article className="overflow-hidden rounded-lg border transition hover:shadow-sm">
-      <Link href={`/ad/${id}`} className="block">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={image ?? "/placeholder.svg"}
-          alt={title}
-          loading="lazy"
-          className="aspect-square w-full bg-muted object-cover transition group-hover:opacity-95"
-        />
-      </Link>
+      <div className="relative">
+        <Link href={`/ad/${id}`} className="block">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={image ?? "/placeholder.svg"}
+            alt={title}
+            loading="lazy"
+            className="aspect-square w-full bg-muted object-cover transition group-hover:opacity-95"
+          />
+        </Link>
+        <div className="absolute right-3 top-3 flex gap-2">
+          <FavoriteToggle
+            variant="overlay"
+            advert={{
+              id,
+              title,
+              price,
+              currency,
+              location,
+              image: image ?? undefined,
+              createdAt,
+              sellerVerified,
+            }}
+          />
+        </div>
+      </div>
       <div className="space-y-2 p-3">
         <Link
           href={`/ad/${id}`}
@@ -87,21 +104,7 @@ export default function AdCard({
               />
             ) : null}
           </div>
-          <div className="flex items-center gap-2">
-            <FavoriteToggle
-              advert={{
-                id,
-                title,
-                price,
-                currency,
-                location,
-                image: image ?? undefined,
-                createdAt,
-                sellerVerified,
-              }}
-            />
-            <ReportButton advertId={id} />
-          </div>
+          <ReportButton advertId={id} />
         </div>
       </div>
     </article>
