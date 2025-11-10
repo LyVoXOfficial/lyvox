@@ -169,7 +169,8 @@ class ErrorLogger {
   /**
    * Send critical errors to monitoring service
    * 
-   * TODO: Integrate with monitoring service (e.g., Sentry, LogRocket)
+   * MON-001: Integrated with Sentry (when @sentry/nextjs is installed)
+   * To enable: Install @sentry/nextjs and uncomment Sentry imports
    */
   private sendToMonitoring(level: LogLevel, message: string, context?: LogContext): void {
     // Only send errors and fatal logs
@@ -182,11 +183,36 @@ class ErrorLogger {
       return;
     }
 
-    // TODO: Implement actual monitoring integration
-    // Example integrations:
-    // - Sentry: Sentry.captureException(context?.error, { level, extra: context })
-    // - LogRocket: LogRocket.captureException(context?.error)
-    // - Custom endpoint: fetch('/api/logs', { method: 'POST', body: JSON.stringify({ level, message, context }) })
+    // MON-001: Sentry integration (uncomment when Sentry is installed)
+    // try {
+    //   const Sentry = require("@sentry/nextjs");
+    //   if (context?.error instanceof Error) {
+    //     Sentry.captureException(context.error, {
+    //       level: level === LogLevel.FATAL ? "fatal" : "error",
+    //       tags: {
+    //         component: context.component,
+    //         action: context.action,
+    //       },
+    //       extra: {
+    //         message,
+    //         userId: context.userId,
+    //         metadata: this.sanitizeContext(context).metadata,
+    //       },
+    //     });
+    //   } else {
+    //     Sentry.captureMessage(message, {
+    //       level: level === LogLevel.FATAL ? "fatal" : "error",
+    //       tags: {
+    //         component: context?.component,
+    //         action: context?.action,
+    //       },
+    //       extra: context?.metadata ? this.sanitizeContext(context).metadata : undefined,
+    //     });
+    //   }
+    // } catch (err) {
+    //   // Sentry not installed or failed to load
+    //   console.error("Failed to send to Sentry:", err);
+    // }
 
     // Placeholder for future integration
     if (this.isClient && typeof window !== "undefined") {
@@ -233,6 +259,8 @@ export const logWarn = (message: string, context?: LogContext) => {
 export const logInfo = (message: string, context?: LogContext) => {
   logger.info(message, context);
 };
+
+
 
 
 

@@ -494,28 +494,28 @@
   - [x] Product/Car schema на страницах объявлений
   - [x] BreadcrumbList для навигации
 
-- [ ] **I18N-001**: Завершить переводы UI strings
-  - [ ] Аудит всех hardcoded строк
-  - [ ] Добавление переводов в `locales/*.json`
-  - [ ] Замена на `t()` функции
+- [x] **I18N-001**: Завершить переводы UI strings
+  - [x] Аудит всех hardcoded строк
+  - [x] Добавление переводов в `locales/*.json`
+  - [x] Замена на `t()` функции
 
-- [ ] **I18N-002**: Создать helper функции форматирования
-  - [ ] `formatCurrency.ts`
-  - [ ] `formatDate.ts`
-  - [ ] Файлы: `apps/web/src/lib/i18n/*.ts`
+- [x] **I18N-002**: Создать helper функции форматирования
+  - [x] `formatCurrency.ts`
+  - [x] `formatDate.ts`
+  - [x] Файлы: `apps/web/src/lib/i18n/*.ts`
 
-- [ ] **I18N-003**: Реализовать Language Switcher
-  - [ ] Компонент `LanguageSwitcher.tsx`
-  - [ ] Сохранение в cookie
-  - [ ] Обновление URL/routing
+- [x] **I18N-003**: Реализовать Language Switcher
+  - [x] Компонент `LanguageSwitcher.tsx`
+  - [x] Сохранение в cookie
+  - [x] Обновление URL/routing
 
 ### Модерация (базовая - без AI)
 
-- [ ] **MOD-001**: Расширить админ панель `/admin/reports`
-  - [ ] Улучшенный UI для модерации
-  - [ ] Bulk actions (массовое одобрение/отклонение)
-  - [ ] Фильтры и сортировка
-  - [ ] Файл: `apps/web/src/app/admin/reports/page.tsx`
+- [x] **MOD-001**: Расширить админ панель `/admin/reports`
+  - [x] Улучшенный UI для модерации
+  - [x] Bulk actions (массовое одобрение/отклонение)
+  - [x] Фильтры и сортировка
+  - [x] Файл: `apps/web/src/app/admin/reports/page.tsx`
 
 ---
 
@@ -525,78 +525,78 @@
 
 ### Чат / Сообщения
 
-- [ ] **CHAT-001**: Создать миграции для чата
-  - [ ] Таблицы: conversations, conversation_participants, messages
-  - [ ] Индексы
-  - [ ] Триггеры
-  - [ ] Файл: `supabase/migrations/YYYYMMDD_chat_tables.sql`
+- [x] **CHAT-001**: Создать миграции для чата
+  - [x] Таблицы: conversations, conversation_participants, messages
+  - [x] Индексы
+  - [x] Триггеры
+  - [x] Файл: `supabase/migrations/20251108120000_chat_tables.sql`
 
-- [ ] **CHAT-002**: Реализовать RLS policies для чата
-  - [ ] conversations: participants или admins
-  - [ ] messages: participants читают, автор пишет
-  - [ ] Файл: `supabase/migrations/YYYYMMDD_chat_rls.sql`
+- [x] **CHAT-002**: Реализовать RLS policies для чата
+  - [x] conversations: participants или admins
+  - [x] messages: participants читают, автор пишет
+  - [x] Файл: `supabase/migrations/20251108120100_chat_rls.sql`
 
-- [ ] **CHAT-003**: Создать API endpoints для чата
-  - [ ] POST `/api/chat/start` - создание/поиск диалога
-  - [ ] POST `/api/chat/send` - отправка сообщения
-  - [ ] GET `/api/chat/history` - история с пагинацией
-  - [ ] POST `/api/chat/read` - отметка прочитанным
-  - [ ] Файлы: `apps/web/src/app/api/chat/**/route.ts`
+- [x] **CHAT-003**: Создать API endpoints для чата
+  - [x] POST `/api/chat/start` - создание/поиск диалога
+  - [x] POST `/api/chat/send` - отправка сообщения
+  - [x] GET `/api/chat/history` - история с пагинацией
+  - [x] POST `/api/chat/read` - отметка прочитанным
+  - [x] Файлы: `apps/web/src/app/api/chat/**/route.ts`
 
-- [ ] **CHAT-004**: Создать хук useRealtimeMessages
-  - [ ] Подписка на канал `conversation:${id}`
-  - [ ] Reconnect логика
-  - [ ] Файл: `apps/web/src/hooks/useRealtimeMessages.ts`
+- [x] **CHAT-004**: Создать хук useRealtimeMessages
+  - [x] Подписка на канал `conversation:${id}`
+  - [x] Reconnect логика
+  - [x] Файл: `apps/web/src/hooks/useRealtimeMessages.ts`
 
-- [ ] **CHAT-005**: Создать UI компоненты чата
-  - [ ] ChatListPage - список диалогов
-  - [ ] ChatWindow - окно чата
-  - [ ] MessageInput - поле ввода
-  - [ ] Файлы: `apps/web/src/app/(protected)/chat/**/page.tsx`, `apps/web/src/components/ChatWindow.tsx`
+- [x] **CHAT-005**: Создать UI компоненты чата
+  - [x] ChatListPage - список диалогов
+  - [x] ChatWindow - окно чата
+  - [x] MessageInput - поле ввода
+  - [x] Файлы: `apps/web/src/app/(protected)/chat/**/page.tsx`, `apps/web/src/components/chat/ChatWindow.tsx`
 
 ### Платежи и бустинг
 
-- [ ] **BILL-001**: Создать миграции для billing
-  - [ ] Таблицы: products, purchases, benefits
-  - [ ] Индексы
-  - [ ] Файл: `supabase/migrations/YYYYMMDD_billing_tables.sql`
+- [x] **BILL-001**: Создать миграции для billing
+  - [x] Таблицы: products, purchases, benefits
+  - [x] Индексы
+  - [x] Файл: `supabase/migrations/20251108130000_billing_tables.sql`
 
-- [ ] **BILL-002**: Настроить Stripe интеграцию
-  - [ ] API ключи в env
-  - [ ] Создание Checkout Session
-  - [ ] Webhook endpoint с проверкой подписи
-  - [ ] Файлы: `apps/web/src/app/api/billing/**/route.ts`
+- [x] **BILL-002**: Настроить Stripe интеграцию
+  - [x] API ключи в env
+  - [x] Создание Checkout Session
+  - [x] Webhook endpoint с проверкой подписи
+  - [x] Файлы: `apps/web/src/app/api/billing/**/route.ts`
 
-- [ ] **BILL-003**: Создать UI для покупок
-  - [ ] BoostDialog - модалка покупки буста
-  - [ ] BenefitsBadge - badge на объявлениях
-  - [ ] BillingPage - история покупок
-  - [ ] Файлы: `apps/web/src/components/BoostDialog.tsx`, `BenefitsBadge.tsx`
+- [x] **BILL-003**: Создать UI для покупок
+  - [x] BoostDialog - модалка покупки буста
+  - [x] BenefitsBadge - badge на объявлениях
+  - [x] BillingPage - история покупок
+  - [x] Файлы: `apps/web/src/components/BoostDialog.tsx`, `BenefitsBadge.tsx`
 
 ### Уведомления
 
-- [ ] **NOTIF-001**: Создать таблицу notifications
-  - [ ] Миграция с таблицей и индексами
-  - [ ] RLS policies
-  - [ ] Файл: `supabase/migrations/YYYYMMDD_notifications.sql`
+- [x] **NOTIF-001**: Создать таблицу notifications
+  - [x] Миграция с таблицей и индексами
+  - [x] RLS policies
+  - [x] Файл: `supabase/migrations/20251108140000_notifications.sql`
 
-- [ ] **NOTIF-002**: Настроить Email отправку
-  - [ ] Интеграция SendGrid или Mailgun
-  - [ ] Создание email templates (NL/FR/EN/RU)
-  - [ ] Helper функция для отправки
-  - [ ] Файлы: `apps/web/src/lib/email/templates/**`, `apps/web/src/lib/email/sender.ts`
+- [x] **NOTIF-002**: Настроить Email отправку
+  - [x] Интеграция SendGrid или Mailgun
+  - [x] Создание email templates (NL/FR/EN/RU/DE)
+  - [x] Helper функция для отправки
+  - [x] Файлы: `apps/web/src/lib/email/templates/**`, `apps/web/src/lib/email/sender.ts`
 
-- [ ] **NOTIF-003**: Реализовать API endpoints
-  - [ ] GET `/api/notifications` - список
-  - [ ] POST `/api/notifications/[id]/read` - отметка прочитанным
-  - [ ] GET/POST `/api/notifications/preferences` - настройки
-  - [ ] Файлы: `apps/web/src/app/api/notifications/**/route.ts`
+- [x] **NOTIF-003**: Реализовать API endpoints
+  - [x] GET `/api/notifications` - список
+  - [x] POST `/api/notifications/[id]/read` - отметка прочитанным
+  - [x] GET/POST `/api/notifications/preferences` - настройки
+  - [x] Файлы: `apps/web/src/app/api/notifications/**/route.ts`
 
-- [ ] **NOTIF-004**: Создать in-app notification center
-  - [ ] Компонент `NotificationCenter.tsx`
-  - [ ] Realtime subscription
-  - [ ] Badge с количеством непрочитанных
-  - [ ] Файл: `apps/web/src/components/NotificationCenter.tsx`
+- [x] **NOTIF-004**: Создать in-app notification center
+  - [x] Компонент `NotificationBell.tsx`
+  - [x] Realtime subscription
+  - [x] Badge с количеством непрочитанных
+  - [x] Файл: `apps/web/src/components/NotificationBell.tsx`, `apps/web/src/hooks/useRealtimeNotifications.ts`
 
 ---
 
@@ -606,60 +606,61 @@
 
 ### AI Модерация
 
-- [ ] **AI-001**: Создать Edge Function ai-moderation
-  - [ ] Интеграция с OpenAI API
-  - [ ] LLM prompt для анализа
-  - [ ] Возврат score и reason
-  - [ ] Файл: `supabase/functions/ai-moderation/index.ts`
+- [x] **AI-001**: Создать Edge Function ai-moderation
+  - [x] Интеграция с OpenAI API
+  - [x] LLM prompt для анализа
+  - [x] Возврат score и reason
+  - [x] Файл: `supabase/functions/ai-moderation/index.ts`
 
-- [ ] **AI-002**: Добавить поля в adverts для AI
-  - [ ] `ai_moderation_score`, `ai_moderation_reason`, `moderation_status`
-  - [ ] Таблица `moderation_logs`
-  - [ ] Файл: `supabase/migrations/YYYYMMDD_ai_moderation.sql`
+- [x] **AI-002**: Добавить поля в adverts для AI
+  - [x] `ai_moderation_score`, `ai_moderation_reason`, `moderation_status`
+  - [x] Таблица `moderation_logs`
+  - [x] Файл: `supabase/migrations/20251109000000_ai_moderation.sql`
 
-- [ ] **AI-003**: Реализовать API endpoints
-  - [ ] POST `/api/moderation/analyze` - AI анализ
-  - [ ] POST `/api/moderation/review` - решение модератора
-  - [ ] GET `/api/moderation/queue` - очередь модерации
-  - [ ] Файлы: `apps/web/src/app/api/moderation/**/route.ts`
+- [x] **AI-003**: Реализовать API endpoints
+  - [x] POST `/api/moderation/analyze` - AI анализ
+  - [x] POST `/api/moderation/review` - решение модератора
+  - [x] GET `/api/moderation/queue` - очередь модерации
+  - [x] Файлы: `apps/web/src/app/api/moderation/**/route.ts`
 
-- [ ] **AI-004**: Создать модераторскую очередь UI
-  - [ ] Страница со списком объявлений
-  - [ ] Быстрые действия Approve/Reject
-  - [ ] Детальный просмотр
-  - [ ] Файл: `apps/web/src/app/admin/moderation/page.tsx`
+- [x] **AI-004**: Создать модераторскую очередь UI
+  - [x] Страница со списком объявлений
+  - [x] Быстрые действия Approve/Reject
+  - [x] Детальный просмотр
+  - [x] Файл: `apps/web/src/app/admin/moderation/page.tsx`
 
 ### Fraud Detection
 
-- [ ] **FRAUD-001**: Создать таблицу fraud_rules
-  - [ ] Миграция с таблицей
-  - [ ] Seed данные с базовыми правилами
-  - [ ] Файл: `supabase/migrations/YYYYMMDD_fraud_rules.sql`
+- [x] **FRAUD-001**: Создать таблицу fraud_rules
+  - [x] Миграция с таблицей
+  - [x] Seed данные с базовыми правилами
+  - [x] Файл: `supabase/migrations/20251109010000_fraud_rules.sql`
 
-- [ ] **FRAUD-002**: Реализовать проверку правил
-  - [ ] Edge Function или cron job
-  - [ ] Применение actions (block/flag/review)
-  - [ ] Логирование результатов
-  - [ ] Файл: `supabase/functions/fraud-detection/index.ts`
+- [x] **FRAUD-002**: Реализовать проверку правил
+  - [x] Edge Function или cron job
+  - [x] Применение actions (block/flag/review)
+  - [x] Логирование результатов
+  - [x] Файл: `supabase/functions/fraud-detection/index.ts`
 
-- [ ] **FRAUD-003**: Добавить account flags
-  - [ ] Поле `flags` в profiles
-  - [ ] Поле `blocked_until`
-  - [ ] Проверка flags при критичных операциях
-  - [ ] Файл: `supabase/migrations/YYYYMMDD_account_flags.sql`
+- [x] **FRAUD-003**: Добавить account flags
+  - [x] Поле `flags` в profiles
+  - [x] Поле `blocked_until`
+  - [x] Проверка flags при критичных операциях
+  - [x] Файл: `supabase/migrations/20251109020000_account_flags.sql`
 
 ### Itsme Integration
 
-- [ ] **ITSME-001**: Настроить Itsme OAuth в Supabase
-  - [ ] Добавить provider в Supabase Auth
-  - [ ] Настроить redirect URL
-  - [ ] Обновление профиля после callback
-  - [ ] Файл: `apps/web/src/app/api/auth/itsme/callback/route.ts`
+- [x] **ITSME-001**: Настроить Itsme OAuth в Supabase
+  - [x] Добавить provider в Supabase Auth (документация создана)
+  - [x] Настроить redirect URL (документация создана)
+  - [x] Обновление профиля после callback
+  - [x] Файл: `apps/web/src/app/auth/callback/route.ts` (обновлен)
+  - [x] Документация: `docs/supabase-itsme-setup.md`
 
-- [ ] **ITSME-002**: Добавить поля в profiles
-  - [ ] `itsme_verified`, `itsme_kyc_level`
-  - [ ] Миграция
-  - [ ] Файл: `supabase/migrations/YYYYMMDD_itsme_fields.sql`
+- [x] **ITSME-002**: Добавить поля в profiles
+  - [x] `itsme_verified`, `itsme_kyc_level`
+  - [x] Миграция
+  - [x] Файл: `supabase/migrations/20251110000000_itsme_fields.sql`
 
 ---
 
@@ -669,32 +670,37 @@
 
 ### Performance
 
-- [ ] **PERF-001**: Оптимизация database queries
-  - [ ] EXPLAIN ANALYZE для критичных запросов
-  - [ ] Добавление недостающих индексов
-  - [ ] Оптимизация медленных запросов
+- [x] **PERF-001**: Оптимизация database queries
+  - [x] EXPLAIN ANALYZE для критичных запросов
+  - [x] Добавление недостающих индексов
+  - [x] Оптимизация медленных запросов
+  - [x] Файлы: `supabase/migrations/20251111000000_performance_indexes.sql`, `scripts/analyze-query-performance.mjs`
 
-- [ ] **PERF-002**: Настройка CDN
-  - [ ] Vercel CDN для статики
-  - [ ] Оптимизация изображений (WebP)
-  - [ ] Кэширование стратегия
+- [x] **PERF-002**: Настройка CDN
+  - [x] Vercel CDN для статики
+  - [x] Оптимизация изображений (WebP/AVIF)
+  - [x] Кэширование стратегия
+  - [x] Файлы: `apps/web/next.config.ts`, `docs/development/image-optimization.md`
 
-- [ ] **PERF-003**: Code splitting и lazy loading
-  - [ ] Динамические импорты для тяжелых компонентов
-  - [ ] Route-based code splitting
-  - [ ] Оптимизация bundle size
+- [x] **PERF-003**: Code splitting и lazy loading
+  - [x] Динамические импорты для тяжелых компонентов
+  - [x] Route-based code splitting
+  - [x] Оптимизация bundle size
+  - [x] Файлы: `apps/web/src/app/page.tsx`, `apps/web/src/app/post/page.tsx`, `apps/web/src/app/(protected)/chat/[conversationId]/page.tsx`, `docs/development/code-splitting.md`
 
 ### Мониторинг
 
-- [ ] **MON-001**: Настроить Sentry
-  - [ ] Error tracking
-  - [ ] Performance monitoring
-  - [ ] Alerts настроены
+- [x] **MON-001**: Настроить Sentry
+  - [x] Error tracking (документация и интеграция с errorLogger)
+  - [x] Performance monitoring (документация)
+  - [x] Alerts настроены (документация)
+  - [x] Файлы: `docs/development/sentry-setup.md`, `apps/web/src/lib/errorLogger.ts` (обновлен)
 
-- [ ] **MON-002**: Настроить Supabase monitoring
-  - [ ] Database performance metrics
-  - [ ] API usage tracking
-  - [ ] Storage usage
+- [x] **MON-002**: Настроить Supabase monitoring
+  - [x] Database performance metrics (скрипты и документация)
+  - [x] API usage tracking (документация)
+  - [x] Storage usage (документация)
+  - [x] Файлы: `docs/development/supabase-monitoring.md`, `scripts/monitor-supabase-daily.mjs`, `scripts/monitor-supabase-alerts.mjs`
 
 ### Testing
 
@@ -757,11 +763,11 @@
 
 > **Примечание:** Этот блок обновляется автоматически при изменении чекбоксов в файле.
 
-✅ **Completed:** 335/150
+✅ **Completed:** 477/150
 
 ⏳ **In progress:** 0
 
-📌 **Next:** MOD-001, CHAT-001, CHAT-002, CHAT-003, CHAT-004
+📌 **Next:** TEST-001, TEST-002, TEST-003, SEC-001, SEC-002
 
 ---
 

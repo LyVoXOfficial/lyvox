@@ -35,7 +35,13 @@
     "save": "Opslaan",
     "user": "Gebruiker",
     "free": "Gratis",
-    "delete": "Verwijderen"
+    "delete": "Verwijderen",
+    "all": "Alle",
+    "open": "Openen",
+    "changed": "Gewijzigd",
+    "before": "voor",
+    "action": "actie",
+    "confirm": "Bevestigen"
   },
   "filters": {
     "sort_by": "Sorteren op",
@@ -655,6 +661,161 @@
         "core": "Belangrijkste informatie",
         "timing": "Tijd & opmerkingen"
       }
+    }
+  },
+  "admin": {
+    "reports": {
+      "title": "Moderatie rapporten",
+      "tabs": {
+        "pending": "In afwachting",
+        "accepted": "Geaccepteerd",
+        "rejected": "Afgewezen"
+      },
+      "reasons": {
+        "fraud": "Fraude",
+        "spam": "Spam",
+        "duplicate": "Duplicaat",
+        "nsfw": "Ongepaste inhoud",
+        "other": "Anders"
+      },
+      "errors": {
+        "auth_required": "Authenticatie vereist",
+        "access_denied": "Toegang geweigerd",
+        "service_role_missing": "SUPABASE_SERVICE_ROLE_KEY is niet geconfigureerd. Stel de SUPABASE_SERVICE_ROLE_KEY omgevingsvariabele in op de server.",
+        "report_not_found": "Rapport niet gevonden",
+        "update_failed": "Rapport bijwerken mislukt",
+        "bulk_select_required": "Selecteer ten minste één rapport",
+        "unknown_action": "Onbekende actie voor bulk update",
+        "bulk_update_failed": "Geselecteerde rapporten bijwerken mislukt",
+        "bulk_partial_failure": "Sommige rapporten zijn niet bijgewerkt ({failureCount} van {totalCount}). Controleer berichten en probeer opnieuw."
+      },
+      "actions": {
+        "accept": "Accepteren",
+        "reject": "Afwijzen",
+        "accept_unpublish": "Accepteren en depubliceren",
+        "bulk_accept": "Geselecteerde accepteren",
+        "bulk_reject": "Geselecteerde afwijzen",
+        "bulk_accept_unpublish": "Geselecteerde accepteren en depubliceren",
+        "bulk_confirm": "Weet u zeker dat u {count} rapport(en) wilt {action}? Deze actie kan niet ongedaan worden gemaakt."
+      },
+      "moderation": {
+        "title": "Moderatie Wachtrij",
+        "all": "Alle",
+        "pending": "In Afwachting",
+        "pending_review": "Vereist Beoordeling",
+        "flagged": "Gemarkeerd",
+        "empty": "Geen advertenties in wachtrij",
+        "view": "Bekijken",
+        "analyze": "Analyseren",
+        "approve": "Goedkeuren",
+        "reject": "Afwijzen",
+        "flag": "Markeren",
+        "analyze_error": "Kan advertentie niet analyseren",
+        "review_error": "Kan advertentie niet beoordelen",
+        "detail_description": "Bekijk advertentiedetails",
+        "description": "Beschrijving",
+        "price": "Prijs",
+        "created_at": "Gemaakt",
+        "ai_score": "AI Moderatie Score",
+        "confirm_approve": "Advertentie Goedkeuren?",
+        "confirm_reject": "Advertentie Afwijzen?",
+        "confirm_flag": "Advertentie Markeren?",
+        "confirm_description": "Geef een reden op voor deze actie (optioneel)",
+        "reason": "Reden (optioneel)",
+        "reason_placeholder": "Voer reden in..."
+      },
+      "table": {
+        "id": "ID",
+        "advert": "Advertentie",
+        "reason": "Reden",
+        "details": "Details",
+        "reporter": "Melder",
+        "reviewed_by": "Beoordeeld door",
+        "created_at": "Aangemaakt",
+        "updated_at": "Bijgewerkt",
+        "status": "Status",
+        "actions": "Acties",
+        "select_all": "Alles selecteren",
+        "no_reports": "Geen rapporten gevonden",
+        "search_placeholder": "Zoeken op ID, advertentietitel of melder..."
+      },
+      "filters": {
+        "title": "Filters",
+        "status": "Status",
+        "reason": "Reden",
+        "search": "Zoeken",
+        "date_from": "Vanaf datum",
+        "date_to": "Tot datum",
+        "reviewer": "Beoordelaar",
+        "clear": "Filters wissen"
+      }
+    }
+  },
+  "chat": {
+    "title": "Berichten",
+    "empty": {
+      "title": "Nog geen gesprekken",
+      "description": "Start een gesprek door contact op te nemen met een verkoper vanaf een advertentiepagina."
+    },
+    "unknown_user": "Onbekende gebruiker",
+    "no_messages": "Nog geen berichten",
+    "connected": "Verbonden",
+    "disconnected": "Niet verbonden",
+    "loading_more": "Meer berichten laden",
+    "input_placeholder": "Typ een bericht...",
+    "error": "Verbindingsfout"
+  },
+  "billing": {
+    "title": "Facturering & Aankopen",
+    "tabs": {
+      "purchases": "Aankopen",
+      "benefits": "Actieve Voordelen"
+    },
+    "boost": {
+      "title": "Boost Uw Advertentie",
+      "description": "Kies een boostpakket om de zichtbaarheid van uw advertentie te vergroten",
+      "features": "Hogere zichtbaarheid in zoekresultaten",
+      "no_products": "Geen boostproducten beschikbaar"
+    },
+    "checkout": {
+      "proceed": "Doorgaan naar Betaling",
+      "processing": "Verwerken...",
+      "error": "Kan checkout-sessie niet maken"
+    },
+    "status": {
+      "pending": "In behandeling",
+      "completed": "Voltooid",
+      "failed": "Mislukt",
+      "refunded": "Terugbetaald"
+    },
+    "benefits": {
+      "boost": "Boost",
+      "premium": "Premium",
+      "hide_phone": "Telefoon Verbergen",
+      "reserve": "Reserve",
+      "highlight": "Markeren"
+    },
+    "amount": "Bedrag",
+    "date": "Datum",
+    "provider": "Provider",
+    "valid_until": "Geldig Tot",
+    "advert": "Advertentie",
+    "no_purchases": "Nog geen aankopen",
+    "no_benefits": "Geen actieve voordelen"
+  },
+  "notifications": {
+    "title": "Meldingen",
+    "empty": "Nog geen meldingen",
+    "view_all": "Alle meldingen bekijken",
+    "mark_read": "Als gelezen markeren",
+    "preferences": "Meldingvoorkeuren",
+    "types": {
+      "new_message": "Nieuw Bericht",
+      "advert_approved": "Advertentie Goedgekeurd",
+      "advert_rejected": "Advertentie Afgewezen",
+      "advert_contact": "Advertentie Contact",
+      "payment_completed": "Betaling Voltooid",
+      "favorite_new_ad": "Nieuwe Advertentie in Favorieten"
     }
   }
 }

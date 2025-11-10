@@ -7,6 +7,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import UserMenu from "@/components/UserMenu";
 import SearchBar from "@/components/SearchBar";
 import CategoryTree from "@/components/CategoryTree";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import NotificationBell from "@/components/NotificationBell";
 import { useI18n } from "@/i18n";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -165,7 +167,9 @@ export default function MainHeader() {
 
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center gap-2 shrink-0">
+          <LanguageSwitcher />
           <Button onClick={handlePostClick}>{t("common.post")}</Button>
+          <NotificationBell />
           <UserMenu />
         </div>
 
@@ -186,11 +190,15 @@ export default function MainHeader() {
                 onCategorySelect={() => setMobileMenuOpen(false)}
               />
               <div className="border-t pt-4 mt-auto space-y-2">
+                <div className="px-2">
+                  <LanguageSwitcher />
+                </div>
                 <Button onClick={handlePostClick} className="w-full">
                   {t("common.post")}
                 </Button>
                 <div className="px-2">
-                  <UserMenu />
+                  <NotificationBell />
+          <UserMenu />
                 </div>
               </div>
             </div>

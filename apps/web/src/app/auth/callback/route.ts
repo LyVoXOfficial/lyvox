@@ -128,6 +128,51 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
+    // Handle Itsme OAuth - update profile with verification status
+    if (data.user?.app_metadata?.provider === "itsme") {
+      try {
+        const itsmeKycLevel = data.user.user_metadata?.kyc_level || 
+                             data.user.app_metadata?.kyc_level || 
+                             "basic";
+        
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({
+            itsme_verified: true,
+            itsme_kyc_level: itsmeKycLevel,
+          })
+          .eq("id", data.user.id);
+
+        if (profileError) {
+          logger.error("Failed to update profile with Itsme verification", {
+            component: "AuthCallback",
+            action: "updateItsmeProfile",
+            metadata: {
+              userId: data.user.id,
+              error: profileError,
+            },
+          });
+          // Don't fail the auth flow if profile update fails
+        } else {
+          logger.info("Profile updated with Itsme verification", {
+            component: "AuthCallback",
+            action: "updateItsmeProfile",
+            metadata: {
+              userId: data.user.id,
+              kycLevel: itsmeKycLevel,
+            },
+          });
+        }
+      } catch (err) {
+        logger.error("Exception updating Itsme profile", {
+          component: "AuthCallback",
+          action: "updateItsmeProfile",
+          error: err,
+        });
+        // Don't fail the auth flow if profile update fails
+      }
+    }
+
     // Successful authentication - redirect to next page
     logger.info("Auth callback successful", {
       component: "AuthCallback",
@@ -135,6 +180,7 @@ export async function GET(request: NextRequest) {
       metadata: {
         userId: data.user?.id,
         email: data.user?.email,
+        provider: data.user?.app_metadata?.provider,
         next,
       },
     });

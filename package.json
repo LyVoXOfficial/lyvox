@@ -14,7 +14,10 @@
     "prune": "pnpm dlx ts-prune",
     "depcheck": "pnpm dlx depcheck",
     "test": "vitest run",
-    "checklist:update": "node scripts/update-checklist-progress.js"
+    "checklist:update": "node scripts/update-checklist-progress.js",
+    "analyze:queries": "node scripts/analyze-query-performance.mjs",
+    "monitor:daily": "node scripts/monitor-supabase-daily.mjs",
+    "monitor:alerts": "node scripts/monitor-supabase-alerts.mjs"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,css,md,json}": [

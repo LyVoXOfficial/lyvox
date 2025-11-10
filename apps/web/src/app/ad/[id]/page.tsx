@@ -5,6 +5,7 @@ import AdvertDetails from "@/components/AdvertDetails";
 import ReportButton from "@/components/ReportButton";
 import SellerCard from "@/components/SellerCard";
 import SimilarAdverts from "@/components/SimilarAdverts";
+import BenefitsBadge from "@/components/BenefitsBadge";
 import { formatCurrency, formatDate } from "@/i18n/format";
 import { getI18nProps, getInitialLocale } from "@/i18n/server";
 import { type Locale } from "@/lib/i18n";
@@ -164,6 +165,10 @@ type AdvertData = {
   seller: SellerInfo;
   category: CategorySummary | null;
   categoryBreadcrumbs: CategorySummary[];
+  benefits: Array<{
+    benefit_type: string;
+    valid_until: string;
+  }>;
 };
 
 type SimilarAdvertItem = {
@@ -536,7 +541,12 @@ export default async function AdvertPage({ params }: PageProps) {
       <script {...getJsonLdScriptProps(breadcrumbJsonLd)} />
       <div className="space-y-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <h1 className="text-2xl font-semibold">{data.advert.title}</h1>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-2xl font-semibold">{data.advert.title}</h1>
+            {data.benefits.length > 0 && <BenefitsBadge benefits={data.benefits} />}
+          </div>
+        </div>
         <ReportButton advertId={data.advert.id} />
       </div>
 
@@ -1307,12 +1317,25 @@ async function loadAdvertData(
     activeAdverts: activeAdvertsCount ?? 0,
   };
 
+  // Load benefits for this advert
+  const { data: benefitsRows } = await svc
+    .from("benefits")
+    .select("benefit_type, valid_until")
+    .eq("advert_id", advertId)
+    .gt("valid_until", new Date().toISOString());
+
+  const benefits = (benefitsRows || []).map((b) => ({
+    benefit_type: b.benefit_type,
+    valid_until: b.valid_until,
+  }));
+
   advertDebug("loadAdvertData:completed", {
     advertId,
     mediaCount: media.length,
     categoryResolved: Boolean(category),
     breadcrumbs: categoryBreadcrumbs.length,
     vehicleOptions: vehicleOptions.length,
+    benefitsCount: benefits.length,
   });
 
   return {
@@ -1329,6 +1352,7 @@ async function loadAdvertData(
     seller,
     category,
     categoryBreadcrumbs,
+    benefits,
   };
   } catch (error) {
     console.error("loadAdvertData unexpected error", { advertId, error });

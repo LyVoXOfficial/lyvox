@@ -35,7 +35,13 @@
     "save": "Save",
     "user": "User",
     "free": "Free",
-    "delete": "Delete"
+    "delete": "Delete",
+    "all": "All",
+    "open": "Open",
+    "changed": "Changed",
+    "before": "before",
+    "action": "action",
+    "confirm": "Confirm"
   },
   "filters": {
     "sort_by": "Sort by",
@@ -655,6 +661,161 @@
         "core": "Main information",
         "timing": "Timing & notes"
       }
+    }
+  },
+  "admin": {
+    "reports": {
+      "title": "Moderation Reports",
+      "tabs": {
+        "pending": "Pending",
+        "accepted": "Accepted",
+        "rejected": "Rejected"
+      },
+      "reasons": {
+        "fraud": "Fraud",
+        "spam": "Spam",
+        "duplicate": "Duplicate",
+        "nsfw": "Inappropriate content",
+        "other": "Other"
+      },
+      "errors": {
+        "auth_required": "Authentication required",
+        "access_denied": "Access denied",
+        "service_role_missing": "SUPABASE_SERVICE_ROLE_KEY is not configured. Set SUPABASE_SERVICE_ROLE_KEY environment variable on the server.",
+        "report_not_found": "Report not found",
+        "update_failed": "Failed to update report",
+        "bulk_select_required": "Select at least one report",
+        "unknown_action": "Unknown action for bulk update",
+        "bulk_update_failed": "Failed to update selected reports",
+        "bulk_partial_failure": "Some reports were not updated ({failureCount} out of {totalCount}). Check messages and try again."
+      },
+      "actions": {
+        "accept": "Accept",
+        "reject": "Reject",
+        "accept_unpublish": "Accept and unpublish",
+        "bulk_accept": "Accept selected",
+        "bulk_reject": "Reject selected",
+        "bulk_accept_unpublish": "Accept and unpublish selected",
+        "bulk_confirm": "Are you sure you want to {action} {count} report(s)? This action cannot be undone."
+      },
+      "moderation": {
+        "title": "Moderation Queue",
+        "all": "All",
+        "pending": "Pending",
+        "pending_review": "Pending Review",
+        "flagged": "Flagged",
+        "empty": "No adverts in queue",
+        "view": "View",
+        "analyze": "Analyze",
+        "approve": "Approve",
+        "reject": "Reject",
+        "flag": "Flag",
+        "analyze_error": "Failed to analyze advert",
+        "review_error": "Failed to review advert",
+        "detail_description": "Review advert details",
+        "description": "Description",
+        "price": "Price",
+        "created_at": "Created",
+        "ai_score": "AI Moderation Score",
+        "confirm_approve": "Approve Advert?",
+        "confirm_reject": "Reject Advert?",
+        "confirm_flag": "Flag Advert?",
+        "confirm_description": "Please provide a reason for this action (optional)",
+        "reason": "Reason (optional)",
+        "reason_placeholder": "Enter reason..."
+      },
+      "table": {
+        "id": "ID",
+        "advert": "Advert",
+        "reason": "Reason",
+        "details": "Details",
+        "reporter": "Reporter",
+        "reviewed_by": "Reviewed by",
+        "created_at": "Created",
+        "updated_at": "Updated",
+        "status": "Status",
+        "actions": "Actions",
+        "select_all": "Select all",
+        "no_reports": "No reports found",
+        "search_placeholder": "Search by ID, advert title, or reporter..."
+      },
+      "filters": {
+        "title": "Filters",
+        "status": "Status",
+        "reason": "Reason",
+        "search": "Search",
+        "date_from": "From date",
+        "date_to": "To date",
+        "reviewer": "Reviewer",
+        "clear": "Clear filters"
+      }
+    }
+  },
+  "chat": {
+    "title": "Messages",
+    "empty": {
+      "title": "No conversations yet",
+      "description": "Start a conversation by contacting a seller from an advert page."
+    },
+    "unknown_user": "Unknown User",
+    "no_messages": "No messages yet",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "loading_more": "Loading more messages",
+    "input_placeholder": "Type a message...",
+    "error": "Connection error"
+  },
+  "billing": {
+    "title": "Billing & Purchases",
+    "tabs": {
+      "purchases": "Purchases",
+      "benefits": "Active Benefits"
+    },
+    "boost": {
+      "title": "Boost Your Advert",
+      "description": "Choose a boost package to increase visibility of your advert",
+      "features": "Higher visibility in search results",
+      "no_products": "No boost products available"
+    },
+    "checkout": {
+      "proceed": "Proceed to Payment",
+      "processing": "Processing...",
+      "error": "Failed to create checkout session"
+    },
+    "status": {
+      "pending": "Pending",
+      "completed": "Completed",
+      "failed": "Failed",
+      "refunded": "Refunded"
+    },
+    "benefits": {
+      "boost": "Boost",
+      "premium": "Premium",
+      "hide_phone": "Hide Phone",
+      "reserve": "Reserve",
+      "highlight": "Highlight"
+    },
+    "amount": "Amount",
+    "date": "Date",
+    "provider": "Provider",
+    "valid_until": "Valid Until",
+    "advert": "Advert",
+    "no_purchases": "No purchases yet",
+    "no_benefits": "No active benefits"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "view_all": "View all notifications",
+    "mark_read": "Mark as read",
+    "preferences": "Notification Preferences",
+    "types": {
+      "new_message": "New Message",
+      "advert_approved": "Advert Approved",
+      "advert_rejected": "Advert Rejected",
+      "advert_contact": "Advert Contact",
+      "payment_completed": "Payment Completed",
+      "favorite_new_ad": "New Advert in Favorites"
     }
   }
 }

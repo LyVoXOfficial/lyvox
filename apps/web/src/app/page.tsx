@@ -1,7 +1,15 @@
-import InfoCarousel from "@/components/info-carousel";
-import CategoriesCarousel from "@/components/categories-carousel";
+import dynamic from "next/dynamic";
 import SectionTitle from "@/components/section-title";
 import AdsGrid from "@/components/ads-grid";
+
+// PERF-003: Lazy load carousels below the fold
+const InfoCarousel = dynamic(() => import("@/components/info-carousel"), {
+  ssr: true, // Keep SSR for SEO
+});
+
+const CategoriesCarousel = dynamic(() => import("@/components/categories-carousel"), {
+  ssr: true, // Keep SSR for SEO
+});
 // import TopSellersCarousel from "@/components/home/TopSellersCarousel";
 // import TopAdvertCard from "@/components/home/TopAdvertCard";
 import { getI18nProps } from "@/i18n/server";

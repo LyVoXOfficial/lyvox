@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import ReportButton from "@/components/ReportButton";
 import VerificationBadge from "@/components/VerificationBadge";
 import FavoriteToggle from "@/components/favorites/FavoriteToggle";
+import BenefitsBadge from "@/components/BenefitsBadge";
 import { useI18n } from "@/i18n";
 
 const dateFormatter = new Intl.DateTimeFormat("ru-RU", {
@@ -22,6 +23,10 @@ type Props = {
   image?: string | null;
   createdAt?: string | null;
   sellerVerified?: boolean;
+  benefits?: Array<{
+    benefit_type: string;
+    valid_until: string;
+  }>;
 };
 
 export default function AdCard({
@@ -33,6 +38,7 @@ export default function AdCard({
   image,
   createdAt,
   sellerVerified,
+  benefits,
 }: Props) {
   const { t } = useI18n();
   const priceFormatter = useMemo(
@@ -82,6 +88,11 @@ export default function AdCard({
             }}
           />
         </div>
+        {benefits && benefits.length > 0 && (
+          <div className="absolute left-3 top-3 z-10">
+            <BenefitsBadge benefits={benefits} />
+          </div>
+        )}
       </div>
       <div className="space-y-2 p-3">
         <Link

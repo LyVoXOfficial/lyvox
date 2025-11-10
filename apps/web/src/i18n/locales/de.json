@@ -35,7 +35,13 @@
     "save": "Speichern",
     "user": "Benutzer",
     "free": "Kostenlos",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "all": "Alle",
+    "open": "Öffnen",
+    "changed": "Geändert",
+    "before": "vor",
+    "action": "Aktion",
+    "confirm": "Bestätigen"
   },
   "filters": {
     "sort_by": "Sortieren nach",
@@ -655,6 +661,161 @@
         "core": "Wesentliche Informationen",
         "timing": "Zeit & Hinweise"
       }
+    }
+  },
+  "admin": {
+    "reports": {
+      "title": "Moderationsberichte",
+      "tabs": {
+        "pending": "Ausstehend",
+        "accepted": "Akzeptiert",
+        "rejected": "Abgelehnt"
+      },
+      "reasons": {
+        "fraud": "Betrug",
+        "spam": "Spam",
+        "duplicate": "Duplikat",
+        "nsfw": "Unangemessener Inhalt",
+        "other": "Sonstiges"
+      },
+      "errors": {
+        "auth_required": "Authentifizierung erforderlich",
+        "access_denied": "Zugriff verweigert",
+        "service_role_missing": "SUPABASE_SERVICE_ROLE_KEY ist nicht konfiguriert. Setzen Sie die Umgebungsvariable SUPABASE_SERVICE_ROLE_KEY auf dem Server.",
+        "report_not_found": "Bericht nicht gefunden",
+        "update_failed": "Aktualisierung des Berichts fehlgeschlagen",
+        "bulk_select_required": "Wählen Sie mindestens einen Bericht aus",
+        "unknown_action": "Unbekannte Aktion für Massenaktualisierung",
+        "bulk_update_failed": "Aktualisierung der ausgewählten Berichte fehlgeschlagen",
+        "bulk_partial_failure": "Einige Berichte wurden nicht aktualisiert ({failureCount} von {totalCount}). Überprüfen Sie die Nachrichten und versuchen Sie es erneut."
+      },
+      "actions": {
+        "accept": "Akzeptieren",
+        "reject": "Ablehnen",
+        "accept_unpublish": "Akzeptieren und veröffentlichen",
+        "bulk_accept": "Ausgewählte akzeptieren",
+        "bulk_reject": "Ausgewählte ablehnen",
+        "bulk_accept_unpublish": "Ausgewählte akzeptieren und veröffentlichen",
+        "bulk_confirm": "Sind Sie sicher, dass Sie {count} Bericht(e) {action} möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+      },
+      "moderation": {
+        "title": "Moderationswarteschlange",
+        "all": "Alle",
+        "pending": "Ausstehend",
+        "pending_review": "Benötigt Überprüfung",
+        "flagged": "Markiert",
+        "empty": "Keine Anzeigen in Warteschlange",
+        "view": "Ansehen",
+        "analyze": "Analysieren",
+        "approve": "Genehmigen",
+        "reject": "Ablehnen",
+        "flag": "Markieren",
+        "analyze_error": "Anzeige konnte nicht analysiert werden",
+        "review_error": "Anzeige konnte nicht überprüft werden",
+        "detail_description": "Anzeigendetails ansehen",
+        "description": "Beschreibung",
+        "price": "Preis",
+        "created_at": "Erstellt",
+        "ai_score": "KI-Moderation Bewertung",
+        "confirm_approve": "Anzeige Genehmigen?",
+        "confirm_reject": "Anzeige Ablehnen?",
+        "confirm_flag": "Anzeige Markieren?",
+        "confirm_description": "Bitte geben Sie einen Grund für diese Aktion an (optional)",
+        "reason": "Grund (optional)",
+        "reason_placeholder": "Grund eingeben..."
+      },
+      "table": {
+        "id": "ID",
+        "advert": "Anzeige",
+        "reason": "Grund",
+        "details": "Details",
+        "reporter": "Melder",
+        "reviewed_by": "Überprüft von",
+        "created_at": "Erstellt",
+        "updated_at": "Aktualisiert",
+        "status": "Status",
+        "actions": "Aktionen",
+        "select_all": "Alle auswählen",
+        "no_reports": "Keine Berichte gefunden",
+        "search_placeholder": "Suche nach ID, Anzeigentitel oder Melder..."
+      },
+      "filters": {
+        "title": "Filter",
+        "status": "Status",
+        "reason": "Grund",
+        "search": "Suchen",
+        "date_from": "Ab Datum",
+        "date_to": "Bis Datum",
+        "reviewer": "Prüfer",
+        "clear": "Filter löschen"
+      }
+    }
+  },
+  "chat": {
+    "title": "Nachrichten",
+    "empty": {
+      "title": "Noch keine Unterhaltungen",
+      "description": "Starten Sie eine Unterhaltung, indem Sie einen Verkäufer von einer Anzeigenseite aus kontaktieren."
+    },
+    "unknown_user": "Unbekannter Benutzer",
+    "no_messages": "Noch keine Nachrichten",
+    "connected": "Verbunden",
+    "disconnected": "Nicht verbunden",
+    "loading_more": "Weitere Nachrichten laden",
+    "input_placeholder": "Nachricht eingeben...",
+    "error": "Verbindungsfehler"
+  },
+  "billing": {
+    "title": "Abrechnung & Käufe",
+    "tabs": {
+      "purchases": "Käufe",
+      "benefits": "Aktive Vorteile"
+    },
+    "boost": {
+      "title": "Ihre Anzeige Boosten",
+      "description": "Wählen Sie ein Boost-Paket, um die Sichtbarkeit Ihrer Anzeige zu erhöhen",
+      "features": "Höhere Sichtbarkeit in Suchergebnissen",
+      "no_products": "Keine Boost-Produkte verfügbar"
+    },
+    "checkout": {
+      "proceed": "Zur Zahlung",
+      "processing": "Verarbeitung...",
+      "error": "Checkout-Sitzung konnte nicht erstellt werden"
+    },
+    "status": {
+      "pending": "Ausstehend",
+      "completed": "Abgeschlossen",
+      "failed": "Fehlgeschlagen",
+      "refunded": "Erstattet"
+    },
+    "benefits": {
+      "boost": "Boost",
+      "premium": "Premium",
+      "hide_phone": "Telefon Ausblenden",
+      "reserve": "Reservieren",
+      "highlight": "Hervorheben"
+    },
+    "amount": "Betrag",
+    "date": "Datum",
+    "provider": "Anbieter",
+    "valid_until": "Gültig Bis",
+    "advert": "Anzeige",
+    "no_purchases": "Noch keine Käufe",
+    "no_benefits": "Keine aktiven Vorteile"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "empty": "Noch keine Benachrichtigungen",
+    "view_all": "Alle Benachrichtigungen ansehen",
+    "mark_read": "Als gelesen markieren",
+    "preferences": "Benachrichtigungseinstellungen",
+    "types": {
+      "new_message": "Neue Nachricht",
+      "advert_approved": "Anzeige Genehmigt",
+      "advert_rejected": "Anzeige Abgelehnt",
+      "advert_contact": "Anzeige Kontakt",
+      "payment_completed": "Zahlung Abgeschlossen",
+      "favorite_new_ad": "Neue Anzeige in Favoriten"
     }
   }
 }

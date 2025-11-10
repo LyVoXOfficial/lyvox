@@ -35,7 +35,13 @@
     "save": "Enregistrer",
     "user": "Utilisateur",
     "free": "Gratuit",
-    "delete": "Supprimer"
+    "delete": "Supprimer",
+    "all": "Tous",
+    "open": "Ouvrir",
+    "changed": "Modifié",
+    "before": "avant",
+    "action": "action",
+    "confirm": "Confirmer"
   },
   "filters": {
     "sort_by": "Trier par",
@@ -655,6 +661,161 @@
         "core": "Informations principales",
         "timing": "Délais & remarques"
       }
+    }
+  },
+  "admin": {
+    "reports": {
+      "title": "Rapports de modération",
+      "tabs": {
+        "pending": "En attente",
+        "accepted": "Acceptés",
+        "rejected": "Rejetés"
+      },
+      "reasons": {
+        "fraud": "Fraude",
+        "spam": "Spam",
+        "duplicate": "Doublon",
+        "nsfw": "Contenu inapproprié",
+        "other": "Autre"
+      },
+      "errors": {
+        "auth_required": "Authentification requise",
+        "access_denied": "Accès refusé",
+        "service_role_missing": "SUPABASE_SERVICE_ROLE_KEY n'est pas configuré. Définissez la variable d'environnement SUPABASE_SERVICE_ROLE_KEY sur le serveur.",
+        "report_not_found": "Rapport non trouvé",
+        "update_failed": "Échec de la mise à jour du rapport",
+        "bulk_select_required": "Sélectionnez au moins un rapport",
+        "unknown_action": "Action inconnue pour la mise à jour en masse",
+        "bulk_update_failed": "Échec de la mise à jour des rapports sélectionnés",
+        "bulk_partial_failure": "Certains rapports n'ont pas été mis à jour ({failureCount} sur {totalCount}). Vérifiez les messages et réessayez."
+      },
+      "actions": {
+        "accept": "Accepter",
+        "reject": "Rejeter",
+        "accept_unpublish": "Accepter et dépublier",
+        "bulk_accept": "Accepter la sélection",
+        "bulk_reject": "Rejeter la sélection",
+        "bulk_accept_unpublish": "Accepter et dépublier la sélection",
+        "bulk_confirm": "Êtes-vous sûr de vouloir {action} {count} rapport(s) ? Cette action ne peut pas être annulée."
+      },
+      "moderation": {
+        "title": "File de Modération",
+        "all": "Tous",
+        "pending": "En Attente",
+        "pending_review": "Nécessite Révision",
+        "flagged": "Signalé",
+        "empty": "Aucune annonce en file",
+        "view": "Voir",
+        "analyze": "Analyser",
+        "approve": "Approuver",
+        "reject": "Rejeter",
+        "flag": "Signaler",
+        "analyze_error": "Impossible d'analyser l'annonce",
+        "review_error": "Impossible d'examiner l'annonce",
+        "detail_description": "Voir les détails de l'annonce",
+        "description": "Description",
+        "price": "Prix",
+        "created_at": "Créé",
+        "ai_score": "Score de Modération IA",
+        "confirm_approve": "Approuver l'Annonce?",
+        "confirm_reject": "Rejeter l'Annonce?",
+        "confirm_flag": "Signaler l'Annonce?",
+        "confirm_description": "Veuillez fournir une raison pour cette action (optionnel)",
+        "reason": "Raison (optionnel)",
+        "reason_placeholder": "Entrez la raison..."
+      },
+      "table": {
+        "id": "ID",
+        "advert": "Annonce",
+        "reason": "Raison",
+        "details": "Détails",
+        "reporter": "Signaleur",
+        "reviewed_by": "Examiné par",
+        "created_at": "Créé",
+        "updated_at": "Mis à jour",
+        "status": "Statut",
+        "actions": "Actions",
+        "select_all": "Tout sélectionner",
+        "no_reports": "Aucun rapport trouvé",
+        "search_placeholder": "Rechercher par ID, titre d'annonce ou signaleur..."
+      },
+      "filters": {
+        "title": "Filtres",
+        "status": "Statut",
+        "reason": "Raison",
+        "search": "Rechercher",
+        "date_from": "À partir de",
+        "date_to": "Jusqu'au",
+        "reviewer": "Examinateur",
+        "clear": "Effacer les filtres"
+      }
+    }
+  },
+  "chat": {
+    "title": "Messages",
+    "empty": {
+      "title": "Aucune conversation pour le moment",
+      "description": "Commencez une conversation en contactant un vendeur depuis une page d'annonce."
+    },
+    "unknown_user": "Utilisateur inconnu",
+    "no_messages": "Aucun message pour le moment",
+    "connected": "Connecté",
+    "disconnected": "Déconnecté",
+    "loading_more": "Chargement de plus de messages",
+    "input_placeholder": "Tapez un message...",
+    "error": "Erreur de connexion"
+  },
+  "billing": {
+    "title": "Facturation & Achats",
+    "tabs": {
+      "purchases": "Achats",
+      "benefits": "Avantages Actifs"
+    },
+    "boost": {
+      "title": "Boostez Votre Annonce",
+      "description": "Choisissez un package de boost pour augmenter la visibilité de votre annonce",
+      "features": "Visibilité accrue dans les résultats de recherche",
+      "no_products": "Aucun produit de boost disponible"
+    },
+    "checkout": {
+      "proceed": "Procéder au Paiement",
+      "processing": "Traitement...",
+      "error": "Échec de la création de la session de paiement"
+    },
+    "status": {
+      "pending": "En attente",
+      "completed": "Terminé",
+      "failed": "Échoué",
+      "refunded": "Remboursé"
+    },
+    "benefits": {
+      "boost": "Boost",
+      "premium": "Premium",
+      "hide_phone": "Masquer le Téléphone",
+      "reserve": "Réserve",
+      "highlight": "Mise en Évidence"
+    },
+    "amount": "Montant",
+    "date": "Date",
+    "provider": "Fournisseur",
+    "valid_until": "Valide Jusqu'au",
+    "advert": "Annonce",
+    "no_purchases": "Aucun achat pour le moment",
+    "no_benefits": "Aucun avantage actif"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "Aucune notification pour le moment",
+    "view_all": "Voir toutes les notifications",
+    "mark_read": "Marquer comme lu",
+    "preferences": "Préférences de Notification",
+    "types": {
+      "new_message": "Nouveau Message",
+      "advert_approved": "Annonce Approuvée",
+      "advert_rejected": "Annonce Rejetée",
+      "advert_contact": "Contact Annonce",
+      "payment_completed": "Paiement Terminé",
+      "favorite_new_ad": "Nouvelle Annonce dans les Favoris"
     }
   }
 }

@@ -7,8 +7,11 @@
 
 export * from "./adverts";
 export * from "./auth";
+export * from "./billing";
 export * from "./categories";
+export * from "./chat";
 export * from "./media";
+export * from "./notifications";
 export * from "./phone";
 export * from "./profile";
 export * from "./reports";

@@ -128,6 +128,18 @@ export async function PATCH(
   const requestedStatus = body.status;
   const isPublishing = requestedStatus === "active";
 
+  // Check if user is blocked when trying to publish
+  if (isPublishing) {
+    const { checkUserBlocked } = await import("@/lib/fraud/checkUserBlocked");
+    const blockCheck = await checkUserBlocked(user.id);
+    if (blockCheck.isBlocked) {
+      return createErrorResponse(ApiErrorCode.FORBIDDEN, {
+        status: 403,
+        detail: blockCheck.reason || "Account is temporarily blocked. Cannot publish adverts.",
+      });
+    }
+  }
+
   if (body.title !== undefined) {
     updates.title = body.title;
   }

@@ -6,6 +6,7 @@ import {
   ApiErrorCode,
 } from "@/lib/apiErrors";
 import type { TablesInsert } from "@/lib/supabaseTypes";
+import { checkUserBlocked } from "@/lib/fraud/checkUserBlocked";
 
 export const runtime = "nodejs";
 
@@ -17,6 +18,15 @@ export async function POST() {
 
   if (!user) {
     return createErrorResponse(ApiErrorCode.UNAUTHENTICATED, { status: 401 });
+  }
+
+  // Check if user is blocked
+  const blockCheck = await checkUserBlocked(user.id);
+  if (blockCheck.isBlocked) {
+    return createErrorResponse(ApiErrorCode.FORBIDDEN, {
+      status: 403,
+      detail: blockCheck.reason || "Account is temporarily blocked",
+    });
   }
 
   const { data: defaultCategory, error: categoryError } = await supabase

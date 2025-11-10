@@ -14,8 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Edit, Trash2, Copy, ChevronLeft, ChevronRight } from "lucide-react";
+import { Edit, Trash2, Copy, ChevronLeft, ChevronRight, Zap } from "lucide-react";
 import { useI18n } from "@/i18n";
+import BoostDialog from "@/components/BoostDialog";
 import { logger } from "@/lib/errorLogger";
 import {
   AlertDialog,
@@ -335,6 +336,16 @@ export default function MyAdvertsPage() {
                         {t("profile.edit")}
                       </Link>
                     </Button>
+                    {advert.status === "active" && (
+                      <BoostDialog
+                        advertId={advert.id}
+                        trigger={
+                          <Button variant="outline" size="sm" title={t("billing.boost.title")}>
+                            <Zap className="h-3 w-3" />
+                          </Button>
+                        }
+                      />
+                    )}
                     <Button
                       variant="outline"
                       size="sm"

@@ -5,6 +5,13 @@ import { supabaseServer } from "@/lib/supabaseServer";
 type ServiceClient = Awaited<ReturnType<typeof supabaseService>>;
 import { supabaseService } from "@/lib/supabaseService";
 import { hasAdminRole } from "@/lib/adminRole";
+import { getI18nProps } from "@/i18n/server";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { formatDate } from "@/lib/i18n/formatDate";
+import BulkActionsClient from "@/components/admin/BulkActionsClient";
 
 export const runtime = "nodejs";
 export const revalidate = 0;
@@ -37,24 +44,18 @@ type ModerationRow = {
   adverts: { id: string; user_id: string | null } | null;
 };
 
-const TABS: Array<{ value: ReportItem["status"]; label: string }> = [
-  { value: "pending", label: "В ожидании" },
-  { value: "accepted", label: "Приняты" },
-  { value: "rejected", label: "Отклонены" },
-];
+const AVAILABLE_REASONS = ["fraud", "spam", "duplicate", "nsfw", "other"];
 
-const REASON_LABEL: Record<string, string> = {
-  fraud: "Мошенничество",
-  spam: "Спам",
-  duplicate: "Дубликат",
-  nsfw: "Непристойный контент",
-  other: "Другое",
-};
+function getTabs(messages: any): Array<{ value: ReportItem["status"]; label: string }> {
+  return [
+    { value: "pending", label: messages?.admin?.reports?.tabs?.pending ?? "Pending" },
+    { value: "accepted", label: messages?.admin?.reports?.tabs?.accepted ?? "Accepted" },
+    { value: "rejected", label: messages?.admin?.reports?.tabs?.rejected ?? "Rejected" },
+  ];
+}
 
-const AVAILABLE_REASONS = Object.keys(REASON_LABEL);
-
-function formatReason(reason: string) {
-  return REASON_LABEL[reason] ?? reason;
+function formatReason(reason: string, messages: any): string {
+  return messages?.admin?.reports?.reasons?.[reason] ?? reason;
 }
 
 function encodeError(message: string) {
@@ -107,6 +108,7 @@ async function moderateReport(
   id: number,
   newStatus: "accepted" | "rejected",
   unpublish: boolean,
+  messages: any,
 ): Promise<{ success: boolean; error?: string }> {
   const { data: report, error: fetchError } = await service
     .from("reports")
@@ -117,7 +119,7 @@ async function moderateReport(
   if (fetchError || !report) {
     return {
       success: false,
-      error: fetchError?.message ?? "Жалоба не найдена",
+      error: fetchError?.message ?? (messages?.admin?.reports?.errors?.report_not_found ?? "Report not found"),
     };
   }
 
@@ -166,19 +168,20 @@ async function updateReport(
 ) {
   "use server";
 
+  const { messages } = await getI18nProps();
   const supabase = await supabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    await setFlash("Необходимо авторизоваться");
+    await setFlash(messages?.admin?.reports?.errors?.auth_required ?? "Authentication required");
     revalidatePath("/admin/reports");
     return;
   }
 
   if (!hasAdminRole(user)) {
-    await setFlash("Недостаточно прав");
+    await setFlash(messages?.admin?.reports?.errors?.access_denied ?? "Access denied");
     revalidatePath("/admin/reports");
     return;
   }
@@ -188,16 +191,16 @@ async function updateReport(
     service = await supabaseService();
   } catch {
     await setFlash(
-      "SUPABASE_SERVICE_ROLE_KEY не настроен. Укажите переменную окружения SUPABASE_SERVICE_ROLE_KEY на сервере.",
+      messages?.admin?.reports?.errors?.service_role_missing ?? "SUPABASE_SERVICE_ROLE_KEY is not configured.",
     );
     revalidatePath("/admin/reports");
     return;
   }
 
-  const result = await moderateReport(service, user.id, id, newStatus, unpublish);
+  const result = await moderateReport(service, user.id, id, newStatus, unpublish, messages);
 
   if (!result.success) {
-    await setFlash(result.error ?? "Не удалось обновить жалобу");
+    await setFlash(result.error ?? (messages?.admin?.reports?.errors?.update_failed ?? "Failed to update report"));
   } else {
     await setFlash(null);
   }
@@ -217,8 +220,10 @@ async function bulkUpdateReports(formData: FormData) {
     })
     .filter((value): value is number => value !== null);
 
+  const { messages } = await getI18nProps();
+
   if (!ids.length) {
-    await setFlash("Выберите хотя бы одну жалобу");
+    await setFlash(messages?.admin?.reports?.errors?.bulk_select_required ?? "Select at least one report");
     revalidatePath("/admin/reports");
     return;
   }
@@ -238,7 +243,7 @@ async function bulkUpdateReports(formData: FormData) {
       newStatus = "rejected";
       break;
     default:
-      await setFlash("Неизвестное действие для массового обновления");
+      await setFlash(messages?.admin?.reports?.errors?.unknown_action ?? "Unknown action for bulk update");
       revalidatePath("/admin/reports");
       return;
   }
@@ -249,13 +254,13 @@ async function bulkUpdateReports(formData: FormData) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    await setFlash("Необходимо авторизоваться");
+    await setFlash(messages?.admin?.reports?.errors?.auth_required ?? "Authentication required");
     revalidatePath("/admin/reports");
     return;
   }
 
   if (!hasAdminRole(user)) {
-    await setFlash("Недостаточно прав");
+    await setFlash(messages?.admin?.reports?.errors?.access_denied ?? "Access denied");
     revalidatePath("/admin/reports");
     return;
   }
@@ -265,7 +270,7 @@ async function bulkUpdateReports(formData: FormData) {
     service = await supabaseService();
   } catch {
     await setFlash(
-      "SUPABASE_SERVICE_ROLE_KEY не настроен. Укажите переменную окружения SUPABASE_SERVICE_ROLE_KEY на сервере.",
+      messages?.admin?.reports?.errors?.service_role_missing ?? "SUPABASE_SERVICE_ROLE_KEY is not configured.",
     );
     revalidatePath("/admin/reports");
     return;
@@ -274,7 +279,7 @@ async function bulkUpdateReports(formData: FormData) {
   let successCount = 0;
   let failureCount = 0;
   for (const id of ids) {
-    const result = await moderateReport(service, user.id, id, newStatus, unpublish);
+    const result = await moderateReport(service, user.id, id, newStatus, unpublish, messages);
     if (result.success) {
       successCount += 1;
     } else {
@@ -285,11 +290,10 @@ async function bulkUpdateReports(formData: FormData) {
   if (failureCount === 0) {
     await setFlash(null);
   } else if (successCount === 0) {
-    await setFlash("Не удалось обновить выбранные жалобы");
+    await setFlash(messages?.admin?.reports?.errors?.bulk_update_failed ?? "Failed to update selected reports");
   } else {
-    await setFlash(
-      `Часть жалоб не обновлена (${failureCount} из ${ids.length}). Проверьте сообщения и повторите попытку.`,
-    );
+    const message = messages?.admin?.reports?.errors?.bulk_partial_failure ?? "Some reports were not updated ({failureCount} out of {totalCount}).";
+    await setFlash(message.replace("{failureCount}", String(failureCount)).replace("{totalCount}", String(ids.length)));
   }
 
   revalidatePath("/admin/reports");
@@ -300,17 +304,35 @@ export default async function AdminReportsPage({
 }: {
   searchParams?: Record<string, string | string[]>;
 }) {
+  const { locale, messages } = await getI18nProps();
+  
+  // Helper function for translations
+  const t = (key: string, params?: Record<string, string | number>): string => {
+    const keys = key.split(".");
+    let value: any = messages;
+    for (const k of keys) {
+      value = value?.[k];
+    }
+    let result = value ?? key;
+    if (params) {
+      result = result.replace(/\{(\w+)\}/g, (match: string, varName: string) => {
+        return params[varName] !== undefined ? String(params[varName]) : match;
+      });
+    }
+    return result;
+  };
+
   const supabase = await supabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return <main className="p-4 text-sm text-red-600">Необходимо авторизоваться.</main>;
+    return <main className="p-4 text-sm text-red-600">{t("admin.reports.errors.auth_required")}.</main>;
   }
 
   if (!hasAdminRole(user)) {
-    return <main className="p-4 text-sm text-red-600">Доступ запрещён.</main>;
+    return <main className="p-4 text-sm text-red-600">{t("admin.reports.errors.access_denied")}.</main>;
   }
 
   let service: ServiceClient;
@@ -319,7 +341,7 @@ export default async function AdminReportsPage({
   } catch {
     return (
       <main className="p-4 text-sm text-red-600">
-        SUPABASE_SERVICE_ROLE_KEY не настроен. Укажите переменную окружения SUPABASE_SERVICE_ROLE_KEY на сервере.
+        {t("admin.reports.errors.service_role_missing")}
       </main>
     );
   }
@@ -336,14 +358,17 @@ export default async function AdminReportsPage({
   const reason = normalizeReason(rawReason);
   const rawSearch = getFirstParam(searchParams?.q);
   const searchQuery = sanitizeSearch(rawSearch);
+  const dateFrom = getFirstParam(searchParams?.date_from);
+  const dateTo = getFirstParam(searchParams?.date_to);
+  const sortBy = getFirstParam(searchParams?.sort_by) || "created_at";
+  const sortOrder = getFirstParam(searchParams?.sort_order) || "desc";
 
   let query = service
     .from("reports")
     .select(
       `id, reason, details, status, created_at, updated_at, advert_id, reporter, reviewed_by, adverts:advert_id ( id, title, user_id )`
     )
-    .eq("status", status)
-    .order("created_at", { ascending: false });
+    .eq("status", status);
 
   if (reason) {
     query = query.eq("reason", reason);
@@ -357,6 +382,21 @@ export default async function AdminReportsPage({
     );
   }
 
+  if (dateFrom) {
+    query = query.gte("created_at", `${dateFrom}T00:00:00Z`);
+  }
+
+  if (dateTo) {
+    query = query.lte("created_at", `${dateTo}T23:59:59Z`);
+  }
+
+  // Sorting
+  const sortColumn = sortBy === "updated_at" ? "updated_at" : 
+                     sortBy === "reason" ? "reason" :
+                     sortBy === "status" ? "status" :
+                     "created_at";
+  query = query.order(sortColumn, { ascending: sortOrder === "asc" });
+
   const { data, error } = await query;
 
   const items: ReportItem[] = (data ?? []) as ReportItem[];
@@ -367,127 +407,217 @@ export default async function AdminReportsPage({
     params.set("status", targetStatus);
     if (reason) params.set("reason", reason);
     if (searchQuery) params.set("q", searchQuery);
+    if (dateFrom) params.set("date_from", dateFrom);
+    if (dateTo) params.set("date_to", dateTo);
+    if (sortBy && sortBy !== "created_at") params.set("sort_by", sortBy);
+    if (sortOrder && sortOrder !== "desc") params.set("sort_order", sortOrder);
     return `?${params.toString()}`;
   };
 
+  const tabs = getTabs(messages);
+
   return (
     <main className="mx-auto max-w-6xl space-y-4 p-4">
-      <h1 className="text-2xl font-semibold">Модерация жалоб</h1>
+      <h1 className="text-2xl font-semibold">{t("admin.reports.title")}</h1>
 
       {(flashError || loadError) && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
-          {flashError || loadError}
-        </div>
+        <Card className="border-destructive">
+          <CardContent className="p-4">
+            <div className="text-sm text-destructive font-medium">
+              {flashError || loadError}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
-      <div className="flex gap-2 text-sm">
-        {TABS.map((tab) => (
-          <Link
-            key={tab.value}
-            href={createTabHref(tab.value)}
-            className={`rounded-xl border px-3 py-1 ${
-              status === tab.value ? "bg-black text-white" : "hover:bg-muted"
-            }`}
-          >
-            {tab.label}
-          </Link>
-        ))}
-      </div>
-
-      <form
-        method="get"
-        className="flex flex-wrap items-end gap-3 rounded-2xl border bg-muted/20 p-3 text-sm"
-      >
-        <input type="hidden" name="status" value={status} />
-        <div className="flex min-w-[200px] flex-col gap-1">
-          <label
-            htmlFor="reason-filter"
-            className="text-xs font-medium uppercase tracking-wide text-muted-foreground"
-          >
-            Причина
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex gap-2">
+          {tabs.map((tab) => (
+            <Button
+              key={tab.value}
+              asChild
+              variant={status === tab.value ? "default" : "outline"}
+              size="sm"
+            >
+              <Link href={createTabHref(tab.value)}>
+                {tab.label}
+              </Link>
+            </Button>
+          ))}
+        </div>
+        <form method="get" className="ml-auto flex items-center gap-2 text-sm">
+          <input type="hidden" name="status" value={status} />
+          {reason && <input type="hidden" name="reason" value={reason} />}
+          {searchQuery && <input type="hidden" name="q" value={searchQuery} />}
+          {dateFrom && <input type="hidden" name="date_from" value={dateFrom} />}
+          {dateTo && <input type="hidden" name="date_to" value={dateTo} />}
+          <label htmlFor="sort-select" className="text-muted-foreground">
+            {t("filters.sort_by")}:
           </label>
           <select
-            id="reason-filter"
-            name="reason"
-            defaultValue={reason ?? ""}
-            className="rounded-lg border px-3 py-1.5"
+            id="sort-select"
+            name="sort_by"
+            className="rounded-lg border px-2 py-1 text-sm h-8"
+            defaultValue={`${sortBy}_${sortOrder}`}
+            onChange={(e) => {
+              const form = e.target.closest("form");
+              if (form) {
+                const [col, ord] = e.target.value.split("_");
+                const sortByInput = document.createElement("input");
+                sortByInput.type = "hidden";
+                sortByInput.name = "sort_by";
+                sortByInput.value = col;
+                form.appendChild(sortByInput);
+                const sortOrderInput = document.createElement("input");
+                sortOrderInput.type = "hidden";
+                sortOrderInput.name = "sort_order";
+                sortOrderInput.value = ord;
+                form.appendChild(sortOrderInput);
+                form.submit();
+              }
+            }}
           >
-            <option value="">Все причины</option>
-            {AVAILABLE_REASONS.map((code) => (
-              <option key={code} value={code}>
-                {formatReason(code)}
-              </option>
-            ))}
+            <option value="created_at_desc">{t("admin.reports.table.created_at")} ↓</option>
+            <option value="created_at_asc">{t("admin.reports.table.created_at")} ↑</option>
+            <option value="updated_at_desc">{t("admin.reports.table.updated_at")} ↓</option>
+            <option value="updated_at_asc">{t("admin.reports.table.updated_at")} ↑</option>
+            <option value="reason_asc">{t("admin.reports.table.reason")} ↑</option>
+            <option value="reason_desc">{t("admin.reports.table.reason")} ↓</option>
           </select>
-        </div>
-
-        <div className="flex min-w-[240px] flex-col gap-1">
-          <label
-            htmlFor="search-filter"
-            className="text-xs font-medium uppercase tracking-wide text-muted-foreground"
-          >
-            Поиск
-          </label>
-          <input
-            id="search-filter"
-            name="q"
-            defaultValue={searchQuery ?? ""}
-            placeholder="ID объявления или жалобщик"
-            className="rounded-lg border px-3 py-1.5"
-          />
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          <button type="submit" className="rounded-xl bg-black px-3 py-1.5 text-white">
-            Применить
-          </button>
-          {(reason || searchQuery) && (
-            <Link href={`?status=${status}`} className="rounded-xl border px-3 py-1.5">
-              Сбросить
-            </Link>
-          )}
-        </div>
-      </form>
-
-      {status === "pending" && (
-        <form
-          id="bulkForm"
-          action={bulkUpdateReports}
-          className="flex flex-wrap items-center gap-2 rounded-2xl border bg-muted/10 p-3 text-sm"
-        >
-          <span className="font-medium">Массовые действия:</span>
-          <button
-            type="submit"
-            name="action"
-            value="accept"
-            className="rounded-xl bg-black px-3 py-1.5 text-white"
-          >
-            Принять
-          </button>
-          <button
-            type="submit"
-            name="action"
-            value="accept_unpublish"
-            className="rounded-xl border px-3 py-1.5"
-          >
-            Принять и снять с публикации
-          </button>
-          <button
-            type="submit"
-            name="action"
-            value="reject"
-            className="rounded-xl border px-3 py-1.5"
-          >
-            Отклонить
-          </button>
-          <span className="text-xs text-muted-foreground">
-            Отметьте нужные жалобы галочкой перед выполнением действия.
-          </span>
         </form>
+      </div>
+
+      <Card>
+        <CardContent className="p-4">
+          <form
+            method="get"
+            className="flex flex-wrap items-end gap-4"
+          >
+            <input type="hidden" name="status" value={status} />
+            <div className="flex min-w-[200px] flex-col gap-1.5">
+              <label
+                htmlFor="reason-filter"
+                className="text-xs font-medium uppercase tracking-wide text-muted-foreground"
+              >
+                {t("admin.reports.filters.reason")}
+              </label>
+              <select
+                id="reason-filter"
+                name="reason"
+                defaultValue={reason ?? ""}
+                className="rounded-lg border px-3 py-1.5 text-sm h-9"
+              >
+                <option value="">{t("common.all")} {t("admin.reports.filters.reason")}</option>
+                {AVAILABLE_REASONS.map((code) => (
+                  <option key={code} value={code}>
+                    {formatReason(code, messages)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex min-w-[240px] flex-col gap-1.5">
+              <label
+                htmlFor="search-filter"
+                className="text-xs font-medium uppercase tracking-wide text-muted-foreground"
+              >
+                {t("admin.reports.filters.search")}
+              </label>
+              <input
+                id="search-filter"
+                name="q"
+                defaultValue={searchQuery ?? ""}
+                placeholder={t("admin.reports.table.search_placeholder")}
+                className="rounded-lg border px-3 py-1.5 text-sm h-9"
+              />
+            </div>
+
+            <div className="flex min-w-[180px] flex-col gap-1.5">
+              <label
+                htmlFor="date-from-filter"
+                className="text-xs font-medium uppercase tracking-wide text-muted-foreground"
+              >
+                {t("admin.reports.filters.date_from")}
+              </label>
+              <input
+                id="date-from-filter"
+                name="date_from"
+                type="date"
+                defaultValue={getFirstParam(searchParams?.date_from) ?? ""}
+                className="rounded-lg border px-3 py-1.5 text-sm h-9"
+              />
+            </div>
+
+            <div className="flex min-w-[180px] flex-col gap-1.5">
+              <label
+                htmlFor="date-to-filter"
+                className="text-xs font-medium uppercase tracking-wide text-muted-foreground"
+              >
+                {t("admin.reports.filters.date_to")}
+              </label>
+              <input
+                id="date-to-filter"
+                name="date_to"
+                type="date"
+                defaultValue={getFirstParam(searchParams?.date_to) ?? ""}
+                className="rounded-lg border px-3 py-1.5 text-sm h-9"
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Button type="submit" size="sm">
+                {t("search.apply")}
+              </Button>
+              {(reason || searchQuery || getFirstParam(searchParams?.date_from) || getFirstParam(searchParams?.date_to)) && (
+                <Button type="button" size="sm" variant="outline" asChild>
+                  <Link href={`?status=${status}`}>
+                    {t("search.clear")}
+                  </Link>
+                </Button>
+              )}
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      {status === "pending" && items.length > 0 && (
+        <>
+          <BulkActionsClient totalCount={items.length} formId="bulkForm" />
+          <form
+            id="bulkForm"
+            action={bulkUpdateReports}
+          >
+            <Button
+              type="submit"
+              name="action"
+              value="accept"
+              className="hidden"
+              id="bulk-accept-btn"
+            />
+            <Button
+              type="submit"
+              name="action"
+              value="accept_unpublish"
+              className="hidden"
+              id="bulk-accept-unpublish-btn"
+            />
+            <Button
+              type="submit"
+              name="action"
+              value="reject"
+              className="hidden"
+              id="bulk-reject-btn"
+            />
+          </form>
+        </>
       )}
 
       {!items.length ? (
-        <p className="text-sm text-muted-foreground">Жалоб нет.</p>
+        <Card>
+          <CardContent className="py-8 text-center text-muted-foreground">
+            {t("admin.reports.table.no_reports")}
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid gap-3">
           {items.map((report) => {
@@ -501,69 +631,92 @@ export default async function AdminReportsPage({
             const rejectAction = updateReport.bind(null, report.id, "rejected", false);
 
             const checkboxId = `select-report-${report.id}`;
+            const statusBadgeVariant = 
+              report.status === "accepted" ? "default" :
+              report.status === "rejected" ? "destructive" :
+              "outline";
 
             return (
-              <div key={report.id} className="space-y-3 rounded-2xl border p-4 text-sm">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="flex items-start gap-3">
-                    {status === "pending" && (
-                      <div className="pt-1">
-                        <input
-                          id={checkboxId}
-                          type="checkbox"
-                          name="ids"
-                          value={report.id}
-                          form="bulkForm"
-                          className="h-4 w-4 rounded border"
-                          aria-label={`Выбрать жалобу #${report.id}`}
-                        />
+              <Card key={report.id}>
+                <CardContent className="p-4">
+                  <div className="space-y-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        {status === "pending" && (
+                          <div className="pt-1 shrink-0">
+                            <Checkbox
+                              id={checkboxId}
+                              name="ids"
+                              value={report.id}
+                              form="bulkForm"
+                              aria-label={`${t("admin.reports.table.select_all")} #${report.id}`}
+                            />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-2">
+                            <span className="font-semibold">#{report.id}</span>
+                            <Badge variant={statusBadgeVariant}>
+                              {t(`admin.reports.tabs.${report.status}`)}
+                            </Badge>
+                            <Badge variant="outline">
+                              {formatReason(report.reason, messages)}
+                            </Badge>
+                          </div>
+                          <div className="text-sm text-muted-foreground space-y-1">
+                            <div>
+                              {t("admin.reports.table.advert")}:{" "}
+                              <Link href={`/ad/${report.advert_id}`} className="underline hover:text-foreground">
+                                {report.adverts?.title || report.advert_id}
+                              </Link>
+                            </div>
+                            <div>
+                              {t("admin.reports.table.reporter")}: {report.reporter}
+                            </div>
+                            <div>
+                              {t("admin.reports.table.created_at")}: {formatDate(report.created_at, locale, "short")}
+                            </div>
+                            {report.reviewed_by && (
+                              <div>
+                                {t("admin.reports.table.reviewed_by")}: {report.reviewed_by}
+                              </div>
+                            )}
+                          </div>
+                          {report.details && (
+                            <div className="mt-3 p-3 bg-muted/50 rounded-lg text-sm whitespace-pre-wrap">
+                              {report.details}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {status === "pending" ? (
+                      <div className="flex flex-wrap gap-2 pt-2 border-t">
+                        <form action={acceptAction}>
+                          <Button type="submit" size="sm">
+                            {t("admin.reports.actions.accept")}
+                          </Button>
+                        </form>
+                        <form action={acceptAndUnpublishAction}>
+                          <Button type="submit" size="sm" variant="outline">
+                            {t("admin.reports.actions.accept_unpublish")}
+                          </Button>
+                        </form>
+                        <form action={rejectAction}>
+                          <Button type="submit" size="sm" variant="destructive">
+                            {t("admin.reports.actions.reject")}
+                          </Button>
+                        </form>
+                      </div>
+                    ) : (
+                      <div className="text-xs text-muted-foreground pt-2 border-t">
+                        {t("admin.reports.table.status")} {t("common.changed")}: {formatDate(report.updated_at ?? report.created_at, locale, "short")}
                       </div>
                     )}
-                    <div>
-                      <div className="font-medium">
-                        #{report.id} • {formatReason(report.reason)} •{" "}
-                        {new Date(report.created_at).toLocaleString("ru-RU")}
-                      </div>
-                      <div className="text-muted-foreground">
-                        Объявление: {report.advert_id} • Жалобщик: {report.reporter}
-                      </div>
-                      {report.details && (
-                        <div className="mt-1 whitespace-pre-wrap text-muted-foreground">
-                          {report.details}
-                        </div>
-                      )}
-                    </div>
                   </div>
-                  <Link href={`/ad/${report.advert_id}`} className="text-sm underline">
-                    Открыть объявление
-                  </Link>
-                </div>
-
-                {status === "pending" ? (
-                  <div className="flex flex-wrap gap-2">
-                    <form action={acceptAction}>
-                      <button type="submit" className="rounded-xl bg-black px-3 py-1.5 text-white">
-                        Принять
-                      </button>
-                    </form>
-                    <form action={acceptAndUnpublishAction}>
-                      <button type="submit" className="rounded-xl border px-3 py-1.5">
-                        Принять + снять с публикации
-                      </button>
-                    </form>
-                    <form action={rejectAction}>
-                      <button type="submit" className="rounded-xl border px-3 py-1.5">
-                        Отклонить
-                      </button>
-                    </form>
-                  </div>
-                ) : (
-                  <div className="text-xs text-muted-foreground">
-                    Статус изменён: {" "}
-                    {new Date(report.updated_at ?? report.created_at).toLocaleString("ru-RU")}
-                  </div>
-                )}
-              </div>
+                </CardContent>
+              </Card>
             );
           })}
         </div>

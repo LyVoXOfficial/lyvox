@@ -16,8 +16,9 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import UploadGallery from "@/components/upload-gallery";
 import { getCategoryIcon } from "@/lib/categoryIcons";
-import { ChevronDown, Check } from "lucide-react";
+import { ChevronDown, Check, Zap } from "lucide-react";
 import { detectCategoryType, getCategoryTypeName } from "@/lib/utils/categoryDetector";
+import BoostDialog from "@/components/BoostDialog";
 import { ElectronicsFields } from "@/components/catalog/ElectronicsFields";
 import { RealEstateFields } from "@/components/catalog/RealEstateFields";
 import { FashionFields } from "@/components/catalog/FashionFields";
@@ -2387,6 +2388,17 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             {t("post.form.back")}
           </Button>
           <div className="flex gap-2">
+            {advertToEdit?.status === "active" && advertId && (
+              <BoostDialog
+                advertId={advertId}
+                trigger={
+                  <Button variant="outline" disabled={isLoading} title={t("billing.boost.title")}>
+                    <Zap className="mr-1 h-4 w-4" />
+                    {t("billing.boost.title")}
+                  </Button>
+                }
+              />
+            )}
             <Button variant="outline" onClick={handleSaveDraft} disabled={isLoading}>
               {t("post.form.save_draft")}
             </Button>

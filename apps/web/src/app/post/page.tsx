@@ -1,7 +1,20 @@
+import dynamic from "next/dynamic";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { getI18nProps } from "@/i18n/server";
-import { PostForm } from "./PostForm";
 import type { Category } from "@/lib/types";
+
+// PERF-003: Lazy load PostForm (heavy component with catalog fields)
+const PostForm = dynamic(() => import("./PostForm").then(mod => ({ default: mod.PostForm })), {
+  loading: () => (
+    <div className="container mx-auto max-w-3xl p-4">
+      <div className="animate-pulse space-y-4">
+        <div className="h-8 bg-muted rounded w-1/3"></div>
+        <div className="h-64 bg-muted rounded"></div>
+      </div>
+    </div>
+  ),
+  ssr: false, // Client-only component
+});
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
