@@ -4,6 +4,7 @@
     "description": "Place de marché: biens, services, immobilier"
   },
   "nav": {
+    "sell": "Vendre",
     "sign_in": "Se connecter",
     "join": "S'inscrire",
     "sign_out": "Se déconnecter",

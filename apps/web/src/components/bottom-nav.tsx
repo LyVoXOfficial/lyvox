@@ -3,7 +3,7 @@
 import type React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Grid3x3, Home, MoreHorizontal, PlusCircle, User } from "lucide-react";
+import { Grid3x3, Home, MoreHorizontal, Plus, User } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 
@@ -41,8 +41,8 @@ export default function BottomNav() {
     },
     {
       href: "/post",
-      label: t("common.post") || "Post",
-      icon: PlusCircle,
+      label: t("nav.sell") || "Sell",
+      icon: Plus,
       matchPattern: defaultMatch,
     },
     {
@@ -67,6 +67,22 @@ export default function BottomNav() {
           const isActive = item.matchPattern
             ? item.matchPattern(path, item.href)
             : defaultMatch(path, item.href);
+
+          if (item.href === "/post") {
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex flex-col items-center justify-center gap-1"
+                aria-label={item.label}
+              >
+                <span className="lyvox-cta-gradient -mt-5 flex h-12 w-12 items-center justify-center rounded-full text-primary-foreground ring-4 ring-background">
+                  <Plus className="h-6 w-6" aria-hidden="true" />
+                </span>
+                <span className="text-[11px] font-semibold leading-none text-primary">{item.label}</span>
+              </Link>
+            );
+          }
 
           return (
             <Link

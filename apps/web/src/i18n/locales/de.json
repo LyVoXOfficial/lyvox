@@ -4,6 +4,7 @@
     "description": "Marktplatz für Waren, Dienstleistungen und Immobilien"
   },
   "nav": {
+    "sell": "Verkaufen",
     "sign_in": "Anmelden",
     "join": "Registrieren",
     "sign_out": "Abmelden",

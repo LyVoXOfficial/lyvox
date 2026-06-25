@@ -4,6 +4,7 @@
     "description": "Marktplaats voor goederen, diensten en vastgoed"
   },
   "nav": {
+    "sell": "Verkopen",
     "sign_in": "Inloggen",
     "join": "Aanmelden",
     "sign_out": "Uitloggen",

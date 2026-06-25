@@ -4,6 +4,7 @@
     "description": "Marketplace for goods, services and real estate"
   },
   "nav": {
+    "sell": "Sell",
     "sign_in": "Sign in",
     "join": "Join",
     "sign_out": "Sign out",

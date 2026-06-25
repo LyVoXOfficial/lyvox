@@ -285,25 +285,25 @@ export default async function Home() {
   return (
     <>
       <script {...getJsonLdScriptProps(organizationJsonLd)} />
-      <div className="space-y-8">
-        <section className="lyvox-hero-mesh grid gap-5 overflow-hidden rounded-2xl border border-border/70 bg-card p-5 shadow-[var(--shadow-card)] md:p-8 lg:grid-cols-[1.45fr_0.55fr]">
-          <div className="space-y-6">
-            <div className="max-w-2xl space-y-3">
-              <p className="text-xs font-bold uppercase tracking-[0.08em] text-primary">{t("home.hero_tag")}</p>
-              <h1 className="text-4xl font-extrabold leading-[1.05] tracking-tight text-foreground md:text-5xl">
+      <div className="space-y-6 md:space-y-8">
+        <section className="lyvox-hero-mesh grid gap-4 overflow-hidden rounded-2xl border border-border/70 bg-card p-4 shadow-[var(--shadow-card)] sm:p-6 md:gap-5 md:p-8 lg:grid-cols-[1.45fr_0.55fr]">
+          <div className="space-y-4 md:space-y-6">
+            <div className="max-w-2xl space-y-2.5 md:space-y-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-primary md:text-xs">{t("home.hero_tag")}</p>
+              <h1 className="text-[1.65rem] font-extrabold leading-[1.12] tracking-tight text-foreground sm:text-4xl sm:leading-[1.05] md:text-5xl">
                 {t("home.hero_title")}
               </h1>
-              <p className="max-w-xl text-base leading-7 text-muted-foreground">
+              <p className="hidden max-w-xl text-sm leading-6 text-muted-foreground sm:block md:text-base md:leading-7">
                 {t("home.hero_subtitle")}
               </p>
             </div>
             <SearchBar />
-            <div className="flex flex-wrap gap-2">
+            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
               {quickActions.map(({ href, label, icon: Icon }) => (
                 <Link
                   key={href}
                   href={href}
-                  className="inline-flex h-10 items-center gap-2 rounded-full border border-border/70 bg-card px-4 text-sm font-semibold text-foreground shadow-[var(--shadow-soft)] transition hover:border-primary/40 hover:text-primary"
+                  className="inline-flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-border/70 bg-card px-4 text-sm font-semibold text-foreground shadow-[var(--shadow-soft)] transition hover:border-primary/40 hover:text-primary"
                 >
                   <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
                   {label}
@@ -311,7 +311,7 @@ export default async function Home() {
               ))}
             </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+          <div className="hidden gap-3 lg:grid lg:grid-cols-1">
             <div className="rounded-xl border border-border/60 bg-card/80 p-4 backdrop-blur">
               <div className="text-3xl font-extrabold tracking-tight text-foreground">{latestAds.length}</div>
               <div className="mt-1 text-sm text-muted-foreground">{t("home.stat_active")}</div>
