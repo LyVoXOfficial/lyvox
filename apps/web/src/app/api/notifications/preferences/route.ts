@@ -11,6 +11,44 @@ import { updateNotificationPreferencesSchema } from "@/lib/validations/notificat
 
 export const runtime = "nodejs";
 
+type NotificationPreferences = {
+  email: Record<string, boolean>;
+  push: Record<string, boolean>;
+  sms: Record<string, boolean>;
+};
+
+const emptyPreferences = (): NotificationPreferences => ({
+  email: {},
+  push: {},
+  sms: {},
+});
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function toBooleanRecord(value: unknown): Record<string, boolean> {
+  if (!isRecord(value)) {
+    return {};
+  }
+
+  return Object.fromEntries(
+    Object.entries(value).filter((entry): entry is [string, boolean] => typeof entry[1] === "boolean"),
+  );
+}
+
+function normalizePreferences(value: unknown): NotificationPreferences {
+  if (!isRecord(value)) {
+    return emptyPreferences();
+  }
+
+  return {
+    email: toBooleanRecord(value.email),
+    push: toBooleanRecord(value.push),
+    sms: toBooleanRecord(value.sms),
+  };
+}
+
 export async function GET() {
   const supabase = await supabaseServer();
   const {
@@ -31,11 +69,7 @@ export async function GET() {
     return handleSupabaseError(error, ApiErrorCode.FETCH_FAILED);
   }
 
-  const preferences = profile?.notification_preferences || {
-    email: {},
-    push: {},
-    sms: {},
-  };
+  const preferences = normalizePreferences(profile?.notification_preferences);
 
   return createSuccessResponse({ preferences });
 }
@@ -76,11 +110,7 @@ export async function POST(req: Request) {
     .eq("id", user.id)
     .maybeSingle();
 
-  const currentPreferences = profile?.notification_preferences || {
-    email: {},
-    push: {},
-    sms: {},
-  };
+  const currentPreferences = normalizePreferences(profile?.notification_preferences);
 
   // Merge with new preferences
   const updatedPreferences = {
@@ -100,4 +130,3 @@ export async function POST(req: Request) {
 
   return createSuccessResponse({ preferences: updatedPreferences });
 }
-

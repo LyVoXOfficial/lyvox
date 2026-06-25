@@ -4,8 +4,14 @@ export const revalidate = 300;
 import { supabaseService } from "@/lib/supabaseService";
 import type { Category } from "@/lib/types";
 import CategoryList from "@/components/category-list";
+import { getI18nProps } from "@/i18n/server";
 
 export default async function CategoriesIndex() {
+  const { messages } = await getI18nProps();
+  const t = (key: string, fallback: string): string => {
+    const value = key.split(".").reduce<any>((acc, part) => (acc ? acc[part] : undefined), messages);
+    return typeof value === "string" ? value : fallback;
+  };
   const supabase = await supabaseService();
   const { data, error } = await supabase
     .from("categories")
@@ -18,14 +24,14 @@ export default async function CategoriesIndex() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-zinc-900">Категории</h1>
+      <h1 className="text-2xl font-semibold tracking-normal text-foreground">{t("common.categories", "Categories")}</h1>
       <p className="text-sm text-muted-foreground">
-        Выберите раздел, чтобы перейти к объявлениям и подкатегориям.
+        Choose a section to browse listings and subcategories.
       </p>
       {items.length ? (
         <CategoryList items={items} base="/c" />
       ) : (
-        <p className="text-sm text-muted-foreground">Категории временно недоступны.</p>
+        <p className="text-sm text-muted-foreground">Categories are temporarily unavailable.</p>
       )}
     </div>
   );

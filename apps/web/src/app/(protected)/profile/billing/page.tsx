@@ -14,7 +14,7 @@ export default async function BillingPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/login?next=/profile/billing");
   }
 
   // Load purchases
@@ -66,4 +66,3 @@ export default async function BillingPage() {
     />
   );
 }
-

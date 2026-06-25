@@ -21,9 +21,12 @@ export default function ComparisonInstructions({ className }: Props) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const dismissed = window.localStorage.getItem(STORAGE_KEY) === "1";
-    setVisible(!dismissed);
-    setHydrated(true);
+    const timeout = window.setTimeout(() => {
+      const dismissed = window.localStorage.getItem(STORAGE_KEY) === "1";
+      setVisible(!dismissed);
+      setHydrated(true);
+    }, 0);
+    return () => window.clearTimeout(timeout);
   }, []);
 
   if (!hydrated || !visible) {
@@ -58,4 +61,3 @@ export default function ComparisonInstructions({ className }: Props) {
     </Alert>
   );
 }
-

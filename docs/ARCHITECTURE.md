@@ -65,9 +65,9 @@ It uses a modular architecture with reusable components located in `apps/web/src
 
 ## Rate Limiting & Abuse Control
 
-- **Covered endpoints.** `/api/phone/request`, `/api/phone/verify`, `/api/auth/register`, `/api/reports/create`, `/api/reports/list`, `/api/reports/update`, and other sensitive routes wrap `withRateLimit` (Upstash Redis sliding window).
+- **Covered endpoints.** `/api/phone/request`, `/api/phone/verify`, `/api/auth/check-email`, `/api/reports/create`, `/api/reports/list`, `/api/reports/update`, `/api/chat/start`, `/api/chat/send`, `/api/billing/checkout`, `/api/search`, `/api/favorites/*`, `/api/top-adverts`, `/api/top-sellers`, and `/api/adverts/{id}/view` wrap `withRateLimit` (Upstash Redis sliding window); see `docs/API_REFERENCE.md` for exact per-route limits. **Note:** `/api/auth/register` is **not** currently rate-limited at the API layer.
 - **Key strategy.** Anonymous traffic keys rate limits by IP, authenticated flows by `user_id`. Roadmap: dynamic throttling that relaxes limits for high-trust users and tightens for new/low-trust accounts.
-- **Response contract.** Breaches return HTTP 429 with body `{"error":"rate_limited","retry_after_seconds":<int>}`. `fetcher.ts` converts this to `RateLimitedError` for consistent UX messaging.
+- **Response contract.** Breaches return HTTP 429 with the standard error envelope `{ "ok": false, "error": "RATE_LIMITED", "detail": "..." }` plus `Retry-After` and `RateLimit-*` headers (`apps/web/src/lib/rateLimiter.ts`). Limiters **fail open** when Upstash env vars are unset.
 
 ## Access Roles (Summary)
 

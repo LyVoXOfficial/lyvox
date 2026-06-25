@@ -18,9 +18,14 @@ function normalize(value: unknown): string[] {
 export function hasAdminRole(user: SupabaseUserLike): boolean {
   if (!user) return false;
 
-  const { app_metadata, user_metadata } = user as {
+  // SECURITY: Only `app_metadata` may be trusted for authorization.
+  // `user_metadata` (raw_user_meta_data) is writable by the user themselves via
+  // `supabase.auth.updateUser({ data: { role: 'admin' } })`, so trusting it here
+  // would allow any authenticated user to escalate to admin. The database
+  // `is_admin()` function (see migration 20251005191500) is the source of truth
+  // and also reads `app_metadata.role` only — keep these aligned.
+  const { app_metadata } = user as {
     app_metadata?: Record<string, unknown> | null;
-    user_metadata?: Record<string, unknown> | null;
   };
 
   const candidates: string[] = [];
@@ -32,11 +37,6 @@ export function hasAdminRole(user: SupabaseUserLike): boolean {
     };
     candidates.push(...normalize(role));
     candidates.push(...normalize(roles));
-  }
-
-  if (user_metadata) {
-    const { role } = user_metadata as { role?: unknown };
-    candidates.push(...normalize(role));
   }
 
   return candidates.some((value) => value.toLowerCase() === "admin");

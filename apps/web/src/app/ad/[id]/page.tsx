@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
+import { CheckCircle2, CircleAlert, Clock, MapPin, MessageSquare, ShieldCheck } from "lucide-react";
 import AdvertGallery from "@/components/AdvertGallery";
 import AdvertDetails from "@/components/AdvertDetails";
-import ReportButton from "@/components/ReportButton";
+import AdvertContactPanel from "@/components/AdvertContactPanel";
 import SellerCard from "@/components/SellerCard";
 import SimilarAdverts from "@/components/SimilarAdverts";
 import BenefitsBadge from "@/components/BenefitsBadge";
@@ -20,7 +21,10 @@ import type { Tables } from "@/lib/supabaseTypes";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://lyvox.be";
+const BASE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  "https://lyvox.be";
 const isDevEnvironment = process.env.NODE_ENV !== "production";
 
 function advertDebug(message: string, context?: Record<string, unknown>) {
@@ -290,9 +294,9 @@ export default async function AdvertPage({ params }: PageProps) {
       advertDebug("Invalid advert id", { resolvedId: id });
       return (
         <div className="space-y-8">
-          <h1 className="text-2xl font-semibold">Некорректный адрес</h1>
+          <h1 className="text-2xl font-semibold">Invalid listing link</h1>
           <p className="text-sm text-muted-foreground">
-            Указан неверный идентификатор объявления. Проверьте ссылку и попробуйте снова.
+            The listing identifier is invalid. Check the link and try again.
           </p>
         </div>
       );
@@ -323,9 +327,9 @@ export default async function AdvertPage({ params }: PageProps) {
       });
       return (
         <div className="space-y-8">
-          <h1 className="text-2xl font-semibold">Не удалось загрузить страницу</h1>
+          <h1 className="text-2xl font-semibold">Could not load the page</h1>
           <p className="text-sm text-muted-foreground">
-            Возникла ошибка при загрузке объявления. Попробуйте обновить страницу позже.
+            We could not load this listing. Please refresh the page or try again later.
           </p>
         </div>
       );
@@ -334,29 +338,31 @@ export default async function AdvertPage({ params }: PageProps) {
     if (!data) {
       advertDebug("Advert data not found", { advertId: id });
       // Graceful fallback instead of 404: show "not found" content,
-      // avoids masking upstream data-loading issues and больше не мешает отладке.
+      // avoids masking upstream data-loading issues during diagnostics.
       return (
         <div className="space-y-8">
-          <h1 className="text-2xl font-semibold">Объявление не найдено</h1>
+          <h1 className="text-2xl font-semibold">Listing not found</h1>
           <p className="text-sm text-muted-foreground">
-            Мы не смогли загрузить объявление. Возможно, оно было удалено или временно недоступно.
+            We could not load this listing. It may have been removed or may be temporarily unavailable.
           </p>
         </div>
       );
     }
 
   const t = createTranslator(messages);
+  const translate = (key: string, fallback: string) => {
+    return translateFallback(t, key, fallback);
+  };
 
   const priceValue = normalizeNullableNumber(data.advert.price);
   const priceText =
     priceValue !== null
       ? formatCurrency(priceValue, locale, data.advert.currency ?? "EUR")
-      : t("advert.price_not_specified") || "Цена не указана";
+      : translate("advert.price_not_specified", "Price on request");
 
   const locationText =
     data.advert.location ??
-    t("advert.location_not_specified") ??
-    "Местоположение не указано";
+    translate("advert.location_not_specified", "Location not set");
 
   const createdText = data.advert.created_at
     ? formatDate(data.advert.created_at, locale)
@@ -385,9 +391,12 @@ export default async function AdvertPage({ params }: PageProps) {
   const galleryImages = data.media.map((item, index) => ({
     id: item.id,
     url: item.url,
-    alt: `${data.advert.title} — ${
-      t("advert.gallery.image_alt", { index: index + 1 }) || `Photo ${index + 1}`
-    }`,
+    alt: `${data.advert.title} - ${translateFallback(
+      t,
+      "advert.gallery.image_alt",
+      `Photo ${index + 1}`,
+      { index: index + 1 },
+    )}`,
     width: item.w ?? undefined,
     height: item.h ?? undefined,
   }));
@@ -413,6 +422,11 @@ export default async function AdvertPage({ params }: PageProps) {
   const slug = generateSlug(data.advert.title);
   const canonicalUrl = `${BASE_URL}/ad/${data.advert.id}/${slug}`;
   const imageUrls = galleryImages.map((image) => image.url).filter(Boolean);
+  const primaryImageUrl = galleryImages[0]?.url ?? null;
+  const listingPath = `/ad/${data.advert.id}/${slug}`;
+  const loginHref = `/login?next=${encodeURIComponent(listingPath)}`;
+  const editHref = `/post?edit=${data.advert.id}`;
+  const sellerVerified = data.seller.verifiedEmail && data.seller.verifiedPhone;
 
   const brandName =
     data.make?.vehicle_make_i18n?.[0]?.name ??
@@ -428,14 +442,22 @@ export default async function AdvertPage({ params }: PageProps) {
       de: category.name_de,
     };
 
-    return byLocale[locale] ?? category.name_en ?? category.name_ru ?? category.slug;
+    return (
+      byLocale[locale] ??
+      category.name_en ??
+      category.name_nl ??
+      category.name_fr ??
+      category.name_de ??
+      category.name_ru ??
+      category.slug
+    );
   };
 
   const breadcrumbElements: Array<Record<string, unknown>> = [
     {
       "@type": "ListItem",
       position: 1,
-      name: t("common.home") || "Home",
+      name: translate("common.home", "Home"),
       item: BASE_URL,
     },
   ];
@@ -444,7 +466,7 @@ export default async function AdvertPage({ params }: PageProps) {
     breadcrumbElements.push({
       "@type": "ListItem",
       position: breadcrumbElements.length + 1,
-      name: t("common.categories") || "Категории",
+      name: translate("common.categories", "Categories"),
       item: `${BASE_URL}/c`,
     });
 
@@ -519,79 +541,196 @@ export default async function AdvertPage({ params }: PageProps) {
     showScores;
 
   const sellerCardLabels = {
-    unknownSellerLabel: t("advert.seller_labels.unknown") || "Продавец",
-    memberSinceLabel: t("advert.seller_labels.member_since") || "На платформе с",
-    verifiedSellerLabel: t("advert.verified_seller") || "Проверенный продавец",
-    verifiedSellerTooltip: t("advert.verified_seller_tooltip") || "Продавец подтвердил email и телефон",
-    emailLabel: t("advert.seller_labels.email") || "Email",
-    emailVerifiedLabel: t("advert.seller_labels.email_verified") || "Подтвержден",
-    emailUnverifiedLabel: t("advert.seller_labels.email_unverified") || "Не подтвержден",
-    phoneLabel: t("advert.seller_labels.phone") || "Телефон",
-    phoneVerifiedLabel: t("advert.seller_labels.phone_verified") || "Подтвержден",
-    phoneUnverifiedLabel: t("advert.seller_labels.phone_unverified") || "Не подтвержден",
-    trustScoreLabel: t("advert.seller_labels.trust_score") || "Уровень доверия",
-    activeAdvertsLabel: t("advert.seller_labels.active_listings") || "Активных объявлений",
-    sellerTypePrivateLabel: t("advert.seller_labels.type_private") || "Частный продавец",
-    sellerTypeProfessionalLabel: t("advert.seller_labels.type_professional") || "Профессиональный продавец",
+    unknownSellerLabel: translate("advert.seller_labels.unknown", "Seller"),
+    memberSinceLabel: translate("advert.seller_labels.member_since", "Member since"),
+    verifiedSellerLabel: translate("advert.verified_seller", "Verified seller"),
+    verifiedSellerTooltip: translate("advert.verified_seller_tooltip", "Seller confirmed email and phone"),
+    emailLabel: translate("advert.seller_labels.email", "Email"),
+    emailVerifiedLabel: translate("advert.seller_labels.email_verified", "Verified"),
+    emailUnverifiedLabel: translate("advert.seller_labels.email_unverified", "Not verified"),
+    phoneLabel: translate("advert.seller_labels.phone", "Phone"),
+    phoneVerifiedLabel: translate("advert.seller_labels.phone_verified", "Verified"),
+    phoneUnverifiedLabel: translate("advert.seller_labels.phone_unverified", "Not verified"),
+    trustScoreLabel: translate("advert.seller_labels.trust_score", "Trust score"),
+    activeAdvertsLabel: translate("advert.seller_labels.active_listings", "Active listings"),
+    sellerTypePrivateLabel: translate("advert.seller_labels.type_private", "Private seller"),
+    sellerTypeProfessionalLabel: translate("advert.seller_labels.type_professional", "Professional seller"),
   };
+
+  const sellerName = data.seller.displayName ?? sellerCardLabels.unknownSellerLabel;
+  const favoriteAdvert = {
+    id: data.advert.id,
+    title: data.advert.title,
+    price: priceValue,
+    currency: data.advert.currency ?? "EUR",
+    location: data.advert.location,
+    image: primaryImageUrl,
+    createdAt: data.advert.created_at,
+    sellerVerified,
+  };
+  const trustTimeline = [
+    {
+      title: translate("advert.trust.email.title", "Email check"),
+      body: data.seller.verifiedEmail
+        ? translate("advert.trust.email.verified", "Seller email has been verified.")
+        : translate("advert.trust.email.pending", "Seller email is not verified yet."),
+      verified: data.seller.verifiedEmail,
+    },
+    {
+      title: translate("advert.trust.phone.title", "Phone check"),
+      body: data.seller.verifiedPhone
+        ? translate("advert.trust.phone.verified", "Seller phone has been verified.")
+        : translate("advert.trust.phone.pending", "Seller phone is not verified yet."),
+      verified: data.seller.verifiedPhone,
+    },
+    {
+      title: translate("advert.trust.messaging.title", "In-platform messaging"),
+      body: translate(
+        "advert.trust.messaging.body",
+        "Use LyVoX chat so there is a record if support needs to review the deal.",
+      ),
+      verified: true,
+    },
+    {
+      title: translate("advert.trust.inspect.title", "Inspect before payment"),
+      body: translate(
+        "advert.trust.inspect.body",
+        "Check item condition, documents, serial numbers, and seller identity before sending money.",
+      ),
+      verified: true,
+    },
+  ];
 
   return (
     <>
       <script {...getJsonLdScriptProps(productJsonLd)} />
       <script {...getJsonLdScriptProps(breadcrumbJsonLd)} />
       <div className="space-y-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-2xl font-semibold">{data.advert.title}</h1>
-            {data.benefits.length > 0 && <BenefitsBadge benefits={data.benefits} />}
+        <header className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground">
+            {data.category ? (
+              <span className="rounded-md bg-muted px-2 py-1">
+                {resolveCategoryName(data.category)}
+              </span>
+            ) : null}
+            <span className="rounded-md bg-muted px-2 py-1">
+              {sellerVerified
+                ? translate("advert.verified_seller", "Verified seller")
+                : translate("advert.seller_checks_pending", "Seller checks pending")}
+            </span>
+            {data.benefits.length > 0 ? <BenefitsBadge benefits={data.benefits} /> : null}
           </div>
-        </div>
-        <ReportButton advertId={data.advert.id} />
-      </div>
 
-      <div className="flex flex-col gap-6 lg:flex-row">
-        <div className="flex-1">
-          <AdvertGallery images={galleryImages} />
-        </div>
-        <aside className="w-full max-w-xs space-y-3 rounded-2xl border p-4 text-sm">
-          <div className="text-xl font-semibold">{priceText}</div>
-          <div className="text-muted-foreground">{locationText}</div>
-          {createdText ? (
-            <div className="text-xs text-muted-foreground">
-              {t("advert.posted") || "Размещено"}: {createdText}
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="max-w-4xl space-y-3">
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                {data.advert.title}
+              </h1>
+              <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5">
+                  <MapPin className="h-4 w-4 text-primary" aria-hidden="true" />
+                  {locationText}
+                </span>
+                {createdText ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Clock className="h-4 w-4 text-primary" aria-hidden="true" />
+                    {translate("advert.posted", "Posted")} {createdText}
+                  </span>
+                ) : null}
+              </div>
             </div>
-          ) : null}
-        </aside>
-      </div>
+          </div>
+        </header>
 
-      <SellerCard seller={data.seller} locale={locale} {...sellerCardLabels} />
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+          <main className="space-y-6">
+          <AdvertGallery images={galleryImages} />
+
+          <section className="rounded-md border border-border/80 bg-card p-4 shadow-sm">
+            <h2 className="mb-2 text-lg font-medium">
+              {translate("advert.description", "Description")}
+            </h2>
+            <p className="whitespace-pre-wrap text-sm leading-6 text-foreground/90">
+              {data.advert.description ??
+                translate("advert.no_description", "No description has been added yet.")}
+            </p>
+          </section>
+
+          <SellerCard seller={data.seller} locale={locale} {...sellerCardLabels} />
+
+          <section className="rounded-md border border-border/80 bg-card p-4 shadow-sm">
+            <div className="mb-4 flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <div>
+                <h2 className="text-lg font-medium">
+                  {translate("advert.trust.title", "Trust and safety")}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {translate(
+                    "advert.trust.body",
+                    "Review seller checks and keep the conversation in LyVoX before arranging payment or delivery.",
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <ol className="grid gap-3 sm:grid-cols-2">
+              {trustTimeline.map((item) => (
+                <li
+                  key={item.title}
+                  className="flex items-start gap-3 rounded-md border border-border/70 bg-muted/30 p-3"
+                >
+                  {item.verified ? (
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
+                  ) : (
+                    <CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{item.title}</p>
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.body}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+
+            <div className="mt-3 flex items-start gap-2 rounded-md bg-primary/5 p-3 text-xs text-muted-foreground">
+              <MessageSquare className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+              <span>
+                {translate(
+                  "advert.trust.anti_phishing",
+                  "Avoid external payment links and requests to move the conversation to another app.",
+                )}
+              </span>
+            </div>
+          </section>
 
       {showDetails ? (
         <AdvertDetails
-          title={t("advert.vehicle_specs") || "Характеристики автомобиля"}
+          title={translate("advert.vehicle_specs", "Vehicle specifications")}
           details={detailItems}
-          optionsTitle={t("advert.options") || "Опции"}
+          optionsTitle={translate("advert.options", "Options")}
           options={optionLabels}
         />
       ) : null}
 
       {showGeneration && data.selectedGeneration ? (
-        <section className="rounded-lg border p-4">
+        <section className="rounded-md border border-border/80 bg-card p-4 shadow-sm">
           <h2 className="mb-4 text-lg font-medium">
-            {t("advert.generation.title") || "Поколение"}
+            {translate("advert.generation.title", "Generation")}
           </h2>
 
           <div className="space-y-4">
             {data.selectedGeneration.code ? (
               <div>
                 <span className="text-sm font-semibold">
-                  {t("advert.generation.code") || "Код"}:{" "}
+                  {translate("advert.generation.code", "Code")}:{" "}
                   {data.selectedGeneration.code}
                 </span>
                 {data.selectedGeneration.facelift ? (
                   <span className="ml-2 text-xs text-muted-foreground">
-                    ({t("advert.generation.facelift") || "Рестайлинг"})
+                    ({translate("advert.generation.facelift", "Facelift")})
                   </span>
                 ) : null}
               </div>
@@ -600,11 +739,11 @@ export default async function AdvertPage({ params }: PageProps) {
             {data.selectedGeneration.start_year ||
             data.selectedGeneration.end_year ? (
               <div className="text-sm text-muted-foreground">
-                {t("advert.generation.years") || "Годы производства"}:{" "}
+                {translate("advert.generation.years", "Production years")}:{" "}
                 {data.selectedGeneration.start_year}
                 {data.selectedGeneration.end_year
                   ? ` - ${data.selectedGeneration.end_year}`
-                  : ` - ${t("advert.generation.present") || "н.в."}`}
+                  : ` - ${translate("advert.generation.present", "present")}`}
               </div>
             ) : null}
 
@@ -617,14 +756,12 @@ export default async function AdvertPage({ params }: PageProps) {
             {generationLocale?.pros.length ? (
               <div>
                 <h3 className="mb-2 text-sm font-semibold text-green-600 dark:text-green-400">
-                  {t("advert.insights.pros") || "Плюсы"}
+                  {translate("advert.insights.pros", "Pros")}
                 </h3>
                 <ul className="space-y-1 text-sm">
                   {generationLocale.pros.map((item, index) => (
                     <li key={`${item}-${index}`} className="flex items-start gap-2">
-                      <span className="text-green-600 dark:text-green-400">
-                        ✓
-                      </span>
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" aria-hidden="true" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -635,12 +772,12 @@ export default async function AdvertPage({ params }: PageProps) {
             {generationLocale?.cons.length ? (
               <div>
                 <h3 className="mb-2 text-sm font-semibold text-red-600 dark:text-red-400">
-                  {t("advert.insights.cons") || "Минусы"}
+                  {translate("advert.insights.cons", "Cons")}
                 </h3>
                 <ul className="space-y-1 text-sm">
                   {generationLocale.cons.map((item, index) => (
                     <li key={`${item}-${index}`} className="flex items-start gap-2">
-                      <span className="text-red-600 dark:text-red-400">✗</span>
+                      <CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" aria-hidden="true" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -651,7 +788,7 @@ export default async function AdvertPage({ params }: PageProps) {
             {generationLocale?.inspectionTips.length ? (
               <div>
                 <h3 className="mb-2 text-sm font-semibold">
-                  {t("advert.insights.inspection_tips") || "Советы по осмотру"}
+                  {translate("advert.insights.inspection_tips", "Inspection tips")}
                 </h3>
                 <ul className="list-inside list-disc space-y-1 text-sm">
                   {generationLocale.inspectionTips.map((item, index) => (
@@ -664,8 +801,7 @@ export default async function AdvertPage({ params }: PageProps) {
             {data.selectedGeneration.production_countries?.length ? (
               <div>
                 <h3 className="mb-2 text-sm font-semibold">
-                  {t("advert.generation.production_countries") ||
-                    "Страны производства"}
+                  {translate("advert.generation.production_countries", "Production countries")}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {data.selectedGeneration.production_countries.map(
@@ -686,23 +822,21 @@ export default async function AdvertPage({ params }: PageProps) {
       ) : null}
 
       {showInsights && data.insights ? (
-        <section className="rounded-lg border p-4">
+        <section className="rounded-md border border-border/80 bg-card p-4 shadow-sm">
           <h2 className="mb-4 text-lg font-medium">
-            {t("advert.insights.title") || "Информация о модели"}
+            {translate("advert.insights.title", "Model insights")}
           </h2>
 
           <div className="space-y-6">
             {translatedInsights?.pros.length ? (
               <div>
                 <h3 className="mb-2 text-sm font-semibold text-green-600 dark:text-green-400">
-                  {t("advert.insights.pros") || "Плюсы"}
+                  {translate("advert.insights.pros", "Pros")}
                 </h3>
                 <ul className="space-y-1 text-sm">
                   {translatedInsights.pros.map((item, index) => (
                     <li key={`${item}-${index}`} className="flex items-start gap-2">
-                      <span className="text-green-600 dark:text-green-400">
-                        ✓
-                      </span>
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" aria-hidden="true" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -713,12 +847,12 @@ export default async function AdvertPage({ params }: PageProps) {
             {translatedInsights?.cons.length ? (
               <div>
                 <h3 className="mb-2 text-sm font-semibold text-red-600 dark:text-red-400">
-                  {t("advert.insights.cons") || "Минусы"}
+                  {translate("advert.insights.cons", "Cons")}
                 </h3>
                 <ul className="space-y-1 text-sm">
                   {translatedInsights.cons.map((item, index) => (
                     <li key={`${item}-${index}`} className="flex items-start gap-2">
-                      <span className="text-red-600 dark:text-red-400">✗</span>
+                      <CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" aria-hidden="true" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -729,7 +863,7 @@ export default async function AdvertPage({ params }: PageProps) {
             {translatedInsights?.inspectionTips.length ? (
               <div>
                 <h3 className="mb-2 text-sm font-semibold">
-                  {t("advert.insights.inspection_tips") || "Советы по осмотру"}
+                  {translate("advert.insights.inspection_tips", "Inspection tips")}
                 </h3>
                 <ul className="list-inside list-disc space-y-1 text-sm">
                   {translatedInsights.inspectionTips.map((item, index) => (
@@ -742,7 +876,7 @@ export default async function AdvertPage({ params }: PageProps) {
             {translatedInsights?.notableFeatures.length ? (
               <div>
                 <h3 className="mb-2 text-sm font-semibold">
-                  {t("advert.insights.notable_features") || "Примечательные особенности"}
+                  {translate("advert.insights.notable_features", "Notable features")}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {translatedInsights.notableFeatures.map((item, index) => (
@@ -760,7 +894,7 @@ export default async function AdvertPage({ params }: PageProps) {
             {translatedInsights?.engineExamples.length ? (
               <div>
                 <h3 className="mb-2 text-sm font-semibold">
-                  {t("advert.insights.engine_examples") || "Примеры двигателей"}
+                  {translate("advert.insights.engine_examples", "Engine examples")}
                 </h3>
                 <ul className="space-y-1 text-sm">
                   {translatedInsights.engineExamples.map((item, index) => (
@@ -773,7 +907,7 @@ export default async function AdvertPage({ params }: PageProps) {
             {translatedInsights?.commonIssues.length ? (
               <div>
                 <h3 className="mb-2 text-sm font-semibold">
-                  {t("advert.insights.common_issues") || "Общие проблемы"}
+                  {translate("advert.insights.common_issues", "Common issues")}
                 </h3>
                 <ul className="list-inside list-disc space-y-1 text-sm text-orange-600 dark:text-orange-400">
                   {translatedInsights.commonIssues.map((item, index) => (
@@ -788,7 +922,7 @@ export default async function AdvertPage({ params }: PageProps) {
                 {reliabilityScoreDisplay !== null ? (
                   <div>
                     <span className="text-xs text-muted-foreground">
-                      {t("advert.insights.reliability") || "Надежность"}:{" "}
+                      {translate("advert.insights.reliability", "Reliability")}:{" "}
                     </span>
                     <span className="text-sm font-medium">
                       {reliabilityScoreDisplay}
@@ -798,7 +932,7 @@ export default async function AdvertPage({ params }: PageProps) {
                 {popularityScoreDisplay !== null ? (
                   <div>
                     <span className="text-xs text-muted-foreground">
-                      {t("advert.insights.popularity") || "Популярность"}:{" "}
+                      {translate("advert.insights.popularity", "Popularity")}:{" "}
                     </span>
                     <span className="text-sm font-medium">
                       {popularityScoreDisplay}
@@ -811,23 +945,29 @@ export default async function AdvertPage({ params }: PageProps) {
         </section>
       ) : null}
 
+          </main>
+
+          <div className="lg:sticky lg:top-24">
+            <AdvertContactPanel
+              advert={favoriteAdvert}
+              seller={data.seller}
+              currentUserId={currentUserId}
+              priceText={priceText}
+              locationText={locationText}
+              createdText={createdText || null}
+              loginHref={loginHref}
+              editHref={editHref}
+              sellerName={sellerName}
+            />
+          </div>
+        </div>
+
       {similarAdverts.length ? (
         <SimilarAdverts
-          title={t("advert.similar_listings") || "Похожие объявления"}
+          title={translate("advert.similar_listings", "Similar listings")}
           adverts={similarAdverts}
         />
       ) : null}
-
-      <section>
-        <h2 className="mb-2 text-lg font-medium">
-          {t("advert.description") || "Описание"}
-        </h2>
-        <p className="whitespace-pre-wrap text-sm text-foreground/90">
-          {data.advert.description ??
-            t("advert.no_description") ??
-            "Описания пока нет."}
-        </p>
-      </section>
     </div>
     </>
   );
@@ -849,9 +989,9 @@ export default async function AdvertPage({ params }: PageProps) {
     });
     return (
       <div className="space-y-8">
-        <h1 className="text-2xl font-semibold">Не удалось загрузить страницу</h1>
+        <h1 className="text-2xl font-semibold">Could not load the page</h1>
         <p className="text-sm text-muted-foreground">
-          Произошла ошибка при загрузке объявления. Попробуйте обновить страницу позже.
+          We could not load this listing. Please refresh the page or try again later.
         </p>
         {isDevEnvironment && message ? (
           <pre className="mt-2 whitespace-pre-wrap rounded-md bg-muted p-3 text-xs text-muted-foreground">
@@ -901,6 +1041,16 @@ function createTranslator(messages: Messages): TFunction {
 
     return result;
   };
+}
+
+function translateFallback(
+  t: TFunction,
+  key: string,
+  fallback: string,
+  params?: Record<string, string | number>,
+): string {
+  const value = t(key, params);
+  return value === key ? fallback : value;
 }
 
 async function loadCurrentUserId(): Promise<string | null> {
@@ -1188,9 +1338,9 @@ async function loadAdvertData(
       media.push({
         id: record.id,
         url: record.signedUrl,
-        width: record.w ?? undefined,
-        height: record.h ?? undefined,
-        sort: record.sort ?? undefined,
+        w: record.w ?? null,
+        h: record.h ?? null,
+        sort: record.sort ?? null,
       });
     }
   }
@@ -1267,7 +1417,7 @@ async function loadAdvertData(
     .from("vehicle_options")
     .select("id, category, code, name_en, name_nl, name_fr, name_de, name_ru")
     .order("category", { ascending: true })
-    .order("name_ru", { ascending: true });
+    .order("name_en", { ascending: true });
 
   if (optionsError) {
     console.warn("Failed to load vehicle options catalog", {
@@ -1517,7 +1667,15 @@ function getColorName(color: VehicleColor | null, locale: Locale): string | null
     de: "name_de",
   };
   const key = map[locale] ?? "name_en";
-  return (color[key] as string | null) ?? color.name_ru ?? color.name_en ?? null;
+  return (
+    (color[key] as string | null) ??
+    color.name_en ??
+    color.name_nl ??
+    color.name_fr ??
+    color.name_de ??
+    color.name_ru ??
+    null
+  );
 }
 
 function translateInsights(
@@ -1589,33 +1747,33 @@ function buildDetailItems({
   const details: DetailItem[] = [];
 
   if (makeName) {
-    details.push({ label: t("advert.make") || "Марка", value: makeName });
+    details.push({ label: translateFallback(t, "advert.make", "Make"), value: makeName });
   }
 
   if (modelName) {
-    details.push({ label: t("advert.model") || "Модель", value: modelName });
+    details.push({ label: translateFallback(t, "advert.model", "Model"), value: modelName });
   }
 
   if (colorName) {
-    details.push({ label: t("advert.color") || "Цвет", value: colorName });
+    details.push({ label: translateFallback(t, "advert.color", "Color"), value: colorName });
   }
 
   const labels: Record<string, string> = {
-    year: t("advert.year") || "Год",
-    steering_wheel: t("advert.steering_wheel") || "Руль",
-    body_type: t("advert.body_type") || "Тип кузова",
-    doors: t("advert.doors") || "Двери",
-    power: t("advert.power") || "Мощность",
-    engine_type: t("advert.engine_type") || "Тип двигателя",
-    engine_volume: t("advert.engine_volume") || "Объем двигателя",
-    transmission: t("advert.transmission") || "Коробка передач",
-    drive: t("advert.drive") || "Привод",
-    mileage: t("advert.mileage") || "Пробег",
-    vehicle_condition: t("advert.condition") || "Состояние",
-    customs_cleared: t("advert.customs_cleared") || "Растаможен",
-    under_warranty: t("advert.warranty") || "Гарантия",
-    owners_count: t("advert.owners") || "Владельцев",
-    vin: t("advert.vin") || "VIN",
+    year: translateFallback(t, "advert.year", "Year"),
+    steering_wheel: translateFallback(t, "advert.steering_wheel", "Steering wheel"),
+    body_type: translateFallback(t, "advert.body_type", "Body type"),
+    doors: translateFallback(t, "advert.doors", "Doors"),
+    power: translateFallback(t, "advert.power", "Power"),
+    engine_type: translateFallback(t, "advert.engine_type", "Engine type"),
+    engine_volume: translateFallback(t, "advert.engine_volume", "Engine volume"),
+    transmission: translateFallback(t, "advert.transmission", "Transmission"),
+    drive: translateFallback(t, "advert.drive", "Drive"),
+    mileage: translateFallback(t, "advert.mileage", "Mileage"),
+    vehicle_condition: translateFallback(t, "advert.condition", "Condition"),
+    customs_cleared: translateFallback(t, "advert.customs_cleared", "Customs cleared"),
+    under_warranty: translateFallback(t, "advert.warranty", "Warranty"),
+    owners_count: translateFallback(t, "advert.owners", "Owners"),
+    vin: translateFallback(t, "advert.vin", "VIN"),
   };
 
   for (const [key, value] of Object.entries(specifics)) {
@@ -1637,7 +1795,9 @@ function buildDetailItems({
         value === "1";
       details.push({
         label,
-        value: bool ? t("common.yes") || "Да" : t("common.no") || "Нет",
+        value: bool
+          ? translateFallback(t, "common.yes", "Yes")
+          : translateFallback(t, "common.no", "No"),
       });
       continue;
     }
@@ -1712,23 +1872,26 @@ function getOptionLabel(
     const key = localeMap[locale] ?? "name_en";
     return (
       (option[key] as string | null) ??
-      option.name_ru ??
       option.name_en ??
+      option.name_nl ??
+      option.name_fr ??
+      option.name_de ??
+      option.name_ru ??
       optionKey
     );
   }
 
   const fallback: Record<string, string> = {
-    air_conditioning: t("advert.option_ac") || "Кондиционер",
-    navigation: t("advert.option_nav") || "Навигация",
-    parking_sensors: t("advert.option_parking") || "Парктроники",
-    leather_seats: t("advert.option_leather") || "Кожаные сиденья",
-    sunroof: t("advert.option_sunroof") || "Люк",
-    multimedia: t("advert.option_multimedia") || "Мультимедиа",
-    safety_abs: t("advert.option_safety_abs") || "ABS",
-    safety_asr: t("advert.option_safety_asr") || "ASR",
+    air_conditioning: translateFallback(t, "advert.option_ac", "Air conditioning"),
+    navigation: translateFallback(t, "advert.option_nav", "Navigation"),
+    parking_sensors: translateFallback(t, "advert.option_parking", "Parking sensors"),
+    leather_seats: translateFallback(t, "advert.option_leather", "Leather seats"),
+    sunroof: translateFallback(t, "advert.option_sunroof", "Sunroof"),
+    multimedia: translateFallback(t, "advert.option_multimedia", "Multimedia"),
+    safety_abs: translateFallback(t, "advert.option_safety_abs", "ABS"),
+    safety_asr: translateFallback(t, "advert.option_safety_asr", "ASR"),
     comfort_heated_seats:
-      t("advert.option_comfort_heated_seats") || "Подогрев сидений",
+      translateFallback(t, "advert.option_comfort_heated_seats", "Heated seats"),
   };
 
   return fallback[code] ?? optionKey;
@@ -1757,11 +1920,11 @@ function formatSpecValue(
   }
 
   if (key === "power") {
-    return `${raw} ${t("advert.hp") || "л.с."}`;
+    return `${raw} ${translateFallback(t, "advert.hp", "hp")}`;
   }
 
   if (key === "engine_volume") {
-    return `${raw} ${t("advert.liters") || "л"}`;
+    return `${raw} ${translateFallback(t, "advert.liters", "L")}`;
   }
 
   if (key === "owners_count") {
@@ -1781,22 +1944,22 @@ function formatSpecValue(
 
 function translateSpecValue(value: string, t: TFunction): string {
   const map: Record<string, string> = {
-    right: t("advert.value_right") || "Right",
-    left: t("advert.value_left") || "Left",
-    rwd: t("advert.value_rwd") || "Rear wheel drive",
-    fwd: t("advert.value_fwd") || "Front wheel drive",
-    awd: t("advert.value_awd") || "All wheel drive",
-    "4wd": t("advert.value_4wd") || "Four wheel drive",
-    electric: t("advert.value_electric") || "Electric",
-    hybrid: t("advert.value_hybrid") || "Hybrid",
-    petrol: t("advert.value_petrol") || "Petrol",
-    diesel: t("advert.value_diesel") || "Diesel",
-    automatic: t("advert.value_automatic") || "Automatic",
-    manual: t("advert.value_manual") || "Manual",
-    cvt: t("advert.value_cvt") || "CVT",
-    not_damaged: t("advert.value_not_damaged") || "Not damaged",
-    damaged: t("advert.value_damaged") || "Damaged",
-    salvage: t("advert.value_salvage") || "Salvage",
+    right: translateFallback(t, "advert.value_right", "Right"),
+    left: translateFallback(t, "advert.value_left", "Left"),
+    rwd: translateFallback(t, "advert.value_rwd", "Rear wheel drive"),
+    fwd: translateFallback(t, "advert.value_fwd", "Front wheel drive"),
+    awd: translateFallback(t, "advert.value_awd", "All wheel drive"),
+    "4wd": translateFallback(t, "advert.value_4wd", "Four wheel drive"),
+    electric: translateFallback(t, "advert.value_electric", "Electric"),
+    hybrid: translateFallback(t, "advert.value_hybrid", "Hybrid"),
+    petrol: translateFallback(t, "advert.value_petrol", "Petrol"),
+    diesel: translateFallback(t, "advert.value_diesel", "Diesel"),
+    automatic: translateFallback(t, "advert.value_automatic", "Automatic"),
+    manual: translateFallback(t, "advert.value_manual", "Manual"),
+    cvt: translateFallback(t, "advert.value_cvt", "CVT"),
+    not_damaged: translateFallback(t, "advert.value_not_damaged", "Not damaged"),
+    damaged: translateFallback(t, "advert.value_damaged", "Damaged"),
+    salvage: translateFallback(t, "advert.value_salvage", "Salvage"),
   };
 
   const normalized = value.toLowerCase().trim();
@@ -1840,4 +2003,3 @@ function formatScore(score: unknown): string | null {
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return Object.prototype.toString.call(value) === "[object Object]";
 }
-

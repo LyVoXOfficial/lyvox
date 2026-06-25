@@ -105,37 +105,37 @@ function handleWebAuthnError(error: unknown): WebAuthnError {
       case "NotSupportedError":
         return createWebAuthnError(
           WebAuthnErrorType.NOT_SUPPORTED,
-          "Ваш браузер не поддерживает биометрическую авторизацию",
+          "This browser does not support passkeys.",
           error,
         );
       case "NotAllowedError":
         return createWebAuthnError(
           WebAuthnErrorType.USER_CANCELLED,
-          "Авторизация отменена пользователем",
+          "Passkey verification was cancelled.",
           error,
         );
       case "InvalidStateError":
         return createWebAuthnError(
           WebAuthnErrorType.INVALID_STATE,
-          "Биометрический ключ уже зарегистрирован",
+          "This passkey is already registered.",
           error,
         );
       case "TimeoutError":
         return createWebAuthnError(
           WebAuthnErrorType.TIMEOUT,
-          "Время ожидания истекло",
+          "Passkey verification timed out.",
           error,
         );
       case "NetworkError":
         return createWebAuthnError(
           WebAuthnErrorType.NETWORK_ERROR,
-          "Ошибка сети при авторизации",
+          "Network error during passkey verification.",
           error,
         );
       default:
         return createWebAuthnError(
           WebAuthnErrorType.UNKNOWN,
-          error.message || "Неизвестная ошибка WebAuthn",
+          error.message || "Unknown WebAuthn error.",
           error,
         );
     }
@@ -147,7 +147,7 @@ function handleWebAuthnError(error: unknown): WebAuthnError {
     if (message.includes("not authenticated") || message.includes("session")) {
       return createWebAuthnError(
         WebAuthnErrorType.NOT_AUTHENTICATED,
-        "Необходимо войти в систему для использования биометрии",
+        "Sign in before using passkeys.",
         error,
       );
     }
@@ -156,7 +156,7 @@ function handleWebAuthnError(error: unknown): WebAuthnError {
   // Общая ошибка
   return createWebAuthnError(
     WebAuthnErrorType.UNKNOWN,
-    "Произошла неизвестная ошибка",
+    "An unknown passkey error occurred.",
     error,
   );
 }
@@ -210,7 +210,7 @@ export async function isPlatformAuthenticatorAvailable(): Promise<boolean> {
  * }
  */
 export async function enrollBiometric(
-  friendlyName: string = "Biometric Key",
+  friendlyName: string = "Passkey",
 ): Promise<EnrollBiometricResult> {
   // Проверка поддержки браузера
   if (!isWebAuthnSupported()) {
@@ -218,7 +218,7 @@ export async function enrollBiometric(
       success: false,
       error: createWebAuthnError(
         WebAuthnErrorType.NOT_SUPPORTED,
-        "Ваш браузер не поддерживает биометрическую авторизацию",
+          "This browser does not support passkeys.",
       ),
     };
   }
@@ -231,7 +231,7 @@ export async function enrollBiometric(
         success: false,
         error: createWebAuthnError(
           WebAuthnErrorType.NOT_AUTHENTICATED,
-          "Необходимо войти в систему для регистрации биометрии",
+        "Sign in before using passkeys.",
         ),
       };
     }
@@ -247,7 +247,7 @@ export async function enrollBiometric(
         success: false,
         error: createWebAuthnError(
           WebAuthnErrorType.ENROLLMENT_FAILED,
-          enrollResponse.error.message || "Не удалось начать регистрацию",
+          enrollResponse.error.message || "Could not start passkey registration.",
           enrollResponse.error,
         ),
       };
@@ -258,7 +258,7 @@ export async function enrollBiometric(
         success: false,
         error: createWebAuthnError(
           WebAuthnErrorType.ENROLLMENT_FAILED,
-          "Не получены данные для регистрации",
+          "No passkey registration data returned.",
         ),
       };
     }
@@ -304,7 +304,7 @@ export async function verifyBiometric(
       success: false,
       error: createWebAuthnError(
         WebAuthnErrorType.NOT_SUPPORTED,
-        "Ваш браузер не поддерживает биометрическую авторизацию",
+          "This browser does not support passkeys.",
       ),
     };
   }
@@ -317,7 +317,7 @@ export async function verifyBiometric(
         success: false,
         error: createWebAuthnError(
           WebAuthnErrorType.NOT_AUTHENTICATED,
-          "Необходимо войти в систему",
+        "Sign in before using passkeys.",
         ),
       };
     }
@@ -331,7 +331,7 @@ export async function verifyBiometric(
           success: false,
           error: createWebAuthnError(
             WebAuthnErrorType.INVALID_STATE,
-            "Нет зарегистрированных биометрических ключей",
+            "No passkeys are registered for this account.",
           ),
         };
       }
@@ -348,7 +348,7 @@ export async function verifyBiometric(
         success: false,
         error: createWebAuthnError(
           WebAuthnErrorType.VERIFICATION_FAILED,
-          challengeResponse.error.message || "Не удалось создать challenge",
+          challengeResponse.error.message || "Could not create passkey challenge.",
           challengeResponse.error,
         ),
       };
@@ -360,7 +360,7 @@ export async function verifyBiometric(
         success: false,
         error: createWebAuthnError(
           WebAuthnErrorType.VERIFICATION_FAILED,
-          "Не получен challenge ID",
+          "No passkey challenge ID returned.",
         ),
       };
     }
@@ -378,7 +378,7 @@ export async function verifyBiometric(
         success: false,
         error: createWebAuthnError(
           WebAuthnErrorType.VERIFICATION_FAILED,
-          verifyResponse.error.message || "Верификация не удалась",
+          verifyResponse.error.message || "Passkey verification failed.",
           verifyResponse.error,
         ),
       };
@@ -418,7 +418,7 @@ export async function listCredentials(): Promise<ListCredentialsResult> {
         credentials: [],
         error: createWebAuthnError(
           WebAuthnErrorType.NOT_AUTHENTICATED,
-          "Необходимо войти в систему",
+        "Sign in before using passkeys.",
         ),
       };
     }
@@ -432,7 +432,7 @@ export async function listCredentials(): Promise<ListCredentialsResult> {
         credentials: [],
         error: createWebAuthnError(
           WebAuthnErrorType.UNKNOWN,
-          factorsResponse.error.message || "Не удалось получить список ключей",
+          factorsResponse.error.message || "Could not load passkeys.",
           factorsResponse.error,
         ),
       };
@@ -447,7 +447,7 @@ export async function listCredentials(): Promise<ListCredentialsResult> {
     const credentials: BiometricCredential[] = webAuthnFactors.map((factor) => ({
       id: factor.id,
       factorId: factor.id,
-      friendlyName: factor.friendly_name || "Biometric Key",
+      friendlyName: factor.friendly_name || "Passkey",
       createdAt: factor.created_at,
       lastUsedAt: factor.updated_at,
       factorType: "webauthn",
@@ -489,7 +489,7 @@ export async function removeCredential(
         success: false,
         error: createWebAuthnError(
           WebAuthnErrorType.NOT_AUTHENTICATED,
-          "Необходимо войти в систему",
+        "Sign in before using passkeys.",
         ),
       };
     }
@@ -504,7 +504,7 @@ export async function removeCredential(
         success: false,
         error: createWebAuthnError(
           WebAuthnErrorType.UNKNOWN,
-          unenrollResponse.error.message || "Не удалось удалить ключ",
+          unenrollResponse.error.message || "Could not remove passkey.",
           unenrollResponse.error,
         ),
       };
@@ -546,70 +546,69 @@ export async function getDeviceCapabilities() {
 export function formatErrorMessage(error: WebAuthnError, locale: string = "en"): string {
   const messages: Record<WebAuthnErrorType, Record<string, string>> = {
     [WebAuthnErrorType.NOT_SUPPORTED]: {
-      en: "Your browser doesn't support biometric authentication. Please use a modern browser.",
-      nl: "Uw browser ondersteunt geen biometrische authenticatie. Gebruik een moderne browser.",
-      fr: "Votre navigateur ne prend pas en charge l'authentification biométrique.",
-      ru: "Ваш браузер не поддерживает биометрическую авторизацию.",
-      de: "Ihr Browser unterstützt keine biometrische Authentifizierung. Bitte verwenden Sie einen modernen Browser.",
+      en: "This browser does not support passkeys. Please use a modern browser.",
+      nl: "Deze browser ondersteunt geen passkeys. Gebruik een moderne browser.",
+      fr: "Ce navigateur ne prend pas en charge les passkeys. Utilisez un navigateur moderne.",
+      ru: "This browser does not support passkeys. Please use a modern browser.",
+      de: "Dieser Browser unterstuetzt keine Passkeys. Bitte verwenden Sie einen modernen Browser.",
     },
     [WebAuthnErrorType.USER_CANCELLED]: {
-      en: "Authentication was cancelled.",
-      nl: "Authenticatie is geannuleerd.",
-      fr: "L'authentification a été annulée.",
-      ru: "Авторизация отменена.",
-      de: "Die Authentifizierung wurde abgebrochen.",
+      en: "Passkey verification was cancelled.",
+      nl: "Passkey-verificatie is geannuleerd.",
+      fr: "Verification par passkey annulee.",
+      ru: "Passkey verification was cancelled.",
+      de: "Passkey-Pruefung wurde abgebrochen.",
     },
     [WebAuthnErrorType.NOT_AUTHENTICATED]: {
-      en: "You need to log in first.",
-      nl: "U moet eerst inloggen.",
-      fr: "Vous devez d'abord vous connecter.",
-      ru: "Необходимо войти в систему.",
-      de: "Sie müssen sich zuerst anmelden.",
+      en: "Sign in before using passkeys.",
+      nl: "Log eerst in voordat u passkeys gebruikt.",
+      fr: "Connectez-vous avant d'utiliser les passkeys.",
+      ru: "Sign in before using passkeys.",
+      de: "Melden Sie sich an, bevor Sie Passkeys verwenden.",
     },
     [WebAuthnErrorType.NETWORK_ERROR]: {
-      en: "Network error occurred. Please check your connection.",
-      nl: "Netwerkfout opgetreden. Controleer uw verbinding.",
-      fr: "Erreur réseau. Vérifiez votre connexion.",
-      ru: "Ошибка сети. Проверьте подключение.",
-      de: "Netzwerkfehler aufgetreten. Bitte überprüfen Sie Ihre Verbindung.",
+      en: "Network error. Check your connection and try again.",
+      nl: "Netwerkfout. Controleer uw verbinding en probeer opnieuw.",
+      fr: "Erreur reseau. Verifiez votre connexion et reessayez.",
+      ru: "Network error. Check your connection and try again.",
+      de: "Netzwerkfehler. Pruefen Sie Ihre Verbindung und versuchen Sie es erneut.",
     },
     [WebAuthnErrorType.TIMEOUT]: {
-      en: "Authentication timed out. Please try again.",
-      nl: "Time-out bij authenticatie. Probeer het opnieuw.",
-      fr: "Délai d'authentification dépassé. Réessayez.",
-      ru: "Время ожидания истекло. Попробуйте снова.",
-      de: "Authentifizierungs-Timeout. Bitte versuchen Sie es erneut.",
+      en: "Passkey verification timed out. Try again.",
+      nl: "Passkey-verificatie is verlopen. Probeer opnieuw.",
+      fr: "Verification par passkey expiree. Reessayez.",
+      ru: "Passkey verification timed out. Try again.",
+      de: "Passkey-Pruefung ist abgelaufen. Versuchen Sie es erneut.",
     },
     [WebAuthnErrorType.INVALID_STATE]: {
-      en: "This biometric key is already registered.",
-      nl: "Deze biometrische sleutel is al geregistreerd.",
-      fr: "Cette clé biométrique est déjà enregistrée.",
-      ru: "Этот биометрический ключ уже зарегистрирован.",
-      de: "Dieser biometrische Schlüssel ist bereits registriert.",
+      en: "This passkey is already registered.",
+      nl: "Deze passkey is al geregistreerd.",
+      fr: "Cette passkey est deja enregistree.",
+      ru: "This passkey is already registered.",
+      de: "Dieser Passkey ist bereits registriert.",
     },
     [WebAuthnErrorType.ENROLLMENT_FAILED]: {
-      en: "Failed to register biometric key.",
-      nl: "Kan biometrische sleutel niet registreren.",
-      fr: "Impossible d'enregistrer la clé biométrique.",
-      ru: "Не удалось зарегистрировать биометрический ключ.",
-      de: "Biometrischer Schlüssel konnte nicht registriert werden.",
+      en: "Could not register this passkey.",
+      nl: "Kan deze passkey niet registreren.",
+      fr: "Impossible d'enregistrer cette passkey.",
+      ru: "Could not register this passkey.",
+      de: "Dieser Passkey konnte nicht registriert werden.",
     },
     [WebAuthnErrorType.VERIFICATION_FAILED]: {
-      en: "Biometric verification failed.",
-      nl: "Biometrische verificatie mislukt.",
-      fr: "Échec de la vérification biométrique.",
-      ru: "Биометрическая верификация не удалась.",
-      de: "Biometrische Überprüfung fehlgeschlagen.",
+      en: "Passkey verification failed.",
+      nl: "Passkey-verificatie mislukt.",
+      fr: "Verification par passkey echouee.",
+      ru: "Passkey verification failed.",
+      de: "Passkey-Pruefung fehlgeschlagen.",
     },
     [WebAuthnErrorType.UNKNOWN]: {
-      en: error.message || "An unknown error occurred.",
-      nl: error.message || "Er is een onbekende fout opgetreden.",
-      fr: error.message || "Une erreur inconnue s'est produite.",
-      ru: error.message || "Произошла неизвестная ошибка.",
-      de: error.message || "Ein unbekannter Fehler ist aufgetreten.",
+      en: error.message || "An unknown passkey error occurred.",
+      nl: error.message || "Er is een onbekende passkey-fout opgetreden.",
+      fr: error.message || "Une erreur passkey inconnue s'est produite.",
+      ru: error.message || "An unknown passkey error occurred.",
+      de: error.message || "Ein unbekannter Passkey-Fehler ist aufgetreten.",
     },
   };
 
   return messages[error.type]?.[locale] || messages[error.type]?.en || error.message;
 }
-

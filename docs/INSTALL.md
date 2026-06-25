@@ -21,14 +21,17 @@
    ```
 3. **Environment variables**
    - Copy `.env.example` to `.env.local` or export variables in your shell.
-   - Ensure `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and Twilio credentials are populated before running API routes.
+   - Ensure `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and Twilio credentials are populated before running API routes. (The web app reads `NEXT_PUBLIC_SUPABASE_URL`; the bare `SUPABASE_URL` is only used by standalone scripts.) Stripe billing additionally needs `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` — see `.env.example`.
 4. **Run Supabase locally (optional)**
    ```bash
    supabase init            # once per machine
    supabase start           # starts Postgres, auth, storage
-   supabase db reset        # applies default schema
-   psql "$SUPABASE_DB_URL" -f supabase/reports.sql
+   supabase db reset        # applies all migrations under supabase/migrations/
    ```
+   `supabase db reset` already applies every migration (including `reports`,
+   `trust_score`, triggers and the `trust_inc` RPC). There is no standalone
+   `supabase/reports.sql` to run — it was split into
+   `supabase/migrations/20251004120000`–`20251004122000`.
 5. **Seed taxonomy**
    ```bash
    pnpm exec tsx scripts/seedCategories.ts
@@ -47,7 +50,6 @@
 - Place SQL migrations under `supabase/migrations/` (timestamped directories).
 - Apply locally via `supabase db push` or manually with `psql`.
 - For production, use `supabase db deploy` after testing locally.
-- Existing `supabase/reports.sql` should be split into migration files before automation; track follow-up in `docs/TODO.md`.
 
 ## Deploying to Vercel
 1. Connect the GitHub repository to Vercel.
@@ -59,15 +61,14 @@
 3. Populate environment variables (copy from `.env.example`, omit server-only secrets from client scope). Ensure:
    - `SUPABASE_SERVICE_ROLE_KEY` is set in server environment only.
    - Twilio credentials are provided, and Supabase admin accounts have `app_metadata.role = 'admin'`.
-   - Upstash Redis variables are added once rate limiting middleware ships.
+   - Upstash Redis variables (`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`) are set; rate limiting is already implemented (`apps/web/src/lib/rateLimiter.ts`) and fails open if these are absent.
 4. Grant Vercel access to Supabase via service role (use Vercel Encrypted KV or environment secrets).
 5. Trigger deployment (push to `main` or create PR).
 
 ## Supabase Configuration Checklist
 - Enable Row Level Security on all domain tables; apply policies from `docs/requirements.md`.
 - Configure Storage bucket `ad-media` with public read and authenticated write policies.
-- Create RPC `trust_inc` and triggers by running `supabase/reports.sql` once.
-- Apply the new migrations (`supabase/migrations/20251004120000`-`20251004122000`) so `reports`, `trust_score`, triggers, and `trust_inc` are provisioned (`pnpm supabase db push`).
+- Apply migrations (`supabase db push`, or `supabase db reset` locally) so `reports`, `trust_score`, triggers, and the `trust_inc` RPC are provisioned — see `supabase/migrations/20251004120000`–`20251004122000`.
 - Deploy and schedule the Supabase Edge Function `maintenance-cleanup` (see `supabase/functions/maintenance-cleanup`) to purge expired OTPs and anonymise audit logs.
 ## WAF & Zero Trust Checklist
 - **Cloudflare:**
@@ -93,7 +94,8 @@
 | --- | --- |
 | Start app only | `pnpm --filter web dev` |
 | Build production | `pnpm build` |
-| Run tests (add when available) | `pnpm test` |
+| Run tests | `pnpm test` |
+| Type-check | `pnpm typecheck` |
 | Seed categories (idempotent) | `pnpm exec tsx scripts/seedCategories.ts` |
 
 Keep this guide updated when deployment tooling, rate limiting, or infrastructure changes.

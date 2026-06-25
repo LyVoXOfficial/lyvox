@@ -1,22 +1,18 @@
-/**
- * BiometricSettings - страница настроек биометрии в профиле
- * 
- * Полный интерфейс для управления биометрическими ключами:
- * - Просмотр зарегистрированных устройств
- * - Добавление новых ключей
- * - Удаление существующих ключей
- * - Информация о поддержке браузера
- * 
- * @example
- * <BiometricSettings locale="en" />
- */
-
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Fingerprint,
+  Info,
+  Laptop,
+  Loader2,
+  Smartphone,
+  Trash2,
+  XCircle,
+} from "lucide-react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,182 +23,146 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useWebAuthn } from "@/hooks/useWebAuthn";
 import { BiometricEnrollButton } from "@/components/BiometricEnrollButton";
-import { toast } from "sonner";
-import { 
-  Fingerprint, 
-  Smartphone, 
-  Laptop, 
-  Trash2, 
-  AlertCircle,
-  CheckCircle2,
-  XCircle,
-  Info,
-  Loader2,
-} from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 import type { BiometricCredential } from "@/lib/webauthn";
 
-// ============================================================================
-// Types
-// ============================================================================
-
 export interface BiometricSettingsProps {
-  /** Локаль для интерфейса */
   locale?: Locale;
-  /** Дополнительные CSS классы */
   className?: string;
 }
 
-// ============================================================================
-// Messages
-// ============================================================================
-
 const messages = {
   en: {
-    title: "Biometric Authentication",
-    description: "Manage your biometric keys for fast and secure login",
-    supported: "Your browser supports biometric authentication",
-    notSupported: "Your browser doesn't support biometric authentication",
-    platformAvailable: "Biometric authenticator available on this device",
-    platformNotAvailable: "No biometric authenticator available on this device",
-    noDevices: "No biometric keys registered",
-    noDevicesDescription: "Add your first biometric key to enable fast login with Face ID, Touch ID, or Windows Hello",
-    devices: "Registered Devices",
-    devicesCount: "{count} device(s) registered",
-    addDevice: "Add Device",
-    removeDevice: "Remove Device",
-    confirmRemoveTitle: "Remove biometric key?",
-    confirmRemoveDescription: "Are you sure you want to remove this biometric key? You can add it again later",
+    title: "Passkeys",
+    description: "Manage device-bound sign-in keys for faster account access.",
+    supported: "This browser supports passkeys",
+    notSupported: "This browser does not support passkeys",
+    platformAvailable: "A platform authenticator is available on this device",
+    platformNotAvailable: "No platform authenticator is available on this device",
+    noDevices: "No passkeys registered",
+    noDevicesDescription: "Add a passkey for faster sign-in with Face ID, Touch ID, or Windows Hello.",
+    devices: "Registered passkeys",
+    devicesCount: "{count} passkey(s) registered",
+    addDevice: "Add passkey",
+    confirmRemoveTitle: "Remove this passkey?",
+    confirmRemoveDescription: "You can add this device again later, but it will no longer be available for sign-in.",
     cancel: "Cancel",
     remove: "Remove",
-    removed: "Biometric key removed",
-    removeFailed: "Failed to remove biometric key",
+    removed: "Passkey removed",
+    removeFailed: "Could not remove passkey",
     lastUsed: "Last used: {date}",
     createdAt: "Added: {date}",
     loading: "Loading...",
-    refreshing: "Refreshing...",
-    infoTitle: "About Biometric Authentication",
-    infoDescription: "Biometric authentication allows you to log in quickly and securely using your device's built-in sensors like fingerprint readers or facial recognition. Your biometric data never leaves your device.",
+    infoTitle: "How passkeys protect your account",
+    infoDescription: "Passkeys use your device authenticator. Biometric data stays on the device and is not shared with LyVoX.",
   },
   nl: {
-    title: "Biometrische authenticatie",
-    description: "Beheer uw biometrische sleutels voor snelle en veilige login",
-    supported: "Uw browser ondersteunt biometrische authenticatie",
-    notSupported: "Uw browser ondersteunt geen biometrische authenticatie",
-    platformAvailable: "Biometrische authenticator beschikbaar op dit apparaat",
-    platformNotAvailable: "Geen biometrische authenticator beschikbaar op dit apparaat",
-    noDevices: "Geen biometrische sleutels geregistreerd",
-    noDevicesDescription: "Voeg uw eerste biometrische sleutel toe om snelle login met Face ID, Touch ID of Windows Hello in te schakelen",
-    devices: "Geregistreerde apparaten",
-    devicesCount: "{count} apparaat/apparaten geregistreerd",
-    addDevice: "Apparaat toevoegen",
-    removeDevice: "Apparaat verwijderen",
-    confirmRemoveTitle: "Biometrische sleutel verwijderen?",
-    confirmRemoveDescription: "Weet u zeker dat u deze biometrische sleutel wilt verwijderen? U kunt deze later opnieuw toevoegen",
+    title: "Passkeys",
+    description: "Beheer apparaatsleutels voor snellere accounttoegang.",
+    supported: "Deze browser ondersteunt passkeys",
+    notSupported: "Deze browser ondersteunt geen passkeys",
+    platformAvailable: "Een platform-authenticator is beschikbaar op dit apparaat",
+    platformNotAvailable: "Geen platform-authenticator beschikbaar op dit apparaat",
+    noDevices: "Geen passkeys geregistreerd",
+    noDevicesDescription: "Voeg een passkey toe voor sneller inloggen met Face ID, Touch ID of Windows Hello.",
+    devices: "Geregistreerde passkeys",
+    devicesCount: "{count} passkey(s) geregistreerd",
+    addDevice: "Passkey toevoegen",
+    confirmRemoveTitle: "Deze passkey verwijderen?",
+    confirmRemoveDescription: "U kunt dit apparaat later opnieuw toevoegen, maar het is niet langer beschikbaar voor aanmelding.",
     cancel: "Annuleren",
     remove: "Verwijderen",
-    removed: "Biometrische sleutel verwijderd",
-    removeFailed: "Kan biometrische sleutel niet verwijderen",
+    removed: "Passkey verwijderd",
+    removeFailed: "Kan passkey niet verwijderen",
     lastUsed: "Laatst gebruikt: {date}",
     createdAt: "Toegevoegd: {date}",
     loading: "Laden...",
-    refreshing: "Vernieuwen...",
-    infoTitle: "Over biometrische authenticatie",
-    infoDescription: "Met biometrische authenticatie kunt u snel en veilig inloggen met de ingebouwde sensoren van uw apparaat, zoals vingerafdrukscanner of gezichtsherkenning. Uw biometrische gegevens verlaten nooit uw apparaat.",
+    infoTitle: "Hoe passkeys uw account beschermen",
+    infoDescription: "Passkeys gebruiken de authenticator van uw apparaat. Biometrische gegevens blijven op het apparaat en worden niet gedeeld met LyVoX.",
   },
   fr: {
-    title: "Authentification biométrique",
-    description: "Gérez vos clés biométriques pour une connexion rapide et sécurisée",
-    supported: "Votre navigateur prend en charge l'authentification biométrique",
-    notSupported: "Votre navigateur ne prend pas en charge l'authentification biométrique",
-    platformAvailable: "Authentificateur biométrique disponible sur cet appareil",
-    platformNotAvailable: "Aucun authentificateur biométrique disponible sur cet appareil",
-    noDevices: "Aucune clé biométrique enregistrée",
-    noDevicesDescription: "Ajoutez votre première clé biométrique pour activer la connexion rapide avec Face ID, Touch ID ou Windows Hello",
-    devices: "Appareils enregistrés",
-    devicesCount: "{count} appareil(s) enregistré(s)",
-    addDevice: "Ajouter un appareil",
-    removeDevice: "Supprimer l'appareil",
-    confirmRemoveTitle: "Supprimer la clé biométrique ?",
-    confirmRemoveDescription: "Êtes-vous sûr de vouloir supprimer cette clé biométrique ? Vous pourrez l'ajouter à nouveau plus tard",
+    title: "Passkeys",
+    description: "Gerez les cles liees aux appareils pour un acces plus rapide au compte.",
+    supported: "Ce navigateur prend en charge les passkeys",
+    notSupported: "Ce navigateur ne prend pas en charge les passkeys",
+    platformAvailable: "Un authentificateur de plateforme est disponible sur cet appareil",
+    platformNotAvailable: "Aucun authentificateur de plateforme disponible sur cet appareil",
+    noDevices: "Aucune passkey enregistree",
+    noDevicesDescription: "Ajoutez une passkey pour une connexion plus rapide avec Face ID, Touch ID ou Windows Hello.",
+    devices: "Passkeys enregistrees",
+    devicesCount: "{count} passkey(s) enregistree(s)",
+    addDevice: "Ajouter une passkey",
+    confirmRemoveTitle: "Supprimer cette passkey ?",
+    confirmRemoveDescription: "Vous pourrez ajouter cet appareil plus tard, mais il ne sera plus disponible pour la connexion.",
     cancel: "Annuler",
     remove: "Supprimer",
-    removed: "Clé biométrique supprimée",
-    removeFailed: "Impossible de supprimer la clé biométrique",
-    lastUsed: "Dernière utilisation : {date}",
-    createdAt: "Ajouté : {date}",
+    removed: "Passkey supprimee",
+    removeFailed: "Impossible de supprimer la passkey",
+    lastUsed: "Derniere utilisation : {date}",
+    createdAt: "Ajoutee : {date}",
     loading: "Chargement...",
-    refreshing: "Actualisation...",
-    infoTitle: "À propos de l'authentification biométrique",
-    infoDescription: "L'authentification biométrique vous permet de vous connecter rapidement et en toute sécurité à l'aide des capteurs intégrés de votre appareil tels que les lecteurs d'empreintes digitales ou la reconnaissance faciale. Vos données biométriques ne quittent jamais votre appareil.",
+    infoTitle: "Comment les passkeys protegent votre compte",
+    infoDescription: "Les passkeys utilisent l'authentificateur de votre appareil. Les donnees biometriques restent sur l'appareil et ne sont pas partagees avec LyVoX.",
   },
   ru: {
-    title: "Биометрическая авторизация",
-    description: "Управление биометрическими ключами для быстрого и безопасного входа",
-    supported: "Ваш браузер поддерживает биометрическую авторизацию",
-    notSupported: "Ваш браузер не поддерживает биометрическую авторизацию",
-    platformAvailable: "Биометрический аутентификатор доступен на этом устройстве",
-    platformNotAvailable: "На этом устройстве нет биометрического аутентификатора",
-    noDevices: "Нет зарегистрированных биометрических ключей",
-    noDevicesDescription: "Добавьте свой первый биометрический ключ для быстрого входа с Face ID, Touch ID или Windows Hello",
-    devices: "Зарегистрированные устройства",
-    devicesCount: "Зарегистрировано устройств: {count}",
-    addDevice: "Добавить устройство",
-    removeDevice: "Удалить устройство",
-    confirmRemoveTitle: "Удалить биометрический ключ?",
-    confirmRemoveDescription: "Вы уверены, что хотите удалить этот биометрический ключ? Вы сможете добавить его снова позже",
-    cancel: "Отмена",
-    remove: "Удалить",
-    removed: "Биометрический ключ удален",
-    removeFailed: "Не удалось удалить биометрический ключ",
-    lastUsed: "Последнее использование: {date}",
-    createdAt: "Добавлено: {date}",
-    loading: "Загрузка...",
-    refreshing: "Обновление...",
-    infoTitle: "О биометрической авторизации",
-    infoDescription: "Биометрическая авторизация позволяет быстро и безопасно входить в систему, используя встроенные датчики вашего устройства, такие как сканер отпечатков пальцев или распознавание лиц. Ваши биометрические данные никогда не покидают ваше устройство.",
+    title: "Passkeys",
+    description: "Manage device-bound sign-in keys for faster account access.",
+    supported: "This browser supports passkeys",
+    notSupported: "This browser does not support passkeys",
+    platformAvailable: "A platform authenticator is available on this device",
+    platformNotAvailable: "No platform authenticator is available on this device",
+    noDevices: "No passkeys registered",
+    noDevicesDescription: "Add a passkey for faster sign-in with Face ID, Touch ID, or Windows Hello.",
+    devices: "Registered passkeys",
+    devicesCount: "{count} passkey(s) registered",
+    addDevice: "Add passkey",
+    confirmRemoveTitle: "Remove this passkey?",
+    confirmRemoveDescription: "You can add this device again later, but it will no longer be available for sign-in.",
+    cancel: "Cancel",
+    remove: "Remove",
+    removed: "Passkey removed",
+    removeFailed: "Could not remove passkey",
+    lastUsed: "Last used: {date}",
+    createdAt: "Added: {date}",
+    loading: "Loading...",
+    infoTitle: "How passkeys protect your account",
+    infoDescription: "Passkeys use your device authenticator. Biometric data stays on the device and is not shared with LyVoX.",
   },
   de: {
-    title: "Biometrische Authentifizierung",
-    description: "Verwalten Sie Ihre biometrischen Schlüssel für schnelle und sichere Anmeldung",
-    supported: "Ihr Browser unterstützt biometrische Authentifizierung",
-    notSupported: "Ihr Browser unterstützt keine biometrische Authentifizierung",
-    platformAvailable: "Biometrischer Authentifikator auf diesem Gerät verfügbar",
-    platformNotAvailable: "Kein biometrischer Authentifikator auf diesem Gerät verfügbar",
-    noDevices: "Keine biometrischen Schlüssel registriert",
-    noDevicesDescription: "Fügen Sie Ihren ersten biometrischen Schlüssel hinzu, um die schnelle Anmeldung mit Face ID, Touch ID oder Windows Hello zu aktivieren",
-    devices: "Registrierte Geräte",
-    devicesCount: "{count} Gerät(e) registriert",
-    addDevice: "Gerät hinzufügen",
-    removeDevice: "Gerät entfernen",
-    confirmRemoveTitle: "Biometrischen Schlüssel entfernen?",
-    confirmRemoveDescription: "Sind Sie sicher, dass Sie diesen biometrischen Schlüssel entfernen möchten? Sie können ihn später erneut hinzufügen",
+    title: "Passkeys",
+    description: "Verwalten Sie geraetegebundene Anmeldeschluessel fuer schnelleren Kontozugriff.",
+    supported: "Dieser Browser unterstuetzt Passkeys",
+    notSupported: "Dieser Browser unterstuetzt keine Passkeys",
+    platformAvailable: "Ein Plattform-Authenticator ist auf diesem Geraet verfuegbar",
+    platformNotAvailable: "Kein Plattform-Authenticator auf diesem Geraet verfuegbar",
+    noDevices: "Keine Passkeys registriert",
+    noDevicesDescription: "Fuegen Sie einen Passkey fuer schnellere Anmeldung mit Face ID, Touch ID oder Windows Hello hinzu.",
+    devices: "Registrierte Passkeys",
+    devicesCount: "{count} Passkey(s) registriert",
+    addDevice: "Passkey hinzufuegen",
+    confirmRemoveTitle: "Diesen Passkey entfernen?",
+    confirmRemoveDescription: "Sie koennen dieses Geraet spaeter erneut hinzufuegen, aber es ist nicht mehr fuer die Anmeldung verfuegbar.",
     cancel: "Abbrechen",
     remove: "Entfernen",
-    removed: "Biometrischer Schlüssel entfernt",
-    removeFailed: "Biometrischer Schlüssel konnte nicht entfernt werden",
+    removed: "Passkey entfernt",
+    removeFailed: "Passkey konnte nicht entfernt werden",
     lastUsed: "Zuletzt verwendet: {date}",
-    createdAt: "Hinzugefügt: {date}",
+    createdAt: "Hinzugefuegt: {date}",
     loading: "Laden...",
-    refreshing: "Aktualisieren...",
-    infoTitle: "Über biometrische Authentifizierung",
-    infoDescription: "Die biometrische Authentifizierung ermöglicht es Ihnen, sich schnell und sicher mit den integrierten Sensoren Ihres Geräts wie Fingerabdrucklesern oder Gesichtserkennung anzumelden. Ihre biometrischen Daten verlassen niemals Ihr Gerät.",
+    infoTitle: "Wie Passkeys Ihr Konto schuetzen",
+    infoDescription: "Passkeys verwenden den Authenticator Ihres Geraets. Biometrische Daten bleiben auf dem Geraet und werden nicht mit LyVoX geteilt.",
   },
-};
+} satisfies Record<Locale, Record<string, string>>;
 
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/**
- * Форматирует дату для отображения
- */
 function formatDate(dateString: string, locale: Locale): string {
   try {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat(locale, {
+    return new Intl.DateTimeFormat(locale === "ru" ? "en" : locale, {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -214,24 +174,18 @@ function formatDate(dateString: string, locale: Locale): string {
   }
 }
 
-/**
- * Определяет иконку устройства по названию
- */
 function getDeviceIcon(friendlyName: string) {
   const name = friendlyName.toLowerCase();
-  
-  if (name.includes("iphone") || name.includes("ipad") || name.includes("android")) {
-    return <Smartphone className="size-5" />;
-  } else if (name.includes("mac") || name.includes("windows") || name.includes("linux")) {
-    return <Laptop className="size-5" />;
-  }
-  
-  return <Fingerprint className="size-5" />;
-}
 
-// ============================================================================
-// Device Card Component
-// ============================================================================
+  if (name.includes("iphone") || name.includes("ipad") || name.includes("android")) {
+    return <Smartphone className="size-5" aria-hidden="true" />;
+  }
+  if (name.includes("mac") || name.includes("windows") || name.includes("linux")) {
+    return <Laptop className="size-5" aria-hidden="true" />;
+  }
+
+  return <Fingerprint className="size-5" aria-hidden="true" />;
+}
 
 interface DeviceCardProps {
   credential: BiometricCredential;
@@ -242,29 +196,29 @@ interface DeviceCardProps {
 
 function DeviceCard({ credential, locale, onRemove, isRemoving }: DeviceCardProps) {
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
-  const msg = messages[locale];
+  const copy = messages[locale] ?? messages.en;
 
   return (
     <>
-      <Card>
-        <CardContent className="flex items-start justify-between p-4">
-          <div className="flex items-start gap-3">
+      <Card className="rounded-md">
+        <CardContent className="flex items-start justify-between gap-3 p-4">
+          <div className="flex min-w-0 items-start gap-3">
             <div className="mt-1 text-muted-foreground">
               {getDeviceIcon(credential.friendlyName)}
             </div>
-            <div className="flex-1 space-y-1">
-              <div className="flex items-center gap-2">
-                <p className="font-medium">{credential.friendlyName}</p>
+            <div className="min-w-0 flex-1 space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="truncate font-medium">{credential.friendlyName}</p>
                 <Badge variant="secondary" className="text-xs">
                   WebAuthn
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground">
-                {msg.createdAt.replace("{date}", formatDate(credential.createdAt, locale))}
+                {copy.createdAt.replace("{date}", formatDate(credential.createdAt, locale))}
               </p>
               {credential.lastUsedAt && (
                 <p className="text-xs text-muted-foreground">
-                  {msg.lastUsed.replace("{date}", formatDate(credential.lastUsedAt, locale))}
+                  {copy.lastUsed.replace("{date}", formatDate(credential.lastUsedAt, locale))}
                 </p>
               )}
             </div>
@@ -274,27 +228,26 @@ function DeviceCard({ credential, locale, onRemove, isRemoving }: DeviceCardProp
             size="icon"
             onClick={() => setShowRemoveDialog(true)}
             disabled={isRemoving}
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+            aria-label="Remove passkey"
           >
             {isRemoving ? (
-              <Loader2 className="size-4 animate-spin" />
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
             ) : (
-              <Trash2 className="size-4" />
+              <Trash2 className="size-4" aria-hidden="true" />
             )}
           </Button>
         </CardContent>
       </Card>
 
       <AlertDialog open={showRemoveDialog} onOpenChange={setShowRemoveDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>{msg.confirmRemoveTitle}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {msg.confirmRemoveDescription}
-            </AlertDialogDescription>
+            <AlertDialogTitle>{copy.confirmRemoveTitle}</AlertDialogTitle>
+            <AlertDialogDescription>{copy.confirmRemoveDescription}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{msg.cancel}</AlertDialogCancel>
+            <AlertDialogCancel>{copy.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 onRemove(credential.factorId);
@@ -302,7 +255,7 @@ function DeviceCard({ credential, locale, onRemove, isRemoving }: DeviceCardProp
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {msg.remove}
+              {copy.remove}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -311,12 +264,9 @@ function DeviceCard({ credential, locale, onRemove, isRemoving }: DeviceCardProp
   );
 }
 
-// ============================================================================
-// Main Component
-// ============================================================================
-
 export function BiometricSettings({ locale = "en", className }: BiometricSettingsProps) {
   const [removingFactorId, setRemovingFactorId] = useState<string | null>(null);
+  const copy = messages[locale] ?? messages.en;
 
   const {
     isSupported,
@@ -329,22 +279,19 @@ export function BiometricSettings({ locale = "en", className }: BiometricSetting
     autoLoad: true,
   });
 
-  const msg = messages[locale];
-
-  // Обработчик удаления устройства
   const handleRemove = async (factorId: string) => {
     setRemovingFactorId(factorId);
 
     try {
       const success = await remove(factorId);
-      
+
       if (success) {
-        toast.success(msg.removed);
+        toast.success(copy.removed);
       } else {
-        toast.error(msg.removeFailed);
+        toast.error(copy.removeFailed);
       }
-    } catch (error) {
-      toast.error(msg.removeFailed);
+    } catch {
+      toast.error(copy.removeFailed);
     } finally {
       setRemovingFactorId(null);
     }
@@ -352,27 +299,26 @@ export function BiometricSettings({ locale = "en", className }: BiometricSetting
 
   return (
     <div className={className}>
-      <Card>
+      <Card className="rounded-md">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Fingerprint className="size-5" />
-            {msg.title}
+            <Fingerprint className="size-5" aria-hidden="true" />
+            {copy.title}
           </CardTitle>
-          <CardDescription>{msg.description}</CardDescription>
+          <CardDescription>{copy.description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Browser Support Status */}
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm">
               {isSupported ? (
                 <>
-                  <CheckCircle2 className="size-4 text-green-600" />
-                  <span className="text-green-600">{msg.supported}</span>
+                  <CheckCircle2 className="size-4 text-emerald-600" aria-hidden="true" />
+                  <span className="text-emerald-700 dark:text-emerald-300">{copy.supported}</span>
                 </>
               ) : (
                 <>
-                  <XCircle className="size-4 text-destructive" />
-                  <span className="text-destructive">{msg.notSupported}</span>
+                  <XCircle className="size-4 text-destructive" aria-hidden="true" />
+                  <span className="text-destructive">{copy.notSupported}</span>
                 </>
               )}
             </div>
@@ -380,61 +326,54 @@ export function BiometricSettings({ locale = "en", className }: BiometricSetting
               <div className="flex items-center gap-2 text-sm">
                 {isPlatformAvailable ? (
                   <>
-                    <CheckCircle2 className="size-4 text-green-600" />
-                    <span className="text-green-600">{msg.platformAvailable}</span>
+                    <CheckCircle2 className="size-4 text-emerald-600" aria-hidden="true" />
+                    <span className="text-emerald-700 dark:text-emerald-300">{copy.platformAvailable}</span>
                   </>
                 ) : (
                   <>
-                    <AlertCircle className="size-4 text-amber-600" />
-                    <span className="text-amber-600">{msg.platformNotAvailable}</span>
+                    <AlertCircle className="size-4 text-amber-600" aria-hidden="true" />
+                    <span className="text-amber-700 dark:text-amber-300">{copy.platformNotAvailable}</span>
                   </>
                 )}
               </div>
             )}
           </div>
 
-          {/* Info Banner */}
-          <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/30">
+          <div className="rounded-md border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/30">
             <div className="flex gap-3">
-              <Info className="size-5 shrink-0 text-blue-600 dark:text-blue-400" />
+              <Info className="size-5 shrink-0 text-blue-600 dark:text-blue-400" aria-hidden="true" />
               <div className="space-y-1">
                 <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                  {msg.infoTitle}
+                  {copy.infoTitle}
                 </p>
                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                  {msg.infoDescription}
+                  {copy.infoDescription}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Devices List */}
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="size-6 animate-spin text-muted-foreground" />
-              <span className="ml-2 text-sm text-muted-foreground">{msg.loading}</span>
+              <Loader2 className="size-6 animate-spin text-muted-foreground" aria-hidden="true" />
+              <span className="ml-2 text-sm text-muted-foreground">{copy.loading}</span>
             </div>
           ) : credentials.length === 0 ? (
-            <div className="rounded-lg border border-dashed p-8 text-center">
-              <Fingerprint className="mx-auto size-12 text-muted-foreground/50" />
-              <h3 className="mt-4 text-sm font-semibold">{msg.noDevices}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {msg.noDevicesDescription}
-              </p>
+            <div className="rounded-md border border-dashed p-8 text-center">
+              <Fingerprint className="mx-auto size-12 text-muted-foreground/50" aria-hidden="true" />
+              <h3 className="mt-4 text-sm font-semibold">{copy.noDevices}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{copy.noDevicesDescription}</p>
               <div className="mt-6">
-                <BiometricEnrollButton
-                  locale={locale}
-                  onSuccess={() => void refresh()}
-                />
+                <BiometricEnrollButton locale={locale} onSuccess={() => void refresh()} />
               </div>
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-sm font-semibold">{msg.devices}</h3>
+                  <h3 className="text-sm font-semibold">{copy.devices}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {msg.devicesCount.replace("{count}", String(credentials.length))}
+                    {copy.devicesCount.replace("{count}", String(credentials.length))}
                   </p>
                 </div>
                 <BiometricEnrollButton
@@ -443,7 +382,7 @@ export function BiometricSettings({ locale = "en", className }: BiometricSetting
                   size="sm"
                   onSuccess={() => void refresh()}
                 >
-                  {msg.addDevice}
+                  {copy.addDevice}
                 </BiometricEnrollButton>
               </div>
 
@@ -466,19 +405,4 @@ export function BiometricSettings({ locale = "en", className }: BiometricSetting
   );
 }
 
-// ============================================================================
-// Default Export
-// ============================================================================
-
 export default BiometricSettings;
-
-
-
-
-
-
-
-
-
-
-

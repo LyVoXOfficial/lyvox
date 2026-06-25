@@ -5,19 +5,17 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function WebAuthnNotAvailableNotice() {
   return (
-    <Alert variant="destructive" className="mb-6">
-      <AlertTriangle className="size-4" />
-      <AlertTitle>WebAuthn (Biometric) MFA недоступен</AlertTitle>
-      <AlertDescription className="mt-2 space-y-2">
+    <Alert className="mb-6 border-amber-200 bg-amber-50/80 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
+      <AlertTriangle className="size-4 text-amber-700 dark:text-amber-300" />
+      <AlertTitle>Passkeys are not available for this account yet</AlertTitle>
+      <AlertDescription className="mt-2 space-y-2 text-amber-800 dark:text-amber-200">
         <p>
-          WebAuthn/Passkeys не поддерживается в текущей версии Supabase для пользовательских проектов.
+          LyVoX currently uses authenticator-app codes for MFA. Passkeys and WebAuthn will be added only when the provider path is stable enough for account recovery.
         </p>
-        <p>
-          <strong>Доступные методы MFA:</strong>
-        </p>
+        <p className="font-medium">Available account protection today:</p>
         <ul className="list-inside list-disc space-y-1">
-          <li>✅ <strong>TOTP</strong> - App Authenticator (Google Authenticator, Authy, 1Password)</li>
-          <li>⚠️ <strong>Phone MFA</strong> - SMS/WhatsApp (требует Pro план)</li>
+          <li>TOTP authenticator apps such as Google Authenticator, 1Password, Authy, or Microsoft Authenticator.</li>
+          <li>Verified email and phone signals used across seller trust surfaces.</li>
         </ul>
       </AlertDescription>
     </Alert>
@@ -28,33 +26,27 @@ export function TOTPRecommendation() {
   return (
     <Alert className="mb-6">
       <Info className="size-4" />
-      <AlertTitle>Рекомендация: Используйте TOTP</AlertTitle>
+      <AlertTitle>Use an authenticator app for stronger account protection</AlertTitle>
       <AlertDescription className="mt-2 space-y-2">
         <p>
-          TOTP (Time-based One-Time Password) - это надежный метод двухфакторной аутентификации,
-          который используют Google, GitHub, Microsoft и другие крупные компании.
-        </p>
-        <p>
-          <strong>Как включить:</strong>
+          Time-based one-time passwords are a reliable two-factor method used by major account systems. They protect your LyVoX account even if a password is exposed.
         </p>
         <ol className="list-inside list-decimal space-y-1">
-          <li>Установите приложение-аутентификатор (Google Authenticator, Authy, 1Password)</li>
-          <li>Используйте Supabase JavaScript SDK для регистрации TOTP фактора</li>
-          <li>Отсканируйте QR-код в приложении</li>
-          <li>Введите 6-значный код для подтверждения</li>
+          <li>Install an authenticator app.</li>
+          <li>Scan the QR code from LyVoX.</li>
+          <li>Enter the six-digit code to finish setup.</li>
         </ol>
         <p className="mt-2">
-          <a 
-            href="https://supabase.com/docs/guides/auth/auth-mfa/totp" 
-            target="_blank" 
+          <a
+            href="https://supabase.com/docs/guides/auth/auth-mfa/totp"
+            target="_blank"
             rel="noopener noreferrer"
             className="text-primary underline hover:no-underline"
           >
-            Документация по TOTP MFA →
+            Read the TOTP MFA documentation
           </a>
         </p>
       </AlertDescription>
     </Alert>
   );
 }
-

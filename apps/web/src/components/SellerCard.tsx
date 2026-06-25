@@ -56,7 +56,7 @@ export default function SellerCard({
     (seller.activeAdverts ?? 0) > 5 ? sellerTypeProfessionalLabel : sellerTypePrivateLabel;
 
   return (
-    <section className="rounded-2xl border p-4 shadow-sm">
+    <section className="rounded-md border border-border/80 bg-card p-4 shadow-sm">
       <header className="mb-4 flex items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">
@@ -115,4 +115,3 @@ export default function SellerCard({
     </section>
   );
 }
-

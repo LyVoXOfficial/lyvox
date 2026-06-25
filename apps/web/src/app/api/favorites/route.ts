@@ -64,9 +64,13 @@ async function getFavorites(request: Request) {
   const { supabase, user } = await getRequestContext(request);
 
   if (!user) {
-    return createErrorResponse(ApiErrorCode.UNAUTH, {
-      status: 401,
-      detail: "Authentication required",
+    return createSuccessResponse({
+      items: [],
+      total: 0,
+      page: 0,
+      limit: 0,
+      hasMore: false,
+      authenticated: false,
     });
   }
 
@@ -272,4 +276,3 @@ export const POST = withRateLimit(addFavorite, {
   getUserId: resolveUserId,
   makeKey: buildRateLimitKey,
 });
-

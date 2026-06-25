@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useI18n } from "@/i18n";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import type { Category } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -34,7 +34,6 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
-  const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -93,26 +92,21 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
     };
   }, [search]);
 
-  // Filter categories based on debounced search
-  useEffect(() => {
+  const filteredCategories = useMemo(() => {
     if (!debouncedSearch.trim()) {
-      setFilteredCategories([]);
-      setShowAutocomplete(false);
-      return;
+      return [];
     }
 
     const query = debouncedSearch.toLowerCase().trim();
-    const filtered = categories
+    return categories
       .filter((cat) => {
         const name = getLocalizedCategoryName(cat, locale).toLowerCase();
         return name.includes(query);
       })
       .slice(0, 10); // Limit to 10 suggestions
-
-    setFilteredCategories(filtered);
-    setShowAutocomplete(filtered.length > 0);
-    setSelectedIndex(-1);
   }, [debouncedSearch, categories, locale]);
+
+  const isAutocompleteOpen = showAutocomplete && filteredCategories.length > 0;
 
   // Close autocomplete when clicking outside
   useEffect(() => {
@@ -161,7 +155,7 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!showAutocomplete || filteredCategories.length === 0) return;
+    if (!isAutocompleteOpen) return;
 
     if (event.key === "ArrowDown") {
       event.preventDefault();
@@ -184,30 +178,37 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
     <form onSubmit={handleSubmit} className={className}>
       <div className="flex flex-1 items-center gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none z-10" />
+          <Search className="absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-muted-foreground pointer-events-none z-10" />
           <input
             ref={inputRef}
             type="search"
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setSelectedIndex(-1);
+              setShowAutocomplete(event.target.value.trim().length > 0);
+            }}
             onFocus={() => {
               if (filteredCategories.length > 0) {
                 setShowAutocomplete(true);
               }
             }}
             onKeyDown={handleKeyDown}
-            placeholder={t("common.search") || "Поиск объявлений"}
-            aria-label={t("common.search") || "Поиск объявлений"}
+            placeholder={t("common.search") || "Search listings, categories, brands"}
+            aria-label={t("common.search") || "Search listings"}
             aria-autocomplete="list"
-            aria-expanded={showAutocomplete}
-            className={isCompact ? "w-full rounded-md border bg-background pl-9 pr-3 py-2 text-sm" : "w-full rounded-md border px-3 py-2 pl-9"}
+            aria-expanded={isAutocompleteOpen}
+            className={cn(
+              "w-full rounded-full border border-border/70 bg-card text-foreground shadow-[var(--shadow-soft)] outline-none transition placeholder:text-muted-foreground focus:border-primary/60 focus:ring-4 focus:ring-primary/12",
+              isCompact ? "h-10 pl-10 pr-4 text-sm" : "h-12 pl-11 pr-4 text-sm md:text-base"
+            )}
           />
           
           {/* Autocomplete dropdown */}
-          {showAutocomplete && filteredCategories.length > 0 && (
+          {isAutocompleteOpen && (
             <div
               ref={autocompleteRef}
-              className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-md shadow-lg z-50 max-h-64 overflow-y-auto"
+              className="absolute left-0 right-0 top-full z-50 mt-2 max-h-72 overflow-y-auto rounded-xl border border-border/70 bg-card shadow-[var(--shadow-hi)]"
               role="listbox"
             >
               {filteredCategories.map((category, index) => (
@@ -219,8 +220,8 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
                     handleCategorySelect(category);
                   }}
                   className={cn(
-                    "block px-4 py-2 hover:bg-gray-50 cursor-pointer border-b last:border-b-0",
-                    selectedIndex === index && "bg-gray-50"
+                    "block cursor-pointer border-b px-4 py-3 transition last:border-b-0 hover:bg-secondary/70",
+                    selectedIndex === index && "bg-secondary"
                   )}
                   role="option"
                   aria-selected={selectedIndex === index}
@@ -231,7 +232,7 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
                         {category.icon}
                       </span>
                     )}
-                    <span className="text-sm">{getLocalizedCategoryName(category, locale)}</span>
+                    <span className="text-sm font-medium">{getLocalizedCategoryName(category, locale)}</span>
                   </div>
                 </Link>
               ))}
@@ -239,8 +240,9 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
           )}
         </div>
         {!isCompact && (
-          <Button type="submit" variant="outline" className="hidden md:inline-flex">
-            {t("common.find") || "Найти"}
+          <Button type="submit" className="hidden h-12 rounded-full px-6 md:inline-flex">
+            {t("common.find") || "Find"}
+            <ArrowRight className="ml-1 h-4 w-4" aria-hidden="true" />
           </Button>
         )}
       </div>

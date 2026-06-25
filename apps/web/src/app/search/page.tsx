@@ -6,6 +6,7 @@ import { useI18n } from "@/i18n";
 import SearchFilters, { type SearchFiltersState } from "@/components/SearchFilters";
 import { logger } from "@/lib/errorLogger";
 import AdsGrid from "@/components/ads-grid";
+import { AdsGridSkeleton } from "@/components/marketplace-grid-states";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -23,7 +24,7 @@ import {
   PaginationPrevious,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
-import { Loader2 } from "lucide-react";
+import { Loader2, SlidersHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type SearchResult = {
@@ -67,6 +68,13 @@ export default function SearchPage() {
   const { t, locale } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const translate = useCallback(
+    (key: string, fallback: string, params?: Record<string, string | number>) => {
+      const value = t(key, params);
+      return value === key ? fallback : value;
+    },
+    [t],
+  );
 
   // Extract URL parameters
   const query = searchParams.get("q") || "";
@@ -132,12 +140,12 @@ export default function SearchPage() {
         response = await fetch(`/api/search?${params.toString()}`);
       } catch (fetchError) {
         // Network error or fetch failed
-        const translated = t("search.fetchFailed");
+        const translated = translate("search.fetchFailed", "Could not load search results.");
         throw new Error(translated);
       }
 
       if (!response.ok) {
-        const translated = t("search.fetchFailed");
+        const translated = translate("search.fetchFailed", "Could not load search results.");
         throw new Error(translated);
       }
 
@@ -145,14 +153,14 @@ export default function SearchPage() {
       try {
         data = await response.json();
       } catch (parseError) {
-        const translated = t("search.fetchFailed");
+        const translated = translate("search.fetchFailed", "Could not load search results.");
         throw new Error(translated);
       }
 
       if (!data.ok || !data.data) {
         // Translate error codes to user-friendly messages
         const errorKey = data.error === "FETCH_FAILED" ? "search.fetchFailed" : "search.error";
-        const translated = t(errorKey);
+        const translated = translate(errorKey, "Could not load search results.");
         throw new Error(translated);
       }
 
@@ -217,7 +225,7 @@ export default function SearchPage() {
       // Error message should already be translated from the catch blocks above
       const errorMessage = err instanceof Error 
         ? err.message 
-        : t("search.error");
+        : translate("search.error", "Could not load search results.");
       setError(errorMessage);
       setResults([]);
       setTotal(0);
@@ -225,7 +233,7 @@ export default function SearchPage() {
     } finally {
       setLoading(false);
     }
-  }, [query, categoryId, priceMin, priceMax, location, sortBy, page, limit, t, searchParams, verifiedOnlyFilter]);
+  }, [query, categoryId, priceMin, priceMax, location, sortBy, page, limit, translate, searchParams, verifiedOnlyFilter]);
 
   // Fetch results when params change
   useEffect(() => {
@@ -382,6 +390,36 @@ export default function SearchPage() {
   const currentPage = page;
   const startItem = currentPage * limit + 1;
   const endItem = Math.min((currentPage + 1) * limit, total);
+  const activeFilterChips = [
+    query ? { key: "q", label: `"${query}"`, params: ["q"] } : null,
+    categoryId ? { key: "category_id", label: t("search.category") || "Category selected", params: ["category_id"] } : null,
+    priceMin || priceMax
+      ? {
+          key: "price",
+          label: `€${priceMin || 0}-${priceMax || 10000}`,
+          params: ["price_min", "price_max"],
+        }
+      : null,
+    location ? { key: "location", label: location, params: ["location"] } : null,
+    verifiedOnlyFilter
+      ? { key: "verified_only", label: t("search.verifiedOnly") || "Verified sellers", params: ["verified_only"] }
+      : null,
+    ...Array.from(searchParams.keys())
+      .filter((key) => key.startsWith("catalog_field_"))
+      .map((key) => ({
+        key,
+        label: key.replace("catalog_field_", ""),
+        params: [key],
+      })),
+  ].filter(Boolean) as Array<{ key: string; label: string; params: string[] }>;
+
+  const clearParams = (keys: string[]) => {
+    const params = new URLSearchParams(searchParams.toString());
+    keys.forEach((key) => params.delete(key));
+    params.set("page", "0");
+    const next = params.toString();
+    router.push(next ? `/search?${next}` : "/search");
+  };
 
   // Render pagination numbers
   const renderPaginationNumbers = () => {
@@ -444,29 +482,30 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="flex flex-col lg:flex-row gap-6">
+    <div className="py-2 md:py-4">
+      <div className="flex flex-col gap-6 lg:flex-row">
         {/* Filters Sidebar */}
-        <aside className="hidden lg:block lg:w-64 shrink-0">
+        <aside className="hidden shrink-0 lg:sticky lg:top-24 lg:block lg:self-start">
           <SearchFilters variant="sidebar" onFiltersChange={handleFiltersChange} />
         </aside>
 
         {/* Main Content */}
         <main className="flex-1 min-w-0">
           {/* Header with sort and mobile filters */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <div className="mb-5 rounded-xl border border-border/70 bg-card p-4 shadow-[var(--shadow-soft)]">
+          <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex-1">
-              <h1 className="text-2xl font-semibold">
+              <h1 className="text-2xl font-extrabold tracking-tight">
                 {query
-                  ? t("search.resultsFor", { query }) || `Результаты для "${query}"`
-                  : t("search.results") || "Результаты поиска"}
+                  ? t("search.resultsFor", { query }) || `Results for "${query}"`
+                  : t("search.results") || "Search results"}
               </h1>
               {!loading && (
                 <p className="text-sm text-muted-foreground mt-1">
                   {total > 0
                     ? t("search.showing", { start: startItem, end: endItem, total }) ||
-                      `Показано ${startItem}-${endItem} из ${total}`
-                    : t("search.noResults") || "Результаты не найдены"}
+                      `Showing ${startItem}-${endItem} of ${total}`
+                    : t("search.noResults") || "No results found"}
                 </p>
               )}
             </div>
@@ -485,39 +524,62 @@ export default function SearchPage() {
               {/* Sort selector */}
               <Select value={sortBy} onValueChange={handleSortChange}>
                 <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder={t("search.sort") || "Сортировка"} />
+                  <SelectValue placeholder={t("search.sort") || "Sort"} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="relevance">
-                    {t("search.sortRelevance") || "Релевантность"}
+                    {t("search.sortRelevance") || "Relevance"}
                   </SelectItem>
                   <SelectItem value="price_asc">
-                    {t("search.sortPriceAsc") || "Цена: по возрастанию"}
+                    {t("search.sortPriceAsc") || "Price: low to high"}
                   </SelectItem>
                   <SelectItem value="price_desc">
-                    {t("search.sortPriceDesc") || "Цена: по убыванию"}
+                    {t("search.sortPriceDesc") || "Price: high to low"}
                   </SelectItem>
                   <SelectItem value="created_at_desc">
-                    {t("search.sortNewest") || "Сначала новые"}
+                    {t("search.sortNewest") || "Newest first"}
                   </SelectItem>
                   <SelectItem value="created_at_asc">
-                    {t("search.sortOldest") || "Сначала старые"}
+                    {t("search.sortOldest") || "Oldest first"}
                   </SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
+          {activeFilterChips.length > 0 && (
+            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border/70 pt-3">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
+                Applied
+              </span>
+              {activeFilterChips.map((chip) => (
+                <button
+                  key={chip.key}
+                  type="button"
+                  onClick={() => clearParams(chip.params)}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border bg-secondary/70 px-2.5 py-1 text-xs font-medium text-secondary-foreground transition hover:border-primary/30 hover:text-primary"
+                >
+                  {chip.label}
+                  <X className="h-3 w-3" aria-hidden="true" />
+                </button>
+              ))}
+              <Button variant="ghost" size="sm" onClick={() => router.push("/search")} className="h-7 px-2 text-xs">
+                {t("search.clear") || "Clear"}
+              </Button>
+            </div>
+          )}
+          </div>
 
           {/* Loading state */}
           {loading && (
-            <div className="flex items-center justify-center py-12">
+            <div className="flex items-center justify-center rounded-md border border-border/80 bg-card py-16">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           )}
 
           {/* Error state */}
           {error && !loading && (
-            <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-center">
+            <div className="rounded-md border border-destructive/50 bg-destructive/10 p-6 text-center">
               <p className="text-sm text-destructive">{error}</p>
               <Button
                 variant="outline"
@@ -525,15 +587,43 @@ export default function SearchPage() {
                 onClick={() => fetchResults()}
                 className="mt-2"
               >
-                {t("common.retry") || "Повторить"}
+                {t("common.retry") || "Retry"}
               </Button>
             </div>
           )}
 
-          {/* Results */}
+          {/* Results — AdsGrid renders a buyer-friendly empty state (with actions)
+              when there are no matches, the #1 churn moment. */}
           {!loading && !error && (
             <>
-              <AdsGrid items={isMobile ? allResults : results} />
+              <AdsGrid
+                items={isMobile ? allResults : results}
+                emptyTitle={translate("search.emptyTitle", "Nothing matched your search")}
+                emptyDescription={
+                  activeFilterChips.length > 0
+                    ? translate(
+                        "search.emptyWithFilters",
+                        "Try removing some filters or broadening your price range.",
+                      )
+                    : translate(
+                        "search.emptyBrowse",
+                        "Browse categories or try a different search term to find what you need.",
+                      )
+                }
+                primaryAction={{
+                  href: "/",
+                  label: translate("search.browseCategories", "Browse categories"),
+                }}
+                secondaryAction={
+                  activeFilterChips.length > 0
+                    ? {
+                        href: "/search",
+                        label: translate("search.clearFilters", "Clear filters"),
+                        variant: "outline",
+                      }
+                    : undefined
+                }
+              />
               
               {/* Pagination (desktop only) */}
               {!isMobile && totalPages > 1 && (
@@ -587,4 +677,3 @@ export default function SearchPage() {
     </div>
   );
 }
-

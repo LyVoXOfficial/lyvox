@@ -1,5 +1,5 @@
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { FavoritesProvider } from "@/components/favorites/FavoritesProvider";
 import TopBar from "@/components/topbar";
@@ -9,6 +9,16 @@ import BottomNav from "@/components/bottom-nav";
 import ViewportBottomSpacer from "@/components/viewport-bottom-spacer";
 import { I18nProvider } from "@/i18n";
 import { getI18nProps } from "@/i18n/server";
+
+// `viewport-fit: cover` is required for the `env(safe-area-inset-*)` paddings
+// used by the bottom nav to be non-zero on notched devices (iOS). themeColor
+// sets the mobile browser chrome and is a prerequisite for PWA work.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#11bdf9",
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const { locale, messages } = await getI18nProps();
@@ -77,7 +87,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           <FavoritesProvider>
             <TopBar />
             <MainHeader />
-            <main className="flex-1 mx-auto max-w-6xl w-full px-4 py-4 md:py-6 pb-[calc(64px+env(safe-area-inset-bottom))]">{children}</main>
+            <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-4 md:py-6 pb-[calc(64px+env(safe-area-inset-bottom))]">{children}</main>
             <LegalFooter />
             <ViewportBottomSpacer />
             <BottomNav />

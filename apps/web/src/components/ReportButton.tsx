@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Flag, X } from "lucide-react";
 
 import { apiFetch, RateLimitedError } from "@/lib/fetcher";
 
@@ -50,17 +51,17 @@ export default function ReportButton({ advertId }: Props) {
         throw new Error(payload.error || response.statusText);
       }
 
-      setMessage("Жалоба отправлена. Спасибо!");
+      setMessage("Report submitted. Thank you.");
       setTimeout(() => close(), 1000);
     } catch (error) {
       if (error instanceof RateLimitedError) {
         const seconds = Math.max(1, Math.round(error.retryAfterSec ?? 60));
         setCooldown(seconds);
-        toast.error(`Слишком много попыток. Повторите через ${seconds} сек.`);
+        toast.error(`Too many attempts. Try again in ${seconds}s.`);
       } else {
         const text =
-          error instanceof Error ? error.message : "Не удалось отправить жалобу";
-        setMessage(`Ошибка: ${text}`);
+          error instanceof Error ? error.message : "Could not submit the report";
+        setMessage(`Error: ${text}`);
       }
       setSubmitting(false);
     }
@@ -77,9 +78,10 @@ export default function ReportButton({ advertId }: Props) {
       <button
         type="button"
         onClick={handleOpen}
-        className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+        className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
       >
-        Пожаловаться
+        <Flag className="h-3.5 w-3.5" aria-hidden="true" />
+        Report
       </button>
       {open && (
         <div
@@ -88,46 +90,46 @@ export default function ReportButton({ advertId }: Props) {
             if (event.target === event.currentTarget) close();
           }}
         >
-          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+          <div className="w-full max-w-md rounded-md bg-card p-5 shadow-xl">
             <div className="flex items-start justify-between gap-3">
-              <h3 className="text-lg font-semibold">Пожаловаться на объявление</h3>
+              <h3 className="text-lg font-semibold">Report listing</h3>
               <button
                 type="button"
                 onClick={close}
-                className="rounded-full px-2 text-lg leading-none text-muted-foreground hover:bg-muted"
+                className="rounded-md p-2 text-muted-foreground hover:bg-muted"
               >
-                ×
-                <span className="sr-only">Закрыть</span>
+                <X className="h-4 w-4" aria-hidden="true" />
+                <span className="sr-only">Close</span>
               </button>
             </div>
 
             <div className="mt-4 space-y-3 text-sm">
               <div>
                 <label className="mb-1 block text-xs uppercase tracking-wide text-muted-foreground">
-                  Причина
+                  Reason
                 </label>
                 <select
                   value={reason}
                   onChange={(event) => setReason(event.target.value)}
-                  className="w-full rounded-xl border px-3 py-2"
+                  className="w-full rounded-md border px-3 py-2"
                 >
-                  <option value="fraud">Мошенничество</option>
-                  <option value="spam">Спам</option>
-                  <option value="duplicate">Дубликат</option>
-                  <option value="nsfw">Непристойный контент</option>
-                  <option value="other">Другое</option>
+                  <option value="fraud">Fraud or phishing</option>
+                  <option value="spam">Spam</option>
+                  <option value="duplicate">Duplicate listing</option>
+                  <option value="nsfw">Unsafe content</option>
+                  <option value="other">Other</option>
                 </select>
               </div>
 
               <div>
                 <label className="mb-1 block text-xs uppercase tracking-wide text-muted-foreground">
-                  Подробности (необязательно)
+                  Details (optional)
                 </label>
                 <textarea
                   value={details}
                   onChange={(event) => setDetails(event.target.value)}
                   rows={4}
-                  className="w-full rounded-xl border px-3 py-2"
+                  className="w-full rounded-md border px-3 py-2"
                 />
               </div>
             </div>
@@ -137,20 +139,20 @@ export default function ReportButton({ advertId }: Props) {
                 type="button"
                 onClick={submit}
                 disabled={submitting || cooldown > 0}
-                className="rounded-xl bg-black px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {submitting
-                  ? "Отправляем…"
+                  ? "Submitting..."
                   : cooldown > 0
-                    ? `Повторите через ${cooldown} с`
-                    : "Отправить"}
+                    ? `Retry in ${cooldown}s`
+                    : "Submit report"}
               </button>
               <button
                 type="button"
                 onClick={close}
-                className="rounded-xl border px-4 py-2"
+                className="rounded-md border px-4 py-2 font-medium"
               >
-                Отмена
+                Cancel
               </button>
             </div>
 

@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useI18n } from "@/i18n";
 import { supabase } from "@/lib/supabaseClient";
 import type { Category } from "@/lib/types";
 import { getCategoryIcon } from "@/lib/categoryIcons";
-import { ChevronRight, ChevronDown, X, MapPin } from "lucide-react";
+import { ChevronRight, ChevronDown, X, MapPin, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -52,6 +52,26 @@ type CatalogSchemaState = {
 };
 
 const SCHEMA_EXCLUDED_TYPES = new Set(["vehicle", "real_estate", "electronics", "fashion", "jobs"]);
+const COMMON_LOCATIONS = [
+  "Brussels",
+  "Antwerp",
+  "Ghent",
+  "Bruges",
+  "Leuven",
+  "Mechelen",
+  "Hasselt",
+  "Genk",
+  "Kortrijk",
+  "Ostend",
+  "Aalst",
+  "Namur",
+  "Liège",
+  "Charleroi",
+  "Mons",
+  "Tournai",
+  "Wavre",
+  "Arlon",
+];
 
 function getLocalizedCategoryName(cat: Category, locale: string): string {
   const localeMap: Record<string, keyof Category> = {
@@ -128,6 +148,10 @@ export default function SearchFilters({
   onFiltersChange,
 }: SearchFiltersProps) {
   const { t, locale } = useI18n();
+  const translate = (key: string, fallback: string) => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -157,7 +181,6 @@ export default function SearchFilters({
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [location, setLocation] = useState("");
-  const [locationSuggestions, setLocationSuggestions] = useState<string[]>([]);
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
   const locationInputRef = useRef<HTMLInputElement>(null);
   const locationSuggestionsRef = useRef<HTMLDivElement>(null);
@@ -172,41 +195,38 @@ export default function SearchFilters({
 
   // Initialize from URL params
   useEffect(() => {
-    const categoryId = searchParams.get("category_id");
-    const priceMin = searchParams.get("price_min");
-    const priceMax = searchParams.get("price_max");
-    const locationParam = searchParams.get("location");
-    const verifiedOnlyParam = searchParams.get("verified_only");
+    const timeout = window.setTimeout(() => {
+      const categoryId = searchParams.get("category_id");
+      const priceMin = searchParams.get("price_min");
+      const priceMax = searchParams.get("price_max");
+      const locationParam = searchParams.get("location");
+      const verifiedOnlyParam = searchParams.get("verified_only");
 
-    if (categoryId) {
-      // Find category in loaded categories
-      const findCategory = (cats: Category[]): Category | null => {
-        for (const cat of cats) {
-          if (cat.id === categoryId) return cat;
-        }
-        return null;
-      };
-      const cat = findCategory(categories);
-      if (cat) setSelectedCategory(cat);
-    }
+      if (categoryId) {
+        const cat = categories.find((category) => category.id === categoryId) ?? null;
+        if (cat) setSelectedCategory(cat);
+      }
 
-    if (priceMin || priceMax) {
-      setPriceRange([
-        priceMin ? Number.parseFloat(priceMin) : 0,
-        priceMax ? Number.parseFloat(priceMax) : 10000,
-      ]);
-    }
+      if (priceMin || priceMax) {
+        setPriceRange([
+          priceMin ? Number.parseFloat(priceMin) : 0,
+          priceMax ? Number.parseFloat(priceMax) : 10000,
+        ]);
+      }
 
-    if (locationParam) {
-      setLocation(locationParam);
-    }
+      if (locationParam) {
+        setLocation(locationParam);
+      }
 
-    if (verifiedOnlyParam) {
-      const normalized = verifiedOnlyParam.trim().toLowerCase();
-      setVerifiedOnly(["true", "1", "yes"].includes(normalized));
-    } else {
-      setVerifiedOnly(false);
-    }
+      if (verifiedOnlyParam) {
+        const normalized = verifiedOnlyParam.trim().toLowerCase();
+        setVerifiedOnly(["true", "1", "yes"].includes(normalized));
+      } else {
+        setVerifiedOnly(false);
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, [searchParams, categories]);
 
   // Load categories
@@ -254,43 +274,15 @@ export default function SearchFilters({
     };
   }, []);
 
-  // Location autocomplete (simple - could be enhanced with API)
-  useEffect(() => {
+  const locationSuggestions = useMemo(() => {
     if (!location.trim()) {
-      setLocationSuggestions([]);
-      setShowLocationSuggestions(false);
-      return;
+      return [];
     }
 
-    // Simple client-side filtering from existing locations
-    // In production, this could use a geocoding API
     const query = location.toLowerCase().trim();
-    // Placeholder: you could fetch distinct locations from DB or use a geocoding service
-    const commonLocations = [
-      "Amsterdam",
-      "Rotterdam",
-      "The Hague",
-      "Utrecht",
-      "Eindhoven",
-      "Groningen",
-      "Tilburg",
-      "Almere",
-      "Breda",
-      "Nijmegen",
-      "Brussels",
-      "Antwerp",
-      "Ghent",
-      "Paris",
-      "Lyon",
-      "Marseille",
-    ];
-
-    const filtered = commonLocations
+    return COMMON_LOCATIONS
       .filter((loc) => loc.toLowerCase().includes(query))
       .slice(0, 5);
-
-    setLocationSuggestions(filtered);
-    setShowLocationSuggestions(filtered.length > 0);
   }, [location]);
 
   // Close location suggestions when clicking outside
@@ -316,26 +308,38 @@ export default function SearchFilters({
     let cancelled = false;
 
     if (!selectedCategory) {
-      setFilterSchemaState({
-        loading: false,
-        error: null,
-        schema: null,
-        fields: {},
-      });
-      setDynamicFilters({});
-      return;
+      const timeout = window.setTimeout(() => {
+        if (cancelled) return;
+        setFilterSchemaState({
+          loading: false,
+          error: null,
+          schema: null,
+          fields: {},
+        });
+        setDynamicFilters({});
+      }, 0);
+      return () => {
+        cancelled = true;
+        window.clearTimeout(timeout);
+      };
     }
 
     const categoryType = detectCategoryType(selectedCategory.path || selectedCategory.slug || "");
     if (SCHEMA_EXCLUDED_TYPES.has(categoryType)) {
-      setFilterSchemaState({
-        loading: false,
-        error: null,
-        schema: null,
-        fields: {},
-      });
-      setDynamicFilters({});
-      return;
+      const timeout = window.setTimeout(() => {
+        if (cancelled) return;
+        setFilterSchemaState({
+          loading: false,
+          error: null,
+          schema: null,
+          fields: {},
+        });
+        setDynamicFilters({});
+      }, 0);
+      return () => {
+        cancelled = true;
+        window.clearTimeout(timeout);
+      };
     }
 
     const loadSchema = async () => {
@@ -554,36 +558,33 @@ export default function SearchFilters({
     router.push(`/search?${params.toString()}`);
   };
 
-  const handleDynamicFieldChange = useCallback(
-    (fieldKey: string, value: unknown) => {
-      setDynamicFilters((prev) => {
-        const next = { ...prev };
-        const isEmpty =
-          value === null ||
-          value === undefined ||
-          (typeof value === "string" && value.trim() === "") ||
-          (typeof value === "number" && Number.isNaN(value));
+  const handleDynamicFieldChange = (fieldKey: string, value: unknown) => {
+    setDynamicFilters((prev) => {
+      const next = { ...prev };
+      const isEmpty =
+        value === null ||
+        value === undefined ||
+        (typeof value === "string" && value.trim() === "") ||
+        (typeof value === "number" && Number.isNaN(value));
 
-        if (isEmpty) {
-          delete next[fieldKey];
-        } else {
-          next[fieldKey] = value;
-        }
+      if (isEmpty) {
+        delete next[fieldKey];
+      } else {
+        next[fieldKey] = value;
+      }
 
-        applyFilters({
-          category_id: selectedCategory?.id || null,
-          price_min: priceRange[0] > 0 ? priceRange[0] : null,
-          price_max: priceRange[1] < 10000 ? priceRange[1] : null,
-          location: location || null,
-          catalog_fields: next,
-          verified_only: verifiedOnly,
-        });
-
-        return next;
+      applyFilters({
+        category_id: selectedCategory?.id || null,
+        price_min: priceRange[0] > 0 ? priceRange[0] : null,
+        price_max: priceRange[1] < 10000 ? priceRange[1] : null,
+        location: location || null,
+        catalog_fields: next,
+        verified_only: verifiedOnly,
       });
-    },
-    [applyFilters, selectedCategory?.id, priceRange, location],
-  );
+
+      return next;
+    });
+  };
 
   const handleApplyFilters = () => {
     applyFilters({
@@ -613,6 +614,7 @@ export default function SearchFilters({
   };
 
   const tree = buildCategoryTree(categories);
+  const isLocationSuggestionsOpen = showLocationSuggestions && locationSuggestions.length > 0;
   const filterSchema = useMemo(() => {
     if (!filterSchemaState.schema) return null;
     return {
@@ -629,6 +631,88 @@ export default function SearchFilters({
       })),
     } as CatalogSchema;
   }, [filterSchemaState.schema]);
+  const activeFilters: Array<{ key: string; label: string; onRemove: () => void }> = [];
+
+  if (selectedCategory) {
+    activeFilters.push({
+        key: "category",
+        label: getLocalizedCategoryName(selectedCategory, locale),
+        onRemove: handleClearCategory,
+    });
+  }
+
+  if (priceRange[0] > 0 || priceRange[1] < 10000) {
+    activeFilters.push({
+      key: "price",
+      label: `€${priceRange[0]}-€${priceRange[1]}`,
+      onRemove: () => {
+        setPriceRange([0, 10000]);
+        applyFilters({
+          category_id: selectedCategory?.id || null,
+          price_min: null,
+          price_max: null,
+          location: location || null,
+          catalog_fields: dynamicFilters,
+          verified_only: verifiedOnly,
+        });
+      },
+    });
+  }
+
+  if (location) {
+    activeFilters.push({
+      key: "location",
+      label: location,
+      onRemove: () => {
+        setLocation("");
+        applyFilters({
+          category_id: selectedCategory?.id || null,
+          price_min: priceRange[0] > 0 ? priceRange[0] : null,
+          price_max: priceRange[1] < 10000 ? priceRange[1] : null,
+          location: null,
+          catalog_fields: dynamicFilters,
+          verified_only: verifiedOnly,
+        });
+      },
+    });
+  }
+
+  if (verifiedOnly) {
+    activeFilters.push({
+      key: "verified",
+      label: translate("search.verifiedOnly", "Verified sellers"),
+      onRemove: () => {
+        setVerifiedOnly(false);
+        applyFilters({
+          category_id: selectedCategory?.id || null,
+          price_min: priceRange[0] > 0 ? priceRange[0] : null,
+          price_max: priceRange[1] < 10000 ? priceRange[1] : null,
+          location: location || null,
+          catalog_fields: dynamicFilters,
+          verified_only: false,
+        });
+      },
+    });
+  }
+
+  const dynamicCount = Object.keys(dynamicFilters).length;
+  if (dynamicCount > 0) {
+    activeFilters.push({
+      key: "specifics",
+      label: `${dynamicCount} specific ${dynamicCount === 1 ? "filter" : "filters"}`,
+      onRemove: () => {
+        setDynamicFilters({});
+        applyFilters({
+          category_id: selectedCategory?.id || null,
+          price_min: priceRange[0] > 0 ? priceRange[0] : null,
+          price_max: priceRange[1] < 10000 ? priceRange[1] : null,
+          location: location || null,
+          catalog_fields: {},
+          verified_only: verifiedOnly,
+        });
+      },
+    });
+  }
 
   const renderCategory = (cat: CategoryWithChildren, level: number = 0): React.ReactNode => {
     const hasChildren = cat.children && cat.children.length > 0;
@@ -680,11 +764,35 @@ export default function SearchFilters({
 
   const filtersContent = (
     <div className="space-y-6">
+      {activeFilters.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <Label className="text-sm font-semibold">Active filters</Label>
+            <Button variant="ghost" size="sm" onClick={handleClearAll} className="h-7 px-2 text-xs">
+              {translate("search.clear", "Clear")}
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {activeFilters.map((filter) => (
+              <button
+                key={filter.key}
+                type="button"
+                onClick={filter.onRemove}
+                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-secondary/70 px-2.5 py-1 text-xs font-medium text-secondary-foreground transition hover:border-primary/30 hover:text-primary"
+              >
+                {filter.label}
+                <X className="h-3 w-3" aria-hidden="true" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Category Filter */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <Label className="text-sm font-semibold">
-            {t("search.category") || "Категория"}
+            {t("search.category") || "Category"}
           </Label>
           {selectedCategory && (
             <Button
@@ -699,13 +807,13 @@ export default function SearchFilters({
         </div>
         {loading ? (
           <div className="text-sm text-muted-foreground">
-            {t("common.loading") || "Загрузка…"}
+            {t("common.loading") || "Loading..."}
           </div>
         ) : (
-          <div className="space-y-1 max-h-64 overflow-y-auto border rounded-md p-2">
+          <div className="max-h-72 space-y-1 overflow-y-auto rounded-md border border-border/80 bg-background p-2">
             {tree.length === 0 ? (
               <div className="text-sm text-muted-foreground p-2">
-                {t("common.categories") || "Категории"} {t("common.loading") || "недоступны"}
+                {t("common.categories") || "Categories"} unavailable
               </div>
             ) : (
               tree.map((cat) => renderCategory(cat))
@@ -714,7 +822,7 @@ export default function SearchFilters({
         )}
         {selectedCategory && (
           <div className="mt-2 text-sm text-muted-foreground">
-            {t("search.selected") || "Выбрано"}: {getLocalizedCategoryName(selectedCategory, locale)}
+            {t("search.selected") || "Selected"}: {getLocalizedCategoryName(selectedCategory, locale)}
           </div>
         )}
       </div>
@@ -722,7 +830,7 @@ export default function SearchFilters({
       {/* Price Range Filter */}
       <div>
         <Label className="text-sm font-semibold mb-3 block">
-          {t("search.price") || "Цена"}
+          {t("search.price") || "Price"}
         </Label>
         <div className="space-y-3">
           <Slider
@@ -766,7 +874,7 @@ export default function SearchFilters({
       {/* Verified Sellers Filter */}
       <div>
         <Label className="text-sm font-semibold mb-3 block">
-          {t("search.verifiedOnly") || "Только проверенные продавцы"}
+          {t("search.verifiedOnly") || "Verified sellers only"}
         </Label>
         <div className="flex items-center gap-2">
           <Checkbox
@@ -786,7 +894,7 @@ export default function SearchFilters({
             }}
           />
           <Label htmlFor="verified-only" className="text-sm text-muted-foreground leading-none font-normal">
-            {t("search.verifiedOnlyHelper") || "Показывать объявления только от верифицированных продавцов"}
+            {t("search.verifiedOnlyHelper") || "Show listings from sellers with verified email and phone"}
           </Label>
         </div>
       </div>
@@ -794,7 +902,7 @@ export default function SearchFilters({
       {/* Location Filter */}
       <div>
         <Label className="text-sm font-semibold mb-3 block">
-          {t("search.location") || "Локация"}
+          {t("search.location") || "Location"}
         </Label>
         <div className="relative">
           <div className="relative">
@@ -805,21 +913,21 @@ export default function SearchFilters({
               value={location}
               onChange={(e) => handleLocationChange(e.target.value)}
               onFocus={() => setShowLocationSuggestions(locationSuggestions.length > 0)}
-              placeholder={t("search.locationPlaceholder") || "Введите город или регион"}
+              placeholder={t("search.locationPlaceholder") || "City or region"}
               className="pl-9"
             />
           </div>
-          {showLocationSuggestions && locationSuggestions.length > 0 && (
+          {isLocationSuggestionsOpen && (
             <div
               ref={locationSuggestionsRef}
-              className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-md shadow-lg z-50 max-h-48 overflow-y-auto"
+              className="absolute left-0 right-0 top-full z-50 mt-2 max-h-52 overflow-y-auto rounded-md border border-border/80 bg-card shadow-xl"
             >
               {locationSuggestions.map((suggestion, index) => (
                 <button
                   key={index}
                   type="button"
                   onClick={() => handleLocationSelect(suggestion)}
-                  className="w-full text-left px-4 py-2 hover:bg-muted cursor-pointer border-b last:border-b-0 text-sm"
+                  className="w-full cursor-pointer border-b px-4 py-2.5 text-left text-sm transition hover:bg-secondary/70 last:border-b-0"
                 >
                   {suggestion}
                 </button>
@@ -860,10 +968,10 @@ export default function SearchFilters({
       {/* Action Buttons */}
       <div className="flex gap-2 pt-4 border-t">
         <Button onClick={handleApplyFilters} className="flex-1">
-          {t("search.apply") || "Применить"}
+          {t("search.apply") || "Apply"}
         </Button>
         <Button variant="outline" onClick={handleClearAll}>
-          {t("search.clear") || "Очистить"}
+          {t("search.clear") || "Clear"}
         </Button>
       </div>
     </div>
@@ -872,9 +980,10 @@ export default function SearchFilters({
   // Sidebar variant (desktop)
   if (actualVariant === "sidebar") {
     return (
-      <aside className="w-64 shrink-0 border-r bg-background p-4">
-        <div className="mb-4">
-          <h2 className="text-lg font-semibold">{t("search.filters") || "Фильтры"}</h2>
+      <aside className="w-72 shrink-0 rounded-md border border-border/80 bg-card p-4 shadow-sm">
+        <div className="mb-4 flex items-center gap-2">
+          <SlidersHorizontal className="h-4 w-4 text-primary" aria-hidden="true" />
+          <h2 className="text-lg font-semibold">{t("search.filters") || "Filters"}</h2>
         </div>
         {filtersContent}
       </aside>
@@ -885,17 +994,22 @@ export default function SearchFilters({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
-        <Button variant="outline" className="w-full md:hidden">
-          {t("search.filters") || "Фильтры"}
+        <Button variant="outline" className="w-full gap-2 md:hidden">
+          <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+          {t("search.filters") || "Filters"}
+          {activeFilters.length > 0 && (
+            <span className="ml-auto rounded-md bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
+              {activeFilters.length}
+            </span>
+          )}
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-80 sm:max-w-sm overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>{t("search.filters") || "Фильтры"}</SheetTitle>
+          <SheetTitle>{t("search.filters") || "Filters"}</SheetTitle>
         </SheetHeader>
         <div className="mt-4 px-4">{filtersContent}</div>
       </SheetContent>
     </Sheet>
   );
 }
-

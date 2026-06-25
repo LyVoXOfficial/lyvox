@@ -1,6 +1,9 @@
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import SectionTitle from "@/components/section-title";
 import AdsGrid from "@/components/ads-grid";
+import SearchBar from "@/components/SearchBar";
+import { ArrowRight, BadgeEuro, Car, Laptop, ShieldCheck } from "lucide-react";
 
 // PERF-003: Lazy load carousels below the fold
 const InfoCarousel = dynamic(() => import("@/components/info-carousel"), {
@@ -21,7 +24,10 @@ import { getFirstImage } from "@/lib/media/getFirstImage";
 
 export const revalidate = 60;
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://lyvox.be";
+const BASE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  "https://lyvox.be";
 
 type AdListItem = {
   id: string;
@@ -252,12 +258,83 @@ export default async function Home() {
     url: BASE_URL,
     logo: `${BASE_URL}/favicon.ico`,
   };
+  const verifiedCount = latestAds.filter((ad) => ad.sellerVerified).length;
+  const quickActions = [
+    {
+      href: "/c/transport",
+      label: t("home.qa_transport"),
+      icon: Car,
+    },
+    {
+      href: "/c/electronics",
+      label: t("home.qa_electronics"),
+      icon: Laptop,
+    },
+    {
+      href: "/search?verified_only=true",
+      label: t("home.qa_verified"),
+      icon: ShieldCheck,
+    },
+    {
+      href: "/search?price_max=0",
+      label: t("home.qa_free"),
+      icon: BadgeEuro,
+    },
+  ];
 
   return (
     <>
       <script {...getJsonLdScriptProps(organizationJsonLd)} />
       <div className="space-y-8">
-      <InfoCarousel />
+        <section className="lyvox-hero-mesh grid gap-5 overflow-hidden rounded-2xl border border-border/70 bg-card p-5 shadow-[var(--shadow-card)] md:p-8 lg:grid-cols-[1.45fr_0.55fr]">
+          <div className="space-y-6">
+            <div className="max-w-2xl space-y-3">
+              <p className="text-xs font-bold uppercase tracking-[0.08em] text-primary">{t("home.hero_tag")}</p>
+              <h1 className="text-4xl font-extrabold leading-[1.05] tracking-tight text-foreground md:text-5xl">
+                {t("home.hero_title")}
+              </h1>
+              <p className="max-w-xl text-base leading-7 text-muted-foreground">
+                {t("home.hero_subtitle")}
+              </p>
+            </div>
+            <SearchBar />
+            <div className="flex flex-wrap gap-2">
+              {quickActions.map(({ href, label, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="inline-flex h-10 items-center gap-2 rounded-full border border-border/70 bg-card px-4 text-sm font-semibold text-foreground shadow-[var(--shadow-soft)] transition hover:border-primary/40 hover:text-primary"
+                >
+                  <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+            <div className="rounded-xl border border-border/60 bg-card/80 p-4 backdrop-blur">
+              <div className="text-3xl font-extrabold tracking-tight text-foreground">{latestAds.length}</div>
+              <div className="mt-1 text-sm text-muted-foreground">{t("home.stat_active")}</div>
+            </div>
+            <div className="rounded-xl border border-border/60 bg-card/80 p-4 backdrop-blur">
+              <div className="text-3xl font-extrabold tracking-tight text-foreground">{freeAds.length}</div>
+              <div className="mt-1 text-sm text-muted-foreground">{t("home.stat_free")}</div>
+            </div>
+            <div className="rounded-xl border border-border/60 bg-card/80 p-4 backdrop-blur">
+              <div className="text-3xl font-extrabold tracking-tight text-foreground">{verifiedCount}</div>
+              <div className="mt-1 text-sm text-muted-foreground">{t("home.stat_verified")}</div>
+            </div>
+            <Link
+              href="/post"
+              className="lyvox-cta-gradient inline-flex items-center justify-between rounded-xl px-5 py-3.5 text-sm font-bold text-primary-foreground transition hover:brightness-105"
+            >
+              {t("home.post_listing")}
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </div>
+        </section>
+
+        <InfoCarousel />
 
       <section className="space-y-4">
         <SectionTitle>{t("common.categories")}</SectionTitle>

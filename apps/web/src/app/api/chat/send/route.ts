@@ -9,6 +9,7 @@ import {
 } from "@/lib/apiErrors";
 import { validateRequest } from "@/lib/validations";
 import { sendMessageSchema } from "@/lib/validations/chat";
+import { scrubContacts } from "@/lib/chat/scrubContacts";
 
 export const runtime = "nodejs";
 
@@ -53,6 +54,13 @@ const baseHandler = async (req: Request) => {
 
   const { conversation_id, body } = validationResult.data;
 
+  // Anti-fraud: mask off-platform contact details (phone/email/URL/IBAN) before
+  // the message is stored or delivered. The dominant C2C scam is luring the
+  // counterpart off-platform; masking removes the lure and gives us a risk
+  // signal. This is a deterrent, not a guarantee — escrow is the real control.
+  const scrubbed = scrubContacts(body);
+  const storedBody = scrubbed.cleaned;
+
   // Verify user is a participant in the conversation
   const { data: participant, error: participantError } = await supabase
     .from("conversation_participants")
@@ -78,7 +86,7 @@ const baseHandler = async (req: Request) => {
     .insert({
       conversation_id,
       author_id: user.id,
-      body,
+      body: storedBody,
     })
     .select("id, conversation_id, author_id, body, created_at")
     .single();
@@ -87,11 +95,15 @@ const baseHandler = async (req: Request) => {
     return handleSupabaseError(insertError, ApiErrorCode.CREATE_FAILED);
   }
 
-  // Log action
+  // Log action (and a risk signal if contact details were masked)
   await supabase.from("logs").insert({
     user_id: user.id,
-    action: "chat_send",
-    details: { conversation_id, message_id: message.id } as never,
+    action: scrubbed.flagged ? "chat_contact_masked" : "chat_send",
+    details: {
+      conversation_id,
+      message_id: message.id,
+      ...(scrubbed.flagged ? { contact_types: scrubbed.types } : {}),
+    } as never,
   });
 
   return createSuccessResponse({
@@ -102,6 +114,9 @@ const baseHandler = async (req: Request) => {
       body: message.body,
       created_at: message.created_at,
     },
+    // Lets the client surface a "we never ask you to pay/contact off-platform"
+    // warning when the user's own message had contact details stripped.
+    contactMasked: scrubbed.flagged,
   });
 };
 

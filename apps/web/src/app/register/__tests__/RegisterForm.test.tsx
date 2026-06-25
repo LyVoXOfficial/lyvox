@@ -70,7 +70,7 @@ describe("<RegisterForm />", () => {
     fireEvent.click(checkboxes[0]);
     fireEvent.click(checkboxes[1]);
 
-    fireEvent.click(screen.getByRole("button", { name: "Register" }));
+    fireEvent.click(screen.getByRole("button", { name: "Create account" }));
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -112,12 +112,12 @@ describe("<RegisterForm />", () => {
     fireEvent.click(checkboxes[0]);
     fireEvent.click(checkboxes[1]);
  
-    fireEvent.click(screen.getByRole("button", { name: "Register" }));
+    fireEvent.click(screen.getByRole("button", { name: "Create account" }));
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalled();
     });
     expect(routerMock.push).not.toHaveBeenCalled();
-    expect(toast.error).toHaveBeenCalledWith("You must accept the Terms of Service and Privacy Policy to continue");
+    expect(toast.error).toHaveBeenCalledWith("Accept the Terms of Service and Privacy Policy to continue.");
   });
 });

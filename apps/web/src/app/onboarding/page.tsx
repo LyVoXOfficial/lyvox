@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { headers } from "next/headers";
+import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { resolveFromAcceptLanguage, resolveLocale, type Locale } from "@/lib/i18n";
 
 type Messages = {
@@ -8,63 +10,71 @@ type Messages = {
   checklist: string[];
   profileCta: string;
   phoneCta: string;
+  secondaryLead: string;
+};
+
+const englishMessages: Messages = {
+  title: "Welcome to LyVoX",
+  lead: "Finish the account checks that make publishing safer and messages more trustworthy.",
+  checklist: [
+    "Confirm the email we sent to your inbox",
+    "Complete your public profile details",
+    "Verify your phone number before high-trust transactions",
+  ],
+  profileCta: "Update profile",
+  phoneCta: "Verify phone",
+  secondaryLead: "You can browse the marketplace now, but publishing and trust signals improve after these checks.",
 };
 
 const messages: Record<Locale, Messages> = {
-  en: {
-    title: "Welcome to LyVoX",
-    lead: "Finish the onboarding tasks to unlock publishing and safer trading.",
-    checklist: [
-      "Confirm the email we just sent you",
-      "Complete your profile details",
-      "Verify your phone number",
-    ],
-    profileCta: "Update profile",
-    phoneCta: "Verify phone",
-  },
+  en: englishMessages,
   fr: {
     title: "Bienvenue sur LyVoX",
-    lead: "Terminez les etapes d'onboarding pour publier en toute confiance.",
+    lead: "Terminez les controles du compte pour publier et echanger avec plus de confiance.",
     checklist: [
-      "Confirmez l'e-mail que nous venons d'envoyer",
-      "Completez les informations de votre profil",
-      "Verifiez votre numero de telephone",
+      "Confirmez l'email envoye dans votre boite",
+      "Completez les informations publiques du profil",
+      "Verifiez votre telephone avant les transactions sensibles",
     ],
     profileCta: "Mettre a jour le profil",
     phoneCta: "Verifier le telephone",
+    secondaryLead: "Vous pouvez deja parcourir la marketplace. Les controles renforcent la confiance.",
   },
   nl: {
     title: "Welkom bij LyVoX",
-    lead: "Rond de onboarding af om veilig te kunnen handelen.",
+    lead: "Rond de accountcontroles af om veiliger te publiceren en te handelen.",
     checklist: [
-      "Bevestig de e-mail die we zojuist hebben verzonden",
-      "Vul je profielgegevens in",
-      "Verifieer je telefoonnummer",
+      "Bevestig de email in je inbox",
+      "Vul je publieke profielgegevens aan",
+      "Verifieer je telefoon voor transacties met meer vertrouwen",
     ],
     profileCta: "Profiel bijwerken",
-    phoneCta: "Telefoon verifiëren",
+    phoneCta: "Telefoon verifieren",
+    secondaryLead: "Je kunt de marketplace nu al bekijken. Controles versterken je vertrouwenssignalen.",
   },
   ru: {
     title: "Добро пожаловать в LyVoX",
-    lead: "Завершите шаги онбординга, чтобы публиковать объявления безопасно.",
+    lead: "Завершите проверки аккаунта — они делают публикацию безопаснее, а переписку надёжнее.",
     checklist: [
-      "Подтвердите письмо, которое мы отправили",
-      "Заполните данные профиля",
-      "Подтвердите номер телефона",
+      "Подтвердите email из письма в вашем почтовом ящике",
+      "Заполните публичные данные профиля",
+      "Подтвердите номер телефона перед сделками с высоким уровнем доверия",
     ],
-    profileCta: "Заполнить профиль",
+    profileCta: "Обновить профиль",
     phoneCta: "Подтвердить телефон",
+    secondaryLead: "Маркетплейс уже доступен для просмотра, но публикация и сигналы доверия улучшаются после этих проверок.",
   },
   de: {
     title: "Willkommen bei LyVoX",
-    lead: "Schließen Sie die Onboarding-Schritte ab, um sicher zu veröffentlichen.",
+    lead: "Schliessen Sie die Kontopruefungen ab, um sicherer zu veroeffentlichen und zu handeln.",
     checklist: [
-      "Bestätigen Sie die E-Mail, die wir gerade gesendet haben",
-      "Vervollständigen Sie Ihre Profildaten",
-      "Verifizieren Sie Ihre Telefonnummer",
+      "Bestaetigen Sie die Email in Ihrem Postfach",
+      "Vervollstaendigen Sie Ihr oeffentliches Profil",
+      "Verifizieren Sie Ihr Telefon fuer vertrauenswuerdige Transaktionen",
     ],
     profileCta: "Profil aktualisieren",
     phoneCta: "Telefon verifizieren",
+    secondaryLead: "Sie koennen die Marketplace bereits nutzen. Pruefungen verbessern Vertrauenssignale.",
   },
 };
 
@@ -82,35 +92,57 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
   const t = messages[locale];
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-12">
-      <header className="space-y-2">
-        <h1 className="text-3xl font-semibold text-zinc-900">{t.title}</h1>
-        <p className="text-base text-zinc-600">{t.lead}</p>
-      </header>
-      <ol className="space-y-3 rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        {t.checklist.map((item) => (
-          <li key={item} className="flex items-start gap-3 text-sm text-zinc-700">
-            <span className="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700">
-              ✓
-            </span>
-            <span>{item}</span>
-          </li>
-        ))}
-      </ol>
-      <div className="flex flex-wrap gap-3">
-        <Link
-          href="/profile/edit"
-          className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
-        >
-          {t.profileCta}
-        </Link>
-        <Link
-          href="/profile/phone"
-          className="inline-flex items-center justify-center rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-        >
-          {t.phoneCta}
-        </Link>
+    <main className="bg-background">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-[minmax(0,1fr)_360px] md:py-14">
+        <section className="space-y-6">
+          <div className="max-w-3xl space-y-4">
+            <div className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+              <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+              Account readiness
+            </div>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{t.title}</h1>
+            <p className="text-base leading-7 text-muted-foreground">{t.lead}</p>
+          </div>
+
+          <ol className="grid gap-3">
+            {t.checklist.map((item, index) => (
+              <li key={item} className="flex items-start gap-3 rounded-md border border-border/80 bg-card p-4 shadow-sm">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-emerald-50 text-sm font-semibold text-emerald-700">
+                  {index + 1}
+                </span>
+                <div>
+                  <p className="font-medium text-foreground">{item}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">This step improves account trust and reduces support checks later.</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+
+          <div className="flex flex-wrap gap-3">
+            <Button asChild>
+              <Link href="/profile/edit">
+                {t.profileCta}
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/profile/phone">{t.phoneCta}</Link>
+            </Button>
+          </div>
+        </section>
+
+        <aside className="rounded-md border border-border/80 bg-card p-5 shadow-sm">
+          <CheckCircle2 className="h-6 w-6 text-emerald-600" aria-hidden="true" />
+          <h2 className="mt-4 text-lg font-semibold">Why this matters</h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">{t.secondaryLead}</p>
+          <Button asChild variant="ghost" className="mt-4 px-0">
+            <Link href="/search">
+              Browse marketplace
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </Button>
+        </aside>
       </div>
-    </div>
+    </main>
   );
 }

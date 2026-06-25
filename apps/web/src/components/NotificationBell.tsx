@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/i18n";
 import { useRealtimeNotifications, type Notification } from "@/hooks/useRealtimeNotifications";
 import { supabase } from "@/lib/supabaseClient";
-import { formatDate } from "@/i18n/format";
+import { formatDate } from "@/lib/i18n/formatDate";
 import Link from "next/link";
 
 export default function NotificationBell() {
@@ -32,13 +32,7 @@ export default function NotificationBell() {
     getUserId();
   }, []);
 
-  useEffect(() => {
-    if (userId && open) {
-      loadNotifications();
-    }
-  }, [userId, open]);
-
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     if (!userId) return;
 
     try {
@@ -52,7 +46,16 @@ export default function NotificationBell() {
     } catch (error) {
       console.error("Failed to load notifications:", error);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId && open) {
+      const timeout = window.setTimeout(() => {
+        void loadNotifications();
+      }, 0);
+      return () => window.clearTimeout(timeout);
+    }
+  }, [userId, open, loadNotifications]);
 
   useRealtimeNotifications({
     userId,
@@ -155,4 +158,3 @@ export default function NotificationBell() {
     </Popover>
   );
 }
-

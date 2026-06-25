@@ -9,6 +9,25 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import type { Category } from "@/lib/types";
 import { apiFetch } from "@/lib/fetcher";
 import { toast } from "sonner";
@@ -16,7 +35,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import UploadGallery from "@/components/upload-gallery";
 import { getCategoryIcon } from "@/lib/categoryIcons";
-import { ChevronDown, Check, Zap } from "lucide-react";
+import { ChevronDown, Check, Loader2, ShieldCheck, Trash2, Zap } from "lucide-react";
 import { detectCategoryType, getCategoryTypeName } from "@/lib/utils/categoryDetector";
 import BoostDialog from "@/components/BoostDialog";
 import { ElectronicsFields } from "@/components/catalog/ElectronicsFields";
@@ -138,6 +157,13 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "pending" | "saving" | "saved" | "error">("idle");
   const [autoSaveError, setAutoSaveError] = useState<string | null>(null);
   const [lastAutoSaveAt, setLastAutoSaveAt] = useState<number | null>(null);
+  const [phoneVerificationOpen, setPhoneVerificationOpen] = useState(false);
+  const [phoneVerificationCode, setPhoneVerificationCode] = useState("");
+  const [phoneVerificationPhone, setPhoneVerificationPhone] = useState("");
+  const [phoneVerificationError, setPhoneVerificationError] = useState<string | null>(null);
+  const [phoneVerificationStatus, setPhoneVerificationStatus] = useState<
+    "idle" | "sending" | "code_sent" | "verifying"
+  >("idle");
   
   // Ref to track if draft creation is in progress
   const draftCreationInProgress = useRef(false);
@@ -484,10 +510,10 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         try {
           const newId = await ensureAdvertId();
           console.log("[PostForm] Draft created, ID:", newId);
-          toast.success(t("post.draft_created") || "Черновик создан");
+          toast.success(t("post.draft_created") || "Draft created");
         } catch (error: any) {
           console.error("[PostForm] Draft creation error:", error);
-          toast.error(t("post.update_error") || "Ошибка", { 
+          toast.error(t("post.update_error") || "Update failed", {
             description: error.message 
           });
         } finally {
@@ -653,7 +679,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   }, [categoryType, catalogSchemaState, formData.catalog_fields, resolveCatalogFieldLabel, t]);
 
   // Prepare vehicle specifics from form data
-  const prepareSpecifics = () => {
+  const prepareSpecifics = useCallback(() => {
     const specifics: Record<string, string> = {};
 
     if (categoryType === "vehicle") {
@@ -703,7 +729,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
     if (formData.additional_phone) specifics.additional_phone = formData.additional_phone;
 
     return specifics;
-  };
+  }, [categoryType, formData]);
 
   const hasMeaningfulChanges = useCallback(() => {
     if (formData.category_id) return true;
@@ -1107,13 +1133,15 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
       return;
     }
 
-    setIsLoading(true);
+    const phone = formData.additional_phone;
+    setPhoneVerificationStatus("sending");
+    setPhoneVerificationError(null);
+    setPhoneVerificationCode("");
     try {
-      // Request OTP
       const requestResponse = await apiFetch("/api/phone/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: formData.additional_phone }),
+        body: JSON.stringify({ phone }),
       });
 
       const requestResult = await requestResponse.json();
@@ -1121,17 +1149,39 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         throw new Error(requestResult.message || requestResult.error || "Failed to send OTP");
       }
 
-      // Prompt for OTP code
-      const code = prompt(t("post.form.additional_phone_verify") + " " + formData.additional_phone + ":");
-      if (!code) {
-        return;
-      }
+      setPhoneVerificationPhone(phone);
+      setPhoneVerificationOpen(true);
+      setPhoneVerificationStatus("code_sent");
+      toast.success("Verification code sent", { description: phone });
+    } catch (error: any) {
+      const message = error.message || "Failed to send verification code";
+      setPhoneVerificationError(message);
+      setPhoneVerificationStatus("idle");
+      toast.error(t("post.update_error"), { description: message });
+    }
+  };
 
-      // Verify OTP
+  const handleSubmitAdditionalPhoneCode = async () => {
+    const code = phoneVerificationCode.trim();
+    const phone = phoneVerificationPhone || formData.additional_phone;
+
+    if (!phone) {
+      setPhoneVerificationError("Enter a phone number first.");
+      return;
+    }
+
+    if (code.length < 6) {
+      setPhoneVerificationError("Enter the 6-digit SMS code.");
+      return;
+    }
+
+    setPhoneVerificationStatus("verifying");
+    setPhoneVerificationError(null);
+    try {
       const verifyResponse = await apiFetch("/api/phone/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: formData.additional_phone, code }),
+        body: JSON.stringify({ phone, code }),
       });
 
       const verifyResult = await verifyResponse.json();
@@ -1139,8 +1189,42 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         throw new Error(verifyResult.message || verifyResult.error || "Invalid verification code");
       }
 
-      setFormData({ ...formData, additional_phone_verified: true });
+      setFormData((previous) => ({
+        ...previous,
+        additional_phone: phone,
+        additional_phone_verified: true,
+      }));
+      setPhoneVerificationOpen(false);
+      setPhoneVerificationCode("");
+      setPhoneVerificationStatus("idle");
       toast.success(t("profile.verified"));
+    } catch (error: any) {
+      const message = error.message || "Invalid verification code";
+      setPhoneVerificationError(message);
+      setPhoneVerificationStatus("code_sent");
+      toast.error(t("post.update_error"), { description: message });
+    }
+  };
+
+  const handleDeleteAdvert = async () => {
+    if (!advertId) {
+      toast.error(t("post.update_error"), { description: "No advert to delete" });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await apiFetch(`/api/adverts/${advertId}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+      if (!result.ok) {
+        throw new Error(result.message || result.error || "Failed to delete");
+      }
+
+      toast.success("Listing deleted");
+      router.push("/profile");
     } catch (error: any) {
       toast.error(t("post.update_error"), { description: error.message });
     } finally {
@@ -2249,6 +2333,74 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   // Step 7: Final details (description, photos, location, contacts)
   if (currentStep === 7) {
     return (
+      <>
+      <Dialog
+        open={phoneVerificationOpen}
+        onOpenChange={(open) => {
+          setPhoneVerificationOpen(open);
+          if (!open && phoneVerificationStatus !== "verifying") {
+            setPhoneVerificationCode("");
+            setPhoneVerificationError(null);
+            setPhoneVerificationStatus("idle");
+          }
+        }}
+      >
+        <DialogContent className="rounded-md">
+          <DialogHeader>
+            <DialogTitle>Verify contact phone</DialogTitle>
+            <DialogDescription>
+              Enter the 6-digit SMS code sent to {phoneVerificationPhone || formData.additional_phone}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Label htmlFor="additional-phone-code">SMS code</Label>
+            <Input
+              id="additional-phone-code"
+              value={phoneVerificationCode}
+              onChange={(event) => {
+                setPhoneVerificationCode(event.target.value.replace(/\D/g, "").slice(0, 6));
+                setPhoneVerificationError(null);
+              }}
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              placeholder="123456"
+              maxLength={6}
+              disabled={phoneVerificationStatus === "verifying"}
+            />
+            {phoneVerificationError ? (
+              <p className="text-sm text-destructive">{phoneVerificationError}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                This keeps buyer contact data inside a verified Belgian phone format.
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setPhoneVerificationOpen(false)}
+              disabled={phoneVerificationStatus === "verifying"}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSubmitAdditionalPhoneCode}
+              disabled={phoneVerificationStatus === "verifying" || phoneVerificationCode.trim().length < 6}
+            >
+              {phoneVerificationStatus === "verifying" ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                  Verifying...
+                </>
+              ) : (
+                "Verify code"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Card>
         <CardHeader>
           <CardTitle>{t("post.form.step_7_title")}</CardTitle>
@@ -2279,7 +2431,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                 </>
               ) : (
                 <div className="border-2 border-dashed rounded-lg p-8 text-center text-muted-foreground">
-                  <p className="text-sm">{t("common.loading") || "Загрузка..."}</p>
+                  <p className="text-sm">{t("common.loading") || "Loading..."}</p>
                 </div>
               )}
             </div>
@@ -2327,11 +2479,19 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                formData.additional_phone.length >= 10 && 
                !formData.additional_phone_verified && (
                 <Button
+                  type="button"
                   variant="outline"
                   onClick={handleVerifyAdditionalPhone}
-                  disabled={isLoading}
+                  disabled={phoneVerificationStatus === "sending" || phoneVerificationStatus === "verifying"}
                 >
-                  {t("post.form.additional_phone_verify")}
+                  {phoneVerificationStatus === "sending" ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                      Sending...
+                    </>
+                  ) : (
+                    t("post.form.additional_phone_verify")
+                  )}
                 </Button>
               )}
             </div>
@@ -2341,7 +2501,10 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
               </p>
             )}
             {formData.additional_phone_verified && (
-              <p className="text-sm text-green-600 mt-1">✓ {t("profile.verified")}</p>
+              <p className="mt-2 inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">
+                <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                {t("profile.verified")}
+              </p>
             )}
           </div>
           </CardContent>
@@ -2353,7 +2516,8 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             {t("post.form.next")}
           </Button>
           </CardFooter>
-    </Card>
+      </Card>
+      </>
   );
 }
 
@@ -2402,35 +2566,32 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             <Button variant="outline" onClick={handleSaveDraft} disabled={isLoading}>
               {t("post.form.save_draft")}
             </Button>
-            <Button variant="destructive" onClick={async () => {
-              if (!confirm(t("post.form.delete"))) return;
-              
-              if (!advertId) {
-                toast.error(t("post.update_error"), { description: "No advert to delete" });
-                return;
-              }
-              
-              setIsLoading(true);
-              try {
-                const response = await apiFetch(`/api/adverts/${advertId}`, {
-                  method: "DELETE",
-                });
-                
-                const result = await response.json();
-                if (!result.ok) {
-                  throw new Error(result.message || result.error || "Failed to delete");
-                }
-                
-                toast.success(t("post.form.delete"));
-                router.push("/profile");
-              } catch (error: any) {
-                toast.error(t("post.update_error"), { description: error.message });
-              } finally {
-                setIsLoading(false);
-              }
-            }} disabled={isLoading}>
-              {t("post.form.delete")}
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" disabled={isLoading}>
+                  <Trash2 className="h-4 w-4" aria-hidden="true" />
+                  {t("post.form.delete")}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="rounded-md">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete listing?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This removes the listing draft and cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteAdvert}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    disabled={isLoading}
+                  >
+                    Delete listing
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <Button onClick={handlePublish} disabled={isLoading}>
               {t("post.publish")}
             </Button>

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, Star, Calendar, Mail, Phone, Edit, BarChart3, Package, MessageSquare, Settings, Heart, Shield, User, Bell } from "lucide-react";
+import { ArrowRight, CheckCircle, Star, Calendar, Mail, Phone, Edit, BarChart3, Package, MessageSquare, Settings, Heart, Shield, User, Bell } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/i18n/format";
 import { ProfileAdvertsList } from "@/components/profile/ProfileAdvertsList";
@@ -16,6 +16,7 @@ import { logger } from "@/lib/errorLogger";
 import { signMediaUrls } from "@/lib/media/signMediaUrls";
 import { getFirstImage } from "@/lib/media/getFirstImage";
 import FavoritesComparisonView from "@/components/favorites/FavoritesComparisonView";
+import type { SelectableAd } from "@/components/comparison/SelectableAdsGrid";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -326,20 +327,20 @@ export default async function ProfilePage() {
             {t("profile.load_error")}
           </h2>
           <p className="mt-2 text-sm text-red-700 dark:text-red-300">
-            Не удалось загрузить данные профиля. Попробуйте обновить страницу или войти заново.
+            Could not load your profile data. Refresh the page or sign in again.
           </p>
           <div className="mt-4 flex gap-2">
             <a
-              href={`/profile?reload=${Date.now()}`}
+              href="/profile?reload=1"
               className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
             >
-              Обновить страницу
+              Refresh page
             </a>
             <a
               href="/login"
               className="rounded-md border border-red-600 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
             >
-              Войти заново
+              Sign in again
             </a>
           </div>
         </div>
@@ -493,7 +494,8 @@ export default async function ProfilePage() {
               <div className="mt-4">
                 <Button asChild variant="outline" className="w-full">
                   <Link href="/profile/adverts">
-                    {t('profile.manage_adverts')} →
+                    {t('profile.manage_adverts')}
+                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
                   </Link>
                 </Button>
               </div>
@@ -527,7 +529,10 @@ export default async function ProfilePage() {
               <div className="flex items-center justify-between">
                 <CardTitle>{t('profile.my_adverts')}</CardTitle>
                 <Button asChild variant="outline">
-                  <Link href="/profile/adverts">{t('profile.view_all')} →</Link>
+                    <Link href="/profile/adverts">
+                      {t('profile.view_all')}
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </Link>
                 </Button>
               </div>
             </CardHeader>
@@ -560,7 +565,7 @@ export default async function ProfilePage() {
                 <p>{t('favorites.empty_state')}</p>
                 <p className="text-sm">{t('favorites.empty_action')}</p>
                 <Button asChild>
-                  <Link href="/search">{t('common.search') || 'Поиск объявлений'}</Link>
+                  <Link href="/search">{t('common.search') || 'Search listings'}</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -570,7 +575,10 @@ export default async function ProfilePage() {
                 <div className="flex items-center justify-between">
                   <CardTitle>{t('profile.favorites')}</CardTitle>
                   <Button asChild variant="outline">
-                    <Link href="/profile/favorites">{t('profile.view_all')} →</Link>
+                    <Link href="/profile/favorites">
+                      {t('profile.view_all')}
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </Link>
                   </Button>
                 </div>
               </CardHeader>
@@ -592,9 +600,9 @@ export default async function ProfilePage() {
                     <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div className="flex-1">
-                    <CardTitle>Безопасность</CardTitle>
+                    <CardTitle>Security</CardTitle>
                     <p className="text-sm text-muted-foreground">
-                      Управление биометрией, сессиями и двухфакторной авторизацией
+                      Manage biometrics, active sessions, and two-factor authentication.
                     </p>
                   </div>
                 </div>
@@ -602,7 +610,7 @@ export default async function ProfilePage() {
               <CardContent>
                 <Button asChild className="w-full">
                   <Link href="/profile/security">
-                    <Shield className="mr-2 h-4 w-4" /> Настройки безопасности
+                    <Shield className="mr-2 h-4 w-4" /> Security settings
                   </Link>
                 </Button>
               </CardContent>
@@ -616,9 +624,9 @@ export default async function ProfilePage() {
                     <User className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div className="flex-1">
-                    <CardTitle>Профиль</CardTitle>
+                    <CardTitle>Profile</CardTitle>
                     <p className="text-sm text-muted-foreground">
-                      Редактирование личной информации и настроек отображения
+                      Update personal information and public display settings.
                     </p>
                   </div>
                 </div>
@@ -626,7 +634,7 @@ export default async function ProfilePage() {
               <CardContent>
                 <Button asChild variant="outline" className="w-full">
                   <Link href="/profile/edit">
-                    <Edit className="mr-2 h-4 w-4" /> Редактировать профиль
+                    <Edit className="mr-2 h-4 w-4" /> Edit profile
                   </Link>
                 </Button>
               </CardContent>
@@ -640,9 +648,9 @@ export default async function ProfilePage() {
                     <Bell className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                   </div>
                   <div className="flex-1">
-                    <CardTitle>Уведомления</CardTitle>
+                    <CardTitle>Notifications</CardTitle>
                     <p className="text-sm text-muted-foreground">
-                      Настройка email и push-уведомлений
+                      Configure email and push notifications.
                     </p>
                   </div>
                 </div>
@@ -652,19 +660,19 @@ export default async function ProfilePage() {
                   <div className="flex items-center justify-between rounded-lg border p-3">
                     <div className="flex items-center gap-2">
                       <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span>Email уведомления</span>
+                      <span>Email notifications</span>
                     </div>
-                    <Badge variant="secondary">Включены</Badge>
+                    <Badge variant="secondary">Enabled</Badge>
                   </div>
                   <div className="flex items-center justify-between rounded-lg border p-3">
                     <div className="flex items-center gap-2">
                       <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                      <span>Сообщения</span>
+                      <span>Messages</span>
                     </div>
-                    <Badge variant="secondary">Включены</Badge>
+                    <Badge variant="secondary">Enabled</Badge>
                   </div>
                   <p className="pt-2 text-xs text-muted-foreground">
-                    Полные настройки уведомлений скоро будут доступны
+                    Full notification preferences will be available soon.
                   </p>
                 </div>
               </CardContent>

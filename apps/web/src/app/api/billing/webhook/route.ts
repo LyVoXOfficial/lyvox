@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { stripe } from "@/lib/stripe/client";
+import { getStripe } from "@/lib/stripe/client";
 import { supabaseService } from "@/lib/supabaseService";
 import {
   createErrorResponse,
@@ -10,15 +10,10 @@ import Stripe from "stripe";
 
 export const runtime = "nodejs";
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-if (!webhookSecret) {
-  console.warn("STRIPE_WEBHOOK_SECRET is not set. Webhook verification will be disabled.");
-}
-
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const signature = req.headers.get("stripe-signature");
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   if (!signature) {
     return createErrorResponse(ApiErrorCode.BAD_INPUT, {
@@ -37,6 +32,7 @@ export async function POST(req: NextRequest) {
   let event: Stripe.Event;
 
   try {
+    const stripe = getStripe();
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err) {
     const error = err as Error;
@@ -214,4 +210,3 @@ export async function POST(req: NextRequest) {
     });
   }
 }
-

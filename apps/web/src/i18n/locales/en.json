@@ -3,7 +3,41 @@
     "title": "LyVoX",
     "description": "Marketplace for goods, services and real estate"
   },
+  "nav": {
+    "sign_in": "Sign in",
+    "join": "Join",
+    "sign_out": "Sign out",
+    "account": "Account",
+    "signed_in_as": "Signed in as",
+    "my_listings": "My listings",
+    "verify_phone": "Verify phone",
+    "admin_panel": "Admin panel",
+    "trust_first": "Trust-first",
+    "open_account_menu": "Open account menu"
+  },
+  "topbar": {
+    "verified_signals": "Verified seller signals",
+    "anti_scam": "Anti-scam moderation",
+    "belgian_deals": "Built for Belgian local deals"
+  },
+  "infocards": {
+    "verified_title": "Verified seller signals",
+    "verified_body": "Phone and email verification make risky listings easier to spot.",
+    "verified_action": "Browse verified",
+    "payment_title": "Local payment readiness",
+    "payment_body": "Billing is set up to support Belgian checkout methods through provider settings.",
+    "payment_action": "View billing",
+    "report_title": "Report suspicious deals",
+    "report_body": "Keep payment and shipping conversations inside LyVoX whenever possible.",
+    "report_action": "Contact support"
+  },
+  "footer": {
+    "tagline": "Belgium-focused marketplace for local listings, verified seller signals and safer conversations.",
+    "browse_listings": "Browse listings",
+    "post_listing": "Post a listing"
+  },
   "common": {
+    "more": "More",
     "language": "Language",
     "search": "Search adverts",
     "find": "Find",
@@ -75,6 +109,17 @@
     "error": "An error occurred"
   },
   "home": {
+    "hero_tag": "LyVoX Belgium marketplace",
+    "hero_title": "Find local deals with stronger trust signals.",
+    "hero_subtitle": "Search Belgian listings, compare sellers, and keep risky conversations inside the platform.",
+    "qa_transport": "Transport",
+    "qa_electronics": "Electronics",
+    "qa_verified": "Verified sellers",
+    "qa_free": "Free listings",
+    "stat_active": "fresh active listings loaded",
+    "stat_free": "free listings surfaced",
+    "stat_verified": "seller profiles verified in latest results",
+    "post_listing": "Post a listing",
     "free_ads": "Free adverts",
     "latest": "Latest adverts",
     "top_sellers_and_adverts": "Top Sellers & Adverts",

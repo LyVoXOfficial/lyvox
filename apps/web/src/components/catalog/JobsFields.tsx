@@ -454,7 +454,7 @@ export function JobsFields({
                   onCheckedChange={(checked) => onChange('driver_license_required', checked)}
                 />
                 <Label htmlFor="driver_license_required" className="cursor-pointer">
-                  Driver's License Required
+                  Driver&apos;s License Required
                 </Label>
               </div>
 
@@ -561,7 +561,6 @@ export function JobsFields({
     </div>
   );
 }
-
 
 
 

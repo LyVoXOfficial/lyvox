@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { formatDistanceToNow } from "date-fns";
+import { enUS } from "date-fns/locale";
+import { CheckCircle2, Loader2, Plus, Shield, Smartphone, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,12 +15,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Shield, Smartphone, Trash2, Plus, Loader2, CheckCircle2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTOTP, type TOTPFactor } from "@/hooks/useTOTP";
 import { TOTPEnrollment } from "./TOTPEnrollment";
-import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
-import { ru } from "date-fns/locale";
 
 interface TOTPSettingsProps {
   className?: string;
@@ -44,13 +44,13 @@ export function TOTPSettings({ className }: TOTPSettingsProps) {
       const success = await unenroll(factorId);
 
       if (success) {
-        toast.success("Аутентификатор удален");
+        toast.success("Authenticator removed");
         setFactorToRemove(null);
       } else {
-        toast.error("Не удалось удалить аутентификатор");
+        toast.error("Could not remove authenticator");
       }
-    } catch (error) {
-      toast.error("Произошла ошибка");
+    } catch {
+      toast.error("Authenticator removal failed");
     } finally {
       setRemovingFactorId(null);
     }
@@ -58,8 +58,8 @@ export function TOTPSettings({ className }: TOTPSettingsProps) {
 
   const handleEnrollmentSuccess = () => {
     setShowEnrollment(false);
-    refresh();
-    toast.success("Двухфакторная аутентификация настроена!");
+    void refresh();
+    toast.success("Two-factor authentication is ready");
   };
 
   if (showEnrollment) {
@@ -75,56 +75,54 @@ export function TOTPSettings({ className }: TOTPSettingsProps) {
 
   return (
     <div className={className}>
-      <Card>
+      <Card className="rounded-md">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Shield className="size-5" />
-            Двухфакторная аутентификация (TOTP)
+            <Shield className="size-5" aria-hidden="true" />
+            Authenticator app codes
           </CardTitle>
           <CardDescription>
-            Защитите свой аккаунт с помощью приложения-аутентификатора
+            Add a second factor so your seller account stays protected even if a password is exposed.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Status Banner */}
           {factors.length > 0 ? (
-            <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-950/30">
+            <div className="rounded-md border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900 dark:bg-emerald-950/30">
               <div className="flex items-start gap-3">
-                <CheckCircle2 className="size-5 text-green-600 dark:text-green-400 mt-0.5" />
+                <CheckCircle2 className="mt-0.5 size-5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
                 <div className="flex-1">
-                  <h3 className="font-semibold text-green-900 dark:text-green-100">
-                    2FA включена
+                  <h3 className="font-semibold text-emerald-900 dark:text-emerald-100">
+                    Two-factor authentication is enabled
                   </h3>
-                  <p className="mt-1 text-sm text-green-700 dark:text-green-300">
-                    Ваш аккаунт защищен двухфакторной аутентификацией
+                  <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-300">
+                    Sign-ins can require a short-lived code from your authenticator app.
                   </p>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950/30">
+            <div className="rounded-md border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/30">
               <div className="flex items-start gap-3">
-                <Shield className="size-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
+                <Shield className="mt-0.5 size-5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
                 <div className="flex-1">
-                  <h3 className="font-semibold text-yellow-900 dark:text-yellow-100">
-                    2FA отключена
+                  <h3 className="font-semibold text-amber-900 dark:text-amber-100">
+                    Two-factor authentication is not enabled
                   </h3>
-                  <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-300">
-                    Рекомендуем включить для дополнительной защиты аккаунта
+                  <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">
+                    We recommend enabling it before handling buyer conversations or paid listing boosts.
                   </p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Factors List */}
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="size-6 animate-spin text-muted-foreground" />
+              <Loader2 className="size-6 animate-spin text-muted-foreground" aria-hidden="true" />
             </div>
           ) : factors.length > 0 ? (
             <div className="space-y-3">
-              <h4 className="text-sm font-medium">Ваши аутентификаторы:</h4>
+              <h4 className="text-sm font-medium">Registered authenticators</h4>
               {factors.map((factor) => (
                 <FactorCard
                   key={factor.id}
@@ -135,52 +133,48 @@ export function TOTPSettings({ className }: TOTPSettingsProps) {
               ))}
             </div>
           ) : (
-            <p className="text-center text-sm text-muted-foreground py-4">
-              Аутентификаторы не настроены
+            <p className="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground">
+              No authenticator app is connected yet.
             </p>
           )}
 
-          {/* Add Button */}
           <Button
             onClick={() => setShowEnrollment(true)}
             variant="outline"
             className="w-full"
             disabled={isLoading}
           >
-            <Plus className="mr-2 size-4" />
-            Добавить аутентификатор
+            <Plus className="size-4" aria-hidden="true" />
+            Add authenticator app
           </Button>
 
-          {/* Info */}
-          <div className="rounded-lg bg-muted p-4 text-sm space-y-2">
-            <p className="font-medium">Как это работает:</p>
-            <ol className="list-inside list-decimal space-y-1 text-muted-foreground">
-              <li>Установите приложение-аутентификатор (Google Authenticator, Authy и т.д.)</li>
-              <li>Отсканируйте QR-код в приложении</li>
-              <li>Введите 6-значный код для подтверждения</li>
-              <li>При следующем входе нужно будет ввести код из приложения</li>
+          <div className="rounded-md bg-muted p-4 text-sm">
+            <p className="font-medium">How setup works</p>
+            <ol className="mt-2 list-inside list-decimal space-y-1 text-muted-foreground">
+              <li>Install an authenticator app such as 1Password, Authy, Google Authenticator, or Microsoft Authenticator.</li>
+              <li>Scan the LyVoX QR code inside the app.</li>
+              <li>Enter the six-digit code to confirm the factor.</li>
+              <li>Use the app code when LyVoX asks for an extra sign-in check.</li>
             </ol>
           </div>
         </CardContent>
       </Card>
 
-      {/* Remove Confirmation Dialog */}
       <AlertDialog open={factorToRemove !== null} onOpenChange={() => setFactorToRemove(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Удалить аутентификатор?</AlertDialogTitle>
+            <AlertDialogTitle>Remove this authenticator?</AlertDialogTitle>
             <AlertDialogDescription>
-              После удаления вам больше не потребуется вводить код при входе.
-              Это снизит безопасность вашего аккаунта.
+              Removing this factor lowers account protection. Add a replacement authenticator before removing your only second factor.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Отмена</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => factorToRemove && handleRemove(factorToRemove)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Удалить
+              Remove authenticator
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -188,10 +182,6 @@ export function TOTPSettings({ className }: TOTPSettingsProps) {
     </div>
   );
 }
-
-// ============================================================================
-// Factor Card Component
-// ============================================================================
 
 interface FactorCardProps {
   factor: TOTPFactor;
@@ -201,27 +191,27 @@ interface FactorCardProps {
 
 function FactorCard({ factor, onRemove, isRemoving }: FactorCardProps) {
   return (
-    <Card>
-      <CardContent className="flex items-center justify-between p-4">
-        <div className="flex items-center gap-3 flex-1">
-          <div className="rounded-full bg-primary/10 p-2">
-            <Smartphone className="size-5 text-primary" />
+    <Card className="rounded-md">
+      <CardContent className="flex items-center justify-between gap-3 p-4">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <div className="rounded-md bg-primary/10 p-2">
+            <Smartphone className="size-5 text-primary" aria-hidden="true" />
           </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <p className="font-medium">{factor.friendly_name || "Authenticator App"}</p>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="truncate font-medium">{factor.friendly_name || "Authenticator app"}</p>
               {factor.status === "verified" ? (
                 <Badge variant="default" className="text-xs">
-                  Активен
+                  Active
                 </Badge>
               ) : (
                 <Badge variant="secondary" className="text-xs">
-                  Не подтвержден
+                  Not verified
                 </Badge>
               )}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Добавлен {formatDistanceToNow(new Date(factor.created_at), { addSuffix: true, locale: ru })}
+            <p className="mt-1 text-xs text-muted-foreground">
+              Added {formatDistanceToNow(new Date(factor.created_at), { addSuffix: true, locale: enUS })}
             </p>
           </div>
         </div>
@@ -230,16 +220,16 @@ function FactorCard({ factor, onRemove, isRemoving }: FactorCardProps) {
           size="icon"
           onClick={onRemove}
           disabled={isRemoving}
-          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+          aria-label="Remove authenticator"
         >
           {isRemoving ? (
-            <Loader2 className="size-4 animate-spin" />
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           ) : (
-            <Trash2 className="size-4" />
+            <Trash2 className="size-4" aria-hidden="true" />
           )}
         </Button>
       </CardContent>
     </Card>
   );
 }
-

@@ -53,13 +53,6 @@ export function useTOTP(options: UseTOTPOptions = {}): UseTOTPReturn {
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load factors on mount if autoLoad is true
-  useEffect(() => {
-    if (autoLoad) {
-      refresh();
-    }
-  }, [autoLoad]);
-
   /**
    * Refresh the list of TOTP factors
    */
@@ -92,6 +85,13 @@ export function useTOTP(options: UseTOTPOptions = {}): UseTOTPReturn {
       setIsLoading(false);
     }
   }, [onError]);
+
+  // Load factors on mount if autoLoad is true
+  useEffect(() => {
+    if (autoLoad) {
+      void refresh();
+    }
+  }, [autoLoad, refresh]);
 
   /**
    * Enroll a new TOTP factor
@@ -321,4 +321,3 @@ export function useTOTP(options: UseTOTPOptions = {}): UseTOTPReturn {
     refresh,
   };
 }
-

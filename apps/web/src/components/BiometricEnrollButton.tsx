@@ -1,137 +1,99 @@
-/**
- * BiometricEnrollButton - кнопка для регистрации биометрического ключа
- * 
- * Показывает кнопку "Добавить биометрию", которая запускает процесс
- * регистрации Touch ID, Face ID, Windows Hello и т.д.
- * 
- * @example
- * <BiometricEnrollButton 
- *   onSuccess={(factorId) => console.log("Enrolled:", factorId)}
- *   variant="default"
- * />
- */
-
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import { Fingerprint, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useWebAuthn } from "@/hooks/useWebAuthn";
-import { toast } from "sonner";
-import { Fingerprint, Loader2 } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 
-// ============================================================================
-// Types
-// ============================================================================
-
 export interface BiometricEnrollButtonProps {
-  /** Callback при успешной регистрации */
   onSuccess?: (factorId: string) => void;
-  /** Callback при ошибке */
   onError?: (error: Error) => void;
-  /** Вариант кнопки */
   variant?: "default" | "outline" | "secondary" | "ghost";
-  /** Размер кнопки */
   size?: "default" | "sm" | "lg" | "icon";
-  /** Дополнительные CSS классы */
   className?: string;
-  /** Текст кнопки (по умолчанию из локализации) */
-  children?: React.ReactNode;
-  /** Локаль для сообщений */
+  children?: ReactNode;
   locale?: Locale;
-  /** Показывать ли иконку */
   showIcon?: boolean;
-  /** Дружественное имя устройства (по умолчанию генерируется автоматически) */
   friendlyName?: string;
 }
 
-// ============================================================================
-// Messages
-// ============================================================================
-
 const messages = {
   en: {
-    button: "Add Biometric",
+    button: "Add passkey",
     enrolling: "Registering...",
-    success: "Biometric key registered successfully!",
-    notSupported: "Your browser doesn't support biometric authentication",
-    notAvailable: "No biometric authenticator available on this device",
+    success: "Passkey registered",
+    notSupported: "This browser does not support passkeys",
+    notAvailable: "No platform authenticator is available on this device",
     cancelled: "Registration cancelled",
-    alreadyExists: "This biometric key is already registered",
-    genericError: "Failed to register biometric key",
+    alreadyExists: "This passkey is already registered",
+    genericError: "Could not register passkey",
   },
   nl: {
-    button: "Biometrie toevoegen",
+    button: "Passkey toevoegen",
     enrolling: "Registreren...",
-    success: "Biometrische sleutel succesvol geregistreerd!",
-    notSupported: "Uw browser ondersteunt geen biometrische authenticatie",
-    notAvailable: "Geen biometrische authenticator beschikbaar op dit apparaat",
+    success: "Passkey geregistreerd",
+    notSupported: "Deze browser ondersteunt geen passkeys",
+    notAvailable: "Geen platform-authenticator beschikbaar op dit apparaat",
     cancelled: "Registratie geannuleerd",
-    alreadyExists: "Deze biometrische sleutel is al geregistreerd",
-    genericError: "Kan biometrische sleutel niet registreren",
+    alreadyExists: "Deze passkey is al geregistreerd",
+    genericError: "Kan passkey niet registreren",
   },
   fr: {
-    button: "Ajouter la biométrie",
+    button: "Ajouter une passkey",
     enrolling: "Enregistrement...",
-    success: "Clé biométrique enregistrée avec succès !",
-    notSupported: "Votre navigateur ne prend pas en charge l'authentification biométrique",
-    notAvailable: "Aucun authentificateur biométrique disponible sur cet appareil",
-    cancelled: "Enregistrement annulé",
-    alreadyExists: "Cette clé biométrique est déjà enregistrée",
-    genericError: "Impossible d'enregistrer la clé biométrique",
+    success: "Passkey enregistree",
+    notSupported: "Ce navigateur ne prend pas en charge les passkeys",
+    notAvailable: "Aucun authentificateur de plateforme disponible sur cet appareil",
+    cancelled: "Enregistrement annule",
+    alreadyExists: "Cette passkey est deja enregistree",
+    genericError: "Impossible d'enregistrer la passkey",
   },
   ru: {
-    button: "Добавить биометрию",
-    enrolling: "Регистрация...",
-    success: "Биометрический ключ успешно зарегистрирован!",
-    notSupported: "Ваш браузер не поддерживает биометрическую авторизацию",
-    notAvailable: "На этом устройстве нет биометрического аутентификатора",
-    cancelled: "Регистрация отменена",
-    alreadyExists: "Этот биометрический ключ уже зарегистрирован",
-    genericError: "Не удалось зарегистрировать биометрический ключ",
+    button: "Add passkey",
+    enrolling: "Registering...",
+    success: "Passkey registered",
+    notSupported: "This browser does not support passkeys",
+    notAvailable: "No platform authenticator is available on this device",
+    cancelled: "Registration cancelled",
+    alreadyExists: "This passkey is already registered",
+    genericError: "Could not register passkey",
   },
   de: {
-    button: "Biometrie hinzufügen",
+    button: "Passkey hinzufuegen",
     enrolling: "Registrierung...",
-    success: "Biometrischer Schlüssel erfolgreich registriert!",
-    notSupported: "Ihr Browser unterstützt keine biometrische Authentifizierung",
-    notAvailable: "Auf diesem Gerät ist kein biometrischer Authentifikator verfügbar",
+    success: "Passkey registriert",
+    notSupported: "Dieser Browser unterstuetzt keine Passkeys",
+    notAvailable: "Auf diesem Geraet ist kein Plattform-Authenticator verfuegbar",
     cancelled: "Registrierung abgebrochen",
-    alreadyExists: "Dieser biometrische Schlüssel ist bereits registriert",
-    genericError: "Biometrischer Schlüssel konnte nicht registriert werden",
+    alreadyExists: "Dieser Passkey ist bereits registriert",
+    genericError: "Passkey konnte nicht registriert werden",
   },
-};
+} satisfies Record<Locale, Record<string, string>>;
 
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/**
- * Генерирует дружественное имя для устройства
- */
 function generateFriendlyName(): string {
   const platform = navigator.platform || "Unknown";
   const ua = navigator.userAgent;
-  
-  // Определяем тип устройства
+
   if (/iPhone|iPad|iPod/.test(ua)) {
     return "iPhone/iPad";
-  } else if (/Mac/.test(platform)) {
-    return "MacBook";
-  } else if (/Win/.test(platform)) {
-    return "Windows PC";
-  } else if (/Android/.test(ua)) {
-    return "Android Device";
-  } else if (/Linux/.test(platform)) {
-    return "Linux Device";
   }
-  
-  return "This Device";
-}
+  if (/Mac/.test(platform)) {
+    return "MacBook";
+  }
+  if (/Win/.test(platform)) {
+    return "Windows PC";
+  }
+  if (/Android/.test(ua)) {
+    return "Android device";
+  }
+  if (/Linux/.test(platform)) {
+    return "Linux device";
+  }
 
-// ============================================================================
-// Component
-// ============================================================================
+  return "This device";
+}
 
 export function BiometricEnrollButton({
   onSuccess,
@@ -145,32 +107,27 @@ export function BiometricEnrollButton({
   friendlyName,
 }: BiometricEnrollButtonProps) {
   const [isEnrolling, setIsEnrolling] = useState(false);
-  
-  const {
-    isSupported,
-    isPlatformAvailable,
-    enroll,
-    error: hookError,
-  } = useWebAuthn({
+  const copy = messages[locale] ?? messages.en;
+
+  const { isSupported, isPlatformAvailable, enroll } = useWebAuthn({
     autoLoad: false,
     onEnrollSuccess: (factorId) => {
-      toast.success(messages[locale].success);
+      toast.success(copy.success);
       onSuccess?.(factorId);
     },
     onError: (error) => {
-      // Обработка конкретных типов ошибок
       switch (error.type) {
         case "NOT_SUPPORTED":
-          toast.error(messages[locale].notSupported);
+          toast.error(copy.notSupported);
           break;
         case "USER_CANCELLED":
-          toast.error(messages[locale].cancelled);
+          toast.error(copy.cancelled);
           break;
         case "INVALID_STATE":
-          toast.error(messages[locale].alreadyExists);
+          toast.error(copy.alreadyExists);
           break;
         default:
-          toast.error(messages[locale].genericError, {
+          toast.error(copy.genericError, {
             description: error.message,
           });
       }
@@ -178,33 +135,26 @@ export function BiometricEnrollButton({
     },
   });
 
-  // Обработчик клика
   const handleEnroll = async () => {
-    // Проверка поддержки
     if (!isSupported) {
-      toast.error(messages[locale].notSupported);
+      toast.error(copy.notSupported);
       return;
     }
 
     if (!isPlatformAvailable) {
-      toast.error(messages[locale].notAvailable);
+      toast.error(copy.notAvailable);
       return;
     }
 
     setIsEnrolling(true);
-    
+
     try {
-      // Генерируем имя устройства если не задано
-      const deviceName = friendlyName || generateFriendlyName();
-      
-      // Запускаем регистрацию
-      await enroll(deviceName);
+      await enroll(friendlyName || generateFriendlyName());
     } finally {
       setIsEnrolling(false);
     }
   };
 
-  // Если браузер не поддерживает, не показываем кнопку
   if (!isSupported) {
     return null;
   }
@@ -219,32 +169,17 @@ export function BiometricEnrollButton({
     >
       {isEnrolling ? (
         <>
-          <Loader2 className="size-4 animate-spin" />
-          {messages[locale].enrolling}
+          <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+          {copy.enrolling}
         </>
       ) : (
         <>
-          {showIcon && <Fingerprint className="size-4" />}
-          {children || messages[locale].button}
+          {showIcon && <Fingerprint className="size-4" aria-hidden="true" />}
+          {children || copy.button}
         </>
       )}
     </Button>
   );
 }
 
-// ============================================================================
-// Default Export
-// ============================================================================
-
 export default BiometricEnrollButton;
-
-
-
-
-
-
-
-
-
-
-

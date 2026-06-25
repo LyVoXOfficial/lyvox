@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +33,9 @@ import { Label } from "@/components/ui/label";
 import { CheckCircle, XCircle, Flag, Loader2, Eye, Zap } from "lucide-react";
 import { formatCurrency } from "@/i18n/format";
 import { formatDate } from "@/i18n/format";
+import type { Locale } from "@/lib/i18n";
 import Link from "next/link";
+import { toast } from "sonner";
 
 type Advert = {
   id: string;
@@ -64,7 +66,7 @@ type Advert = {
 interface ModerationQueueClientProps {
   initialAdverts: Advert[];
   t: (key: string) => string;
-  locale: string;
+  locale: Locale;
 }
 
 export default function ModerationQueueClient({
@@ -82,7 +84,7 @@ export default function ModerationQueueClient({
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState<string | null>(null);
 
-  const loadQueue = async () => {
+  const loadQueue = useCallback(async () => {
     setIsLoading(true);
     try {
       const statusParam = statusFilter === "all" ? "all" : statusFilter;
@@ -97,11 +99,11 @@ export default function ModerationQueueClient({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [statusFilter]);
 
   useEffect(() => {
     loadQueue();
-  }, [statusFilter]);
+  }, [loadQueue]);
 
   const handleAnalyze = async (advertId: string) => {
     setIsAnalyzing(advertId);
@@ -117,11 +119,11 @@ export default function ModerationQueueClient({
         // Reload queue to show updated scores
         await loadQueue();
       } else {
-        alert(t("admin.moderation.analyze_error") || "Failed to analyze");
+        toast.error(t("admin.moderation.analyze_error") || "Failed to analyze");
       }
     } catch (error) {
       console.error("Failed to analyze:", error);
-      alert(t("admin.moderation.analyze_error") || "Failed to analyze");
+      toast.error(t("admin.moderation.analyze_error") || "Failed to analyze");
     } finally {
       setIsAnalyzing(null);
     }
@@ -150,11 +152,11 @@ export default function ModerationQueueClient({
         setReviewReason("");
         await loadQueue();
       } else {
-        alert(t("admin.moderation.review_error") || "Failed to review");
+        toast.error(t("admin.moderation.review_error") || "Failed to review");
       }
     } catch (error) {
       console.error("Failed to review:", error);
-      alert(t("admin.moderation.review_error") || "Failed to review");
+      toast.error(t("admin.moderation.review_error") || "Failed to review");
     } finally {
       setIsLoading(false);
     }
@@ -458,4 +460,3 @@ export default function ModerationQueueClient({
     </div>
   );
 }
-

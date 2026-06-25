@@ -14,7 +14,7 @@ export default async function ChatListPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/login?next=/chat");
   }
 
   // Load conversations for the user
@@ -60,13 +60,21 @@ export default async function ChatListPage() {
       };
 
       // Get the other participant
-      const { data: peers } = await supabase
+      const { data: peerParticipant } = await supabase
         .from("conversation_participants")
-        .select("user_id, profiles!inner(id, display_name)")
+        .select("user_id")
         .eq("conversation_id", conv.id)
         .neq("user_id", user.id)
         .limit(1)
         .maybeSingle();
+
+      const { data: peerProfile } = peerParticipant
+        ? await supabase
+            .from("profiles")
+            .select("id, display_name")
+            .eq("id", peerParticipant.user_id)
+            .maybeSingle()
+        : { data: null };
 
       // Get last message
       const { data: lastMessage } = await supabase
@@ -79,11 +87,10 @@ export default async function ChatListPage() {
 
       return {
         id: conv.id,
-        peer: peers?.profiles
+        peer: peerParticipant
           ? {
-              id: peers.user_id,
-              display_name: (peers.profiles as { id: string; display_name: string | null })
-                .display_name,
+              id: peerParticipant.user_id,
+              display_name: peerProfile?.display_name ?? null,
             }
           : null,
         advert: conv.adverts || null,
@@ -91,12 +98,12 @@ export default async function ChatListPage() {
           ? {
               id: lastMessage.id,
               body: lastMessage.body,
-              created_at: lastMessage.created_at,
+              created_at: lastMessage.created_at ?? conv.last_message_at ?? conv.created_at ?? "",
               author_id: lastMessage.author_id,
             }
           : null,
         last_message_at: conv.last_message_at,
-        created_at: conv.created_at,
+        created_at: conv.created_at ?? "",
         last_read_at: participant.last_read_at,
       };
     }),
@@ -106,4 +113,3 @@ export default async function ChatListPage() {
 
   return <ChatListClient conversations={conversationsWithPeers} messages={messages} />;
 }
-

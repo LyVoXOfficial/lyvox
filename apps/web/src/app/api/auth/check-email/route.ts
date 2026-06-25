@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseService } from "@/lib/supabaseService";
+import { createRateLimiter, withRateLimit, getClientIp } from "@/lib/rateLimiter";
 import { z } from "zod";
 
 const checkEmailSchema = z.object({
@@ -8,13 +9,22 @@ const checkEmailSchema = z.object({
 
 export const runtime = "nodejs";
 
+// This endpoint is an email-existence oracle, so it must be rate-limited to
+// slow down enumeration and prevent the service-role `listUsers()` scan below
+// from being used as a DoS amplifier.
+const checkEmailIpLimiter = createRateLimiter({
+  limit: 20,
+  windowSec: 60,
+  prefix: "check-email:ip",
+});
+
 /**
  * Check if an email is available for registration
  * GET /api/auth/check-email?email=test@example.com
- * 
- * Note: This endpoint is rate-limited to prevent email enumeration attacks
+ *
+ * Rate-limited per IP to mitigate email enumeration attacks.
  */
-export async function GET(request: Request) {
+async function handleGet(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const email = searchParams.get("email");
@@ -55,7 +65,12 @@ export async function GET(request: Request) {
       );
     }
 
-    // Query admin API to check if user exists
+    // NOTE: `listUsers()` without pagination only returns the first page
+    // (~50 users), so this existence check is not reliable once the user base
+    // grows. Uniqueness is ultimately enforced by Supabase Auth at signUp, so a
+    // false "available" only degrades pre-validation UX. For a correct + indexed
+    // lookup, expose a SECURITY DEFINER RPC (e.g. `email_exists(text)`) and call
+    // it here instead of scanning the table. Tracked in docs/SECURITY_AUDIT.md.
     const { data: users, error } = await supabase.auth.admin.listUsers();
 
     if (error) {
@@ -100,7 +115,7 @@ export async function GET(request: Request) {
         ok: true,
         available: true,
       },
-      { 
+      {
         status: 200,
         headers: {
           "Cache-Control": "no-store, must-revalidate",
@@ -109,4 +124,9 @@ export async function GET(request: Request) {
     );
   }
 }
+
+export const GET = withRateLimit(handleGet, {
+  limiter: checkEmailIpLimiter,
+  makeKey: (req, _userId, ip) => ip ?? getClientIp(req) ?? "anonymous",
+});
 

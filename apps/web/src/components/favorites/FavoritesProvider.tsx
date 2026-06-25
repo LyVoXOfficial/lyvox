@@ -84,6 +84,13 @@ export function FavoritesProvider({ children }: Props) {
         return;
       }
 
+      if (payload.data.authenticated === false) {
+        setItems({});
+        setIsAuthenticated(false);
+        setInitialized(true);
+        return;
+      }
+
       const normalized = payload.data.items.map((item: any) => ({
         advertId: item.advert_id,
         favoritedAt: item.favorited_at ?? item.created_at ?? null,
@@ -261,4 +268,3 @@ export function useFavorites(): FavoritesContextValue {
   }
   return context;
 }
-

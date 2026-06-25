@@ -5,21 +5,14 @@ import type { Database } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
 
-/**
- * Auth callback handler for OAuth and email confirmations
- * Handles code exchange and redirects to the appropriate page
- */
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const error = url.searchParams.get("error");
   const errorDescription = url.searchParams.get("error_description");
   const next = url.searchParams.get("next") ?? "/profile";
-
-  // Collect cookies to set in response
   const cookiesToSet: Array<{ name: string; value: string; options: CookieOptions }> = [];
 
-  // Create Supabase client with proper cookie handling for route handlers
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -35,10 +28,9 @@ export async function GET(request: NextRequest) {
           cookiesToSet.push({ name, value: "", options: { ...options, maxAge: 0 } });
         },
       },
-    }
+    },
   );
 
-  // Handle OAuth/email errors
   if (error) {
     logger.error("Auth callback received error", {
       component: "AuthCallback",
@@ -51,7 +43,7 @@ export async function GET(request: NextRequest) {
 
     const errorUrl = new URL("/login", url.origin);
     errorUrl.searchParams.set("error", error);
-    
+
     if (errorDescription) {
       errorUrl.searchParams.set("message", errorDescription);
     }
@@ -59,7 +51,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(errorUrl);
   }
 
-  // Validate code parameter
   if (!code) {
     logger.error("Auth callback missing code parameter", {
       component: "AuthCallback",
@@ -67,12 +58,11 @@ export async function GET(request: NextRequest) {
     });
     const loginUrl = new URL("/login", url.origin);
     loginUrl.searchParams.set("error", "missing_code");
-    loginUrl.searchParams.set("message", "Неверная ссылка для входа");
+    loginUrl.searchParams.set("message", "This sign-in link is invalid.");
     return NextResponse.redirect(loginUrl);
   }
 
   try {
-    // Log the code exchange attempt
     logger.info("Attempting code exchange", {
       component: "AuthCallback",
       action: "exchangeCode",
@@ -81,8 +71,7 @@ export async function GET(request: NextRequest) {
         origin: url.origin,
       },
     });
-    
-    // Exchange code for session
+
     const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
 
     if (exchangeError) {
@@ -99,24 +88,22 @@ export async function GET(request: NextRequest) {
 
       const loginUrl = new URL("/login", url.origin);
       loginUrl.searchParams.set("error", "exchange_failed");
-      
-      // Handle specific errors with better messages
+
       if (exchangeError.message.includes("expired") || exchangeError.code === "otp_expired") {
-        loginUrl.searchParams.set("message", "Ссылка истекла. Запросите новую ссылку для входа");
+        loginUrl.searchParams.set("message", "This link has expired. Request a new sign-in link.");
       } else if (exchangeError.message.includes("already used") || exchangeError.code === "otp_disabled") {
-        loginUrl.searchParams.set("message", "Ссылка уже использована. Запросите новую");
+        loginUrl.searchParams.set("message", "This link was already used. Request a new one.");
       } else if (exchangeError.message.includes("Email link is invalid") || exchangeError.code === "bad_oauth_state") {
-        loginUrl.searchParams.set("message", "Неверная ссылка. Запросите новую ссылку для входа");
+        loginUrl.searchParams.set("message", "This link is invalid. Request a new sign-in link.");
       } else if (exchangeError.status === 422) {
-        loginUrl.searchParams.set("message", "Неверный формат ссылки. Используйте ссылку из письма целиком");
+        loginUrl.searchParams.set("message", "Use the complete link from the email.");
       } else {
-        loginUrl.searchParams.set("message", `Ошибка входа: ${exchangeError.message}`);
+        loginUrl.searchParams.set("message", `Sign in failed: ${exchangeError.message}`);
       }
 
       return NextResponse.redirect(loginUrl);
     }
 
-    // Verify session was created
     if (!data.session) {
       logger.error("Auth callback no session created", {
         component: "AuthCallback",
@@ -124,17 +111,15 @@ export async function GET(request: NextRequest) {
       });
       const loginUrl = new URL("/login", url.origin);
       loginUrl.searchParams.set("error", "no_session");
-      loginUrl.searchParams.set("message", "Не удалось создать сессию");
+      loginUrl.searchParams.set("message", "Could not create a session.");
       return NextResponse.redirect(loginUrl);
     }
 
-    // Handle Itsme OAuth - update profile with verification status
     if (data.user?.app_metadata?.provider === "itsme") {
       try {
-        const itsmeKycLevel = data.user.user_metadata?.kyc_level || 
-                             data.user.app_metadata?.kyc_level || 
-                             "basic";
-        
+        const itsmeKycLevel =
+          data.user.user_metadata?.kyc_level || data.user.app_metadata?.kyc_level || "basic";
+
         const { error: profileError } = await supabase
           .from("profiles")
           .update({
@@ -152,7 +137,6 @@ export async function GET(request: NextRequest) {
               error: profileError,
             },
           });
-          // Don't fail the auth flow if profile update fails
         } else {
           logger.info("Profile updated with Itsme verification", {
             component: "AuthCallback",
@@ -163,17 +147,15 @@ export async function GET(request: NextRequest) {
             },
           });
         }
-      } catch (err) {
+      } catch (profileUpdateError) {
         logger.error("Exception updating Itsme profile", {
           component: "AuthCallback",
           action: "updateItsmeProfile",
-          error: err,
+          error: profileUpdateError,
         });
-        // Don't fail the auth flow if profile update fails
       }
     }
 
-    // Successful authentication - redirect to next page
     logger.info("Auth callback successful", {
       component: "AuthCallback",
       action: "success",
@@ -185,30 +167,24 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Redirect with cookies set
     const redirectUrl = new URL(next, url.origin);
     const response = NextResponse.redirect(redirectUrl);
-    
-    // Set all collected cookies
+
     cookiesToSet.forEach(({ name, value, options }) => {
       response.cookies.set(name, value, options);
     });
-    
+
     return response;
-  } catch (err) {
-    // Catch unexpected errors
+  } catch (callbackError) {
     logger.fatal("Auth callback unexpected error", {
       component: "AuthCallback",
       action: "handleException",
-      error: err,
+      error: callbackError,
     });
 
     const loginUrl = new URL("/login", url.origin);
     loginUrl.searchParams.set("error", "internal_error");
-    loginUrl.searchParams.set(
-      "message",
-      "Произошла непредвиденная ошибка. Попробуйте снова"
-    );
+    loginUrl.searchParams.set("message", "An unexpected error occurred. Try again.");
     return NextResponse.redirect(loginUrl);
   }
 }

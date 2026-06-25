@@ -1,17 +1,7 @@
-import dynamic from "next/dynamic";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { redirect, notFound } from "next/navigation";
 import { getI18nProps } from "@/i18n/server";
-
-// PERF-003: Lazy load ChatWindow (heavy component with realtime subscriptions)
-const ChatWindow = dynamic(() => import("@/components/chat/ChatWindow"), {
-  loading: () => (
-    <div className="flex h-screen items-center justify-center">
-      <div className="animate-pulse text-muted-foreground">Loading chat...</div>
-    </div>
-  ),
-  ssr: false, // Client-only component with realtime
-});
+import ChatWindow from "@/components/chat/ChatWindow";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -29,7 +19,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect(`/login?next=${encodeURIComponent(`/chat/${conversationId}`)}`);
   }
 
   // Verify user is a participant
@@ -68,18 +58,26 @@ export default async function ChatPage({ params }: ChatPageProps) {
   }
 
   // Get peer information
-  const { data: peers } = await supabase
+  const { data: peerParticipant } = await supabase
     .from("conversation_participants")
-    .select("user_id, profiles!inner(id, display_name)")
+    .select("user_id")
     .eq("conversation_id", conversationId)
     .neq("user_id", user.id)
     .limit(1)
     .maybeSingle();
 
-  const peer = peers?.profiles
+  const { data: peerProfile } = peerParticipant
+    ? await supabase
+        .from("profiles")
+        .select("id, display_name")
+        .eq("id", peerParticipant.user_id)
+        .maybeSingle()
+    : { data: null };
+
+  const peer = peerParticipant
     ? {
-        id: peers.user_id,
-        display_name: (peers.profiles as { id: string; display_name: string | null }).display_name,
+        id: peerParticipant.user_id,
+        display_name: peerProfile?.display_name ?? null,
       }
     : null;
 
@@ -96,7 +94,13 @@ export default async function ChatPage({ params }: ChatPageProps) {
   }
 
   // Reverse to get chronological order (oldest first)
-  const sortedMessages = (messages || []).reverse();
+  const sortedMessages = (messages || [])
+    .reverse()
+    .map((message) => ({
+      ...message,
+      created_at: message.created_at ?? new Date().toISOString(),
+      updated_at: message.updated_at ?? undefined,
+    }));
 
   const { messages: i18nMessages } = await getI18nProps();
 
@@ -111,4 +115,3 @@ export default async function ChatPage({ params }: ChatPageProps) {
     />
   );
 }
-

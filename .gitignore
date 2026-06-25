@@ -151,12 +151,14 @@ supabase/.branches/
 # Build caches
 .turbo/
 .cache/
+.codex/
 *.zst
 *.tar.zst
 diff.txt
 tmp.txt
 
 # VSCode local
+.cursor/
 .vscode/
 !.vscode/settings.json
 !.vscode/extensions.json
@@ -165,13 +167,13 @@ tmp.txt
 .DS_Store
 Thumbs.db
 
-# Generated seeds/artifacts
-/scripts/vehicles_seed.sql
-
-# Documentation output
-/docs/
-/docs/**
-PROMPT_MAIN.md
+# Generated root artifacts
+/vehicles_seed.sql
+/audit-report.json
+/i18n-audit-report.json
+/diff_stat.txt
+/tmp_patch.txt
+/status_tmp.txt
 
 # Security - secrets and credentials
 *.ps1
@@ -181,3 +183,4 @@ PROMPT_MAIN.md
 **/*password*
 **/.env.local
 **/.env.production
+.vercel

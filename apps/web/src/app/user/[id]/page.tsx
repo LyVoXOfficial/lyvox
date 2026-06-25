@@ -9,6 +9,7 @@ import { formatDate } from "@/i18n/format";
 import { ProfileAdvertsList } from "@/components/profile/ProfileAdvertsList";
 import { ProfileReviewsList } from "@/components/profile/ProfileReviewsList";
 import { logger } from "@/lib/errorLogger";
+import { signMediaUrls } from "@/lib/media/signMediaUrls";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -31,7 +32,7 @@ type PublicProfileData = {
     status: string | null;
     created_at: string;
     location: string | null;
-    media: { url: string | null; sort: number | null }[] | null;
+    media: { url: string | null; signedUrl: string | null; sort: number | null }[] | null;
   }>;
   reviews: Array<{
     id: string;
@@ -136,6 +137,32 @@ async function loadPublicProfileData(userId: string): Promise<PublicProfileData 
   }
 
   const adverts = activeAdverts ?? [];
+  const flatMedia = adverts.flatMap((ad) =>
+    Array.isArray(ad.media)
+      ? ad.media.map((media) => ({
+          advert_id: ad.id,
+          url: media.url ?? null,
+          sort: media.sort ?? null,
+        }))
+      : []
+  );
+  const signedMedia = await signMediaUrls(flatMedia);
+  const mediaByAdvert = signedMedia.reduce(
+    (acc, media) => {
+      if (!acc.has(media.advert_id)) {
+        acc.set(media.advert_id, []);
+      }
+
+      acc.get(media.advert_id)!.push({
+        url: media.url ?? null,
+        signedUrl: media.signedUrl,
+        sort: media.sort ?? null,
+      });
+
+      return acc;
+    },
+    new Map<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>>()
+  );
 
   return {
     id: profile.id,
@@ -153,7 +180,7 @@ async function loadPublicProfileData(userId: string): Promise<PublicProfileData 
       status: ad.status,
       created_at: ad.created_at ?? "",
       location: ad.location,
-      media: ad.media ?? [],
+      media: mediaByAdvert.get(ad.id) ?? [],
     })),
     reviews: reviewsList.map((review) => ({
       id: review.id,
@@ -317,4 +344,3 @@ export default async function PublicProfilePage({
     </main>
   );
 }
-

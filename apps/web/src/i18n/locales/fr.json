@@ -3,7 +3,41 @@
     "title": "LyVoX",
     "description": "Place de marché: biens, services, immobilier"
   },
+  "nav": {
+    "sign_in": "Se connecter",
+    "join": "S'inscrire",
+    "sign_out": "Se déconnecter",
+    "account": "Compte",
+    "signed_in_as": "Connecté en tant que",
+    "my_listings": "Mes annonces",
+    "verify_phone": "Vérifier le téléphone",
+    "admin_panel": "Panneau d'administration",
+    "trust_first": "La confiance d'abord",
+    "open_account_menu": "Ouvrir le menu du compte"
+  },
+  "topbar": {
+    "verified_signals": "Signaux de vendeurs vérifiés",
+    "anti_scam": "Modération anti-arnaque",
+    "belgian_deals": "Conçu pour les offres locales belges"
+  },
+  "infocards": {
+    "verified_title": "Signaux de vendeurs vérifiés",
+    "verified_body": "La vérification du téléphone et de l'e-mail permet de repérer plus facilement les annonces à risque.",
+    "verified_action": "Voir les vérifiés",
+    "payment_title": "Prêt pour les paiements locaux",
+    "payment_body": "La facturation est configurée pour prendre en charge les méthodes de paiement belges via les paramètres du fournisseur.",
+    "payment_action": "Voir la facturation",
+    "report_title": "Signaler les offres suspectes",
+    "report_body": "Gardez si possible les conversations de paiement et de livraison au sein de LyVoX.",
+    "report_action": "Contacter le support"
+  },
+  "footer": {
+    "tagline": "Place de marché axée sur la Belgique pour les annonces locales, des vendeurs vérifiés et des conversations plus sûres.",
+    "browse_listings": "Parcourir les annonces",
+    "post_listing": "Publier une annonce"
+  },
   "common": {
+    "more": "Plus",
     "language": "Langue",
     "search": "Recherche d'annonces",
     "find": "Rechercher",
@@ -75,6 +109,17 @@
     "error": "Une erreur s'est produite"
   },
   "home": {
+    "hero_tag": "Place de marché LyVoX Belgique",
+    "hero_title": "Trouvez des offres locales avec des signaux de confiance renforcés.",
+    "hero_subtitle": "Recherchez des annonces belges, comparez les vendeurs et gardez les conversations à risque sur la plateforme.",
+    "qa_transport": "Transport",
+    "qa_electronics": "Électronique",
+    "qa_verified": "Vendeurs vérifiés",
+    "qa_free": "Annonces gratuites",
+    "stat_active": "annonces actives chargées",
+    "stat_free": "annonces gratuites affichées",
+    "stat_verified": "profils de vendeurs vérifiés dans les résultats récents",
+    "post_listing": "Publier une annonce",
     "free_ads": "Annonces gratuites",
     "latest": "Dernières annonces",
     "top_sellers_and_adverts": "Top Vendeurs & Annonces",

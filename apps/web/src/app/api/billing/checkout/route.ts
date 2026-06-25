@@ -9,7 +9,7 @@ import {
 } from "@/lib/apiErrors";
 import { validateRequest } from "@/lib/validations";
 import { createCheckoutSchema } from "@/lib/validations/billing";
-import { stripe } from "@/lib/stripe/client";
+import { getStripe } from "@/lib/stripe/client";
 
 export const runtime = "nodejs";
 
@@ -41,9 +41,10 @@ const baseHandler = async (req: Request) => {
     return createErrorResponse(ApiErrorCode.UNAUTH, { status: 401 });
   }
 
-  // Check if user is blocked
+  // Check if user is blocked (fail closed: a payment must not proceed if we
+  // can't confirm the account is in good standing)
   const { checkUserBlocked } = await import("@/lib/fraud/checkUserBlocked");
-  const blockCheck = await checkUserBlocked(user.id);
+  const blockCheck = await checkUserBlocked(user.id, { failClosed: true });
   if (blockCheck.isBlocked) {
     return createErrorResponse(ApiErrorCode.FORBIDDEN, {
       status: 403,
@@ -133,8 +134,8 @@ const baseHandler = async (req: Request) => {
   const cancelUrl = `${baseUrl}/billing/cancel`;
 
   try {
+    const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
       line_items: [
         {
           price_data: {
@@ -205,4 +206,3 @@ export const POST = withRateLimit(withUserLimit, {
   limiter: checkoutIpLimiter,
   makeKey: (_req, _userId, ip) => (ip ? ip : null),
 });
-

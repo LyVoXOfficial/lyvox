@@ -7,36 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
-  }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       ad_item_specifics: {
@@ -99,6 +69,8 @@ export type Database = {
       }
       adverts: {
         Row: {
+          ai_moderation_reason: string | null
+          ai_moderation_score: number | null
           category_id: string
           condition: string | null
           created_at: string | null
@@ -107,6 +79,7 @@ export type Database = {
           id: string
           location: string | null
           location_id: string | null
+          moderation_status: string | null
           price: number | null
           status: string
           title: string
@@ -114,6 +87,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ai_moderation_reason?: string | null
+          ai_moderation_score?: number | null
           category_id: string
           condition?: string | null
           created_at?: string | null
@@ -122,6 +97,7 @@ export type Database = {
           id?: string
           location?: string | null
           location_id?: string | null
+          moderation_status?: string | null
           price?: number | null
           status?: string
           title: string
@@ -129,6 +105,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          ai_moderation_reason?: string | null
+          ai_moderation_score?: number | null
           category_id?: string
           condition?: string | null
           created_at?: string | null
@@ -137,6 +115,7 @@ export type Database = {
           id?: string
           location?: string | null
           location_id?: string | null
+          moderation_status?: string | null
           price?: number | null
           status?: string
           title?: string
@@ -163,6 +142,54 @@ export type Database = {
             columns: ["location_id"]
             isOneToOne: false
             referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      benefits: {
+        Row: {
+          advert_id: string | null
+          benefit_type: string
+          created_at: string | null
+          id: string
+          purchase_id: string | null
+          user_id: string
+          valid_from: string | null
+          valid_until: string
+        }
+        Insert: {
+          advert_id?: string | null
+          benefit_type: string
+          created_at?: string | null
+          id?: string
+          purchase_id?: string | null
+          user_id: string
+          valid_from?: string | null
+          valid_until: string
+        }
+        Update: {
+          advert_id?: string | null
+          benefit_type?: string
+          created_at?: string | null
+          id?: string
+          purchase_id?: string | null
+          user_id?: string
+          valid_from?: string | null
+          valid_until?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "benefits_advert_id_fkey"
+            columns: ["advert_id"]
+            isOneToOne: false
+            referencedRelation: "adverts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "benefits_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
             referencedColumns: ["id"]
           },
         ]
@@ -457,6 +484,76 @@ export type Database = {
         }
         Relationships: []
       }
+      conversation_participants: {
+        Row: {
+          conversation_id: string
+          created_at: string | null
+          last_read_at: string | null
+          muted: boolean | null
+          role: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string | null
+          last_read_at?: string | null
+          muted?: boolean | null
+          role: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string | null
+          last_read_at?: string | null
+          muted?: boolean | null
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          advert_id: string | null
+          created_at: string | null
+          created_by: string
+          id: string
+          last_message_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          advert_id?: string | null
+          created_at?: string | null
+          created_by: string
+          id?: string
+          last_message_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          advert_id?: string | null
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          last_message_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_advert_id_fkey"
+            columns: ["advert_id"]
+            isOneToOne: false
+            referencedRelation: "adverts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cp_codes: {
         Row: {
           code: string
@@ -724,6 +821,102 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      fraud_detection_logs: {
+        Row: {
+          action_taken: string
+          advert_id: string | null
+          created_at: string | null
+          details: Json | null
+          id: string
+          match_score: number
+          rule_id: string | null
+          rule_name: string
+          user_id: string | null
+        }
+        Insert: {
+          action_taken: string
+          advert_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          match_score: number
+          rule_id?: string | null
+          rule_name: string
+          user_id?: string | null
+        }
+        Update: {
+          action_taken?: string
+          advert_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          match_score?: number
+          rule_id?: string | null
+          rule_name?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fraud_detection_logs_advert_id_fkey"
+            columns: ["advert_id"]
+            isOneToOne: false
+            referencedRelation: "adverts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fraud_detection_logs_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "fraud_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fraud_rules: {
+        Row: {
+          action: string
+          condition: Json
+          created_at: string | null
+          description: string | null
+          enabled: boolean | null
+          id: string
+          metadata: Json | null
+          name: string
+          priority: number | null
+          rule_type: string
+          severity: string
+          updated_at: string | null
+        }
+        Insert: {
+          action: string
+          condition: Json
+          created_at?: string | null
+          description?: string | null
+          enabled?: boolean | null
+          id?: string
+          metadata?: Json | null
+          name: string
+          priority?: number | null
+          rule_type: string
+          severity: string
+          updated_at?: string | null
+        }
+        Update: {
+          action?: string
+          condition?: Json
+          created_at?: string | null
+          description?: string | null
+          enabled?: boolean | null
+          id?: string
+          metadata?: Json | null
+          name?: string
+          priority?: number | null
+          rule_type?: string
+          severity?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       job_categories: {
         Row: {
@@ -1112,6 +1305,127 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          author_id: string
+          body: string
+          conversation_id: string
+          created_at: string | null
+          id: number
+          updated_at: string | null
+        }
+        Insert: {
+          author_id: string
+          body: string
+          conversation_id: string
+          created_at?: string | null
+          id?: number
+          updated_at?: string | null
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          conversation_id?: string
+          created_at?: string | null
+          id?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      moderation_logs: {
+        Row: {
+          action_taken: string | null
+          advert_id: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          moderation_type: string
+          moderator_id: string | null
+          reason: string | null
+          recommendation: string | null
+          score: number | null
+        }
+        Insert: {
+          action_taken?: string | null
+          advert_id: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          moderation_type: string
+          moderator_id?: string | null
+          reason?: string | null
+          recommendation?: string | null
+          score?: number | null
+        }
+        Update: {
+          action_taken?: string | null
+          advert_id?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          moderation_type?: string
+          moderator_id?: string | null
+          reason?: string | null
+          recommendation?: string | null
+          score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_logs_advert_id_fkey"
+            columns: ["advert_id"]
+            isOneToOne: false
+            referencedRelation: "adverts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string
+          channel: string
+          created_at: string | null
+          id: string
+          payload: Json | null
+          read_at: string | null
+          sent_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          channel: string
+          created_at?: string | null
+          id?: string
+          payload?: Json | null
+          read_at?: string | null
+          sent_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          channel?: string
+          created_at?: string | null
+          id?: string
+          payload?: Json | null
+          read_at?: string | null
+          sent_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pet_species_legal: {
         Row: {
           breed_restrictions: boolean | null
@@ -1223,12 +1537,47 @@ export type Database = {
         }
         Relationships: []
       }
+      products: {
+        Row: {
+          active: boolean | null
+          code: string
+          created_at: string | null
+          currency: string | null
+          id: string
+          name: Json
+          price_cents: number
+        }
+        Insert: {
+          active?: boolean | null
+          code: string
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          name: Json
+          price_cents: number
+        }
+        Update: {
+          active?: boolean | null
+          code?: string
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          name?: Json
+          price_cents?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          blocked_until: string | null
           consents: Json | null
           created_at: string | null
           display_name: string | null
+          flags: Json | null
           id: string
+          itsme_kyc_level: string | null
+          itsme_verified: boolean | null
+          notification_preferences: Json | null
           phone: string | null
           rating: number | null
           total_deals: number | null
@@ -1236,10 +1585,15 @@ export type Database = {
           verified_phone: boolean | null
         }
         Insert: {
+          blocked_until?: string | null
           consents?: Json | null
           created_at?: string | null
           display_name?: string | null
+          flags?: Json | null
           id: string
+          itsme_kyc_level?: string | null
+          itsme_verified?: boolean | null
+          notification_preferences?: Json | null
           phone?: string | null
           rating?: number | null
           total_deals?: number | null
@@ -1247,10 +1601,15 @@ export type Database = {
           verified_phone?: boolean | null
         }
         Update: {
+          blocked_until?: string | null
           consents?: Json | null
           created_at?: string | null
           display_name?: string | null
+          flags?: Json | null
           id?: string
+          itsme_kyc_level?: string | null
+          itsme_verified?: boolean | null
+          notification_preferences?: Json | null
           phone?: string | null
           rating?: number | null
           total_deals?: number | null
@@ -1463,6 +1822,56 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      purchases: {
+        Row: {
+          amount_cents: number
+          created_at: string | null
+          currency: string | null
+          id: string
+          product_code: string
+          provider: string
+          provider_payment_intent_id: string | null
+          provider_session_id: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          product_code: string
+          provider: string
+          provider_payment_intent_id?: string | null
+          provider_session_id?: string | null
+          status: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          product_code?: string
+          provider?: string
+          provider_payment_intent_id?: string | null
+          provider_session_id?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchases_product_code_fkey"
+            columns: ["product_code"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       reports: {
         Row: {
@@ -2612,35 +3021,35 @@ export type Database = {
       addgeometrycolumn:
         | {
             Args: {
-              column_name: string
-              new_dim: number
-              new_srid: number
-              new_type: string
-              schema_name: string
-              table_name: string
-              use_typmod?: boolean
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              column_name: string
-              new_dim: number
-              new_srid: number
-              new_type: string
-              table_name: string
-              use_typmod?: boolean
-            }
-            Returns: string
-          }
-        | {
-            Args: {
               catalog_name: string
               column_name: string
               new_dim: number
               new_srid_in: number
               new_type: string
               schema_name: string
+              table_name: string
+              use_typmod?: boolean
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              column_name: string
+              new_dim: number
+              new_srid: number
+              new_type: string
+              schema_name: string
+              table_name: string
+              use_typmod?: boolean
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              column_name: string
+              new_dim: number
+              new_srid: number
+              new_type: string
               table_name: string
               use_typmod?: boolean
             }
@@ -2655,6 +3064,15 @@ export type Database = {
       dropgeometrycolumn:
         | {
             Args: {
+              catalog_name: string
+              column_name: string
+              schema_name: string
+              table_name: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
               column_name: string
               schema_name: string
               table_name: string
@@ -2662,26 +3080,17 @@ export type Database = {
             Returns: string
           }
         | { Args: { column_name: string; table_name: string }; Returns: string }
+      dropgeometrytable:
         | {
             Args: {
               catalog_name: string
-              column_name: string
               schema_name: string
               table_name: string
             }
             Returns: string
           }
-      dropgeometrytable:
         | { Args: { schema_name: string; table_name: string }; Returns: string }
         | { Args: { table_name: string }; Returns: string }
-        | {
-            Args: {
-              catalog_name: string
-              schema_name: string
-              table_name: string
-            }
-            Returns: string
-          }
       enablelongtransactions: { Args: never; Returns: string }
       equals: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
       geometry: { Args: { "": string }; Returns: unknown }
@@ -2798,10 +3207,11 @@ export type Database = {
         Args: { advert_id_param: string; user_id_param: string }
         Returns: boolean
       }
+      is_user_blocked: { Args: { user_id_param: string }; Returns: boolean }
       longtransactionsenabled: { Args: never; Returns: boolean }
       populate_geometry_columns:
-        | { Args: { use_typmod?: boolean }; Returns: string }
         | { Args: { tbl_oid: unknown; use_typmod?: boolean }; Returns: number }
+        | { Args: { use_typmod?: boolean }; Returns: string }
       postgis_constraint_dims: {
         Args: { geomcolumn: string; geomschema: string; geomtable: string }
         Returns: number
@@ -2854,7 +3264,6 @@ export type Database = {
           radius_km?: number
           search_query?: string
           sort_by?: string
-          verified_only?: boolean
         }
         Returns: {
           category_id: string
@@ -2867,7 +3276,6 @@ export type Database = {
           location_id: string
           price: number
           relevance_rank: number
-          seller_verified: boolean | null
           status: string
           title: string
           total_count: number
@@ -2940,6 +3348,14 @@ export type Database = {
       st_asewkt: { Args: { "": string }; Returns: string }
       st_asgeojson:
         | {
+            Args: { geog: unknown; maxdecimaldigits?: number; options?: number }
+            Returns: string
+          }
+        | {
+            Args: { geom: unknown; maxdecimaldigits?: number; options?: number }
+            Returns: string
+          }
+        | {
             Args: {
               geom_column?: string
               maxdecimaldigits?: number
@@ -2948,18 +3364,32 @@ export type Database = {
             }
             Returns: string
           }
-        | {
-            Args: { geom: unknown; maxdecimaldigits?: number; options?: number }
-            Returns: string
-          }
-        | {
-            Args: { geog: unknown; maxdecimaldigits?: number; options?: number }
-            Returns: string
-          }
         | { Args: { "": string }; Returns: string }
       st_asgml:
         | {
+            Args: {
+              geog: unknown
+              id?: string
+              maxdecimaldigits?: number
+              nprefix?: string
+              options?: number
+            }
+            Returns: string
+          }
+        | {
             Args: { geom: unknown; maxdecimaldigits?: number; options?: number }
+            Returns: string
+          }
+        | { Args: { "": string }; Returns: string }
+        | {
+            Args: {
+              geog: unknown
+              id?: string
+              maxdecimaldigits?: number
+              nprefix?: string
+              options?: number
+              version: number
+            }
             Returns: string
           }
         | {
@@ -2973,35 +3403,13 @@ export type Database = {
             }
             Returns: string
           }
-        | {
-            Args: {
-              geog: unknown
-              id?: string
-              maxdecimaldigits?: number
-              nprefix?: string
-              options?: number
-              version: number
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              geog: unknown
-              id?: string
-              maxdecimaldigits?: number
-              nprefix?: string
-              options?: number
-            }
-            Returns: string
-          }
-        | { Args: { "": string }; Returns: string }
       st_askml:
         | {
-            Args: { geom: unknown; maxdecimaldigits?: number; nprefix?: string }
+            Args: { geog: unknown; maxdecimaldigits?: number; nprefix?: string }
             Returns: string
           }
         | {
-            Args: { geog: unknown; maxdecimaldigits?: number; nprefix?: string }
+            Args: { geom: unknown; maxdecimaldigits?: number; nprefix?: string }
             Returns: string
           }
         | { Args: { "": string }; Returns: string }
@@ -3022,11 +3430,11 @@ export type Database = {
       }
       st_assvg:
         | {
-            Args: { geom: unknown; maxdecimaldigits?: number; rel?: number }
+            Args: { geog: unknown; maxdecimaldigits?: number; rel?: number }
             Returns: string
           }
         | {
-            Args: { geog: unknown; maxdecimaldigits?: number; rel?: number }
+            Args: { geom: unknown; maxdecimaldigits?: number; rel?: number }
             Returns: string
           }
         | { Args: { "": string }; Returns: string }
@@ -3034,8 +3442,7 @@ export type Database = {
       st_astwkb:
         | {
             Args: {
-              geom: unknown[]
-              ids: number[]
+              geom: unknown
               prec?: number
               prec_m?: number
               prec_z?: number
@@ -3046,7 +3453,8 @@ export type Database = {
           }
         | {
             Args: {
-              geom: unknown
+              geom: unknown[]
+              ids: number[]
               prec?: number
               prec_m?: number
               prec_z?: number
@@ -3060,8 +3468,8 @@ export type Database = {
         Returns: string
       }
       st_azimuth:
-        | { Args: { geom1: unknown; geom2: unknown }; Returns: number }
         | { Args: { geog1: unknown; geog2: unknown }; Returns: number }
+        | { Args: { geom1: unknown; geom2: unknown }; Returns: number }
       st_boundingdiagonal: {
         Args: { fits?: boolean; geom: unknown }
         Returns: unknown
@@ -3126,11 +3534,11 @@ export type Database = {
         Returns: boolean
       }
       st_distance:
-        | { Args: { geom1: unknown; geom2: unknown }; Returns: number }
         | {
             Args: { geog1: unknown; geog2: unknown; use_spheroid?: boolean }
             Returns: number
           }
+        | { Args: { geom1: unknown; geom2: unknown }; Returns: number }
       st_distancesphere:
         | { Args: { geom1: unknown; geom2: unknown }; Returns: number }
         | {
@@ -3152,6 +3560,11 @@ export type Database = {
       }
       st_equals: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
       st_expand:
+        | { Args: { box: unknown; dx: number; dy: number }; Returns: unknown }
+        | {
+            Args: { box: unknown; dx: number; dy: number; dz?: number }
+            Returns: unknown
+          }
         | {
             Args: {
               dm?: number
@@ -3162,11 +3575,6 @@ export type Database = {
             }
             Returns: unknown
           }
-        | {
-            Args: { box: unknown; dx: number; dy: number; dz?: number }
-            Returns: unknown
-          }
-        | { Args: { box: unknown; dx: number; dy: number }; Returns: unknown }
       st_force3d: { Args: { geom: unknown; zvalue?: number }; Returns: unknown }
       st_force3dm: {
         Args: { geom: unknown; mvalue?: number }
@@ -3189,8 +3597,8 @@ export type Database = {
       st_geogfromtext: { Args: { "": string }; Returns: unknown }
       st_geographyfromtext: { Args: { "": string }; Returns: unknown }
       st_geohash:
-        | { Args: { geom: unknown; maxchars?: number }; Returns: string }
         | { Args: { geog: unknown; maxchars?: number }; Returns: string }
+        | { Args: { geom: unknown; maxchars?: number }; Returns: string }
       st_geomcollfromtext: { Args: { "": string }; Returns: unknown }
       st_geometricmedian: {
         Args: {
@@ -3234,8 +3642,8 @@ export type Database = {
         Returns: unknown
       }
       st_intersects:
-        | { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
         | { Args: { geog1: unknown; geog2: unknown }; Returns: boolean }
+        | { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
       st_isvaliddetail: {
         Args: { flags?: number; geom: unknown }
         Returns: Database["public"]["CompositeTypes"]["valid_detail"]
@@ -3388,8 +3796,8 @@ export type Database = {
         Returns: unknown
       }
       st_setsrid:
-        | { Args: { geom: unknown; srid: number }; Returns: unknown }
         | { Args: { geog: unknown; srid: number }; Returns: unknown }
+        | { Args: { geom: unknown; srid: number }; Returns: unknown }
       st_sharedpaths: {
         Args: { geom1: unknown; geom2: unknown }
         Returns: unknown
@@ -3412,8 +3820,8 @@ export type Database = {
         Returns: Record<string, unknown>[]
       }
       st_srid:
-        | { Args: { geom: unknown }; Returns: number }
         | { Args: { geog: unknown }; Returns: number }
+        | { Args: { geom: unknown }; Returns: number }
       st_subdivide: {
         Args: { geom: unknown; gridsize?: number; maxvertices?: number }
         Returns: unknown[]
@@ -3442,15 +3850,15 @@ export type Database = {
       }
       st_touches: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
       st_transform:
-        | { Args: { geom: unknown; to_proj: string }; Returns: unknown }
-        | {
-            Args: { from_proj: string; geom: unknown; to_srid: number }
-            Returns: unknown
-          }
         | {
             Args: { from_proj: string; geom: unknown; to_proj: string }
             Returns: unknown
           }
+        | {
+            Args: { from_proj: string; geom: unknown; to_srid: number }
+            Returns: unknown
+          }
+        | { Args: { geom: unknown; to_proj: string }; Returns: unknown }
       st_triangulatepolygon: { Args: { g1: unknown }; Returns: unknown }
       st_union:
         | { Args: { geom1: unknown; geom2: unknown }; Returns: unknown }
@@ -3484,6 +3892,10 @@ export type Database = {
           table_name: string
         }
         Returns: string
+      }
+      user_has_flag: {
+        Args: { flag_name: string; user_id_param: string }
+        Returns: boolean
       }
       validate_belgian_phone: { Args: { phone: string }; Returns: boolean }
       validate_belgian_postcode: {
@@ -3711,10 +4123,8 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },
 } as const
+

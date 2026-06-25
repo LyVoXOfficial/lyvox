@@ -187,33 +187,32 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     <div className="space-y-6">
       <Breadcrumbs
         items={breadcrumbItems}
-        homeLabel="Все категории"
+        homeLabel="All categories"
         homeHref="/c"
       />
 
       <header className="space-y-1">
-        <h1 className="text-2xl font-semibold text-zinc-900">{currentName}</h1>
+        <h1 className="text-2xl font-semibold tracking-normal text-foreground">{currentName}</h1>
         <p className="text-sm text-muted-foreground">
-          Список объявлений в этой категории обновляется в режиме реального времени.
+          Active listings in this category are refreshed as sellers publish new offers.
         </p>
       </header>
 
       {children.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-lg font-medium text-zinc-900">Подкатегории</h2>
+          <h2 className="text-lg font-semibold text-foreground">Subcategories</h2>
           <CategoryList items={children} base="/c" />
         </section>
       )}
 
       <section className="space-y-3">
-        <h2 className="text-lg font-medium text-zinc-900">Объявления</h2>
+        <h2 className="text-lg font-semibold text-foreground">Listings</h2>
         <CategoryFilters />
         {adverts.length > 0 ? (
           <AdsGrid items={adverts} />
         ) : (
           <p className="text-sm text-muted-foreground">
-            В данной категории пока нет активных объявлений. 
-            Станьте первым, кто разместит объявление!
+            There are no active listings in this category yet. Be the first to post one.
           </p>
         )}
       </section>

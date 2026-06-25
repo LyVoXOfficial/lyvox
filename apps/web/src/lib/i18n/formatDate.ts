@@ -58,6 +58,10 @@ export function formatDate(
   }
 }
 
+export function formatRelativeTime(date: Date | string, locale: Locale): string {
+  return formatDate(date, locale, "relative");
+}
+
 /**
  * Format a date as relative time (e.g., "2 hours ago", "2 часа назад")
  * @param date - Date object

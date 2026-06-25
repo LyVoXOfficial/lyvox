@@ -1,33 +1,40 @@
 "use client";
 
+import Link from "next/link";
 import { useI18n } from "@/i18n";
 
 export default function LegalFooter() {
   const { t } = useI18n();
+  const translate = (key: string, fallback: string) => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
+
   return (
-    <footer className="border-t bg-white mb-16 md:mb-0">
-      <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-zinc-600 grid md:grid-cols-3 gap-4">
+    <footer className="mb-16 border-t border-border/75 bg-card md:mb-0">
+      <div className="mx-auto grid max-w-7xl gap-6 px-4 py-8 text-sm text-muted-foreground md:grid-cols-[1.2fr_1fr_1fr]">
         <div>
-          <div className="font-medium">{t("common.about")}</div>
-          <ul className="mt-2 space-y-1">
-            <li><a className="hover:underline" href="/about">{t("common.about_project")}</a></li>
-            <li><a className="hover:underline" href="/contact">{t("common.contacts")}</a></li>
+          <div className="font-semibold text-foreground">LyVoX</div>
+          <p className="mt-2 max-w-sm leading-6">
+            {translate(
+              "footer.tagline",
+              "Belgium-focused marketplace for local listings, verified seller signals and safer conversations.",
+            )}
+          </p>
+        </div>
+        <div>
+          <div className="font-semibold text-foreground">{translate("common.about", "Marketplace")}</div>
+          <ul className="mt-2 space-y-2">
+            <li><Link className="hover:text-foreground" href="/search">{translate("footer.browse_listings", "Browse listings")}</Link></li>
+            <li><Link className="hover:text-foreground" href="/post">{translate("footer.post_listing", "Post a listing")}</Link></li>
+            <li><Link className="hover:text-foreground" href="/contact">{translate("common.contacts", "Contact")}</Link></li>
           </ul>
         </div>
         <div>
-          <div className="font-medium">{t("common.legal")}</div>
-          <ul className="mt-2 space-y-1">
-            <li><a className="hover:underline" href="/legal/terms">{t("common.terms")}</a></li>
-            <li><a className="hover:underline" href="/legal/privacy">{t("common.privacy")}</a></li>
-            <li><a className="hover:underline" href="/legal/gdpr">{t("common.gdpr")}</a></li>
-            <li><a className="hover:underline" href="/safety">{t("common.safety")}</a></li>
-          </ul>
-        </div>
-        <div>
-          <div className="font-medium">{t("common.social")}</div>
-          <ul className="mt-2 space-y-1">
-            <li><a className="hover:underline" href="#" target="_blank" rel="noopener noreferrer">{t("common.instagram")}</a></li>
-            <li><a className="hover:underline" href="#" target="_blank" rel="noopener noreferrer">{t("common.facebook")}</a></li>
+          <div className="font-semibold text-foreground">{translate("common.legal", "Legal")}</div>
+          <ul className="mt-2 space-y-2">
+            <li><Link className="hover:text-foreground" href="/legal/terms">{translate("common.terms", "Terms")}</Link></li>
+            <li><Link className="hover:text-foreground" href="/legal/privacy">{translate("common.privacy", "Privacy")}</Link></li>
           </ul>
         </div>
       </div>

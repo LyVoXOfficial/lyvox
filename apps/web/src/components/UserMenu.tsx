@@ -2,8 +2,20 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  ChevronDown,
+  LayoutDashboard,
+  ListChecks,
+  LogIn,
+  LogOut,
+  Phone,
+  UserCircle,
+  UserPlus,
+} from "lucide-react";
 import { hasAdminRole, type SupabaseUserLike } from "@/lib/adminRole";
 import { supabase } from "@/lib/supabaseClient";
+import { useI18n } from "@/i18n";
+import { cn } from "@/lib/utils";
 
 type MeResponse = {
   user: unknown;
@@ -11,7 +23,15 @@ type MeResponse = {
   verifiedPhone?: boolean;
 };
 
+type MenuLink = {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  tone?: "default" | "warning";
+};
+
 export default function UserMenu() {
+  const { t } = useI18n();
   const [email, setEmail] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [phoneVerified, setPhoneVerified] = useState<boolean | null>(null);
@@ -24,7 +44,6 @@ export default function UserMenu() {
     let phoneVerificationFetched = false;
 
     const fetchPhoneVerification = async (userEmail: string | null) => {
-      // Only fetch phone verification if email changed
       if (userEmail === lastEmail && phoneVerificationFetched) {
         return;
       }
@@ -50,7 +69,7 @@ export default function UserMenu() {
           setPhoneVerified(verifiedFromPhone ?? verifiedFallback);
           phoneVerificationFetched = true;
         }
-      } catch (error) {
+      } catch {
         if (!cancelled) {
           setPhoneVerified(null);
           phoneVerificationFetched = true;
@@ -60,15 +79,15 @@ export default function UserMenu() {
 
     const checkUser = async () => {
       try {
-        // Use Supabase directly for more reliable session check
-        const { data: { user } } = await supabase.auth.getUser();
-        
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
         if (!cancelled) {
           if (user) {
             const userEmail = user.email ?? null;
             setEmail(userEmail);
             setIsAdmin(hasAdminRole(user as SupabaseUserLike));
-            // Fetch phone verification only if email changed
             await fetchPhoneVerification(userEmail);
           } else {
             setEmail(null);
@@ -78,7 +97,7 @@ export default function UserMenu() {
             phoneVerificationFetched = false;
           }
         }
-      } catch (error) {
+      } catch {
         if (!cancelled) {
           setEmail(null);
           setIsAdmin(false);
@@ -88,17 +107,14 @@ export default function UserMenu() {
       }
     };
 
-    // Check immediately on mount
     checkUser();
 
-    // Listen for auth state changes from Supabase
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (!cancelled) {
         if (session?.user) {
           const userEmail = session.user.email ?? null;
           setEmail(userEmail);
           setIsAdmin(hasAdminRole(session.user as SupabaseUserLike));
-          // Fetch phone verification only if email changed
           fetchPhoneVerification(userEmail);
         } else {
           setEmail(null);
@@ -158,85 +174,95 @@ export default function UserMenu() {
       <div className="flex items-center gap-2">
         <Link
           href="/login"
-          className="rounded-xl border px-3 py-2 text-sm font-medium hover:bg-muted"
+          className="inline-flex h-10 items-center gap-2 rounded-md border border-border/80 bg-card px-3 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent"
         >
-          Войти
+          <LogIn className="h-4 w-4" aria-hidden="true" />
+          {t("nav.sign_in")}
         </Link>
         <Link
           href="/register"
-          className="rounded-xl border border-primary bg-primary px-3 py-2 text-sm font-medium text-white hover:opacity-90"
+          className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
         >
-          Регистрация
+          <UserPlus className="h-4 w-4" aria-hidden="true" />
+          {t("nav.join")}
         </Link>
       </div>
     );
   }
 
+  const accountLabel = email.split("@")[0] || t("nav.account");
+  const initials = accountLabel.slice(0, 2).toUpperCase();
   const showPhoneVerification = phoneVerified === false;
+  const menuLinks: MenuLink[] = [
+    { href: "/profile", label: t("common.profile"), icon: UserCircle },
+    { href: "/profile/adverts", label: t("nav.my_listings"), icon: ListChecks },
+    ...(showPhoneVerification
+      ? [{ href: "/profile/phone", label: t("nav.verify_phone"), icon: Phone, tone: "warning" as const }]
+      : []),
+    ...(isAdmin
+      ? [{ href: "/admin/reports", label: t("nav.admin_panel"), icon: LayoutDashboard }]
+      : []),
+  ];
 
   return (
     <div ref={containerRef} className="relative">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium hover:bg-muted"
+        className="flex h-10 items-center gap-2 rounded-md border border-border/80 bg-card px-2.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent"
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-label={t("nav.open_account_menu")}
       >
-        <span className="hidden sm:inline">{email}</span>
-        <span className="sm:hidden">Аккаунт</span>
-        <svg className="h-3 w-3 text-muted-foreground" viewBox="0 0 12 8" aria-hidden>
-          <path d="M10.59 1.59 6 6.17 1.41 1.59 0 3l6 6 6-6z" fill="currentColor" />
-        </svg>
+        <span className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-xs font-semibold text-primary">
+          {initials}
+        </span>
+        <span className="hidden max-w-36 truncate sm:inline">{accountLabel}</span>
+        <ChevronDown
+          className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")}
+          aria-hidden="true"
+        />
       </button>
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-50 mt-2 min-w-56 rounded-xl border bg-white p-2 shadow-lg"
+          className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-md border border-border/80 bg-popover p-1.5 text-popover-foreground shadow-xl"
         >
-          <Link
-            href="/profile"
-            onClick={closeMenu}
-            className="block rounded-lg px-3 py-2 text-sm hover:bg-muted"
-            role="menuitem"
-          >
-            Профиль
-          </Link>
-          <Link
-            href="/profile/adverts"
-            onClick={closeMenu}
-            className="block rounded-lg px-3 py-2 text-sm hover:bg-muted"
-            role="menuitem"
-          >
-            Мои объявления
-          </Link>
-          {showPhoneVerification && (
-            <Link
-              href="/profile/phone"
-              onClick={closeMenu}
-              className="block rounded-lg px-3 py-2 text-sm hover:bg-muted"
-              role="menuitem"
-            >
-              Верификация телефона
-            </Link>
-          )}
-          {isAdmin && (
-            <Link
-              href="/admin/reports"
-              onClick={closeMenu}
-              className="mt-1 block rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
-              role="menuitem"
-            >
-              Админ-панель
-            </Link>
-          )}
+          <div className="border-b border-border/70 px-3 py-2.5">
+            <p className="text-xs font-medium uppercase text-muted-foreground">{t("nav.signed_in_as")}</p>
+            <p className="truncate text-sm font-semibold">{email}</p>
+          </div>
+
+          <div className="py-1">
+            {menuLinks.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={closeMenu}
+                  className={cn(
+                    "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent",
+                    item.tone === "warning" && "text-amber-700 hover:bg-amber-50"
+                  )}
+                  role="menuitem"
+                >
+                  <Icon className="h-4 w-4" aria-hidden="true" />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+
           <button
             type="button"
             onClick={signOut}
-            className="mt-1 w-full rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
             role="menuitem"
           >
-            Выйти
+            <LogOut className="h-4 w-4" aria-hidden="true" />
+            {t("nav.sign_out")}
           </button>
         </div>
       )}

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { supabase } from "@/lib/supabaseClient";
 import { Loader2, Mail } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/lib/supabaseClient";
 
 type Props = {
   email: string;
@@ -22,12 +22,12 @@ export function VerifyEmailClient({ email }: Props) {
       });
 
       if (error) {
-        toast.error("Не удалось отправить письмо. Попробуйте позже");
+        toast.error("Could not send the email. Try again later.");
       } else {
-        toast.success("Письмо с подтверждением отправлено на " + email);
+        toast.success(`Verification email sent to ${email}.`);
       }
-    } catch (err) {
-      toast.error("Ошибка отправки письма");
+    } catch {
+      toast.error("Could not send the email.");
     } finally {
       setSending(false);
     }
@@ -35,28 +35,23 @@ export function VerifyEmailClient({ email }: Props) {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        Мы отправили письмо с подтверждением на <strong>{email}</strong>. 
-        Пожалуйста, проверьте вашу почту и перейдите по ссылке.
+      <p className="text-sm leading-6 text-muted-foreground">
+        We sent a verification email to <strong className="text-foreground">{email}</strong>.
+        Check your inbox and open the confirmation link.
       </p>
-      <Button
-        onClick={handleResendVerification}
-        disabled={sending}
-        variant="outline"
-      >
+      <Button onClick={handleResendVerification} disabled={sending} variant="outline">
         {sending ? (
           <>
-            <Loader2 className="mr-2 size-4 animate-spin" />
-            Отправка...
+            <Loader2 className="size-4 animate-spin" />
+            Sending...
           </>
         ) : (
           <>
-            <Mail className="mr-2 size-4" />
-            Отправить письмо повторно
+            <Mail className="size-4" />
+            Resend verification email
           </>
         )}
       </Button>
     </div>
   );
 }
-

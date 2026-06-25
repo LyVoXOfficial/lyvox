@@ -1,19 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { FaFacebook, FaGoogle } from "react-icons/fa";
+import { ArrowLeft, CheckCircle2, Loader2, Lock, Mail, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "sonner";
-import { loginSchema } from "@/lib/validations/auth";
 import { logger } from "@/lib/errorLogger";
-import { Loader2, Mail, Lock, Chrome } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { FaGoogle, FaFacebook, FaGithub } from "react-icons/fa";
+import { supabase } from "@/lib/supabaseClient";
+import { loginSchema } from "@/lib/validations/auth";
 
 function LoginPageInner() {
   const searchParams = useSearchParams();
@@ -26,18 +27,15 @@ function LoginPageInner() {
   const [rememberDevice, setRememberDevice] = useState(false);
   const [activeTab, setActiveTab] = useState<"password" | "magic-link">("password");
 
-  // Display errors from callback redirect
   const callbackError = searchParams.get("error");
   const callbackMessage = searchParams.get("message");
 
-  // Show callback errors on mount
   useEffect(() => {
     if (callbackError && callbackMessage) {
       toast.error(callbackMessage, { id: callbackError });
     }
   }, [callbackError, callbackMessage]);
 
-  // Real-time validation while typing (only after user touched the field)
   useEffect(() => {
     if (!touched || !email) {
       setValidationError(null);
@@ -53,16 +51,14 @@ function LoginPageInner() {
     }
   }, [email, touched]);
 
-  // Password login handler
-  const handlePasswordLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handlePasswordLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
     setLoading(true);
     setValidationError(null);
 
     try {
-      // Client-side validation
       const validationResult = loginSchema.safeParse({ email: email.trim() });
-      
+
       if (!validationResult.success) {
         const firstError = validationResult.error.issues[0];
         setValidationError(firstError.message);
@@ -71,8 +67,9 @@ function LoginPageInner() {
       }
 
       if (!password || password.length < 8) {
-        setValidationError("Пароль должен содержать минимум 8 символов");
-        toast.error("Пароль должен содержать минимум 8 символов");
+        const message = "Password must contain at least 8 characters.";
+        setValidationError(message);
+        toast.error(message);
         return;
       }
 
@@ -82,15 +79,14 @@ function LoginPageInner() {
       });
 
       if (error) {
-        // Handle specific Supabase errors
         if (error.message.includes("Invalid login credentials")) {
-          toast.error("Неверный email или пароль");
+          toast.error("The email or password is incorrect.");
         } else if (error.message.includes("Email not confirmed")) {
-          toast.error("Пожалуйста, подтвердите ваш email перед входом");
+          toast.error("Confirm your email before signing in.");
         } else if (error.message.includes("Too many requests")) {
-          toast.error("Слишком много попыток. Попробуйте позже");
+          toast.error("Too many attempts. Try again later.");
         } else {
-          toast.error("Ошибка входа. Попробуйте позже");
+          toast.error("Sign in failed. Try again later.");
         }
         logger.error("Password login failed", {
           component: "LoginPage",
@@ -102,31 +98,30 @@ function LoginPageInner() {
           error,
         });
       } else if (data.session) {
-        toast.success("Вход выполнен успешно");
+        toast.success("Signed in successfully.");
         const next = searchParams.get("next") ?? "/profile";
         router.push(next);
       }
-    } catch (err) {
+    } catch (error) {
       logger.error("Password login exception", {
         component: "LoginPage",
         action: "handlePasswordLogin",
-        error: err,
+        error,
       });
-      toast.error("Не удалось подключиться к серверу. Проверьте интернет-соединение");
+      toast.error("Could not reach the server. Check your internet connection.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Magic link login handler
-  const handleMagicLinkLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleMagicLinkLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
     setLoading(true);
     setValidationError(null);
 
     try {
       const validationResult = loginSchema.safeParse({ email: email.trim() });
-      
+
       if (!validationResult.success) {
         const firstError = validationResult.error.issues[0];
         setValidationError(firstError.message);
@@ -140,7 +135,7 @@ function LoginPageInner() {
 
       const { error } = await supabase.auth.signInWithOtp({
         email: validationResult.data.email,
-        options: { 
+        options: {
           emailRedirectTo: redirectUrl.toString(),
           shouldCreateUser: false,
           data: {
@@ -151,15 +146,15 @@ function LoginPageInner() {
 
       if (error) {
         if (error.message.includes("Email not confirmed")) {
-          toast.error("Пожалуйста, подтвердите ваш email перед входом");
+          toast.error("Confirm your email before signing in.");
         } else if (error.message.includes("Invalid email")) {
-          toast.error("Неверный формат email");
+          toast.error("Enter a valid email address.");
         } else if (error.message.includes("Too many requests")) {
-          toast.error("Слишком много попыток. Попробуйте позже");
+          toast.error("Too many attempts. Try again later.");
         } else if (error.message.includes("User not found")) {
-          toast.error("Пользователь не найден. Зарегистрируйтесь сначала");
+          toast.error("No account found for this email. Create an account first.");
         } else {
-          toast.error("Ошибка входа. Попробуйте позже");
+          toast.error("Sign in failed. Try again later.");
         }
         logger.error("Magic link login failed", {
           component: "LoginPage",
@@ -171,22 +166,21 @@ function LoginPageInner() {
           error,
         });
       } else {
-        toast.success("Ссылка для входа отправлена на email");
+        toast.success("Sign-in link sent. Check your email.");
       }
-    } catch (err) {
+    } catch (error) {
       logger.error("Magic link login exception", {
         component: "LoginPage",
         action: "handleMagicLinkLogin",
-        error: err,
+        error,
       });
-      toast.error("Не удалось подключиться к серверу. Проверьте интернет-соединение");
+      toast.error("Could not reach the server. Check your internet connection.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Social OAuth handler
-  const handleSocialLogin = async (provider: "google" | "facebook" | "github") => {
+  const handleSocialLogin = async (provider: "google" | "facebook") => {
     setLoading(true);
     try {
       const redirectUrl = new URL("/auth/callback", window.location.origin);
@@ -201,7 +195,7 @@ function LoginPageInner() {
       });
 
       if (error) {
-        toast.error(`Ошибка входа через ${provider}`);
+        toast.error(`Could not continue with ${provider}.`);
         logger.error("Social login failed", {
           component: "LoginPage",
           action: "handleSocialLogin",
@@ -209,14 +203,14 @@ function LoginPageInner() {
           error,
         });
       }
-    } catch (err) {
+    } catch (error) {
       logger.error("Social login exception", {
         component: "LoginPage",
         action: "handleSocialLogin",
         metadata: { provider },
-        error: err,
+        error,
       });
-      toast.error("Не удалось подключиться к серверу");
+      toast.error("Could not reach the server.");
     } finally {
       setLoading(false);
     }
@@ -226,206 +220,231 @@ function LoginPageInner() {
   const registerHref = next ? `/register?next=${encodeURIComponent(next)}` : "/register";
 
   return (
-    <div className="max-w-md space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold">Вход в аккаунт</h1>
-        <p className="text-sm text-muted-foreground">
-          Выберите способ входа в систему
-        </p>
-      </div>
-
-      {/* Social OAuth Buttons */}
-      <div className="space-y-3">
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={() => handleSocialLogin("google")}
-          disabled={loading}
-        >
-          <FaGoogle className="mr-2 size-4" />
-          Войти через Google
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={() => handleSocialLogin("facebook")}
-          disabled={loading}
-        >
-          <FaFacebook className="mr-2 size-4" />
-          Войти через Facebook
-        </Button>
-      </div>
-
-      {/* Divider */}
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-zinc-300 dark:border-zinc-700"></div>
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="bg-white dark:bg-zinc-950 px-2 text-zinc-500">или</span>
-        </div>
-      </div>
-
-      {/* Tabs for Password / Magic Link */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "password" | "magic-link")}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="password">
-            <Lock className="mr-2 size-4" />
-            Пароль
-          </TabsTrigger>
-          <TabsTrigger value="magic-link">
-            <Mail className="mr-2 size-4" />
-            Ссылка
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Password Tab */}
-        <TabsContent value="password" className="space-y-4">
-          <form onSubmit={handlePasswordLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email-password">Email адрес</Label>
-              <Input
-                id="email-password"
-                type="email"
-                placeholder="ваш-email@example.com"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                }}
-                onBlur={() => setTouched(true)}
-                required
-                disabled={loading}
-                aria-invalid={!!validationError}
-                aria-describedby={validationError ? "email-error" : undefined}
-              />
-              {validationError && (
-                <p id="email-error" className="text-sm text-red-600">
-                  {validationError}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Пароль</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Введите пароль"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={loading}
-                minLength={8}
-              />
-            </div>
-
-            <Button 
-              type="submit" 
-              disabled={loading || !!validationError} 
-              className="w-full"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                  Вход...
-                </>
-              ) : (
-                "Войти"
-              )}
-            </Button>
-          </form>
-        </TabsContent>
-
-        {/* Magic Link Tab */}
-        <TabsContent value="magic-link" className="space-y-4">
-          <form onSubmit={handleMagicLinkLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email-magic">Email адрес</Label>
-              <Input
-                id="email-magic"
-                type="email"
-                placeholder="ваш-email@example.com"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                }}
-                onBlur={() => setTouched(true)}
-                required
-                disabled={loading}
-                aria-invalid={!!validationError}
-                aria-describedby={validationError ? "email-error-magic" : undefined}
-              />
-              {validationError && (
-                <p id="email-error-magic" className="text-sm text-red-600">
-                  {validationError}
-                </p>
-              )}
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="remember-device"
-                checked={rememberDevice}
-                onCheckedChange={(checked) => setRememberDevice(checked === true)}
-                disabled={loading}
-              />
-              <label
-                htmlFor="remember-device"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Запомнить это устройство на 30 дней
-              </label>
-            </div>
-
-            <Button 
-              type="submit" 
-              disabled={loading || !!validationError} 
-              variant="outline" 
-              className="w-full"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                  Отправляем ссылку...
-                </>
-              ) : (
-                "Отправить ссылку на email"
-              )}
-            </Button>
-          </form>
-        </TabsContent>
-      </Tabs>
-
-      {/* Links */}
-      <div className="space-y-2 text-center text-sm">
-        <p className="text-zinc-600 dark:text-zinc-400">
-          Нет аккаунта?{" "}
-          <Link href={registerHref} className="font-medium underline hover:text-zinc-900 dark:hover:text-zinc-100">
-            Зарегистрироваться
-          </Link>
-        </p>
-        <p className="text-zinc-600 dark:text-zinc-400">
-          Забыли пароль?{" "}
-          <Link 
-            href="/auth/recovery" 
-            className="font-medium underline hover:text-zinc-900 dark:hover:text-zinc-100"
+    <main className="min-h-[calc(100vh-4rem)] bg-background">
+      <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-10 md:grid-cols-[minmax(0,1fr)_440px] md:py-16">
+        <section className="flex flex-col justify-center gap-6">
+          <Link
+            href="/"
+            className="inline-flex w-fit items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
-            Восстановить доступ
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Back to marketplace
           </Link>
-        </p>
+
+          <div className="max-w-xl space-y-4">
+            <div className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+              <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+              Protected account access
+            </div>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+              Sign in to manage listings, messages, and trusted payments.
+            </h1>
+            <p className="text-base leading-7 text-muted-foreground">
+              Use password, magic link, or OAuth. We keep account actions clear and route you back
+              to the exact marketplace task you started.
+            </p>
+          </div>
+
+          <div className="grid max-w-xl gap-3 sm:grid-cols-3">
+            {["Verified seller tools", "Saved listings", "Secure messages"].map((item) => (
+              <div key={item} className="flex items-center gap-2 rounded-md border border-border/70 bg-card px-3 py-2 text-sm">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <Card className="rounded-md border-border/80 shadow-lg shadow-black/5">
+          <CardHeader>
+            <CardTitle className="text-2xl">Sign in</CardTitle>
+            <CardDescription>Choose the fastest option available for your account.</CardDescription>
+          </CardHeader>
+
+          <CardContent className="space-y-6">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11"
+                onClick={() => handleSocialLogin("google")}
+                disabled={loading}
+              >
+                <FaGoogle className="size-4" />
+                Google
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11"
+                onClick={() => handleSocialLogin("facebook")}
+                disabled={loading}
+              >
+                <FaFacebook className="size-4" />
+                Facebook
+              </Button>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                <div className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">or continue with</span>
+              </div>
+            </div>
+
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "password" | "magic-link")}>
+              <TabsList className="grid h-10 w-full grid-cols-2 rounded-md">
+                <TabsTrigger value="password">
+                  <Lock className="size-4" />
+                  Password
+                </TabsTrigger>
+                <TabsTrigger value="magic-link">
+                  <Mail className="size-4" />
+                  Magic link
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="password" className="pt-4">
+                <form onSubmit={handlePasswordLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email-password">Email address</Label>
+                    <Input
+                      id="email-password"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(event) => {
+                        setEmail(event.target.value);
+                      }}
+                      onBlur={() => setTouched(true)}
+                      required
+                      disabled={loading}
+                      aria-invalid={!!validationError}
+                      aria-describedby={validationError ? "email-error" : undefined}
+                    />
+                    {validationError && (
+                      <p id="email-error" className="text-sm text-destructive">
+                        {validationError}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      required
+                      disabled={loading}
+                      minLength={8}
+                    />
+                  </div>
+
+                  <Button type="submit" disabled={loading || !!validationError} className="h-11 w-full">
+                    {loading ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin" />
+                        Signing in...
+                      </>
+                    ) : (
+                      "Sign in"
+                    )}
+                  </Button>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="magic-link" className="pt-4">
+                <form onSubmit={handleMagicLinkLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email-magic">Email address</Label>
+                    <Input
+                      id="email-magic"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(event) => {
+                        setEmail(event.target.value);
+                      }}
+                      onBlur={() => setTouched(true)}
+                      required
+                      disabled={loading}
+                      aria-invalid={!!validationError}
+                      aria-describedby={validationError ? "email-error-magic" : undefined}
+                    />
+                    {validationError && (
+                      <p id="email-error-magic" className="text-sm text-destructive">
+                        {validationError}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-start gap-3 rounded-md border border-border/70 bg-muted/40 p-3">
+                    <Checkbox
+                      id="remember-device"
+                      checked={rememberDevice}
+                      onCheckedChange={(checked) => setRememberDevice(checked === true)}
+                      disabled={loading}
+                    />
+                    <label htmlFor="remember-device" className="text-sm leading-5 text-muted-foreground">
+                      Remember this device for 30 days after the email link sign-in.
+                    </label>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={loading || !!validationError}
+                    variant="outline"
+                    className="h-11 w-full"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin" />
+                        Sending link...
+                      </>
+                    ) : (
+                      "Send sign-in link"
+                    )}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+
+            <div className="space-y-2 border-t border-border pt-4 text-center text-sm">
+              <p className="text-muted-foreground">
+                New to LyVoX?{" "}
+                <Link href={registerHref} className="font-medium text-primary underline-offset-4 hover:underline">
+                  Create an account
+                </Link>
+              </p>
+              <p className="text-muted-foreground">
+                Forgot your password?{" "}
+                <Link href="/auth/recovery" className="font-medium text-primary underline-offset-4 hover:underline">
+                  Recover access
+                </Link>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </main>
   );
 }
 
 export default function LoginPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
-      <Suspense fallback={<p>Загрузка...</p>}>
-        <LoginPageInner />
-      </Suspense>
-    </main>
+    <Suspense
+      fallback={
+        <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center text-sm text-muted-foreground">
+          Loading sign-in...
+        </main>
+      }
+    >
+      <LoginPageInner />
+    </Suspense>
   );
 }

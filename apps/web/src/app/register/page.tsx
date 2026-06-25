@@ -15,8 +15,10 @@ export default async function RegisterPage({ searchParams }: PageProps) {
   const initialLocale: Locale = fromQuery ?? resolveFromAcceptLanguage(acceptLanguage);
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 py-12">
-      <RegisterForm initialLocale={initialLocale} />
-    </div>
+    <main className="min-h-[calc(100vh-4rem)] bg-background">
+      <div className="mx-auto w-full max-w-3xl px-4 py-10 md:py-16">
+        <RegisterForm initialLocale={initialLocale} />
+      </div>
+    </main>
   );
 }

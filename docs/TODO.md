@@ -8,15 +8,15 @@
 - [ ] Expand automated API tests to cover happy/error-paths described in `docs/API_REFERENCE.md`.
 - [ ] Capture and validate Recupel membership IDs for commercial sellers before allowing electronic listings (WEEE compliance, 2025-03-29).
 - [x] Implement cascading make/model/year selectors for Transport listings using `seed/transport_make_model.csv`, require mileage & condition inputs, and surface a dedicated EV subcategory. (2025-01-XX: Полностью переработана форма создания объявлений с 8 шагами, включая автокомплит марки, каскадные селекторы модели/года/кузова, технические параметры, опции, верификацию телефона)
-- [ ] Ship migrations for `conversations`, `conversation_participants`, `messages`, refresh `supabase/types/database.types.ts`, and sync domain docs for realtime chat.
-- [ ] Expose chat server actions or `/api/chat/*` endpoints that enforce participant membership, rely on `supabaseService()` server-side only, and apply rate limiting on send.
+- [x] Ship migrations for `conversations`, `conversation_participants`, `messages` (`supabase/migrations/20251108120000_chat_tables.sql`, `20251108120100_chat_rls.sql`), refresh types, and sync domain docs for realtime chat.
+- [x] Expose `/api/chat/*` endpoints that enforce participant membership, rely on `supabaseService()` server-side only, and apply rate limiting on send (`chat/start`, `chat/send`, `chat/history`, `chat/read`).
 - [ ] Deliver client-only chat UI (`ChatWindow.tsx`) with Supabase Realtime subscription lifecycle (subscribe/retry/unsubscribe) and optimistic message handling.
 - [ ] Add QA coverage: preview smoke-test for realtime chat, reconnection scenarios, and Sentry alerting for channel/system errors.
 - [ ] Notifications for chat: define event→channel matrix (email/push), templates, and delivery logs; implement dedupe + quiet hours.
 - [ ] Retention policy for chat: TTLs, DSAR export, soft-delete + cron cleanup for expired messages/conversations.
 - [ ] Moderation integration: message-level reports, auto-mute rules, admin review surfaces.
 
-_No undocumented or deprecated API routes were detected during the 2025-10-05 audit._
+_API surface re-documented on 2026-06-25: `docs/API_REFERENCE.md` now covers all ~58 route files (the prior 2025-10-05 note claiming "no undocumented routes" was inaccurate — most of the chat/billing/notifications/media/catalog surface had been undocumented). Security review of the same surface: `docs/SECURITY_AUDIT.md`._
 
 - [x] Add consent management UI in profile settings (toggle marketing opt-in, export history).
 - [x] Add automated tests for `/api/auth/register` and onboarding redirects.
@@ -51,5 +51,7 @@ _No undocumented or deprecated API routes were detected during the 2025-10-05 au
 
 ## Known Issues
 
-- ESLint configuration is currently facing a circular dependency issue and is partially disabled.
-- Pre-commit hooks are failing due to a test failure in `RegisterForm.test.tsx`.
+- [resolved 2026-06-05] `pnpm lint` passes; no ESLint circular dependency failure reproduced during the project audit.
+- [resolved 2026-06-05] `pnpm test` passes, including `RegisterForm.test.tsx`.
+- `pnpm test` still emits React `act(...)` warnings in catalog component tests; treat as cleanup, not a current blocker.
+- `pnpm lint` emits a `baseline-browser-mapping` freshness warning; update the dev dependency when doing dependency maintenance.

@@ -24,7 +24,7 @@ export default function AdvertDetails({
   }
 
   return (
-    <section className="space-y-6 rounded-lg border p-4">
+    <section className="space-y-6 rounded-md border border-border/80 bg-card p-4 shadow-sm">
       {hasDetails ? (
         <div>
           <h2 className="mb-3 text-lg font-medium">{title}</h2>
@@ -59,4 +59,3 @@ export default function AdvertDetails({
     </section>
   );
 }
-

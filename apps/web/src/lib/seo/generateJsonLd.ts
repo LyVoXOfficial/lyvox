@@ -9,7 +9,6 @@ const stringifyJsonLd = (data: JsonLdInput): string => {
     return JSON.stringify(data, null, JSON_SPACE);
   } catch (error) {
     if (process.env.NODE_ENV !== "production") {
-      // eslint-disable-next-line no-console
       console.warn("[seo] Failed to stringify JSON-LD payload", error);
     }
     return "{}";
@@ -26,4 +25,3 @@ export const getJsonLdScriptProps = (
 });
 
 export type { JsonLdInput };
-

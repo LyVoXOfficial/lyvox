@@ -1,120 +1,84 @@
-/**
- * BiometricLoginButton - кнопка для входа через биометрию
- * 
- * Показывает кнопку "Войти с биометрией", которая запускает процесс
- * верификации через Touch ID, Face ID, Windows Hello и т.д.
- * 
- * @example
- * <BiometricLoginButton 
- *   onSuccess={() => router.push("/profile")}
- *   variant="outline"
- * />
- */
-
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { Fingerprint, Loader2, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useWebAuthn } from "@/hooks/useWebAuthn";
-import { toast } from "sonner";
-import { Fingerprint, Loader2, ShieldCheck } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 
-// ============================================================================
-// Types
-// ============================================================================
-
 export interface BiometricLoginButtonProps {
-  /** Callback при успешной верификации */
   onSuccess?: () => void;
-  /** Callback при ошибке */
   onError?: (error: Error) => void;
-  /** Вариант кнопки */
   variant?: "default" | "outline" | "secondary" | "ghost";
-  /** Размер кнопки */
   size?: "default" | "sm" | "lg" | "icon";
-  /** Дополнительные CSS классы */
   className?: string;
-  /** Текст кнопки (по умолчанию из локализации) */
-  children?: React.ReactNode;
-  /** Локаль для сообщений */
+  children?: ReactNode;
   locale?: Locale;
-  /** Показывать ли иконку */
   showIcon?: boolean;
-  /** Автоматически перенаправлять после успеха */
   redirectTo?: string;
-  /** ID конкретного фактора для верификации (если не указан, используется первый доступный) */
   factorId?: string;
-  /** Автоматически запустить верификацию при монтировании */
   autoVerify?: boolean;
 }
 
-// ============================================================================
-// Messages
-// ============================================================================
-
 const messages = {
   en: {
-    button: "Sign in with Biometric",
+    button: "Sign in with passkey",
     verifying: "Verifying...",
-    success: "Successfully verified!",
-    notSupported: "Your browser doesn't support biometric authentication",
-    notAvailable: "No biometric authenticator available",
-    noCredentials: "No biometric keys registered. Please add one first",
+    success: "Identity verified",
+    notSupported: "This browser does not support passkeys",
+    notAvailable: "No platform authenticator is available",
+    noCredentials: "No passkeys are registered for this account",
     cancelled: "Verification cancelled",
     failed: "Verification failed",
-    genericError: "Failed to verify",
+    genericError: "Could not verify passkey",
   },
   nl: {
-    button: "Inloggen met biometrie",
-    verifying: "Verifiëren...",
-    success: "Succesvol geverifieerd!",
-    notSupported: "Uw browser ondersteunt geen biometrische authenticatie",
-    notAvailable: "Geen biometrische authenticator beschikbaar",
-    noCredentials: "Geen biometrische sleutels geregistreerd. Voeg er eerst een toe",
+    button: "Inloggen met passkey",
+    verifying: "Verifieren...",
+    success: "Identiteit geverifieerd",
+    notSupported: "Deze browser ondersteunt geen passkeys",
+    notAvailable: "Geen platform-authenticator beschikbaar",
+    noCredentials: "Er zijn geen passkeys voor dit account geregistreerd",
     cancelled: "Verificatie geannuleerd",
     failed: "Verificatie mislukt",
-    genericError: "Verificatie mislukt",
+    genericError: "Kan passkey niet verifieren",
   },
   fr: {
-    button: "Se connecter avec la biométrie",
-    verifying: "Vérification...",
-    success: "Vérifié avec succès !",
-    notSupported: "Votre navigateur ne prend pas en charge l'authentification biométrique",
-    notAvailable: "Aucun authentificateur biométrique disponible",
-    noCredentials: "Aucune clé biométrique enregistrée. Veuillez en ajouter une d'abord",
-    cancelled: "Vérification annulée",
-    failed: "Échec de la vérification",
-    genericError: "Échec de la vérification",
+    button: "Se connecter avec une passkey",
+    verifying: "Verification...",
+    success: "Identite verifiee",
+    notSupported: "Ce navigateur ne prend pas en charge les passkeys",
+    notAvailable: "Aucun authentificateur de plateforme disponible",
+    noCredentials: "Aucune passkey n'est enregistree pour ce compte",
+    cancelled: "Verification annulee",
+    failed: "Verification echouee",
+    genericError: "Impossible de verifier la passkey",
   },
   ru: {
-    button: "Войти с биометрией",
-    verifying: "Проверка...",
-    success: "Успешно верифицировано!",
-    notSupported: "Ваш браузер не поддерживает биометрическую авторизацию",
-    notAvailable: "Нет доступного биометрического аутентификатора",
-    noCredentials: "Нет зарегистрированных биометрических ключей. Сначала добавьте один",
-    cancelled: "Верификация отменена",
-    failed: "Верификация не удалась",
-    genericError: "Не удалось выполнить верификацию",
+    button: "Sign in with passkey",
+    verifying: "Verifying...",
+    success: "Identity verified",
+    notSupported: "This browser does not support passkeys",
+    notAvailable: "No platform authenticator is available",
+    noCredentials: "No passkeys are registered for this account",
+    cancelled: "Verification cancelled",
+    failed: "Verification failed",
+    genericError: "Could not verify passkey",
   },
   de: {
-    button: "Mit Biometrie anmelden",
-    verifying: "Überprüfung...",
-    success: "Erfolgreich verifiziert!",
-    notSupported: "Ihr Browser unterstützt keine biometrische Authentifizierung",
-    notAvailable: "Kein biometrischer Authentifikator verfügbar",
-    noCredentials: "Keine biometrischen Schlüssel registriert. Bitte fügen Sie zuerst einen hinzu",
-    cancelled: "Überprüfung abgebrochen",
-    failed: "Überprüfung fehlgeschlagen",
-    genericError: "Überprüfung fehlgeschlagen",
+    button: "Mit Passkey anmelden",
+    verifying: "Pruefung...",
+    success: "Identitaet verifiziert",
+    notSupported: "Dieser Browser unterstuetzt keine Passkeys",
+    notAvailable: "Kein Plattform-Authenticator verfuegbar",
+    noCredentials: "Fuer dieses Konto sind keine Passkeys registriert",
+    cancelled: "Pruefung abgebrochen",
+    failed: "Pruefung fehlgeschlagen",
+    genericError: "Passkey konnte nicht verifiziert werden",
   },
-};
-
-// ============================================================================
-// Component
-// ============================================================================
+} satisfies Record<Locale, Record<string, string>>;
 
 export function BiometricLoginButton({
   onSuccess,
@@ -132,20 +96,15 @@ export function BiometricLoginButton({
   const router = useRouter();
   const [isVerifying, setIsVerifying] = useState(false);
   const [hasAutoVerified, setHasAutoVerified] = useState(false);
+  const copy = messages[locale] ?? messages.en;
 
-  const {
-    isSupported,
-    isPlatformAvailable,
-    credentials,
-    isLoading,
-    verify,
-  } = useWebAuthn({
+  const { isSupported, isPlatformAvailable, credentials, isLoading, verify } = useWebAuthn({
     autoLoad: true,
     onVerifySuccess: () => {
-      toast.success(messages[locale].success, {
-        icon: <ShieldCheck className="size-4" />,
+      toast.success(copy.success, {
+        icon: <ShieldCheck className="size-4" aria-hidden="true" />,
       });
-      
+
       if (onSuccess) {
         onSuccess();
       } else if (redirectTo) {
@@ -153,21 +112,20 @@ export function BiometricLoginButton({
       }
     },
     onError: (error) => {
-      // Обработка конкретных типов ошибок
       switch (error.type) {
         case "NOT_SUPPORTED":
-          toast.error(messages[locale].notSupported);
+          toast.error(copy.notSupported);
           break;
         case "USER_CANCELLED":
-          toast.error(messages[locale].cancelled);
+          toast.error(copy.cancelled);
           break;
         case "VERIFICATION_FAILED":
-          toast.error(messages[locale].failed, {
+          toast.error(copy.failed, {
             description: error.message,
           });
           break;
         default:
-          toast.error(messages[locale].genericError, {
+          toast.error(copy.genericError, {
             description: error.message,
           });
       }
@@ -175,7 +133,31 @@ export function BiometricLoginButton({
     },
   });
 
-  // Автоматическая верификация при монтировании
+  const handleVerify = useCallback(async () => {
+    if (!isSupported) {
+      toast.error(copy.notSupported);
+      return;
+    }
+
+    if (!isPlatformAvailable) {
+      toast.error(copy.notAvailable);
+      return;
+    }
+
+    if (credentials.length === 0) {
+      toast.error(copy.noCredentials);
+      return;
+    }
+
+    setIsVerifying(true);
+
+    try {
+      await verify(factorId);
+    } finally {
+      setIsVerifying(false);
+    }
+  }, [copy, credentials.length, factorId, isPlatformAvailable, isSupported, verify]);
+
   useEffect(() => {
     if (
       autoVerify &&
@@ -188,47 +170,24 @@ export function BiometricLoginButton({
       setHasAutoVerified(true);
       void handleVerify();
     }
-  }, [autoVerify, hasAutoVerified, isLoading, isSupported, isPlatformAvailable, credentials]);
+  }, [
+    autoVerify,
+    credentials.length,
+    handleVerify,
+    hasAutoVerified,
+    isLoading,
+    isPlatformAvailable,
+    isSupported,
+  ]);
 
-  // Обработчик клика
-  const handleVerify = async () => {
-    // Проверка поддержки
-    if (!isSupported) {
-      toast.error(messages[locale].notSupported);
-      return;
-    }
-
-    if (!isPlatformAvailable) {
-      toast.error(messages[locale].notAvailable);
-      return;
-    }
-
-    // Проверка наличия зарегистрированных ключей
-    if (credentials.length === 0) {
-      toast.error(messages[locale].noCredentials);
-      return;
-    }
-
-    setIsVerifying(true);
-
-    try {
-      // Запускаем верификацию
-      await verify(factorId);
-    } finally {
-      setIsVerifying(false);
-    }
-  };
-
-  // Если браузер не поддерживает, не показываем кнопку
   if (!isSupported) {
     return null;
   }
 
-  // Если нет зарегистрированных ключей и это не autoVerify, показываем disabled кнопку
-  const isDisabled = 
-    isVerifying || 
-    isLoading || 
-    !isPlatformAvailable || 
+  const isDisabled =
+    isVerifying ||
+    isLoading ||
+    !isPlatformAvailable ||
     credentials.length === 0;
 
   return (
@@ -241,37 +200,22 @@ export function BiometricLoginButton({
     >
       {isVerifying ? (
         <>
-          <Loader2 className="size-4 animate-spin" />
-          {messages[locale].verifying}
+          <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+          {copy.verifying}
         </>
       ) : isLoading ? (
         <>
-          <Loader2 className="size-4 animate-spin" />
+          <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           Loading...
         </>
       ) : (
         <>
-          {showIcon && <Fingerprint className="size-4" />}
-          {children || messages[locale].button}
+          {showIcon && <Fingerprint className="size-4" aria-hidden="true" />}
+          {children || copy.button}
         </>
       )}
     </Button>
   );
 }
 
-// ============================================================================
-// Default Export
-// ============================================================================
-
 export default BiometricLoginButton;
-
-
-
-
-
-
-
-
-
-
-

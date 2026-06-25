@@ -1,52 +1,40 @@
 import { z } from "zod";
 
-/**
- * Email validation pattern
- */
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/**
- * Password validation: at least 8 characters, 3 of 4 character classes
- * (uppercase, lowercase, number, symbol)
- */
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$|^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$|^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$|^(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$|^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+const passwordRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$|^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$|^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$|^(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$|^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 
-/**
- * Schema for email login (POST /api/auth/login or OTP)
- */
 export const loginSchema = z.object({
   email: z
     .string()
     .trim()
     .toLowerCase()
-    .min(1, "Пожалуйста, введите ваш email")
-    .regex(emailPattern, "Введите корректный email адрес (например: user@example.com)"),
+    .min(1, "Enter your email address.")
+    .regex(emailPattern, "Enter a valid email address, for example user@example.com."),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;
 
-/**
- * Schema for user registration (POST /api/auth/register)
- */
 export const registerSchema = z
   .object({
     email: z
       .string()
       .trim()
       .toLowerCase()
-      .min(1, "Пожалуйста, введите email")
-      .regex(emailPattern, "Введите корректный email адрес (например: user@example.com)"),
-    
+      .min(1, "Enter your email address.")
+      .regex(emailPattern, "Enter a valid email address, for example user@example.com."),
+
     password: z
       .string()
-      .min(8, "Пароль должен содержать минимум 8 символов")
+      .min(8, "Password must contain at least 8 characters.")
       .regex(
         passwordRegex,
-        "Пароль должен содержать минимум 3 из: заглавные буквы, строчные буквы, цифры, символы",
+        "Password must include at least 3 of: uppercase letters, lowercase letters, numbers, symbols.",
       ),
-    
-    confirmPassword: z.string().min(1, "Пожалуйста, подтвердите пароль"),
-    
+
+    confirmPassword: z.string().min(1, "Confirm your password."),
+
     consents: z
       .object({
         terms: z.boolean(),
@@ -54,23 +42,22 @@ export const registerSchema = z
         marketing: z.boolean().optional(),
       })
       .refine((data) => data.terms === true, {
-        message: "Необходимо принять условия использования",
+        message: "Accept the Terms of Service to continue.",
         path: ["terms"],
       })
       .refine((data) => data.privacy === true, {
-        message: "Необходимо принять политику конфиденциальности",
+        message: "Accept the Privacy Policy to continue.",
         path: ["privacy"],
       }),
-    
+
     locale: z
       .string()
-      .regex(/^(en|nl|fr|ru|de)$/i, "Язык должен быть одним из: en, nl, fr, ru, de")
+      .regex(/^(en|nl|fr|ru|de)$/i, "Language must be one of: en, nl, fr, ru, de.")
       .optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Пароли не совпадают",
+    message: "Passwords do not match.",
     path: ["confirmPassword"],
   });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
-

@@ -3,7 +3,41 @@
     "title": "LyVoX",
     "description": "Marktplaats voor goederen, diensten en vastgoed"
   },
+  "nav": {
+    "sign_in": "Inloggen",
+    "join": "Aanmelden",
+    "sign_out": "Uitloggen",
+    "account": "Account",
+    "signed_in_as": "Aangemeld als",
+    "my_listings": "Mijn advertenties",
+    "verify_phone": "Telefoon verifiëren",
+    "admin_panel": "Beheerpaneel",
+    "trust_first": "Vertrouwen voorop",
+    "open_account_menu": "Accountmenu openen"
+  },
+  "topbar": {
+    "verified_signals": "Geverifieerde verkoperssignalen",
+    "anti_scam": "Anti-fraude moderatie",
+    "belgian_deals": "Gemaakt voor lokale Belgische deals"
+  },
+  "infocards": {
+    "verified_title": "Geverifieerde verkoperssignalen",
+    "verified_body": "Telefoon- en e-mailverificatie maken risicovolle advertenties makkelijker te herkennen.",
+    "verified_action": "Bekijk geverifieerd",
+    "payment_title": "Klaar voor lokale betalingen",
+    "payment_body": "Facturatie is ingesteld om Belgische betaalmethoden via providerinstellingen te ondersteunen.",
+    "payment_action": "Facturatie bekijken",
+    "report_title": "Meld verdachte deals",
+    "report_body": "Houd gesprekken over betaling en verzending waar mogelijk binnen LyVoX.",
+    "report_action": "Contacteer support"
+  },
+  "footer": {
+    "tagline": "Op België gerichte marktplaats voor lokale advertenties, geverifieerde verkopers en veiligere gesprekken.",
+    "browse_listings": "Advertenties bekijken",
+    "post_listing": "Plaats een advertentie"
+  },
   "common": {
+    "more": "Meer",
     "language": "Taal",
     "search": "Zoek advertenties",
     "find": "Zoeken",
@@ -75,6 +109,17 @@
     "error": "Er is een fout opgetreden"
   },
   "home": {
+    "hero_tag": "LyVoX België marktplaats",
+    "hero_title": "Vind lokale deals met sterkere vertrouwenssignalen.",
+    "hero_subtitle": "Zoek Belgische advertenties, vergelijk verkopers en houd riskante gesprekken binnen het platform.",
+    "qa_transport": "Transport",
+    "qa_electronics": "Elektronica",
+    "qa_verified": "Geverifieerde verkopers",
+    "qa_free": "Gratis advertenties",
+    "stat_active": "actieve advertenties geladen",
+    "stat_free": "gratis advertenties getoond",
+    "stat_verified": "verkopersprofielen geverifieerd in recente resultaten",
+    "post_listing": "Plaats een advertentie",
     "free_ads": "Gratis advertenties",
     "latest": "Nieuwste advertenties",
     "top_sellers_and_adverts": "Top Verkopers & Advertenties",

@@ -46,8 +46,11 @@ export interface SEOMetadata {
  * Generate canonical URL
  */
 export function generateCanonicalUrl(advertId: string, slug: string): string {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lyvox.be';
-  return `${baseUrl}/adverts/${advertId}/${slug}`;
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    'https://lyvox.be';
+  return `${baseUrl}/ad/${advertId}/${slug}`;
 }
 
 /**
@@ -98,4 +101,3 @@ export function generateBaseThing(data: BaseAdvertData) {
     } : undefined,
   };
 }
-

@@ -6,10 +6,12 @@ import type { Category } from "@/lib/types";
 import { supabase } from "@/lib/supabaseClient";
 import { getCategoryIcon } from "@/lib/categoryIcons";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useI18n } from "@/i18n";
 
 type Item = Category;
 
 export default function CategoriesCarousel() {
+  const { locale } = useI18n();
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -37,56 +39,65 @@ export default function CategoriesCarousel() {
   };
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">Загрузка категорий…</p>;
+    return <p className="text-sm text-muted-foreground">Loading categories...</p>;
   }
 
   if (!items.length) {
-    return <p className="text-sm text-muted-foreground">Категории временно недоступны.</p>;
+    return <p className="text-sm text-muted-foreground">Categories are temporarily unavailable.</p>;
   }
 
   return (
     <div className="relative">
       <button
         type="button"
-        aria-label="Назад"
+        aria-label="Previous categories"
         onClick={() => scrollBy(-240)}
-        className="absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow hover:bg-white"
+        className="absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full border bg-card/90 p-2 shadow-sm backdrop-blur hover:bg-card"
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory px-10 py-2"
+        className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-10 py-2"
       >
         {items.map((cat) => {
           const Icon = getCategoryIcon(cat.icon, cat.level);
+          const label =
+            locale === "nl"
+              ? cat.name_nl
+              : locale === "fr"
+                ? cat.name_fr
+                : locale === "de"
+                  ? cat.name_de
+                  : locale === "ru"
+                    ? cat.name_ru
+                    : cat.name_en;
           return (
             <Link
               key={cat.slug}
               href={`/c/${cat.path}`}
-              className="snap-start flex w-28 flex-col items-center gap-2 rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md"
+              className="group flex w-32 snap-start flex-col items-center gap-2.5 rounded-xl border border-border/70 bg-card p-4 shadow-[var(--shadow-soft)] transition duration-200 hover:-translate-y-1 hover:border-primary/30 hover:shadow-[var(--shadow-card)]"
             >
-              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 text-zinc-600">
+              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary text-primary transition-colors duration-200 group-hover:bg-primary group-hover:text-primary-foreground">
                 <Icon className="h-5 w-5" aria-hidden />
               </span>
-              <span className="text-center text-xs font-medium text-zinc-900">
-                {cat.name_ru}
+              <span className="line-clamp-2 min-h-8 text-center text-xs font-semibold leading-tight text-foreground group-hover:text-primary">
+                {label || cat.name_en || cat.name_ru}
               </span>
-              <span className="text-center text-[10px] text-zinc-500">Показать</span>
             </Link>
           );
         })}
       </div>
       <button
         type="button"
-        aria-label="Вперёд"
+        aria-label="Next categories"
         onClick={() => scrollBy(240)}
-        className="absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow hover:bg-white"
+        className="absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded-full border bg-card/90 p-2 shadow-sm backdrop-blur hover:bg-card"
       >
         <ChevronRight className="h-4 w-4" />
       </button>
-      <div className="pointer-events-none absolute inset-y-0 left-6 w-16 bg-gradient-to-r from-white" />
-      <div className="pointer-events-none absolute inset-y-0 right-6 w-16 bg-gradient-to-l from-white" />
+      <div className="pointer-events-none absolute inset-y-0 left-6 w-10 bg-gradient-to-r from-background" />
+      <div className="pointer-events-none absolute inset-y-0 right-6 w-10 bg-gradient-to-l from-background" />
     </div>
   );
 }

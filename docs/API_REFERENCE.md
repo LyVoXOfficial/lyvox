@@ -1,693 +1,497 @@
 # LyVoX API Reference
 
-This reference covers every API Route under `apps/web/src/app/api`. All JSON responses are UTF-8 encoded. Authenticated requests must include the Supabase session cookies (`sb:token`, `sb:refreshToken`) issued by Supabase Auth.
+> Generated from source code on 2026-06-25. Documents all **58 route handler files** (`src/app/api/**/route.ts`) in the LyVoX Next.js App Router, yielding ~63 endpoint operations.
 
-> **Admin note:** Admin-only endpoints require a Supabase session whose JWT exposes `app_metadata.role = 'admin'`. Next.js handlers verify this claim before running service-role database calls.
+## Conventions
 
-## GET /api/me
+**Standard envelope.** Most endpoints use helpers from `src/lib/apiErrors.ts`:
+- Success: `{ "ok": true, "data": <payload> }` (the **Response** payloads below are the contents of `data` unless noted).
+- Error: `{ "ok": false, "error": "<CODE>", "detail"?: "<string>" }` with an appropriate HTTP status (400/401/403/404/409/429/500).
 
-- **Purpose:** Return the current Supabase session plus profile, consent, and phone verification state.
-- **Authentication:** Supabase session cookie (optional). Unauthenticated users receive all fields set to `null`/`false`.
-- **Request body:** Not used.
-- **Response schema:**
+**Deviations** (flagged per-endpoint): the `catalog/*` routes return bare arrays/objects with a `{ "error": "<message>" }` error shape; `auth/check-email`, `locale`, and `catalog/schema` return custom top-level shapes; the `moderation/*` routes hand-build `{ ok, data }` / `{ ok, error }` (shape-conformant, not via the helpers).
 
-```json
-{
-  "type": "object",
-  "properties": {
-    "user": {
-      "anyOf": [
-        { "type": "object" },
-        { "type": "null" }
-      ]
-    },
-    "profile": {
-      "anyOf": [
-        { "type": "object" },
-        { "type": "null" }
-      ]
-    },
-    "phone": {
-      "anyOf": [
-        { "type": "object" },
-        { "type": "null" }
-      ]
-    },
-    "verifiedPhone": { "type": "boolean" },
-    "verifiedEmail": { "type": "boolean" },
-    "consents": {
-      "anyOf": [
-        { "type": "object" },
-        { "type": "null" }
-      ]
-    }
-  },
-  "required": [
-    "user",
-    "profile",
-    "phone",
-    "verifiedPhone",
-    "verifiedEmail",
-    "consents"
-  ],
-  "additionalProperties": false
-}
-```
+**Auth.** "user" means the handler calls `supabase.auth.getUser()` and returns 401 if absent. Some routes call `getUser()` but do **not** 401 — they return a public/empty payload for anonymous callers; these are marked **none (optional)**. "admin" means `hasAdminRole(user)` is required (checks `app_metadata.role`/`roles` == `admin`; 403 otherwise).
 
-- **Notes:** `consents` returns the latest snapshot saved in `profiles.consents` (`terms`, `privacy`, `marketing` objects with `accepted`, `accepted_at`, `version`).
-- **Errors:** None (always 200).
-- **curl:**
-
-```bash
-curl -X GET https://localhost:3000/api/me \
-  --cookie "sb:token=YOUR_ACCESS_TOKEN; sb:refreshToken=YOUR_REFRESH_TOKEN"
-```
-
-## POST /api/auth/signout
-
-- **Purpose:** Terminate the current Supabase session.
-- **Authentication:** Supabase session cookie required.
-- **Request schema:** _No body._
-- **Response schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "ok": { "const": true }
-  },
-  "required": ["ok"],
-  "additionalProperties": false
-}
-```
-
-- **Error codes:** None (always 200; Supabase errors surface via server logs).
-- **curl:**
-
-```bash
-curl -X POST https://localhost:3000/api/auth/signout \
-  --cookie "sb:token=YOUR_ACCESS_TOKEN" \
-  -H "Content-Length: 0"
-```
-
-## POST /api/auth/register
-
-- **Purpose:** Register a new user, persist profile consent metadata, and trigger Supabase email verification.
-- **Authentication:** Public (no session required).
-- **Rate limits:** Not enforced at the API layer; rely on Supabase abuse controls.
-- **Request schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "email": { "type": "string", "format": "email" },
-    "password": { "type": "string", "minLength": 8 },
-    "confirmPassword": { "type": "string", "minLength": 8 },
-    "consents": {
-      "type": "object",
-      "properties": {
-        "terms": { "type": "boolean" },
-        "privacy": { "type": "boolean" },
-        "marketing": { "type": "boolean" }
-      },
-      "required": ["terms", "privacy"],
-      "additionalProperties": false
-    },
-    "locale": { "type": "string", "enum": ["en", "fr", "nl", "ru"], "default": "en" }
-  },
-  "required": ["email", "password", "confirmPassword", "consents"],
-  "additionalProperties": false
-}
-```
-
-- **Response schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "ok": { "const": true },
-    "verificationRequired": { "type": "boolean" }
-  },
-  "required": ["ok", "verificationRequired"],
-  "additionalProperties": false
-}
-```
-
-- **Error codes:**
-  - `400 INVALID_JSON` – request body is not valid JSON.
-  - `400 INVALID_EMAIL` – email fails validation.
-  - `400 WEAK_PASSWORD` – password does not satisfy complexity rules.
-  - `400 PASSWORD_MISMATCH` – confirmation does not match password.
-  - `400 CONSENT_REQUIRED` – mandatory GDPR consents not accepted.
-  - `400 SIGNUP_FAILED` – Supabase returned an unexpected error (see `detail`).
-  - `409 EMAIL_IN_USE` – Supabase reports an existing user for the email.
-  - `500 SERVICE_ROLE_MISSING` – service-role key not configured on the backend.
-  - `500 PROFILE_UPSERT_FAILED` – unable to persist the initial `profiles` record.
-  - `500 SIGNUP_INCOMPLETE` – Supabase did not return a user identifier.
-
-- **curl:**
-
-```bash
-curl -X POST https://localhost:3000/api/auth/register   -H "Content-Type: application/json"   -d '{
-    "email": "founder@example.com",
-    "password": "SecureP@ssw0rd",
-    "confirmPassword": "SecureP@ssw0rd",
-    "consents": { "terms": true, "privacy": true, "marketing": false },
-    "locale": "en"
-  }'
-```
-
-
-
-## POST /api/profile/update
-
-- **Purpose:** Upsert the authenticated user's profile display name.
-- **Authentication:** Supabase session cookie required.
-- **Request schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "display_name": { "type": "string", "maxLength": 80 }
-  },
-  "required": ["display_name"],
-  "additionalProperties": false
-}
-```
-
-- **Response schema (success):**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "ok": { "const": true }
-  },
-  "required": ["ok"],
-  "additionalProperties": false
-}
-```
-
-- **Error codes:**
-  - `401 UNAUTH`: `{ "ok": false, "error": "UNAUTH" }`
-  - `400 BAD REQUEST`: `{ "ok": false, "error": "<supabase_error_message>" }`
-
-- **curl:**
-
-```bash
-curl -X POST https://localhost:3000/api/profile/update \
-  --cookie "sb:token=YOUR_ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"display_name":"Jane Seller"}'
-```
-
-## POST /api/profile/consents
-
-- **Purpose:** Update the marketing consent snapshot for the authenticated profile and record an audit log.
-- **Authentication:** Supabase session cookie required.
-- **Request schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "marketingOptIn": { "type": "boolean" }
-  },
-  "required": ["marketingOptIn"],
-  "additionalProperties": false
-}
-```
-
-- **Response schema (success):**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "ok": { "const": true },
-    "consents": { "type": "object" }
-  },
-  "required": ["ok", "consents"],
-  "additionalProperties": false
-}
-```
-
-- **Error codes:**
-  - `400 INVALID_JSON`/`INVALID_PAYLOAD`
-  - `401 UNAUTH`
-  - `500 SERVICE_ROLE_MISSING`/`PROFILE_LOOKUP_FAILED`/`CONSENT_UPDATE_FAILED`/`CONSENT_LOG_FAILED`
-
-- **curl:**
-
-```bash
-curl -X POST https://localhost:3000/api/profile/consents \
-  --cookie "sb:token=YOUR_ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"marketingOptIn":true}'
-```
-
-## GET /api/profile/consents
-
-- **Purpose:** Export the latest consent snapshot plus audit history of consent events.
-- **Authentication:** Supabase session cookie required.
-- **Query params:** `format=download` (optional) to force `Content-Disposition: attachment`.
-- **Response schema (200):**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "generatedAt": { "type": "string", "format": "date-time" },
-    "consents": { "type": ["object", "null"] },
-    "history": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer" },
-          "action": { "type": "string" },
-          "details": { "type": ["object", "null"] },
-          "created_at": { "type": ["string", "null"], "format": "date-time" }
-        },
-        "required": ["id", "action", "details", "created_at"],
-        "additionalProperties": false
-      }
-    }
-  },
-  "required": ["generatedAt", "consents", "history"],
-  "additionalProperties": false
-}
-```
-
-- **Error codes:**
-  - `401 UNAUTH`
-  - `500 SERVICE_ROLE_MISSING`/`PROFILE_LOOKUP_FAILED`/`CONSENT_LOG_FETCH_FAILED`
-
-- **curl:**
-
-```bash
-curl -X GET "https://localhost:3000/api/profile/consents?format=download" \
-  --cookie "sb:token=YOUR_ACCESS_TOKEN" \
-  -H "Accept: application/json" \
-  -o consents.json
-```
-
-## GET /api/profile/get
-
-- **Purpose:** Retrieve the authenticated user's profile summary.
-- **Authentication:** Supabase session cookie (optional). Unauthenticated requests return `{}`.
-- **Request body:** _No body._
-- **Response schema (200):**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "display_name": { "type": ["string", "null"] },
-    "phone": { "type": ["string", "null"] },
-    "verified_email": { "type": ["boolean", "null"] },
-    "verified_phone": { "type": ["boolean", "null"] },
-    "created_at": { "type": ["string", "null"], "format": "date-time" }
-  },
-  "additionalProperties": false
-}
-```
-
-- **Error codes:** `400 BAD REQUEST` for Supabase errors: `{ "error": "<message>" }`.
-- **curl:**
-
-```bash
-curl -X GET https://localhost:3000/api/profile/get \
-  --cookie "sb:token=YOUR_ACCESS_TOKEN"
-```
-
-## POST /api/phone/request
-
-- **Purpose:** Start phone verification. Validates E.164 format, stores number, generates OTP, sends SMS via Twilio.
-- **Authentication:** Supabase session cookie required.
-- **Request schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "phone": {
-      "type": "string",
-      "pattern": "^\\+\\d{8,15}$"
-    }
-  },
-  "required": ["phone"],
-  "additionalProperties": false
-}
-```
-
-- **Response schema (success):** `{ "type": "object", "properties": { "ok": { "const": true } }, "required": ["ok"], "additionalProperties": false }`
-- **Rate limits:** 5 requests / 15 minutes per user (`otp:user:<uid>`), fallback 5 / 15 minutes per IP, plus 20 / 60 minutes per IP (`otp:ip:<ip>`).
-- **Error codes:**
-  - `400 INVALID_FORMAT`: `{ "ok": false, "error": "INVALID_FORMAT" }`
-  - `401 UNAUTH`: `{ "ok": false, "error": "UNAUTH" }`
-- `429 rate_limited`: `{ "error": "rate_limited", "retry_after_seconds": <seconds>, "limit": <n>, "remaining": 0, "resetAt": "<iso>" }` with headers `Retry-After`, `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`.
-  - `500 SMS_SEND_FAIL`: Twilio failure `{ "ok": false, "error": "SMS_SEND_FAIL" }`
-  - `500 INTERNAL_ERROR`: unexpected issue `{ "ok": false, "error": "INTERNAL_ERROR", "detail": "..." }`
-
-- **curl:**
-
-```bash
-curl -X POST https://localhost:3000/api/phone/request \
-  --cookie "sb:token=YOUR_ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"phone":"+32470000000"}'
-```
-
-## POST /api/phone/verify
-
-- **Purpose:** Verify the OTP delivered to the user.
-- **Authentication:** Supabase session cookie required.
-- **Request schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "phone": {
-      "type": "string",
-      "pattern": "^\\+\\d{8,15}$"
-    },
-    "code": {
-      "type": "string",
-      "minLength": 4,
-      "maxLength": 6
-    }
-  },
-  "required": ["phone", "code"],
-  "additionalProperties": false
-}
-```
-
-- **Response schema:** `{ "type": "object", "properties": { "ok": { "const": true } }, "required": ["ok"], "additionalProperties": false }`
-- **Error codes:**
-  - `401 UNAUTH`: `{ "ok": false, "error": "UNAUTH" }`
-  - `400 OTP_NOT_FOUND`: `{ "ok": false, "error": "OTP_NOT_FOUND" }`
-  - `400 OTP_EXPIRED`: `{ "ok": false, "error": "OTP_EXPIRED" }`
-  - `400 OTP_INVALID`: `{ "ok": false, "error": "OTP_INVALID" }`
-  - `429 OTP_LOCKED`: `{ "ok": false, "error": "OTP_LOCKED" }`
-  - `500 INTERNAL_ERROR`: `{ "ok": false, "error": "INTERNAL_ERROR", "detail": "..." }`
-
-- **curl:**
-
-```bash
-curl -X POST https://localhost:3000/api/phone/verify \
-  --cookie "sb:token=YOUR_ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"phone":"+32470000000","code":"123456"}'
-```
-
-## POST /api/adverts
-
-- **Purpose:** Create a new draft advert for the authenticated user with default values.
-- **Authentication:** Supabase session cookie required.
-- **Request body:** _No body._
-- **Response schema (success):**
-```json
-{
-  "type": "object",
-  "properties": {
-    "ok": { "const": true },
-    "advert": {
-      "type": "object",
-      "properties": {
-        "id": { "type": "string", "format": "uuid" },
-        "status": { "type": "string", "const": "draft" },
-        "category_id": { "type": "string", "format": "uuid" }
-      },
-      "required": ["id", "status", "category_id"]
-    }
-  },
-  "required": ["ok", "advert"]
-}
-```
-- **Error codes:**
-  - `401 UNAUTHENTICATED` – The user is not authenticated.
-  - `400 <db_error>` or `400 CREATE_FAILED` – The database operation failed.
-- **curl:**
-```bash
-curl -X POST https://localhost:3000/api/adverts \
-  --cookie "sb:token=YOUR_ACCESS_TOKEN" \
-  -H "Content-Length: 0"
-```
-
-## PATCH /api/adverts/:id
-
-- **Purpose:** Update an existing advert. The caller must be the owner.
-- **Authentication:** Supabase session cookie required.
-- **Path params:** `id` (UUID string).
-- **Request schema:**
-```json
-{
-  "type": "object",
-  "properties": {
-    "title": { "type": "string", "minLength": 3 },
-    "description": { "type": "string", "minLength": 10 },
-    "price": { "type": ["number", "null"], "minimum": 0 },
-    "location": { "type": "string" },
-    "category_id": { "type": "string", "format": "uuid" },
-    "condition": { "type": "string", "enum": ["new", "used", "for_parts"] },
-    "currency": { "type": "string", "enum": ["EUR", "USD", "GBP", "RUB"] },
-    "status": { "type": "string", "enum": ["draft", "active", "archived"] },
-    "specifics": {
-      "type": "object",
-      "description": "Vehicle-specific attributes stored as key-value pairs (strings). Includes make_id, model_id, year, steering_wheel, body_type, doors, color_id, color_code, power, engine_type, engine_volume, transmission, drive, mileage, vehicle_condition, customs_cleared, under_warranty, owners_count, vin, additional_phone, and option_* keys for selected vehicle options.",
-      "additionalProperties": { "type": "string" }
-    }
-  },
-  "additionalProperties": false
-}
-```
-- **Response schema (success):**
-```json
-{
-  "type": "object",
-  "properties": {
-    "ok": { "const": true },
-    "advert": {
-      "type": "object",
-      "properties": {
-        "id": { "type": "string", "format": "uuid" },
-        "status": { "type": "string" },
-        "category_id": { "type": "string", "format": "uuid" },
-        "condition": { "type": ["string", "null"] }
-      },
-      "required": ["id", "status", "category_id", "condition"]
-    }
-  },
-  "required": ["ok", "advert"]
-}
-```
-- **Error codes:**
-  - `400 MISSING_ID` – The advert ID is missing from the URL path.
-  - `400 INVALID_PAYLOAD` – The request body is not valid JSON.
-  - `400 invalid_vehicle_data` – The vehicle data is invalid (see `details` for specifics).
-  - `400 invalid_status` – The requested status is not a valid value.
-  - `400 invalid_transition` – The requested status transition is not allowed (e.g., from `active` to `draft`).
-  - `400 media_required` – The advert must have at least one image to be published.
-  - `400 media_check_failed` – An error occurred while checking for media.
-  - `400 update_failed` – The database update operation failed.
-  - `400 fetch_failed` – Failed to fetch the existing advert record.
-  - `401 UNAUTHENTICATED` – The user is not authenticated.
-  - `403 FORBIDDEN` – The user does not own this advert.
-  - `403 forbidden_status` – The requested status is not allowed (e.g., `blocked`).
-  - `404 NOT_FOUND` – The advert with the specified ID was not found.
-- **curl:**
-```bash
-curl -X PATCH https://localhost:3000/api/adverts/00000000-0000-0000-0000-000000000000 \
-  --cookie "sb:token=YOUR_ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"title":"Updated Title", "status":"active"}'
-```
-
-## DELETE /api/adverts/:id
-
-- **Purpose:** Delete an advert owned by the caller, cascading media and item specifics.
-- **Authentication:** Supabase session cookie required.
-- **Path params:** `id` (UUID string).
-- **Request body:** _No body._
-- **Response schema:** `{ "type": "object", "properties": { "ok": { "const": true } }, "required": ["ok"], "additionalProperties": false }`
-- **Error codes:**
-  - `400 MISSING_ID`: `{ "ok": false, "error": "MISSING_ID" }`
-  - `401 UNAUTHENTICATED`: `{ "ok": false, "error": "UNAUTHENTICATED" }`
-  - `403 FORBIDDEN`: `{ "ok": false, "error": "FORBIDDEN" }` (caller does not own the advert).
-  - `404 NOT_FOUND`: `{ "ok": false, "error": "NOT_FOUND" }`
-  - `400 <db_error>`: `{ "ok": false, "error": "<message>" }` (ad_item_specifics/media delete failure).
-
-- **curl:**
-
-```bash
-curl -X DELETE https://localhost:3000/api/adverts/00000000-0000-0000-0000-000000000000 \
-  --cookie "sb:token=YOUR_ACCESS_TOKEN"
-```
-
-## POST /api/reports/create
-
-- **Purpose:** File a moderation report against an advert.
-- **Authentication:** Supabase session cookie required.
-- **Request schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "advert_id": { "type": "string", "format": "uuid" },
-    "reason": {
-      "type": "string",
-      "enum": ["fraud", "spam", "duplicate", "nsfw", "other"]
-    },
-    "details": { "type": ["string", "null"], "maxLength": 2000 }
-  },
-  "required": ["advert_id", "reason"],
-  "additionalProperties": false
-}
-```
-
-- **Response schema:** `{ "type": "object", "properties": { "ok": { "const": true } }, "required": ["ok"], "additionalProperties": false }`
-- **Rate limits:** 5 submissions / 10 minutes per user (`report:user:<uid>`), 50 submissions / 24 hours per IP (`report:ip:<ip>`).
-- **Error codes:**
-  - `401 UNAUTH`: `{ "ok": false, "error": "UNAUTH" }`
-  - `400 BAD_INPUT`: `{ "ok": false, "error": "BAD_INPUT" }`
-  - `409 ALREADY_REPORTED`: `{ "ok": false, "error": "ALREADY_REPORTED" }`
-- `429 rate_limited`: `{ "error": "rate_limited", "retry_after_seconds": <seconds>, "limit": <n>, "remaining": 0, "resetAt": "<iso>" }` with headers `Retry-After`, `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`.
-  - `400 <db_error>`: `{ "ok": false, "error": "<message>" }`
-
-- **curl:**
-
-```bash
-curl -X POST https://localhost:3000/api/reports/create \
-  --cookie "sb:token=YOUR_ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"advert_id":"00000000-0000-0000-0000-000000000000","reason":"fraud","details":"Suspicious pricing."}'
-```
-
-## GET /api/reports/list
-
-- **Purpose:** List reports for moderation filtered by status.
-- **Authentication:** Supabase session cookie with `app_metadata.role = 'admin'`. Requests without the admin claim return `403 FORBIDDEN`.
-- **Query params:** `status=pending|accepted|rejected` (defaults to `pending`).
-- **Response schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "ok": { "const": true },
-    "items": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer" },
-          "reason": { "type": "string" },
-          "details": { "type": ["string", "null"] },
-          "status": { "type": "string" },
-          "created_at": { "type": "string", "format": "date-time" },
-          "updated_at": { "type": ["string", "null"], "format": "date-time" },
-          "advert_id": { "type": "string", "format": "uuid" },
-          "reporter": { "type": "string", "format": "uuid" },
-          "reviewed_by": { "type": ["string", "null"], "format": "uuid" },
-          "adverts": {
-            "type": ["object", "null"],
-            "properties": {
-              "id": { "type": "string", "format": "uuid" },
-              "title": { "type": ["string", "null"] },
-              "user_id": { "type": ["string", "null"], "format": "uuid" }
-            },
-            "additionalProperties": false
-          }
-        },
-        "additionalProperties": false
-      }
-    }
-  },
-  "required": ["ok", "items"],
-  "additionalProperties": false
-}
-```
-
-- **Rate limits:** 60 requests / minute per admin (`report:admin:<uid>`).
-- **Error codes:**
-  - `403 FORBIDDEN`: `{ "ok": false, "error": "FORBIDDEN" }`
-  - `500 SERVICE_ROLE_REQUIRED`: `{ "ok": false, "error": "SUPABASE_SERVICE_ROLE_KEY is not configured..." }`
-- `429 rate_limited`: `{ "error": "rate_limited", "retry_after_seconds": <seconds>, "limit": <n>, "remaining": 0, "resetAt": "<iso>" }` with headers `Retry-After`, `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`.
-  - `400 <db_error>`: `{ "ok": false, "error": "<message>" }`
-
-- **curl:**
-
-```bash
-curl -X GET "https://localhost:3000/api/reports/list?status=pending" \
-  --cookie "sb:token=ADMIN_ACCESS_TOKEN" # run from backend context where SUPABASE_SERVICE_ROLE_KEY is configured
-```
-
-## POST /api/reports/update
-
-- **Purpose:** Update moderation status, optionally unpublish the advert, and adjust trust.
-- **Authentication:** Supabase session cookie with `app_metadata.role = 'admin'`; handler escalates to the service role internally for writes.
-- **Request schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "id": { "type": "integer" },
-    "new_status": {
-      "type": "string",
-      "enum": ["accepted", "rejected"]
-    },
-    "unpublish": { "type": "boolean" }
-  },
-  "required": ["id", "new_status"],
-  "additionalProperties": false
-}
-```
-
-- **Response schema:** `{ "type": "object", "properties": { "ok": { "const": true } }, "required": ["ok"], "additionalProperties": false }`
-- **Rate limits:** 60 updates / minute per admin (`report:admin:<uid>`).
-- **Error codes:**
-  - `403 FORBIDDEN`: `{ "ok": false, "error": "FORBIDDEN" }`
-  - `400 BAD_INPUT`: `{ "ok": false, "error": "BAD_INPUT" }`
-  - `500 SERVICE_ROLE_REQUIRED`: `{ "ok": false, "error": "SUPABASE_SERVICE_ROLE_KEY is not configured..." }`
-  - `404 NOT_FOUND`: `{ "ok": false, "error": "NOT_FOUND" }`
-  - `400 UPDATE_FAILED`: `{ "ok": false, "error": "<message>" }`
-- `429 rate_limited`: `{ "error": "rate_limited", "retry_after_seconds": <seconds>, "limit": <n>, "remaining": 0, "resetAt": "<iso>" }` with headers `Retry-After`, `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`.
-
-- **curl (server-side execution)**:
-
-```bash
-curl -X POST https://localhost:3000/api/reports/update \
-  --cookie "sb:token=ADMIN_ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"id":123,"new_status":"accepted","unpublish":true}'
-```
-
-## GET /api/reports/list (server failure example)
-
-If `SUPABASE_SERVICE_ROLE_KEY` is absent, the endpoint returns:
-
-```json
-{
-  "ok": false,
-  "error": "SUPABASE_SERVICE_ROLE_KEY is not configured. Set SUPABASE_SERVICE_ROLE_KEY on the server to view complaints."
-}
-```
+**Rate limiting.** Via `withRateLimit`/`createRateLimiter` (Upstash sliding window). **Fails open** when `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` are unset (limiter returns success). On limit: HTTP 429 `RATE_LIMITED` with `Retry-After`/`RateLimit-*` headers. Multi-tier routes enforce user-keyed AND IP-keyed limits.
 
 ---
 
-_All endpoints declare `export const runtime = "nodejs";` to ensure compatibility with Supabase libraries and Upstash clients._
+## Auth
+
+### POST /api/auth/register
+- Auth: none
+- Rate limit: no
+- Request (JSON, `registerSchema`): `email` (string, valid email), `password` (string, min 8, ≥3 of upper/lower/digit/symbol), `confirmPassword` (must equal password), `consents` `{ terms: true, privacy: true, marketing?: boolean }` (terms & privacy must be true), `locale?` (en|nl|fr|ru|de)
+- Behavior: `supabase.auth.signUp`, upserts `profiles` row (service role) with consent snapshot, logs `consent_accept`.
+- Response: `{ verificationRequired: boolean }` (HTTP 201). Errors: `INVALID_JSON`, validation (`INVALID_PAYLOAD`), `SIGNUP_FAILED`/`EMAIL_IN_USE`, `SIGNUP_INCOMPLETE` (500), `SERVICE_ROLE_MISSING` (500), `PROFILE_UPSERT_FAILED`.
+
+### POST /api/auth/signout
+- Auth: none (calls `signOut`; no user check)
+- Rate limit: no
+- Request: none
+- Response: `{}` (empty data).
+
+### GET /api/auth/check-email
+- Auth: none
+- Rate limit: yes — per IP, 20/60s (`prefix: check-email:ip`)
+- Request (query): `email` (string, valid email)
+- Behavior: service-role `listUsers()` scan (first page only — noted unreliable at scale in code; see docs/SECURITY_AUDIT.md H1b).
+- Response (custom top-level, **not** enveloped): `{ ok: true, available: boolean }` with `Cache-Control: no-store`. On invalid email: `{ ok: false, error: "INVALID_EMAIL", detail }` (400). On service/internal errors it returns `available: true` (fails safe).
+
+### POST /api/auth/webauthn/enroll
+- Auth: user
+- Rate limit: no
+- Request (JSON, `enrollSchema`): `friendlyName?` (string 1–100, default `"Biometric Key"`)
+- Behavior: `supabase.auth.mfa.enroll({ factorType: "webauthn" })`.
+- Response: `{ factorId: string, friendlyName: string }` (HTTP 201). Errors: `INVALID_JSON`, `BAD_INPUT`, `UNAUTHENTICATED` (401), `INTERNAL_ERROR` (500).
+
+### GET /api/auth/webauthn/list
+- Auth: user
+- Rate limit: no
+- Request: none
+- Response: `{ credentials: Array<{ id, factorId, friendlyName, createdAt, lastUsedAt, factorType: "webauthn" }> }` (WebAuthn MFA factors).
+
+### POST /api/auth/webauthn/verify
+- Auth: user
+- Rate limit: no
+- Request (JSON, `verifySchema`): `factorId?` (uuid; if omitted, first WebAuthn factor is used)
+- Behavior: `mfa.challenge` then `mfa.verify`.
+- Response: `{ verified: true }`. Errors: `NOT_FOUND` (404, no factors), `INTERNAL_ERROR` (500).
+
+### DELETE /api/auth/webauthn/remove
+- Auth: user
+- Rate limit: no
+- Request (JSON, `removeSchema`): `factorId` (uuid, required)
+- Behavior: verifies factor belongs to user, `mfa.unenroll`.
+- Response: `{ removed: true }`. Errors: `NOT_FOUND` (404), `INTERNAL_ERROR` (500).
 
 ---
 
-## 🔗 Related Docs
+## Adverts
 
-**Domains:** [adverts.md](./domains/adverts.md)
-**Development:** [security-compliance.md](./development/security-compliance.md) • [deep-audit-20251108.md](./development/deep-audit-20251108.md) • [MASTER_CHECKLIST.md](./development/MASTER_CHECKLIST.md)
-**Catalog:** [CATALOG_MASTER.md](./catalog/CATALOG_MASTER.md)
+### POST /api/adverts
+- Auth: user
+- Rate limit: no
+- Request: none (creates a draft)
+- Behavior: blocks blocked users (403), picks default active level-1 category, inserts `adverts` row (status `draft`, currency `EUR`).
+- Response: `{ advert: { id, status, category_id } }`. Errors: `FORBIDDEN` (403, blocked), `CATEGORY_LOOKUP_FAILED` (500), `CREATE_FAILED`.
+
+### GET /api/adverts/{id}
+- Auth: none (optional) — public for `active` adverts; for non-active, owner-only (else 404)
+- Rate limit: no
+- Request (path): `id` (uuid; non-UUID → 404)
+- Behavior: service-role fetch; loads `ad_item_specifics`.
+- Response: `{ advert: { id, user_id, title, description, price, currency, condition, location, created_at, updated_at, status, category_id, specifics } }`. Errors: `NOT_FOUND` (404).
+
+### PATCH /api/adverts/{id}
+- Auth: user (owner-only; non-owner → 403 + audit log `advert_update_denied`)
+- Rate limit: no
+- Request (path) `id`; (JSON, `updateAdvertSchema`, all optional): `title` (3–200), `description` (≤10000), `price` (number ≥0, nullable), `currency` (EUR|USD|GBP|RUB), `condition` (new|used|for_parts), `location` (≤200, nullable), `category_id` (uuid), `status` (draft|active|archived), `specifics` (record<string,string>, nullable)
+- Behavior: enforces status transitions; publishing (`active`) requires blocked-check (403), description ≥10 chars, category, condition, and ≥1 media; upserts/clears `ad_item_specifics`; logs `advert_status_change`.
+- Response: `{}` (empty data). Errors: `MISSING_ID`, `INVALID_PAYLOAD` (invalid status/transition), `BAD_INPUT` (`DESCRIPTION_TOO_SHORT`/`CATEGORY_REQUIRED`/`CONDITION_REQUIRED`/`MEDIA_REQUIRED`), `NOT_FOUND` (404), `FORBIDDEN` (403), `UPDATE_FAILED`.
+
+### DELETE /api/adverts/{id}
+- Auth: user (owner-only; non-owner → 403 + audit log `advert_delete_denied`)
+- Rate limit: no
+- Request (path): `id`
+- Behavior: deletes `ad_item_specifics`, `media` rows + storage objects (`ad-media` bucket), then advert; logs `advert_delete`.
+- Response: `{}`. Errors: `MISSING_ID`, `NOT_FOUND` (404), `FORBIDDEN` (403), `UPDATE_FAILED`.
+
+### POST /api/adverts/{id}/view
+- Auth: none (optional) — records `user_id` if present, else anonymous
+- Rate limit: yes — per IP, 100/60s (`prefix: adverts:view`)
+- Request (path): `id` (uuid)
+- Behavior: inserts `advert_views` (ip, user-agent), calls RPC `get_advert_view_count`.
+- Response: `{ message: "View tracked", advert_id, view_count }` (insert failure is non-critical → still 200 with a "tracking failed" message). Errors: `BAD_INPUT` (invalid uuid), `NOT_FOUND` (404).
+
+---
+
+## Media
+
+All media routes use the `ad-media` bucket; `MEDIA_LIMIT_PER_ADVERT = 12`. Auth + ownership via `requireAuthenticatedUser` / `ensureAdvertOwnership` (`src/app/api/media/_shared.ts`).
+
+### POST /api/media/sign
+- Auth: user (advert owner; else 403 + log `media_sign_denied`)
+- Rate limit: no
+- Request (JSON, `signMediaSchema`): `advertId` (uuid), `fileName` (1–255), `contentType` (must start `image/`), `fileSize` (int >0, ≤5MB)
+- Behavior: enforces 12-item limit (409 `LIMIT_REACHED`); creates a signed upload URL (TTL 5 min).
+- Response: `{ path, token, expiresIn: 300, orderIndex, max: 12 }`. Errors: `LIMIT_REACHED` (409), `SIGNED_URL_FAILED`.
+
+### POST /api/media/complete
+- Auth: user (advert owner; else 403)
+- Rate limit: no
+- Request (JSON, `completeMediaSchema`): `advertId` (uuid), `storagePath` (string, must match `userId/advertId/...` and end with extension), `width?` (int >0), `height?` (int >0)
+- Behavior: verifies path prefix `${user.id}/${advertId}/` (403 + log `media_complete_denied`); enforces 12-limit; inserts `media` row; returns signed download URL (TTL 15 min). Reused path → `{ reused: true }`.
+- Response: `{ media: { id, url (signed), sort, w, h, storagePath } }`. Errors: `FORBIDDEN` (403), `LIMIT_REACHED` (409), `CREATE_FAILED`, `SIGNED_URL_FAILED`.
+
+### GET /api/media/list
+- Auth: user (advert owner; else 403 + log `media_list_denied`)
+- Rate limit: no
+- Request (query): `advertId` (required)
+- Behavior: signed download URLs (TTL 10 min); legacy `http(s)` URLs returned as-is.
+- Response: `{ items: Array<{ id, url, storagePath, sort, w, h, created_at }>, expiresIn: 600 }`. Errors: `MISSING_ADVERT_ID`.
+
+### GET /api/media/public
+- Auth: none — public, only for `active` adverts
+- Rate limit: no
+- Request (query): `advertId` (required)
+- Behavior: 403 if advert not active; service-role signed URLs (TTL 10 min).
+- Response: `{ items: Array<{ id, url, storagePath, sort, w, h, created_at }>, expiresIn: 600 }`. Errors: `MISSING_ADVERT_ID`, `NOT_FOUND` (404), `FORBIDDEN` (403, inactive).
+
+### POST /api/media/reorder
+- Auth: user (advert owner; else 403 + log `media_reorder_denied`)
+- Rate limit: no
+- Request (JSON, `reorderMediaSchema`): `advertId` (uuid), `orderedIds` (array of uuids, min 1)
+- Behavior: validates all IDs belong to advert (else `UNKNOWN_MEDIA_ID`); rewrites `sort`.
+- Response: `{}`. Errors: `UNKNOWN_MEDIA_ID` (400).
+
+### DELETE /api/media/{id}
+- Auth: user (advert owner; else 403 + log `media_delete_denied`)
+- Rate limit: no
+- Request (path): `id` (media id)
+- Behavior: removes storage object + `media` row; re-sequences remaining `sort` values.
+- Response: `{}`. Errors: `MISSING_ID`, `NOT_FOUND` (404), `UPDATE_FAILED`.
+
+---
+
+## Catalog
+
+> All catalog routes are public (no auth), `dynamic = "force-dynamic"`, no rate limit. Unless noted, the success body is a **bare array** (not enveloped); errors are `{ "error": "<message>" }` with status 500/400/404.
+
+### GET /api/catalog/contract-types
+- Request (query): `lang?` (en|fr|nl|ru|de, default en)
+- Response: bare array of `{ id, code, slug, name, description, sort_order }` (from `job_contract_types`).
+
+### GET /api/catalog/cp-codes
+- Request (query): `lang?` (en|fr|nl, default en), `search?` (matches code or localized name)
+- Response: bare array of `{ code, name, sector }` (from `cp_codes`).
+
+### GET /api/catalog/device-brands
+- Request (query): `device_type?` (filters brands having models of that type), `search?` (ilike on name)
+- Response: bare array of `{ id, slug, name, logo_url, country, website }` (active `device_brands`).
+
+### GET /api/catalog/device-models
+- Request (query): `brand` or `brand_id` (required), `device_type` (required), `search?`, `limit?` (default 20)
+- Behavior: RPC `search_device_models`.
+- Response: bare array (RPC result). Errors: 400 if `brand`/`device_type` missing.
+
+### GET /api/catalog/epc-ratings
+- Request (query): `lang?` (en|fr|nl, default en)
+- Response: bare array of `{ code, name, description, max_kwh_per_sqm_year, color, sort_order }` (from `epc_ratings`).
+
+### GET /api/catalog/job-categories
+- Request (query): `lang?` (en|fr|nl|de|ru, default en)
+- Response: bare array of `{ id, slug, parent_id, is_active, name }` (from `job_categories`).
+
+### GET /api/catalog/property-types
+- Request (query): `lang?` (en|fr|nl|de|ru, default en)
+- Response: bare array of `{ id, slug, category, is_active, name }` (from `property_types`).
+
+### GET /api/catalog/fields
+- Request (query): `category` (slug, required), `lang?` (default en)
+- Behavior: returns hard-coded field-group definitions per category type (property/job/electronics).
+- Response: **bare object** `{ category_slug, category_type, uses_specialized_table, field_groups: [{ name, label, fields: [...] }] }`. Errors: 400 (`category` missing), 404 (unknown category), 501 (type without definitions).
+
+### GET /api/catalog/schema
+- Request (query): `category_id` OR `category_slug` (one required)
+- Behavior: resolves active `catalog_subcategory_schema` walking up parent categories; loads `catalog_fields` + `catalog_field_options`.
+- Response (**enveloped**): `{ ok: true, data: { category, resolved_category_id, schema: { id, version, steps }, fields: Record<field_key, {...}> } }`. Errors: `{ ok: false, error: "<message>" }` with 400/404/500.
+
+---
+
+## Categories
+
+### GET /api/categories/tree
+- Auth: none (public)
+- Rate limit: no (cached via `revalidate = 3600`)
+- Request (query, `categoryTreeQuerySchema`): `locale?` (en|nl|fr|ru|de, default en)
+- Behavior: builds recursive tree of active categories with localized names.
+- Response: `{ tree: CategoryTreeNode[], locale, count }` (empty: `{ tree: [] }`). Each node: `{ id, parent_id, slug, level, name, path, sort, icon, is_active, children? }`. Errors: validation, `FETCH_FAILED`.
+
+---
+
+## Chat
+
+### GET /api/chat/history
+- Auth: user
+- Rate limit: no
+- Request (query): `conversationId` (uuid, required), `cursor?` (numeric message id), `limit?` (default 50, max 100)
+- Behavior: verifies participant (403 if not); paginated, returns chronological order.
+- Response: `{ messages: Array<{ id, conversation_id, author_id, body, created_at, updated_at }>, has_more: boolean, next_cursor: number|null }`. Errors: `BAD_INPUT`, `FORBIDDEN` (403).
+
+### POST /api/chat/start
+- Auth: user
+- Rate limit: yes — user 10/60s (`chat:start:user`) AND IP 30/3600s (`chat:start:ip`, bucket `global`)
+- Request (JSON, `startConversationSchema`): `advert_id?` (uuid), `peer_id` (uuid, required)
+- Behavior: cannot start with self (400); if `advert_id`, advert must exist & be active; returns existing conversation if found, else creates conversation + participants (owner/peer); logs `chat_start`.
+- Response: `{ conversation_id, created: boolean }`. Errors: `BAD_INPUT`, `NOT_FOUND` (404), `FORBIDDEN` (403), `CREATE_FAILED`.
+
+### POST /api/chat/send
+- Auth: user
+- Rate limit: yes — user 20/60s (`chat:send:user`) AND IP 100/3600s (`chat:send:ip`, bucket `global`)
+- Request (JSON, `sendMessageSchema`): `conversation_id` (uuid), `body` (string 1–5000)
+- Behavior: verifies participant (403); inserts `messages`; logs `chat_send`.
+- Response: `{ message: { id, conversation_id, author_id, body, created_at } }`. Errors: `FORBIDDEN` (403), `CREATE_FAILED`.
+
+### POST /api/chat/read
+- Auth: user
+- Rate limit: **no** (exported as `baseHandler` directly)
+- Request (JSON, `markReadSchema`): `conversation_id` (uuid)
+- Behavior: verifies participant (403); updates `last_read_at`; logs `chat_read`.
+- Response: `{}`. Errors: `FORBIDDEN` (403), `UPDATE_FAILED`.
+
+---
+
+## Billing
+
+### GET /api/billing/products
+- Auth: none (public)
+- Rate limit: no
+- Request: none
+- Response: `{ products: Array<{ id, code, name, price_cents, currency, active }> }` (active only, ordered by price).
+
+### GET /api/billing/benefits
+- Auth: user
+- Rate limit: no
+- Request (query): `advert_id?`
+- Behavior: returns currently-valid benefits (`valid_until > now`) for the user.
+- Response: `{ benefits: Array<{ id, purchase_id, user_id, advert_id, benefit_type, valid_from, valid_until, created_at }> }`. Errors: `UNAUTH` (401), `FETCH_FAILED`.
+
+### GET /api/billing/purchases
+- Auth: user
+- Rate limit: no
+- Request (query): `status?`, `limit?` (default 20, max 100), `offset?` (default 0)
+- Response: `{ purchases: Array<{ id, product_code, provider, status, amount_cents, currency, created_at, updated_at, products: { code, name } }>, total, limit, offset }`. Errors: `UNAUTH` (401), `BAD_INPUT`, `FETCH_FAILED`.
+
+### POST /api/billing/checkout
+- Auth: user
+- Rate limit: yes — user 10/60s (`billing:checkout:user`) AND IP 20/3600s (`billing:checkout:ip`, bucket `global`)
+- Request (JSON, `createCheckoutSchema`): `product_code` (string, required), `advert_id?` (uuid)
+- Behavior: blocks blocked users (403); product must exist & be active; if `advert_id`, must belong to user (403); inserts pending `purchases` row; creates Stripe Checkout Session; updates row with session id.
+- Response: `{ session_id, url }`. Errors: `UNAUTH` (401), `FORBIDDEN` (403), `NOT_FOUND` (404), `CREATE_FAILED`, `INTERNAL_ERROR` (500, Stripe failure → purchase marked `failed`).
+
+### POST /api/billing/webhook
+- Auth: none (Stripe signature-verified via `stripe-signature` header + `STRIPE_WEBHOOK_SECRET`)
+- Rate limit: no
+- Request: raw Stripe event body. Handles `checkout.session.completed` (idempotent; marks purchase completed, creates `benefits` by product code prefix/duration, logs `purchase_completed`), `payment_intent.succeeded` (log only), `payment_intent.payment_failed` (marks purchase failed, logs).
+- Response: `{ received: true }`. Errors: `BAD_INPUT` (400, missing/invalid signature), `INTERNAL_ERROR` (500).
+
+---
+
+## Notifications
+
+### GET /api/notifications
+- Auth: user
+- Rate limit: no
+- Request (query): `unread_only?` (`true`), `limit?` (default 20, max 100), `offset?` (default 0)
+- Response: `{ notifications: Array<{ id, type, channel, title, body, payload, read_at, sent_at, created_at }>, total, limit, offset }`. Errors: `UNAUTH` (401), `BAD_INPUT`.
+
+### POST /api/notifications/{id}/read
+- Auth: user (owner of notification; else 403)
+- Rate limit: no
+- Request (path): `id`
+- Behavior: sets `read_at` if not already read.
+- Response: `{}`. Errors: `UNAUTH` (401), `BAD_INPUT`, `NOT_FOUND` (404), `FORBIDDEN` (403), `UPDATE_FAILED`.
+
+### GET /api/notifications/preferences
+- Auth: user
+- Rate limit: no
+- Request: none
+- Response: `{ preferences: { email: Record<string,bool>, push: {...}, sms: {...} } }`. Errors: `UNAUTH` (401), `FETCH_FAILED`.
+
+### POST /api/notifications/preferences
+- Auth: user
+- Rate limit: no
+- Request (JSON, `updateNotificationPreferencesSchema`): `email?`, `push?`, `sms?` (each `Record<string, boolean>`)
+- Behavior: merges with existing preferences on `profiles`.
+- Response: `{ preferences: { email, push, sms } }`. Errors: `UNAUTH` (401), `UPDATE_FAILED`.
+
+---
+
+## Moderation
+
+> All moderation routes build `{ ok, data }` / `{ ok, error }` JSON manually (shape-conformant). `dynamic = "force-dynamic"`, no caching. All require the admin role.
+
+### GET /api/moderation/queue
+- Auth: admin
+- Rate limit: no
+- Request (query): `status?` (pending|pending_review|flagged|all, default `pending`), `limit?` (default 50), `offset?` (default 0)
+- Response: `{ ok: true, data: { adverts: [...], pagination: { total, limit, offset, hasMore } } }`. Errors: `UNAUTHENTICATED` (401), `FORBIDDEN` (403), `INVALID_STATUS` (400), `FETCH_FAILED` (500).
+
+### POST /api/moderation/analyze
+- Auth: admin
+- Rate limit: no
+- Request (JSON): `advert_id` (required)
+- Behavior: fetches advert, invokes Supabase Edge Function `ai-moderation` (service-role bearer).
+- Response: `{ ok: true, data: <edge function result> }`. Errors: `UNAUTHENTICATED` (401), `FORBIDDEN` (403), `MISSING_ADVERT_ID` (400), `ADVERT_NOT_FOUND` (404), `AI_MODERATION_FAILED`/`INTERNAL_ERROR` (500).
+
+### POST /api/moderation/review
+- Auth: admin
+- Rate limit: no
+- Request (JSON): `advert_id` (required), `action` (approve|reject|flag, required), `reason?`
+- Behavior: service-role updates `adverts.moderation_status` + `status` (approve→active, reject/flag→draft); inserts `moderation_logs`.
+- Response: `{ ok: true, data: { advert_id, action, status } }`. Errors: `UNAUTHENTICATED` (401), `FORBIDDEN` (403), `MISSING_REQUIRED_FIELDS`/`INVALID_ACTION` (400), `UPDATE_FAILED`/`INTERNAL_ERROR` (500).
+
+---
+
+## Reports
+
+### POST /api/reports/create
+- Auth: user
+- Rate limit: yes — user 5/600s (`report:user`, env `RATE_LIMIT_REPORT_USER_PER_10M`) AND IP 50/86400s (`report:ip`, bucket `global`, env `RATE_LIMIT_REPORT_IP_PER_24H`)
+- Request (JSON, `createReportSchema`): `advert_id` (uuid), `reason` (string 1–500), `details?` (string ≤2000, nullable)
+- Behavior: blocks duplicate pending report by same reporter (409); inserts `reports`; logs `report_create`.
+- Response: `{}`. Errors: `UNAUTH` (401), `ALREADY_REPORTED` (409), `CREATE_FAILED`.
+
+### GET /api/reports/list
+- Auth: admin (no explicit 401 for anonymous — `hasAdminRole(null)` is false → 403)
+- Rate limit: yes — 60/60s (`report:admin`, env `RATE_LIMIT_ADMIN_PER_MIN`)
+- Request (query): `status?` (default `pending`)
+- Behavior: service-role select with joined advert.
+- Response: `{ items: Array<{ id, reason, details, status, created_at, updated_at, advert_id, reporter, reviewed_by, adverts: { id, title, user_id } }> }`. Errors: `FORBIDDEN` (403), `SERVICE_ROLE_MISSING` (500), `FETCH_FAILED`.
+
+### POST /api/reports/update
+- Auth: admin (`UNAUTH` 401 if no user, then `FORBIDDEN` 403 if not admin)
+- Rate limit: yes — 60/60s (`report:admin`, env `RATE_LIMIT_ADMIN_PER_MIN`)
+- Request (JSON, `updateReportSchema`): `id` (positive int), `new_status` (accepted|rejected), `unpublish?` (boolean)
+- Behavior: service-role updates `reports` (`reviewed_by`, `updated_at`); on `accepted` decrements seller trust via RPC `trust_inc` (−15) and optionally sets advert `status = inactive`; logs `report_update`.
+- Response: `{}`. Errors: `UNAUTH` (401), `FORBIDDEN` (403), `SERVICE_ROLE_MISSING` (500), `NOT_FOUND` (404), `UPDATE_FAILED`.
+
+---
+
+## Profile
+
+### GET /api/profile/get
+- Auth: none (optional) — anonymous returns empty `{}`
+- Rate limit: no
+- Request: none
+- Response: `{ display_name, phone, verified_email, verified_phone, created_at }` (or `{}` if no profile / unauthenticated). Errors: `FETCH_FAILED`.
+
+### POST /api/profile/update
+- Auth: user
+- Rate limit: no
+- Request (JSON, `updateProfileSchema`): `display_name?` (string 1–100)
+- Behavior: upserts `profiles` row.
+- Response: `{}`. Errors: `UNAUTH` (401), `UPDATE_FAILED`.
+
+### GET /api/profile/adverts
+- Auth: user
+- Rate limit: no
+- Request (query, `getUserAdvertsQuerySchema`): `page?` (int ≥1, default 1), `pageSize?` (int 1–100, default 12), `status?` (all|active|draft|archived, default all)
+- Behavior: returns user's adverts with signed media URLs attached.
+- Response: `{ adverts: Array<{ id, title, price, status, created_at, location, media: [{ url, signedUrl, sort }] }>, total, page, pageSize }`. Errors: `UNAUTHENTICATED` (401), `FETCH_FAILED`.
+
+### GET /api/profile/consents
+- Auth: user
+- Rate limit: no
+- Request (query): `format?` (`download` → adds `Content-Disposition` attachment header)
+- Behavior: reads consent snapshot + service-role audit log history (`consent_accept`/`consent_update`).
+- Response: `{ generatedAt, consents, history: Array<{ id, action, details, created_at }> }`. Errors: `UNAUTH` (401), `SERVICE_ROLE_MISSING` (500), `FETCH_FAILED`.
+
+### POST /api/profile/consents
+- Auth: user
+- Rate limit: no
+- Request (JSON, `updateConsentsSchema`): `marketingOptIn?` (boolean)
+- Behavior: updates marketing consent snapshot on `profiles`; logs `consent_update` (service role).
+- Response: `{ consents: <snapshot> }`. Errors: `UNAUTH` (401), `UPDATE_FAILED`, `SERVICE_ROLE_MISSING` (500), `INTERNAL_ERROR`.
+
+---
+
+## Favorites
+
+### GET /api/favorites
+- Auth: none (optional) — anonymous returns empty list with `authenticated: false`
+- Rate limit: yes — 60/60s (`favorites:get`), keyed by userId or IP
+- Request (query): `page?` (default 0), `limit?` (default 24, max 100)
+- Behavior: returns favorites with first signed image + seller verified flag.
+- Response: `{ items: Array<{ advert_id, favorited_at, advert: { ...fields, image, seller_verified } | null }>, total, page, limit, hasMore }` (anonymous: `{ items: [], total: 0, page: 0, limit: 0, hasMore: false, authenticated: false }`). Errors: `FETCH_FAILED`.
+
+### POST /api/favorites
+- Auth: user
+- Rate limit: yes — 30/60s (`favorites:post`), keyed by userId or IP
+- Request (JSON, `addFavoriteSchema`): `advert_id` (uuid)
+- Behavior: advert must exist & be active; inserts `favorites` (duplicate → 200 "Already in favorites").
+- Response: `{ message: "Added to favorites", advert_id }` (HTTP 201). Errors: `UNAUTH` (401), `INVALID_JSON`, `BAD_INPUT`, `NOT_FOUND` (404).
+
+### DELETE /api/favorites/{advertId}
+- Auth: user
+- Rate limit: yes — 30/60s (`favorites:delete`), keyed by userId or IP
+- Request (path): `advertId` (uuid)
+- Behavior: deletes the user's favorite; 404 if none deleted.
+- Response: `{ message: "Removed from favorites", advert_id }`. Errors: `UNAUTH` (401), `BAD_INPUT`, `NOT_FOUND` (404).
+
+---
+
+## Search
+
+### GET /api/search
+- Auth: none (public)
+- Rate limit: yes — per IP, 60/60s (`search:ip`, env `RATE_LIMIT_SEARCH_IP_PER_MIN`)
+- Request (query, `searchAdvertsQuerySchema`): `q?` (1–200), `category_id?` (uuid), `price_min?`/`price_max?` (numeric; min≤max), `location?` (≤200), `verified_only?` (true/1/yes), `lat?`/`lng?` (paired; valid coordinate ranges), `radius_km?` (>0, ≤1000, default 50), `sort_by?` (relevance|price_asc|price_desc|created_at_asc|created_at_desc, default created_at_desc), `page?` (default 0), `limit?` (default 24, max 100)
+- Behavior: RPC `search_adverts`; strips per-row `total_count`, coerces `seller_verified`.
+- Response: `{ items: [...], total, page, limit, hasMore }`. Errors: validation, `FETCH_FAILED`.
+
+---
+
+## Phone (Verification)
+
+### POST /api/phone/request
+- Auth: user
+- Rate limit: yes — user 5/900s (`otp:user`, env `RATE_LIMIT_OTP_USER_PER_15M`), IP-fallback 5/900s (anonymous only), AND IP 20/3600s (`otp:ip`, env `RATE_LIMIT_OTP_IP_PER_60M`)
+- Request (JSON, `requestOtpSchema`): `phone` (E.164, `^\+\d{8,15}$`)
+- Behavior: optional Twilio carrier lookup; upserts `phones`; deactivates prior OTPs; stores HMAC-hashed 6-digit OTP (10-min expiry) in `phone_otps`; sends SMS via Twilio; logs `phone_request`.
+- Response: `{}`. Errors: `UNAUTH` (401), `PHONE_SAVE_FAILED`, `OTP_CLEANUP_FAILED`, `OTP_CREATE_FAILED`, `SMS_SEND_FAIL` (500).
+
+### POST /api/phone/verify
+- Auth: user
+- Rate limit: yes — user 5/900s (`otp:verify:user`), IP-fallback 5/900s (anonymous only), AND IP 20/3600s (`otp:verify:ip`)
+- Request (JSON, `verifyOtpSchema`): `phone` (E.164), `code` (string 1–10)
+- Behavior: finds latest unused OTP; checks expiry; locks after 5 attempts (429); HMAC-compares; on success marks OTP used and `phones.verified = true`; logs `phone_verify`.
+- Response: `{}`. Errors: `UNAUTH` (401), `OTP_NOT_FOUND` (400), `OTP_EXPIRED` (400), `OTP_LOCKED` (429), `OTP_INVALID` (400), `PHONE_UPDATE_FAILED`.
+
+---
+
+## Misc
+
+### POST /api/locale
+- Auth: none
+- Rate limit: no
+- Request (JSON): `locale` (string)
+- Behavior: resolves and sets `locale` cookie (1-year, `sameSite: lax`, not httpOnly).
+- Response (custom top-level, **not** enveloped): `{ ok: true, locale }`. Errors: `{ ok: false, error: "INVALID_LOCALE" }` (400), `{ ok: false, error: "INTERNAL_ERROR" }` (500).
+
+### GET /api/me
+- Auth: none (optional) — anonymous returns all-null payload
+- Rate limit: no
+- Request: none
+- Behavior: aggregates `profiles` + `phones` for the current user.
+- Response: `{ user, profile, phone: { number, verified } | null, verifiedPhone, verifiedEmail, consents }` (anonymous: all `null`/`false`).
+
+### POST /api/comparison
+- Auth: user
+- Rate limit: no
+- Request (JSON, `payloadSchema`): `advertIds` (array of uuids, min 2, max 4; no duplicates)
+- Behavior: loads active adverts with category, specifics, signed first image, seller trust score + verified flag; preserves request order.
+- Response: `{ adverts: Array<{ id, title, price, currency, location, categoryId, categoryName, condition, image, createdAt, sellerVerified, sellerTrustScore, specifics }> }`. Errors: `UNAUTH` (401), `INVALID_JSON`, `BAD_INPUT` (validation / not enough active / not found / duplicates), `FETCH_FAILED`.
+
+### GET /api/top-adverts
+- Auth: none (public)
+- Rate limit: yes — per IP, 60/60s (`top-adverts`)
+- Request (query): `limit?` (default 10, max 100)
+- Behavior: scores up to 1000 recent active adverts by `views*1 + favorites*5` (views last 30 days); attaches first image.
+- Response: `{ adverts: Array<{ id, title, price, currency, location, status, created_at, user_id, view_count, favorite_count, popularity_score, image }>, total }`. Errors: `FETCH_FAILED` (500).
+
+### GET /api/top-sellers
+- Auth: none (public)
+- Rate limit: yes — per IP, 60/60s (`top-sellers`)
+- Request (query): `limit?` (default 10, max 100), `offset?` (default 0)
+- Behavior: reads `top_sellers` materialized view.
+- Response: `{ sellers: [...], total, limit, offset }`. Errors: `FETCH_FAILED` (500).
+
+---
+
+## Notes / unverified items
+
+- Rate limits "fail open" if Upstash env vars are unset (all such routes effectively unlimited in that configuration).
+- `reports/list` does not issue a distinct 401 for anonymous callers; `hasAdminRole(null)` returns false so anonymous requests get 403.
+- `chat/history` accepts a `cursor` as a message id and filters `id < cursor`; the numeric-vs-uuid id type for `messages` is unverified from the route files alone.

@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useI18n } from "@/i18n";
 import { formatCurrency } from "@/i18n/format";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface Product {
   code: string;
@@ -81,11 +82,11 @@ export default function BoostDialog({ advertId, trigger }: BoostDialogProps) {
         window.location.href = data.data.url;
       } else {
         console.error("Failed to create checkout:", data.error);
-        alert(t("billing.checkout.error"));
+        toast.error(t("billing.checkout.error"));
       }
     } catch (error) {
       console.error("Failed to create checkout:", error);
-      alert(t("billing.checkout.error"));
+      toast.error(t("billing.checkout.error"));
     } finally {
       setIsCreatingCheckout(false);
     }
@@ -172,4 +173,3 @@ export default function BoostDialog({ advertId, trigger }: BoostDialogProps) {
     </Dialog>
   );
 }
-

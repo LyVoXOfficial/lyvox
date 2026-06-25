@@ -104,7 +104,10 @@ export async function POST(request: NextRequest) {
       created_at,
       user_id,
       category_id,
-      specifics,
+      condition,
+      ad_item_specifics (
+        specifics
+      ),
       category:category_id (
         id,
         name_en,
@@ -228,8 +231,11 @@ export async function POST(request: NextRequest) {
         category?.slug ??
         null;
 
-      const specifics = (advert.specifics as Record<string, unknown> | null) ?? {};
+      const specifics =
+        ((advert.ad_item_specifics as { specifics?: Record<string, unknown> | null } | null)
+          ?.specifics as Record<string, unknown> | null) ?? {};
       const conditionValue =
+        normalizeCondition(advert.condition) ??
         normalizeCondition(specifics.condition) ??
         normalizeCondition(specifics.state) ??
         null;

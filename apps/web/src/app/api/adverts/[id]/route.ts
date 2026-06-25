@@ -131,7 +131,7 @@ export async function PATCH(
   // Check if user is blocked when trying to publish
   if (isPublishing) {
     const { checkUserBlocked } = await import("@/lib/fraud/checkUserBlocked");
-    const blockCheck = await checkUserBlocked(user.id);
+    const blockCheck = await checkUserBlocked(user.id, { failClosed: true });
     if (blockCheck.isBlocked) {
       return createErrorResponse(ApiErrorCode.FORBIDDEN, {
         status: 403,

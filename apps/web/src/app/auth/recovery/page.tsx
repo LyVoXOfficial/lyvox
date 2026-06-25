@@ -2,20 +2,21 @@
 
 import Link from "next/link";
 import { Suspense, useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
-import { Button } from "@/components/ui/button";
+import { ArrowLeft, CheckCircle2, Loader2, Mail, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { Loader2, AlertCircle, Mail, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { supabase } from "@/lib/supabaseClient";
 
 function RecoveryPageInner() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
-  const handleRecovery = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRecovery = async (event: React.FormEvent) => {
+    event.preventDefault();
     setLoading(true);
 
     try {
@@ -24,125 +25,138 @@ function RecoveryPageInner() {
       });
 
       if (error) {
-        toast.error("Ошибка отправки ссылки для восстановления");
+        toast.error("Could not send the recovery link.");
       } else {
         setSent(true);
-        toast.success("Ссылка для восстановления отправлена на email");
+        toast.success("Recovery link sent. Check your email.");
       }
-    } catch (err) {
-      toast.error("Не удалось отправить ссылку. Проверьте подключение к интернету");
+    } catch {
+      toast.error("Could not send the link. Check your internet connection.");
     } finally {
       setLoading(false);
     }
   };
 
-  if (sent) {
-    return (
-      <div className="max-w-md space-y-6">
-        <div className="space-y-2 text-center">
-          <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-            <Mail className="size-6 text-green-600 dark:text-green-400" />
-          </div>
-          <h1 className="text-2xl font-semibold">Проверьте ваш email</h1>
-          <p className="text-sm text-muted-foreground">
-            Мы отправили ссылку для восстановления доступа на <strong>{email}</strong>
-          </p>
-        </div>
-
-        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/30">
-          <div className="flex gap-3">
-            <AlertCircle className="size-5 shrink-0 text-blue-600 dark:text-blue-400" />
-            <div className="space-y-1 text-sm">
-              <p className="font-medium text-blue-900 dark:text-blue-100">
-                Не получили письмо?
-              </p>
-              <ul className="list-inside list-disc text-blue-700 dark:text-blue-300">
-                <li>Проверьте папку Спам</li>
-                <li>Убедитесь, что email указан правильно</li>
-                <li>Попробуйте отправить ссылку повторно через несколько минут</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => setSent(false)}
-          >
-            Отправить повторно
-          </Button>
-          <Link href="/login">
-            <Button variant="ghost" className="w-full">
-              <ArrowLeft className="mr-2 size-4" />
-              Вернуться ко входу
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-md space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold">Восстановление доступа</h1>
-        <p className="text-sm text-muted-foreground">
-          Введите ваш email, и мы отправим вам ссылку для сброса пароля
-        </p>
-      </div>
+    <main className="min-h-[calc(100vh-4rem)] bg-background">
+      <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-10 md:grid-cols-[minmax(0,1fr)_440px] md:py-16">
+        <section className="flex flex-col justify-center gap-6">
+          <Link
+            href="/login"
+            className="inline-flex w-fit items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Back to sign in
+          </Link>
 
-      <form onSubmit={handleRecovery} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="text-sm font-medium">
-            Email адрес
-          </label>
-          <input
-            id="email"
-            type="email"
-            placeholder="ваш-email@example.com"
-            className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 transition-colors focus:border-blue-500 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            disabled={loading}
-          />
-        </div>
+          <div className="max-w-xl space-y-4">
+            <div className="inline-flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+              <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+              Account recovery
+            </div>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+              Reset access without exposing account details.
+            </h1>
+            <p className="text-base leading-7 text-muted-foreground">
+              We send a single-use recovery link to the email on your account. The link expires
+              automatically, so request a new one if it has already been used.
+            </p>
+          </div>
+        </section>
 
-        <Button
-          type="submit"
-          disabled={loading}
-          className="w-full"
-        >
-          {loading ? (
+        <Card className="rounded-md border-border/80 shadow-lg shadow-black/5">
+          {sent ? (
             <>
-              <Loader2 className="mr-2 size-4 animate-spin" />
-              Отправляем ссылку...
+              <CardHeader className="text-center">
+                <div className="mx-auto flex size-12 items-center justify-center rounded-md bg-emerald-50">
+                  <Mail className="size-6 text-emerald-600" aria-hidden="true" />
+                </div>
+                <CardTitle className="text-2xl">Check your email</CardTitle>
+                <CardDescription>
+                  We sent a recovery link to <span className="font-medium text-foreground">{email}</span>.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                <div className="rounded-md border border-border/80 bg-muted/40 p-4">
+                  <p className="text-sm font-medium">No email yet?</p>
+                  <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
+                    <li className="flex gap-2">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" aria-hidden="true" />
+                      Check spam, promotions, or quarantine folders.
+                    </li>
+                    <li className="flex gap-2">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" aria-hidden="true" />
+                      Confirm the email address is typed correctly.
+                    </li>
+                    <li className="flex gap-2">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" aria-hidden="true" />
+                      Wait a few minutes before requesting another link.
+                    </li>
+                  </ul>
+                </div>
+
+                <Button variant="outline" className="h-11 w-full" onClick={() => setSent(false)}>
+                  Send another link
+                </Button>
+                <Button asChild variant="ghost" className="w-full">
+                  <Link href="/login">
+                    <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                    Return to sign in
+                  </Link>
+                </Button>
+              </CardContent>
             </>
           ) : (
-            "Отправить ссылку для восстановления"
-          )}
-        </Button>
-      </form>
+            <>
+              <CardHeader>
+                <CardTitle className="text-2xl">Recover access</CardTitle>
+                <CardDescription>Enter your account email and we will send a reset link.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleRecovery} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      required
+                      disabled={loading}
+                    />
+                  </div>
 
-      <div className="text-center">
-        <Link href="/login">
-          <Button variant="ghost" className="text-sm">
-            <ArrowLeft className="mr-2 size-4" />
-            Вернуться ко входу
-          </Button>
-        </Link>
+                  <Button type="submit" disabled={loading} className="h-11 w-full">
+                    {loading ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin" />
+                        Sending link...
+                      </>
+                    ) : (
+                      "Send recovery link"
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </>
+          )}
+        </Card>
       </div>
-    </div>
+    </main>
   );
 }
 
 export default function RecoveryPage() {
   return (
-    <Suspense fallback={<p>Загрузка...</p>}>
+    <Suspense
+      fallback={
+        <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center text-sm text-muted-foreground">
+          Loading recovery...
+        </main>
+      }
+    >
       <RecoveryPageInner />
     </Suspense>
   );
 }
-

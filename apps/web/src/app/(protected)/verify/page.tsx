@@ -1,16 +1,16 @@
-import { redirect } from "next/navigation";
-import { supabaseServer } from "@/lib/supabaseServer";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Mail, Phone, AlertCircle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { AlertCircle, ArrowLeft, CheckCircle2, Mail, Phone, ShieldCheck } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabaseServer } from "@/lib/supabaseServer";
 import { VerifyEmailClient } from "./VerifyEmailClient";
 import { VerifyPhoneClient } from "./VerifyPhoneClient";
 
 export const metadata = {
-  title: "Верификация аккаунта | LyVoX",
-  description: "Подтвердите email и телефон для размещения объявлений",
+  title: "Account verification | LyVoX",
+  description: "Verify email and phone details before publishing listings.",
 };
 
 export default async function VerifyPage() {
@@ -20,10 +20,9 @@ export default async function VerifyPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login?redirect=/verify");
+    redirect("/login?next=/verify");
   }
 
-  // Get profile verification status
   const { data: profile } = await supabase
     .from("profiles")
     .select("verified_email, verified_phone, phone")
@@ -33,144 +32,143 @@ export default async function VerifyPage() {
   const verifiedEmail = profile?.verified_email ?? false;
   const verifiedPhone = profile?.verified_phone ?? false;
   const phone = profile?.phone;
+  const isFullyVerified = verifiedEmail && verifiedPhone;
 
   return (
-    <main className="container mx-auto p-4 max-w-2xl">
-      <div className="mb-6">
-        <Link href="/profile">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 size-4" />
-            Назад к профилю
-          </Button>
-        </Link>
-      </div>
+    <main className="bg-background">
+      <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 md:py-10">
+        <Button asChild variant="ghost" size="sm" className="px-0">
+          <Link href="/profile">
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Back to profile
+          </Link>
+        </Button>
 
-      <div className="space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Верификация аккаунта</h1>
-          <p className="text-muted-foreground mt-2">
-            Подтвердите email и телефон, чтобы размещать объявления
-          </p>
-        </div>
+        <header className="grid gap-6 md:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+              <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+              Trust checks
+            </div>
+            <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">Account verification</h1>
+            <p className="max-w-2xl text-base leading-7 text-muted-foreground">
+              Verify email and phone details to improve marketplace trust and unlock safer publishing flows.
+            </p>
+          </div>
 
-        {/* Verification Status Alert */}
-        {!verifiedEmail || !verifiedPhone ? (
-          <Card className="border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/30">
+          <Card
+            className={
+              isFullyVerified
+                ? "rounded-md border-emerald-200 bg-emerald-50"
+                : "rounded-md border-amber-200 bg-amber-50"
+            }
+          >
             <CardHeader>
-              <div className="flex items-center gap-2">
-                <AlertCircle className="size-5 text-amber-600 dark:text-amber-500" />
-                <CardTitle className="text-amber-900 dark:text-amber-100">
-                  Требуется верификация
-                </CardTitle>
+              <div className="flex items-start gap-3">
+                {isFullyVerified ? (
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-700" aria-hidden="true" />
+                ) : (
+                  <AlertCircle className="mt-0.5 h-5 w-5 text-amber-700" aria-hidden="true" />
+                )}
+                <div>
+                  <CardTitle className={isFullyVerified ? "text-emerald-950" : "text-amber-950"}>
+                    {isFullyVerified ? "Ready to publish" : "Verification required"}
+                  </CardTitle>
+                  <CardDescription className={isFullyVerified ? "text-emerald-800" : "text-amber-800"}>
+                    {isFullyVerified
+                      ? "Your account has the required trust checks."
+                      : "Complete both checks before posting with full trust signals."}
+                  </CardDescription>
+                </div>
               </div>
-              <CardDescription className="text-amber-800 dark:text-amber-200">
-                Для размещения объявлений необходимо подтвердить email и телефон.
-              </CardDescription>
             </CardHeader>
+            {isFullyVerified ? (
+              <CardContent>
+                <Button asChild>
+                  <Link href="/post">Post a listing</Link>
+                </Button>
+              </CardContent>
+            ) : null}
           </Card>
-        ) : (
-          <Card className="border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30">
+        </header>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card className="rounded-md border-border/80">
             <CardHeader>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="size-5 text-green-600 dark:text-green-500" />
-                <CardTitle className="text-green-900 dark:text-green-100">
-                  Аккаунт полностью верифицирован
-                </CardTitle>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-5 w-5 text-primary" aria-hidden="true" />
+                  <CardTitle>Email address</CardTitle>
+                </div>
+                {verifiedEmail ? (
+                  <Badge className="bg-emerald-600">
+                    <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+                    Verified
+                  </Badge>
+                ) : (
+                  <Badge variant="destructive">Not verified</Badge>
+                )}
               </div>
-              <CardDescription className="text-green-800 dark:text-green-200">
-                Вы можете размещать объявления без ограничений.
-              </CardDescription>
+              <CardDescription>{user.email}</CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href="/post">
-                <Button>Разместить объявление</Button>
-              </Link>
+              {verifiedEmail ? (
+                <p className="text-sm leading-6 text-muted-foreground">
+                  Your email is verified. Marketplace updates and buyer/seller notifications can reach this address.
+                </p>
+              ) : (
+                <VerifyEmailClient email={user.email!} />
+              )}
             </CardContent>
           </Card>
-        )}
 
-        {/* Email Verification Card */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Mail className="size-5" />
-                <CardTitle>Email адрес</CardTitle>
+          <Card className="rounded-md border-border/80">
+            <CardHeader>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <Phone className="h-5 w-5 text-primary" aria-hidden="true" />
+                  <CardTitle>Phone number</CardTitle>
+                </div>
+                {verifiedPhone ? (
+                  <Badge className="bg-emerald-600">
+                    <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+                    Verified
+                  </Badge>
+                ) : (
+                  <Badge variant="destructive">Not verified</Badge>
+                )}
               </div>
-              {verifiedEmail ? (
-                <Badge variant="default" className="bg-green-600">
-                  <CheckCircle2 className="mr-1 size-3" />
-                  Подтвержден
-                </Badge>
-              ) : (
-                <Badge variant="destructive">Не подтвержден</Badge>
-              )}
-            </div>
-            <CardDescription>
-              {user.email}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {verifiedEmail ? (
-              <p className="text-sm text-muted-foreground">
-                Ваш email подтвержден. Вы будете получать уведомления на этот адрес.
-              </p>
-            ) : (
-              <VerifyEmailClient email={user.email!} />
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Phone Verification Card */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Phone className="size-5" />
-                <CardTitle>Номер телефона</CardTitle>
-              </div>
+              <CardDescription>{phone || "No phone number added"}</CardDescription>
+            </CardHeader>
+            <CardContent>
               {verifiedPhone ? (
-                <Badge variant="default" className="bg-green-600">
-                  <CheckCircle2 className="mr-1 size-3" />
-                  Подтвержден
-                </Badge>
+                <p className="text-sm leading-6 text-muted-foreground">
+                  Your phone is verified. Buyers can use stronger trust signals when deciding to contact you.
+                </p>
               ) : (
-                <Badge variant="destructive">Не подтвержден</Badge>
+                <VerifyPhoneClient userId={user.id} currentPhone={phone} />
               )}
-            </div>
-            <CardDescription>
-              {phone || "Телефон не указан"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {verifiedPhone ? (
-              <p className="text-sm text-muted-foreground">
-                Ваш телефон подтвержден. Покупатели смогут связаться с вами по этому номеру.
-              </p>
-            ) : (
-              <VerifyPhoneClient userId={user.id} currentPhone={phone} />
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Help Section */}
-        <Card>
+        <Card className="rounded-md border-border/80 bg-muted/30">
           <CardHeader>
-            <CardTitle>Нужна помощь?</CardTitle>
+            <CardTitle>Need help?</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <CardContent className="grid gap-3 text-sm leading-6 text-muted-foreground md:grid-cols-3">
             <p>
-              <strong>Не получили письмо?</strong> Проверьте папку "Спам" или запросите повторно.
+              <strong className="text-foreground">No email?</strong> Check spam or request another confirmation email.
             </p>
             <p>
-              <strong>Проблемы с телефоном?</strong> Убедитесь, что номер указан в международном формате.
+              <strong className="text-foreground">Phone issue?</strong> Use international format such as +32.
             </p>
             <p>
-              <strong>Всё ещё нужна помощь?</strong>{" "}
-              <Link href="/contacts" className="text-primary underline">
-                Свяжитесь с нами
+              <strong className="text-foreground">Still blocked?</strong>{" "}
+              <Link href="/contact" className="font-medium text-primary underline-offset-4 hover:underline">
+                Contact support
               </Link>
+              .
             </p>
           </CardContent>
         </Card>
@@ -178,4 +176,3 @@ export default async function VerifyPage() {
     </main>
   );
 }
-

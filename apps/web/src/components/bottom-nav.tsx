@@ -1,9 +1,10 @@
 "use client";
 
+import type React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Grid3x3, Home, MoreHorizontal, PlusCircle, User } from "lucide-react";
 import { useI18n } from "@/i18n";
-import { Home, Grid3x3, PlusCircle, User, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
@@ -16,51 +17,51 @@ type NavItem = {
 export default function BottomNav() {
   const path = usePathname();
   const { t } = useI18n();
+  const moreLabel = t("common.more");
 
-  // Default match function for exact match or starts with
-  const defaultMatch = (path: string, href: string): boolean => {
+  const defaultMatch = (currentPath: string, href: string): boolean => {
     if (href === "/") {
-      return path === "/";
+      return currentPath === "/";
     }
-    return path === href || path.startsWith(`${href}/`);
+    return currentPath === href || currentPath.startsWith(`${href}/`);
   };
 
   const items: NavItem[] = [
     {
       href: "/",
-      label: t("common.home") || "Главная",
+      label: t("common.home") || "Home",
       icon: Home,
-      matchPattern: (path, href) => path === href,
+      matchPattern: (currentPath, href) => currentPath === href,
     },
     {
       href: "/c",
-      label: t("common.categories") || "Категории",
+      label: t("common.categories") || "Categories",
       icon: Grid3x3,
       matchPattern: defaultMatch,
     },
     {
       href: "/post",
-      label: t("common.post") || "Подать",
+      label: t("common.post") || "Post",
       icon: PlusCircle,
       matchPattern: defaultMatch,
     },
     {
       href: "/profile",
-      label: t("common.profile") || "Профиль",
+      label: t("common.profile") || "Profile",
       icon: User,
       matchPattern: defaultMatch,
     },
     {
       href: "/more",
-      label: "Еще",
+      label: moreLabel === "common.more" ? "More" : moreLabel,
       icon: MoreHorizontal,
-      matchPattern: (path, href) => path === href || path.startsWith("/more"),
+      matchPattern: (currentPath, href) => currentPath === href || currentPath.startsWith("/more"),
     },
   ];
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-40 border-t bg-white/95 backdrop-blur md:hidden pb-[env(safe-area-inset-bottom)]">
-      <div className="grid grid-cols-5 h-14">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border/80 bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
+      <div className="grid h-14 grid-cols-5">
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = item.matchPattern
@@ -72,25 +73,20 @@ export default function BottomNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center justify-center gap-0.5 text-xs transition-colors",
+                "relative flex flex-col items-center justify-center gap-0.5 text-xs transition-colors",
                 "hover:bg-muted/50 active:bg-muted",
-                isActive
-                  ? "text-primary font-medium"
-                  : "text-muted-foreground"
+                isActive ? "font-medium text-primary" : "text-muted-foreground",
               )}
               aria-label={item.label}
               aria-current={isActive ? "page" : undefined}
             >
               <Icon
-                className={cn(
-                  "h-5 w-5 transition-colors",
-                  isActive ? "text-primary" : "text-muted-foreground"
-                )}
+                className={cn("h-5 w-5 transition-colors", isActive ? "text-primary" : "text-muted-foreground")}
                 aria-hidden="true"
               />
               <span className="leading-none">{item.label}</span>
               {isActive && (
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-t-full" />
+                <span className="absolute bottom-0 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-t-full bg-primary" />
               )}
             </Link>
           );

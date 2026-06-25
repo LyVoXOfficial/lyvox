@@ -45,18 +45,20 @@ export default function SelectableAdsGrid({
   const compareDisabled = selectedCount < 2 || isLoading;
 
   useEffect(() => {
-    if (selectedCount > 0) {
-      setShowPulse(false);
-      return;
-    }
+    if (selectedCount > 0 || !showPulse) return;
 
-    setShowPulse(true);
     const timeout = window.setTimeout(() => setShowPulse(false), 2400);
     return () => window.clearTimeout(timeout);
-  }, [selectedCount]);
+  }, [selectedCount, showPulse]);
 
   const toggleSelection = useCallback(
     (id: string, nextState: boolean) => {
+      if (nextState) {
+        setShowPulse(false);
+      } else if (selectedIds.length === 1 && selectedIds[0] === id) {
+        setShowPulse(true);
+      }
+
       setSelectedIds((prev) => {
         const set = new Set(prev);
         if (nextState) {
@@ -70,7 +72,7 @@ export default function SelectableAdsGrid({
         return Array.from(set);
       });
     },
-    [maxSelection],
+    [maxSelection, selectedIds],
   );
 
   const handleCompare = useCallback(() => {
@@ -82,6 +84,7 @@ export default function SelectableAdsGrid({
 
   const handleReset = useCallback(() => {
     setSelectedIds([]);
+    setShowPulse(true);
   }, []);
 
   if (!items.length) {

@@ -1,20 +1,11 @@
-import dynamic from "next/dynamic";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { getI18nProps } from "@/i18n/server";
 import type { Category } from "@/lib/types";
-
-// PERF-003: Lazy load PostForm (heavy component with catalog fields)
-const PostForm = dynamic(() => import("./PostForm").then(mod => ({ default: mod.PostForm })), {
-  loading: () => (
-    <div className="container mx-auto max-w-3xl p-4">
-      <div className="animate-pulse space-y-4">
-        <div className="h-8 bg-muted rounded w-1/3"></div>
-        <div className="h-64 bg-muted rounded"></div>
-      </div>
-    </div>
-  ),
-  ssr: false, // Client-only component
-});
+import { PostForm } from "./PostForm";
+import Link from "next/link";
+import { AlertTriangle, Mail, Phone, ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -88,19 +79,28 @@ export default async function PostPage({
   } = await supabase.auth.getUser();
   const { messages } = await getI18nProps();
   const t = (key: string) => key.split('.').reduce<any>((acc, p) => (acc ? acc[p] : undefined), messages) ?? key;
+  const tf = (key: string, fallback: string) => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
 
 
   if (!user) {
     return (
-      <main className="container mx-auto p-4 text-center">
-        <h1 className="text-2xl font-bold">{t("post.post_ad")}</h1>
-        <p className="mt-4">
-          {t("post.please")}{" "}
-          <a href="/login" className="underline">
-            {t("profile.login")}
-          </a>
-          , {t("post.to_post")}.
-        </p>
+      <main className="container mx-auto flex min-h-[60vh] max-w-xl items-center p-4">
+        <Card className="w-full rounded-md">
+          <CardHeader>
+            <CardTitle>{t("post.post_ad")}</CardTitle>
+            <CardDescription>
+              Sign in before creating a listing so drafts, buyer messages, and verification stay attached to one account.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href="/login">{tf("profile.login", "Sign in")}</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </main>
     );
   }
@@ -118,41 +118,50 @@ export default async function PostPage({
   // Redirect to verification page if not verified
   if (!verifiedEmail || !verifiedPhone) {
     return (
-      <main className="container mx-auto p-4 max-w-2xl">
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 dark:border-amber-900 dark:bg-amber-950/30">
-          <h1 className="text-2xl font-bold text-amber-900 dark:text-amber-100">
-            Требуется верификация
-          </h1>
-          <p className="mt-4 text-amber-800 dark:text-amber-200">
-            Для размещения объявлений необходимо подтвердить email и телефон.
-          </p>
-          <div className="mt-6 space-y-2">
-            {!verifiedEmail && (
-              <p className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
-                <span className="size-2 rounded-full bg-amber-600"></span>
-                Email не подтвержден
-              </p>
-            )}
-            {!verifiedPhone && (
-              <p className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
-                <span className="size-2 rounded-full bg-amber-600"></span>
-                Телефон не подтвержден
-              </p>
-            )}
-          </div>
-          <div className="mt-6">
-            <a
-              href="/verify"
-              className="inline-block rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"
-            >
-              Перейти к верификации
-            </a>
-          </div>
-        </div>
+      <main className="container mx-auto flex min-h-[60vh] max-w-2xl items-center p-4">
+        <Card className="w-full rounded-md border-amber-200 bg-amber-50/80 dark:border-amber-900 dark:bg-amber-950/30">
+          <CardHeader>
+            <div className="mb-2 flex size-10 items-center justify-center rounded-md bg-amber-100 text-amber-700 dark:bg-amber-900/60 dark:text-amber-200">
+              <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+            </div>
+            <CardTitle className="text-amber-950 dark:text-amber-100">
+              Verify your account before publishing
+            </CardTitle>
+            <CardDescription className="text-amber-800 dark:text-amber-200">
+              Listings require confirmed contact details to reduce fraud and keep buyer conversations accountable.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div className="space-y-2">
+              {!verifiedEmail && (
+                <p className="flex items-center gap-2 text-sm font-medium text-amber-900 dark:text-amber-100">
+                  <Mail className="h-4 w-4" aria-hidden="true" />
+                  Email confirmation is missing
+                </p>
+              )}
+              {!verifiedPhone && (
+                <p className="flex items-center gap-2 text-sm font-medium text-amber-900 dark:text-amber-100">
+                  <Phone className="h-4 w-4" aria-hidden="true" />
+                  Phone verification is missing
+                </p>
+              )}
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button asChild>
+                <Link href="/verify">Go to verification</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/profile">
+                  <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+                  Review profile
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </main>
     );
   }
-
   const categories = await getCategories();
   const editId = typeof searchParams.edit === 'string' ? searchParams.edit : null;
   const advertToEdit = editId ? await getAdvertForEdit(editId, user.id) : null;

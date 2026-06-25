@@ -1,124 +1,153 @@
+import Link from "next/link";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { supabaseServer } from "@/lib/supabaseServer";
-import { getI18nProps } from "@/i18n/server";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, CheckCircle2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { supabaseServer } from "@/lib/supabaseServer";
 
 export const metadata = {
-  title: "Редактировать профиль | LyVoX",
-  description: "Редактирование информации профиля",
+  title: "Edit profile | LyVoX",
+  description: "Update marketplace profile details.",
 };
 
-export default async function ProfileEditPage() {
+async function updateProfileAction(formData: FormData) {
+  "use server";
+
   const supabase = await supabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login?redirect=/profile/edit");
+    redirect("/login?next=/profile/edit");
   }
 
-  // Get profile data
+  const displayNameRaw = formData.get("display_name");
+  const phoneRaw = formData.get("phone");
+  const displayName =
+    typeof displayNameRaw === "string" && displayNameRaw.trim()
+      ? displayNameRaw.trim().slice(0, 100)
+      : user.email?.split("@")[0] || "LyVoX user";
+  const phone = typeof phoneRaw === "string" && phoneRaw.trim() ? phoneRaw.trim() : null;
+
+  const { error } = await supabase.from("profiles").upsert(
+    {
+      id: user.id,
+      display_name: displayName,
+      phone,
+    },
+    { onConflict: "id" },
+  );
+
+  if (error) {
+    redirect("/profile/edit?status=error");
+  }
+
+  revalidatePath("/profile");
+  revalidatePath("/profile/edit");
+  redirect("/profile?updated=profile");
+}
+
+type PageProps = {
+  searchParams?: {
+    status?: string;
+  };
+};
+
+export default async function ProfileEditPage({ searchParams }: PageProps) {
+  const supabase = await supabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login?next=/profile/edit");
+  }
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("display_name, phone")
     .eq("id", user.id)
     .maybeSingle();
 
-  const { locale, messages } = await getI18nProps();
-
   return (
-    <main className="container mx-auto p-4 max-w-2xl">
-      <div className="mb-6">
-        <Link href="/profile">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 size-4" />
-            Назад к профилю
-          </Button>
-        </Link>
-      </div>
+    <main className="bg-background">
+      <div className="mx-auto max-w-3xl space-y-6 px-4 py-8 md:py-10">
+        <Button asChild variant="ghost" size="sm" className="px-0">
+          <Link href="/profile">
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Back to profile
+          </Link>
+        </Button>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Редактировать профиль</CardTitle>
-          <CardDescription>
-            Обновите информацию вашего профиля
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form className="space-y-6">
-            {/* Display Name */}
-            <div className="space-y-2">
-              <Label htmlFor="display_name">Отображаемое имя</Label>
-              <Input
-                id="display_name"
-                name="display_name"
-                type="text"
-                defaultValue={profile?.display_name || ""}
-                placeholder="Введите ваше имя"
-              />
-              <p className="text-xs text-muted-foreground">
-                Это имя будет видно другим пользователям
-              </p>
+        <Card className="rounded-md border-border/80 shadow-sm">
+          <CardHeader>
+            <div className="inline-flex w-fit items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+              <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+              Public identity
             </div>
+            <CardTitle className="text-2xl">Edit profile</CardTitle>
+            <CardDescription>
+              Keep your seller profile clear and consistent. Buyers use these details before starting a conversation.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {searchParams?.status === "error" ? (
+              <div className="mb-5 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+                Could not save your profile. Check the values and try again.
+              </div>
+            ) : null}
 
-            {/* Email (read-only) */}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={user.email || ""}
-                disabled
-                className="bg-muted"
-              />
-              <p className="text-xs text-muted-foreground">
-                Email нельзя изменить
-              </p>
-            </div>
+            <form action={updateProfileAction} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="display_name">Display name</Label>
+                <Input
+                  id="display_name"
+                  name="display_name"
+                  type="text"
+                  defaultValue={profile?.display_name || user.email?.split("@")[0] || ""}
+                  placeholder="Your public name"
+                  maxLength={100}
+                />
+                <p className="text-xs text-muted-foreground">Shown on your listings, profile, and chat conversations.</p>
+              </div>
 
-            {/* Phone */}
-            <div className="space-y-2">
-              <Label htmlFor="phone">Телефон</Label>
-              <Input
-                id="phone"
-                name="phone"
-                type="tel"
-                defaultValue={profile?.phone || ""}
-                placeholder="+32 XXX XX XX XX"
-              />
-              <p className="text-xs text-muted-foreground">
-                Используется для связи с покупателями
-              </p>
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" value={user.email || ""} disabled className="bg-muted" />
+                <p className="text-xs text-muted-foreground">Email changes are handled through account security.</p>
+              </div>
 
-            {/* Actions */}
-            <div className="flex gap-2">
-              <Button type="submit" className="flex-1">
-                Сохранить изменения
-              </Button>
-              <Link href="/profile">
-                <Button type="button" variant="outline">
-                  Отмена
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  defaultValue={profile?.phone || ""}
+                  placeholder="+32 XXX XX XX XX"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Used for trust checks and buyer contact preferences. Verify it from the verification page.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Button type="submit" className="flex-1">
+                  <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                  Save profile
                 </Button>
-              </Link>
-            </div>
-          </form>
-
-          <div className="mt-6 pt-6 border-t">
-            <p className="text-sm text-muted-foreground mb-4">
-              <strong>Примечание:</strong> Редактирование профиля будет реализовано
-              в следующей версии с помощью Server Actions.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+                <Button asChild variant="outline">
+                  <Link href="/profile">Cancel</Link>
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </main>
   );
 }
-

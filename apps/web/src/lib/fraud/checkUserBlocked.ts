@@ -5,21 +5,38 @@ import { supabaseServer } from "@/lib/supabaseServer";
  * @param userId - User ID to check
  * @returns Object with isBlocked boolean and blockedUntil timestamp if blocked
  */
-export async function checkUserBlocked(userId: string): Promise<{
+export async function checkUserBlocked(
+  userId: string,
+  options: { failClosed?: boolean } = {},
+): Promise<{
   isBlocked: boolean;
   blockedUntil: string | null;
   reason?: string;
 }> {
   const supabase = await supabaseServer();
-  
+
   const { data: profile, error } = await supabase
     .from("profiles")
     .select("blocked_until, flags")
     .eq("id", userId)
-    .single();
+    .maybeSingle();
 
-  if (error || !profile) {
-    // If we can't fetch profile, allow operation (fail open)
+  if (error) {
+    // A genuine read failure. On high-risk paths (publish, checkout) callers pass
+    // failClosed: true — we must NOT wave a possibly-blocked user through on a
+    // transient DB error. Low-risk callers keep the fail-open default.
+    if (options.failClosed) {
+      return {
+        isBlocked: true,
+        blockedUntil: null,
+        reason: "Account verification is temporarily unavailable. Please try again.",
+      };
+    }
+    return { isBlocked: false, blockedUntil: null };
+  }
+
+  if (!profile) {
+    // No profile row yet (e.g. a brand-new account) — there is nothing to block.
     return { isBlocked: false, blockedUntil: null };
   }
 

@@ -39,7 +39,7 @@
  * }
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import {
   isWebAuthnSupported,
   isPlatformAuthenticatorAvailable,
@@ -390,13 +390,11 @@ export function useWebAuthn(options: UseWebAuthnOptions = {}): UseWebAuthnReturn
  * }
  */
 export function useWebAuthnSupport(): boolean {
-  const [supported, setSupported] = useState(false);
-
-  useEffect(() => {
-    setSupported(isWebAuthnSupported());
-  }, []);
-
-  return supported;
+  return useSyncExternalStore(
+    () => () => {},
+    isWebAuthnSupported,
+    () => false,
+  );
 }
 
 /**
@@ -432,7 +430,6 @@ export function usePlatformAuthenticator() {
 // ============================================================================
 
 export default useWebAuthn;
-
 
 
 

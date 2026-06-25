@@ -48,6 +48,7 @@ export function useRealtimeNotifications({
   const reconnectAttemptsRef = useRef(0);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isMountedRef = useRef(true);
+  const subscribeRef = useRef<() => void>(() => {});
 
   const cleanup = useCallback(() => {
     if (channelRef.current) {
@@ -60,6 +61,28 @@ export function useRealtimeNotifications({
     }
     setIsConnected(false);
   }, []);
+
+  const scheduleReconnect = useCallback(() => {
+    if (!isMountedRef.current) return;
+    if (reconnectAttemptsRef.current >= MAX_RECONNECT_ATTEMPTS) {
+      const error = new Error("Max reconnect attempts reached");
+      setError(error);
+      onError?.(error);
+      return;
+    }
+
+    reconnectAttemptsRef.current += 1;
+    const delay = Math.min(
+      INITIAL_RECONNECT_DELAY * Math.pow(2, reconnectAttemptsRef.current - 1),
+      MAX_RECONNECT_DELAY,
+    );
+
+    reconnectTimeoutRef.current = setTimeout(() => {
+      if (isMountedRef.current && userId && enabled) {
+        subscribeRef.current();
+      }
+    }, delay);
+  }, [userId, enabled, onError]);
 
   const subscribe = useCallback(() => {
     if (!userId || !enabled) {
@@ -133,29 +156,7 @@ export function useRealtimeNotifications({
       });
 
     channelRef.current = channel;
-  }, [userId, enabled, onNotification, onError, cleanup]);
-
-  const scheduleReconnect = useCallback(() => {
-    if (!isMountedRef.current) return;
-    if (reconnectAttemptsRef.current >= MAX_RECONNECT_ATTEMPTS) {
-      const error = new Error("Max reconnect attempts reached");
-      setError(error);
-      onError?.(error);
-      return;
-    }
-
-    reconnectAttemptsRef.current += 1;
-    const delay = Math.min(
-      INITIAL_RECONNECT_DELAY * Math.pow(2, reconnectAttemptsRef.current - 1),
-      MAX_RECONNECT_DELAY,
-    );
-
-    reconnectTimeoutRef.current = setTimeout(() => {
-      if (isMountedRef.current && userId && enabled) {
-        subscribe();
-      }
-    }, delay);
-  }, [userId, enabled, subscribe, onError]);
+  }, [userId, enabled, onNotification, onError, cleanup, scheduleReconnect]);
 
   const reconnect = useCallback(() => {
     reconnectAttemptsRef.current = 0;
@@ -167,14 +168,21 @@ export function useRealtimeNotifications({
   }, [subscribe]);
 
   useEffect(() => {
+    subscribeRef.current = subscribe;
+  }, [subscribe]);
+
+  useEffect(() => {
     isMountedRef.current = true;
-    subscribe();
+    const timeout = setTimeout(() => {
+      subscribeRef.current();
+    }, 0);
 
     return () => {
       isMountedRef.current = false;
+      clearTimeout(timeout);
       cleanup();
     };
-  }, [subscribe, cleanup]);
+  }, [cleanup, subscribe]);
 
   return {
     isConnected,
@@ -182,4 +190,3 @@ export function useRealtimeNotifications({
     reconnect,
   };
 }
-

@@ -30,14 +30,14 @@ export default function AdvertGallery({ images }: AdvertGalleryProps) {
 
   return (
     <div className="space-y-4">
-      <div className="overflow-hidden rounded-lg border">
+      <div className="overflow-hidden rounded-md border border-border/80 bg-card shadow-sm">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={activeImage?.url || PLACEHOLDER_IMAGE}
           alt={activeImage?.alt || "Advert image"}
           width={activeImage?.width ?? undefined}
           height={activeImage?.height ?? undefined}
-          className="h-full max-h-[460px] w-full bg-muted object-cover"
+          className="aspect-[4/3] max-h-[460px] w-full bg-muted object-cover"
         />
       </div>
 
@@ -67,4 +67,3 @@ export default function AdvertGallery({ images }: AdvertGalleryProps) {
     </div>
   );
 }
-

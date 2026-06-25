@@ -1,12 +1,14 @@
+import Link from "next/link";
+
 export default function Footer() {
   return (
-    <footer className="border-t mt-10">
-      <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-zinc-600 flex flex-wrap gap-4 justify-between">
+    <footer className="mt-10 border-t border-border/75">
+      <div className="mx-auto flex max-w-7xl flex-wrap justify-between gap-4 px-4 py-6 text-sm text-muted-foreground">
         <p>© {new Date().getFullYear()} LyVoX</p>
         <nav className="flex gap-4">
-          <a href="/legal/terms" className="hover:underline">Условия</a>
-          <a href="/legal/privacy" className="hover:underline">Конфиденциальность</a>
-          <a href="/contact" className="hover:underline">Контакты</a>
+          <Link href="/legal/terms" className="hover:text-foreground">Terms</Link>
+          <Link href="/legal/privacy" className="hover:text-foreground">Privacy</Link>
+          <Link href="/contact" className="hover:text-foreground">Contact</Link>
         </nav>
       </div>
     </footer>

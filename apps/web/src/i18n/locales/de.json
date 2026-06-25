@@ -3,7 +3,41 @@
     "title": "LyVoX",
     "description": "Marktplatz für Waren, Dienstleistungen und Immobilien"
   },
+  "nav": {
+    "sign_in": "Anmelden",
+    "join": "Registrieren",
+    "sign_out": "Abmelden",
+    "account": "Konto",
+    "signed_in_as": "Angemeldet als",
+    "my_listings": "Meine Anzeigen",
+    "verify_phone": "Telefon verifizieren",
+    "admin_panel": "Adminbereich",
+    "trust_first": "Vertrauen zuerst",
+    "open_account_menu": "Kontomenü öffnen"
+  },
+  "topbar": {
+    "verified_signals": "Verifizierte Verkäufersignale",
+    "anti_scam": "Anti-Betrugs-Moderation",
+    "belgian_deals": "Für lokale belgische Angebote gemacht"
+  },
+  "infocards": {
+    "verified_title": "Verifizierte Verkäufersignale",
+    "verified_body": "Telefon- und E-Mail-Verifizierung machen riskante Anzeigen leichter erkennbar.",
+    "verified_action": "Verifizierte ansehen",
+    "payment_title": "Bereit für lokale Zahlungen",
+    "payment_body": "Die Abrechnung unterstützt belgische Zahlungsmethoden über die Anbietereinstellungen.",
+    "payment_action": "Abrechnung ansehen",
+    "report_title": "Verdächtige Angebote melden",
+    "report_body": "Halten Sie Zahlungs- und Versandgespräche nach Möglichkeit innerhalb von LyVoX.",
+    "report_action": "Support kontaktieren"
+  },
+  "footer": {
+    "tagline": "Auf Belgien ausgerichteter Marktplatz für lokale Anzeigen, verifizierte Verkäufer und sicherere Gespräche.",
+    "browse_listings": "Anzeigen durchsuchen",
+    "post_listing": "Anzeige aufgeben"
+  },
   "common": {
+    "more": "Mehr",
     "language": "Sprache",
     "search": "Anzeigen suchen",
     "find": "Finden",
@@ -75,6 +109,17 @@
     "error": "Ein Fehler ist aufgetreten"
   },
   "home": {
+    "hero_tag": "LyVoX Belgien Marktplatz",
+    "hero_title": "Finden Sie lokale Angebote mit stärkeren Vertrauenssignalen.",
+    "hero_subtitle": "Durchsuchen Sie belgische Anzeigen, vergleichen Sie Verkäufer und halten Sie riskante Gespräche auf der Plattform.",
+    "qa_transport": "Transport",
+    "qa_electronics": "Elektronik",
+    "qa_verified": "Verifizierte Verkäufer",
+    "qa_free": "Kostenlose Anzeigen",
+    "stat_active": "aktive Anzeigen geladen",
+    "stat_free": "kostenlose Anzeigen angezeigt",
+    "stat_verified": "Verkäuferprofile in aktuellen Ergebnissen verifiziert",
+    "post_listing": "Anzeige aufgeben",
     "free_ads": "Kostenlose Anzeigen",
     "latest": "Neueste Anzeigen",
     "top_sellers_and_adverts": "Top Verkäufer & Anzeigen",
