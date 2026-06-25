@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useI18n } from "@/i18n";
 import SearchFilters, { type SearchFiltersState } from "@/components/SearchFilters";
 import { logger } from "@/lib/errorLogger";
+import { mapSearchItemToCard } from "@/lib/advertCards";
 import AdsGrid from "@/components/ads-grid";
 import { AdsGridSkeleton } from "@/components/marketplace-grid-states";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,7 @@ type SearchResponse = {
       price?: number | null;
       currency?: string | null;
       location?: string | null;
+      image?: string | null;       // NEW — now provided by /api/search
       created_at?: string | null;
       seller_verified?: boolean;
       user_id?: string;
@@ -164,52 +166,7 @@ export default function SearchPage() {
         throw new Error(translated);
       }
 
-      // Fetch media for results using public API
-      const ids = data.data.items.map((item) => item.id);
-      const firstMedia = new Map<string, string>();
-
-      if (ids.length > 0) {
-        // Fetch media for each advert (we'll optimize this later with a bulk endpoint)
-        const mediaPromises = ids.slice(0, 24).map(async (id) => {
-          try {
-            const mediaResponse = await fetch(`/api/media/public?advertId=${id}`);
-            if (mediaResponse.ok) {
-              const mediaData = await mediaResponse.json();
-              if (mediaData.ok && mediaData.items && mediaData.items.length > 0) {
-                // Get first image (sorted by sort order)
-                const firstItem = mediaData.items[0];
-                return { advertId: id, url: firstItem.url || null };
-              }
-            }
-          } catch (err) {
-            logger.warn("Failed to fetch media for advert", {
-              component: "SearchPage",
-              action: "fetchMedia",
-              metadata: { advertId: id },
-              error: err,
-            });
-          }
-          return { advertId: id, url: null };
-        });
-
-        const mediaResults = await Promise.all(mediaPromises);
-        mediaResults.forEach(({ advertId, url }) => {
-          if (url) {
-            firstMedia.set(advertId, url);
-          }
-        });
-      }
-
-      const formattedResults: SearchResult[] = data.data.items.map((item) => ({
-        id: item.id,
-        title: item.title,
-        price: item.price ?? null,
-        currency: item.currency ?? null,
-        location: item.location ?? null,
-        image: firstMedia.get(item.id) ?? null,
-        createdAt: item.created_at ?? null,
-        sellerVerified: Boolean(item.seller_verified),
-      }));
+      const formattedResults: SearchResult[] = data.data.items.map(mapSearchItemToCard);
 
       setResults(formattedResults);
 
