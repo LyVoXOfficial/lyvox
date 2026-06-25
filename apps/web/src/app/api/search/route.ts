@@ -82,6 +82,7 @@ const baseHandler = async (request: Request) => {
     page_offset: pageOffset,
     page_limit: params.limit,
     verified_only: params.verified_only ?? false,
+    condition_filter: params.condition ?? undefined,
   };
 
   const supabase = await supabaseServer();

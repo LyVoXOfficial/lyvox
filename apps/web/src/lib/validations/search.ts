@@ -53,6 +53,13 @@ export const searchAdvertsQuerySchema = z
       .nullable()
       .transform((val) => val || null),
 
+    // Condition filter (matches adverts.condition)
+    condition: z
+      .enum(["new", "used", "for_parts"])
+      .optional()
+      .nullable()
+      .transform((val) => val || null),
+
     // Verified sellers filter
     verified_only: z
       .string()
