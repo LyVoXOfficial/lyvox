@@ -12,14 +12,18 @@ export default function CategoryFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t } = useI18n();
+  const tr = (k: string, fb: string) => {
+    const v = t(k);
+    return v === k ? fb : v;
+  };
 
   const currentSort = searchParams.get("sort") || "date-desc";
 
   const sortOptions: SortOption[] = [
-    { value: "date-desc", label: t("filters.newest_first") || "Newest first" },
-    { value: "date-asc", label: t("filters.oldest_first") || "Oldest first" },
-    { value: "price-asc", label: t("filters.price_low_high") || "Price: low to high" },
-    { value: "price-desc", label: t("filters.price_high_low") || "Price: high to low" },
+    { value: "date-desc", label: tr("filters.newest_first", "Newest first") },
+    { value: "date-asc", label: tr("filters.oldest_first", "Oldest first") },
+    { value: "price-asc", label: tr("filters.price_low_high", "Price: low to high") },
+    { value: "price-desc", label: tr("filters.price_high_low", "Price: high to low") },
   ];
 
   const handleSortChange = (value: string) => {
@@ -29,15 +33,15 @@ export default function CategoryFilters() {
   };
 
   return (
-    <div className="flex items-center gap-4 border-y border-border/80 bg-muted/30 py-3">
+    <div className="flex items-center gap-3 rounded-xl border border-border/70 bg-card px-4 py-3 shadow-[var(--shadow-soft)]">
       <label htmlFor="sort" className="text-sm font-medium text-muted-foreground">
-        {t("filters.sort_by") || "Sort by"}
+        {tr("filters.sort_by", "Sort by")}
       </label>
       <select
         id="sort"
         value={currentSort}
         onChange={(event) => handleSortChange(event.target.value)}
-        className="h-10 max-w-xs flex-1 rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="h-10 max-w-xs flex-1 rounded-xl border border-border bg-background px-3 text-sm text-foreground transition focus:outline-none focus:ring-4 focus:ring-primary/12"
       >
         {sortOptions.map((option) => (
           <option key={option.value} value={option.value}>

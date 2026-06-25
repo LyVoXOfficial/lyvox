@@ -3,6 +3,7 @@ import type { Locale } from "@/lib/i18n";
 type ConsentKeys = "terms" | "privacy" | "marketing";
 
 type RegisterMessages = {
+  trustedSetup: string;
   title: string;
   intro: string;
   languageLabel: string;
@@ -36,6 +37,7 @@ type RegisterMessages = {
 };
 
 const englishMessages: RegisterMessages = {
+  trustedSetup: "Trusted account setup",
   title: "Create your LyVoX account",
   intro: "Register once to post listings, message sellers, save searches, and manage trusted account checks.",
   languageLabel: "Language",
@@ -80,6 +82,7 @@ const englishMessages: RegisterMessages = {
 export const registerMessages: Record<Locale, RegisterMessages> = {
   en: englishMessages,
   fr: {
+    trustedSetup: "Configuration de compte securisee",
     title: "Creer votre compte LyVoX",
     intro: "Inscrivez-vous pour publier des annonces, contacter les vendeurs et gerer les verifications du compte.",
     languageLabel: "Langue",
@@ -121,6 +124,7 @@ export const registerMessages: Record<Locale, RegisterMessages> = {
     loginLink: "Se connecter",
   },
   nl: {
+    trustedSetup: "Vertrouwde accountconfiguratie",
     title: "Maak je LyVoX-account",
     intro: "Registreer om advertenties te plaatsen, verkopers te berichten en accountcontroles te beheren.",
     languageLabel: "Taal",
@@ -162,6 +166,7 @@ export const registerMessages: Record<Locale, RegisterMessages> = {
     loginLink: "Inloggen",
   },
   ru: {
+    trustedSetup: "Настройка проверенного аккаунта",
     title: "Создайте аккаунт LyVoX",
     intro: "Зарегистрируйтесь один раз, чтобы публиковать объявления, писать продавцам, сохранять поиски и проходить проверки доверия.",
     languageLabel: "Язык",
@@ -203,6 +208,7 @@ export const registerMessages: Record<Locale, RegisterMessages> = {
     loginLink: "Войти",
   },
   de: {
+    trustedSetup: "Vertrauenswuerdige Kontoeinrichtung",
     title: "LyVoX-Konto erstellen",
     intro: "Registrieren Sie sich, um Anzeigen zu posten, Nachrichten zu senden und Kontopruefungen zu verwalten.",
     languageLabel: "Sprache",

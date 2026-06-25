@@ -49,7 +49,11 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   }
 
   const typedCurrent = current as Category;
-  const { locale } = await getI18nProps();
+  const { locale, messages } = await getI18nProps();
+  const t = (key: string, fallback: string): string => {
+    const value = key.split(".").reduce<any>((acc, part) => (acc ? acc[part] : undefined), messages);
+    return typeof value === "string" ? value : fallback;
+  };
 
   // Get all categories needed for breadcrumbs
   const crumbPaths = slugPath
@@ -187,33 +191,45 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     <div className="space-y-6">
       <Breadcrumbs
         items={breadcrumbItems}
-        homeLabel="All categories"
+        homeLabel={t("category.allCategories", "All categories")}
         homeHref="/c"
       />
 
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-normal text-foreground">{currentName}</h1>
+      <header className="space-y-1.5">
+        <h1 className="text-2xl font-extrabold tracking-tight text-foreground">{currentName}</h1>
         <p className="text-sm text-muted-foreground">
-          Active listings in this category are refreshed as sellers publish new offers.
+          {t(
+            "category.listingsSubtitle",
+            "Active listings in this category are refreshed as sellers publish new offers.",
+          )}
         </p>
       </header>
 
       {children.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-foreground">Subcategories</h2>
+          <h2 className="text-lg font-extrabold tracking-tight text-foreground">
+            {t("category.subcategories", "Subcategories")}
+          </h2>
           <CategoryList items={children} base="/c" />
         </section>
       )}
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-foreground">Listings</h2>
+        <h2 className="text-lg font-extrabold tracking-tight text-foreground">
+          {t("category.listings", "Listings")}
+        </h2>
         <CategoryFilters />
         {adverts.length > 0 ? (
           <AdsGrid items={adverts} />
         ) : (
-          <p className="text-sm text-muted-foreground">
-            There are no active listings in this category yet. Be the first to post one.
-          </p>
+          <div className="rounded-2xl border border-border/70 bg-card p-8 text-center shadow-[var(--shadow-soft)]">
+            <p className="text-sm text-muted-foreground">
+              {t(
+                "category.noListings",
+                "There are no active listings in this category yet. Be the first to post one.",
+              )}
+            </p>
+          </div>
         )}
       </section>
     </div>

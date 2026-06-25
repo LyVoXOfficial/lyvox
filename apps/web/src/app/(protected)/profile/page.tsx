@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowRight, CheckCircle, Star, Calendar, Mail, Phone, Edit, BarChart3, Package, MessageSquare, Settings, Heart, Shield, User, Bell } from "lucide-react";
+import { ArrowRight, CheckCircle, Star, Calendar, Mail, Phone, Edit, BarChart3, Package, MessageSquare, Settings, Heart, Shield, ShieldCheck, User, Bell } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/i18n/format";
 import { ProfileAdvertsList } from "@/components/profile/ProfileAdvertsList";
@@ -311,6 +311,10 @@ export default async function ProfilePage() {
   } = await supabase.auth.getUser();
   const { locale, messages } = await getI18nProps();
   const t = (key: string) => key.split('.').reduce<any>((acc, p) => (acc ? acc[p] : undefined), messages) ?? key;
+  const tr = (key: string, fallback: string) => {
+    const v = t(key);
+    return v === key ? fallback : v;
+  };
 
 
   if (!user) {
@@ -322,26 +326,20 @@ export default async function ProfilePage() {
   if (!profile) {
     return (
       <main className="container mx-auto p-4">
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/30">
-          <h2 className="text-lg font-semibold text-red-900 dark:text-red-100">
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 shadow-[var(--shadow-soft)]">
+          <h2 className="text-lg font-extrabold tracking-tight text-destructive">
             {t("profile.load_error")}
           </h2>
-          <p className="mt-2 text-sm text-red-700 dark:text-red-300">
-            Could not load your profile data. Refresh the page or sign in again.
+          <p className="mt-2 text-sm text-muted-foreground">
+            {tr("profile.load_error_hint", "Could not load your profile data. Refresh the page or sign in again.")}
           </p>
-          <div className="mt-4 flex gap-2">
-            <a
-              href="/profile?reload=1"
-              className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-            >
-              Refresh page
-            </a>
-            <a
-              href="/login"
-              className="rounded-md border border-red-600 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
-            >
-              Sign in again
-            </a>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button asChild>
+              <Link href="/profile?reload=1">{tr("profile.reload_page", "Refresh page")}</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/login">{tr("profile.login_again", "Sign in again")}</Link>
+            </Button>
           </div>
         </div>
       </main>
@@ -373,11 +371,21 @@ export default async function ProfilePage() {
           <AvatarFallback>{display_name?.charAt(0).toUpperCase()}</AvatarFallback>
         </Avatar>
         <div className="flex-1 text-center md:text-left">
-          <h1 className="text-3xl font-bold">{display_name}</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">{display_name}</h1>
           <div className="flex flex-wrap justify-center gap-2 pt-2 md:justify-start">
             <Badge variant="secondary">{t('profile.member')}</Badge>
-            {verified_phone && <Badge variant="secondary">{t('profile.phone_verified')}</Badge>}
-            {trust_score > 50 && <Badge variant="secondary">{t('profile.trusted_seller')}</Badge>}
+            {verified_phone && (
+              <Badge className="lyvox-trust-gradient gap-1 text-white">
+                <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                {t('profile.phone_verified')}
+              </Badge>
+            )}
+            {trust_score > 50 && (
+              <Badge className="lyvox-trust-gradient gap-1 text-white">
+                <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                {t('profile.trusted_seller')}
+              </Badge>
+            )}
           </div>
         </div>
         <Button asChild variant="outline">
@@ -389,7 +397,7 @@ export default async function ProfilePage() {
 
       {/* Navigation Tabs */}
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="flex w-full flex-nowrap gap-2 overflow-x-auto rounded-lg bg-muted/60 p-1 sm:grid sm:grid-cols-5 sm:gap-0">
+        <TabsList className="flex w-full flex-nowrap gap-2 overflow-x-auto rounded-xl bg-muted/60 p-1 sm:grid sm:grid-cols-5 sm:gap-0">
           <TabsTrigger value="dashboard" className="flex flex-none min-w-[120px] items-center gap-2 sm:min-w-0 sm:flex-1">
             <BarChart3 className="h-4 w-4 shrink-0" />
             <span className="text-xs font-medium sm:text-sm">{t('profile.dashboard')}</span>
@@ -449,11 +457,11 @@ export default async function ProfilePage() {
               </CardHeader>
               <CardContent className="flex flex-col gap-1 text-sm">
                 <div className="flex items-center gap-2">
-                  <Mail className={`h-4 w-4 ${verified_email ? 'text-green-500' : 'text-muted-foreground'}`} />
+                  <Mail className={`h-4 w-4 ${verified_email ? 'text-primary' : 'text-muted-foreground'}`} />
                   <span>{t('profile.email')}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Phone className={`h-4 w-4 ${verified_phone ? 'text-green-500' : 'text-muted-foreground'}`} />
+                  <Phone className={`h-4 w-4 ${verified_phone ? 'text-primary' : 'text-muted-foreground'}`} />
                   <span>{t('profile.phone')}</span>
                 </div>
               </CardContent>
@@ -479,15 +487,15 @@ export default async function ProfilePage() {
             <CardContent>
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">{advertsStats.active}</div>
+                  <div className="text-2xl font-extrabold tracking-tight text-primary">{advertsStats.active}</div>
                   <div className="text-sm text-muted-foreground">{t('profile.active')}</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-600">{advertsStats.draft}</div>
+                  <div className="text-2xl font-extrabold tracking-tight text-foreground">{advertsStats.draft}</div>
                   <div className="text-sm text-muted-foreground">{t('profile.draft')}</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-600">{advertsStats.archived}</div>
+                  <div className="text-2xl font-extrabold tracking-tight text-muted-foreground">{advertsStats.archived}</div>
                   <div className="text-sm text-muted-foreground">{t('profile.archived')}</div>
                 </div>
               </div>
@@ -565,7 +573,7 @@ export default async function ProfilePage() {
                 <p>{t('favorites.empty_state')}</p>
                 <p className="text-sm">{t('favorites.empty_action')}</p>
                 <Button asChild>
-                  <Link href="/search">{t('common.search') || 'Search listings'}</Link>
+                  <Link href="/search">{tr('common.search', 'Search listings')}</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -596,13 +604,13 @@ export default async function ProfilePage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-blue-50 p-2 dark:bg-blue-950">
-                    <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <div className="rounded-xl bg-primary/10 p-2">
+                    <Shield className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <CardTitle>Security</CardTitle>
+                    <CardTitle>{tr("profile.security", "Security")}</CardTitle>
                     <p className="text-sm text-muted-foreground">
-                      Manage biometrics, active sessions, and two-factor authentication.
+                      {tr("profile.security_description", "Manage biometrics, active sessions, and two-factor authentication.")}
                     </p>
                   </div>
                 </div>
@@ -610,7 +618,7 @@ export default async function ProfilePage() {
               <CardContent>
                 <Button asChild className="w-full">
                   <Link href="/profile/security">
-                    <Shield className="mr-2 h-4 w-4" /> Security settings
+                    <Shield className="mr-2 h-4 w-4" /> {tr("profile.security_settings", "Security settings")}
                   </Link>
                 </Button>
               </CardContent>
@@ -620,13 +628,13 @@ export default async function ProfilePage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-purple-50 p-2 dark:bg-purple-950">
-                    <User className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  <div className="rounded-xl bg-primary/10 p-2">
+                    <User className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <CardTitle>Profile</CardTitle>
+                    <CardTitle>{tr("profile.profile_settings", "Profile")}</CardTitle>
                     <p className="text-sm text-muted-foreground">
-                      Update personal information and public display settings.
+                      {tr("profile.profile_description", "Update personal information and public display settings.")}
                     </p>
                   </div>
                 </div>
@@ -634,7 +642,7 @@ export default async function ProfilePage() {
               <CardContent>
                 <Button asChild variant="outline" className="w-full">
                   <Link href="/profile/edit">
-                    <Edit className="mr-2 h-4 w-4" /> Edit profile
+                    <Edit className="mr-2 h-4 w-4" /> {t("profile.edit_profile")}
                   </Link>
                 </Button>
               </CardContent>
@@ -644,35 +652,35 @@ export default async function ProfilePage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-amber-50 p-2 dark:bg-amber-950">
-                    <Bell className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  <div className="rounded-xl bg-primary/10 p-2">
+                    <Bell className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <CardTitle>Notifications</CardTitle>
+                    <CardTitle>{tr("profile.notifications", "Notifications")}</CardTitle>
                     <p className="text-sm text-muted-foreground">
-                      Configure email and push notifications.
+                      {tr("profile.notifications_description", "Configure email and push notifications.")}
                     </p>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="flex items-center justify-between rounded-xl border border-border/70 p-3">
                     <div className="flex items-center gap-2">
                       <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span>Email notifications</span>
+                      <span>{tr("profile.email_notifications", "Email notifications")}</span>
                     </div>
-                    <Badge variant="secondary">Enabled</Badge>
+                    <Badge variant="secondary">{tr("profile.enabled", "Enabled")}</Badge>
                   </div>
-                  <div className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="flex items-center justify-between rounded-xl border border-border/70 p-3">
                     <div className="flex items-center gap-2">
                       <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                      <span>Messages</span>
+                      <span>{tr("profile.messages_notifications", "Messages")}</span>
                     </div>
-                    <Badge variant="secondary">Enabled</Badge>
+                    <Badge variant="secondary">{tr("profile.enabled", "Enabled")}</Badge>
                   </div>
                   <p className="pt-2 text-xs text-muted-foreground">
-                    Full notification preferences will be available soon.
+                    {tr("profile.notifications_coming_soon", "Full notification preferences will be available soon.")}
                   </p>
                 </div>
               </CardContent>

@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star } from "lucide-react";
 import { type ProfileReview } from "@/lib/profileTypes";
+import { useI18n } from "@/i18n";
 
 type ProfileReviewsListProps = {
   reviews: ProfileReview[];
@@ -15,7 +16,7 @@ const StarRating = ({ rating }: { rating: number }) => (
       <Star
         key={i}
         className={`h-5 w-5 ${
-          i < rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
+          i < rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"
         }`}
       />
     ))}
@@ -23,10 +24,16 @@ const StarRating = ({ rating }: { rating: number }) => (
 );
 
 export function ProfileReviewsList({ reviews }: ProfileReviewsListProps) {
+  const { t } = useI18n();
+  const tr = (k: string, fb: string) => {
+    const v = t(k);
+    return v === k ? fb : v;
+  };
+
   if (!reviews || reviews.length === 0) {
     return (
-      <div className="text-center text-muted-foreground py-10">
-        <p>На этого пользователя пока нет отзывов.</p>
+      <div className="py-10 text-center text-muted-foreground">
+        <p>{tr("profile.no_reviews", "No reviews for this user yet.")}</p>
       </div>
     );
   }
@@ -41,7 +48,7 @@ export function ProfileReviewsList({ reviews }: ProfileReviewsListProps) {
               <AvatarFallback>{review.author?.display_name?.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="flex-1">
-                <p className="font-semibold">{review.author?.display_name ?? 'Аноним'}</p>
+                <p className="font-semibold text-foreground">{review.author?.display_name ?? tr("profile.anonymous", "Anonymous user")}</p>
                 <StarRating rating={review.rating} />
             </div>
           </CardHeader>

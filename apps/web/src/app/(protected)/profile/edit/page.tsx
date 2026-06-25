@@ -7,6 +7,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabaseServer } from "@/lib/supabaseServer";
+import { getI18nProps } from "@/i18n/server";
+
+function createTr(messages: Record<string, unknown>) {
+  return (key: string, fallback: string): string => {
+    const value = key
+      .split(".")
+      .reduce<unknown>((acc, part) => (acc && typeof acc === "object" ? (acc as Record<string, unknown>)[part] : undefined), messages);
+    return typeof value === "string" && value.length > 0 ? value : fallback;
+  };
+}
 
 export const metadata = {
   title: "Edit profile | LyVoX",
@@ -73,75 +83,98 @@ export default async function ProfileEditPage({ searchParams }: PageProps) {
     .eq("id", user.id)
     .maybeSingle();
 
+  const { messages } = await getI18nProps();
+  const tr = createTr(messages as Record<string, unknown>);
+
   return (
     <main className="bg-background">
       <div className="mx-auto max-w-3xl space-y-6 px-4 py-8 md:py-10">
         <Button asChild variant="ghost" size="sm" className="px-0">
           <Link href="/profile">
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Back to profile
+            {tr("profile.back_to_profile", "Back to profile")}
           </Link>
         </Button>
 
-        <Card className="rounded-md border-border/80 shadow-sm">
+        <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
           <CardHeader>
-            <div className="inline-flex w-fit items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+            <div className="lyvox-trust-gradient inline-flex w-fit items-center gap-2 rounded-xl px-3 py-1 text-xs font-medium text-white">
               <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-              Public identity
+              {tr("profile.public_identity", "Public identity")}
             </div>
-            <CardTitle className="text-2xl">Edit profile</CardTitle>
+            <CardTitle className="text-2xl font-extrabold tracking-tight">
+              {tr("profile.edit_profile", "Edit profile")}
+            </CardTitle>
             <CardDescription>
-              Keep your seller profile clear and consistent. Buyers use these details before starting a conversation.
+              {tr(
+                "profile.edit_intro",
+                "Keep your seller profile clear and consistent. Buyers use these details before starting a conversation.",
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {searchParams?.status === "error" ? (
-              <div className="mb-5 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-                Could not save your profile. Check the values and try again.
+              <div className="mb-5 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+                {tr("profile.edit_save_error", "Could not save your profile. Check the values and try again.")}
               </div>
             ) : null}
 
             <form action={updateProfileAction} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="display_name">Display name</Label>
+                <Label htmlFor="display_name">{tr("profile.display_name", "Display name")}</Label>
                 <Input
                   id="display_name"
                   name="display_name"
                   type="text"
                   defaultValue={profile?.display_name || user.email?.split("@")[0] || ""}
-                  placeholder="Your public name"
+                  placeholder={tr("profile.display_name_placeholder", "Your public name")}
                   maxLength={100}
+                  className="rounded-xl focus:ring-4 focus:ring-primary/12"
                 />
-                <p className="text-xs text-muted-foreground">Shown on your listings, profile, and chat conversations.</p>
+                <p className="text-xs text-muted-foreground">
+                  {tr("profile.display_name_hint", "Shown on your listings, profile, and chat conversations.")}
+                </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={user.email || ""} disabled className="bg-muted" />
-                <p className="text-xs text-muted-foreground">Email changes are handled through account security.</p>
+                <Label htmlFor="email">{tr("profile.email", "Email")}</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={user.email || ""}
+                  disabled
+                  className="rounded-xl bg-muted focus:ring-4 focus:ring-primary/12"
+                />
+                <p className="text-xs text-muted-foreground">
+                  {tr("profile.email_hint", "Email changes are handled through account security.")}
+                </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone">{tr("profile.phone", "Phone")}</Label>
                 <Input
                   id="phone"
                   name="phone"
                   type="tel"
                   defaultValue={profile?.phone || ""}
                   placeholder="+32 XXX XX XX XX"
+                  className="rounded-xl focus:ring-4 focus:ring-primary/12"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Used for trust checks and buyer contact preferences. Verify it from the verification page.
+                  {tr(
+                    "profile.phone_hint",
+                    "Used for trust checks and buyer contact preferences. Verify it from the verification page.",
+                  )}
                 </p>
               </div>
 
               <div className="flex flex-col gap-2 sm:flex-row">
                 <Button type="submit" className="flex-1">
                   <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-                  Save profile
+                  {tr("profile.save_profile", "Save profile")}
                 </Button>
                 <Button asChild variant="outline">
-                  <Link href="/profile">Cancel</Link>
+                  <Link href="/profile">{tr("common.cancel", "Cancel")}</Link>
                 </Button>
               </div>
             </form>

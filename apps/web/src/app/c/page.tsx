@@ -23,15 +23,23 @@ export default async function CategoriesIndex() {
   const items = error ? [] : ((data as Category[]) ?? []);
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold tracking-normal text-foreground">{t("common.categories", "Categories")}</h1>
-      <p className="text-sm text-muted-foreground">
-        Choose a section to browse listings and subcategories.
-      </p>
+    <div className="space-y-6">
+      <header className="space-y-1.5">
+        <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
+          {t("common.categories", "Categories")}
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          {t("category.indexSubtitle", "Choose a section to browse listings and subcategories.")}
+        </p>
+      </header>
       {items.length ? (
         <CategoryList items={items} base="/c" />
       ) : (
-        <p className="text-sm text-muted-foreground">Categories are temporarily unavailable.</p>
+        <div className="rounded-2xl border border-border/70 bg-card p-6 text-center shadow-[var(--shadow-soft)]">
+          <p className="text-sm text-muted-foreground">
+            {t("category.unavailable", "Categories are temporarily unavailable.")}
+          </p>
+        </div>
       )}
     </div>
   );

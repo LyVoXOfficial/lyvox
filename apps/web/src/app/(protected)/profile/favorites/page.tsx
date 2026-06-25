@@ -30,6 +30,10 @@ function mapSelectableItems(ordered: ReturnType<typeof useFavorites>["ordered"])
 
 export default function FavoritesPage() {
   const { t } = useI18n();
+  const tr = (key: string, fallback: string): string => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
   const { ordered, isLoading, refresh } = useFavorites();
 
   useEffect(() => {
@@ -39,20 +43,20 @@ export default function FavoritesPage() {
   const items = mapSelectableItems(ordered);
   const totalFavorites = ordered.filter((favorite) => favorite.advert).length;
   const hiddenCount = Math.max(0, totalFavorites - items.length);
-  const title = t("favorites.title") || "Favorites";
+  const title = tr("favorites.title", "Favorites");
 
   return (
     <main className="space-y-6">
       <header className="flex items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+          <div className="lyvox-trust-gradient inline-flex items-center gap-2 rounded-xl px-3 py-1 text-xs font-medium text-white">
             <Heart className="h-3.5 w-3.5" aria-hidden="true" />
-            Saved listings
+            {tr("favorites.saved_listings", "Saved listings")}
           </div>
-          <h1 className="mt-3 text-2xl font-semibold">{title}</h1>
+          <h1 className="mt-3 text-2xl font-extrabold tracking-tight">{title}</h1>
         </div>
         <Button asChild variant="outline">
-          <Link href="/search">{t("common.search") || "Search listings"}</Link>
+          <Link href="/search">{tr("common.search", "Search adverts")}</Link>
         </Button>
       </header>
 
@@ -60,28 +64,27 @@ export default function FavoritesPage() {
         <Alert variant="warning">
           <ShieldAlert className="h-4 w-4" aria-hidden="true" />
           <AlertDescription>
-            {t("favorites.hidden_inactive", { count: hiddenCount.toString() }) ||
-              `${hiddenCount} ${hiddenCount === 1 ? "favorite" : "favorites"} hidden because the advert is no longer active.`}
+            {t("favorites.hidden_inactive", { count: hiddenCount.toString() })}
           </AlertDescription>
         </Alert>
       ) : null}
 
       {isLoading ? (
-        <Card className="rounded-md border-border/80">
+        <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-soft)]">
           <CardContent className="py-10 text-center text-muted-foreground">
-            {t("common.loading") || "Loading..."}
+            {tr("common.loading", "Loading…")}
           </CardContent>
         </Card>
       ) : items.length === 0 ? (
-        <Card className="rounded-md border-border/80">
+        <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-soft)]">
           <CardHeader>
-            <CardTitle>{title}</CardTitle>
+            <CardTitle className="font-extrabold tracking-tight">{title}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-center text-muted-foreground">
-            <p>{t("favorites.empty_state") || "You have not saved any listings yet."}</p>
-            <p>{t("favorites.empty_action") || "Browse the marketplace and save listings you want to compare later."}</p>
+            <p>{tr("favorites.empty_state", "You haven't saved any favorites yet")}</p>
+            <p>{tr("favorites.empty_action", "Browse listings and tap the heart icon to save them")}</p>
             <Button asChild>
-              <Link href="/search">{t("common.search") || "Search listings"}</Link>
+              <Link href="/search">{tr("common.search", "Search adverts")}</Link>
             </Button>
           </CardContent>
         </Card>

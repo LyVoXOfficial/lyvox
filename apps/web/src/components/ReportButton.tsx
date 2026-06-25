@@ -5,12 +5,18 @@ import { toast } from "sonner";
 import { Flag, X } from "lucide-react";
 
 import { apiFetch, RateLimitedError } from "@/lib/fetcher";
+import { useI18n } from "@/i18n";
 
 type Props = {
   advertId: string;
 };
 
 export default function ReportButton({ advertId }: Props) {
+  const { t } = useI18n();
+  const tr = (key: string, fallback: string, params?: Record<string, string | number>) => {
+    const value = t(key, params);
+    return value === key ? fallback : value;
+  };
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("fraud");
   const [details, setDetails] = useState("");
@@ -51,17 +57,19 @@ export default function ReportButton({ advertId }: Props) {
         throw new Error(payload.error || response.statusText);
       }
 
-      setMessage("Report submitted. Thank you.");
+      setMessage(tr("report.success", "Report submitted. Thank you."));
       setTimeout(() => close(), 1000);
     } catch (error) {
       if (error instanceof RateLimitedError) {
         const seconds = Math.max(1, Math.round(error.retryAfterSec ?? 60));
         setCooldown(seconds);
-        toast.error(`Too many attempts. Try again in ${seconds}s.`);
+        toast.error(
+          tr("report.too_many_attempts", `Too many attempts. Try again in ${seconds}s.`, { seconds }),
+        );
       } else {
         const text =
-          error instanceof Error ? error.message : "Could not submit the report";
-        setMessage(`Error: ${text}`);
+          error instanceof Error ? error.message : tr("report.submit_error", "Could not submit the report");
+        setMessage(tr("report.error_prefix", `Error: ${text}`, { message: text }));
       }
       setSubmitting(false);
     }
@@ -81,7 +89,7 @@ export default function ReportButton({ advertId }: Props) {
         className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
       >
         <Flag className="h-3.5 w-3.5" aria-hidden="true" />
-        Report
+        {tr("report.button", "Report")}
       </button>
       {open && (
         <div
@@ -90,46 +98,46 @@ export default function ReportButton({ advertId }: Props) {
             if (event.target === event.currentTarget) close();
           }}
         >
-          <div className="w-full max-w-md rounded-md bg-card p-5 shadow-xl">
+          <div className="w-full max-w-md rounded-2xl border border-border/70 bg-card p-5 shadow-[var(--shadow-card)]">
             <div className="flex items-start justify-between gap-3">
-              <h3 className="text-lg font-semibold">Report listing</h3>
+              <h3 className="text-lg font-extrabold tracking-tight">{tr("report.title", "Report listing")}</h3>
               <button
                 type="button"
                 onClick={close}
-                className="rounded-md p-2 text-muted-foreground hover:bg-muted"
+                className="rounded-xl p-2 text-muted-foreground hover:bg-muted"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
-                <span className="sr-only">Close</span>
+                <span className="sr-only">{tr("report.close", "Close")}</span>
               </button>
             </div>
 
             <div className="mt-4 space-y-3 text-sm">
               <div>
                 <label className="mb-1 block text-xs uppercase tracking-wide text-muted-foreground">
-                  Reason
+                  {tr("report.reason_label", "Reason")}
                 </label>
                 <select
                   value={reason}
                   onChange={(event) => setReason(event.target.value)}
-                  className="w-full rounded-md border px-3 py-2"
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-4 focus:ring-primary/12"
                 >
-                  <option value="fraud">Fraud or phishing</option>
-                  <option value="spam">Spam</option>
-                  <option value="duplicate">Duplicate listing</option>
-                  <option value="nsfw">Unsafe content</option>
-                  <option value="other">Other</option>
+                  <option value="fraud">{tr("report.reasons.fraud", "Fraud or phishing")}</option>
+                  <option value="spam">{tr("report.reasons.spam", "Spam")}</option>
+                  <option value="duplicate">{tr("report.reasons.duplicate", "Duplicate listing")}</option>
+                  <option value="nsfw">{tr("report.reasons.nsfw", "Unsafe content")}</option>
+                  <option value="other">{tr("report.reasons.other", "Other")}</option>
                 </select>
               </div>
 
               <div>
                 <label className="mb-1 block text-xs uppercase tracking-wide text-muted-foreground">
-                  Details (optional)
+                  {tr("report.details_label", "Details (optional)")}
                 </label>
                 <textarea
                   value={details}
                   onChange={(event) => setDetails(event.target.value)}
                   rows={4}
-                  className="w-full rounded-md border px-3 py-2"
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-4 focus:ring-primary/12"
                 />
               </div>
             </div>
@@ -139,20 +147,20 @@ export default function ReportButton({ advertId }: Props) {
                 type="button"
                 onClick={submit}
                 disabled={submitting || cooldown > 0}
-                className="rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-xl bg-primary px-4 py-2 font-medium text-primary-foreground shadow-[var(--shadow-soft)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {submitting
-                  ? "Submitting..."
+                  ? tr("report.submitting", "Submitting...")
                   : cooldown > 0
-                    ? `Retry in ${cooldown}s`
-                    : "Submit report"}
+                    ? tr("report.retry_in", `Retry in ${cooldown}s`, { seconds: cooldown })
+                    : tr("report.submit", "Submit report")}
               </button>
               <button
                 type="button"
                 onClick={close}
-                className="rounded-md border px-4 py-2 font-medium"
+                className="rounded-xl border border-border px-4 py-2 font-medium"
               >
-                Cancel
+                {tr("common.cancel", "Cancel")}
               </button>
             </div>
 

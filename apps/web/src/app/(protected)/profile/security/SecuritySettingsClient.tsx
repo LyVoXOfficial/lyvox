@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TOTPSettings } from "@/components/TOTPSettings";
 import { supabase } from "@/lib/supabaseClient";
+import { useI18n } from "@/i18n";
 import { WebAuthnNotAvailableNotice } from "./mfa-notice";
 
 interface Session {
@@ -116,31 +117,36 @@ interface SessionCardProps {
 }
 
 function SessionCard({ session, isCurrent, onRevoke, isRevoking }: SessionCardProps) {
+  const { t } = useI18n();
+  const tr = (key: string, fallback: string): string => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
   const userAgent = typeof navigator !== "undefined" ? navigator.userAgent : "";
   const parsed = parseUserAgent(userAgent);
 
   return (
-    <Card className={isCurrent ? "rounded-md border-primary/50" : "rounded-md"}>
+    <Card className={isCurrent ? "rounded-xl border-primary/50 shadow-[var(--shadow-soft)]" : "rounded-xl border-border/70 shadow-[var(--shadow-soft)]"}>
       <CardContent className="flex items-start justify-between gap-3 p-4">
         <div className="flex min-w-0 flex-1 items-start gap-3">
           <div className="mt-1 text-muted-foreground">{parsed.icon}</div>
           <div className="min-w-0 flex-1 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <p className="font-medium">
-                {parsed.browser} on {parsed.os}
+                {parsed.browser} {tr("profile.on", "on")} {parsed.os}
               </p>
               <Badge variant="outline" className="text-xs">
-                {parsed.device}
+                {tr(`profile.device_${parsed.device.toLowerCase()}`, parsed.device)}
               </Badge>
               {isCurrent && (
                 <Badge variant="default" className="text-xs">
-                  Current session
+                  {tr("profile.current_session", "Current session")}
                 </Badge>
               )}
               {session.aal === "aal2" && (
                 <Badge variant="secondary" className="text-xs">
                   <CheckCircle2 className="size-3" aria-hidden="true" />
-                  MFA checked
+                  {tr("profile.mfa_checked", "MFA checked")}
                 </Badge>
               )}
             </div>
@@ -148,12 +154,12 @@ function SessionCard({ session, isCurrent, onRevoke, isRevoking }: SessionCardPr
             <div className="space-y-1 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <Clock className="size-3" aria-hidden="true" />
-                <span>Last activity: {formatSessionDate(session.updatedAt)}</span>
+                <span>{tr("profile.last_activity", "Last activity")}: {formatSessionDate(session.updatedAt)}</span>
               </div>
               {session.notAfter && (
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="size-3" aria-hidden="true" />
-                  <span>Expires: {formatSessionDate(session.notAfter)}</span>
+                  <span>{tr("profile.expires", "Expires")}: {formatSessionDate(session.notAfter)}</span>
                 </div>
               )}
             </div>
@@ -167,7 +173,7 @@ function SessionCard({ session, isCurrent, onRevoke, isRevoking }: SessionCardPr
             onClick={() => onRevoke(session.id)}
             disabled={isRevoking}
             className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-            aria-label="End session"
+            aria-label={tr("profile.end_session", "End session")}
           >
             {isRevoking ? (
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -183,6 +189,11 @@ function SessionCard({ session, isCurrent, onRevoke, isRevoking }: SessionCardPr
 
 export function SecuritySettingsClient() {
   const router = useRouter();
+  const { t } = useI18n();
+  const tr = (key: string, fallback: string): string => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
   const [sessions, setSessions] = useState<Session[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
@@ -216,7 +227,7 @@ export function SecuritySettingsClient() {
       ]);
     } catch (error) {
       console.error("Failed to load sessions:", error);
-      toast.error("Could not load active sessions");
+      toast.error(tr("profile.sessions_load_error", "Could not load active sessions"));
     } finally {
       setIsLoading(false);
     }
@@ -230,11 +241,11 @@ export function SecuritySettingsClient() {
     setRevokingSessionId(sessionId);
 
     try {
-      toast.success("Session ended");
+      toast.success(tr("profile.session_ended", "Session ended"));
       setSessions((current) => current.filter((session) => session.id !== sessionId));
     } catch (error) {
       console.error("Failed to revoke session:", error);
-      toast.error("Could not end this session");
+      toast.error(tr("profile.session_end_error", "Could not end this session"));
     } finally {
       setRevokingSessionId(null);
     }
@@ -250,12 +261,12 @@ export function SecuritySettingsClient() {
         throw error;
       }
 
-      toast.success("Other devices disconnected");
+      toast.success(tr("profile.other_devices_disconnected", "Other devices disconnected"));
       await loadSessions();
       setShowRevokeAllDialog(false);
     } catch (error) {
       console.error("Failed to revoke all sessions:", error);
-      toast.error("Could not disconnect other devices");
+      toast.error(tr("profile.disconnect_error", "Could not disconnect other devices"));
     } finally {
       setIsRevokingAll(false);
     }
@@ -267,29 +278,34 @@ export function SecuritySettingsClient() {
     <div className="space-y-6 p-4 sm:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Account security</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">
+            {tr("profile.account_security", "Account security")}
+          </h1>
           <p className="max-w-2xl text-sm text-muted-foreground">
-            Manage two-factor authentication, active sessions, and recovery-aware account protection.
+            {tr(
+              "profile.account_security_intro",
+              "Manage two-factor authentication, active sessions, and recovery-aware account protection.",
+            )}
           </p>
         </div>
         <Button variant="outline" onClick={() => router.push("/profile")}>
-          Back to profile
+          {tr("profile.back_to_profile", "Back to profile")}
         </Button>
       </div>
 
       <WebAuthnNotAvailableNotice />
       <TOTPSettings />
 
-      <Card className="rounded-md">
+      <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
         <CardHeader>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-1">
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 font-extrabold tracking-tight">
                 <Shield className="size-5" aria-hidden="true" />
-                Active sessions
+                {tr("profile.active_sessions", "Active sessions")}
               </CardTitle>
               <CardDescription>
-                Review where your LyVoX account is currently signed in.
+                {tr("profile.active_sessions_desc", "Review where your LyVoX account is currently signed in.")}
               </CardDescription>
             </div>
             {otherSessionsCount > 0 && (
@@ -299,7 +315,7 @@ export function SecuritySettingsClient() {
                 onClick={() => setShowRevokeAllDialog(true)}
               >
                 <LogOut className="size-4" aria-hidden="true" />
-                Disconnect other devices
+                {tr("profile.disconnect_other_devices", "Disconnect other devices")}
               </Button>
             )}
           </div>
@@ -308,17 +324,21 @@ export function SecuritySettingsClient() {
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="size-6 animate-spin text-muted-foreground" aria-hidden="true" />
-              <span className="ml-2 text-sm text-muted-foreground">Loading sessions...</span>
+              <span className="ml-2 text-sm text-muted-foreground">
+                {tr("profile.loading_sessions", "Loading sessions…")}
+              </span>
             </div>
           ) : sessions.length === 0 ? (
-            <div className="rounded-md border border-dashed p-8 text-center">
+            <div className="rounded-xl border border-dashed border-border/70 p-8 text-center">
               <Shield className="mx-auto size-12 text-muted-foreground/50" aria-hidden="true" />
-              <h3 className="mt-4 text-sm font-semibold">No active session found</h3>
+              <h3 className="mt-4 text-sm font-semibold">
+                {tr("profile.no_active_session", "No active session found")}
+              </h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Sign in again if this page cannot read your current session.
+                {tr("profile.no_active_session_desc", "Sign in again if this page cannot read your current session.")}
               </p>
               <Button className="mt-5" onClick={() => router.push("/login")}>
-                Sign in
+                {tr("profile.sign_in", "Sign in")}
               </Button>
             </div>
           ) : (
@@ -335,15 +355,18 @@ export function SecuritySettingsClient() {
             </div>
           )}
 
-          <div className="rounded-md border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/30">
+          <div className="rounded-xl border border-border/70 bg-muted p-4">
             <div className="flex gap-3">
-              <AlertTriangle className="size-5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+              <AlertTriangle className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
               <div className="space-y-1">
-                <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
-                  See a device you do not recognize?
+                <p className="text-sm font-medium text-foreground">
+                  {tr("profile.unrecognized_device_title", "See a device you do not recognize?")}
                 </p>
-                <p className="text-sm text-amber-700 dark:text-amber-300">
-                  End the session, change your password, and keep two-factor authentication enabled before continuing buyer or seller conversations.
+                <p className="text-sm text-muted-foreground">
+                  {tr(
+                    "profile.unrecognized_device_desc",
+                    "End the session, change your password, and keep two-factor authentication enabled before continuing buyer or seller conversations.",
+                  )}
                 </p>
               </div>
             </div>
@@ -351,39 +374,48 @@ export function SecuritySettingsClient() {
         </CardContent>
       </Card>
 
-      <Card className="rounded-md">
+      <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-extrabold tracking-tight">
             <CheckCircle2 className="size-5" aria-hidden="true" />
-            Security recommendations
+            {tr("profile.security_recommendations", "Security recommendations")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="space-y-3 text-sm">
             <li className="flex items-start gap-3">
-              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
               <div>
-                <p className="font-medium">Enable authenticator-app codes</p>
+                <p className="font-medium">{tr("profile.rec_totp_title", "Enable authenticator-app codes")}</p>
                 <p className="text-muted-foreground">
-                  They protect listing drafts, seller identity signals, and buyer conversations from password-only account takeover.
+                  {tr(
+                    "profile.rec_totp_desc",
+                    "They protect listing drafts, seller identity signals, and buyer conversations from password-only account takeover.",
+                  )}
                 </p>
               </div>
             </li>
             <li className="flex items-start gap-3">
-              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
               <div>
-                <p className="font-medium">Review sessions regularly</p>
+                <p className="font-medium">{tr("profile.rec_sessions_title", "Review sessions regularly")}</p>
                 <p className="text-muted-foreground">
-                  If you use shared or public devices, sign out when you finish and check this page afterwards.
+                  {tr(
+                    "profile.rec_sessions_desc",
+                    "If you use shared or public devices, sign out when you finish and check this page afterwards.",
+                  )}
                 </p>
               </div>
             </li>
             <li className="flex items-start gap-3">
-              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
               <div>
-                <p className="font-medium">Keep recovery details current</p>
+                <p className="font-medium">{tr("profile.rec_recovery_title", "Keep recovery details current")}</p>
                 <p className="text-muted-foreground">
-                  Verified email and phone details make account recovery safer without exposing private information to buyers.
+                  {tr(
+                    "profile.rec_recovery_desc",
+                    "Verified email and phone details make account recovery safer without exposing private information to buyers.",
+                  )}
                 </p>
               </div>
             </li>
@@ -392,15 +424,18 @@ export function SecuritySettingsClient() {
       </Card>
 
       <AlertDialog open={showRevokeAllDialog} onOpenChange={setShowRevokeAllDialog}>
-        <AlertDialogContent className="rounded-md">
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Disconnect every other device?</AlertDialogTitle>
+            <AlertDialogTitle>{tr("profile.disconnect_all_title", "Disconnect every other device?")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This signs out all other active sessions. Those devices will need to sign in again before accessing your account.
+              {tr(
+                "profile.disconnect_all_desc",
+                "This signs out all other active sessions. Those devices will need to sign in again before accessing your account.",
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isRevokingAll}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isRevokingAll}>{tr("common.cancel", "Cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleRevokeAllSessions}
               disabled={isRevokingAll}
@@ -409,10 +444,10 @@ export function SecuritySettingsClient() {
               {isRevokingAll ? (
                 <>
                   <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-                  Disconnecting...
+                  {tr("profile.disconnecting", "Disconnecting…")}
                 </>
               ) : (
-                "Disconnect other devices"
+                tr("profile.disconnect_other_devices", "Disconnect other devices")
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

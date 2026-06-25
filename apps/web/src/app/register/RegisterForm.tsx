@@ -233,7 +233,7 @@ export default function RegisterForm({ initialLocale }: Props) {
         <div className="space-y-2.5">
           <div className="inline-flex items-center gap-2 rounded-full lyvox-trust-gradient px-3 py-1 text-xs font-semibold text-white shadow-[var(--shadow-soft)]">
             <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-            Trusted account setup
+            {messages.trustedSetup}
           </div>
           <CardTitle className="text-2xl font-extrabold tracking-tight">{messages.title}</CardTitle>
           <CardDescription className="max-w-xl">{messages.intro}</CardDescription>
