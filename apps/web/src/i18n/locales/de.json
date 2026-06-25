@@ -479,18 +479,6 @@
     "max_files_reached": "Maximal 12 Fotos",
     "drag_drop_hint": "Bilder hierher ziehen oder zum Auswählen klicken",
     "delete": "Löschen",
-    "gallery": {
-      "open_fullscreen": "Im Vollbild öffnen",
-      "close": "Galerie schließen",
-      "counter": "{current} / {total}",
-      "thumbnail": "Miniaturbild {index}",
-      "previous": "Vorheriges Foto",
-      "next": "Nächstes Foto",
-      "zoom_in": "Heranzoomen",
-      "zoom_out": "Herauszoomen",
-      "fullscreen_title": "Galerie",
-      "image_alt": "Foto {index}"
-    },
     "preview": "Vorschau",
     "close_preview": "Vorschau schließen",
     "set_cover": "Als Titelbild festlegen",
@@ -602,6 +590,18 @@
       "years": "Produktionsjahre",
       "present": "heute",
       "production_countries": "Produktionsländer"
+    },
+    "gallery": {
+      "open_fullscreen": "Im Vollbild öffnen",
+      "close": "Galerie schließen",
+      "counter": "{current} / {total}",
+      "thumbnail": "Miniaturbild {index}",
+      "previous": "Vorheriges Foto",
+      "next": "Nächstes Foto",
+      "zoom_in": "Heranzoomen",
+      "zoom_out": "Herauszoomen",
+      "fullscreen_title": "Galerie",
+      "image_alt": "Foto {index}"
     }
   },
   "catalog": {
@@ -626,7 +626,13 @@
         "number_min": "„{field}“ muss mindestens {min} sein.",
         "number_max": "„{field}“ darf höchstens {max} sein.",
         "option_invalid": "Wählen Sie einen gültigen Wert für „{field}“."
-      }
+      },
+      "select_type": "Typ auswählen...",
+      "select_brand": "Marke auswählen...",
+      "select_model": "Modell auswählen...",
+      "select_category": "Kategorie auswählen...",
+      "select_rating": "Klasse auswählen...",
+      "loading": "Wird geladen..."
     },
     "furniture": {
       "material": "Hauptmaterial",
@@ -804,6 +810,43 @@
         "core": "Wesentliche Informationen",
         "timing": "Zeit & Hinweise"
       }
+    },
+    "electronics": {
+      "no_models": "Keine Modelle für diese Marke verfügbar",
+      "accessories_placeholder": "z. B. Ladegerät, Kabel, Hülle"
+    },
+    "real_estate": {
+      "dimensions": "Abmessungen",
+      "epc_no_limit": "Kein Limit"
+    },
+    "fashion": {
+      "select_gender": "Geschlecht auswählen...",
+      "eu_size": "EU-Größe",
+      "select_eu_size": "EU-Größe auswählen...",
+      "select_size": "Größe auswählen...",
+      "select_material": "Material auswählen...",
+      "select_season": "Saison auswählen...",
+      "select_pattern": "Muster auswählen...",
+      "material_cotton": "Baumwolle",
+      "material_polyester": "Polyester",
+      "material_wool": "Wolle",
+      "material_leather": "Leder",
+      "material_denim": "Denim",
+      "material_silk": "Seide",
+      "material_linen": "Leinen",
+      "material_synthetic": "Synthetik",
+      "material_mixed": "Mischgewebe"
+    },
+    "jobs": {
+      "select_contract": "Vertrag auswählen...",
+      "select_cp": "PK auswählen...",
+      "language_dutch": "Niederländisch",
+      "language_french": "Französisch",
+      "language_english": "Englisch",
+      "language_german": "Deutsch",
+      "language_other": "Andere",
+      "company_name_placeholder": "Name Ihres Unternehmens",
+      "hr_contact_name_placeholder": "Name des HR-Managers"
     }
   },
   "admin": {
@@ -1028,5 +1071,86 @@
     "too_many_attempts": "Zu viele Versuche. Versuchen Sie es in {seconds}s erneut.",
     "submit_error": "Meldung konnte nicht gesendet werden",
     "error_prefix": "Fehler: {message}"
+  },
+  "more": {
+    "searchListings": "Anzeigen suchen",
+    "postListing": "Anzeige aufgeben",
+    "favorites": "Favoriten",
+    "messages": "Nachrichten",
+    "profile": "Profil",
+    "securitySettings": "Sicherheitseinstellungen",
+    "contactSupport": "Support kontaktieren",
+    "terms": "Bedingungen",
+    "privacy": "Datenschutz",
+    "accountSafetyLegal": "Konto, Sicherheit und Rechtliches"
+  },
+  "contactpage": {
+    "badge": "Support-Center",
+    "title": "LyVoX-Support kontaktieren",
+    "lead": "Wählen Sie den Weg, der zu Ihrem Anliegen passt. Fügen Sie bei Meldungen zu Anzeigen, Zahlungen oder Sicherheit den Anzeigenlink, das Verkäuferprofil, Screenshots und den zeitlichen Ablauf bei.",
+    "priorityTitle": "Antwortprioritäten",
+    "priorityBody": "Fragen zu Sicherheit, Kontozugang und Transaktionen werden zuerst geprüft. Allgemeine Produktfragen werden nach dringenden Vertrauens- und Sicherheitsmeldungen bearbeitet.",
+    "accountTitle": "Konto und Zugang",
+    "accountDesc": "Hilfe bei Anmeldung, Wiederherstellung, Profilverifizierung oder verdächtigen Kontoaktivitäten.",
+    "accountAction": "Zugang wiederherstellen",
+    "listingTitle": "Problem mit Anzeige oder Transaktion",
+    "listingDesc": "Melden Sie eine verdächtige Anzeige, ein Zahlungsproblem oder eine Sicherheitsfrage, bevor Sie ein Geschäft fortsetzen.",
+    "listingAction": "Anzeige finden",
+    "generalTitle": "Allgemeiner Support",
+    "generalDesc": "Fragen zu LyVoX, Marktplatzrichtlinien, Partnerschaften oder operativem Support.",
+    "generalAction": "Support per E-Mail",
+    "beforeTitle": "Bevor Sie uns kontaktieren",
+    "beforeTip1": "Geben Sie keine Passwörter, Kartendaten oder Einmalcodes in Nachrichten weiter.",
+    "beforeTip2": "Nutzen Sie die Melden-Schaltfläche bei verdächtigen Anzeigen, damit die Moderation den Anzeigenkontext erhält.",
+    "beforeTip3": "Halten Sie die Kommunikation möglichst im LyVoX-Chat, um einen klareren Nachweis bei Streitfällen zu haben."
+  },
+  "verify": {
+    "trust_checks": "Vertrauensprüfungen",
+    "title": "Kontoverifizierung",
+    "subtitle": "Bestätige E-Mail und Telefon, um das Vertrauen auf dem Marktplatz zu stärken und sicherer zu veröffentlichen.",
+    "ready_title": "Bereit zum Veröffentlichen",
+    "required_title": "Verifizierung erforderlich",
+    "ready_desc": "Dein Konto hat die erforderlichen Vertrauensprüfungen bestanden.",
+    "required_desc": "Schließe beide Prüfungen ab, um mit vollen Vertrauenssignalen zu veröffentlichen.",
+    "post_listing": "Anzeige aufgeben",
+    "email_title": "E-Mail-Adresse",
+    "verified": "Verifiziert",
+    "not_verified": "Nicht verifiziert",
+    "email_done": "Deine E-Mail ist verifiziert. Marktplatz-Updates sowie Käufer- und Verkäufer-Benachrichtigungen erreichen diese Adresse.",
+    "phone_title": "Telefonnummer",
+    "no_phone": "Keine Telefonnummer hinzugefügt",
+    "phone_done": "Dein Telefon ist verifiziert. Käufer sehen stärkere Vertrauenssignale, wenn sie dich kontaktieren.",
+    "help_title": "Brauchst du Hilfe?",
+    "help_email_q": "Keine E-Mail?",
+    "help_email_a": "Prüfe den Spam-Ordner oder fordere eine neue Bestätigungs-E-Mail an.",
+    "help_phone_q": "Problem mit dem Telefon?",
+    "help_phone_a": "Verwende das internationale Format, zum Beispiel +32.",
+    "help_blocked_q": "Immer noch blockiert?",
+    "contact_support": "Support kontaktieren",
+    "email_intro": "Wir haben eine Bestätigungs-E-Mail gesendet an",
+    "email_intro_2": "Prüfe deinen Posteingang und öffne den Bestätigungslink.",
+    "sending": "Wird gesendet...",
+    "resend_email": "Bestätigungs-E-Mail erneut senden",
+    "email_send_error": "E-Mail konnte nicht gesendet werden.",
+    "email_send_error_retry": "E-Mail konnte nicht gesendet werden. Versuche es später erneut.",
+    "email_sent": "Bestätigungs-E-Mail gesendet an",
+    "step_phone": "Schritt 1 — Telefon hinzufügen",
+    "step_code": "Schritt 2 — Code eingeben",
+    "phone_hint": "Verwende das internationale Format, zum Beispiel +32...",
+    "send_code": "Bestätigungscode senden",
+    "sms_code": "SMS-Code",
+    "code_hint": "Gib den 6-stelligen Code ein, der gesendet wurde an",
+    "verifying": "Wird verifiziert...",
+    "verify_code": "Code verifizieren",
+    "change_number": "Nummer ändern",
+    "phone_invalid": "Gib eine gültige Telefonnummer ein.",
+    "phone_update_error": "Deine Telefonnummer konnte nicht aktualisiert werden.",
+    "sms_unavailable": "Der SMS-Versand ist vorübergehend nicht verfügbar.",
+    "code_send_error": "Bestätigungscode konnte nicht gesendet werden.",
+    "code_sent": "Bestätigungscode gesendet an",
+    "code_required": "Gib den SMS-Code ein.",
+    "code_incorrect": "Der Code ist falsch. Versuche es erneut.",
+    "phone_verified": "Telefonnummer verifiziert.",
+    "code_verify_error": "Code konnte nicht verifiziert werden."
   }
 }

@@ -1251,15 +1251,15 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
 
       if (autoSaveStatus === "saving") {
         messageKey = "post.auto_save.saving";
-        toneClass = "text-amber-600";
+        toneClass = "text-primary";
       } else if (autoSaveStatus === "saved") {
         messageKey = "post.auto_save.saved";
-        toneClass = "text-green-600";
+        toneClass = "text-primary";
       } else if (autoSaveStatus === "error") {
         messageKey = "post.auto_save.error";
         toneClass = "text-destructive";
       } else if (autoSaveStatus === "pending") {
-        toneClass = "text-amber-600";
+        toneClass = "text-muted-foreground";
       }
 
       let message = t(messageKey);
@@ -1292,16 +1292,16 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
     return (
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm font-medium text-muted-foreground">
             {t("post.form.step")} {currentStep} {t("post.form.of")} {TOTAL_STEPS}
           </span>
-          <span className="text-sm font-medium">
+          <span className="text-sm font-bold text-primary tabular-nums">
             {Math.round(progress)}%
           </span>
         </div>
-        <div className="w-full bg-muted rounded-full h-2">
+        <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
           <div
-            className="bg-primary rounded-full h-2 transition-all duration-300"
+            className="lyvox-trust-gradient rounded-full h-2.5 transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -1335,16 +1335,16 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
     return acc;
   }, [] as Array<{ main: Category; subcategories: Category[] }>);
 
-  // Color scheme for category blocks
+  // Color scheme for category blocks (design-system tokens, "trust in colour")
   const categoryColors = [
-    { bg: "bg-blue-50", border: "border-blue-200", hover: "hover:bg-blue-100", text: "text-blue-700", icon: "text-blue-600" },
-    { bg: "bg-green-50", border: "border-green-200", hover: "hover:bg-green-100", text: "text-green-700", icon: "text-green-600" },
-    { bg: "bg-purple-50", border: "border-purple-200", hover: "hover:bg-purple-100", text: "text-purple-700", icon: "text-purple-600" },
-    { bg: "bg-orange-50", border: "border-orange-200", hover: "hover:bg-orange-100", text: "text-orange-700", icon: "text-orange-600" },
-    { bg: "bg-pink-50", border: "border-pink-200", hover: "hover:bg-pink-100", text: "text-pink-700", icon: "text-pink-600" },
-    { bg: "bg-indigo-50", border: "border-indigo-200", hover: "hover:bg-indigo-100", text: "text-indigo-700", icon: "text-indigo-600" },
-    { bg: "bg-teal-50", border: "border-teal-200", hover: "hover:bg-teal-100", text: "text-teal-700", icon: "text-teal-600" },
-    { bg: "bg-amber-50", border: "border-amber-200", hover: "hover:bg-amber-100", text: "text-amber-700", icon: "text-amber-600" },
+    { bg: "bg-card", border: "border-border/70", hover: "hover:bg-muted/60", text: "text-foreground", icon: "text-primary" },
+    { bg: "bg-card", border: "border-border/70", hover: "hover:bg-muted/60", text: "text-foreground", icon: "text-primary" },
+    { bg: "bg-card", border: "border-border/70", hover: "hover:bg-muted/60", text: "text-foreground", icon: "text-primary" },
+    { bg: "bg-card", border: "border-border/70", hover: "hover:bg-muted/60", text: "text-foreground", icon: "text-primary" },
+    { bg: "bg-card", border: "border-border/70", hover: "hover:bg-muted/60", text: "text-foreground", icon: "text-primary" },
+    { bg: "bg-card", border: "border-border/70", hover: "hover:bg-muted/60", text: "text-foreground", icon: "text-primary" },
+    { bg: "bg-card", border: "border-border/70", hover: "hover:bg-muted/60", text: "text-foreground", icon: "text-primary" },
+    { bg: "bg-card", border: "border-border/70", hover: "hover:bg-muted/60", text: "text-foreground", icon: "text-primary" },
   ];
 
   const handleCategorySelect = (mainCat: Category, subCat?: Category) => {
@@ -1375,9 +1375,9 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   // Step 1: Category selection
   if (currentStep === 1) {
   return (
-    <Card>
+    <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
       <CardHeader>
-          <CardTitle>{t("post.form.step_1_title")}</CardTitle>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">{t("post.form.step_1_title")}</CardTitle>
       </CardHeader>
         <CardContent>
           <ProgressIndicator />
@@ -1393,8 +1393,8 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
               return (
                 <div
                   key={group.main.id}
-                  className={`${colors.bg} ${colors.border} border-2 rounded-lg p-4 transition-all ${
-                    (isMainSelected || isSubSelected) ? "ring-2 ring-primary" : ""
+                  className={`${colors.bg} ${colors.border} border rounded-xl p-4 shadow-[var(--shadow-soft)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)] hover:border-primary/40 ${
+                    (isMainSelected || isSubSelected) ? "ring-2 ring-primary border-primary/50" : ""
                   }`}
                 >
                   <div 
@@ -1407,7 +1407,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className={`${colors.text} font-semibold text-lg`}>
+                        <h3 className={`${colors.text} font-bold tracking-tight text-lg`}>
                           {getCategoryName(group.main)}
                         </h3>
                         {hasSubcategories && (
@@ -1432,7 +1432,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                     </div>
                   </div>
                   {showSubcategories && group.subcategories.length > 0 && (
-                    <div className="space-y-2 mt-4 pt-4 border-t border-current/20">
+                    <div className="space-y-2 mt-4 pt-4 border-t border-border/70">
                       {group.subcategories.map((subCat) => {
                         const SubIcon = getCategoryIcon(subCat.icon, subCat.level);
                         const isSubCatSelected = formData.category_id === subCat.id;
@@ -1441,8 +1441,8 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                             key={subCat.id}
                             data-testid={`subcategory-${subCat.slug}`}
                             onClick={() => handleCategorySelect(group.main, subCat)}
-                            className={`${colors.bg} ${colors.border} border rounded-md p-3 ${colors.hover} flex items-center gap-3 cursor-pointer transition-all ${
-                              isSubCatSelected ? "ring-2 ring-primary" : ""
+                            className={`bg-muted/40 ${colors.border} border rounded-xl p-3 min-h-[44px] ${colors.hover} flex items-center gap-3 cursor-pointer transition-all ${
+                              isSubCatSelected ? "ring-2 ring-primary border-primary/50" : ""
                             }`}
                           >
                             <SubIcon className={`w-5 h-5 ${colors.icon}`} />
@@ -1462,8 +1462,8 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             })}
           </div>
         </CardContent>
-        <CardFooter className="flex justify-end">
-          <Button onClick={handleNext} disabled={!formData.category_id}>
+        <CardFooter className="flex justify-end sticky bottom-0 z-10 bg-card/95 backdrop-blur border-t border-border/70 rounded-b-2xl">
+          <Button size="lg" onClick={handleNext} disabled={!formData.category_id}>
             {t("post.form.next")}
           </Button>
         </CardFooter>
@@ -1488,9 +1488,9 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
     const showForParts = ['vehicle', 'electronics'].includes(categoryType);
     
     return (
-      <Card>
+      <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
         <CardHeader>
-          <CardTitle>{t("post.form.step_2_title")}</CardTitle>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">{t("post.form.step_2_title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <ProgressIndicator />
@@ -1510,11 +1510,11 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             </SelectContent>
           </Select>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={handleBack}>
+        <CardFooter className="flex justify-between gap-3 sticky bottom-0 z-10 bg-card/95 backdrop-blur border-t border-border/70 rounded-b-2xl">
+          <Button variant="outline" size="lg" onClick={handleBack}>
             {t("post.form.back")}
           </Button>
-          <Button onClick={handleNext} disabled={!formData.condition}>
+          <Button size="lg" onClick={handleNext} disabled={!formData.condition}>
             {t("post.form.next")}
           </Button>
         </CardFooter>
@@ -1533,9 +1533,9 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
     
     // Vehicle-specific fields
     return (
-      <Card>
+      <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
         <CardHeader>
-          <CardTitle>{t("post.form.step_3_title")}</CardTitle>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">{t("post.form.step_3_title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <ProgressIndicator />
@@ -1554,11 +1554,11 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
               }}
             />
             {showMakeDropdown && filteredMakes.length > 0 && (
-              <div className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-lg max-h-60 overflow-auto">
+              <div className="absolute z-50 w-full mt-1 bg-popover border border-border/70 rounded-xl shadow-[var(--shadow-card)] max-h-60 overflow-auto">
                 {filteredMakes.slice(0, 10).map((make) => (
                   <div
                     key={make.id}
-                    className="px-3 py-2 cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                    className="px-3 py-2.5 cursor-pointer hover:bg-accent hover:text-accent-foreground first:rounded-t-xl last:rounded-b-xl"
                     onClick={() => {
                       setFormData({ ...formData, make_id: make.id, model_id: "" });
                       setMakeSearchQuery(make.name_en);
@@ -1736,11 +1736,11 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             />
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={handleBack}>
+        <CardFooter className="flex justify-between gap-3 sticky bottom-0 z-10 bg-card/95 backdrop-blur border-t border-border/70 rounded-b-2xl">
+          <Button variant="outline" size="lg" onClick={handleBack}>
             {t("post.form.back")}
           </Button>
-          <Button onClick={handleNext}>
+          <Button size="lg" onClick={handleNext}>
             {t("post.form.next")}
           </Button>
         </CardFooter>
@@ -1754,9 +1754,9 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
     const hasSchema = Boolean(schema?.steps?.length);
 
     return (
-      <Card>
+      <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
         <CardHeader>
-          <CardTitle>{t("post.form.step_4_title")}</CardTitle>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">{t("post.form.step_4_title")}</CardTitle>
           <CardDescription>
             {getCategoryTypeName(categoryType as any)}
           </CardDescription>
@@ -1966,13 +1966,13 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           {isSchemaCategory && (
             <div className="space-y-4">
               {schemaLoading && (
-                <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+                <div className="rounded-xl border border-dashed border-border/70 p-4 text-sm text-muted-foreground">
                   {t("catalog.common.schema_loading")}
                 </div>
               )}
 
               {!schemaLoading && schemaError && (
-                <div className="rounded-md border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+                <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
                   {schemaError}
                 </div>
               )}
@@ -1988,18 +1988,18 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
               )}
 
               {!schemaLoading && !schemaError && !hasSchema && (
-                <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+                <div className="rounded-xl border border-dashed border-border/70 p-4 text-sm text-muted-foreground">
                   {t("catalog.common.schema_missing")}
                 </div>
               )}
             </div>
           )}
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={handleBack}>
+        <CardFooter className="flex justify-between gap-3 sticky bottom-0 z-10 bg-card/95 backdrop-blur border-t border-border/70 rounded-b-2xl">
+          <Button variant="outline" size="lg" onClick={handleBack}>
             {t("post.form.back")}
           </Button>
-          <Button onClick={handleNext}>
+          <Button size="lg" onClick={handleNext}>
             {t("post.form.next")}
           </Button>
         </CardFooter>
@@ -2017,13 +2017,13 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
     }
     
     return (
-      <Card>
+      <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
         <CardHeader>
-          <CardTitle>{t("post.form.step_5_title")}</CardTitle>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">{t("post.form.step_5_title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <ProgressIndicator />
-          
+
           {/* Vehicle-specific fields */}
           {categoryType === 'vehicle' && (
             <>
@@ -2171,11 +2171,11 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={handleBack}>
+        <CardFooter className="flex justify-between gap-3 sticky bottom-0 z-10 bg-card/95 backdrop-blur border-t border-border/70 rounded-b-2xl">
+          <Button variant="outline" size="lg" onClick={handleBack}>
             {t("post.form.back")}
           </Button>
-          <Button onClick={handleNext}>
+          <Button size="lg" onClick={handleNext}>
             {t("post.form.next")}
           </Button>
         </CardFooter>
@@ -2204,9 +2204,9 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
     ];
 
     return (
-      <Card>
+      <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
         <CardHeader>
-          <CardTitle>{t("post.form.step_6_title")}</CardTitle>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">{t("post.form.step_6_title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6 max-h-[600px] overflow-y-auto">
           <ProgressIndicator />
@@ -2216,7 +2216,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
 
             return (
               <div key={cat.key} className="space-y-2">
-                <h3 className="font-semibold text-lg">{cat.label}</h3>
+                <h3 className="font-bold tracking-tight text-lg">{cat.label}</h3>
                 <div className="space-y-2 pl-4">
                   {catOptions.map((opt) => {
                     const optionKey = `${opt.category}_${opt.code}`;
@@ -2318,11 +2318,11 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             );
           })}
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={handleBack}>
+        <CardFooter className="flex justify-between gap-3 sticky bottom-0 z-10 bg-card/95 backdrop-blur border-t border-border/70 rounded-b-2xl">
+          <Button variant="outline" size="lg" onClick={handleBack}>
             {t("post.form.back")}
           </Button>
-          <Button onClick={handleNext}>
+          <Button size="lg" onClick={handleNext}>
             {t("post.form.next")}
           </Button>
         </CardFooter>
@@ -2345,7 +2345,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           }
         }}
       >
-        <DialogContent className="rounded-md">
+        <DialogContent className="rounded-xl">
           <DialogHeader>
             <DialogTitle>Verify contact phone</DialogTitle>
             <DialogDescription>
@@ -2401,9 +2401,9 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <Card>
+      <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
         <CardHeader>
-          <CardTitle>{t("post.form.step_7_title")}</CardTitle>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">{t("post.form.step_7_title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <ProgressIndicator />
@@ -2430,8 +2430,9 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                   </p>
                 </>
               ) : (
-                <div className="border-2 border-dashed rounded-lg p-8 text-center text-muted-foreground">
-                  <p className="text-sm">{t("common.loading") || "Loading..."}</p>
+                <div className="lyvox-image-placeholder rounded-xl p-8 flex flex-col items-center justify-center gap-2 text-center">
+                  <ShieldCheck className="h-8 w-8 text-white/85" aria-hidden="true" />
+                  <p className="text-sm font-medium text-white/85">{t("common.loading") || "Loading..."}</p>
                 </div>
               )}
             </div>
@@ -2501,18 +2502,18 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
               </p>
             )}
             {formData.additional_phone_verified && (
-              <p className="mt-2 inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">
+              <p className="mt-2 inline-flex items-center gap-2 rounded-full lyvox-trust-gradient px-3 py-1.5 text-sm font-semibold text-white">
                 <ShieldCheck className="h-4 w-4" aria-hidden="true" />
                 {t("profile.verified")}
               </p>
             )}
           </div>
           </CardContent>
-          <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={handleBack}>
+          <CardFooter className="flex justify-between gap-3 sticky bottom-0 z-10 bg-card/95 backdrop-blur border-t border-border/70 rounded-b-2xl">
+          <Button variant="outline" size="lg" onClick={handleBack}>
             {t("post.form.back")}
           </Button>
-          <Button onClick={handleNext}>
+          <Button size="lg" onClick={handleNext}>
             {t("post.form.next")}
           </Button>
           </CardFooter>
@@ -2524,14 +2525,14 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   // Step 8: Preview
   if (currentStep === 8) {
     return (
-      <Card>
+      <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
         <CardHeader>
-          <CardTitle>{t("post.form.step_8_title")}</CardTitle>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">{t("post.form.step_8_title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <ProgressIndicator />
-          <div className="border rounded-lg p-4 space-y-2">
-            <h3 className="font-bold text-xl">
+          <div className="border border-border/70 bg-muted/30 rounded-xl p-4 space-y-2 shadow-[var(--shadow-soft)]">
+            <h3 className="font-extrabold tracking-tight text-xl">
               {categories.find((c) => c.id === formData.category_id) ? 
                 getCategoryName(categories.find((c) => c.id === formData.category_id)!) : 
                 t("post.category")}
@@ -2547,33 +2548,33 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             </p>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between gap-2">
-          <Button variant="outline" onClick={handleBack}>
+        <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 sticky bottom-0 z-10 bg-card/95 backdrop-blur border-t border-border/70 rounded-b-2xl">
+          <Button variant="outline" size="lg" onClick={handleBack} className="w-full sm:w-auto">
             {t("post.form.back")}
           </Button>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
             {advertToEdit?.status === "active" && advertId && (
               <BoostDialog
                 advertId={advertId}
                 trigger={
-                  <Button variant="outline" disabled={isLoading} title={t("billing.boost.title")}>
+                  <Button variant="outline" size="lg" disabled={isLoading} title={t("billing.boost.title")} className="text-amber-600 hover:text-amber-700">
                     <Zap className="mr-1 h-4 w-4" />
                     {t("billing.boost.title")}
                   </Button>
                 }
               />
             )}
-            <Button variant="outline" onClick={handleSaveDraft} disabled={isLoading}>
+            <Button variant="outline" size="lg" onClick={handleSaveDraft} disabled={isLoading}>
               {t("post.form.save_draft")}
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" disabled={isLoading}>
+                <Button variant="destructive" size="lg" disabled={isLoading}>
                   <Trash2 className="h-4 w-4" aria-hidden="true" />
                   {t("post.form.delete")}
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className="rounded-md">
+              <AlertDialogContent className="rounded-xl">
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete listing?</AlertDialogTitle>
                   <AlertDialogDescription>
@@ -2592,7 +2593,12 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-            <Button onClick={handlePublish} disabled={isLoading}>
+            <Button
+              size="lg"
+              onClick={handlePublish}
+              disabled={isLoading}
+              className="lyvox-cta-gradient text-white border-0 hover:opacity-95"
+            >
               {t("post.publish")}
             </Button>
           </div>

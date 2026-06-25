@@ -9,6 +9,9 @@ import { Label } from "@/components/ui/label";
 import { useI18n } from "@/i18n";
 import type { CatalogFieldDefinition, CatalogFieldOption, CatalogSchemaField } from "./types";
 
+const INPUT_CLASS = "rounded-xl h-11 min-h-[44px] focus-visible:ring-4 focus-visible:ring-primary/12";
+const TEXTAREA_CLASS = "rounded-xl focus-visible:ring-4 focus-visible:ring-primary/12";
+
 type FieldWidgetProps = {
   field: CatalogFieldDefinition;
   schemaField: CatalogSchemaField;
@@ -54,6 +57,7 @@ function TextWidget({ field, schemaField, value, onChange, readonly }: FieldWidg
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholderKey ? t(placeholderKey) : undefined}
         readOnly={readonly}
+        className={INPUT_CLASS}
       />
       {descriptionKey && <p className="text-xs text-muted-foreground">{t(descriptionKey)}</p>}
     </div>
@@ -79,6 +83,7 @@ function TextareaWidget({ field, schemaField, value, onChange, readonly }: Field
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholderKey ? t(placeholderKey) : undefined}
         readOnly={readonly}
+        className={TEXTAREA_CLASS}
       />
       {descriptionKey && <p className="text-xs text-muted-foreground">{t(descriptionKey)}</p>}
     </div>
@@ -113,6 +118,7 @@ function NumberWidget({ field, schemaField, value, onChange, readonly }: FieldWi
           max={max}
           step={step}
           readOnly={readonly}
+          className={INPUT_CLASS}
         />
         {field.unit && <span className="self-center text-sm text-muted-foreground">{field.unit}</span>}
       </div>
@@ -137,7 +143,7 @@ function SelectWidget({ field, schemaField, value, onChange, readonly }: FieldWi
         onValueChange={(code) => onChange(code)}
         disabled={readonly}
       >
-        <SelectTrigger>
+        <SelectTrigger className={INPUT_CLASS}>
           <SelectValue placeholder={placeholderKey ? t(placeholderKey) : t("catalog.common.select_placeholder")} />
         </SelectTrigger>
         <SelectContent>
@@ -187,6 +193,7 @@ function DateWidget({ field, schemaField, value, onChange, readonly }: FieldWidg
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholderKey ? t(placeholderKey) : undefined}
         readOnly={readonly}
+        className={INPUT_CLASS}
       />
       {descriptionKey && <p className="text-xs text-muted-foreground">{t(descriptionKey)}</p>}
     </div>

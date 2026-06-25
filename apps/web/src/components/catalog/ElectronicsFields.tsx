@@ -23,7 +23,13 @@ export function ElectronicsFields({
   locale = "en",
 }: ElectronicsFieldsProps) {
   const { t } = useI18n();
-  
+  const tr = (k: string, fb: string) => {
+    const v = t(k);
+    return v === k ? fb : v;
+  };
+  const inputClass = "rounded-xl h-11 min-h-[44px] focus-visible:ring-4 focus-visible:ring-primary/12";
+  const cardClass = "border-border/70 shadow-[var(--shadow-soft)]";
+
   // Reference data
   const [brands, setBrands] = useState<any[]>([]);
   const [models, setModels] = useState<any[]>([]);
@@ -74,19 +80,19 @@ export function ElectronicsFields({
 
   // Device types based on electronics subcategory
   const deviceTypes = [
-    { value: 'smartphone', label: 'Smartphone' },
-    { value: 'tablet', label: 'Tablet' },
-    { value: 'laptop', label: 'Laptop' },
-    { value: 'desktop', label: 'Desktop PC' },
-    { value: 'monitor', label: 'Monitor' },
-    { value: 'tv', label: 'TV' },
-    { value: 'camera', label: 'Camera' },
-    { value: 'lens', label: 'Lens' },
-    { value: 'audio', label: 'Audio Equipment' },
-    { value: 'smartwatch', label: 'Smartwatch' },
-    { value: 'console', label: 'Gaming Console' },
-    { value: 'appliance', label: 'Home Appliance' },
-    { value: 'other', label: 'Other' },
+    { value: 'smartphone', label: tr('catalog.electronics.smartphone', 'Smartphone') },
+    { value: 'tablet', label: tr('catalog.electronics.tablet', 'Tablet') },
+    { value: 'laptop', label: tr('catalog.electronics.laptop', 'Laptop') },
+    { value: 'desktop', label: tr('catalog.electronics.desktop', 'Desktop PC') },
+    { value: 'monitor', label: tr('catalog.electronics.monitor', 'Monitor') },
+    { value: 'tv', label: tr('catalog.electronics.tv', 'TV') },
+    { value: 'camera', label: tr('catalog.electronics.camera', 'Camera') },
+    { value: 'lens', label: tr('catalog.electronics.lens', 'Lens') },
+    { value: 'audio', label: tr('catalog.electronics.audio', 'Audio Equipment') },
+    { value: 'smartwatch', label: tr('catalog.electronics.smartwatch', 'Smartwatch') },
+    { value: 'console', label: tr('catalog.electronics.console', 'Gaming Console') },
+    { value: 'appliance', label: tr('catalog.electronics.appliance', 'Home Appliance') },
+    { value: 'other', label: tr('catalog.electronics.other', 'Other') },
   ];
 
   const isMobileDevice = ['smartphone', 'tablet'].includes(formData.device_type || '');
@@ -96,23 +102,23 @@ export function ElectronicsFields({
   return (
     <div className="space-y-8">
       {/* Basic Device Info */}
-      <Card>
+      <Card className={cardClass}>
         <CardHeader>
-          <CardTitle>Device Information</CardTitle>
+          <CardTitle className="font-extrabold tracking-tight">{tr('catalog.electronics.device_info', 'Device Information')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Device Type */}
             <div className="space-y-2">
               <Label htmlFor="device_type">
-                Device Type <span className="text-red-500">*</span>
+                {tr('catalog.electronics.device_type', 'Device Type')} <span className="text-destructive">*</span>
               </Label>
               <Select
                 value={formData.device_type || ''}
                 onValueChange={(val) => onChange('device_type', val)}
               >
-                <SelectTrigger id="device_type">
-                  <SelectValue placeholder="Select type..." />
+                <SelectTrigger id="device_type" className={inputClass}>
+                  <SelectValue placeholder={tr('catalog.common.select_type', 'Select type...')} />
                 </SelectTrigger>
                 <SelectContent>
                   {deviceTypes.map((type) => (
@@ -127,7 +133,7 @@ export function ElectronicsFields({
             {/* Brand */}
             <div className="space-y-2">
               <Label htmlFor="brand_id">
-                Brand <span className="text-red-500">*</span>
+                {tr('catalog.electronics.brand', 'Brand')} <span className="text-destructive">*</span>
               </Label>
               <Select
                 value={formData.brand_id || ''}
@@ -137,8 +143,8 @@ export function ElectronicsFields({
                 }}
                 disabled={isLoadingBrands}
               >
-                <SelectTrigger id="brand_id">
-                  <SelectValue placeholder="Select brand..." />
+                <SelectTrigger id="brand_id" className={inputClass}>
+                  <SelectValue placeholder={tr('catalog.common.select_brand', 'Select brand...')} />
                 </SelectTrigger>
                 <SelectContent>
                   {brands.map((brand) => (
@@ -153,14 +159,14 @@ export function ElectronicsFields({
             {/* Model */}
             {formData.brand_id && (
               <div className="space-y-2">
-                <Label htmlFor="model_id">Model</Label>
+                <Label htmlFor="model_id">{tr('catalog.electronics.model', 'Model')}</Label>
                 <Select
                   value={formData.model_id || ''}
                   onValueChange={(val) => onChange('model_id', val)}
                   disabled={isLoadingModels || models.length === 0}
                 >
-                  <SelectTrigger id="model_id">
-                    <SelectValue placeholder={isLoadingModels ? "Loading..." : "Select model..."} />
+                  <SelectTrigger id="model_id" className={inputClass}>
+                    <SelectValue placeholder={isLoadingModels ? tr('catalog.common.loading', 'Loading...') : tr('catalog.common.select_model', 'Select model...')} />
                   </SelectTrigger>
                   <SelectContent>
                     {models.map((model) => (
@@ -171,14 +177,14 @@ export function ElectronicsFields({
                   </SelectContent>
                 </Select>
                 {!isLoadingModels && models.length === 0 && (
-                  <p className="text-sm text-muted-foreground">No models available for this brand</p>
+                  <p className="text-sm text-muted-foreground">{tr('catalog.electronics.no_models', 'No models available for this brand')}</p>
                 )}
               </div>
             )}
 
             {/* Year */}
             <div className="space-y-2">
-              <Label htmlFor="year_manufactured">Year</Label>
+              <Label htmlFor="year_manufactured">{tr('catalog.electronics.year', 'Year')}</Label>
               <Input
                 id="year_manufactured"
                 type="number"
@@ -186,6 +192,7 @@ export function ElectronicsFields({
                 max={new Date().getFullYear() + 1}
                 value={formData.year_manufactured ?? ''}
                 onChange={(e) => onChange('year_manufactured', e.target.value ? parseInt(e.target.value) : null)}
+                className={inputClass}
               />
             </div>
           </div>
@@ -194,20 +201,20 @@ export function ElectronicsFields({
 
       {/* Mobile-Specific Fields */}
       {isMobileDevice && (
-        <Card>
+        <Card className={cardClass}>
           <CardHeader>
-            <CardTitle>Mobile Device Details</CardTitle>
+            <CardTitle className="font-extrabold tracking-tight">{tr('catalog.electronics.mobile_details', 'Mobile Device Details')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="storage_gb">Storage (GB)</Label>
+                <Label htmlFor="storage_gb">{tr('catalog.electronics.storage_gb', 'Storage (GB)')}</Label>
                 <Select
                   value={formData.storage_gb?.toString() || ''}
                   onValueChange={(val) => onChange('storage_gb', parseInt(val))}
                 >
-                  <SelectTrigger id="storage_gb">
-                    <SelectValue placeholder="Select..." />
+                  <SelectTrigger id="storage_gb" className={inputClass}>
+                    <SelectValue placeholder={tr('catalog.common.select_placeholder', 'Select...')} />
                   </SelectTrigger>
                   <SelectContent>
                     {[16, 32, 64, 128, 256, 512, 1024].map((size) => (
@@ -220,13 +227,13 @@ export function ElectronicsFields({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="memory_ram_gb">RAM (GB)</Label>
+                <Label htmlFor="memory_ram_gb">{tr('catalog.electronics.memory_ram_gb', 'RAM (GB)')}</Label>
                 <Select
                   value={formData.memory_ram_gb?.toString() || ''}
                   onValueChange={(val) => onChange('memory_ram_gb', parseInt(val))}
                 >
-                  <SelectTrigger id="memory_ram_gb">
-                    <SelectValue placeholder="Select..." />
+                  <SelectTrigger id="memory_ram_gb" className={inputClass}>
+                    <SelectValue placeholder={tr('catalog.common.select_placeholder', 'Select...')} />
                   </SelectTrigger>
                   <SelectContent>
                     {[1, 2, 3, 4, 6, 8, 12, 16].map((size) => (
@@ -239,7 +246,7 @@ export function ElectronicsFields({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="battery_health">Battery Health (%)</Label>
+                <Label htmlFor="battery_health">{tr('catalog.electronics.battery_health', 'Battery Health (%)')}</Label>
                 <Input
                   id="battery_health"
                   type="number"
@@ -247,18 +254,20 @@ export function ElectronicsFields({
                   max={100}
                   value={formData.battery_health ?? ''}
                   onChange={(e) => onChange('battery_health', e.target.value ? parseInt(e.target.value) : null)}
+                  className={inputClass}
                 />
-                <p className="text-sm text-muted-foreground">Check in Settings → Battery</p>
+                <p className="text-sm text-muted-foreground">{tr('catalog.electronics.battery_health_help', 'Check in Settings → Battery')}</p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="color">Color</Label>
+                <Label htmlFor="color">{tr('catalog.electronics.color', 'Color')}</Label>
                 <Input
                   id="color"
                   type="text"
                   maxLength={50}
                   value={formData.color || ''}
                   onChange={(e) => onChange('color', e.target.value)}
+                  className={inputClass}
                 />
               </div>
 
@@ -269,7 +278,7 @@ export function ElectronicsFields({
                   onCheckedChange={(checked) => onChange('factory_unlocked', checked)}
                 />
                 <Label htmlFor="factory_unlocked" className="cursor-pointer">
-                  Factory Unlocked (No SIM Lock)
+                  {tr('catalog.electronics.factory_unlocked', 'Factory Unlocked (No SIM Lock)')}
                 </Label>
               </div>
             </div>
@@ -279,32 +288,33 @@ export function ElectronicsFields({
 
       {/* Computer-Specific Fields */}
       {isComputer && (
-        <Card>
+        <Card className={cardClass}>
           <CardHeader>
-            <CardTitle>Computer Specifications</CardTitle>
+            <CardTitle className="font-extrabold tracking-tight">{tr('catalog.electronics.computer_specs', 'Computer Specifications')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="processor">Processor</Label>
+                <Label htmlFor="processor">{tr('catalog.electronics.processor', 'Processor')}</Label>
                 <Input
                   id="processor"
                   type="text"
-                  placeholder="e.g., Intel Core i7-12700K"
+                  placeholder={tr('catalog.electronics.processor_placeholder', 'e.g., Intel Core i7-12700K')}
                   maxLength={100}
                   value={formData.processor || ''}
                   onChange={(e) => onChange('processor', e.target.value)}
+                  className={inputClass}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="memory_ram_gb">RAM (GB)</Label>
+                <Label htmlFor="memory_ram_gb">{tr('catalog.electronics.memory_ram_gb', 'RAM (GB)')}</Label>
                 <Select
                   value={formData.memory_ram_gb?.toString() || ''}
                   onValueChange={(val) => onChange('memory_ram_gb', parseInt(val))}
                 >
-                  <SelectTrigger id="memory_ram_gb">
-                    <SelectValue placeholder="Select..." />
+                  <SelectTrigger id="memory_ram_gb" className={inputClass}>
+                    <SelectValue placeholder={tr('catalog.common.select_placeholder', 'Select...')} />
                   </SelectTrigger>
                   <SelectContent>
                     {[4, 8, 16, 32, 64, 128].map((size) => (
@@ -317,31 +327,31 @@ export function ElectronicsFields({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="storage_type">Storage Type</Label>
+                <Label htmlFor="storage_type">{tr('catalog.electronics.storage_type', 'Storage Type')}</Label>
                 <Select
                   value={formData.storage_type || ''}
                   onValueChange={(val) => onChange('storage_type', val)}
                 >
-                  <SelectTrigger id="storage_type">
-                    <SelectValue placeholder="Select..." />
+                  <SelectTrigger id="storage_type" className={inputClass}>
+                    <SelectValue placeholder={tr('catalog.common.select_placeholder', 'Select...')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="hdd">HDD</SelectItem>
-                    <SelectItem value="ssd">SSD</SelectItem>
-                    <SelectItem value="nvme">NVMe SSD</SelectItem>
-                    <SelectItem value="hybrid">Hybrid (HDD + SSD)</SelectItem>
+                    <SelectItem value="hdd">{tr('catalog.electronics.storage_type_hdd', 'HDD')}</SelectItem>
+                    <SelectItem value="ssd">{tr('catalog.electronics.storage_type_ssd', 'SSD')}</SelectItem>
+                    <SelectItem value="nvme">{tr('catalog.electronics.storage_type_nvme', 'NVMe SSD')}</SelectItem>
+                    <SelectItem value="hybrid">{tr('catalog.electronics.storage_type_hybrid', 'Hybrid (HDD + SSD)')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="storage_gb">Storage Capacity (GB)</Label>
+                <Label htmlFor="storage_gb">{tr('catalog.electronics.storage_capacity', 'Storage Capacity (GB)')}</Label>
                 <Select
                   value={formData.storage_gb?.toString() || ''}
                   onValueChange={(val) => onChange('storage_gb', parseInt(val))}
                 >
-                  <SelectTrigger id="storage_gb">
-                    <SelectValue placeholder="Select..." />
+                  <SelectTrigger id="storage_gb" className={inputClass}>
+                    <SelectValue placeholder={tr('catalog.common.select_placeholder', 'Select...')} />
                   </SelectTrigger>
                   <SelectContent>
                     {[128, 256, 512, 1024, 2048, 4096].map((size) => (
@@ -354,33 +364,34 @@ export function ElectronicsFields({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="graphics_card">Graphics Card</Label>
+                <Label htmlFor="graphics_card">{tr('catalog.electronics.graphics_card', 'Graphics Card')}</Label>
                 <Input
                   id="graphics_card"
                   type="text"
-                  placeholder="e.g., NVIDIA RTX 4080"
+                  placeholder={tr('catalog.electronics.graphics_card_placeholder', 'e.g., NVIDIA RTX 4080')}
                   maxLength={100}
                   value={formData.graphics_card || ''}
                   onChange={(e) => onChange('graphics_card', e.target.value)}
+                  className={inputClass}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="operating_system">Operating System</Label>
+                <Label htmlFor="operating_system">{tr('catalog.electronics.operating_system', 'Operating System')}</Label>
                 <Select
                   value={formData.operating_system || ''}
                   onValueChange={(val) => onChange('operating_system', val)}
                 >
-                  <SelectTrigger id="operating_system">
-                    <SelectValue placeholder="Select..." />
+                  <SelectTrigger id="operating_system" className={inputClass}>
+                    <SelectValue placeholder={tr('catalog.common.select_placeholder', 'Select...')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="windows_11">Windows 11</SelectItem>
-                    <SelectItem value="windows_10">Windows 10</SelectItem>
-                    <SelectItem value="macos">macOS</SelectItem>
-                    <SelectItem value="linux">Linux</SelectItem>
-                    <SelectItem value="chrome_os">Chrome OS</SelectItem>
-                    <SelectItem value="none">None / DOS</SelectItem>
+                    <SelectItem value="windows_11">{tr('catalog.electronics.os_windows_11', 'Windows 11')}</SelectItem>
+                    <SelectItem value="windows_10">{tr('catalog.electronics.os_windows_10', 'Windows 10')}</SelectItem>
+                    <SelectItem value="macos">{tr('catalog.electronics.os_macos', 'macOS')}</SelectItem>
+                    <SelectItem value="linux">{tr('catalog.electronics.os_linux', 'Linux')}</SelectItem>
+                    <SelectItem value="chrome_os">{tr('catalog.electronics.os_chrome', 'Chrome OS')}</SelectItem>
+                    <SelectItem value="none">{tr('catalog.electronics.os_none', 'None / DOS')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -391,14 +402,14 @@ export function ElectronicsFields({
 
       {/* Display-Specific Fields */}
       {isDisplay && (
-        <Card>
+        <Card className={cardClass}>
           <CardHeader>
-            <CardTitle>Display Specifications</CardTitle>
+            <CardTitle className="font-extrabold tracking-tight">{tr('catalog.electronics.display_specs', 'Display Specifications')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="screen_size_inches">Screen Size (inches)</Label>
+                <Label htmlFor="screen_size_inches">{tr('catalog.electronics.screen_size', 'Screen Size (inches)')}</Label>
                 <Input
                   id="screen_size_inches"
                   type="number"
@@ -407,36 +418,37 @@ export function ElectronicsFields({
                   step={0.1}
                   value={formData.screen_size_inches ?? ''}
                   onChange={(e) => onChange('screen_size_inches', e.target.value ? parseFloat(e.target.value) : null)}
+                  className={inputClass}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="resolution">Resolution</Label>
+                <Label htmlFor="resolution">{tr('catalog.electronics.resolution', 'Resolution')}</Label>
                 <Select
                   value={formData.resolution || ''}
                   onValueChange={(val) => onChange('resolution', val)}
                 >
-                  <SelectTrigger id="resolution">
-                    <SelectValue placeholder="Select..." />
+                  <SelectTrigger id="resolution" className={inputClass}>
+                    <SelectValue placeholder={tr('catalog.common.select_placeholder', 'Select...')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="hd">HD (1366x768)</SelectItem>
-                    <SelectItem value="full_hd">Full HD (1920x1080)</SelectItem>
-                    <SelectItem value="2k">2K (2560x1440)</SelectItem>
-                    <SelectItem value="4k">4K UHD (3840x2160)</SelectItem>
-                    <SelectItem value="8k">8K (7680x4320)</SelectItem>
+                    <SelectItem value="hd">{tr('catalog.electronics.resolution_hd', 'HD (1366x768)')}</SelectItem>
+                    <SelectItem value="full_hd">{tr('catalog.electronics.resolution_fhd', 'Full HD (1920x1080)')}</SelectItem>
+                    <SelectItem value="2k">{tr('catalog.electronics.resolution_2k', '2K (2560x1440)')}</SelectItem>
+                    <SelectItem value="4k">{tr('catalog.electronics.resolution_4k', '4K UHD (3840x2160)')}</SelectItem>
+                    <SelectItem value="8k">{tr('catalog.electronics.resolution_8k', '8K (7680x4320)')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="panel_type">Panel Type</Label>
+                <Label htmlFor="panel_type">{tr('catalog.electronics.panel_type', 'Panel Type')}</Label>
                 <Select
                   value={formData.panel_type || ''}
                   onValueChange={(val) => onChange('panel_type', val)}
                 >
-                  <SelectTrigger id="panel_type">
-                    <SelectValue placeholder="Select..." />
+                  <SelectTrigger id="panel_type" className={inputClass}>
+                    <SelectValue placeholder={tr('catalog.common.select_placeholder', 'Select...')} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="lcd">LCD</SelectItem>
@@ -451,13 +463,13 @@ export function ElectronicsFields({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="refresh_rate_hz">Refresh Rate (Hz)</Label>
+                <Label htmlFor="refresh_rate_hz">{tr('catalog.electronics.refresh_rate', 'Refresh Rate (Hz)')}</Label>
                 <Select
                   value={formData.refresh_rate_hz?.toString() || ''}
                   onValueChange={(val) => onChange('refresh_rate_hz', parseInt(val))}
                 >
-                  <SelectTrigger id="refresh_rate_hz">
-                    <SelectValue placeholder="Select..." />
+                  <SelectTrigger id="refresh_rate_hz" className={inputClass}>
+                    <SelectValue placeholder={tr('catalog.common.select_placeholder', 'Select...')} />
                   </SelectTrigger>
                   <SelectContent>
                     {[50, 60, 75, 120, 144, 165, 240, 360].map((rate) => (
@@ -476,7 +488,7 @@ export function ElectronicsFields({
                   onCheckedChange={(checked) => onChange('smart_tv', checked)}
                 />
                 <Label htmlFor="smart_tv" className="cursor-pointer">
-                  Smart TV
+                  {tr('catalog.electronics.smart_tv', 'Smart TV')}
                 </Label>
               </div>
             </div>
@@ -485,9 +497,9 @@ export function ElectronicsFields({
       )}
 
       {/* General Condition & Warranty */}
-      <Card>
+      <Card className={cardClass}>
         <CardHeader>
-          <CardTitle>Condition & Warranty</CardTitle>
+          <CardTitle className="font-extrabold tracking-tight">{tr('catalog.common.condition_warranty', 'Condition & Warranty')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -499,7 +511,7 @@ export function ElectronicsFields({
                   onCheckedChange={(checked) => onChange('original_box', checked)}
                 />
                 <Label htmlFor="original_box" className="cursor-pointer">
-                  Original Box Included
+                  {tr('catalog.electronics.original_box', 'Original Box Included')}
                 </Label>
               </div>
 
@@ -510,7 +522,7 @@ export function ElectronicsFields({
                   onCheckedChange={(checked) => onChange('warranty_remaining', checked)}
                 />
                 <Label htmlFor="warranty_remaining" className="cursor-pointer">
-                  Warranty Remaining
+                  {tr('catalog.electronics.warranty_remaining', 'Warranty Remaining')}
                 </Label>
               </div>
 
@@ -521,22 +533,23 @@ export function ElectronicsFields({
                   onCheckedChange={(checked) => onChange('original_accessories', checked)}
                 />
                 <Label htmlFor="original_accessories" className="cursor-pointer">
-                  Original Accessories Included
+                  {tr('catalog.electronics.original_accessories', 'Original Accessories Included')}
                 </Label>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="accessories_included">Accessories Included</Label>
+              <Label htmlFor="accessories_included">{tr('catalog.electronics.accessories_included', 'Accessories Included')}</Label>
               <Input
                 id="accessories_included"
                 type="text"
-                placeholder="e.g., Charger, cable, case"
+                placeholder={tr('catalog.electronics.accessories_placeholder', 'e.g., Charger, cable, case')}
                 maxLength={200}
                 value={formData.accessories_included || ''}
                 onChange={(e) => onChange('accessories_included', e.target.value)}
+                className={inputClass}
               />
-              <p className="text-sm text-muted-foreground">List all included accessories</p>
+              <p className="text-sm text-muted-foreground">{tr('catalog.electronics.accessories_help', 'List all included accessories')}</p>
             </div>
           </div>
         </CardContent>

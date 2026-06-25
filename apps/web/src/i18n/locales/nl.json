@@ -479,18 +479,6 @@
     "max_files_reached": "Maximaal 12 foto’s",
     "drag_drop_hint": "Sleep afbeeldingen hierheen of klik om te selecteren",
     "delete": "Verwijderen",
-    "gallery": {
-      "open_fullscreen": "Volledig scherm openen",
-      "close": "Galerij sluiten",
-      "counter": "{current} / {total}",
-      "thumbnail": "Miniatuur {index}",
-      "previous": "Vorige foto",
-      "next": "Volgende foto",
-      "zoom_in": "Inzoomen",
-      "zoom_out": "Uitzoomen",
-      "fullscreen_title": "Galerij",
-      "image_alt": "Foto {index}"
-    },
     "preview": "Voorbeeld",
     "close_preview": "Voorbeeld sluiten",
     "set_cover": "Instellen als omslag",
@@ -602,6 +590,18 @@
       "years": "Productiejaren",
       "present": "heden",
       "production_countries": "Productielanden"
+    },
+    "gallery": {
+      "open_fullscreen": "Volledig scherm openen",
+      "close": "Galerij sluiten",
+      "counter": "{current} / {total}",
+      "thumbnail": "Miniatuur {index}",
+      "previous": "Vorige foto",
+      "next": "Volgende foto",
+      "zoom_in": "Inzoomen",
+      "zoom_out": "Uitzoomen",
+      "fullscreen_title": "Galerij",
+      "image_alt": "Foto {index}"
     }
   },
   "catalog": {
@@ -626,7 +626,13 @@
         "number_min": "\"{field}\" moet minimaal {min} zijn.",
         "number_max": "\"{field}\" mag maximaal {max} zijn.",
         "option_invalid": "Kies een geldige waarde voor \"{field}\"."
-      }
+      },
+      "select_type": "Selecteer type...",
+      "select_brand": "Selecteer merk...",
+      "select_model": "Selecteer model...",
+      "select_category": "Selecteer categorie...",
+      "select_rating": "Selecteer label...",
+      "loading": "Laden..."
     },
     "furniture": {
       "material": "Belangrijkste materiaal",
@@ -804,6 +810,43 @@
         "core": "Belangrijkste informatie",
         "timing": "Tijd & opmerkingen"
       }
+    },
+    "electronics": {
+      "no_models": "Geen modellen beschikbaar voor dit merk",
+      "accessories_placeholder": "bijv. oplader, kabel, hoesje"
+    },
+    "real_estate": {
+      "dimensions": "Afmetingen",
+      "epc_no_limit": "Geen limiet"
+    },
+    "fashion": {
+      "select_gender": "Selecteer geslacht...",
+      "eu_size": "EU-maat",
+      "select_eu_size": "Selecteer EU-maat...",
+      "select_size": "Selecteer maat...",
+      "select_material": "Selecteer materiaal...",
+      "select_season": "Selecteer seizoen...",
+      "select_pattern": "Selecteer patroon...",
+      "material_cotton": "Katoen",
+      "material_polyester": "Polyester",
+      "material_wool": "Wol",
+      "material_leather": "Leer",
+      "material_denim": "Denim",
+      "material_silk": "Zijde",
+      "material_linen": "Linnen",
+      "material_synthetic": "Synthetisch",
+      "material_mixed": "Gemengd"
+    },
+    "jobs": {
+      "select_contract": "Selecteer contract...",
+      "select_cp": "Selecteer PC...",
+      "language_dutch": "Nederlands",
+      "language_french": "Frans",
+      "language_english": "Engels",
+      "language_german": "Duits",
+      "language_other": "Andere",
+      "company_name_placeholder": "Naam van uw bedrijf",
+      "hr_contact_name_placeholder": "Naam van de HR-manager"
     }
   },
   "admin": {
@@ -1028,5 +1071,86 @@
     "too_many_attempts": "Te veel pogingen. Probeer over {seconds}s opnieuw.",
     "submit_error": "Kon de melding niet verzenden",
     "error_prefix": "Fout: {message}"
+  },
+  "more": {
+    "searchListings": "Zoek advertenties",
+    "postListing": "Plaats een advertentie",
+    "favorites": "Favorieten",
+    "messages": "Berichten",
+    "profile": "Profiel",
+    "securitySettings": "Beveiligingsinstellingen",
+    "contactSupport": "Contacteer ondersteuning",
+    "terms": "Voorwaarden",
+    "privacy": "Privacy",
+    "accountSafetyLegal": "Account, veiligheid en juridisch"
+  },
+  "contactpage": {
+    "badge": "Ondersteuningscentrum",
+    "title": "Neem contact op met LyVoX-ondersteuning",
+    "lead": "Kies de route die bij je probleem past. Voeg bij meldingen over advertenties, betalingen of veiligheid de advertentielink, het verkopersprofiel, schermafbeeldingen en de tijdlijn van wat er is gebeurd toe.",
+    "priorityTitle": "Reactieprioriteiten",
+    "priorityBody": "Veiligheid, accounttoegang en transactieproblemen worden als eerste behandeld. Gewone productvragen worden na dringende vertrouwens- en veiligheidsmeldingen opgepakt.",
+    "accountTitle": "Account en toegang",
+    "accountDesc": "Hulp bij aanmelden, herstel, profielverificatie of verdachte accountactiviteit.",
+    "accountAction": "Toegang herstellen",
+    "listingTitle": "Probleem met advertentie of transactie",
+    "listingDesc": "Meld een verdachte advertentie, betalingsprobleem of veiligheidskwestie voordat je een deal voortzet.",
+    "listingAction": "Advertentie zoeken",
+    "generalTitle": "Algemene ondersteuning",
+    "generalDesc": "Vragen over LyVoX, marktplaatsbeleid, partnerschappen of operationele ondersteuning.",
+    "generalAction": "E-mail ondersteuning",
+    "beforeTitle": "Voordat je contact opneemt",
+    "beforeTip1": "Deel geen wachtwoorden, kaartgegevens of eenmalige codes in berichten.",
+    "beforeTip2": "Gebruik de meldknop bij verdachte advertenties zodat moderatie de advertentiecontext ontvangt.",
+    "beforeTip3": "Houd communicatie zoveel mogelijk binnen de LyVoX-chat voor een duidelijker geschillenspoor."
+  },
+  "verify": {
+    "trust_checks": "Vertrouwenschecks",
+    "title": "Accountverificatie",
+    "subtitle": "Verifieer je e-mail en telefoon om het vertrouwen op de marktplaats te vergroten en veiliger te publiceren.",
+    "ready_title": "Klaar om te publiceren",
+    "required_title": "Verificatie vereist",
+    "ready_desc": "Je account heeft de vereiste vertrouwenschecks.",
+    "required_desc": "Voltooi beide checks om te plaatsen met volledige vertrouwenssignalen.",
+    "post_listing": "Plaats een advertentie",
+    "email_title": "E-mailadres",
+    "verified": "Geverifieerd",
+    "not_verified": "Niet geverifieerd",
+    "email_done": "Je e-mail is geverifieerd. Marktplaats-updates en koper/verkoper-meldingen kunnen dit adres bereiken.",
+    "phone_title": "Telefoonnummer",
+    "no_phone": "Geen telefoonnummer toegevoegd",
+    "phone_done": "Je telefoon is geverifieerd. Kopers zien sterkere vertrouwenssignalen wanneer ze contact met je opnemen.",
+    "help_title": "Hulp nodig?",
+    "help_email_q": "Geen e-mail?",
+    "help_email_a": "Controleer spam of vraag een nieuwe bevestigingsmail aan.",
+    "help_phone_q": "Probleem met telefoon?",
+    "help_phone_a": "Gebruik internationaal formaat zoals +32.",
+    "help_blocked_q": "Nog steeds geblokkeerd?",
+    "contact_support": "Neem contact op met support",
+    "email_intro": "We hebben een verificatie-e-mail gestuurd naar",
+    "email_intro_2": "Controleer je inbox en open de bevestigingslink.",
+    "sending": "Versturen...",
+    "resend_email": "Verificatie-e-mail opnieuw versturen",
+    "email_send_error": "Kon de e-mail niet versturen.",
+    "email_send_error_retry": "Kon de e-mail niet versturen. Probeer het later opnieuw.",
+    "email_sent": "Verificatie-e-mail verstuurd naar",
+    "step_phone": "Stap 1 — Telefoon toevoegen",
+    "step_code": "Stap 2 — Code invoeren",
+    "phone_hint": "Gebruik internationaal formaat, bijvoorbeeld +32...",
+    "send_code": "Verificatiecode versturen",
+    "sms_code": "Sms-code",
+    "code_hint": "Voer de 6-cijferige code in die is verzonden naar",
+    "verifying": "Verifiëren...",
+    "verify_code": "Code verifiëren",
+    "change_number": "Nummer wijzigen",
+    "phone_invalid": "Voer een geldig telefoonnummer in.",
+    "phone_update_error": "Kon je telefoonnummer niet bijwerken.",
+    "sms_unavailable": "Sms-bezorging is tijdelijk niet beschikbaar.",
+    "code_send_error": "Kon de verificatiecode niet versturen.",
+    "code_sent": "Verificatiecode verstuurd naar",
+    "code_required": "Voer de sms-code in.",
+    "code_incorrect": "De code is onjuist. Probeer het opnieuw.",
+    "phone_verified": "Telefoonnummer geverifieerd.",
+    "code_verify_error": "Kon de code niet verifiëren."
   }
 }

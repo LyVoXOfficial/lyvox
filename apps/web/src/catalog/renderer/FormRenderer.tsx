@@ -36,7 +36,7 @@ export function FormRenderer({ schema, fields, values, onChange, locale, readonl
 
   if (!steps.length) {
     return (
-      <div className="rounded-md border border-dashed p-6 text-sm text-muted-foreground">
+      <div className="rounded-xl border border-dashed border-border/70 p-6 text-sm text-muted-foreground">
         {t("catalog.common.no_schema_defined")}
       </div>
     );
@@ -47,12 +47,12 @@ export function FormRenderer({ schema, fields, values, onChange, locale, readonl
       {steps.map((step) => (
         <div key={step.key} className="space-y-4">
           <div>
-            {step.title_i18n_key && <h3 className="text-lg font-semibold">{t(step.title_i18n_key)}</h3>}
+            {step.title_i18n_key && <h3 className="text-lg font-extrabold tracking-tight">{t(step.title_i18n_key)}</h3>}
             {step.description_i18n_key && <p className="text-sm text-muted-foreground">{t(step.description_i18n_key)}</p>}
           </div>
 
           {step.groups?.map((group) => (
-            <div key={group.key} className="space-y-3 rounded-lg border bg-card p-4 shadow-sm">
+            <div key={group.key} className="space-y-3 rounded-xl border border-border/70 bg-card p-4 shadow-[var(--shadow-soft)]">
               <div>
                 {group.title_i18n_key && <h4 className="text-base font-medium">{t(group.title_i18n_key)}</h4>}
                 {group.description_i18n_key && (
@@ -65,7 +65,7 @@ export function FormRenderer({ schema, fields, values, onChange, locale, readonl
                   const fieldDefinition = fields[schemaField.field_key];
                   if (!fieldDefinition) {
                     return (
-                      <div key={schemaField.field_key} className="rounded border border-dashed p-4 text-sm text-muted-foreground">
+                      <div key={schemaField.field_key} className="rounded-xl border border-dashed border-border/70 p-4 text-sm text-muted-foreground">
                         {t("catalog.common.field_missing", { field: schemaField.field_key })}
                       </div>
                     );

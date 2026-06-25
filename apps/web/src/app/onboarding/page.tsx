@@ -96,18 +96,18 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-[minmax(0,1fr)_360px] md:py-14">
         <section className="space-y-6">
           <div className="max-w-3xl space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+            <div className="inline-flex items-center gap-2 rounded-xl lyvox-trust-gradient px-3 py-1 text-xs font-medium text-white">
               <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
               Account readiness
             </div>
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{t.title}</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">{t.title}</h1>
             <p className="text-base leading-7 text-muted-foreground">{t.lead}</p>
           </div>
 
           <ol className="grid gap-3">
             {t.checklist.map((item, index) => (
-              <li key={item} className="flex items-start gap-3 rounded-md border border-border/80 bg-card p-4 shadow-sm">
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-emerald-50 text-sm font-semibold text-emerald-700">
+              <li key={item} className="flex items-start gap-3 rounded-xl border border-border/70 bg-card p-4 shadow-[var(--shadow-soft)]">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-sm font-semibold text-primary">
                   {index + 1}
                 </span>
                 <div>
@@ -131,9 +131,9 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
           </div>
         </section>
 
-        <aside className="rounded-md border border-border/80 bg-card p-5 shadow-sm">
-          <CheckCircle2 className="h-6 w-6 text-emerald-600" aria-hidden="true" />
-          <h2 className="mt-4 text-lg font-semibold">Why this matters</h2>
+        <aside className="rounded-2xl border border-border/70 bg-card p-5 shadow-[var(--shadow-soft)]">
+          <CheckCircle2 className="h-6 w-6 text-primary" aria-hidden="true" />
+          <h2 className="mt-4 text-lg font-extrabold tracking-tight text-foreground">Why this matters</h2>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">{t.secondaryLead}</p>
           <Button asChild variant="ghost" className="mt-4 px-0">
             <Link href="/search">

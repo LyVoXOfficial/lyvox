@@ -5,8 +5,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabaseServer } from "@/lib/supabaseServer";
+import { getI18nProps } from "@/i18n/server";
 import { VerifyEmailClient } from "./VerifyEmailClient";
 import { VerifyPhoneClient } from "./VerifyPhoneClient";
+
+function createTr(messages: Record<string, unknown>) {
+  return (key: string, fallback: string): string => {
+    const value = key
+      .split(".")
+      .reduce<unknown>((acc, part) => (acc && typeof acc === "object" ? (acc as Record<string, unknown>)[part] : undefined), messages);
+    return typeof value === "string" && value.length > 0 ? value : fallback;
+  };
+}
 
 export const metadata = {
   title: "Account verification | LyVoX",
@@ -15,6 +25,8 @@ export const metadata = {
 
 export default async function VerifyPage() {
   const supabase = await supabaseServer();
+  const { messages } = await getI18nProps();
+  const tr = createTr(messages as Record<string, unknown>);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -40,52 +52,59 @@ export default async function VerifyPage() {
         <Button asChild variant="ghost" size="sm" className="px-0">
           <Link href="/profile">
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Back to profile
+            {tr("profile.back_to_profile", "Back to profile")}
           </Link>
         </Button>
 
         <header className="grid gap-6 md:grid-cols-[minmax(0,1fr)_320px]">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+            <div className="lyvox-trust-gradient inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium text-white shadow-[var(--shadow-soft)]">
               <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-              Trust checks
+              {tr("verify.trust_checks", "Trust checks")}
             </div>
-            <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">Account verification</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl">
+              {tr("verify.title", "Account verification")}
+            </h1>
             <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-              Verify email and phone details to improve marketplace trust and unlock safer publishing flows.
+              {tr(
+                "verify.subtitle",
+                "Verify email and phone details to improve marketplace trust and unlock safer publishing flows.",
+              )}
             </p>
           </div>
 
           <Card
             className={
               isFullyVerified
-                ? "rounded-md border-emerald-200 bg-emerald-50"
-                : "rounded-md border-amber-200 bg-amber-50"
+                ? "lyvox-trust-gradient rounded-2xl border-transparent text-white shadow-[var(--shadow-card)]"
+                : "rounded-2xl border-border/70 bg-muted shadow-[var(--shadow-soft)]"
             }
           >
             <CardHeader>
               <div className="flex items-start gap-3">
                 {isFullyVerified ? (
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-700" aria-hidden="true" />
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 text-white" aria-hidden="true" />
                 ) : (
-                  <AlertCircle className="mt-0.5 h-5 w-5 text-amber-700" aria-hidden="true" />
+                  <AlertCircle className="mt-0.5 h-5 w-5 text-muted-foreground" aria-hidden="true" />
                 )}
                 <div>
-                  <CardTitle className={isFullyVerified ? "text-emerald-950" : "text-amber-950"}>
-                    {isFullyVerified ? "Ready to publish" : "Verification required"}
-                  </CardTitle>
-                  <CardDescription className={isFullyVerified ? "text-emerald-800" : "text-amber-800"}>
+                  <CardTitle className={isFullyVerified ? "text-white" : "text-foreground"}>
                     {isFullyVerified
-                      ? "Your account has the required trust checks."
-                      : "Complete both checks before posting with full trust signals."}
+                      ? tr("verify.ready_title", "Ready to publish")
+                      : tr("verify.required_title", "Verification required")}
+                  </CardTitle>
+                  <CardDescription className={isFullyVerified ? "text-white/85" : "text-muted-foreground"}>
+                    {isFullyVerified
+                      ? tr("verify.ready_desc", "Your account has the required trust checks.")
+                      : tr("verify.required_desc", "Complete both checks before posting with full trust signals.")}
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
             {isFullyVerified ? (
               <CardContent>
-                <Button asChild>
-                  <Link href="/post">Post a listing</Link>
+                <Button asChild variant="secondary">
+                  <Link href="/post">{tr("verify.post_listing", "Post a listing")}</Link>
                 </Button>
               </CardContent>
             ) : null}
@@ -93,20 +112,20 @@ export default async function VerifyPage() {
         </header>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <Card className="rounded-md border-border/80">
+          <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-soft)]">
             <CardHeader>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-2">
                   <Mail className="h-5 w-5 text-primary" aria-hidden="true" />
-                  <CardTitle>Email address</CardTitle>
+                  <CardTitle>{tr("verify.email_title", "Email address")}</CardTitle>
                 </div>
                 {verifiedEmail ? (
-                  <Badge className="bg-emerald-600">
-                    <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-                    Verified
+                  <Badge className="lyvox-trust-gradient border-transparent text-white">
+                    <ShieldCheck className="h-3 w-3" aria-hidden="true" />
+                    {tr("verify.verified", "Verified")}
                   </Badge>
                 ) : (
-                  <Badge variant="destructive">Not verified</Badge>
+                  <Badge variant="destructive">{tr("verify.not_verified", "Not verified")}</Badge>
                 )}
               </div>
               <CardDescription>{user.email}</CardDescription>
@@ -114,7 +133,10 @@ export default async function VerifyPage() {
             <CardContent>
               {verifiedEmail ? (
                 <p className="text-sm leading-6 text-muted-foreground">
-                  Your email is verified. Marketplace updates and buyer/seller notifications can reach this address.
+                  {tr(
+                    "verify.email_done",
+                    "Your email is verified. Marketplace updates and buyer/seller notifications can reach this address.",
+                  )}
                 </p>
               ) : (
                 <VerifyEmailClient email={user.email!} />
@@ -122,28 +144,31 @@ export default async function VerifyPage() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-md border-border/80">
+          <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-soft)]">
             <CardHeader>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-2">
                   <Phone className="h-5 w-5 text-primary" aria-hidden="true" />
-                  <CardTitle>Phone number</CardTitle>
+                  <CardTitle>{tr("verify.phone_title", "Phone number")}</CardTitle>
                 </div>
                 {verifiedPhone ? (
-                  <Badge className="bg-emerald-600">
-                    <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-                    Verified
+                  <Badge className="lyvox-trust-gradient border-transparent text-white">
+                    <ShieldCheck className="h-3 w-3" aria-hidden="true" />
+                    {tr("verify.verified", "Verified")}
                   </Badge>
                 ) : (
-                  <Badge variant="destructive">Not verified</Badge>
+                  <Badge variant="destructive">{tr("verify.not_verified", "Not verified")}</Badge>
                 )}
               </div>
-              <CardDescription>{phone || "No phone number added"}</CardDescription>
+              <CardDescription>{phone || tr("verify.no_phone", "No phone number added")}</CardDescription>
             </CardHeader>
             <CardContent>
               {verifiedPhone ? (
                 <p className="text-sm leading-6 text-muted-foreground">
-                  Your phone is verified. Buyers can use stronger trust signals when deciding to contact you.
+                  {tr(
+                    "verify.phone_done",
+                    "Your phone is verified. Buyers can use stronger trust signals when deciding to contact you.",
+                  )}
                 </p>
               ) : (
                 <VerifyPhoneClient userId={user.id} currentPhone={phone} />
@@ -152,21 +177,23 @@ export default async function VerifyPage() {
           </Card>
         </div>
 
-        <Card className="rounded-md border-border/80 bg-muted/30">
+        <Card className="rounded-2xl border-border/70 bg-muted shadow-[var(--shadow-soft)]">
           <CardHeader>
-            <CardTitle>Need help?</CardTitle>
+            <CardTitle>{tr("verify.help_title", "Need help?")}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3 text-sm leading-6 text-muted-foreground md:grid-cols-3">
             <p>
-              <strong className="text-foreground">No email?</strong> Check spam or request another confirmation email.
+              <strong className="text-foreground">{tr("verify.help_email_q", "No email?")}</strong>{" "}
+              {tr("verify.help_email_a", "Check spam or request another confirmation email.")}
             </p>
             <p>
-              <strong className="text-foreground">Phone issue?</strong> Use international format such as +32.
+              <strong className="text-foreground">{tr("verify.help_phone_q", "Phone issue?")}</strong>{" "}
+              {tr("verify.help_phone_a", "Use international format such as +32.")}
             </p>
             <p>
-              <strong className="text-foreground">Still blocked?</strong>{" "}
+              <strong className="text-foreground">{tr("verify.help_blocked_q", "Still blocked?")}</strong>{" "}
               <Link href="/contact" className="font-medium text-primary underline-offset-4 hover:underline">
-                Contact support
+                {tr("verify.contact_support", "Contact support")}
               </Link>
               .
             </p>

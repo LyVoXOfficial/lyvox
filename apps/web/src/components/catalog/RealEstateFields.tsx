@@ -23,7 +23,13 @@ export function RealEstateFields({
   locale = "en",
 }: RealEstateFieldsProps) {
   const { t } = useI18n();
-  
+  const tr = (k: string, fb: string) => {
+    const v = t(k);
+    return v === k ? fb : v;
+  };
+  const inputClass = "rounded-xl h-11 min-h-[44px] focus-visible:ring-4 focus-visible:ring-primary/12";
+  const cardClass = "border-border/70 shadow-[var(--shadow-soft)]";
+
   // Reference data
   const [propertyTypes, setPropertyTypes] = useState<any[]>([]);
   const [epcRatings, setEpcRatings] = useState<any[]>([]);
@@ -58,23 +64,23 @@ export function RealEstateFields({
   return (
     <div className="space-y-8">
       {/* Basic Information */}
-      <Card>
+      <Card className={cardClass}>
         <CardHeader>
-          <CardTitle>Basic Information</CardTitle>
+          <CardTitle className="font-extrabold tracking-tight">{tr('catalog.common.basic_info', 'Basic Information')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Property Type */}
             <div className="space-y-2">
               <Label htmlFor="property_type_id">
-                Property Type <span className="text-red-500">*</span>
+                {tr('catalog.real_estate.property_type', 'Property Type')} <span className="text-destructive">*</span>
               </Label>
               <Select
                 value={formData.property_type_id || ''}
                 onValueChange={(val) => onChange('property_type_id', val)}
               >
-                <SelectTrigger id="property_type_id">
-                  <SelectValue placeholder="Select type..." />
+                <SelectTrigger id="property_type_id" className={inputClass}>
+                  <SelectValue placeholder={tr('catalog.common.select_type', 'Select type...')} />
                 </SelectTrigger>
                 <SelectContent>
                   {propertyTypes.map((type) => (
@@ -89,18 +95,18 @@ export function RealEstateFields({
             {/* Listing Type */}
             <div className="space-y-2">
               <Label htmlFor="listing_type">
-                Listing Type <span className="text-red-500">*</span>
+                {tr('catalog.real_estate.listing_type', 'Listing Type')} <span className="text-destructive">*</span>
               </Label>
               <Select
                 value={formData.listing_type || ''}
                 onValueChange={(val) => onChange('listing_type', val as 'sale' | 'rent')}
               >
-                <SelectTrigger id="listing_type">
-                  <SelectValue placeholder="Select..." />
+                <SelectTrigger id="listing_type" className={inputClass}>
+                  <SelectValue placeholder={tr('catalog.common.select_placeholder', 'Select...')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="sale">For Sale</SelectItem>
-                  <SelectItem value="rent">For Rent</SelectItem>
+                  <SelectItem value="sale">{tr('catalog.real_estate.sale', 'For Sale')}</SelectItem>
+                  <SelectItem value="rent">{tr('catalog.real_estate.rent', 'For Rent')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -109,15 +115,15 @@ export function RealEstateFields({
       </Card>
 
       {/* Dimensions */}
-      <Card>
+      <Card className={cardClass}>
         <CardHeader>
-          <CardTitle>Dimensions</CardTitle>
+          <CardTitle className="font-extrabold tracking-tight">{tr('catalog.real_estate.dimensions', 'Dimensions')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <Label htmlFor="area_sqm">
-                Living Area (m²) <span className="text-red-500">*</span>
+                {tr('catalog.real_estate.area_sqm', 'Living Area (m²)')} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="area_sqm"
@@ -128,11 +134,12 @@ export function RealEstateFields({
                 value={formData.area_sqm ?? ''}
                 onChange={(e) => onChange('area_sqm', e.target.value ? parseFloat(e.target.value) : null)}
                 required
+                className={inputClass}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="rooms">Total Rooms</Label>
+              <Label htmlFor="rooms">{tr('catalog.real_estate.rooms', 'Total Rooms')}</Label>
               <Input
                 id="rooms"
                 type="number"
@@ -140,11 +147,12 @@ export function RealEstateFields({
                 max={20}
                 value={formData.rooms ?? ''}
                 onChange={(e) => onChange('rooms', e.target.value ? parseInt(e.target.value) : null)}
+                className={inputClass}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bedrooms">Bedrooms</Label>
+              <Label htmlFor="bedrooms">{tr('catalog.real_estate.bedrooms', 'Bedrooms')}</Label>
               <Input
                 id="bedrooms"
                 type="number"
@@ -152,11 +160,12 @@ export function RealEstateFields({
                 max={15}
                 value={formData.bedrooms ?? ''}
                 onChange={(e) => onChange('bedrooms', e.target.value ? parseInt(e.target.value) : null)}
+                className={inputClass}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bathrooms">Bathrooms</Label>
+              <Label htmlFor="bathrooms">{tr('catalog.real_estate.bathrooms', 'Bathrooms')}</Label>
               <Input
                 id="bathrooms"
                 type="number"
@@ -165,12 +174,13 @@ export function RealEstateFields({
                 step={0.5}
                 value={formData.bathrooms ?? ''}
                 onChange={(e) => onChange('bathrooms', e.target.value ? parseFloat(e.target.value) : null)}
+                className={inputClass}
               />
-              <p className="text-sm text-muted-foreground">Use 0.5 for half bathrooms</p>
+              <p className="text-sm text-muted-foreground">{tr('catalog.real_estate.bathrooms_help', 'Use 0.5 for half bathrooms')}</p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="land_area_sqm">Land Area (m²)</Label>
+              <Label htmlFor="land_area_sqm">{tr('catalog.real_estate.land_area_sqm', 'Land Area (m²)')}</Label>
               <Input
                 id="land_area_sqm"
                 type="number"
@@ -178,38 +188,39 @@ export function RealEstateFields({
                 step={0.1}
                 value={formData.land_area_sqm ?? ''}
                 onChange={(e) => onChange('land_area_sqm', e.target.value ? parseFloat(e.target.value) : null)}
+                className={inputClass}
               />
-              <p className="text-sm text-muted-foreground">For houses and land</p>
+              <p className="text-sm text-muted-foreground">{tr('catalog.real_estate.land_area_help', 'For houses and land')}</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Energy Performance (Belgium EPC) */}
-      <Card>
+      <Card className={cardClass}>
         <CardHeader>
-          <CardTitle>Energy Performance</CardTitle>
+          <CardTitle className="font-extrabold tracking-tight">{tr('catalog.real_estate.energy_performance', 'Energy Performance')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="epc_rating">EPC Rating</Label>
+              <Label htmlFor="epc_rating">{tr('catalog.real_estate.epc_rating', 'EPC Rating')}</Label>
               <Select
                 value={formData.epc_rating || ''}
                 onValueChange={(val) => onChange('epc_rating', val)}
               >
-                <SelectTrigger id="epc_rating">
-                  <SelectValue placeholder="Select rating..." />
+                <SelectTrigger id="epc_rating" className={inputClass}>
+                  <SelectValue placeholder={tr('catalog.common.select_rating', 'Select rating...')} />
                 </SelectTrigger>
                 <SelectContent>
                   {epcRatings.map((rating) => (
                     <SelectItem key={rating.code} value={rating.code}>
                       <div className="flex items-center gap-2">
-                        <div 
-                          className="w-4 h-4 rounded" 
+                        <div
+                          className="w-4 h-4 rounded"
                           style={{ backgroundColor: rating.color }}
                         />
-                        {rating.name} ({rating.max_kwh_per_sqm_year ? `≤${rating.max_kwh_per_sqm_year}` : 'No limit'} kWh/m²/year)
+                        {rating.name} ({rating.max_kwh_per_sqm_year ? `≤${rating.max_kwh_per_sqm_year}` : tr('catalog.real_estate.epc_no_limit', 'No limit')} kWh/m²/year)
                       </div>
                     </SelectItem>
                   ))}
@@ -218,7 +229,7 @@ export function RealEstateFields({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="epc_cert_number">EPC Certificate Number</Label>
+              <Label htmlFor="epc_cert_number">{tr('catalog.real_estate.epc_cert_number', 'EPC Certificate Number')}</Label>
               <Input
                 id="epc_cert_number"
                 type="text"
@@ -226,17 +237,19 @@ export function RealEstateFields({
                 pattern="^[0-9]{8}-[0-9]{7}-[0-9]{2}$"
                 value={formData.epc_cert_number || ''}
                 onChange={(e) => onChange('epc_cert_number', e.target.value)}
+                className={inputClass}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="epc_kwh_per_sqm_year">Energy Consumption (kWh/m²/year)</Label>
+              <Label htmlFor="epc_kwh_per_sqm_year">{tr('catalog.real_estate.epc_kwh', 'Energy Consumption (kWh/m²/year)')}</Label>
               <Input
                 id="epc_kwh_per_sqm_year"
                 type="number"
                 min={0}
                 value={formData.epc_kwh_per_sqm_year ?? ''}
                 onChange={(e) => onChange('epc_kwh_per_sqm_year', e.target.value ? parseInt(e.target.value) : null)}
+                className={inputClass}
               />
             </div>
 
@@ -247,7 +260,7 @@ export function RealEstateFields({
                 onCheckedChange={(checked) => onChange('double_glazing', checked)}
               />
               <Label htmlFor="double_glazing" className="cursor-pointer">
-                Double Glazing
+                {tr('catalog.real_estate.double_glazing', 'Double Glazing')}
               </Label>
             </div>
           </div>
@@ -256,15 +269,15 @@ export function RealEstateFields({
 
       {/* Rental-Specific Fields */}
       {isRental && (
-        <Card>
+        <Card className={cardClass}>
           <CardHeader>
-            <CardTitle>Rental Details</CardTitle>
+            <CardTitle className="font-extrabold tracking-tight">{tr('catalog.real_estate.rental_details', 'Rental Details')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="rent_monthly">
-                  Monthly Rent (€) <span className="text-red-500">*</span>
+                  {tr('catalog.real_estate.rent_monthly', 'Monthly Rent (€)')} <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="rent_monthly"
@@ -273,22 +286,24 @@ export function RealEstateFields({
                   value={formData.rent_monthly ?? ''}
                   onChange={(e) => onChange('rent_monthly', e.target.value ? parseFloat(e.target.value) : null)}
                   required
+                  className={inputClass}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="rent_charges_monthly">Monthly Charges (€)</Label>
+                <Label htmlFor="rent_charges_monthly">{tr('catalog.real_estate.rent_charges', 'Monthly Charges (€)')}</Label>
                 <Input
                   id="rent_charges_monthly"
                   type="number"
                   min={0}
                   value={formData.rent_charges_monthly ?? ''}
                   onChange={(e) => onChange('rent_charges_monthly', e.target.value ? parseFloat(e.target.value) : null)}
+                  className={inputClass}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="deposit_months">Security Deposit (months)</Label>
+                <Label htmlFor="deposit_months">{tr('catalog.real_estate.deposit_months', 'Security Deposit (months)')}</Label>
                 <Input
                   id="deposit_months"
                   type="number"
@@ -297,33 +312,35 @@ export function RealEstateFields({
                   step={0.5}
                   value={formData.deposit_months ?? ''}
                   onChange={(e) => onChange('deposit_months', e.target.value ? parseFloat(e.target.value) : null)}
+                  className={inputClass}
                 />
-                <p className="text-sm text-muted-foreground">Maximum 3 months (Belgium law)</p>
+                <p className="text-sm text-muted-foreground">{tr('catalog.real_estate.deposit_months_help', 'Maximum 3 months (Belgium law)')}</p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="available_from">Available From</Label>
+                <Label htmlFor="available_from">{tr('catalog.real_estate.available_from', 'Available From')}</Label>
                 <Input
                   id="available_from"
                   type="date"
                   value={formData.available_from || ''}
                   onChange={(e) => onChange('available_from', e.target.value)}
+                  className={inputClass}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="furnished">Furnished Status</Label>
+                <Label htmlFor="furnished">{tr('catalog.real_estate.furnished', 'Furnished Status')}</Label>
                 <Select
                   value={formData.furnished || ''}
                   onValueChange={(val) => onChange('furnished', val)}
                 >
-                  <SelectTrigger id="furnished">
-                    <SelectValue placeholder="Select..." />
+                  <SelectTrigger id="furnished" className={inputClass}>
+                    <SelectValue placeholder={tr('catalog.common.select_placeholder', 'Select...')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="unfurnished">Unfurnished</SelectItem>
-                    <SelectItem value="semi_furnished">Semi-Furnished</SelectItem>
-                    <SelectItem value="fully_furnished">Fully Furnished</SelectItem>
+                    <SelectItem value="unfurnished">{tr('catalog.real_estate.unfurnished', 'Unfurnished')}</SelectItem>
+                    <SelectItem value="semi_furnished">{tr('catalog.real_estate.semi_furnished', 'Semi-Furnished')}</SelectItem>
+                    <SelectItem value="fully_furnished">{tr('catalog.real_estate.fully_furnished', 'Fully Furnished')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -333,15 +350,15 @@ export function RealEstateFields({
       )}
 
       {/* Location */}
-      <Card>
+      <Card className={cardClass}>
         <CardHeader>
-          <CardTitle>Location</CardTitle>
+          <CardTitle className="font-extrabold tracking-tight">{tr('catalog.common.location', 'Location')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="postcode">
-                Postcode <span className="text-red-500">*</span>
+                {tr('catalog.real_estate.postcode', 'Postcode')} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="postcode"
@@ -352,13 +369,14 @@ export function RealEstateFields({
                 value={formData.postcode || ''}
                 onChange={(e) => onChange('postcode', e.target.value)}
                 required
+                className={inputClass}
               />
-              <p className="text-sm text-muted-foreground">4-digit Belgian postcode</p>
+              <p className="text-sm text-muted-foreground">{tr('catalog.real_estate.postcode_help', '4-digit Belgian postcode')}</p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="municipality">
-                Municipality <span className="text-red-500">*</span>
+                {tr('catalog.real_estate.municipality', 'Municipality')} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="municipality"
@@ -367,17 +385,19 @@ export function RealEstateFields({
                 value={formData.municipality || ''}
                 onChange={(e) => onChange('municipality', e.target.value)}
                 required
+                className={inputClass}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="neighborhood">Neighborhood</Label>
+              <Label htmlFor="neighborhood">{tr('catalog.real_estate.neighborhood', 'Neighborhood')}</Label>
               <Input
                 id="neighborhood"
                 type="text"
                 maxLength={100}
                 value={formData.neighborhood || ''}
                 onChange={(e) => onChange('neighborhood', e.target.value)}
+                className={inputClass}
               />
             </div>
           </div>
@@ -385,14 +405,14 @@ export function RealEstateFields({
       </Card>
 
       {/* Features */}
-      <Card>
+      <Card className={cardClass}>
         <CardHeader>
-          <CardTitle>Features</CardTitle>
+          <CardTitle className="font-extrabold tracking-tight">{tr('catalog.common.features', 'Features')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="parking_spaces">Parking Spaces</Label>
+              <Label htmlFor="parking_spaces">{tr('catalog.real_estate.parking_spaces', 'Parking Spaces')}</Label>
               <Input
                 id="parking_spaces"
                 type="number"
@@ -400,11 +420,12 @@ export function RealEstateFields({
                 max={10}
                 value={formData.parking_spaces ?? 0}
                 onChange={(e) => onChange('parking_spaces', e.target.value ? parseInt(e.target.value) : 0)}
+                className={inputClass}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="terrace_sqm">Terrace Area (m²)</Label>
+              <Label htmlFor="terrace_sqm">{tr('catalog.real_estate.terrace_sqm', 'Terrace Area (m²)')}</Label>
               <Input
                 id="terrace_sqm"
                 type="number"
@@ -412,11 +433,12 @@ export function RealEstateFields({
                 step={0.1}
                 value={formData.terrace_sqm ?? ''}
                 onChange={(e) => onChange('terrace_sqm', e.target.value ? parseFloat(e.target.value) : null)}
+                className={inputClass}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="garden_sqm">Garden Area (m²)</Label>
+              <Label htmlFor="garden_sqm">{tr('catalog.real_estate.garden_sqm', 'Garden Area (m²)')}</Label>
               <Input
                 id="garden_sqm"
                 type="number"
@@ -424,6 +446,7 @@ export function RealEstateFields({
                 step={0.1}
                 value={formData.garden_sqm ?? ''}
                 onChange={(e) => onChange('garden_sqm', e.target.value ? parseFloat(e.target.value) : null)}
+                className={inputClass}
               />
             </div>
 
@@ -434,7 +457,7 @@ export function RealEstateFields({
                   checked={formData.elevator === true}
                   onCheckedChange={(checked) => onChange('elevator', checked)}
                 />
-                <Label htmlFor="elevator" className="cursor-pointer">Elevator</Label>
+                <Label htmlFor="elevator" className="cursor-pointer">{tr('catalog.real_estate.elevator', 'Elevator')}</Label>
               </div>
 
               <div className="flex items-center space-x-2">
@@ -443,7 +466,7 @@ export function RealEstateFields({
                   checked={formData.cellar === true}
                   onCheckedChange={(checked) => onChange('cellar', checked)}
                 />
-                <Label htmlFor="cellar" className="cursor-pointer">Cellar/Storage</Label>
+                <Label htmlFor="cellar" className="cursor-pointer">{tr('catalog.real_estate.cellar', 'Cellar/Storage')}</Label>
               </div>
 
               <div className="flex items-center space-x-2">
@@ -452,7 +475,7 @@ export function RealEstateFields({
                   checked={formData.pet_friendly === true}
                   onCheckedChange={(checked) => onChange('pet_friendly', checked)}
                 />
-                <Label htmlFor="pet_friendly" className="cursor-pointer">Pet Friendly</Label>
+                <Label htmlFor="pet_friendly" className="cursor-pointer">{tr('catalog.real_estate.pet_friendly', 'Pet Friendly')}</Label>
               </div>
             </div>
           </div>
