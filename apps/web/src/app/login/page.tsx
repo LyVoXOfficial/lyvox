@@ -232,11 +232,11 @@ function LoginPageInner() {
           </Link>
 
           <div className="max-w-xl space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+            <div className="lyvox-trust-gradient inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold text-white">
               <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
               Protected account access
             </div>
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+            <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-foreground md:text-4xl">
               Sign in to manage listings, messages, and trusted payments.
             </h1>
             <p className="text-base leading-7 text-muted-foreground">
@@ -247,15 +247,15 @@ function LoginPageInner() {
 
           <div className="grid max-w-xl gap-3 sm:grid-cols-3">
             {["Verified seller tools", "Saved listings", "Secure messages"].map((item) => (
-              <div key={item} className="flex items-center gap-2 rounded-md border border-border/70 bg-card px-3 py-2 text-sm">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+              <div key={item} className="flex items-center gap-2 rounded-xl border border-border/70 bg-card px-3 py-2.5 text-sm font-medium shadow-[var(--shadow-soft)]">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                 <span>{item}</span>
               </div>
             ))}
           </div>
         </section>
 
-        <Card className="rounded-md border-border/80 shadow-lg shadow-black/5">
+        <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
           <CardHeader>
             <CardTitle className="text-2xl">Sign in</CardTitle>
             <CardDescription>Choose the fastest option available for your account.</CardDescription>
