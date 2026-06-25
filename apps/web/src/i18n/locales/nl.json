@@ -109,6 +109,25 @@
     "fetchFailed": "Zoekresultaten laden mislukt",
     "error": "Er is een fout opgetreden"
   },
+  "contact": {
+    "price": "Prijs",
+    "posted": "Geplaatst",
+    "active_listings": "actieve advertenties",
+    "verified": "Geverifieerd",
+    "checks_pending": "Controles in behandeling",
+    "email": "E-mail",
+    "phone": "Telefoon",
+    "not_verified": "Niet geverifieerd",
+    "manage": "Advertentie beheren",
+    "message": "Bericht naar verkoper",
+    "opening": "Chat openen…",
+    "sign_in_to_message": "Log in om te berichten",
+    "safer_title": "Checklist veilige deal",
+    "safer_1": "Houd betaling en levering binnen LyVoX.",
+    "safer_2": "Controleer het item en de verkoper voordat u betaalt.",
+    "too_many": "Te veel pogingen. Probeer het zo opnieuw.",
+    "error_generic": "Kon het gesprek niet openen"
+  },
   "home": {
     "hero_tag": "LyVoX België marktplaats",
     "hero_title": "Vind lokale deals met sterkere vertrouwenssignalen.",

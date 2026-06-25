@@ -109,6 +109,25 @@
     "fetchFailed": "Failed to load search results",
     "error": "An error occurred"
   },
+  "contact": {
+    "price": "Price",
+    "posted": "Posted",
+    "active_listings": "active listings",
+    "verified": "Verified",
+    "checks_pending": "Checks pending",
+    "email": "Email",
+    "phone": "Phone",
+    "not_verified": "Not verified",
+    "manage": "Manage listing",
+    "message": "Message seller",
+    "opening": "Opening chat…",
+    "sign_in_to_message": "Sign in to message",
+    "safer_title": "Safer deal checklist",
+    "safer_1": "Keep payment and delivery discussion inside LyVoX.",
+    "safer_2": "Inspect the item and seller signals before sending money.",
+    "too_many": "Too many chat attempts. Try again shortly.",
+    "error_generic": "Could not open the conversation"
+  },
   "home": {
     "hero_tag": "LyVoX Belgium marketplace",
     "hero_title": "Find local deals with stronger trust signals.",

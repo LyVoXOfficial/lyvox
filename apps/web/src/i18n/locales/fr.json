@@ -109,6 +109,25 @@
     "fetchFailed": "Échec du chargement des résultats",
     "error": "Une erreur s'est produite"
   },
+  "contact": {
+    "price": "Prix",
+    "posted": "Publié",
+    "active_listings": "annonces actives",
+    "verified": "Vérifié",
+    "checks_pending": "Vérifications en cours",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "not_verified": "Non vérifié",
+    "manage": "Gérer l'annonce",
+    "message": "Contacter le vendeur",
+    "opening": "Ouverture du chat…",
+    "sign_in_to_message": "Connectez-vous pour écrire",
+    "safer_title": "Checklist transaction sûre",
+    "safer_1": "Gardez le paiement et la livraison sur LyVoX.",
+    "safer_2": "Inspectez l'article et le vendeur avant de payer.",
+    "too_many": "Trop de tentatives. Réessayez bientôt.",
+    "error_generic": "Impossible d'ouvrir la conversation"
+  },
   "home": {
     "hero_tag": "Place de marché LyVoX Belgique",
     "hero_title": "Trouvez des offres locales avec des signaux de confiance renforcés.",
