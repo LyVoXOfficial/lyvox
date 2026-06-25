@@ -459,7 +459,11 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 **Interfaces:**
 - Consumes: `mapSearchItemToCard` (Task 3); `/api/search` items now carry `image` (Task 2).
 
-This task has no new unit test — it is wiring; the mapping logic is covered by Task 3, and correctness (images appear) is verified by `tsc` + `build` + the live check in Task 15. It removes a real bug: the current code reads `mediaData.items` (the envelope is `{ ok, data: { items } }`), so it always resolved `null` and the page rendered placeholders.
+This task has no new unit test — it is wiring; the mapping logic is covered by Task 3, and correctness (images appear) is verified by `tsc` + `build` + the live check in Task 15. It removes a real bug: `createSuccessResponse(data)` returns `{ ok: true, data }` (`apiErrors.ts`), so `/api/media/public` returns `{ ok, data: { items } }`, but the page reads `mediaData.items` (`search/page.tsx:178`) — always `undefined` — so every result rendered the placeholder.
+
+- [ ] **Step 0 (cheap insurance): grep for the same envelope misread elsewhere**
+
+Run: `rg -n "\.json\(\)" apps/web/src --glob '!**/__tests__/**' -A3 | rg -n "(?<![.]data)\.items|(?<![.]data)\.(?:user|advert|profile|count)\b" ` (or simply review other `await res.json()` sites). Any consumer of a `createSuccessResponse` route that reads `body.<field>` instead of `body.data.<field>` is the same bug — note it for a follow-up (do not fix unrelated routes in this task; just record findings in the commit body if any).
 
 - [ ] **Step 1: Add the import**
 
@@ -690,22 +694,22 @@ In `apps/web/src/app/ad/[id]/page.tsx`, add the import:
 import RecentlyViewedRecorder from "@/components/discovery/RecentlyViewedRecorder";
 ```
 
-Inside the rendered JSX of `AdvertPage` (near the top of the main content, alongside `AdvertGallery`), render the recorder using the data the page already has. Use the same first-image URL the page passes to `AdvertGallery`; if no single "first image" variable is readily available, pass `image: null`:
+Inside the rendered JSX of `AdvertPage` (near the top of the main content, alongside `AdvertGallery`), render the recorder. The page already computes `primaryImageUrl` (`const primaryImageUrl = galleryImages[0]?.url ?? null;` at `ad/[id]/page.tsx:425`) and exposes the advert as `data.advert` (type `AdvertRecord`, fields `id/title/price/currency/location`). Reuse both:
 
 ```tsx
 <RecentlyViewedRecorder
   advert={{
-    id: advert.id,
-    title: advert.title,
-    price: advert.price ?? null,
-    currency: advert.currency ?? null,
-    location: advert.location ?? null,
-    image: firstImageUrl ?? null, // reuse the gallery's first image; else null
+    id: data.advert.id,
+    title: data.advert.title,
+    price: data.advert.price ?? null,
+    currency: data.advert.currency ?? null,
+    location: data.advert.location ?? null,
+    image: primaryImageUrl,
   }}
 />
 ```
 
-(Match the real field names on the page's `advert` object; if a field is absent, pass `null`.)
+(If any field name differs at implementation time, match the real `data.advert` shape; pass `null` for an absent field.)
 
 - [ ] **Step 3: Verify types compile**
 
@@ -1238,6 +1242,15 @@ Add near the other imports in `SearchBar.tsx`:
 
 ```typescript
 import { getRecentSearches, addRecentSearch, removeRecentSearch } from "@/lib/recentSearches";
+```
+
+SearchBar already has `const { t, locale } = useI18n();` but **no `tr` helper** — add one right after it (the new dropdown JSX uses `tr`):
+
+```typescript
+const tr = (key: string, fallback: string) => {
+  const value = t(key);
+  return value === key ? fallback : value;
+};
 ```
 
 Add state alongside the existing component state:
