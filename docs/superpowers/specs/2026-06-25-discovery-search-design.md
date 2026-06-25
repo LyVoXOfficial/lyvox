@@ -1,7 +1,19 @@
 # Stage 1 — Discovery & Search (UX overhaul)
 
 _Design spec · 2026-06-25 · part of the staged "whole-core" user-friendliness overhaul
-(Stages: 1 Discovery/Search → 2 Listing detail & contact → 3 Sell → 4 Trust/escrow → 5 Engagement)._
+(Stages: **1 Discovery/Search** → **1.5 Passkeys / biometric login** → 2 Listing detail &
+offers → 3 Sell → 4 Trust/escrow → 5 Engagement). Stage 1.5 = a friendly UX over the
+existing WebAuthn scaffolding (`/api/auth/webauthn/*`, `lib/webauthn.ts`): "log in once,
+then bind a device passkey → unlock with Face/Touch ID". Pulled in early because it is both
+a wow-feature and an anti-fraud lever, and the foundation already exists._
+
+## Implementation phasing (each phase ships + is verified on www.lyvox.be)
+Ordered by dependency: the Trust Gate (F) gates the like action and swipe-up actions, so it
+must land **with** likes and **before** the swipe deck.
+1. **Phase 1** — Discovery feed (A) + instant search (B) + filters/sort (C).
+2. **Phase 2** — Trust Gate (F) + likes & popularity formula (G).
+3. **Phase 3** — Swipe mode (E) + the simple "make an offer" message (swipe-up action).
+4. **Phase 4** — Saved searches + alerts (D).
 
 ## Goal
 Make the entry experience (find → browse) feel as fast, alive and trust-forward as
@@ -14,9 +26,16 @@ verified there (local dev preview does not reflect CSS — see `memory/deploy-pi
 - Filtering is a real **mobile bottom-sheet** with condition + sort + active chips.
 - Logged-in users can **save a search** and see "N new since saved"; anonymous users get
   local saved searches.
+- A **swipe "Discover" deck** lets users like (right), pass (left), act (up), and open (tap)
+  adverts; the deck reranks toward their taste and never repeats cards.
+- **Likes** drive a real popularity ranking (`views·0.3 + likes·3 + favorites·5`), shown as a
+  count on cards — distinct from the heart/favorite.
+- High-intent actions (publish, message, offer, like) flow through one **Trust Gate** that asks
+  anonymous users to register/login and unverified users to verify their phone, then replays
+  the action — instead of failing or silently redirecting.
 - All new UI is localized in 5 locales; `pnpm build` ✅, `tsc` ✅, i18n check PASS, tests ✅.
 
-## Scope — four parts
+## Scope — seven parts (A–D = browse/search · E–G = swipe, gate, likes)
 
 ### A. Discovery feed (home)
 - **New** `components/discovery/DiscoveryFeed.tsx` (client): renders an initial page passed
@@ -86,6 +105,84 @@ verified there (local dev preview does not reflect CSS — see `memory/deploy-pi
   Function scanning new adverts against saved searches → notifications) is **Stage 5**. Stage 1
   ships save + list + re-run + "N new since saved" + the alert toggle (stored, not yet firing).
 
+### E. Swipe mode ("Discover" — a Tinder-style deck)
+A playful, **opt-in** way to browse — a full-screen card deck reachable from a "Discover"
+entry on the home feed and `/search`. It is a *second view* over the same data, never the
+only way in.
+- **New** `app/discover/page.tsx` + `components/discover/SwipeDeck.tsx` (client): a stack of
+  large advert cards (photo-first: image, title, price, location, the heart, a like count).
+  Cards come from `/api/search` reranked toward the user's taste (see below); the deck
+  prefetches the next ~10 and tracks "seen" ids so the same advert isn't shown twice.
+- **Gestures** (touch + mouse drag + keyboard arrows + on-screen buttons for accessibility):
+  - **Swipe RIGHT = Like 👍** — a public popularity signal. Calls `POST /api/likes` (Section G),
+    bumps the like count, and feeds the taste engine. **Not** a favorite. Requires auth →
+    if anonymous, the Trust Gate (Section F) opens; the pending like is replayed after sign-in.
+  - **Swipe LEFT = Pass** — recorded locally only (taste signal: down-weight this
+    category/seller/price band). No server call.
+  - **Swipe UP = Act** — opens the **actions sheet** for that advert: *Message seller*,
+    *Make an offer*, *Open listing*. Message/offer route through the Trust Gate first.
+  - **Tap = Open** the full listing (`/ad/{id}`).
+  - The **heart on the photo = Favorite** (existing favorites system) — independent of swipe.
+- **Taste engine** `lib/taste.ts` (client, localStorage, anonymous-friendly): keeps lightweight
+  weights per `{category_id, price_band, location, seller}` from likes (+), favorites (++) and
+  passes (−). The deck asks `/api/search` for a candidate pool (newest + popular) and reorders
+  it client-side by a taste score; cold-start (no signal) = popularity order. No ML, no new
+  table — purely a reranking heuristic. Cleared with a "Reset preferences" control.
+- **Themed decks ("Drops")**: optional preset decks the deck header can switch between —
+  e.g. "Near you", "Under €50", "Just listed", "Popular now" — each just a different
+  `/api/search` query feeding the same SwipeDeck. Stage-1 ships 3–4 presets.
+- **Seen-tracking** `lib/seenAdverts.ts` (localStorage, cap ~500, FIFO) so refreshes don't
+  repeat cards; resettable.
+- Reuse the "Trust, in colour" tokens; honor `prefers-reduced-motion` (cross-fade instead of
+  fling). Empty deck → "You're all caught up" with a link back to the feed.
+
+### F. Trust Gate (high-intent action guard)
+A single reusable modal that protects **high-intent actions** (post a listing, contact/message
+a seller, make an offer, swipe-up "Act", like). It replaces the old "match" idea.
+- **New** `components/trust/TrustGate.tsx` + `lib/useTrustGate.ts` (a hook returning
+  `requireTrust(action, run)` ). Logic by state:
+  - **Not signed in** → show a compact **register / login** panel (reuse existing auth forms,
+    embedded — not a full-page redirect) with a one-line "why" ("Create a free account to
+    message sellers safely"). On success the original action is **replayed** automatically.
+  - **Signed in but phone unverified** → show the **phone-verification** step (reuse
+    `/api/phone/request` + `/api/phone/verify`, the existing OTP flow) inline. On success,
+    replay the action.
+  - **Signed in + verified** → run the action immediately (no modal).
+- The gate reads auth + `phone_verified` from the session/profile already exposed to the client.
+  Actions register their requirement level: *like* and *contact* need **auth**; *message*,
+  *offer*, and *publish* need **auth + phone-verified**. (Publish already enforces this
+  server-side — the gate just makes it friendly and pre-emptive.)
+- **Security boundary:** the gate is **UX only**. Every protected action keeps its existing
+  server-side authz/verification check — the modal never becomes the source of truth.
+- **Passkeys tie-in (Stage 1.5):** once the user has signed in via the gate, offer "Enable
+  fast sign-in on this device" → enroll a passkey via the existing `/api/auth/webauthn/enroll`.
+  The enrollment UX is built in Stage 1.5; Stage 1 just leaves the hook/affordance.
+
+### G. Likes & popularity formula
+Likes are a **public popularity signal** distinct from favorites (private save list).
+- **New table** `public.advert_likes` (mirrors the favorites table):
+  `user_id uuid not null references auth.users(id) on delete cascade,
+   advert_id uuid not null references public.adverts(id) on delete cascade,
+   created_at timestamptz not null default now(), primary key (user_id, advert_id)`.
+  **RLS:** any authenticated user may `insert`/`delete` their **own** row and `select` only
+  their **own** rows (all `auth.uid() = user_id`) — so the deck can render "did I like this".
+  Per-advert `like_count` is exposed **only as an aggregate** via a `SECURITY DEFINER` function
+  `advert_like_count(advert_id) returns int` (and a batch variant), so individual likers are
+  never readable by other users. Index `(advert_id)` for counting. Shipped as a migration,
+  applied surgically via `pg`.
+- **API** `app/api/likes/route.ts`: `POST {advert_id}` toggles the caller's like
+  (insert/delete), returns `{liked, like_count}`. **Auth required** (the Trust Gate guarantees
+  it client-side); rate-limited per user (Upstash) as anti-spam; zod-validated; `{ok,data}`
+  envelope. A `GET ?advert_id=` (or batch) returns `{like_count, liked}` for rendering.
+- **Popularity formula:** `app/api/top-adverts/route.ts` changes its score from
+  `views·1 + favorites·5` to **`views·0.3 + likes·3 + favorites·5`** (likes weighted between
+  cheap views and high-effort favorites). Computed from `like_count` + `favorite_count`
+  aggregates; keep it a single bounded query. "Popular now" deck (Section E) and any
+  "Top/Popular" rails read this endpoint.
+- **UI:** advert cards and the detail page show a 👍 like count next to the heart;
+  the swipe deck's right-swipe and a tappable like button on cards both call `/api/likes`
+  (through the Trust Gate). Favorites UI is unchanged.
+
 ## Mobile / tactile
 Horizontal swipe rows (recently-viewed, categories), pull-friendly infinite feed, the filter
 bottom-sheet with sticky apply/clear, tap targets ≥40px, smooth skeletons. Reuse the
@@ -102,19 +199,32 @@ bottom-sheet with sticky apply/clear, tap targets ≥40px, smooth skeletons. Reu
 - Unit (vitest): `lib/recentSearches.ts` (dedupe/cap/order), `lib/recentlyViewed.ts`,
   `lib/savedSearches.ts` (local shape), and a pure `savedSearchMatches(filters, advert)` helper
   if used client-side.
-- API: `app/api/saved-searches` CRUD (auth, ownership, validation) — mock supabase like the
-  existing route tests.
+- Unit (vitest): `lib/taste.ts` (weight update from like/favorite/pass, taste-score ranking,
+  cold-start = popularity order), `lib/seenAdverts.ts` (cap/FIFO/dedupe), and a pure
+  `popularityScore({views,likes,favorites})` helper used by `/api/top-adverts`.
+- API: `app/api/saved-searches` CRUD and `app/api/likes` (auth required, toggle insert/delete,
+  rate-limit, ownership, validation) — mock supabase like the existing route tests.
+- Trust Gate: a small test that `requireTrust` runs the action immediately when verified, opens
+  the register panel when anonymous, opens phone-verify when unverified, and replays the action
+  after each gate clears.
 - Live: verify on www.lyvox.be (infinite scroll loads, instant results appear, filter sheet,
-  save+list) after each deploy. Gate every push on `tsc`, `pnpm build`, i18n PASS, `pnpm test`.
+  save+list, swipe deck likes/passes, like count + popularity, the Trust Gate on a contact/like
+  action) after each deploy. Gate every push on `tsc`, `pnpm build`, i18n PASS, `pnpm test`.
 
 ## Out of scope (later stages)
-Map view (needs a map lib + reliable geo) · offers/negotiation in chat (Stage 2) · fast
-photo-first sell + AI assist (Stage 3) · itsme/escrow/disputes (Stage 4) · alert delivery
-job + push/email (Stage 5).
+Map view (needs a map lib + reliable geo) · full offer management — accept / counter / expire
+(Stage 2; Stage 1's swipe-up "Make an offer" is just a structured offer **message** in chat) ·
+server-side taste/recommendation ML (Stage 1 taste is a client localStorage heuristic) ·
+passkey **enrollment UX** (Stage 1.5 — Stage 1 only leaves the affordance) · fast photo-first
+sell + AI assist (Stage 3) · itsme/escrow/disputes (Stage 4) · alert delivery job + push/email
+(Stage 5).
 
 ## Data flow summary
 `Home (SSR latest) → DiscoveryFeed → /api/search (paged)`;
 `SearchBar (debounced) → /api/search?limit=6 + localStorage recent`;
 `SearchFilters → URL params → /api/search (now incl. condition + sort) → search_adverts RPC`;
 `Save search → /api/saved-searches → saved_searches table`;
-`/saved → GET /api/saved-searches (+new_count) → re-run /search`.
+`/saved → GET /api/saved-searches (+new_count) → re-run /search`;
+`/discover → SwipeDeck → /api/search (taste-reranked) → right=POST /api/likes · up=actions sheet · tap=/ad/{id}`;
+`High-intent action → useTrustGate → (auth panel | phone-verify) → replay action`;
+`Like/favorite/view counts → /api/top-adverts (views·0.3 + likes·3 + favorites·5) → Popular rails & deck`.
