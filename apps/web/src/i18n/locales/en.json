@@ -1154,6 +1154,8 @@
     "code_verify_error": "Could not verify the code."
   },
   "discovery": {
-    "recently_viewed": "Recently viewed"
+    "recently_viewed": "Recently viewed",
+    "load_error": "Couldn't load more listings.",
+    "end_of_feed": "You've reached the end."
   }
 }

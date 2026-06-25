@@ -1154,6 +1154,8 @@
     "code_verify_error": "Code konnte nicht verifiziert werden."
   },
   "discovery": {
-    "recently_viewed": "Zuletzt angesehen"
+    "recently_viewed": "Zuletzt angesehen",
+    "load_error": "Weitere Anzeigen konnten nicht geladen werden.",
+    "end_of_feed": "Sie haben das Ende erreicht."
   }
 }

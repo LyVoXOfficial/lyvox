@@ -1154,6 +1154,8 @@
     "code_verify_error": "Kon de code niet verifiëren."
   },
   "discovery": {
-    "recently_viewed": "Recent bekeken"
+    "recently_viewed": "Recent bekeken",
+    "load_error": "Kon meer advertenties niet laden.",
+    "end_of_feed": "Je hebt het einde bereikt."
   }
 }

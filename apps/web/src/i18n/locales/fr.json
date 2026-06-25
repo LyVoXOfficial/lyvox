@@ -1154,6 +1154,8 @@
     "code_verify_error": "Impossible de vérifier le code."
   },
   "discovery": {
-    "recently_viewed": "Vus récemment"
+    "recently_viewed": "Vus récemment",
+    "load_error": "Impossible de charger plus d'annonces.",
+    "end_of_feed": "Vous êtes arrivé à la fin."
   }
 }
