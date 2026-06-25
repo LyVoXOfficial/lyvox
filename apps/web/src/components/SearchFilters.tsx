@@ -23,6 +23,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type SearchFiltersProps = {
   variant?: "sidebar" | "drawer";
@@ -38,6 +45,8 @@ export type SearchFiltersState = {
   location: string | null;
   catalog_fields: Record<string, unknown>;
   verified_only: boolean;
+  condition: string | null;
+  sort_by: string;
 };
 
 type CategoryWithChildren = Category & {
@@ -192,6 +201,8 @@ export default function SearchFilters({
   });
   const [dynamicFilters, setDynamicFilters] = useState<Record<string, unknown>>({});
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [condition, setCondition] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<string>("created_at_desc");
 
   // Initialize from URL params
   useEffect(() => {
@@ -224,6 +235,12 @@ export default function SearchFilters({
       } else {
         setVerifiedOnly(false);
       }
+
+      const conditionParam = searchParams.get("condition");
+      setCondition(conditionParam || null);
+
+      const sortByParam = searchParams.get("sort_by");
+      setSortBy(sortByParam ?? "created_at_desc");
     }, 0);
 
     return () => window.clearTimeout(timeout);
@@ -451,6 +468,8 @@ export default function SearchFilters({
       location: location || null,
       catalog_fields: {},
       verified_only: verifiedOnly,
+      condition,
+      sort_by: sortBy,
     });
   };
 
@@ -464,6 +483,8 @@ export default function SearchFilters({
       location: location || null,
       catalog_fields: {},
       verified_only: verifiedOnly,
+      condition,
+      sort_by: sortBy,
     });
   };
 
@@ -481,6 +502,8 @@ export default function SearchFilters({
       location: selectedLocation || null,
       catalog_fields: dynamicFilters,
       verified_only: verifiedOnly,
+      condition,
+      sort_by: sortBy,
     });
   };
 
@@ -497,6 +520,8 @@ export default function SearchFilters({
       location: filters.location,
       catalog_fields: filters.catalog_fields ?? dynamicFilters,
       verified_only: filters.verified_only ?? verifiedOnly,
+      condition: filters.condition ?? condition,
+      sort_by: filters.sort_by ?? sortBy,
     };
 
     onFiltersChange?.(mergedFilters);
@@ -532,6 +557,16 @@ export default function SearchFilters({
       params.set("verified_only", "true");
     } else {
       params.delete("verified_only");
+    }
+
+    if (mergedFilters.condition) {
+      params.set("condition", mergedFilters.condition);
+    } else {
+      params.delete("condition");
+    }
+
+    if (mergedFilters.sort_by) {
+      params.set("sort_by", mergedFilters.sort_by);
     }
 
     Array.from(params.keys())
@@ -580,6 +615,8 @@ export default function SearchFilters({
         location: location || null,
         catalog_fields: next,
         verified_only: verifiedOnly,
+        condition,
+        sort_by: sortBy,
       });
 
       return next;
@@ -594,6 +631,8 @@ export default function SearchFilters({
       location: location || null,
       catalog_fields: dynamicFilters,
       verified_only: verifiedOnly,
+      condition,
+      sort_by: sortBy,
     });
   };
 
@@ -603,6 +642,8 @@ export default function SearchFilters({
     setLocation("");
     setDynamicFilters({});
     setVerifiedOnly(false);
+    setCondition(null);
+    setSortBy("created_at_desc");
     applyFilters({
       category_id: null,
       price_min: null,
@@ -610,6 +651,8 @@ export default function SearchFilters({
       location: null,
       catalog_fields: {},
       verified_only: false,
+      condition: null,
+      sort_by: "created_at_desc",
     });
   };
 
@@ -654,6 +697,8 @@ export default function SearchFilters({
           location: location || null,
           catalog_fields: dynamicFilters,
           verified_only: verifiedOnly,
+          condition,
+          sort_by: sortBy,
         });
       },
     });
@@ -672,6 +717,8 @@ export default function SearchFilters({
           location: null,
           catalog_fields: dynamicFilters,
           verified_only: verifiedOnly,
+          condition,
+          sort_by: sortBy,
         });
       },
     });
@@ -690,6 +737,33 @@ export default function SearchFilters({
           location: location || null,
           catalog_fields: dynamicFilters,
           verified_only: false,
+          condition,
+          sort_by: sortBy,
+        });
+      },
+    });
+  }
+
+  if (condition) {
+    const conditionLabels: Record<string, string> = {
+      new: tr("search.condition_new", "New"),
+      used: tr("search.condition_used", "Used"),
+      for_parts: tr("search.condition_for_parts", "For parts"),
+    };
+    activeFilters.push({
+      key: "condition",
+      label: conditionLabels[condition] ?? condition,
+      onRemove: () => {
+        setCondition(null);
+        applyFilters({
+          category_id: selectedCategory?.id || null,
+          price_min: priceRange[0] > 0 ? priceRange[0] : null,
+          price_max: priceRange[1] < 10000 ? priceRange[1] : null,
+          location: location || null,
+          catalog_fields: dynamicFilters,
+          verified_only: verifiedOnly,
+          condition: null,
+          sort_by: sortBy,
         });
       },
     });
@@ -712,6 +786,8 @@ export default function SearchFilters({
           location: location || null,
           catalog_fields: {},
           verified_only: verifiedOnly,
+          condition,
+          sort_by: sortBy,
         });
       },
     });
@@ -897,6 +973,8 @@ export default function SearchFilters({
                 location: location || null,
                 catalog_fields: dynamicFilters,
                 verified_only: value,
+                condition,
+                sort_by: sortBy,
               });
             }}
           />
@@ -905,6 +983,39 @@ export default function SearchFilters({
             {tr("search.verifiedOnlyHelper", "Show listings from sellers with verified email and phone")}
           </span>
         </label>
+      </div>
+
+      {/* Condition Filter */}
+      <div className="space-y-2">
+        <p className="text-sm font-semibold">{tr("search.condition", "Condition")}</p>
+        {([
+          ["new", tr("search.condition_new", "New")],
+          ["used", tr("search.condition_used", "Used")],
+          ["for_parts", tr("search.condition_for_parts", "For parts")],
+        ] as const).map(([value, label]) => (
+          <label key={value} className="flex items-center gap-2 text-sm">
+            <Checkbox
+              checked={condition === value}
+              onCheckedChange={(checked) => setCondition(checked ? value : null)}
+            />
+            {label}
+          </label>
+        ))}
+      </div>
+
+      {/* Sort Filter */}
+      <div className="space-y-2">
+        <p className="text-sm font-semibold">{tr("search.sort", "Sort")}</p>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="relevance">{tr("search.sortRelevance", "Relevance")}</SelectItem>
+            <SelectItem value="price_asc">{tr("search.sortPriceAsc", "Price: low to high")}</SelectItem>
+            <SelectItem value="price_desc">{tr("search.sortPriceDesc", "Price: high to low")}</SelectItem>
+            <SelectItem value="created_at_desc">{tr("search.sortNewest", "Newest first")}</SelectItem>
+            <SelectItem value="created_at_asc">{tr("search.sortOldest", "Oldest first")}</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Location Filter */}

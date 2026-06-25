@@ -85,6 +85,7 @@ export default function SearchPage() {
   const priceMax = searchParams.get("price_max");
   const location = searchParams.get("location") || null;
   const sortBy = searchParams.get("sort_by") || "created_at_desc";
+  const condition = searchParams.get("condition");
   const page = Number.parseInt(searchParams.get("page") || "0", 10);
   const limit = 24;
   const verifiedOnlyFilter = (() => {
@@ -130,6 +131,7 @@ export default function SearchPage() {
       params.set("page", page.toString());
       params.set("limit", limit.toString());
       if (verifiedOnlyFilter) params.set("verified_only", "true");
+      if (condition) params.set("condition", condition);
 
       searchParams.forEach((value, key) => {
         if (key.startsWith("catalog_field_")) {
@@ -190,7 +192,7 @@ export default function SearchPage() {
     } finally {
       setLoading(false);
     }
-  }, [query, categoryId, priceMin, priceMax, location, sortBy, page, limit, translate, searchParams, verifiedOnlyFilter]);
+  }, [query, categoryId, priceMin, priceMax, location, sortBy, page, limit, translate, searchParams, verifiedOnlyFilter, condition]);
 
   // Fetch results when params change
   useEffect(() => {
@@ -231,6 +233,16 @@ export default function SearchPage() {
       params.set("verified_only", "true");
     } else {
       params.delete("verified_only");
+    }
+
+    if (filters.condition) {
+      params.set("condition", filters.condition);
+    } else {
+      params.delete("condition");
+    }
+
+    if (filters.sort_by) {
+      params.set("sort_by", filters.sort_by);
     }
 
     Array.from(params.keys())
@@ -284,7 +296,7 @@ export default function SearchPage() {
   // Reset accumulated results when search params change (except page)
   useEffect(() => {
     setAllResults([]);
-  }, [query, categoryId, priceMin, priceMax, location, sortBy, verifiedOnlyFilter]);
+  }, [query, categoryId, priceMin, priceMax, location, sortBy, verifiedOnlyFilter, condition]);
 
   // Accumulate results for infinite scroll
   useEffect(() => {
