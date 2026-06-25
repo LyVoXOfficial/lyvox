@@ -2,6 +2,8 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import SectionTitle from "@/components/section-title";
 import AdsGrid from "@/components/ads-grid";
+import DiscoveryFeed from "@/components/discovery/DiscoveryFeed";
+import RecentlyViewed from "@/components/discovery/RecentlyViewed";
 import SearchBar from "@/components/SearchBar";
 import { ArrowRight, BadgeEuro, Car, Laptop, ShieldCheck } from "lucide-react";
 
@@ -21,6 +23,7 @@ import { getJsonLdScriptProps } from "@/lib/seo";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { signMediaUrls } from "@/lib/media/signMediaUrls";
 import { getFirstImage } from "@/lib/media/getFirstImage";
+import type { AdvertCard } from "@/lib/advertCards";
 
 export const revalidate = 60;
 
@@ -166,7 +169,7 @@ async function getFreeAds(supabase: SupabaseClient): Promise<AdListItem[]> {
   }));
 }
 
-async function getLatestAds(supabase: SupabaseClient): Promise<AdListItem[]> {
+async function getLatestAds(supabase: SupabaseClient): Promise<AdvertCard[]> {
   // Get latest ads
   const { data: ads, error: adsError } = await supabase
     .from("adverts")
@@ -221,9 +224,9 @@ async function getLatestAds(supabase: SupabaseClient): Promise<AdListItem[]> {
   return (ads ?? []).map((ad) => ({
     id: ad.id,
     title: ad.title,
-    price: ad.price,
+    price: ad.price ?? null,
     currency: ad.currency ?? null,
-    location: ad.location,
+    location: ad.location ?? null,
     createdAt: ad.created_at ?? null,
     image: mediaMap.get(ad.id) ?? null,
     sellerVerified: verifiedMap.get(ad.user_id ?? "") ?? false,
@@ -356,9 +359,10 @@ export default async function Home() {
         <AdsGrid items={freeAds} />
       </section>
 
+        <RecentlyViewed />
         <section className="space-y-4">
           <SectionTitle>{t("home.latest")}</SectionTitle>
-          <AdsGrid items={latestAds} />
+          <DiscoveryFeed initialItems={latestAds} />
         </section>
       </div>
     </>
