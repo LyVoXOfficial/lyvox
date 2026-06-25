@@ -1152,5 +1152,8 @@
     "code_incorrect": "Le code est incorrect. Réessayez.",
     "phone_verified": "Numéro de téléphone vérifié.",
     "code_verify_error": "Impossible de vérifier le code."
+  },
+  "discovery": {
+    "recently_viewed": "Vus récemment"
   }
 }

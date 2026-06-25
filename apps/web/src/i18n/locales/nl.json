@@ -1152,5 +1152,8 @@
     "code_incorrect": "De code is onjuist. Probeer het opnieuw.",
     "phone_verified": "Telefoonnummer geverifieerd.",
     "code_verify_error": "Kon de code niet verifiëren."
+  },
+  "discovery": {
+    "recently_viewed": "Recent bekeken"
   }
 }
