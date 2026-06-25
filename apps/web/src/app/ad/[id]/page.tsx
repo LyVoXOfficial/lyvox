@@ -7,6 +7,7 @@ import AdvertContactPanel from "@/components/AdvertContactPanel";
 import SellerCard from "@/components/SellerCard";
 import SimilarAdverts from "@/components/SimilarAdverts";
 import BenefitsBadge from "@/components/BenefitsBadge";
+import RecentlyViewedRecorder from "@/components/discovery/RecentlyViewedRecorder";
 import { formatCurrency, formatDate } from "@/i18n/format";
 import { getI18nProps, getInitialLocale } from "@/i18n/server";
 import { type Locale } from "@/lib/i18n";
@@ -644,6 +645,16 @@ export default async function AdvertPage({ params }: PageProps) {
 
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
           <main className="space-y-6">
+          <RecentlyViewedRecorder
+            advert={{
+              id: data.advert.id,
+              title: data.advert.title,
+              price: data.advert.price ?? null,
+              currency: data.advert.currency ?? null,
+              location: data.advert.location ?? null,
+              image: primaryImageUrl,
+            }}
+          />
           <AdvertGallery images={galleryImages} />
 
           <section className="rounded-md border border-border/80 bg-card p-4 shadow-sm">
