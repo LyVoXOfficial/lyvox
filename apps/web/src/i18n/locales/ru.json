@@ -115,7 +115,10 @@
     "apply": "Применить",
     "clear": "Очистить",
     "fetchFailed": "Ошибка загрузки результатов",
-    "error": "Произошла ошибка"
+    "error": "Произошла ошибка",
+    "instant_results": "Объявления",
+    "recent_searches": "Недавние запросы",
+    "remove_recent": "Удалить"
   },
   "contact": {
     "price": "Цена",

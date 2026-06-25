@@ -115,7 +115,10 @@
     "apply": "Anwenden",
     "clear": "Löschen",
     "fetchFailed": "Suchergebnisse konnten nicht geladen werden",
-    "error": "Ein Fehler ist aufgetreten"
+    "error": "Ein Fehler ist aufgetreten",
+    "instant_results": "Anzeigen",
+    "recent_searches": "Letzte Suchen",
+    "remove_recent": "Entfernen"
   },
   "contact": {
     "price": "Preis",

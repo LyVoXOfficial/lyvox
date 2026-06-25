@@ -115,7 +115,10 @@
     "apply": "Apply",
     "clear": "Clear",
     "fetchFailed": "Failed to load search results",
-    "error": "An error occurred"
+    "error": "An error occurred",
+    "instant_results": "Listings",
+    "recent_searches": "Recent searches",
+    "remove_recent": "Remove"
   },
   "contact": {
     "price": "Price",

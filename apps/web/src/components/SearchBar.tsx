@@ -9,6 +9,7 @@ import { ArrowRight, Search } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import type { Category } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { getRecentSearches, addRecentSearch, removeRecentSearch } from "@/lib/recentSearches";
 
 type SearchBarProps = {
   variant?: "default" | "compact";
@@ -30,12 +31,21 @@ function getLocalizedCategoryName(cat: Category, locale: string): string {
 
 export default function SearchBar({ variant = "default", className, onSubmit }: SearchBarProps) {
   const { t, locale } = useI18n();
+  const tr = (key: string, fallback: string) => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [instant, setInstant] = useState<
+    Array<{ id: string; title: string; price?: number | null; currency?: string | null; image?: string | null }>
+  >([]);
+  const [recent, setRecent] = useState<string[]>([]);
+  const [focused, setFocused] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<HTMLDivElement>(null);
@@ -92,6 +102,34 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
     };
   }, [search]);
 
+  // Load recent searches when input gains focus
+  useEffect(() => {
+    if (focused) setRecent(getRecentSearches());
+  }, [focused]);
+
+  // Fetch top listing results for the debounced query
+  useEffect(() => {
+    const q = debouncedSearch.trim();
+    if (q.length < 2) {
+      setInstant([]);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&limit=6`);
+        if (!res.ok) return;
+        const body = await res.json();
+        if (!cancelled && body.ok && body.data) setInstant(body.data.items);
+      } catch {
+        /* ignore — dropdown just omits listing results */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedSearch]);
+
   const filteredCategories = useMemo(() => {
     if (!debouncedSearch.trim()) {
       return [];
@@ -106,7 +144,11 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
       .slice(0, 10); // Limit to 10 suggestions
   }, [debouncedSearch, categories, locale]);
 
-  const isAutocompleteOpen = showAutocomplete && filteredCategories.length > 0;
+  const isAutocompleteOpen =
+    focused &&
+    (instant.length > 0 ||
+      (debouncedSearch.trim().length < 2 && recent.length > 0) ||
+      (showAutocomplete && filteredCategories.length > 0));
 
   // Close autocomplete when clicking outside
   useEffect(() => {
@@ -141,8 +183,10 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
     }
 
     if (onSubmit) {
+      addRecentSearch(query);
       onSubmit(query);
     } else {
+      addRecentSearch(query);
       router.push(`/search?q=${encodeURIComponent(query)}`);
     }
     setShowAutocomplete(false);
@@ -189,10 +233,12 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
               setShowAutocomplete(event.target.value.trim().length > 0);
             }}
             onFocus={() => {
+              setFocused(true);
               if (filteredCategories.length > 0) {
                 setShowAutocomplete(true);
               }
             }}
+            onBlur={() => setTimeout(() => setFocused(false), 150)}
             onKeyDown={handleKeyDown}
             placeholder={t("common.search") || "Search listings, categories, brands"}
             aria-label={t("common.search") || "Search listings"}
@@ -211,7 +257,63 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
               className="absolute left-0 right-0 top-full z-50 mt-2 max-h-72 overflow-y-auto rounded-xl border border-border/70 bg-card shadow-[var(--shadow-hi)]"
               role="listbox"
             >
-              {filteredCategories.map((category, index) => (
+              {instant.length > 0 && (
+                <div className="border-b border-border/60 py-1">
+                  <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {tr("search.instant_results", "Listings")}
+                  </p>
+                  {instant.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => router.push(`/ad/${item.id}`)}
+                      className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-secondary/60"
+                    >
+                      <span className="lyvox-image-placeholder flex h-10 w-10 shrink-0 overflow-hidden rounded-md">
+                        {item.image ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img src={item.image} alt="" className="h-full w-full object-cover" />
+                        ) : null}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate text-sm">{item.title}</span>
+                      {typeof item.price === "number" && (
+                        <span className="shrink-0 text-sm font-semibold">
+                          {item.price} {item.currency ?? "EUR"}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {focused && debouncedSearch.trim().length < 2 && recent.length > 0 && (
+                <div className="py-1">
+                  <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {tr("search.recent_searches", "Recent searches")}
+                  </p>
+                  {recent.map((q) => (
+                    <div key={q} className="flex items-center justify-between px-3 py-1.5 hover:bg-secondary/60">
+                      <button
+                        type="button"
+                        onClick={() => router.push(`/search?q=${encodeURIComponent(q)}`)}
+                        className="min-w-0 flex-1 truncate text-left text-sm"
+                      >
+                        {q}
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={tr("search.remove_recent", "Remove")}
+                        onClick={() => setRecent(removeRecentSearch(q))}
+                        className="ml-2 shrink-0 text-muted-foreground hover:text-foreground"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {showAutocomplete && filteredCategories.map((category, index) => (
                 <Link
                   key={category.id}
                   href={`/c/${category.path}`}

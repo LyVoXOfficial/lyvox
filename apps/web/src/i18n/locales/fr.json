@@ -115,7 +115,10 @@
     "apply": "Appliquer",
     "clear": "Effacer",
     "fetchFailed": "Échec du chargement des résultats",
-    "error": "Une erreur s'est produite"
+    "error": "Une erreur s'est produite",
+    "instant_results": "Annonces",
+    "recent_searches": "Recherches récentes",
+    "remove_recent": "Supprimer"
   },
   "contact": {
     "price": "Prix",

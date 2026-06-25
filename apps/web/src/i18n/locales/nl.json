@@ -115,7 +115,10 @@
     "apply": "Toepassen",
     "clear": "Wissen",
     "fetchFailed": "Zoekresultaten laden mislukt",
-    "error": "Er is een fout opgetreden"
+    "error": "Er is een fout opgetreden",
+    "instant_results": "Advertenties",
+    "recent_searches": "Recente zoekopdrachten",
+    "remove_recent": "Verwijderen"
   },
   "contact": {
     "price": "Prijs",
