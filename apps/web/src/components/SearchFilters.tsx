@@ -6,7 +6,7 @@ import { useI18n } from "@/i18n";
 import { supabase } from "@/lib/supabaseClient";
 import type { Category } from "@/lib/types";
 import { getCategoryIcon } from "@/lib/categoryIcons";
-import { ChevronRight, ChevronDown, X, MapPin, SlidersHorizontal } from "lucide-react";
+import { ChevronRight, ChevronDown, X, MapPin, SlidersHorizontal, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -148,7 +148,7 @@ export default function SearchFilters({
   onFiltersChange,
 }: SearchFiltersProps) {
   const { t, locale } = useI18n();
-  const translate = (key: string, fallback: string) => {
+  const tr = (key: string, fallback: string) => {
     const value = t(key);
     return value === key ? fallback : value;
   };
@@ -680,7 +680,7 @@ export default function SearchFilters({
   if (verifiedOnly) {
     activeFilters.push({
       key: "verified",
-      label: translate("search.verifiedOnly", "Verified sellers"),
+      label: tr("search.verifiedOnly", "Verified sellers"),
       onRemove: () => {
         setVerifiedOnly(false);
         applyFilters({
@@ -699,7 +699,10 @@ export default function SearchFilters({
   if (dynamicCount > 0) {
     activeFilters.push({
       key: "specifics",
-      label: `${dynamicCount} specific ${dynamicCount === 1 ? "filter" : "filters"}`,
+      label: (dynamicCount === 1
+        ? tr("filters.specificFilterOne", "{count} specific filter")
+        : tr("filters.specificFilterOther", "{count} specific filters")
+      ).replace("{count}", String(dynamicCount)),
       onRemove: () => {
         setDynamicFilters({});
         applyFilters({
@@ -722,34 +725,34 @@ export default function SearchFilters({
     const name = getLocalizedCategoryName(cat, locale);
 
     return (
-      <div key={cat.id} className={cn("space-y-1", level > 0 && "ml-4")}>
-        <div className="flex items-center gap-2">
+      <div key={cat.id} className={cn("space-y-1", level > 0 && "ml-3")}>
+        <div className="flex items-center gap-1">
           {hasChildren && (
             <button
               type="button"
               onClick={() => toggleExpand(cat.id)}
-              className="p-1 hover:bg-muted rounded transition-colors"
-              aria-label={isExpanded ? "Collapse" : "Expand"}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted"
+              aria-label={isExpanded ? tr("filters.collapse", "Collapse") : tr("filters.expand", "Expand")}
             >
               {isExpanded ? (
-                <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                <ChevronDown className="h-4 w-4" />
               ) : (
-                <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                <ChevronRight className="h-4 w-4" />
               )}
             </button>
           )}
-          {!hasChildren && <span className="w-5" />}
+          {!hasChildren && <span className="w-3 shrink-0" />}
           <button
             type="button"
             onClick={() => handleCategorySelect(cat)}
             className={cn(
-              "flex items-center gap-2 flex-1 px-2 py-1.5 rounded-md text-sm transition-colors text-left",
+              "flex min-h-[40px] flex-1 items-center gap-2 rounded-lg px-3 py-2 text-sm text-left transition-colors",
               "hover:bg-muted",
               isSelected && "bg-primary/10 text-primary font-medium",
               level === 0 && "font-medium"
             )}
           >
-            <Icon className="h-4 w-4 text-muted-foreground" />
+            <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
             <span className="flex-1">{name}</span>
           </button>
         </div>
@@ -765,11 +768,11 @@ export default function SearchFilters({
   const filtersContent = (
     <div className="space-y-6">
       {activeFilters.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           <div className="flex items-center justify-between gap-2">
-            <Label className="text-sm font-semibold">Active filters</Label>
-            <Button variant="ghost" size="sm" onClick={handleClearAll} className="h-7 px-2 text-xs">
-              {translate("search.clear", "Clear")}
+            <Label className="text-sm font-semibold">{tr("filters.activeFilters", "Active filters")}</Label>
+            <Button variant="ghost" size="sm" onClick={handleClearAll} className="h-8 px-2 text-xs">
+              {tr("search.clear", "Clear")}
             </Button>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -778,10 +781,10 @@ export default function SearchFilters({
                 key={filter.key}
                 type="button"
                 onClick={filter.onRemove}
-                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-secondary/70 px-2.5 py-1 text-xs font-medium text-secondary-foreground transition hover:border-primary/30 hover:text-primary"
+                className="inline-flex min-h-[32px] items-center gap-1.5 rounded-full border border-border/70 bg-secondary/70 px-3 py-1 text-xs font-medium text-secondary-foreground transition hover:border-primary/30 hover:text-primary"
               >
                 {filter.label}
-                <X className="h-3 w-3" aria-hidden="true" />
+                <X className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
             ))}
           </div>
@@ -792,28 +795,29 @@ export default function SearchFilters({
       <div>
         <div className="flex items-center justify-between mb-3">
           <Label className="text-sm font-semibold">
-            {t("search.category") || "Category"}
+            {tr("search.category", "Category")}
           </Label>
           {selectedCategory && (
             <Button
               variant="ghost"
               size="sm"
               onClick={handleClearCategory}
-              className="h-auto p-1 text-xs"
+              className="h-8 w-8 p-0 text-xs"
+              aria-label={tr("search.clear", "Clear")}
             >
-              <X className="h-3 w-3" />
+              <X className="h-4 w-4" />
             </Button>
           )}
         </div>
         {loading ? (
           <div className="text-sm text-muted-foreground">
-            {t("common.loading") || "Loading..."}
+            {tr("common.loading", "Loading...")}
           </div>
         ) : (
-          <div className="max-h-72 space-y-1 overflow-y-auto rounded-md border border-border/80 bg-background p-2">
+          <div className="max-h-72 space-y-1 overflow-y-auto rounded-xl border border-border/70 bg-background p-2 shadow-[var(--shadow-soft)]">
             {tree.length === 0 ? (
               <div className="text-sm text-muted-foreground p-2">
-                {t("common.categories") || "Categories"} unavailable
+                {tr("filters.categoriesUnavailable", "Categories unavailable")}
               </div>
             ) : (
               tree.map((cat) => renderCategory(cat))
@@ -822,7 +826,7 @@ export default function SearchFilters({
         )}
         {selectedCategory && (
           <div className="mt-2 text-sm text-muted-foreground">
-            {t("search.selected") || "Selected"}: {getLocalizedCategoryName(selectedCategory, locale)}
+            {tr("search.selected", "Selected")}: {getLocalizedCategoryName(selectedCategory, locale)}
           </div>
         )}
       </div>
@@ -830,7 +834,7 @@ export default function SearchFilters({
       {/* Price Range Filter */}
       <div>
         <Label className="text-sm font-semibold mb-3 block">
-          {t("search.price") || "Price"}
+          {tr("search.price", "Price")}
         </Label>
         <div className="space-y-3">
           <Slider
@@ -851,8 +855,8 @@ export default function SearchFilters({
                 const val = Number.parseFloat(e.target.value) || 0;
                 setPriceRange([Math.min(val, priceRange[1]), priceRange[1]]);
               }}
-              className="w-24"
-              placeholder="Min"
+              className="h-11 flex-1"
+              placeholder={tr("filters.min", "Min")}
             />
             <span className="text-muted-foreground">—</span>
             <Input
@@ -864,8 +868,8 @@ export default function SearchFilters({
                 const val = Number.parseFloat(e.target.value) || 10000;
                 setPriceRange([priceRange[0], Math.max(val, priceRange[0])]);
               }}
-              className="w-24"
-              placeholder="Max"
+              className="h-11 flex-1"
+              placeholder={tr("filters.max", "Max")}
             />
           </div>
         </div>
@@ -874,9 +878,12 @@ export default function SearchFilters({
       {/* Verified Sellers Filter */}
       <div>
         <Label className="text-sm font-semibold mb-3 block">
-          {t("search.verifiedOnly") || "Verified sellers only"}
+          {tr("search.verifiedOnly", "Verified sellers only")}
         </Label>
-        <div className="flex items-center gap-2">
+        <label
+          htmlFor="verified-only"
+          className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border border-border/70 bg-background p-3 shadow-[var(--shadow-soft)] transition-colors hover:border-primary/30"
+        >
           <Checkbox
             id="verified-only"
             checked={verifiedOnly}
@@ -893,16 +900,17 @@ export default function SearchFilters({
               });
             }}
           />
-          <Label htmlFor="verified-only" className="text-sm text-muted-foreground leading-none font-normal">
-            {t("search.verifiedOnlyHelper") || "Show listings from sellers with verified email and phone"}
-          </Label>
-        </div>
+          <span className="flex items-center gap-1.5 text-sm text-muted-foreground leading-snug font-normal">
+            <ShieldCheck className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+            {tr("search.verifiedOnlyHelper", "Show listings from sellers with verified email and phone")}
+          </span>
+        </label>
       </div>
 
       {/* Location Filter */}
       <div>
         <Label className="text-sm font-semibold mb-3 block">
-          {t("search.location") || "Location"}
+          {tr("search.location", "Location")}
         </Label>
         <div className="relative">
           <div className="relative">
@@ -913,21 +921,21 @@ export default function SearchFilters({
               value={location}
               onChange={(e) => handleLocationChange(e.target.value)}
               onFocus={() => setShowLocationSuggestions(locationSuggestions.length > 0)}
-              placeholder={t("search.locationPlaceholder") || "City or region"}
-              className="pl-9"
+              placeholder={tr("search.locationPlaceholder", "City or region")}
+              className="h-11 pl-9"
             />
           </div>
           {isLocationSuggestionsOpen && (
             <div
               ref={locationSuggestionsRef}
-              className="absolute left-0 right-0 top-full z-50 mt-2 max-h-52 overflow-y-auto rounded-md border border-border/80 bg-card shadow-xl"
+              className="absolute left-0 right-0 top-full z-50 mt-2 max-h-52 overflow-y-auto rounded-xl border border-border/70 bg-card shadow-[var(--shadow-card)]"
             >
               {locationSuggestions.map((suggestion, index) => (
                 <button
                   key={index}
                   type="button"
                   onClick={() => handleLocationSelect(suggestion)}
-                  className="w-full cursor-pointer border-b px-4 py-2.5 text-left text-sm transition hover:bg-secondary/70 last:border-b-0"
+                  className="flex min-h-[44px] w-full cursor-pointer items-center border-b border-border/60 px-4 py-2.5 text-left text-sm transition hover:bg-secondary/70 last:border-b-0"
                 >
                   {suggestion}
                 </button>
@@ -941,7 +949,7 @@ export default function SearchFilters({
     {selectedCategory && !SCHEMA_EXCLUDED_TYPES.has(detectCategoryType(selectedCategory.path || selectedCategory.slug || "")) && (
       <div className="space-y-4">
         <Label className="text-sm font-semibold block">
-          {t("search.filters")}
+          {tr("search.filters", "Filters")}
         </Label>
         {filterSchemaState.loading && (
           <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
@@ -964,28 +972,30 @@ export default function SearchFilters({
         )}
       </div>
     )}
+    </div>
+  );
 
-      {/* Action Buttons */}
-      <div className="flex gap-2 pt-4 border-t">
-        <Button onClick={handleApplyFilters} className="flex-1">
-          {t("search.apply") || "Apply"}
-        </Button>
-        <Button variant="outline" onClick={handleClearAll}>
-          {t("search.clear") || "Clear"}
-        </Button>
-      </div>
+  const filtersFooter = (
+    <div className="flex gap-2">
+      <Button onClick={handleApplyFilters} className="h-11 flex-1">
+        {tr("search.apply", "Apply")}
+      </Button>
+      <Button variant="outline" onClick={handleClearAll} className="h-11 px-5">
+        {tr("search.clear", "Clear")}
+      </Button>
     </div>
   );
 
   // Sidebar variant (desktop)
   if (actualVariant === "sidebar") {
     return (
-      <aside className="w-72 shrink-0 rounded-md border border-border/80 bg-card p-4 shadow-sm">
-        <div className="mb-4 flex items-center gap-2">
+      <aside className="w-72 shrink-0 rounded-2xl border border-border/70 bg-card p-5 shadow-[var(--shadow-card)]">
+        <div className="mb-5 flex items-center gap-2">
           <SlidersHorizontal className="h-4 w-4 text-primary" aria-hidden="true" />
-          <h2 className="text-lg font-semibold">{t("search.filters") || "Filters"}</h2>
+          <h2 className="text-lg font-extrabold tracking-tight">{tr("search.filters", "Filters")}</h2>
         </div>
         {filtersContent}
+        <div className="mt-6 border-t border-border/70 pt-4">{filtersFooter}</div>
       </aside>
     );
   }
@@ -994,21 +1004,30 @@ export default function SearchFilters({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
-        <Button variant="outline" className="w-full gap-2 md:hidden">
+        <Button variant="outline" className="h-11 w-full gap-2 rounded-xl md:hidden">
           <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
-          {t("search.filters") || "Filters"}
+          {tr("search.filters", "Filters")}
           {activeFilters.length > 0 && (
-            <span className="ml-auto rounded-md bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
+            <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
               {activeFilters.length}
             </span>
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-80 sm:max-w-sm overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>{t("search.filters") || "Filters"}</SheetTitle>
+      <SheetContent
+        side="left"
+        className="flex w-[90vw] max-w-sm flex-col gap-0 p-0"
+      >
+        <SheetHeader className="border-b border-border/70 px-4 py-4">
+          <SheetTitle className="flex items-center gap-2 text-lg font-extrabold tracking-tight">
+            <SlidersHorizontal className="h-4 w-4 text-primary" aria-hidden="true" />
+            {tr("search.filters", "Filters")}
+          </SheetTitle>
         </SheetHeader>
-        <div className="mt-4 px-4">{filtersContent}</div>
+        <div className="flex-1 overflow-y-auto px-4 py-5">{filtersContent}</div>
+        <div className="sticky bottom-0 border-t border-border/70 bg-card px-4 py-4 shadow-[var(--shadow-card)]">
+          {filtersFooter}
+        </div>
       </SheetContent>
     </Sheet>
   );

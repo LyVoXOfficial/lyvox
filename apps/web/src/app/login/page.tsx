@@ -15,8 +15,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { logger } from "@/lib/errorLogger";
 import { supabase } from "@/lib/supabaseClient";
 import { loginSchema } from "@/lib/validations/auth";
+import { useI18n } from "@/i18n";
 
 function LoginPageInner() {
+  const { t } = useI18n();
+  const tr = (k: string, fb: string) => {
+    const v = t(k);
+    return v === k ? fb : v;
+  };
   const searchParams = useSearchParams();
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -67,7 +73,7 @@ function LoginPageInner() {
       }
 
       if (!password || password.length < 8) {
-        const message = "Password must contain at least 8 characters.";
+        const message = tr("auth.errorPasswordMinLength", "Password must contain at least 8 characters.");
         setValidationError(message);
         toast.error(message);
         return;
@@ -80,13 +86,13 @@ function LoginPageInner() {
 
       if (error) {
         if (error.message.includes("Invalid login credentials")) {
-          toast.error("The email or password is incorrect.");
+          toast.error(tr("auth.errorIncorrectCredentials", "The email or password is incorrect."));
         } else if (error.message.includes("Email not confirmed")) {
-          toast.error("Confirm your email before signing in.");
+          toast.error(tr("auth.errorConfirmEmail", "Confirm your email before signing in."));
         } else if (error.message.includes("Too many requests")) {
-          toast.error("Too many attempts. Try again later.");
+          toast.error(tr("auth.errorTooManyAttempts", "Too many attempts. Try again later."));
         } else {
-          toast.error("Sign in failed. Try again later.");
+          toast.error(tr("auth.errorSignInFailed", "Sign in failed. Try again later."));
         }
         logger.error("Password login failed", {
           component: "LoginPage",
@@ -98,7 +104,7 @@ function LoginPageInner() {
           error,
         });
       } else if (data.session) {
-        toast.success("Signed in successfully.");
+        toast.success(tr("auth.signedInSuccess", "Signed in successfully."));
         const next = searchParams.get("next") ?? "/profile";
         router.push(next);
       }
@@ -108,7 +114,7 @@ function LoginPageInner() {
         action: "handlePasswordLogin",
         error,
       });
-      toast.error("Could not reach the server. Check your internet connection.");
+      toast.error(tr("auth.errorConnection", "Could not reach the server. Check your internet connection."));
     } finally {
       setLoading(false);
     }
@@ -146,15 +152,15 @@ function LoginPageInner() {
 
       if (error) {
         if (error.message.includes("Email not confirmed")) {
-          toast.error("Confirm your email before signing in.");
+          toast.error(tr("auth.errorConfirmEmail", "Confirm your email before signing in."));
         } else if (error.message.includes("Invalid email")) {
-          toast.error("Enter a valid email address.");
+          toast.error(tr("auth.errorInvalidEmail", "Enter a valid email address."));
         } else if (error.message.includes("Too many requests")) {
-          toast.error("Too many attempts. Try again later.");
+          toast.error(tr("auth.errorTooManyAttempts", "Too many attempts. Try again later."));
         } else if (error.message.includes("User not found")) {
-          toast.error("No account found for this email. Create an account first.");
+          toast.error(tr("auth.errorNoAccount", "No account found for this email. Create an account first."));
         } else {
-          toast.error("Sign in failed. Try again later.");
+          toast.error(tr("auth.errorSignInFailed", "Sign in failed. Try again later."));
         }
         logger.error("Magic link login failed", {
           component: "LoginPage",
@@ -166,7 +172,7 @@ function LoginPageInner() {
           error,
         });
       } else {
-        toast.success("Sign-in link sent. Check your email.");
+        toast.success(tr("auth.magicLinkSent", "Sign-in link sent. Check your email."));
       }
     } catch (error) {
       logger.error("Magic link login exception", {
@@ -174,7 +180,7 @@ function LoginPageInner() {
         action: "handleMagicLinkLogin",
         error,
       });
-      toast.error("Could not reach the server. Check your internet connection.");
+      toast.error(tr("auth.errorConnection", "Could not reach the server. Check your internet connection."));
     } finally {
       setLoading(false);
     }
@@ -195,7 +201,7 @@ function LoginPageInner() {
       });
 
       if (error) {
-        toast.error(`Could not continue with ${provider}.`);
+        toast.error(tr("auth.errorSocialProvider", "Could not continue with {provider}.").replace("{provider}", provider));
         logger.error("Social login failed", {
           component: "LoginPage",
           action: "handleSocialLogin",
@@ -210,7 +216,7 @@ function LoginPageInner() {
         metadata: { provider },
         error,
       });
-      toast.error("Could not reach the server.");
+      toast.error(tr("auth.errorConnectionShort", "Could not reach the server."));
     } finally {
       setLoading(false);
     }
@@ -228,28 +234,34 @@ function LoginPageInner() {
             className="inline-flex w-fit items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Back to marketplace
+            {tr("auth.backToMarketplace", "Back to marketplace")}
           </Link>
 
           <div className="max-w-xl space-y-4">
             <div className="lyvox-trust-gradient inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold text-white">
               <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-              Protected account access
+              {tr("auth.protectedAccess", "Protected account access")}
             </div>
             <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-foreground md:text-4xl">
-              Sign in to manage listings, messages, and trusted payments.
+              {tr("auth.heroHeading", "Sign in to manage listings, messages, and trusted payments.")}
             </h1>
             <p className="text-base leading-7 text-muted-foreground">
-              Use password, magic link, or OAuth. We keep account actions clear and route you back
-              to the exact marketplace task you started.
+              {tr(
+                "auth.heroSubtitle",
+                "Use password, magic link, or OAuth. We keep account actions clear and route you back to the exact marketplace task you started.",
+              )}
             </p>
           </div>
 
           <div className="grid max-w-xl gap-3 sm:grid-cols-3">
-            {["Verified seller tools", "Saved listings", "Secure messages"].map((item) => (
-              <div key={item} className="flex items-center gap-2 rounded-xl border border-border/70 bg-card px-3 py-2.5 text-sm font-medium shadow-[var(--shadow-soft)]">
+            {[
+              { key: "auth.featureSellerTools", fb: "Verified seller tools" },
+              { key: "auth.featureSavedListings", fb: "Saved listings" },
+              { key: "auth.featureSecureMessages", fb: "Secure messages" },
+            ].map((item) => (
+              <div key={item.key} className="flex items-center gap-2 rounded-xl border border-border/70 bg-card px-3 py-2.5 text-sm font-medium shadow-[var(--shadow-soft)]">
                 <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-                <span>{item}</span>
+                <span>{tr(item.key, item.fb)}</span>
               </div>
             ))}
           </div>
@@ -257,8 +269,8 @@ function LoginPageInner() {
 
         <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
           <CardHeader>
-            <CardTitle className="text-2xl">Sign in</CardTitle>
-            <CardDescription>Choose the fastest option available for your account.</CardDescription>
+            <CardTitle className="text-2xl">{tr("auth.cardTitle", "Sign in")}</CardTitle>
+            <CardDescription>{tr("auth.cardDescription", "Choose the fastest option available for your account.")}</CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-6">
@@ -290,30 +302,30 @@ function LoginPageInner() {
                 <div className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">or continue with</span>
+                <span className="bg-card px-2 text-muted-foreground">{tr("auth.orContinueWith", "or continue with")}</span>
               </div>
             </div>
 
             <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "password" | "magic-link")}>
-              <TabsList className="grid h-10 w-full grid-cols-2 rounded-md">
+              <TabsList className="grid h-10 w-full grid-cols-2 rounded-xl">
                 <TabsTrigger value="password">
                   <Lock className="size-4" />
-                  Password
+                  {tr("auth.tabPassword", "Password")}
                 </TabsTrigger>
                 <TabsTrigger value="magic-link">
                   <Mail className="size-4" />
-                  Magic link
+                  {tr("auth.tabMagicLink", "Magic link")}
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="password" className="pt-4">
                 <form onSubmit={handlePasswordLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email-password">Email address</Label>
+                    <Label htmlFor="email-password">{tr("auth.emailLabel", "Email address")}</Label>
                     <Input
                       id="email-password"
                       type="email"
-                      placeholder="you@example.com"
+                      placeholder={tr("auth.emailPlaceholder", "you@example.com")}
                       value={email}
                       onChange={(event) => {
                         setEmail(event.target.value);
@@ -332,11 +344,11 @@ function LoginPageInner() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password">{tr("auth.passwordLabel", "Password")}</Label>
                     <Input
                       id="password"
                       type="password"
-                      placeholder="Enter your password"
+                      placeholder={tr("auth.passwordPlaceholder", "Enter your password")}
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
                       required
@@ -349,10 +361,10 @@ function LoginPageInner() {
                     {loading ? (
                       <>
                         <Loader2 className="size-4 animate-spin" />
-                        Signing in...
+                        {tr("auth.signingIn", "Signing in...")}
                       </>
                     ) : (
-                      "Sign in"
+                      tr("auth.signInButton", "Sign in")
                     )}
                   </Button>
                 </form>
@@ -361,11 +373,11 @@ function LoginPageInner() {
               <TabsContent value="magic-link" className="pt-4">
                 <form onSubmit={handleMagicLinkLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email-magic">Email address</Label>
+                    <Label htmlFor="email-magic">{tr("auth.emailLabel", "Email address")}</Label>
                     <Input
                       id="email-magic"
                       type="email"
-                      placeholder="you@example.com"
+                      placeholder={tr("auth.emailPlaceholder", "you@example.com")}
                       value={email}
                       onChange={(event) => {
                         setEmail(event.target.value);
@@ -383,7 +395,7 @@ function LoginPageInner() {
                     )}
                   </div>
 
-                  <div className="flex items-start gap-3 rounded-md border border-border/70 bg-muted/40 p-3">
+                  <div className="flex items-start gap-3 rounded-xl border border-border/70 bg-muted/40 p-3">
                     <Checkbox
                       id="remember-device"
                       checked={rememberDevice}
@@ -391,7 +403,7 @@ function LoginPageInner() {
                       disabled={loading}
                     />
                     <label htmlFor="remember-device" className="text-sm leading-5 text-muted-foreground">
-                      Remember this device for 30 days after the email link sign-in.
+                      {tr("auth.rememberDevice", "Remember this device for 30 days after the email link sign-in.")}
                     </label>
                   </div>
 
@@ -404,10 +416,10 @@ function LoginPageInner() {
                     {loading ? (
                       <>
                         <Loader2 className="size-4 animate-spin" />
-                        Sending link...
+                        {tr("auth.sendingLink", "Sending link...")}
                       </>
                     ) : (
-                      "Send sign-in link"
+                      tr("auth.sendMagicLink", "Send sign-in link")
                     )}
                   </Button>
                 </form>
@@ -416,15 +428,15 @@ function LoginPageInner() {
 
             <div className="space-y-2 border-t border-border pt-4 text-center text-sm">
               <p className="text-muted-foreground">
-                New to LyVoX?{" "}
+                {tr("auth.newToLyvox", "New to LyVoX?")}{" "}
                 <Link href={registerHref} className="font-medium text-primary underline-offset-4 hover:underline">
-                  Create an account
+                  {tr("auth.createAccount", "Create an account")}
                 </Link>
               </p>
               <p className="text-muted-foreground">
-                Forgot your password?{" "}
+                {tr("auth.forgotPassword", "Forgot your password?")}{" "}
                 <Link href="/auth/recovery" className="font-medium text-primary underline-offset-4 hover:underline">
-                  Recover access
+                  {tr("auth.recoverAccess", "Recover access")}
                 </Link>
               </p>
             </div>
@@ -435,15 +447,22 @@ function LoginPageInner() {
   );
 }
 
+function LoginFallback() {
+  const { t } = useI18n();
+  const tr = (k: string, fb: string) => {
+    const v = t(k);
+    return v === k ? fb : v;
+  };
+  return (
+    <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center text-sm text-muted-foreground">
+      {tr("auth.loadingSignIn", "Loading sign-in...")}
+    </main>
+  );
+}
+
 export default function LoginPage() {
   return (
-    <Suspense
-      fallback={
-        <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center text-sm text-muted-foreground">
-          Loading sign-in...
-        </main>
-      }
-    >
+    <Suspense fallback={<LoginFallback />}>
       <LoginPageInner />
     </Suspense>
   );

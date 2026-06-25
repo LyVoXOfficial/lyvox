@@ -228,20 +228,20 @@ export default function RegisterForm({ initialLocale }: Props) {
     : "/login";
 
   return (
-    <Card className="w-full rounded-md border-border/80 shadow-lg shadow-black/5">
+    <Card className="w-full rounded-2xl border border-border/70 shadow-[var(--shadow-card)]">
       <CardHeader className="gap-4 sm:grid-cols-[1fr_auto]">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+        <div className="space-y-2.5">
+          <div className="inline-flex items-center gap-2 rounded-full lyvox-trust-gradient px-3 py-1 text-xs font-semibold text-white shadow-[var(--shadow-soft)]">
             <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
             Trusted account setup
           </div>
-          <CardTitle className="text-2xl">{messages.title}</CardTitle>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">{messages.title}</CardTitle>
           <CardDescription className="max-w-xl">{messages.intro}</CardDescription>
         </div>
         <label className="text-sm text-muted-foreground">
-          <span className="block text-xs font-medium uppercase">{messages.languageLabel}</span>
+          <span className="block text-xs font-medium uppercase tracking-wide">{messages.languageLabel}</span>
           <select
-            className="mt-1 h-10 w-36 rounded-md border border-input bg-background px-3 text-sm text-foreground shadow-sm"
+            className="mt-1 h-10 w-full min-w-36 rounded-xl border border-border bg-background px-3 text-sm text-foreground shadow-[var(--shadow-soft)] focus:outline-none focus:ring-4 focus:ring-primary/12 sm:w-36"
             value={locale}
             onChange={(event) => setLocale(event.target.value as Locale)}
           >
@@ -259,7 +259,7 @@ export default function RegisterForm({ initialLocale }: Props) {
           <Button
             type="button"
             variant="outline"
-            className="h-11"
+            className="h-11 rounded-xl shadow-[var(--shadow-soft)]"
             onClick={() => handleSocialRegister("google")}
             disabled={socialLoading || submitting}
           >
@@ -269,7 +269,7 @@ export default function RegisterForm({ initialLocale }: Props) {
           <Button
             type="button"
             variant="outline"
-            className="h-11"
+            className="h-11 rounded-xl shadow-[var(--shadow-soft)]"
             onClick={() => handleSocialRegister("facebook")}
             disabled={socialLoading || submitting}
           >
@@ -301,10 +301,10 @@ export default function RegisterForm({ initialLocale }: Props) {
                 {...register("email", { required: messages.emailError })}
                 className={
                   emailAvailable === false
-                    ? "border-destructive pr-28 focus-visible:ring-destructive/30"
+                    ? "rounded-xl border-destructive pr-28 focus-visible:ring-4 focus-visible:ring-destructive/20"
                     : emailAvailable === true
-                      ? "border-emerald-500 pr-28 focus-visible:ring-emerald-500/30"
-                      : "pr-28"
+                      ? "rounded-xl border-primary pr-28 focus-visible:ring-4 focus-visible:ring-primary/12"
+                      : "rounded-xl pr-28 focus-visible:ring-4 focus-visible:ring-primary/12"
                 }
               />
               {checkingEmail && (
@@ -313,7 +313,7 @@ export default function RegisterForm({ initialLocale }: Props) {
                 </span>
               )}
               {!checkingEmail && emailAvailable === true && (
-                <span className="absolute right-3 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 text-xs font-medium text-emerald-600">
+                <span className="absolute right-3 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 text-xs font-medium text-primary">
                   <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
                   {messages.emailAvailable}
                 </span>
@@ -326,13 +326,19 @@ export default function RegisterForm({ initialLocale }: Props) {
             <label className="text-sm font-medium" htmlFor="password">
               {messages.passwordLabel}
             </label>
-            <Input id="password" type="password" autoComplete="new-password" {...register("password", { required: messages.passwordError })} />
-            <div className="rounded-md border border-border/80 bg-muted/40 p-3">
+            <Input
+              id="password"
+              type="password"
+              autoComplete="new-password"
+              {...register("password", { required: messages.passwordError })}
+              className="rounded-xl focus-visible:ring-4 focus-visible:ring-primary/12"
+            />
+            <div className="rounded-xl border border-border/70 bg-muted/40 p-3.5 shadow-[var(--shadow-soft)]">
               <p className="text-sm text-muted-foreground">{messages.passwordHint}</p>
-              <ul className="mt-2 grid gap-1 text-sm text-muted-foreground sm:grid-cols-2">
+              <ul className="mt-2 grid gap-1.5 text-sm text-muted-foreground sm:grid-cols-2">
                 {messages.passwordChecklist.map((item) => (
                   <li key={item} className="flex gap-2">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" aria-hidden="true" />
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -350,16 +356,17 @@ export default function RegisterForm({ initialLocale }: Props) {
               type="password"
               autoComplete="new-password"
               {...register("confirmPassword", { required: messages.confirmPasswordError })}
+              className="rounded-xl focus-visible:ring-4 focus-visible:ring-primary/12"
             />
             {errors.confirmPassword?.message ? (
               <p className="text-sm text-destructive">{String(errors.confirmPassword.message)}</p>
             ) : null}
           </div>
 
-          <div className="grid gap-3 rounded-md border border-border/80 bg-muted/30 p-4">
-            <span className="text-sm font-medium">{messages.consentsTitle}</span>
+          <div className="grid gap-3 rounded-xl border border-border/70 bg-muted/30 p-4 shadow-[var(--shadow-soft)]">
+            <span className="text-sm font-semibold text-foreground">{messages.consentsTitle}</span>
             <label className="flex items-start gap-3 text-sm text-muted-foreground">
-              <input type="checkbox" className="mt-1 h-4 w-4 accent-primary" {...register("terms")} />
+              <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0 accent-primary" {...register("terms")} />
               <span>
                 {messages.consents.terms} (
                 <Link className="font-medium text-primary underline-offset-4 hover:underline" href="/legal/terms" target="_blank">
@@ -369,7 +376,7 @@ export default function RegisterForm({ initialLocale }: Props) {
               </span>
             </label>
             <label className="flex items-start gap-3 text-sm text-muted-foreground">
-              <input type="checkbox" className="mt-1 h-4 w-4 accent-primary" {...register("privacy")} />
+              <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0 accent-primary" {...register("privacy")} />
               <span>
                 {messages.consents.privacy} (
                 <Link className="font-medium text-primary underline-offset-4 hover:underline" href="/legal/privacy" target="_blank">
@@ -379,7 +386,7 @@ export default function RegisterForm({ initialLocale }: Props) {
               </span>
             </label>
             <label className="flex items-start gap-3 text-sm text-muted-foreground">
-              <input type="checkbox" className="mt-1 h-4 w-4 accent-primary" {...register("marketing")} />
+              <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0 accent-primary" {...register("marketing")} />
               <span>{messages.consents.marketing}</span>
             </label>
             {(errors.terms?.message || errors.privacy?.message) && (
@@ -387,7 +394,7 @@ export default function RegisterForm({ initialLocale }: Props) {
             )}
           </div>
 
-          <Button type="submit" disabled={submitting} className="h-11">
+          <Button type="submit" disabled={submitting} className="h-11 rounded-xl lyvox-cta-gradient text-primary-foreground shadow-[var(--shadow-card)]">
             {submitting ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
@@ -400,7 +407,7 @@ export default function RegisterForm({ initialLocale }: Props) {
         </form>
       </CardContent>
 
-      <CardFooter className="justify-center border-t border-border pt-5 text-sm text-muted-foreground">
+      <CardFooter className="justify-center border-t border-border/70 pt-5 text-sm text-muted-foreground">
         {messages.loginPrompt}{" "}
         <Link href={loginHref} className="ml-1 font-medium text-primary underline-offset-4 hover:underline">
           {messages.loginLink}

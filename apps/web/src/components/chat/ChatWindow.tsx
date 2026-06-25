@@ -219,10 +219,10 @@ export default function ChatWindow({
   };
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-6">
+    <div className="container mx-auto max-w-6xl px-0 sm:px-4 sm:py-6">
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <Card className="min-h-[calc(100vh-9rem)] rounded-md py-0">
-          <div className="flex items-center gap-3 border-b px-4 py-3">
+        <Card className="flex min-h-[calc(100dvh-7.5rem)] flex-col overflow-hidden rounded-none border-x-0 border-border/70 py-0 shadow-[var(--shadow-soft)] sm:min-h-[calc(100vh-9rem)] sm:rounded-2xl sm:border-x">
+          <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-border/70 bg-card/95 px-4 py-3 backdrop-blur">
             <Button asChild variant="ghost" size="icon" aria-label={translate("chat.back", "Back to messages")}>
               <Link href="/chat">
                 <ArrowLeft className="h-5 w-5" aria-hidden="true" />
@@ -233,7 +233,7 @@ export default function ChatWindow({
               <AvatarFallback>{getInitials(peerName)}</AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">
-              <h1 className="truncate text-base font-semibold">{peerName}</h1>
+              <h1 className="truncate text-base font-extrabold tracking-tight">{peerName}</h1>
               {advert ? (
                 <p className="truncate text-sm text-muted-foreground">{advert.title}</p>
               ) : (
@@ -252,16 +252,16 @@ export default function ChatWindow({
               disabled={isConnected}
             >
               {isConnected ? (
-                <Wifi className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+                <Wifi className="h-4 w-4 text-primary" aria-hidden="true" />
               ) : (
-                <WifiOff className="h-4 w-4 text-amber-600" aria-hidden="true" />
+                <WifiOff className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
               )}
             </Button>
           </div>
 
           <div
             ref={messagesContainerRef}
-            className="h-[calc(100vh-20rem)] min-h-[360px] space-y-4 overflow-y-auto px-4 py-4"
+            className="flex-1 space-y-4 overflow-y-auto px-4 py-4"
             onScroll={(event) => {
               const target = event.target as HTMLDivElement;
               if (target.scrollTop === 0 && hasMore) {
@@ -275,6 +275,7 @@ export default function ChatWindow({
                   type="button"
                   variant="outline"
                   size="sm"
+                  className="rounded-full"
                   onClick={() => void loadMoreMessages()}
                   disabled={isLoadingMore}
                 >
@@ -289,17 +290,17 @@ export default function ChatWindow({
             ) : null}
 
             {historyError ? (
-              <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+              <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
                 {historyError}
               </div>
             ) : null}
 
             {messages.length === 0 ? (
               <div className="flex min-h-[260px] flex-col items-center justify-center text-center">
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
-                  <MessageSquare className="h-5 w-5" aria-hidden="true" />
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <MessageSquare className="h-6 w-6" aria-hidden="true" />
                 </div>
-                <h2 className="text-lg font-semibold">
+                <h2 className="text-lg font-extrabold tracking-tight">
                   {translate("chat.no_messages_title", "Start the conversation")}
                 </h2>
                 <p className="mt-1 max-w-md text-sm text-muted-foreground">
@@ -325,17 +326,17 @@ export default function ChatWindow({
                     ) : null}
                     <div className={`flex max-w-[78%] flex-col ${isOwn ? "items-end" : "items-start"}`}>
                       <div
-                        className={`rounded-md px-4 py-2 ${
+                        className={`rounded-2xl px-4 py-2.5 shadow-[var(--shadow-soft)] ${
                           isOwn
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-foreground"
+                            ? "rounded-br-md bg-primary text-primary-foreground"
+                            : "rounded-bl-md bg-muted text-foreground"
                         }`}
                       >
                         <p className="whitespace-pre-wrap break-words text-sm leading-6">
                           {message.body}
                         </p>
                       </div>
-                      <span className="mt-1 text-xs text-muted-foreground">
+                      <span className="mt-1 px-1 text-xs text-muted-foreground">
                         {formatDate(message.created_at, locale, "short")}
                       </span>
                     </div>
@@ -346,9 +347,9 @@ export default function ChatWindow({
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="border-t bg-background px-4 py-3">
+          <div className="sticky bottom-[calc(56px+env(safe-area-inset-bottom))] z-10 border-t border-border/70 bg-card/95 px-4 py-3 backdrop-blur md:bottom-0">
             {sendError ? (
-              <div className="mb-2 flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-2 text-xs text-destructive">
+              <div className="mb-2 flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-2 text-xs text-destructive">
                 <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                 <span>{sendError}</span>
               </div>
@@ -361,14 +362,15 @@ export default function ChatWindow({
                 placeholder={translate("chat.input_placeholder", "Write a message about the listing...")}
                 disabled={isSending}
                 maxLength={5000}
-                rows={2}
-                className="max-h-36 min-h-11 resize-none"
+                rows={1}
+                className="max-h-36 min-h-11 resize-none rounded-2xl px-4 py-2.5 focus-visible:ring-4 focus-visible:ring-primary/12"
               />
               <Button
                 type="button"
+                size="icon"
                 onClick={() => void handleSend()}
                 disabled={!inputValue.trim() || isSending}
-                className="h-11"
+                className="h-11 w-11 shrink-0 rounded-full"
               >
                 {isSending ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -379,28 +381,28 @@ export default function ChatWindow({
               </Button>
             </div>
             {realtimeError ? (
-              <p className="mt-2 text-xs text-amber-700">
+              <p className="mt-2 text-xs text-muted-foreground">
                 {translate("chat.realtime_warning", "Live updates are reconnecting. You can still send messages.")}
               </p>
             ) : null}
           </div>
         </Card>
 
-        <aside className="space-y-4">
+        <aside className="space-y-4 px-4 sm:px-0">
           {advert ? (
-            <Card className="rounded-md py-0">
+            <Card className="rounded-xl border-border/70 py-0 shadow-[var(--shadow-soft)]">
               <CardContent className="space-y-3 p-4">
-                <Badge variant="secondary">
+                <Badge variant="secondary" className="rounded-full">
                   <BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" />
                   {translate("chat.listing_context", "Listing context")}
                 </Badge>
                 <div>
-                  <h2 className="text-sm font-semibold leading-5">{advert.title}</h2>
+                  <h2 className="text-sm font-extrabold tracking-tight leading-5">{advert.title}</h2>
                   {advertPrice ? (
-                    <p className="mt-1 text-lg font-semibold">{advertPrice}</p>
+                    <p className="mt-1 text-lg font-extrabold tracking-tight">{advertPrice}</p>
                   ) : null}
                 </div>
-                <Button asChild variant="outline" className="w-full">
+                <Button asChild variant="outline" className="w-full rounded-full">
                   <Link href={`/ad/${advert.id}`}>
                     {translate("chat.view_listing", "View listing")}
                   </Link>
@@ -409,12 +411,12 @@ export default function ChatWindow({
             </Card>
           ) : null}
 
-          <Card className="rounded-md py-0">
+          <Card className="rounded-xl border-border/70 py-0 shadow-[var(--shadow-soft)]">
             <CardContent className="space-y-3 p-4">
               <div className="flex items-start gap-2">
                 <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                 <div>
-                  <h2 className="text-sm font-semibold">
+                  <h2 className="text-sm font-extrabold tracking-tight">
                     {translate("chat.safety.title", "Deal safely")}
                   </h2>
                   <p className="mt-1 text-xs leading-5 text-muted-foreground">
