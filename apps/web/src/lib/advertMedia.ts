@@ -56,6 +56,9 @@ export async function resolveFirstImages(
         path,
         SIGNED_DOWNLOAD_TTL_SECONDS,
       );
+      if (error) {
+        console.error(`Failed to create signed URL for path "${path}":`, error);
+      }
       if (!error && data?.signedUrl) out.set(advertId, data.signedUrl);
     }),
   );

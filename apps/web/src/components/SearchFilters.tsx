@@ -996,7 +996,20 @@ export default function SearchFilters({
           <label key={value} className="flex items-center gap-2 text-sm">
             <Checkbox
               checked={condition === value}
-              onCheckedChange={(checked) => setCondition(checked ? value : null)}
+              onCheckedChange={(checked) => {
+                const newCondition = checked ? value : null;
+                setCondition(newCondition);
+                applyFilters({
+                  category_id: selectedCategory?.id || null,
+                  price_min: priceRange[0] > 0 ? priceRange[0] : null,
+                  price_max: priceRange[1] < 10000 ? priceRange[1] : null,
+                  location: location || null,
+                  catalog_fields: dynamicFilters,
+                  verified_only: verifiedOnly,
+                  condition: newCondition,
+                  sort_by: sortBy,
+                });
+              }}
             />
             {label}
           </label>
@@ -1006,7 +1019,19 @@ export default function SearchFilters({
       {/* Sort Filter */}
       <div className="space-y-2">
         <p className="text-sm font-semibold">{tr("search.sort", "Sort")}</p>
-        <Select value={sortBy} onValueChange={setSortBy}>
+        <Select value={sortBy} onValueChange={(newSortBy) => {
+          setSortBy(newSortBy);
+          applyFilters({
+            category_id: selectedCategory?.id || null,
+            price_min: priceRange[0] > 0 ? priceRange[0] : null,
+            price_max: priceRange[1] < 10000 ? priceRange[1] : null,
+            location: location || null,
+            catalog_fields: dynamicFilters,
+            verified_only: verifiedOnly,
+            condition,
+            sort_by: newSortBy,
+          });
+        }}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="relevance">{tr("search.sortRelevance", "Relevance")}</SelectItem>
