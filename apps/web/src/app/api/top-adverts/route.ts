@@ -1,6 +1,7 @@
 import { supabaseServer } from "@/lib/supabaseServer";
 import { createSuccessResponse, createErrorResponse, ApiErrorCode } from "@/lib/apiErrors";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import { popularityScore } from "@/lib/popularity";
 
 const limiter = createRateLimiter({
   limit: 60,
@@ -64,9 +65,16 @@ async function baseHandler(request: Request) {
     .select("advert_id")
     .in("advert_id", advertIds);
 
-  // Count views and favorites per advert
+  // Get like counts for adverts
+  const { data: likeCounts } = await supabase
+    .from("advert_likes")
+    .select("advert_id")
+    .in("advert_id", advertIds);
+
+  // Count views, favorites, and likes per advert
   const viewCountMap: Record<string, number> = {};
   const favoriteCountMap: Record<string, number> = {};
+  const likeCountMap: Record<string, number> = {};
 
   viewCounts?.forEach((v) => {
     viewCountMap[v.advert_id] = (viewCountMap[v.advert_id] || 0) + 1;
@@ -76,19 +84,25 @@ async function baseHandler(request: Request) {
     favoriteCountMap[f.advert_id] = (favoriteCountMap[f.advert_id] || 0) + 1;
   });
 
+  likeCounts?.forEach((l) => {
+    likeCountMap[l.advert_id] = (likeCountMap[l.advert_id] || 0) + 1;
+  });
+
   // Calculate popularity score and sort
   const advertsWithScores = adverts.map((advert) => {
     const views = viewCountMap[advert.id] || 0;
     const favorites = favoriteCountMap[advert.id] || 0;
-    
-    // Popularity score: views * 1 + favorites * 5 (favorites are more valuable)
-    const popularityScore = views * 1 + favorites * 5;
+    const likes = likeCountMap[advert.id] || 0;
+
+    // Popularity score: views·0.3 + likes·3 + favorites·5
+    const score = popularityScore({ views, likes, favorites });
 
     return {
       ...advert,
       view_count: views,
       favorite_count: favorites,
-      popularity_score: popularityScore,
+      like_count: likes,
+      popularity_score: score,
     };
   });
 
