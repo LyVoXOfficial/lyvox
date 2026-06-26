@@ -11,6 +11,7 @@ import ViewportBottomSpacer from "@/components/viewport-bottom-spacer";
 import { I18nProvider } from "@/i18n";
 import { getI18nProps } from "@/i18n/server";
 import { TrustGateProvider } from "@/components/trust/TrustGateProvider";
+import { Toaster } from "sonner";
 
 // `viewport-fit: cover` is required for the `env(safe-area-inset-*)` paddings
 // used by the bottom nav to be non-zero on notched devices (iOS). themeColor
@@ -99,6 +100,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             </LikesProvider>
           </FavoritesProvider>
         </I18nProvider>
+        {/* Global toast container — without this, every toast.* call across the app is silently dropped. */}
+        <Toaster position="top-center" richColors closeButton />
       </body>
     </html>
   );

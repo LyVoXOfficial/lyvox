@@ -152,22 +152,28 @@ export default function RegisterForm({ initialLocale }: Props) {
   const onSubmit = handleSubmit(async (values) => {
     if (!emailPattern.test(values.email)) {
       setError("email", { type: "manual", message: messages.emailError });
+      toast.error(messages.emailError);
       return;
     }
 
     if (!passwordValidity(values.password)) {
       setError("password", { type: "manual", message: messages.passwordError });
+      toast.error(messages.passwordError);
       return;
     }
 
     if (values.password !== values.confirmPassword) {
       setError("confirmPassword", { type: "manual", message: messages.confirmPasswordError });
+      toast.error(messages.confirmPasswordError);
       return;
     }
 
     if (!values.terms || !values.privacy) {
       setError("terms", { type: "manual", message: messages.consentsError });
       setError("privacy", { type: "manual", message: messages.consentsError });
+      // Surface this — the consent checkboxes sit below the fold on mobile, so an inline-only
+      // error looked like "nothing happened" after pressing submit.
+      toast.error(messages.consentsError);
       return;
     }
 
