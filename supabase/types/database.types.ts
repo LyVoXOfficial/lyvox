@@ -347,11 +347,15 @@ export type Database = {
           legal_name: string
           phone_e164: string | null
           postcode: string | null
+          returns_url: string | null
+          self_certified_at: string | null
+          self_certified_ip: string | null
           status: string
           trade_name: string | null
           updated_at: string
           vat_liable: boolean
           vat_number: string | null
+          withdrawal_terms: string | null
         }
         Insert: {
           address_line?: string | null
@@ -367,11 +371,15 @@ export type Database = {
           legal_name: string
           phone_e164?: string | null
           postcode?: string | null
+          returns_url?: string | null
+          self_certified_at?: string | null
+          self_certified_ip?: string | null
           status?: string
           trade_name?: string | null
           updated_at?: string
           vat_liable?: boolean
           vat_number?: string | null
+          withdrawal_terms?: string | null
         }
         Update: {
           address_line?: string | null
@@ -387,11 +395,15 @@ export type Database = {
           legal_name?: string
           phone_e164?: string | null
           postcode?: string | null
+          returns_url?: string | null
+          self_certified_at?: string | null
+          self_certified_ip?: string | null
           status?: string
           trade_name?: string | null
           updated_at?: string
           vat_liable?: boolean
           vat_number?: string | null
+          withdrawal_terms?: string | null
         }
         Relationships: [
           {
