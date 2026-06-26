@@ -160,6 +160,13 @@ export default function UserMenu() {
   const closeMenu = useCallback(() => setOpen(false), []);
 
   const signOut = async () => {
+    // Clear the client Supabase session (localStorage) as well as the server cookie, otherwise the
+    // browser keeps a stale session and the UI can still look "signed in" after signing out.
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      /* ignore */
+    }
     try {
       await fetch("/api/auth/signout", {
         method: "POST",
