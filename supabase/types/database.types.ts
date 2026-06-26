@@ -133,6 +133,7 @@ export type Database = {
         Row: {
           ai_moderation_reason: string | null
           ai_moderation_score: number | null
+          business_id: string | null
           category_id: string
           condition: string | null
           created_at: string | null
@@ -151,6 +152,7 @@ export type Database = {
         Insert: {
           ai_moderation_reason?: string | null
           ai_moderation_score?: number | null
+          business_id?: string | null
           category_id: string
           condition?: string | null
           created_at?: string | null
@@ -169,6 +171,7 @@ export type Database = {
         Update: {
           ai_moderation_reason?: string | null
           ai_moderation_score?: number | null
+          business_id?: string | null
           category_id?: string
           condition?: string | null
           created_at?: string | null
@@ -1762,6 +1765,7 @@ export type Database = {
           notification_preferences: Json | null
           phone: string | null
           rating: number | null
+          seller_type: string
           total_deals: number | null
           verified_email: boolean | null
           verified_phone: boolean | null
@@ -1778,6 +1782,7 @@ export type Database = {
           notification_preferences?: Json | null
           phone?: string | null
           rating?: number | null
+          seller_type?: string
           total_deals?: number | null
           verified_email?: boolean | null
           verified_phone?: boolean | null
@@ -1794,6 +1799,7 @@ export type Database = {
           notification_preferences?: Json | null
           phone?: string | null
           rating?: number | null
+          seller_type?: string
           total_deals?: number | null
           verified_email?: boolean | null
           verified_phone?: boolean | null
