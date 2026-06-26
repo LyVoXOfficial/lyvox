@@ -8,6 +8,7 @@ import {
 import { validateRequest, searchAdvertsQuerySchema } from "@/lib/validations";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import { resolveFirstImages } from "@/lib/advertMedia";
+import { resolveLikeCounts } from "@/lib/likeCounts";
 
 export const runtime = "nodejs";
 
@@ -109,10 +110,12 @@ const baseHandler = async (request: Request) => {
       };
     }) ?? [];
 
-  const imageMap = await resolveFirstImages(results.map((r) => r.id as string));
+  const ids = results.map((r) => r.id as string);
+  const [imageMap, likeMap] = await Promise.all([resolveFirstImages(ids), resolveLikeCounts(ids)]);
   const itemsWithImages = results.map((r) => ({
     ...r,
     image: imageMap.get(r.id as string) ?? null,
+    like_count: likeMap.get(r.id as string) ?? 0,
   }));
 
   return createSuccessResponse({

@@ -18,12 +18,16 @@ vi.mock("@/lib/advertMedia", () => ({
   resolveFirstImages: (...args: unknown[]) => resolveFirstImagesMock(...(args as [])),
 }));
 
+const resolveLikeCountsMock = vi.fn(async () => new Map([["adv-1", 3]]));
+vi.mock("@/lib/likeCounts", () => ({ resolveLikeCounts: (...a: unknown[]) => resolveLikeCountsMock(...(a as [])) }));
+
 const { GET } = await import("../route");
 
 describe("GET /api/search", () => {
   beforeEach(() => {
     rpcMock.mockReset();
     resolveFirstImagesMock.mockClear();
+    resolveLikeCountsMock.mockClear();
   });
 
   it("attaches a signed image URL to each item", async () => {
@@ -55,5 +59,15 @@ describe("GET /api/search", () => {
     const res = await GET(new Request("https://x.test/api/search"));
     const body = await res.json();
     expect(body.data.items[0].image).toBeNull();
+  });
+
+  it("attaches like_count to each item", async () => {
+    rpcMock.mockResolvedValue({
+      data: [{ id: "adv-1", title: "Bike", status: "active", total_count: 1 }],
+      error: null,
+    });
+    const res = await GET(new Request("https://x.test/api/search?limit=24"));
+    const body = await res.json();
+    expect(body.data.items[0].like_count).toBe(3);
   });
 });
