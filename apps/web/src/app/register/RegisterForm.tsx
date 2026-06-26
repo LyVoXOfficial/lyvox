@@ -213,6 +213,10 @@ export default function RegisterForm({ initialLocale }: Props) {
           setError("email", { type: "manual", message: messages.emailError });
         } else if (errorCode === "SERVICE_ROLE_MISSING") {
           errorMessage = messages.errorService;
+        } else if (payload?.detail) {
+          // Surface the real reason (e.g. a password the auth server rejected as weak/breached, or a
+          // rate limit) instead of a vague generic message the user can't act on.
+          errorMessage = payload.detail;
         }
         toast.error(errorMessage);
         return;
