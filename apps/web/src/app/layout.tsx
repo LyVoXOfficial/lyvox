@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { FavoritesProvider } from "@/components/favorites/FavoritesProvider";
+import { LikesProvider } from "@/components/likes/LikesProvider";
 import TopBar from "@/components/topbar";
 import MainHeader from "@/components/main-header";
 import LegalFooter from "@/components/legal-footer";
@@ -85,12 +86,14 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <body className="min-h-screen flex flex-col">
         <I18nProvider locale={locale} messages={messages}>
           <FavoritesProvider>
-            <TopBar />
-            <MainHeader />
-            <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-4 md:py-6 pb-[calc(64px+env(safe-area-inset-bottom))]">{children}</main>
-            <LegalFooter />
-            <ViewportBottomSpacer />
-            <BottomNav />
+            <LikesProvider>
+              <TopBar />
+              <MainHeader />
+              <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-4 md:py-6 pb-[calc(64px+env(safe-area-inset-bottom))]">{children}</main>
+              <LegalFooter />
+              <ViewportBottomSpacer />
+              <BottomNav />
+            </LikesProvider>
           </FavoritesProvider>
         </I18nProvider>
       </body>
