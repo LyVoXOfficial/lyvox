@@ -14,11 +14,11 @@ function getLocalizedCategoryName(cat: Category, locale: string): string {
 }
 
 export default function CategoryList({ items, base = "/c" }: { items: Category[]; base?: string }) {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const filtered = (items ?? []).filter((cat) => cat.is_active !== false);
 
   if (!filtered.length) {
-    return <p className="text-sm text-muted-foreground">No categories available.</p>;
+    return <p className="text-sm text-muted-foreground">{t("category.no_categories")}</p>;
   }
 
   const uniqueItems = Array.from(new Map(filtered.map((item) => [item.slug, item])).values());
@@ -41,7 +41,7 @@ export default function CategoryList({ items, base = "/c" }: { items: Category[]
               <span className="space-y-1">
                 <span className="block text-sm font-semibold text-foreground">{label}</span>
                 {cat.level <= 2 ? (
-                  <span className="block text-xs text-muted-foreground">Browse listings</span>
+                  <span className="block text-xs text-muted-foreground">{t("footer.browse_listings")}</span>
                 ) : null}
               </span>
             </Link>

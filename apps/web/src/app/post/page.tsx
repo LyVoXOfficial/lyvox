@@ -92,7 +92,10 @@ export default async function PostPage({
           <CardHeader>
             <CardTitle>{t("post.post_ad")}</CardTitle>
             <CardDescription>
-              Sign in before creating a listing so drafts, buyer messages, and verification stay attached to one account.
+              {tf(
+                "post.signin_intro",
+                "Sign in before creating a listing so drafts, buyer messages, and verification stay attached to one account.",
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -125,10 +128,13 @@ export default async function PostPage({
               <ShieldCheck className="h-5 w-5" aria-hidden="true" />
             </div>
             <CardTitle className="text-amber-950 dark:text-amber-100">
-              Verify your account before publishing
+              {tf("post.verify_title", "Verify your account before publishing")}
             </CardTitle>
             <CardDescription className="text-amber-800 dark:text-amber-200">
-              Listings require confirmed contact details to reduce fraud and keep buyer conversations accountable.
+              {tf(
+                "post.verify_body",
+                "Listings require confirmed contact details to reduce fraud and keep buyer conversations accountable.",
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
@@ -136,24 +142,24 @@ export default async function PostPage({
               {!verifiedEmail && (
                 <p className="flex items-center gap-2 text-sm font-medium text-amber-900 dark:text-amber-100">
                   <Mail className="h-4 w-4" aria-hidden="true" />
-                  Email confirmation is missing
+                  {tf("post.email_missing", "Email confirmation is missing")}
                 </p>
               )}
               {!verifiedPhone && (
                 <p className="flex items-center gap-2 text-sm font-medium text-amber-900 dark:text-amber-100">
                   <Phone className="h-4 w-4" aria-hidden="true" />
-                  Phone verification is missing
+                  {tf("post.phone_missing", "Phone verification is missing")}
                 </p>
               )}
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button asChild>
-                <Link href="/verify">Go to verification</Link>
+                <Link href="/verify">{tf("post.goto_verify", "Go to verification")}</Link>
               </Button>
               <Button asChild variant="outline">
                 <Link href="/profile">
                   <AlertTriangle className="h-4 w-4" aria-hidden="true" />
-                  Review profile
+                  {tf("post.review_profile", "Review profile")}
                 </Link>
               </Button>
             </div>
