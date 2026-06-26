@@ -7,6 +7,7 @@ import {
 } from "@/lib/apiErrors";
 import type { TablesInsert } from "@/lib/supabaseTypes";
 import { checkUserBlocked } from "@/lib/fraud/checkUserBlocked";
+import { isViewerVerified } from "@/lib/auth/requireVerified";
 
 export const runtime = "nodejs";
 
@@ -18,6 +19,10 @@ export async function POST() {
 
   if (!user) {
     return createErrorResponse(ApiErrorCode.UNAUTHENTICATED, { status: 401 });
+  }
+
+  if (!(await isViewerVerified(supabase, user.id))) {
+    return createErrorResponse(ApiErrorCode.VERIFICATION_REQUIRED, { status: 403, detail: "Phone verification required to publish" });
   }
 
   // Check if user is blocked
