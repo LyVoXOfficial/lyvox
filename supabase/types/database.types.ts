@@ -1347,6 +1347,42 @@ export type Database = {
           },
         ]
       }
+      kyc_records: {
+        Row: {
+          created_at: string
+          data_class: string
+          document_ref: string | null
+          id: string
+          legal_basis: string | null
+          meta: Json | null
+          retention_until: string
+          subject_id: string
+          subject_type: string
+        }
+        Insert: {
+          created_at?: string
+          data_class: string
+          document_ref?: string | null
+          id?: string
+          legal_basis?: string | null
+          meta?: Json | null
+          retention_until: string
+          subject_id: string
+          subject_type: string
+        }
+        Update: {
+          created_at?: string
+          data_class?: string
+          document_ref?: string | null
+          id?: string
+          legal_basis?: string | null
+          meta?: Json | null
+          retention_until?: string
+          subject_id?: string
+          subject_type?: string
+        }
+        Relationships: []
+      }
       locations: {
         Row: {
           city: string | null
