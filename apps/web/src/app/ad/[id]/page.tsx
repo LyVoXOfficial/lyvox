@@ -16,6 +16,8 @@ import { getJsonLdScriptProps } from "@/lib/seo";
 import { generateSlug, truncateDescription } from "@/lib/seo/catalog/common";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
+import { isViewerVerified } from "@/lib/auth/requireVerified";
+import SellerIdentityGate from "@/components/trust/SellerIdentityGate";
 import { signMediaUrls } from "@/lib/media/signMediaUrls";
 import { getFirstImage } from "@/lib/media/getFirstImage";
 import type { Tables } from "@/lib/supabaseTypes";
@@ -351,6 +353,10 @@ export default async function AdvertPage({ params }: PageProps) {
       );
     }
 
+  const viewerVerified = await loadViewerVerified(currentUserId);
+  const isOwnListing = !!currentUserId && currentUserId === data.seller.id;
+  const canSeeSeller = viewerVerified || isOwnListing;
+
   const t = createTranslator(messages);
   const translate = (key: string, fallback: string) => {
     return translateFallback(t, key, fallback);
@@ -672,7 +678,11 @@ export default async function AdvertPage({ params }: PageProps) {
             </p>
           </section>
 
-          <SellerCard seller={data.seller} locale={locale} {...sellerCardLabels} />
+          {canSeeSeller ? (
+            <SellerCard seller={data.seller} locale={locale} {...sellerCardLabels} />
+          ) : (
+            <SellerIdentityGate />
+          )}
 
           <section className="rounded-md border border-border/80 bg-card p-4 shadow-sm">
             <div className="mb-4 flex items-start gap-3">
@@ -1079,6 +1089,17 @@ async function loadCurrentUserId(): Promise<string | null> {
   } catch (error) {
     console.warn("Failed to resolve current user", error);
     return null;
+  }
+}
+
+async function loadViewerVerified(userId: string | null): Promise<boolean> {
+  if (!userId) return false;
+  try {
+    const supabase = await supabaseServer();
+    return await isViewerVerified(supabase, userId);
+  } catch (error) {
+    console.warn("Failed to resolve viewer verification", error);
+    return false; // fail-closed: hide identity if we can't confirm
   }
 }
 
