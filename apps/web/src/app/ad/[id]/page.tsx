@@ -7,6 +7,7 @@ import AdvertContactPanel from "@/components/AdvertContactPanel";
 import SellerCard from "@/components/SellerCard";
 import SimilarAdverts from "@/components/SimilarAdverts";
 import BenefitsBadge from "@/components/BenefitsBadge";
+import LikeToggle from "@/components/likes/LikeToggle";
 import RecentlyViewedRecorder from "@/components/discovery/RecentlyViewedRecorder";
 import { formatCurrency, formatDate } from "@/i18n/format";
 import { getI18nProps, getInitialLocale } from "@/i18n/server";
@@ -420,6 +421,9 @@ export default async function AdvertPage({ params }: PageProps) {
     count: similarAdverts.length,
   });
 
+  const { data: likeCountData } = await (await supabaseServer()).rpc("get_advert_like_count", { advert_id_param: data.advert.id });
+  const likeCount = Number(likeCountData ?? 0);
+
   const slug = generateSlug(data.advert.title);
   const canonicalUrl = `${BASE_URL}/ad/${data.advert.id}/${slug}`;
   const imageUrls = galleryImages.map((image) => image.url).filter(Boolean);
@@ -640,6 +644,7 @@ export default async function AdvertPage({ params }: PageProps) {
                 ) : null}
               </div>
             </div>
+            <LikeToggle advertId={data.advert.id} initialCount={likeCount} variant="inline" />
           </div>
         </header>
 

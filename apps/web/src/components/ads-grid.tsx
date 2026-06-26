@@ -12,6 +12,7 @@ type Item = {
   image?: string | null;
   createdAt?: string | null;
   sellerVerified?: boolean;
+  likeCount?: number;
 };
 
 type AdsGridProps = {

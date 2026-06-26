@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import ReportButton from "@/components/ReportButton";
 import VerificationBadge from "@/components/VerificationBadge";
 import FavoriteToggle from "@/components/favorites/FavoriteToggle";
+import LikeToggle from "@/components/likes/LikeToggle";
 import BenefitsBadge from "@/components/BenefitsBadge";
 import { useI18n } from "@/i18n";
 
@@ -18,6 +19,7 @@ type Props = {
   image?: string | null;
   createdAt?: string | null;
   sellerVerified?: boolean;
+  likeCount?: number;
   benefits?: Array<{
     benefit_type: string;
     valid_until: string;
@@ -33,6 +35,7 @@ export default function AdCard({
   image,
   createdAt,
   sellerVerified,
+  likeCount,
   benefits,
 }: Props) {
   const { t, locale } = useI18n();
@@ -137,8 +140,11 @@ export default function AdCard({
               />
             ) : null}
           </div>
-          <div className="sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
-            <ReportButton advertId={id} />
+          <div className="flex items-center gap-2">
+            <LikeToggle advertId={id} initialCount={likeCount ?? 0} variant="inline" />
+            <div className="sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
+              <ReportButton advertId={id} />
+            </div>
           </div>
         </div>
       </div>
