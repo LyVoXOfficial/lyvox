@@ -2243,6 +2243,42 @@ export type Database = {
         }
         Relationships: []
       }
+      verifications: {
+        Row: {
+          created_at: string
+          evidence: Json | null
+          expires_at: string | null
+          id: string
+          method: string
+          status: string
+          subject_id: string
+          subject_type: string
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          evidence?: Json | null
+          expires_at?: string | null
+          id?: string
+          method: string
+          status?: string
+          subject_id: string
+          subject_type: string
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          evidence?: Json | null
+          expires_at?: string | null
+          id?: string
+          method?: string
+          status?: string
+          subject_id?: string
+          subject_type?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       vehicle_colors: {
         Row: {
           code: string
