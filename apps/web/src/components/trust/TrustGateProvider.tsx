@@ -49,12 +49,19 @@ export function TrustGateProvider({ children }: { children: ReactNode }) {
     }
   }, [level, finish]);
 
+  const handleOpenChange = useCallback((next: boolean) => {
+    if (!next) {
+      pendingRun.current = null; // dismiss = cancel the gated action
+    }
+    setOpen(next);
+  }, []);
+
   const value: TrustGateContextValue = { requireTrust };
 
   return (
     <TrustGateContext.Provider value={value}>
       {children}
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
