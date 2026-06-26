@@ -9,7 +9,7 @@ describe("mapSearchItemToCard", () => {
     });
     expect(card).toEqual({
       id: "x", title: "Sofa", price: 120, currency: "EUR", location: "Antwerp",
-      image: "signed:x.jpg", createdAt: "2026-06-01T00:00:00Z", sellerVerified: true,
+      image: "signed:x.jpg", createdAt: "2026-06-01T00:00:00Z", sellerVerified: true, likeCount: 0,
     });
   });
 
@@ -17,7 +17,12 @@ describe("mapSearchItemToCard", () => {
     const card = mapSearchItemToCard({ id: "y", title: "Chair" });
     expect(card).toEqual({
       id: "y", title: "Chair", price: null, currency: null, location: null,
-      image: null, createdAt: null, sellerVerified: false,
+      image: null, createdAt: null, sellerVerified: false, likeCount: 0,
     });
+  });
+
+  it("maps like_count to likeCount (default 0)", () => {
+    expect(mapSearchItemToCard({ id: "x", title: "T", like_count: 5 }).likeCount).toBe(5);
+    expect(mapSearchItemToCard({ id: "y", title: "T" }).likeCount).toBe(0);
   });
 });
