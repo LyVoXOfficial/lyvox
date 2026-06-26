@@ -166,6 +166,7 @@ async function getFreeAds(supabase: SupabaseClient): Promise<AdListItem[]> {
     createdAt: ad.created_at ?? null,
     image: mediaMap.get(ad.id) ?? null,
     sellerVerified: verifiedMap.get(ad.user_id ?? "") ?? false,
+    likeCount: 0,
   }));
 }
 
@@ -230,6 +231,7 @@ async function getLatestAds(supabase: SupabaseClient): Promise<AdvertCard[]> {
     createdAt: ad.created_at ?? null,
     image: mediaMap.get(ad.id) ?? null,
     sellerVerified: verifiedMap.get(ad.user_id ?? "") ?? false,
+    likeCount: 0,
   }));
 }
 

@@ -4,7 +4,7 @@ import type { AdvertCard } from "@/lib/advertCards";
 
 const card = (id: string): AdvertCard => ({
   id, title: id, price: null, currency: null, location: null, image: null,
-  createdAt: null, sellerVerified: false,
+  createdAt: null, sellerVerified: false, likeCount: 0,
 });
 
 describe("appendUnique", () => {
