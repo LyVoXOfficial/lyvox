@@ -136,27 +136,51 @@ only way in.
 - Reuse the "Trust, in colour" tokens; honor `prefers-reduced-motion` (cross-fade instead of
   fling). Empty deck → "You're all caught up" with a link back to the feed.
 
-### F. Trust Gate (high-intent action guard)
-A single reusable modal that protects **high-intent actions** (post a listing, contact/message
-a seller, make an offer, swipe-up "Act", like). It replaces the old "match" idea.
-- **New** `components/trust/TrustGate.tsx` + `lib/useTrustGate.ts` (a hook returning
-  `requireTrust(action, run)` ). Logic by state:
-  - **Not signed in** → show a compact **register / login** panel (reuse existing auth forms,
-    embedded — not a full-page redirect) with a one-line "why" ("Create a free account to
-    message sellers safely"). On success the original action is **replayed** automatically.
-  - **Signed in but phone unverified** → show the **phone-verification** step (reuse
-    `/api/phone/request` + `/api/phone/verify`, the existing OTP flow) inline. On success,
-    replay the action.
-  - **Signed in + verified** → run the action immediately (no modal).
-- The gate reads auth + `phone_verified` from the session/profile already exposed to the client.
-  Actions register their requirement level: *like* and *contact* need **auth**; *message*,
-  *offer*, and *publish* need **auth + phone-verified**. (Publish already enforces this
-  server-side — the gate just makes it friendly and pre-emptive.)
-- **Security boundary:** the gate is **UX only**. Every protected action keeps its existing
-  server-side authz/verification check — the modal never becomes the source of truth.
-- **Passkeys tie-in (Stage 1.5):** once the user has signed in via the gate, offer "Enable
-  fast sign-in on this device" → enroll a passkey via the existing `/api/auth/webauthn/enroll`.
-  The enrollment UX is built in Stage 1.5; Stage 1 just leaves the hook/affordance.
+### F. Trust Gate + verified-only interaction model
+LyVoX is **browse-open, act-verified**. Anyone can browse, search, and view a listing
+anonymously; everything else is gated by a **real, server-enforced** trust tier — the Trust
+Gate is the friendly front-end over that enforcement, **not** a cosmetic modal.
+
+**Action tiers** (decided 2026-06-26 with the user; blast radius = 0 — only 2 users / 4 active
+adverts in the DB, none owned by unverified users, so enforcement is safe with no migration):
+
+| Tier | Actions |
+|------|---------|
+| **Open** (anonymous) | browse feed, search, view a listing's photos/title/price/description |
+| **Auth** (account; phone NOT required) | **like** 👍, **favorite** ❤️ |
+| **Verified** (account **+** phone-verified) | **contact / message a seller**, **publish a listing**, **make an offer** (Stage-3 action), and **seeing seller identity / contact affordance** |
+
+Correction to an earlier draft: the codebase did **not** enforce phone-verification anywhere
+(neither `POST /api/adverts` nor `POST /api/chat/start` checked it — only auth). This model
+**adds** that enforcement.
+
+- **Server guard (the source of truth)** `lib/auth/requireVerified.ts`: given a request,
+  returns the user iff signed-in **and** phone-verified (reads `phones.verified` /
+  `profiles.verified_phone`, the same signals `/api/me` exposes); otherwise a `403`
+  `VERIFICATION_REQUIRED` (new `ApiErrorCode`). Applied to `POST /api/chat/start` and
+  `POST /api/adverts`. The like/favorite routes keep their existing **auth-only** check.
+- **Client gate** `components/trust/TrustGate.tsx` + `lib/useTrustGate.ts` — a hook
+  `requireTrust(level: "auth" | "verified", run: () => void)` that reads auth + `verifiedPhone`
+  from `/api/me` and, if the tier isn't met, opens the modal; on success it **replays** `run`:
+  - **Not signed in** → compact **email+password login** (browser client
+    `supabase.auth.signInWithPassword`) with a tab/link to **register** (reuse the existing
+    standalone `RegisterForm`). Do **not** extract the full `LoginPageInner` — a small inline
+    form is enough.
+  - **Signed in but (level = "verified" and) phone unverified** → inline **phone-verification**
+    reusing the **live** Supabase-native OTP flow that `/verify` already uses
+    (`supabase.auth.signInWithOtp` → `verifyOtp` → set `profiles.verified_phone`), **not** the
+    unused custom `/api/phone/*` endpoints.
+  - **Tier already met** → run immediately (no modal).
+- Routes that return `VERIFICATION_REQUIRED`/`401` make the client open the gate at the right
+  tier and replay — so the gate and the server guard agree, and the server stays authoritative.
+- **Hide seller identity from unverified viewers:** on the ad-detail page the contact panel
+  shows the seller name + "Message seller" **only** to verified viewers; everyone else sees a
+  "Verify your phone to contact the seller" card that opens the Trust Gate. (The listing itself
+  — photos/title/price/description — stays open.) Nothing sensitive is otherwise exposed today
+  (no raw phone/email is rendered; contact is chat-based).
+- **Passkeys tie-in (Stage 1.5):** once signed in via the gate, offer "Enable fast sign-in on
+  this device" → `/api/auth/webauthn/enroll`. Enrollment UX is Stage 1.5; this stage leaves the
+  hook/affordance only.
 
 ### G. Likes & popularity formula
 Likes are a **public popularity signal** distinct from favorites (private save list).
@@ -164,16 +188,21 @@ Likes are a **public popularity signal** distinct from favorites (private save l
   `user_id uuid not null references auth.users(id) on delete cascade,
    advert_id uuid not null references public.adverts(id) on delete cascade,
    created_at timestamptz not null default now(), primary key (user_id, advert_id)`.
-  **RLS:** any authenticated user may `insert`/`delete` their **own** row and `select` only
-  their **own** rows (all `auth.uid() = user_id`) — so the deck can render "did I like this".
-  Per-advert `like_count` is exposed **only as an aggregate** via a `SECURITY DEFINER` function
-  `advert_like_count(advert_id) returns int` (and a batch variant), so individual likers are
-  never readable by other users. Index `(advert_id)` for counting. Shipped as a migration,
-  applied surgically via `pg`.
-- **API** `app/api/likes/route.ts`: `POST {advert_id}` toggles the caller's like
-  (insert/delete), returns `{liked, like_count}`. **Auth required** (the Trust Gate guarantees
-  it client-side); rate-limited per user (Upstash) as anti-spam; zod-validated; `{ok,data}`
-  envelope. A `GET ?advert_id=` (or batch) returns `{like_count, liked}` for rendering.
+  **RLS — mirror the existing `favorites` table** (favorites already uses public-read): a
+  `user_manage_own_likes` policy (`for all using (auth.uid() = user_id) with check
+  (auth.uid() = user_id)`) plus a `public_read_likes` policy (`for select using (true)`) so
+  per-advert counts are readable. Indexes `(user_id, created_at desc)` and `(advert_id)`. Add a
+  `get_advert_like_count(advert_id uuid) returns bigint` SQL helper (mirroring
+  `get_advert_favorite_count`). Shipped as a migration, applied surgically via `pg`. (Likes are
+  a public popularity signal, so public-read is consistent with favorites; choosing own-rows-only
+  `select` would silently break the `/api/top-adverts` count query, which reads rows directly.)
+- **API** `app/api/likes/route.ts` (POST) + `app/api/likes/[advertId]/route.ts` (DELETE),
+  **mirroring `/api/favorites`**: POST `{advert_id}` inserts the caller's like (idempotent on
+  the `23505` unique violation), DELETE removes it. **Auth required** (401 otherwise) — this is
+  the **Auth** tier, NOT verified. Rate-limited per user (same `withRateLimit` pattern as
+  favorites). A like count for rendering comes from `get_advert_like_count` (detail page) and
+  the `LikesProvider` (own liked-state). A client `LikesProvider` + `useLikes()` + `LikeToggle`
+  mirror `FavoritesProvider`/`useFavorites`/`FavoriteToggle`.
 - **Popularity formula:** `app/api/top-adverts/route.ts` changes its score from
   `views·1 + favorites·5` to **`views·0.3 + likes·3 + favorites·5`** (likes weighted between
   cheap views and high-effort favorites). Computed from `like_count` + `favorite_count`
