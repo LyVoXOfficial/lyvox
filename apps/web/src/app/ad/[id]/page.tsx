@@ -975,14 +975,14 @@ export default async function AdvertPage({ params }: PageProps) {
           <div className="lg:sticky lg:top-24">
             <AdvertContactPanel
               advert={favoriteAdvert}
-              seller={data.seller}
+              seller={canSeeSeller ? data.seller : { ...data.seller, displayName: null }}
               currentUserId={currentUserId}
               priceText={priceText}
               locationText={locationText}
               createdText={createdText || null}
               loginHref={loginHref}
               editHref={editHref}
-              sellerName={sellerName}
+              sellerName={canSeeSeller ? sellerName : ""}
               canSeeSeller={canSeeSeller}
             />
           </div>
