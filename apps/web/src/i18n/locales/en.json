@@ -1551,5 +1551,29 @@
     "body": "Confirm your phone number to view the seller's profile and contact them. It keeps the marketplace safe for everyone.",
     "cta": "Verify my phone",
     "name_hidden": "Verified users only"
+  },
+  "discover": {
+    "title": "Discover",
+    "subtitle": "Swipe through listings — like, pass, or act.",
+    "enter": "Swipe mode",
+    "empty_title": "You're all caught up",
+    "empty_body": "No more listings to show right now.",
+    "back_to_feed": "Back to the feed",
+    "retry": "Try again",
+    "like": "Like",
+    "pass": "Pass",
+    "act": "Actions",
+    "open_listing": "Open listing",
+    "message_seller": "Message seller",
+    "make_offer": "Make an offer",
+    "offer_template": "Hi! Is this still available? I'd like to make an offer.",
+    "reset_prefs": "Reset preferences",
+    "no_photo": "No photo",
+    "drop": {
+      "just_listed": "Just listed",
+      "under_50": "Under €50",
+      "verified": "Verified sellers",
+      "cheapest": "Cheapest"
+    }
   }
 }

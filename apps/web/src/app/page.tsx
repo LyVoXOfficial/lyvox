@@ -339,6 +339,17 @@ export default async function Home() {
           </div>
         </section>
 
+        <Link
+          href="/discover"
+          className="flex items-center justify-between gap-3 rounded-2xl border border-border/70 bg-card px-5 py-4 shadow-[var(--shadow-card)] transition hover:border-primary/40"
+        >
+          <span>
+            <span className="block font-semibold text-foreground">{t("discover.title")}</span>
+            <span className="block text-sm text-muted-foreground">{t("discover.subtitle")}</span>
+          </span>
+          <ArrowRight className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+        </Link>
+
         <InfoCarousel />
 
       <section className="space-y-4">

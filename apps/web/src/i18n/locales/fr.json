@@ -1551,5 +1551,29 @@
     "body": "Confirmez votre numéro pour voir le profil du vendeur et le contacter. Cela protège la place de marché.",
     "cta": "Vérifier mon téléphone",
     "name_hidden": "Utilisateurs vérifiés uniquement"
+  },
+  "discover": {
+    "title": "Découvrir",
+    "subtitle": "Faites défiler les annonces — j'aime, passer ou agir.",
+    "enter": "Mode swipe",
+    "empty_title": "Vous avez tout vu",
+    "empty_body": "Plus d'annonces à afficher pour le moment.",
+    "back_to_feed": "Retour au fil",
+    "retry": "Réessayer",
+    "like": "J'aime",
+    "pass": "Passer",
+    "act": "Actions",
+    "open_listing": "Ouvrir l'annonce",
+    "message_seller": "Contacter le vendeur",
+    "make_offer": "Faire une offre",
+    "offer_template": "Bonjour ! Est-ce toujours disponible ? J'aimerais faire une offre.",
+    "reset_prefs": "Réinitialiser les préférences",
+    "no_photo": "Pas de photo",
+    "drop": {
+      "just_listed": "Nouveautés",
+      "under_50": "Moins de 50 €",
+      "verified": "Vendeurs vérifiés",
+      "cheapest": "Moins chers"
+    }
   }
 }

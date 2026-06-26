@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useI18n } from "@/i18n";
 import SearchFilters, { type SearchFiltersState } from "@/components/SearchFilters";
@@ -480,6 +481,13 @@ export default function SearchPage() {
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Link
+                href="/discover"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border/80 bg-card px-3 py-2 text-sm font-medium text-foreground transition hover:border-primary/40"
+              >
+                {t("discover.enter")}
+              </Link>
+
               {/* Mobile filters button */}
               <div className="lg:hidden">
                 <SearchFilters

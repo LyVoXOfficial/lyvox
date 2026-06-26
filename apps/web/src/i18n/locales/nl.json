@@ -1551,5 +1551,29 @@
     "body": "Bevestig je telefoonnummer om het profiel van de verkoper te zien en contact op te nemen. Zo blijft de marktplaats veilig.",
     "cta": "Telefoon verifiëren",
     "name_hidden": "Alleen geverifieerde gebruikers"
+  },
+  "discover": {
+    "title": "Ontdekken",
+    "subtitle": "Swipe door zoekertjes — like, sla over of reageer.",
+    "enter": "Swipe-modus",
+    "empty_title": "Je bent helemaal bij",
+    "empty_body": "Voorlopig geen zoekertjes meer.",
+    "back_to_feed": "Terug naar de feed",
+    "retry": "Opnieuw proberen",
+    "like": "Like",
+    "pass": "Overslaan",
+    "act": "Acties",
+    "open_listing": "Zoekertje openen",
+    "message_seller": "Verkoper berichten",
+    "make_offer": "Een bod doen",
+    "offer_template": "Hallo! Is dit nog beschikbaar? Ik wil graag een bod doen.",
+    "reset_prefs": "Voorkeuren wissen",
+    "no_photo": "Geen foto",
+    "drop": {
+      "just_listed": "Net geplaatst",
+      "under_50": "Onder €50",
+      "verified": "Geverifieerde verkopers",
+      "cheapest": "Goedkoopst"
+    }
   }
 }

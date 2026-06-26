@@ -1551,5 +1551,29 @@
     "body": "Bestätigen Sie Ihre Telefonnummer, um das Verkäuferprofil zu sehen und Kontakt aufzunehmen. Das schützt den Marktplatz.",
     "cta": "Telefon bestätigen",
     "name_hidden": "Nur verifizierte Nutzer"
+  },
+  "discover": {
+    "title": "Entdecken",
+    "subtitle": "Wischen Sie durch Anzeigen — Like, Überspringen oder Aktion.",
+    "enter": "Swipe-Modus",
+    "empty_title": "Sie sind auf dem neuesten Stand",
+    "empty_body": "Momentan keine weiteren Anzeigen.",
+    "back_to_feed": "Zurück zum Feed",
+    "retry": "Erneut versuchen",
+    "like": "Like",
+    "pass": "Überspringen",
+    "act": "Aktionen",
+    "open_listing": "Anzeige öffnen",
+    "message_seller": "Verkäufer kontaktieren",
+    "make_offer": "Angebot machen",
+    "offer_template": "Hallo! Ist das noch verfügbar? Ich möchte ein Angebot machen.",
+    "reset_prefs": "Einstellungen zurücksetzen",
+    "no_photo": "Kein Foto",
+    "drop": {
+      "just_listed": "Neu eingestellt",
+      "under_50": "Unter 50 €",
+      "verified": "Verifizierte Verkäufer",
+      "cheapest": "Günstigste"
+    }
   }
 }
