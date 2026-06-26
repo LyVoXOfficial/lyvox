@@ -10,6 +10,8 @@ import { ProfileAdvertsList } from "@/components/profile/ProfileAdvertsList";
 import { ProfileReviewsList } from "@/components/profile/ProfileReviewsList";
 import { logger } from "@/lib/errorLogger";
 import { signMediaUrls } from "@/lib/media/signMediaUrls";
+import { isViewerVerified } from "@/lib/auth/requireVerified";
+import SellerIdentityGate from "@/components/trust/SellerIdentityGate";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -226,18 +228,37 @@ export default async function PublicProfilePage({
     reviews,
   } = profile;
 
+  // Identity gate (verified-only model): unverified viewers don't see the owner's
+  // identity (name/avatar). Listings stay public. Fail-closed for anonymous viewers.
+  // Redact at the data boundary — the name must not reach the HTML (incl. the avatar
+  // seed URL) when hidden, not just the visible <h1>.
+  const supabase = await supabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const currentUserId = user?.id ?? null;
+  const isOwnProfile = !!currentUserId && currentUserId === id;
+  const viewerVerified = currentUserId ? await isViewerVerified(supabase, currentUserId) : false;
+  const canSeeIdentity = viewerVerified || isOwnProfile;
+
+  const headerName = canSeeIdentity
+    ? display_name || t("profile.anonymous")
+    : t("seller_gate.name_hidden");
+  const avatarSeed = canSeeIdentity && display_name ? display_name : "User";
+  const avatarInitial = canSeeIdentity && display_name ? display_name.charAt(0).toUpperCase() : "U";
+
   return (
     <main className="container mx-auto max-w-5xl space-y-8 p-4 md:p-8">
       {/* Profile Header */}
       <div className="flex flex-col items-center gap-6 md:flex-row">
         <Avatar className="h-24 w-24 border-2 border-primary">
           <AvatarImage
-            src={`https://api.dicebear.com/8.x/initials/svg?seed=${display_name || "User"}`}
+            src={`https://api.dicebear.com/8.x/initials/svg?seed=${avatarSeed}`}
           />
-          <AvatarFallback>{display_name?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
+          <AvatarFallback>{avatarInitial}</AvatarFallback>
         </Avatar>
         <div className="flex-1 text-center md:text-left">
-          <h1 className="text-3xl font-bold">{display_name || t("profile.anonymous")}</h1>
+          <h1 className="text-3xl font-bold">{headerName}</h1>
           <div className="flex flex-wrap justify-center gap-2 pt-2 md:justify-start">
             <Badge variant="secondary">{t("profile.member")}</Badge>
             {verified_email && (
@@ -256,6 +277,8 @@ export default async function PublicProfilePage({
           </div>
         </div>
       </div>
+
+      {!canSeeIdentity && <SellerIdentityGate />}
 
       {/* Stats & Info */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
