@@ -4,7 +4,7 @@
 
 **Goal:** Make high-intent actions (contact a seller, publish a listing) require a **phone-verified** account, enforced server-side, and give users a friendly **Trust Gate** modal that signs them in / registers / verifies their phone in place and then replays the action.
 
-**Architecture:** A small server guard `requireVerified` (auth **+** phone-verified, reading `phones.verified` OR `profiles.verified_phone`) returns `403 VERIFICATION_REQUIRED` and is applied to `POST /api/chat/start` and `POST /api/adverts`. On the client, a root-mounted `TrustGateProvider` exposes `requireTrust(level, run)`: for `level:"auth"` it shows a compact email+password login (+ a register tab reusing the existing `RegisterForm`); for `level:"verified"` it additionally shows a phone-OTP step (the **live** Supabase-native flow `signInWithOtp`→`verifyOtp`→set `profiles.verified_phone`). When the required tier is met, the modal closes and `run` is replayed. The contact-seller button routes through `requireTrust("verified", startChat)` and also maps a server `403 VERIFICATION_REQUIRED` to opening the gate, so the gate and the server guard always agree (server stays authoritative).
+**Architecture:** A small server helper `isViewerVerified` (auth **+** phone-verified, reading `phones.verified` OR `profiles.verified_phone`) gates `POST /api/chat/start` and `POST /api/adverts` with `403 VERIFICATION_REQUIRED`. On the client, a root-mounted `TrustGateProvider` exposes `requireTrust(level, run)`: for `level:"auth"` it shows a compact email+password login (+ a register tab reusing the existing `RegisterForm`); for `level:"verified"` it additionally shows a phone-OTP step. **The phone step uses the project's existing, proven Twilio endpoints `POST /api/phone/request` (sends the SMS, upserts the `phones` row) + `POST /api/phone/verify` (sets `phones.verified=true`)** — NOT Supabase-native `signInWithOtp`. (Decision basis: the one currently-verified user has `phones.verified=true`, which only the Twilio `/api/phone/verify` flow sets; native OTP is unproven here, and the custom endpoints exist precisely because native SMS likely isn't configured. The Twilio endpoints also run under the existing session, avoiding any sign-in/session-swap risk.) When the required tier is met, the modal closes and `run` is replayed. The contact-seller button routes through `requireTrust("verified", startChat)` and also maps a server `403 VERIFICATION_REQUIRED` to re-opening the gate, so the gate and the server guard always agree (server stays authoritative).
 
 **Tech Stack:** Next.js 16 (App Router, `runtime=nodejs` routes), React 19, Supabase (browser client `@/lib/supabaseClient`, server `supabaseServer()`, native phone OTP), Zod, Vitest (jsdom), Tailwind v4 + shadcn `Dialog`, sonner toasts, custom `useI18n()`.
 
@@ -25,7 +25,7 @@
 - `apps/web/src/app/api/chat/start/route.ts`: `const supabase = await supabaseServer(); const { data:{ user } } = await supabase.auth.getUser(); if (!user) return createErrorResponse(ApiErrorCode.UNAUTH, { status: 401 });` then parses `{advert_id?, peer_id}` and is exported as nested `withRateLimit(withRateLimit(baseHandler, {...}), {...})`.
 - `apps/web/src/app/api/adverts/route.ts`: `export async function POST() { const supabase = await supabaseServer(); const { data:{ user } } = await supabase.auth.getUser(); if (!user) return createErrorResponse(ApiErrorCode.UNAUTHENTICATED, { status: 401 }); ... }` (no rate-limit wrapper).
 - `/api/me` verified resolution: reads `profiles.verified_phone` and `phones.verified`.
-- Live phone OTP: `supabase.auth.signInWithOtp({ phone })` → `supabase.auth.verifyOtp({ phone, token, type:"sms" })` → `supabase.from("profiles").update({ verified_phone: true }).eq("id", userId)`.
+- **Twilio phone OTP (the path this plan uses):** `POST /api/phone/request` — body `{ phone }` (E.164, e.g. `+32…`), auth required, **upserts the `phones` row + creates a `phone_otps` row + sends the Twilio SMS**, returns `{ ok:true, data:{} }` (or `500 SMS_SEND_FAIL` if Twilio send fails, `401 UNAUTH` if not signed in). `POST /api/phone/verify` — body `{ code, phone }`, auth required, HMAC-checks the OTP and on success **sets `phones.verified=true`**, returns `{ ok:true, data:{} }` (errors: `OTP_NOT_FOUND`/`OTP_EXPIRED`/`OTP_INVALID` 400, `OTP_LOCKED` 429). Both are rate-limited. Requires `TWILIO_ACCOUNT_SID`/`TWILIO_AUTH_TOKEN`/`TWILIO_FROM` env in prod.
 - Browser client: `import { supabase } from "@/lib/supabaseClient"` (singleton); `supabase.auth.signInWithPassword({ email, password })`.
 - `RegisterForm` (`apps/web/src/app/register/RegisterForm.tsx`) is a standalone client component taking `{ initialLocale }`.
 - Layout nesting: `<I18nProvider><FavoritesProvider><LikesProvider>{…children}</LikesProvider></FavoritesProvider></I18nProvider>` (`apps/web/src/app/layout.tsx`).
@@ -42,8 +42,7 @@
 
 **Interfaces:**
 - Produces: `ApiErrorCode.VERIFICATION_REQUIRED`. And in `requireVerified.ts`:
-  - `isViewerVerified(supabase, userId: string): Promise<boolean>` — true iff `phones.verified === true` OR `profiles.verified_phone === true`.
-  - `requireVerified(req: Request): Promise<{ ok: true; supabase; user } | { ok: false; response: NextResponse }>` — 401 `UNAUTH` if not signed in, 403 `VERIFICATION_REQUIRED` if signed in but not phone-verified, else `{ ok:true, supabase, user }`.
+  - `isViewerVerified(supabase, userId: string): Promise<boolean>` — true iff `phones.verified === true` OR `profiles.verified_phone === true`. (This is the only export consumed by Tasks 2, 3 and the Phase-2c ad page; do NOT add an unused `requireVerified` wrapper.)
 
 - [ ] **Step 1: Add the error code**
 
@@ -56,9 +55,8 @@ In `apps/web/src/lib/apiErrors.ts`, add to the `ApiErrorCode` enum after `RATE_L
 
 ```typescript
 // apps/web/src/lib/auth/__tests__/requireVerified.test.ts
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 
-const getUserMock = vi.fn();
 const tableData: Record<string, { data: unknown; error: unknown }> = {};
 function builder(table: string) {
   const b: Record<string, unknown> = {};
@@ -66,43 +64,33 @@ function builder(table: string) {
   (b as { maybeSingle: unknown }).maybeSingle = async () => tableData[table] ?? { data: null, error: null };
   return b;
 }
-const supabase = { auth: { getUser: getUserMock }, from: (t: string) => builder(t) };
+const supabase = { from: (t: string) => builder(t) } as never;
 
-vi.mock("@/lib/supabaseServer", () => ({ supabaseServer: async () => supabase }));
+const { isViewerVerified } = await import("@/lib/auth/requireVerified");
 
-const { requireVerified, isViewerVerified } = await import("@/lib/auth/requireVerified");
+describe("isViewerVerified", () => {
+  beforeEach(() => { tableData.profiles = { data: null, error: null }; tableData.phones = { data: null, error: null }; });
 
-describe("requireVerified", () => {
-  beforeEach(() => { getUserMock.mockReset(); tableData.profiles = { data: null, error: null }; tableData.phones = { data: null, error: null }; });
-
-  it("401 UNAUTH when not signed in", async () => {
-    getUserMock.mockResolvedValue({ data: { user: null } });
-    const r = await requireVerified(new Request("https://x.test"));
-    expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.response.status).toBe(401);
-  });
-
-  it("403 VERIFICATION_REQUIRED when signed in but not phone-verified", async () => {
-    getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
-    tableData.profiles = { data: { verified_phone: false }, error: null };
-    tableData.phones = { data: { verified: false }, error: null };
-    const r = await requireVerified(new Request("https://x.test"));
-    expect(r.ok).toBe(false);
-    if (!r.ok) { expect(r.response.status).toBe(403); const b = await r.response.json(); expect(b.error).toBe("VERIFICATION_REQUIRED"); }
-  });
-
-  it("ok when profiles.verified_phone is true (native OTP path)", async () => {
-    getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
-    tableData.profiles = { data: { verified_phone: true }, error: null };
-    tableData.phones = { data: { verified: false }, error: null }; // stale row must not mask it
-    const r = await requireVerified(new Request("https://x.test"));
-    expect(r.ok).toBe(true);
-  });
-
-  it("isViewerVerified true when phones.verified is true", async () => {
+  it("true when phones.verified is true", async () => {
     tableData.phones = { data: { verified: true }, error: null };
     tableData.profiles = { data: { verified_phone: false }, error: null };
     expect(await isViewerVerified(supabase, "u1")).toBe(true);
+  });
+
+  it("true when profiles.verified_phone is true even if a stale phones row says false (OR, not ??)", async () => {
+    tableData.phones = { data: { verified: false }, error: null };
+    tableData.profiles = { data: { verified_phone: true }, error: null };
+    expect(await isViewerVerified(supabase, "u1")).toBe(true);
+  });
+
+  it("false when neither signal is true", async () => {
+    tableData.phones = { data: { verified: false }, error: null };
+    tableData.profiles = { data: { verified_phone: false }, error: null };
+    expect(await isViewerVerified(supabase, "u1")).toBe(false);
+  });
+
+  it("false when both rows are missing", async () => {
+    expect(await isViewerVerified(supabase, "u1")).toBe(false);
   });
 });
 ```
@@ -116,14 +104,10 @@ Expected: FAIL — module not found.
 
 ```typescript
 // apps/web/src/lib/auth/requireVerified.ts
-import type { NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { supabaseServer } from "@/lib/supabaseServer";
-import { createErrorResponse, ApiErrorCode } from "@/lib/apiErrors";
 
-type ServerClient = Awaited<ReturnType<typeof supabaseServer>>;
-
-/** True iff the user's phone is verified by EITHER signal (phones.verified OR profiles.verified_phone). */
+/** True iff the user's phone is verified by EITHER signal (phones.verified OR profiles.verified_phone).
+ *  OR — not ?? — so a stale phones.verified=false row can't mask a verified profile, and vice-versa. */
 export async function isViewerVerified(
   supabase: Pick<SupabaseClient, "from">,
   userId: string,
@@ -136,25 +120,9 @@ export async function isViewerVerified(
   const phoneVerified = (phoneRes.data as { verified?: boolean } | null)?.verified === true;
   return profileVerified || phoneVerified;
 }
-
-type RequireVerifiedResult =
-  | { ok: true; supabase: ServerClient; user: { id: string } }
-  | { ok: false; response: NextResponse };
-
-/** Route guard: requires a signed-in, phone-verified user. */
-export async function requireVerified(_req: Request): Promise<RequireVerifiedResult> {
-  const supabase = await supabaseServer();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return { ok: false, response: createErrorResponse(ApiErrorCode.UNAUTH, { status: 401, detail: "Authentication required" }) };
-  }
-  const verified = await isViewerVerified(supabase, user.id);
-  if (!verified) {
-    return { ok: false, response: createErrorResponse(ApiErrorCode.VERIFICATION_REQUIRED, { status: 403, detail: "Phone verification required" }) };
-  }
-  return { ok: true, supabase, user: { id: user.id } };
-}
 ```
+
+(The `403 VERIFICATION_REQUIRED` response itself is built inline by the route handlers in Tasks 2–3, using the `ApiErrorCode.VERIFICATION_REQUIRED` added in Step 1 — there is no `requireVerified` wrapper to keep this minimal and avoid an unused export.)
 
 - [ ] **Step 5: Run the test to verify it passes**
 
@@ -529,7 +497,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 - Modify: `apps/web/src/i18n/locales/{en,ru,nl,fr,de}.json`
 
 **Interfaces:**
-- Consumes: `supabase` browser client. Produces: `<TrustGatePhone userId={string} onVerified={() => void} />` — a two-step phone-verify form replicating the LIVE `/verify` flow: step 1 `supabase.auth.signInWithOtp({ phone })` (after saving the number to `profiles.phone`); step 2 `supabase.auth.verifyOtp({ phone, token, type:"sms" })` then `supabase.from("profiles").update({ verified_phone: true }).eq("id", userId)`; on success calls `onVerified`.
+- Consumes: `apiFetch` (`@/lib/fetcher`) → the proven Twilio endpoints. Produces: `<TrustGatePhone onVerified={() => void} />` — a two-step phone-verify form. Step 1 `POST /api/phone/request { phone }` (sends the Twilio SMS; the endpoint uses the existing session — no `userId` prop needed). Step 2 `POST /api/phone/verify { code, phone }` (sets `phones.verified=true`). Both return `{ ok, data }`; on a successful verify (`response.ok && body.ok`) it calls `onVerified`. The phone must be **E.164** (e.g. `+32…`) — the endpoint's zod schema enforces it; show the `+` hint in the input.
 
 - [ ] **Step 1: Create the component**
 
@@ -539,13 +507,13 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { supabase } from "@/lib/supabaseClient";
+import { apiFetch } from "@/lib/fetcher";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useI18n } from "@/i18n";
 
-export default function TrustGatePhone({ userId, onVerified }: { userId: string; onVerified: () => void }) {
+export default function TrustGatePhone({ onVerified }: { onVerified: () => void }) {
   const { t } = useI18n();
   const tr = (k: string, fb: string) => { const v = t(k); return v === k ? fb : v; };
   const [step, setStep] = useState<"phone" | "code">("phone");
@@ -556,14 +524,19 @@ export default function TrustGatePhone({ userId, onVerified }: { userId: string;
   const sendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     if (pending) return;
-    if (!phone || phone.trim().length < 8) { toast.error(tr("trust.phone_invalid", "Enter a valid phone number.")); return; }
+    if (!phone.trim().startsWith("+") || phone.trim().length < 8) { toast.error(tr("trust.phone_invalid", "Enter a valid phone number with country code (e.g. +32…).")); return; }
     setPending(true);
     try {
-      await supabase.from("profiles").update({ phone: phone.trim() }).eq("id", userId);
-      const { error } = await supabase.auth.signInWithOtp({ phone: phone.trim() });
-      if (error) { toast.error(tr("trust.code_send_error", "Could not send the code.")); return; }
+      const res = await apiFetch("/api/phone/request", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        credentials: "include", body: JSON.stringify({ phone: phone.trim() }),
+      });
+      const body = await res.json().catch(() => ({ ok: false }));
+      if (!res.ok || !body?.ok) { toast.error(tr("trust.code_send_error", "Could not send the code.")); return; }
       toast.success(tr("trust.code_sent", "Code sent."));
       setStep("code");
+    } catch {
+      toast.error(tr("trust.code_send_error", "Could not send the code."));
     } finally {
       setPending(false);
     }
@@ -575,11 +548,16 @@ export default function TrustGatePhone({ userId, onVerified }: { userId: string;
     if (!code || code.trim().length < 4) { toast.error(tr("trust.code_required", "Enter the SMS code.")); return; }
     setPending(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({ phone: phone.trim(), token: code.trim(), type: "sms" });
-      if (error) { toast.error(tr("trust.code_incorrect", "The code is incorrect.")); return; }
-      await supabase.from("profiles").update({ verified_phone: true }).eq("id", userId);
+      const res = await apiFetch("/api/phone/verify", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        credentials: "include", body: JSON.stringify({ code: code.trim(), phone: phone.trim() }),
+      });
+      const body = await res.json().catch(() => ({ ok: false }));
+      if (!res.ok || !body?.ok) { toast.error(tr("trust.code_incorrect", "The code is incorrect.")); return; }
       toast.success(tr("trust.phone_verified", "Phone verified."));
       onVerified();
+    } catch {
+      toast.error(tr("trust.code_incorrect", "The code is incorrect."));
     } finally {
       setPending(false);
     }
@@ -669,7 +647,6 @@ export function TrustGateProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [stage, setStage] = useState<Stage>("login");
   const [level, setLevel] = useState<Level>("auth");
-  const [userId, setUserId] = useState<string | null>(null);
   const pendingRun = useRef<(() => void) | null>(null);
 
   const finish = useCallback(() => {
@@ -685,7 +662,6 @@ export function TrustGateProvider({ children }: { children: ReactNode }) {
     if (met) { run(); return; }
     pendingRun.current = run;
     setLevel(lvl);
-    setUserId(trust.userId);
     setStage(trust.signedIn ? "phone" : "login");
     setOpen(true);
   }, []);
@@ -693,7 +669,6 @@ export function TrustGateProvider({ children }: { children: ReactNode }) {
   // After sign-in: re-evaluate. If level is "verified" and phone still unverified, advance to phone; else finish.
   const handleSignedIn = useCallback(async () => {
     const trust = await fetchViewerTrust();
-    setUserId(trust.userId);
     if (level === "verified" && !(trust.signedIn && trust.verifiedPhone)) {
       setStage("phone");
     } else {
@@ -720,9 +695,9 @@ export function TrustGateProvider({ children }: { children: ReactNode }) {
           </DialogHeader>
           {stage === "login" ? (
             <TrustGateLogin locale={locale} onSignedIn={handleSignedIn} />
-          ) : userId ? (
-            <TrustGatePhone userId={userId} onVerified={finish} />
-          ) : null}
+          ) : (
+            <TrustGatePhone onVerified={finish} />
+          )}
         </DialogContent>
       </Dialog>
     </TrustGateContext.Provider>
@@ -852,18 +827,26 @@ curl -s -o /dev/null -w "%{http_code}\n" -X POST https://www.lyvox.be/api/advert
 # A listing page still renders for anonymous viewers (browse stays open)
 curl -s -o /dev/null -w "%{http_code}\n" https://www.lyvox.be/
 ```
-Expected: anonymous `POST /api/chat/start` → `401` (and a signed-in-but-unverified user would get `403 VERIFICATION_REQUIRED`); anonymous `POST /api/adverts` → `401`; home → `200`. Then in a browser: as a signed-out user, clicking "Message seller" opens the Trust Gate (login → phone); as a signed-in-unverified user it opens at the phone step; verifying then opens the chat. Confirm the gate's login + phone steps render and the SMS OTP arrives.
+Expected: anonymous `POST /api/chat/start` → `401` (a signed-in-but-unverified user gets `403 VERIFICATION_REQUIRED`); anonymous `POST /api/adverts` → `401`; home → `200`.
 
-- [ ] **Step 4: Done.** Phase 2c (hide seller identity from unverified viewers) follows as its own plan.
+- [ ] **Step 4: REAL end-to-end OTP check (the dependency the whole phase rests on — do NOT skip)**
+
+The curls above only prove the gate *blocks*; they never complete a verification. The entire phase is dead if the Twilio SMS path doesn't actually deliver. In a browser on www.lyvox.be, signed in as a **phone-unverified** account (e.g. register a fresh test account, confirm email, sign in):
+1. Open a listing you don't own → click **"Message seller"** → the Trust Gate opens at the **phone** step (you're signed in but unverified).
+2. Enter a real phone number in **E.164** (`+32…`) → "Send code" → **confirm an SMS actually arrives** (this exercises `/api/phone/request` → Twilio). If it returns `SMS_SEND_FAIL`/no SMS, STOP: Twilio is not live in prod — the verified tier cannot be shipped; surface this to the user before relying on it.
+3. Enter the code → "Verify" → the gate closes and the **chat opens** (the replay of the gated action now succeeds because the server guard sees `phones.verified=true`).
+Also confirm: a signed-**out** user clicking "Message seller" opens the gate at the **login** step first, then advances to phone.
+
+- [ ] **Step 5: Done.** Phase 2c (hide seller identity from unverified viewers) follows as its own plan.
 
 ---
 
 ## Self-Review
 
 **1. Spec coverage (Phase 2b = the enforcement + gate half of spec Section F):**
-- Server guard `requireVerified` (the real source of truth) + `VERIFICATION_REQUIRED` → Task 1. ✅
-- Verified enforcement on contact + publish → Tasks 2, 3. ✅
-- Trust Gate: auth tier (login + register) → Task 5; verified tier (phone OTP, live Supabase-native flow) → Task 6; provider/hook + replay + mounted at root → Tasks 4, 7. ✅
+- Server `isViewerVerified` (the real source of truth, OR not `??`) + `VERIFICATION_REQUIRED` → Task 1. ✅
+- Verified enforcement on contact + publish (403 built inline from `isViewerVerified`) → Tasks 2, 3. ✅
+- Trust Gate: auth tier (login + register) → Task 5; verified tier (phone OTP via the **proven Twilio `/api/phone/*` endpoints**, not native OTP — decided after confirming the one verified user came through Twilio + real Twilio creds present) → Task 6; provider/hook + replay + mounted at root → Tasks 4, 7. ✅
 - Contact routed through the gate (and 403 mapped to the gate) → Task 8. ✅
 - Deferred to **Phase 2c** (correctly out of scope here): hiding seller identity from unverified viewers (needs the same `isViewerVerified` on the server page — built here, reused there). Likes/favorites keep auth-only (not re-gated through the modal in this phase).
 
