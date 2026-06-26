@@ -20,7 +20,7 @@ export const CAPABILITY_ENV: Record<Capability, string> = {
 
 export function isCapabilityEnabled(
   cap: Capability,
-  env: NodeJS.ProcessEnv = process.env,
+  env: Record<string, string | undefined> = process.env,
 ): boolean {
   return env[CAPABILITY_ENV[cap]] === "true";
 }

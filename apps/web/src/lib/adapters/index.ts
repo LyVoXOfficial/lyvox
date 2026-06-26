@@ -8,17 +8,17 @@ const disabledIdentity: IdentityAdapter = { verify: async () => ({ status: "unsu
 const disabledOtp: OtpAdapter = { send: async () => ({ status: "unsupported" }) };
 const disabledPayments: PaymentsAdapter = { createPayout: async () => ({ status: "unsupported" }) };
 
-function gated<T>(cap: Capability, adapter: T, env: NodeJS.ProcessEnv): T | null {
+function gated<T>(cap: Capability, adapter: T, env: Record<string, string | undefined>): T | null {
   return isCapabilityEnabled(cap, env) ? adapter : null;
 }
 
-export function getIdentityAdapter(env: NodeJS.ProcessEnv = process.env): IdentityAdapter | null {
+export function getIdentityAdapter(env: Record<string, string | undefined> = process.env): IdentityAdapter | null {
   return gated("stripe_identity", disabledIdentity, env);
 }
-export function getOtpAdapter(env: NodeJS.ProcessEnv = process.env): OtpAdapter | null {
+export function getOtpAdapter(env: Record<string, string | undefined> = process.env): OtpAdapter | null {
   return gated("whatsapp_otp", disabledOtp, env);
 }
-export function getPaymentsAdapter(env: NodeJS.ProcessEnv = process.env): PaymentsAdapter | null {
+export function getPaymentsAdapter(env: Record<string, string | undefined> = process.env): PaymentsAdapter | null {
   return gated("payments_escrow", disabledPayments, env);
 }
 
