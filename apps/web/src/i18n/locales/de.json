@@ -1170,5 +1170,14 @@
     "recently_viewed": "Zuletzt angesehen",
     "load_error": "Weitere Anzeigen konnten nicht geladen werden.",
     "end_of_feed": "Sie haben das Ende erreicht."
+  },
+  "trust": {
+    "tab_login": "Anmelden",
+    "tab_register": "Konto erstellen",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "signing_in": "Anmeldung…",
+    "login_failed": "Anmeldung fehlgeschlagen. E-Mail und Passwort prüfen.",
+    "signed_in": "Angemeldet."
   }
 }

@@ -1170,5 +1170,14 @@
     "recently_viewed": "Recently viewed",
     "load_error": "Couldn't load more listings.",
     "end_of_feed": "You've reached the end."
+  },
+  "trust": {
+    "tab_login": "Sign in",
+    "tab_register": "Create account",
+    "email": "Email",
+    "password": "Password",
+    "signing_in": "Signing in…",
+    "login_failed": "Sign in failed. Check your email and password.",
+    "signed_in": "Signed in."
   }
 }

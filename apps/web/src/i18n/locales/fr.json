@@ -1170,5 +1170,14 @@
     "recently_viewed": "Vus récemment",
     "load_error": "Impossible de charger plus d'annonces.",
     "end_of_feed": "Vous êtes arrivé à la fin."
+  },
+  "trust": {
+    "tab_login": "Se connecter",
+    "tab_register": "Créer un compte",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "signing_in": "Connexion…",
+    "login_failed": "Échec de la connexion. Vérifiez l'e-mail et le mot de passe.",
+    "signed_in": "Connecté."
   }
 }
