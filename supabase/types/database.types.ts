@@ -93,6 +93,39 @@ export type Database = {
           },
         ]
       }
+      saved_searches: {
+        Row: {
+          alert_enabled: boolean
+          created_at: string
+          filters: Json
+          id: string
+          last_seen_at: string
+          name: string
+          query: string | null
+          user_id: string
+        }
+        Insert: {
+          alert_enabled?: boolean
+          created_at?: string
+          filters?: Json
+          id?: string
+          last_seen_at?: string
+          name: string
+          query?: string | null
+          user_id: string
+        }
+        Update: {
+          alert_enabled?: boolean
+          created_at?: string
+          filters?: Json
+          id?: string
+          last_seen_at?: string
+          name?: string
+          query?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       adverts: {
         Row: {
           ai_moderation_reason: string | null
