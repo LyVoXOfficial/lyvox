@@ -148,3 +148,7 @@ across these keys; ru is impersonal-consistent, fr uniformly "vous", de uniforml
 The whole `discover.*` namespace (incl. `discover.drop.*` and `discover.offer_template`) — ru native,
 nl/fr/de machine-drafted. Review against `en.json`. `discover.offer_template` is a user-sent chat
 message, so its tone matters most.
+
+### saved (16) — added 2026-06-26 with Phase 4 saved searches
+The whole `saved.*` namespace — ru native, nl/fr/de machine-drafted. Review against `en.json`.
+`saved.new_count` carries a `{count}` placeholder that must stay verbatim.
