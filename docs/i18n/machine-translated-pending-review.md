@@ -143,3 +143,8 @@ across these keys; ru is impersonal-consistent, fr uniformly "vous", de uniforml
 - `search.emptyBrowse`
 - `search.emptyTitle`
 - `search.emptyWithFilters`
+
+### discover (23) — added 2026-06-26 with Phase 3 swipe mode
+The whole `discover.*` namespace (incl. `discover.drop.*` and `discover.offer_template`) — ru native,
+nl/fr/de machine-drafted. Review against `en.json`. `discover.offer_template` is a user-sent chat
+message, so its tone matters most.
