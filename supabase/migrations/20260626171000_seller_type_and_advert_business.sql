@@ -15,7 +15,8 @@ declare conname text;
 begin
   select c.conname into conname from pg_constraint c
    where c.conrelid='public.adverts'::regclass and c.contype='c'
-     and pg_get_constraintdef(c.oid) ilike '%status%';
+     and pg_get_constraintdef(c.oid) ~* '\ystatus\y'
+     and pg_get_constraintdef(c.oid) not ilike '%moderation%';
   if conname is not null then
     execute format('alter table public.adverts drop constraint %I', conname);
   end if;
