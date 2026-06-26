@@ -136,7 +136,7 @@ const baseHandler = async (req: Request) => {
     const authToken = Buffer.from(
       `${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`,
     ).toString("base64");
-    await fetch(
+    const twilioResponse = await fetch(
       `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`,
       {
         method: "POST",
@@ -151,6 +151,21 @@ const baseHandler = async (req: Request) => {
         }),
       },
     );
+    // fetch() only rejects on a network failure. A Twilio rejection (trial-account
+    // restriction, non-SMS-capable sender, geo-permissions for the destination) comes back
+    // as a non-2xx response with an error body. Without this check the route returned success
+    // while no SMS was ever delivered — the caller saw "code sent" and waited for nothing.
+    if (!twilioResponse.ok) {
+      const twilioError = (await twilioResponse.json().catch(() => null)) as
+        | { code?: number; message?: string }
+        | null;
+      console.error("TWILIO_SEND_FAILED", {
+        httpStatus: twilioResponse.status,
+        twilioCode: twilioError?.code,
+        twilioMessage: twilioError?.message,
+      });
+      return createErrorResponse(ApiErrorCode.SMS_SEND_FAIL, { status: 502 });
+    }
   } catch (error) {
     console.error("TWILIO_SEND_ERROR", error);
     return createErrorResponse(ApiErrorCode.SMS_SEND_FAIL, { status: 500 });

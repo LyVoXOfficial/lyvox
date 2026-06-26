@@ -107,7 +107,7 @@ export function VerifyPhoneClient({ userId, currentPhone }: Props) {
             id="verification-code"
             type="text"
             inputMode="numeric"
-            placeholder="123456"
+            placeholder="XXXXXX"
             value={verificationCode}
             onChange={(event) => setVerificationCode(event.target.value)}
             maxLength={6}

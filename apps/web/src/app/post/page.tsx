@@ -1,4 +1,5 @@
 import { supabaseServer } from "@/lib/supabaseServer";
+import { isViewerVerified } from "@/lib/auth/requireVerified";
 import { getI18nProps } from "@/i18n/server";
 import type { Category } from "@/lib/types";
 import { PostForm } from "./PostForm";
@@ -116,7 +117,10 @@ export default async function PostPage({
     .maybeSingle();
 
   const verifiedEmail = profile?.verified_email ?? false;
-  const verifiedPhone = profile?.verified_phone ?? false;
+  // Gate on EITHER phone signal (phones.verified OR profiles.verified_phone), matching the
+  // API-level guard. Verifying through the on-page TrustGate sets only phones.verified, so reading
+  // profiles.verified_phone alone would leave a verified user blocked on this page.
+  const verifiedPhone = await isViewerVerified(supabase, user.id);
 
   // Redirect to verification page if not verified
   if (!verifiedEmail || !verifiedPhone) {

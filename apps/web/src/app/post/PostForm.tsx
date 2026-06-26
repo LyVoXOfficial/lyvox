@@ -2363,7 +2363,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
               }}
               inputMode="numeric"
               autoComplete="one-time-code"
-              placeholder="123456"
+              placeholder="XXXXXX"
               maxLength={6}
               disabled={phoneVerificationStatus === "verifying"}
             />
