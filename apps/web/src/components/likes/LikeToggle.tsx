@@ -30,13 +30,19 @@ export default function LikeToggle({ advertId, initialCount = 0, className, vari
         if (result.error === "unauthorized") toast.info(tr("likes.login_required", "Sign in to like listings"));
         else toast.error(tr("likes.failed", "Could not update like"));
       }
-    } finally { setPending(false); }
+    } catch {
+      setCount((c) => Math.max(0, c + (wasLiked ? 1 : -1)));
+      toast.error(tr("likes.failed", "Could not update like"));
+    } finally {
+      setPending(false);
+    }
   };
 
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={pending || isLoading}
       aria-pressed={liked}
       aria-label={liked ? tr("likes.remove", "Remove like") : tr("likes.add", "Like")}
       className={cn(
