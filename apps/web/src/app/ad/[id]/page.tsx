@@ -529,7 +529,6 @@ export default async function AdvertPage({ params }: PageProps) {
       : undefined,
     seller: {
       "@type": "Organization",
-      "@id": `${BASE_URL}/user/${data.seller.id}`,
       name: "LyVoX seller",
     },
     itemCondition: "https://schema.org/UsedCondition",
