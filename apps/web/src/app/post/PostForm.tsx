@@ -1149,6 +1149,12 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         if (requestResult.error === "PHONE_ALREADY_REGISTERED") {
           throw new Error(t("trust.phone_already_registered"));
         }
+        if (requestResult.error === "PHONE_NOT_BELGIAN_MOBILE") {
+          throw new Error(t("trust.phone_not_belgian_mobile"));
+        }
+        if (requestResult.error === "PHONE_LINE_TYPE_BLOCKED") {
+          throw new Error(t("trust.phone_line_type_blocked"));
+        }
         throw new Error(requestResult.message || requestResult.error || "Failed to send OTP");
       }
 
@@ -1191,6 +1197,12 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
       if (!verifyResult.ok) {
         if (verifyResult.error === "PHONE_ALREADY_REGISTERED") {
           throw new Error(t("trust.phone_already_registered"));
+        }
+        if (verifyResult.error === "PHONE_NOT_BELGIAN_MOBILE") {
+          throw new Error(t("trust.phone_not_belgian_mobile"));
+        }
+        if (verifyResult.error === "PHONE_LINE_TYPE_BLOCKED") {
+          throw new Error(t("trust.phone_line_type_blocked"));
         }
         throw new Error(verifyResult.message || verifyResult.error || "Invalid verification code");
       }

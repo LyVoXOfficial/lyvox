@@ -1542,6 +1542,8 @@
     "code_incorrect": "De code is onjuist.",
     "phone_verified": "Telefoon geverifieerd.",
     "phone_already_registered": "Dit telefoonnummer is al gekoppeld aan een ander account.",
+    "phone_not_belgian_mobile": "Voer een geldig Belgisch mobiel nummer in (+32 4xx xx xx xx).",
+    "phone_line_type_blocked": "Virtuele of wegwerpnummers worden niet geaccepteerd. Gebruik een echt Belgisch mobiel nummer.",
     "gate_title_auth": "Log in om door te gaan",
     "gate_body_auth": "Maak een gratis account of log in om door te gaan.",
     "gate_title_phone": "Verifieer je telefoon",

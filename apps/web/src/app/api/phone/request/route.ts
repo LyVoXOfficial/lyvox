@@ -11,6 +11,7 @@ import {
 } from "@/lib/apiErrors";
 import { validateRequest } from "@/lib/validations";
 import { requestOtpSchema } from "@/lib/validations/phone";
+import { parseBelgianMobile } from "@/lib/validations/belgianPhone";
 import type { TablesInsert } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
@@ -72,6 +73,16 @@ const baseHandler = async (req: Request) => {
     return createErrorResponse(ApiErrorCode.UNAUTH, { status: 401 });
   }
 
+  // Belgium-only policy (Layer A): accept only valid Belgian MOBILE numbers and
+  // normalize national / 0032 / +32 input to canonical E.164. Every downstream
+  // operation uses this normalized `e164` so the verify route (which normalizes
+  // identically) matches the stored value.
+  const belgianResult = parseBelgianMobile(phone);
+  if (!belgianResult.ok) {
+    return createErrorResponse(ApiErrorCode.PHONE_NOT_BELGIAN_MOBILE, { status: 400 });
+  }
+  const e164 = belgianResult.e164;
+
   // Best-effort pre-check: the e164 column is globally UNIQUE, so at most one
   // phones row can own a given number. If that row belongs to ANOTHER user,
   // reject early with a dedicated, localizable error — before any Twilio lookup,
@@ -85,7 +96,7 @@ const baseHandler = async (req: Request) => {
     const existingPhone = await service
       .from("phones")
       .select("user_id")
-      .eq("e164", phone.trim())
+      .eq("e164", e164)
       .maybeSingle();
     if (
       !existingPhone.error &&
@@ -98,25 +109,44 @@ const baseHandler = async (req: Request) => {
     // Pre-check is best-effort; fall through to the constraint-backed upsert.
   }
 
+  // Layer B: Twilio Lookup v2 line-type gate. Hard-block VoIP / non-fixed-VoIP
+  // (disposable / "receive-SMS-online") numbers BEFORE issuing an OTP or sending
+  // SMS. FAIL-OPEN on everything else: if the call throws, returns non-ok, or has
+  // no line_type_intelligence.type, we log and continue — a Twilio outage must not
+  // lock out legitimate users (Layer A already filters hard). The lookup json is
+  // still stored in phones.lookup as before.
   let lookup: Record<string, unknown> | null = null;
   if (process.env.TWILIO_LOOKUP_URL && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
     try {
-      const lookupUrl = `${process.env.TWILIO_LOOKUP_URL}/${encodeURIComponent(phone)}?Type=carrier`;
+      const lookupUrl = `${process.env.TWILIO_LOOKUP_URL}/${encodeURIComponent(e164)}?Fields=line_type_intelligence`;
       const authToken = Buffer.from(
         `${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`,
       ).toString("base64");
       const response = await fetch(lookupUrl, {
         headers: { Authorization: `Basic ${authToken}` },
       });
-      lookup = (await response.json()) as Record<string, unknown>;
-    } catch {
-      // Lookup failures should not block OTP issuance.
+      if (response.ok) {
+        const lookupData = (await response.json()) as Record<string, unknown>;
+        lookup = lookupData;
+        const lineType = (
+          lookupData?.line_type_intelligence as Record<string, unknown> | undefined
+        )?.type as string | undefined;
+        const normalizedType = lineType?.toLowerCase();
+        if (normalizedType === "voip" || normalizedType === "nonfixedvoip") {
+          return createErrorResponse(ApiErrorCode.PHONE_LINE_TYPE_BLOCKED, { status: 403 });
+        }
+      } else {
+        console.warn("TWILIO_LOOKUP_NON_OK", { httpStatus: response.status });
+      }
+    } catch (error) {
+      // Fail-open: network / parse error must not block OTP issuance.
+      console.warn("TWILIO_LOOKUP_FAILED_FALLBACK", error);
     }
   }
 
   const phoneRecord: TablesInsert<"phones"> = {
     user_id: user.id,
-    e164: phone.trim(),
+    e164: e164,
     verified: false,
     lookup: lookup as TablesInsert<"phones">["lookup"],
   };
@@ -137,7 +167,7 @@ const baseHandler = async (req: Request) => {
     .from("phone_otps")
     .update({ used: true })
     .eq("user_id", user.id)
-    .eq("e164", phone)
+    .eq("e164", e164)
     .eq("used", false);
   if (deactivatePrevious.error) {
     return handleSupabaseError(deactivatePrevious.error, ApiErrorCode.OTP_CLEANUP_FAILED);
@@ -151,7 +181,7 @@ const baseHandler = async (req: Request) => {
 
   const otpInsert: TablesInsert<"phone_otps"> = {
     user_id: user.id,
-    e164: phone,
+    e164: e164,
     code_hash: codeHash,
     code_salt: salt,
     code_last_four: codeLastFour,
@@ -179,7 +209,7 @@ const baseHandler = async (req: Request) => {
         },
         body: new URLSearchParams({
           From: process.env.TWILIO_FROM ?? "",
-          To: phone,
+          To: e164,
           Body: `LyVoX: ваш код подтверждения ${code}. Срок действия 10 минут.`,
         }),
       },
@@ -205,7 +235,7 @@ const baseHandler = async (req: Request) => {
   }
 
   const logDetails = {
-    e164: phone,
+    e164: e164,
     lookup,
     otp_last_four: codeLastFour,
   } as TablesInsert<"logs">["details"];

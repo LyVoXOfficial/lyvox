@@ -1,18 +1,19 @@
 import { z } from "zod";
 
 /**
- * E.164 phone number pattern: + followed by 8-15 digits
- */
-const e164Pattern = /^\+\d{8,15}$/;
-
-/**
  * Schema for requesting an OTP (POST /api/phone/request)
+ *
+ * The phone field is accepted as a loose, trimmed string here: national
+ * (0470…), 0032… and +32… forms are all valid input. The strict Belgian-mobile
+ * validation + canonical E.164 normalization happens in the route handlers via
+ * parseBelgianMobile(), which is the single source of truth.
  */
 export const requestOtpSchema = z.object({
   phone: z
     .string()
     .trim()
-    .regex(e164Pattern, "Phone must be in E.164 format (e.g., +32470123456)"),
+    .min(6, "Phone number too short")
+    .max(20, "Phone number too long"),
 });
 
 export type RequestOtpInput = z.infer<typeof requestOtpSchema>;
@@ -24,8 +25,9 @@ export const verifyOtpSchema = z.object({
   phone: z
     .string()
     .trim()
-    .regex(e164Pattern, "Phone must be in E.164 format (e.g., +32470123456)"),
-  
+    .min(6, "Phone number too short")
+    .max(20, "Phone number too long"),
+
   code: z
     .string()
     .trim()

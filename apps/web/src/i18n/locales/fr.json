@@ -1542,6 +1542,8 @@
     "code_incorrect": "Le code est incorrect.",
     "phone_verified": "Téléphone vérifié.",
     "phone_already_registered": "Ce numéro de téléphone est déjà lié à un autre compte.",
+    "phone_not_belgian_mobile": "Veuillez entrer un numéro de mobile belge valide (+32 4xx xx xx xx).",
+    "phone_line_type_blocked": "Les numéros virtuels ou jetables ne sont pas acceptés. Utilisez un vrai numéro de mobile belge.",
     "gate_title_auth": "Connectez-vous pour continuer",
     "gate_body_auth": "Créez un compte gratuit ou connectez-vous pour continuer.",
     "gate_title_phone": "Vérifiez votre téléphone",

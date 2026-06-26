@@ -10,6 +10,7 @@ import {
 } from "@/lib/apiErrors";
 import { validateRequest } from "@/lib/validations";
 import { verifyOtpSchema } from "@/lib/validations/phone";
+import { parseBelgianMobile } from "@/lib/validations/belgianPhone";
 import type { Tables, TablesInsert, TablesUpdate } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
@@ -73,11 +74,19 @@ const baseHandler = async (req: Request) => {
     return createErrorResponse(ApiErrorCode.UNAUTH, { status: 401 });
   }
 
+  // Belgium-only policy (Layer A): normalize identically to the request route so
+  // the e164 we query matches the one stored when the OTP was issued.
+  const belgianResult = parseBelgianMobile(phone);
+  if (!belgianResult.ok) {
+    return createErrorResponse(ApiErrorCode.PHONE_NOT_BELGIAN_MOBILE, { status: 400 });
+  }
+  const e164 = belgianResult.e164;
+
   const { data: rows, error } = await supabase
     .from("phone_otps")
     .select("*")
     .eq("user_id", user.id)
-    .eq("e164", phone.trim())
+    .eq("e164", e164)
     .eq("used", false)
     .order("created_at", { ascending: false })
     .limit(1);
@@ -126,7 +135,7 @@ const baseHandler = async (req: Request) => {
   const logEntry: TablesInsert<"logs"> = {
     user_id: user.id,
     action: "phone_verify",
-    details: { e164: phone.trim(), otp_last_four: otp.code_last_four },
+    details: { e164: e164, otp_last_four: otp.code_last_four },
   };
   const { error: logError } = await supabase.from("logs").insert(logEntry);
   if (logError) {
