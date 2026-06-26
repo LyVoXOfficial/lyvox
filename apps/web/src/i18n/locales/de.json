@@ -1574,6 +1574,8 @@
       "under_50": "Unter 50 €",
       "verified": "Verifizierte Verkäufer",
       "cheapest": "Günstigste"
-    }
+    },
+    "error_title": "Etwas ist schiefgelaufen",
+    "error_body": "Weitere Anzeigen konnten nicht geladen werden."
   }
 }

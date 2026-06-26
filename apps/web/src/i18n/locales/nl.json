@@ -1574,6 +1574,8 @@
       "under_50": "Onder €50",
       "verified": "Geverifieerde verkopers",
       "cheapest": "Goedkoopst"
-    }
+    },
+    "error_title": "Er ging iets mis",
+    "error_body": "We konden geen zoekertjes laden."
   }
 }

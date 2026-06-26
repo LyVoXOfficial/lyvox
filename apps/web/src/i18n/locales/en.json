@@ -1574,6 +1574,8 @@
       "under_50": "Under €50",
       "verified": "Verified sellers",
       "cheapest": "Cheapest"
-    }
+    },
+    "error_title": "Something went wrong",
+    "error_body": "We couldn't load more listings."
   }
 }

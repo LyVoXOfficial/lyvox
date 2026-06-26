@@ -76,7 +76,7 @@ export default function SwipeDeck({ initial, drops }: { initial: DeckCard[]; dro
     try {
       const next = await fetchDropPage(activeDrop, page);
       const fresh = filterUnseen(next);
-      if (next.length === 0) setDone(true);
+      if (next.length < PAGE_SIZE) setDone(true); // partial/empty page = end of catalog
       setPage((p) => p + 1);
       setQueue((q) => {
         const have = new Set(q.map((c) => c.id));
@@ -278,9 +278,11 @@ export default function SwipeDeck({ initial, drops }: { initial: DeckCard[]; dro
       >
         {isEmpty ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border bg-card/60 p-6 text-center">
-            <h2 className="text-lg font-semibold">{t("discover.empty_title")}</h2>
+            <h2 className="text-lg font-semibold">
+              {error ? t("discover.error_title") : t("discover.empty_title")}
+            </h2>
             <p className="text-sm text-muted-foreground">
-              {error ? t("discover.empty_body") : t("discover.empty_body")}
+              {error ? t("discover.error_body") : t("discover.empty_body")}
             </p>
             {error ? (
               <Button onClick={() => void loadMore()} variant="outline">
