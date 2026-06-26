@@ -44,13 +44,13 @@ describe("/api/saved-searches list+create", () => {
     expect((await POST(jsonReq({ name: "x", filters: {} }))).status).toBe(401);
   });
 
-  it("POST 400 when at the 50 cap", async () => {
+  it("POST 409 when at the 50 cap", async () => {
     getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
     fromMock.mockImplementation(() => ({
       select: () => ({ eq: async () => ({ count: 50, error: null }) }),
     }));
     const res = await POST(jsonReq({ name: "x", filters: {} }));
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(409);
     expect((await res.json()).error).toBeTruthy();
   });
 

@@ -29,6 +29,22 @@ const createLimiter = createRateLimiter({ limit: 30, windowSec: 60, prefix: "sav
 
 const SAVED_CAP = 50;
 const NEW_COUNT_SCAN = 100;
+const NEW_COUNT_CONCURRENCY = 5;
+
+// Bounded-concurrency map — caps how many search_adverts scans run at once when computing
+// new_count for the list (avoids a 50-wide RPC fan-out on a busy account).
+async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const out: R[] = new Array(items.length);
+  let cursor = 0;
+  const worker = async () => {
+    while (cursor < items.length) {
+      const idx = cursor++;
+      out[idx] = await fn(items[idx]);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return out;
+}
 
 const filtersSchema = z.object({
   category_id: z.string().uuid().nullish(),
@@ -86,12 +102,10 @@ async function listSaved(request: Request) {
     .order("created_at", { ascending: false });
   if (error) return handleSupabaseError(error, ApiErrorCode.FETCH_FAILED);
 
-  const items = await Promise.all(
-    (data ?? []).map(async (row) => {
-      const nc = await computeNewCount(supabase, (row.filters ?? {}) as SavedFilters, row.query ?? null, row.last_seen_at);
-      return { ...row, new_count: nc.count, new_count_capped: nc.capped };
-    }),
-  );
+  const items = await mapWithConcurrency(data ?? [], NEW_COUNT_CONCURRENCY, async (row) => {
+    const nc = await computeNewCount(supabase, (row.filters ?? {}) as SavedFilters, row.query ?? null, row.last_seen_at);
+    return { ...row, new_count: nc.count, new_count_capped: nc.capped };
+  });
   return createSuccessResponse({ items, total: items.length });
 }
 
@@ -114,7 +128,8 @@ async function createSaved(request: Request) {
     .eq("user_id", user.id);
   if (countError) return handleSupabaseError(countError, ApiErrorCode.FETCH_FAILED);
   if ((count ?? 0) >= SAVED_CAP) {
-    return createErrorResponse(ApiErrorCode.BAD_INPUT, { status: 400, detail: "Saved search limit reached" });
+    // 409 (distinct from a 400 validation error) so the client can show the cap message specifically.
+    return createErrorResponse(ApiErrorCode.BAD_INPUT, { status: 409, detail: "Saved search limit reached" });
   }
 
   const { data, error } = await supabase

@@ -15,6 +15,7 @@ type Row = {
   filters: SavedSearchFilters;
   alert_enabled?: boolean;
   new_count?: number;
+  new_count_capped?: boolean;
   local?: boolean;
 };
 
@@ -110,7 +111,7 @@ export default function SavedSearchesClient() {
                     <span className="truncate font-semibold">{r.name}</span>
                     {r.new_count ? (
                       <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                        {t("saved.new_count", { count: r.new_count })}
+                        {t("saved.new_count", { count: r.new_count_capped ? `${r.new_count}+` : r.new_count })}
                       </span>
                     ) : null}
                   </div>

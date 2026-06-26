@@ -35,7 +35,7 @@ export default function SaveSearchButton({
         toast(t("saved.signin_to_alert"));
         return;
       }
-      if (res.status === 400) {
+      if (res.status === 409) {
         toast.error(t("saved.cap_reached"));
         return;
       }
