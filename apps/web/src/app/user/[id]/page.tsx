@@ -247,6 +247,12 @@ export default async function PublicProfilePage({
   const avatarSeed = canSeeIdentity && display_name ? display_name : "User";
   const avatarInitial = canSeeIdentity && display_name ? display_name.charAt(0).toUpperCase() : "U";
 
+  // Hide review authors' identities from unverified viewers too (same verified-only model as the
+  // profile owner). Redact at the data boundary — names must not reach the client component's HTML.
+  const displayReviews = canSeeIdentity
+    ? reviews
+    : reviews.map((r) => ({ ...r, author: r.author ? { ...r.author, display_name: null } : null }));
+
   return (
     <main className="container mx-auto max-w-5xl space-y-8 p-4 md:p-8">
       {/* Profile Header */}
@@ -358,7 +364,7 @@ export default async function PublicProfilePage({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ProfileReviewsList reviews={reviews} />
+                <ProfileReviewsList reviews={displayReviews} />
               </CardContent>
             </Card>
           )}
