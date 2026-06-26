@@ -67,6 +67,32 @@ export type Database = {
           },
         ]
       }
+      advert_likes: {
+        Row: {
+          advert_id: string
+          created_at: string | null
+          user_id: string
+        }
+        Insert: {
+          advert_id: string
+          created_at?: string | null
+          user_id: string
+        }
+        Update: {
+          advert_id?: string
+          created_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advert_likes_advert_id_fkey"
+            columns: ["advert_id"]
+            isOneToOne: false
+            referencedRelation: "adverts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       adverts: {
         Row: {
           ai_moderation_reason: string | null
@@ -3192,6 +3218,10 @@ export type Database = {
       }
       geomfromewkt: { Args: { "": string }; Returns: unknown }
       get_advert_favorite_count: {
+        Args: { advert_id_param: string }
+        Returns: number
+      }
+      get_advert_like_count: {
         Args: { advert_id_param: string }
         Returns: number
       }
