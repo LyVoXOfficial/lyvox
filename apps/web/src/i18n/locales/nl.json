@@ -1195,5 +1195,11 @@
     "gate_body_auth": "Maak een gratis account of log in om door te gaan.",
     "gate_title_phone": "Verifieer je telefoon",
     "gate_body_phone": "Bevestig je telefoonnummer om verkopers te contacteren en te plaatsen."
+  },
+  "seller_gate": {
+    "title": "Verifieer om de verkoper te zien",
+    "body": "Bevestig je telefoonnummer om het profiel van de verkoper te zien en contact op te nemen. Zo blijft de marktplaats veilig.",
+    "cta": "Telefoon verifiëren",
+    "name_hidden": "Alleen geverifieerde gebruikers"
   }
 }

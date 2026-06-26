@@ -1195,5 +1195,11 @@
     "gate_body_auth": "Créez un compte gratuit ou connectez-vous pour continuer.",
     "gate_title_phone": "Vérifiez votre téléphone",
     "gate_body_phone": "Confirmez votre numéro pour contacter les vendeurs et publier des annonces."
+  },
+  "seller_gate": {
+    "title": "Vérifiez pour voir le vendeur",
+    "body": "Confirmez votre numéro pour voir le profil du vendeur et le contacter. Cela protège la place de marché.",
+    "cta": "Vérifier mon téléphone",
+    "name_hidden": "Utilisateurs vérifiés uniquement"
   }
 }

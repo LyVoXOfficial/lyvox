@@ -1195,5 +1195,11 @@
     "gate_body_auth": "Create a free account or sign in to continue.",
     "gate_title_phone": "Verify your phone",
     "gate_body_phone": "Confirm your phone number to contact sellers and publish listings."
+  },
+  "seller_gate": {
+    "title": "Verify to see the seller",
+    "body": "Confirm your phone number to view the seller's profile and contact them. It keeps the marketplace safe for everyone.",
+    "cta": "Verify my phone",
+    "name_hidden": "Verified users only"
   }
 }

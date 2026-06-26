@@ -1195,5 +1195,11 @@
     "gate_body_auth": "Erstellen Sie ein kostenloses Konto oder melden Sie sich an.",
     "gate_title_phone": "Telefon bestätigen",
     "gate_body_phone": "Bestätigen Sie Ihre Nummer, um Verkäufer zu kontaktieren und zu veröffentlichen."
+  },
+  "seller_gate": {
+    "title": "Bestätigen, um den Verkäufer zu sehen",
+    "body": "Bestätigen Sie Ihre Telefonnummer, um das Verkäuferprofil zu sehen und Kontakt aufzunehmen. Das schützt den Marktplatz.",
+    "cta": "Telefon bestätigen",
+    "name_hidden": "Nur verifizierte Nutzer"
   }
 }
