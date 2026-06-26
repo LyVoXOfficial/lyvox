@@ -1594,6 +1594,8 @@
     "deleted_toast": "Gespeicherte Suche gelöscht",
     "unnamed": "Gespeicherte Suche",
     "all_listings": "Alle Anzeigen",
-    "signin_prompt": "Melden Sie sich an, um Suchen geräteübergreifend zu speichern und Benachrichtigungen zu erhalten."
+    "signin_prompt": "Melden Sie sich an, um Suchen geräteübergreifend zu speichern und Benachrichtigungen zu erhalten.",
+    "alert_title": "Neue Treffer: {name}",
+    "alert_body": "{count} neue Anzeige(n) passen zu Ihrer gespeicherten Suche."
   }
 }

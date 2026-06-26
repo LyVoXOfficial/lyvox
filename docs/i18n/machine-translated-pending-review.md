@@ -149,6 +149,7 @@ The whole `discover.*` namespace (incl. `discover.drop.*` and `discover.offer_te
 nl/fr/de machine-drafted. Review against `en.json`. `discover.offer_template` is a user-sent chat
 message, so its tone matters most.
 
-### saved (16) — added 2026-06-26 with Phase 4 saved searches
-The whole `saved.*` namespace — ru native, nl/fr/de machine-drafted. Review against `en.json`.
-`saved.new_count` carries a `{count}` placeholder that must stay verbatim.
+### saved (18) — added 2026-06-26 with Phase 4 saved searches + Stage 5 alerts
+The whole `saved.*` namespace (incl. `saved.alert_title`/`saved.alert_body` for cron-delivered
+notifications) — ru native, nl/fr/de machine-drafted. Review against `en.json`. `saved.new_count`,
+`saved.alert_title` ({name}) and `saved.alert_body` ({count}) carry placeholders that must stay verbatim.

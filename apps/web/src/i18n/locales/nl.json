@@ -1594,6 +1594,8 @@
     "deleted_toast": "Opgeslagen zoekopdracht verwijderd",
     "unnamed": "Opgeslagen zoekopdracht",
     "all_listings": "Alle zoekertjes",
-    "signin_prompt": "Meld u aan om zoekopdrachten op alle apparaten op te slaan en meldingen te krijgen."
+    "signin_prompt": "Meld u aan om zoekopdrachten op alle apparaten op te slaan en meldingen te krijgen.",
+    "alert_title": "Nieuwe resultaten: {name}",
+    "alert_body": "{count} nieuw(e) zoekertje(s) komen overeen met uw opgeslagen zoekopdracht."
   }
 }

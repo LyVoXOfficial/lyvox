@@ -99,6 +99,7 @@ export type Database = {
           created_at: string
           filters: Json
           id: string
+          last_alerted_at: string
           last_seen_at: string
           name: string
           query: string | null
@@ -109,6 +110,7 @@ export type Database = {
           created_at?: string
           filters?: Json
           id?: string
+          last_alerted_at?: string
           last_seen_at?: string
           name: string
           query?: string | null
@@ -119,6 +121,7 @@ export type Database = {
           created_at?: string
           filters?: Json
           id?: string
+          last_alerted_at?: string
           last_seen_at?: string
           name?: string
           query?: string | null

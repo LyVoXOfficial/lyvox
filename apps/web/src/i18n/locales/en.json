@@ -1594,6 +1594,8 @@
     "deleted_toast": "Saved search deleted",
     "unnamed": "Saved search",
     "all_listings": "All listings",
-    "signin_prompt": "Sign in to save searches across devices and get alerts."
+    "signin_prompt": "Sign in to save searches across devices and get alerts.",
+    "alert_title": "New matches: {name}",
+    "alert_body": "{count} new listing(s) match your saved search."
   }
 }

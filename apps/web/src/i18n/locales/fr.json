@@ -1594,6 +1594,8 @@
     "deleted_toast": "Recherche enregistrée supprimée",
     "unnamed": "Recherche enregistrée",
     "all_listings": "Toutes les annonces",
-    "signin_prompt": "Connectez-vous pour enregistrer vos recherches sur tous vos appareils et recevoir des alertes."
+    "signin_prompt": "Connectez-vous pour enregistrer vos recherches sur tous vos appareils et recevoir des alertes.",
+    "alert_title": "Nouveaux résultats : {name}",
+    "alert_body": "{count} nouvelle(s) annonce(s) correspondent à votre recherche enregistrée."
   }
 }
