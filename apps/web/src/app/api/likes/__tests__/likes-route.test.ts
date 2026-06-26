@@ -24,7 +24,7 @@ describe("POST /api/likes", () => {
 
   it("401 when not signed in", async () => {
     getUserMock.mockResolvedValue({ data: { user: null } });
-    const res = await POST(jsonReq({ advert_id: "11111111-1111-1111-1111-111111111111" }));
+    const res = await POST(jsonReq({ advert_id: "11111111-1111-4111-8111-111111111111" }));
     expect(res.status).toBe(401);
   });
 
@@ -37,7 +37,7 @@ describe("POST /api/likes", () => {
       if (table === "advert_likes") return { insert: async () => ({ error: null }) };
       throw new Error("unexpected table " + table);
     });
-    const res = await POST(jsonReq({ advert_id: "11111111-1111-1111-1111-111111111111" }));
+    const res = await POST(jsonReq({ advert_id: "11111111-1111-4111-8111-111111111111" }));
     expect(res.status).toBe(201);
     const body = await res.json();
     expect(body.ok).toBe(true);
@@ -52,7 +52,7 @@ describe("POST /api/likes", () => {
       if (table === "advert_likes") return { insert: async () => ({ error: { code: "23505" } }) };
       throw new Error("unexpected table " + table);
     });
-    const res = await POST(jsonReq({ advert_id: "11111111-1111-1111-1111-111111111111" }));
+    const res = await POST(jsonReq({ advert_id: "11111111-1111-4111-8111-111111111111" }));
     expect(res.ok).toBe(true);
     const body = await res.json();
     expect(body.ok).toBe(true);

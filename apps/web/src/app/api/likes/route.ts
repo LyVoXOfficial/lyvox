@@ -1,12 +1,11 @@
 import { z } from "zod";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import { createErrorResponse, createSuccessResponse, handleSupabaseError, ApiErrorCode } from "@/lib/apiErrors";
 
 export const runtime = "nodejs";
 
-type SupabaseServerClient = SupabaseClient;
+type SupabaseServerClient = Awaited<ReturnType<typeof supabaseServer>>;
 type SupabaseUser = Awaited<ReturnType<SupabaseServerClient["auth"]["getUser"]>>["data"]["user"];
 
 const contextCache = new WeakMap<Request, Promise<{ supabase: SupabaseServerClient; user: SupabaseUser }>>();
@@ -28,19 +27,21 @@ const buildRateLimitKey = (_req: Request, userId: string | null, ip: string | nu
 const likesGetLimiter = createRateLimiter({ limit: 60, windowSec: 60, prefix: "likes:get" });
 const likesPostLimiter = createRateLimiter({ limit: 30, windowSec: 60, prefix: "likes:post" });
 
-const addLikeSchema = z.object({ advert_id: z.string().guid() });
+const addLikeSchema = z.object({ advert_id: z.string().uuid() });
 
 async function getLikes(request: Request) {
   const { supabase, user } = await getRequestContext(request);
   if (!user) {
     return createSuccessResponse({ items: [], total: 0, authenticated: false });
   }
+  const url = new URL(request.url);
+  const limit = Math.min(Math.max(1, Number.parseInt(url.searchParams.get("limit") ?? "200", 10) || 200), 200);
   const { data, error } = await supabase
     .from("advert_likes")
     .select("advert_id")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
-    .limit(500);
+    .limit(limit);
   if (error) return handleSupabaseError(error, ApiErrorCode.FETCH_FAILED);
   return createSuccessResponse({ items: data ?? [], total: data?.length ?? 0, authenticated: true });
 }

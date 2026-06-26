@@ -26,7 +26,7 @@ const getRequestContext = async (req: Request) => {
 const resolveUserId = (req: Request) => getRequestContext(req).then(({ user }) => user?.id ?? null);
 
 const deleteLimiter = createRateLimiter({ limit: 30, windowSec: 60, prefix: "likes:delete" });
-const uuidSchema = z.string().guid();
+const uuidSchema = z.string().uuid();
 
 const buildRateLimitKey = (_req: Request, userId: string | null, ip: string | null) =>
   userId ?? ip ?? "anonymous";
