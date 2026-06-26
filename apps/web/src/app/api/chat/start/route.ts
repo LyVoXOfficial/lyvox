@@ -9,6 +9,7 @@ import {
 } from "@/lib/apiErrors";
 import { validateRequest } from "@/lib/validations";
 import { startConversationSchema } from "@/lib/validations/chat";
+import { isViewerVerified } from "@/lib/auth/requireVerified";
 
 export const runtime = "nodejs";
 
@@ -38,6 +39,10 @@ const baseHandler = async (req: Request) => {
 
   if (!user) {
     return createErrorResponse(ApiErrorCode.UNAUTH, { status: 401 });
+  }
+
+  if (!(await isViewerVerified(supabase, user.id))) {
+    return createErrorResponse(ApiErrorCode.VERIFICATION_REQUIRED, { status: 403, detail: "Phone verification required to contact a seller" });
   }
 
   const parseResult = await safeJsonParse<{ advert_id?: unknown; peer_id?: unknown }>(req);
