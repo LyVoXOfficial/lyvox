@@ -1577,5 +1577,23 @@
     },
     "error_title": "Une erreur s'est produite",
     "error_body": "Impossible de charger plus d'annonces."
+  },
+  "saved": {
+    "save_button": "Enregistrer la recherche",
+    "saved_toast": "Recherche enregistrée",
+    "signin_to_alert": "Enregistré sur cet appareil. Connectez-vous pour recevoir des alertes.",
+    "cap_reached": "Vous avez atteint la limite de 50 recherches enregistrées.",
+    "error": "Une erreur s'est produite",
+    "title": "Recherches enregistrées",
+    "subtitle": "Relancez une recherche et voyez les nouveautés depuis votre enregistrement.",
+    "empty": "Vous n'avez pas encore enregistré de recherches.",
+    "new_count": "{count} nouveau(x)",
+    "view_results": "Voir les résultats",
+    "alerts": "Alertes",
+    "delete": "Supprimer",
+    "deleted_toast": "Recherche enregistrée supprimée",
+    "unnamed": "Recherche enregistrée",
+    "all_listings": "Toutes les annonces",
+    "signin_prompt": "Connectez-vous pour enregistrer vos recherches sur tous vos appareils et recevoir des alertes."
   }
 }

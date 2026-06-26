@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useI18n } from "@/i18n";
 import SearchFilters, { type SearchFiltersState } from "@/components/SearchFilters";
+import SaveSearchButton from "@/components/saved/SaveSearchButton";
 import { logger } from "@/lib/errorLogger";
 import { mapSearchItemToCard } from "@/lib/advertCards";
 import AdsGrid from "@/components/ads-grid";
@@ -487,6 +488,19 @@ export default function SearchPage() {
               >
                 {t("discover.enter")}
               </Link>
+
+              <SaveSearchButton
+                query={query}
+                filters={{
+                  category_id: categoryId,
+                  price_min: priceMin ? Number(priceMin) : null,
+                  price_max: priceMax ? Number(priceMax) : null,
+                  location,
+                  verified_only: verifiedOnlyFilter || null,
+                  condition: condition || null,
+                  sort_by: sortBy,
+                }}
+              />
 
               {/* Mobile filters button */}
               <div className="lg:hidden">

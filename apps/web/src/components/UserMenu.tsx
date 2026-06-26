@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Bookmark,
   ChevronDown,
   LayoutDashboard,
   ListChecks,
@@ -196,6 +197,7 @@ export default function UserMenu() {
   const menuLinks: MenuLink[] = [
     { href: "/profile", label: t("common.profile"), icon: UserCircle },
     { href: "/profile/adverts", label: t("nav.my_listings"), icon: ListChecks },
+    { href: "/saved", label: t("saved.title"), icon: Bookmark },
     ...(showPhoneVerification
       ? [{ href: "/profile/phone", label: t("nav.verify_phone"), icon: Phone, tone: "warning" as const }]
       : []),

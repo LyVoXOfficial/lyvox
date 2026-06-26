@@ -1577,5 +1577,23 @@
     },
     "error_title": "Something went wrong",
     "error_body": "We couldn't load more listings."
+  },
+  "saved": {
+    "save_button": "Save search",
+    "saved_toast": "Search saved",
+    "signin_to_alert": "Saved on this device. Sign in to get alerts.",
+    "cap_reached": "You've reached the 50 saved-search limit.",
+    "error": "Something went wrong",
+    "title": "Saved searches",
+    "subtitle": "Re-run a search and see what's new since you saved it.",
+    "empty": "You haven't saved any searches yet.",
+    "new_count": "{count} new",
+    "view_results": "View results",
+    "alerts": "Alerts",
+    "delete": "Delete",
+    "deleted_toast": "Saved search deleted",
+    "unnamed": "Saved search",
+    "all_listings": "All listings",
+    "signin_prompt": "Sign in to save searches across devices and get alerts."
   }
 }

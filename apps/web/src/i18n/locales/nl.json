@@ -1577,5 +1577,23 @@
     },
     "error_title": "Er ging iets mis",
     "error_body": "We konden geen zoekertjes laden."
+  },
+  "saved": {
+    "save_button": "Zoekopdracht opslaan",
+    "saved_toast": "Zoekopdracht opgeslagen",
+    "signin_to_alert": "Opgeslagen op dit apparaat. Meld u aan voor meldingen.",
+    "cap_reached": "U heeft de limiet van 50 opgeslagen zoekopdrachten bereikt.",
+    "error": "Er ging iets mis",
+    "title": "Opgeslagen zoekopdrachten",
+    "subtitle": "Voer een zoekopdracht opnieuw uit en zie wat er nieuw is sinds u opsloeg.",
+    "empty": "U heeft nog geen zoekopdrachten opgeslagen.",
+    "new_count": "{count} nieuw",
+    "view_results": "Resultaten bekijken",
+    "alerts": "Meldingen",
+    "delete": "Verwijderen",
+    "deleted_toast": "Opgeslagen zoekopdracht verwijderd",
+    "unnamed": "Opgeslagen zoekopdracht",
+    "all_listings": "Alle zoekertjes",
+    "signin_prompt": "Meld u aan om zoekopdrachten op alle apparaten op te slaan en meldingen te krijgen."
   }
 }

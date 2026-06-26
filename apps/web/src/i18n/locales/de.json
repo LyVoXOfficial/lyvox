@@ -1577,5 +1577,23 @@
     },
     "error_title": "Etwas ist schiefgelaufen",
     "error_body": "Weitere Anzeigen konnten nicht geladen werden."
+  },
+  "saved": {
+    "save_button": "Suche speichern",
+    "saved_toast": "Suche gespeichert",
+    "signin_to_alert": "Auf diesem Gerät gespeichert. Melden Sie sich an, um Benachrichtigungen zu erhalten.",
+    "cap_reached": "Sie haben das Limit von 50 gespeicherten Suchen erreicht.",
+    "error": "Etwas ist schiefgelaufen",
+    "title": "Gespeicherte Suchen",
+    "subtitle": "Führen Sie eine Suche erneut aus und sehen Sie, was seit dem Speichern neu ist.",
+    "empty": "Sie haben noch keine Suchen gespeichert.",
+    "new_count": "{count} neu",
+    "view_results": "Ergebnisse ansehen",
+    "alerts": "Benachrichtigungen",
+    "delete": "Löschen",
+    "deleted_toast": "Gespeicherte Suche gelöscht",
+    "unnamed": "Gespeicherte Suche",
+    "all_listings": "Alle Anzeigen",
+    "signin_prompt": "Melden Sie sich an, um Suchen geräteübergreifend zu speichern und Benachrichtigungen zu erhalten."
   }
 }
