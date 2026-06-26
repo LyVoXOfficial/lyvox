@@ -1190,6 +1190,10 @@
     "verify": "Vérifier",
     "verifying": "Vérification…",
     "code_incorrect": "Le code est incorrect.",
-    "phone_verified": "Téléphone vérifié."
+    "phone_verified": "Téléphone vérifié.",
+    "gate_title_auth": "Connectez-vous pour continuer",
+    "gate_body_auth": "Créez un compte gratuit ou connectez-vous pour continuer.",
+    "gate_title_phone": "Vérifiez votre téléphone",
+    "gate_body_phone": "Confirmez votre numéro pour contacter les vendeurs et publier des annonces."
   }
 }

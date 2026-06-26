@@ -10,6 +10,7 @@ import BottomNav from "@/components/bottom-nav";
 import ViewportBottomSpacer from "@/components/viewport-bottom-spacer";
 import { I18nProvider } from "@/i18n";
 import { getI18nProps } from "@/i18n/server";
+import { TrustGateProvider } from "@/components/trust/TrustGateProvider";
 
 // `viewport-fit: cover` is required for the `env(safe-area-inset-*)` paddings
 // used by the bottom nav to be non-zero on notched devices (iOS). themeColor
@@ -87,12 +88,14 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <I18nProvider locale={locale} messages={messages}>
           <FavoritesProvider>
             <LikesProvider>
-              <TopBar />
-              <MainHeader />
-              <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-4 md:py-6 pb-[calc(64px+env(safe-area-inset-bottom))]">{children}</main>
-              <LegalFooter />
-              <ViewportBottomSpacer />
-              <BottomNav />
+              <TrustGateProvider>
+                <TopBar />
+                <MainHeader />
+                <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-4 md:py-6 pb-[calc(64px+env(safe-area-inset-bottom))]">{children}</main>
+                <LegalFooter />
+                <ViewportBottomSpacer />
+                <BottomNav />
+              </TrustGateProvider>
             </LikesProvider>
           </FavoritesProvider>
         </I18nProvider>

@@ -1190,6 +1190,10 @@
     "verify": "Bestätigen",
     "verifying": "Wird geprüft…",
     "code_incorrect": "Der Code ist falsch.",
-    "phone_verified": "Telefon bestätigt."
+    "phone_verified": "Telefon bestätigt.",
+    "gate_title_auth": "Zum Fortfahren anmelden",
+    "gate_body_auth": "Erstellen Sie ein kostenloses Konto oder melden Sie sich an.",
+    "gate_title_phone": "Telefon bestätigen",
+    "gate_body_phone": "Bestätigen Sie Ihre Nummer, um Verkäufer zu kontaktieren und zu veröffentlichen."
   }
 }

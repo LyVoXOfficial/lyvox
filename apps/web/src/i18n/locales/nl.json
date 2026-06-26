@@ -1190,6 +1190,10 @@
     "verify": "Verifiëren",
     "verifying": "Verifiëren…",
     "code_incorrect": "De code is onjuist.",
-    "phone_verified": "Telefoon geverifieerd."
+    "phone_verified": "Telefoon geverifieerd.",
+    "gate_title_auth": "Log in om door te gaan",
+    "gate_body_auth": "Maak een gratis account of log in om door te gaan.",
+    "gate_title_phone": "Verifieer je telefoon",
+    "gate_body_phone": "Bevestig je telefoonnummer om verkopers te contacteren en te plaatsen."
   }
 }
