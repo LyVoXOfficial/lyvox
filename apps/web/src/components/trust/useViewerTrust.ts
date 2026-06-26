@@ -4,10 +4,11 @@ export async function fetchViewerTrust(): Promise<ViewerTrust> {
   try {
     const res = await fetch("/api/me", { cache: "no-store", credentials: "include" });
     if (!res.ok) return { signedIn: false, verifiedPhone: false, userId: null };
-    const data = await res.json().catch(() => null);
-    const userId = data?.user?.id ?? null;
+    const json = await res.json().catch(() => null);
+    const payload = json?.data ?? json;          // unwrap createSuccessResponse {ok,data}
+    const userId = payload?.user?.id ?? null;
     if (!userId) return { signedIn: false, verifiedPhone: false, userId: null };
-    return { signedIn: true, verifiedPhone: data?.verifiedPhone === true, userId };
+    return { signedIn: true, verifiedPhone: payload?.verifiedPhone === true, userId };
   } catch {
     return { signedIn: false, verifiedPhone: false, userId: null };
   }

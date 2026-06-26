@@ -108,12 +108,13 @@ export default function AdvertContactPanel({
         credentials: "include",
       });
 
-      if (response.status === 401 || response.status === 403) {
+      const payload = (await response.json().catch(() => null)) as ChatStartResponse | null;
+
+      if (response.status === 401 || (response.status === 403 && payload?.error === "VERIFICATION_REQUIRED")) {
         requireTrust("verified", () => void startChat());
         return;
       }
 
-      const payload = (await response.json().catch(() => null)) as ChatStartResponse | null;
       const conversationId = payload?.data?.conversation_id;
 
       if (!response.ok || !payload?.ok || !conversationId) {
