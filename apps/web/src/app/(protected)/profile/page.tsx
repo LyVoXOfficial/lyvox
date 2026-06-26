@@ -1,5 +1,5 @@
 import { supabaseServer } from "@/lib/supabaseServer";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { getI18nProps } from "@/i18n/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -318,7 +318,8 @@ export default async function ProfilePage() {
 
 
   if (!user) {
-    return notFound();
+    // Logged-out users get the login form (with a return path), not a 404.
+    redirect("/login?redirect=/profile");
   }
 
   const profile = await loadProfileData(user.id);
