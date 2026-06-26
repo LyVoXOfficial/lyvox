@@ -7,9 +7,9 @@
 
 ---
 
-## The two framing decisions that govern this entire document
+## The framing decisions that govern this entire document
 
-Before any section: two cross-cutting decisions were resolved up front because every section depends on them. If you read nothing else, read these.
+Before any section: three cross-cutting decisions were resolved up front because every section depends on them. If you read nothing else, read these.
 
 ### Decision 1 — There are TWO different "monies," and only one of them is a compliance trip-wire
 
@@ -32,6 +32,19 @@ To prevent the data-model, dashboard, and badge sections from contradicting each
 - **`kyc_records`** — sensitive ID/KYB artefacts, isolated table, owner+admin RLS only.
 - **`badges_awarded`** — stores *only* non-derivable manual badges; everything else is derived at read time.
 - **No linear status enum.** Trust **level is derived** from `verifications` (+ the already-shipped `verified_email`/`verified_phone`/`itsme_verified` booleans as read-caches). **Suspension is an orthogonal overlay** (`profiles.blocked_until`/`flags`, `businesses.status='suspended'`), never a rung on the ladder. A single `unverified→…→suspended` column is rejected: it would conflate person-identity with entity-identity (two independent axes) and contradict the booleans already in production.
+
+### Decision 3 — Activation-ready by default: build now, flip-a-switch later
+
+The founder's strategy is **validate-first, monetize-later, with zero re-architecture at each gate**: launch FREE (no payments, no subscriptions) to test whether the audience shows up; if it lives, register a **sole proprietorship (eenmanszaak)** and switch on identity + (optionally) paid plans; as profit grows and is journaled, incorporate a **full company** and switch on buyer↔seller payments. The non-negotiable requirement: at each gate, going live must be **"add a credential, flip a flag" — minutes, not a week of building after launch.**
+
+Therefore every company-gated capability is **engineered NOW, gated OFF**, never "deferred to be built later":
+
+- **Capability flags.** A single env/config-driven capability registry — e.g. `PRO_SUBSCRIPTIONS_ENABLED`, `STRIPE_IDENTITY_ENABLED`, `ITSME_ENABLED`, `WHATSAPP_OTP_ENABLED`, `PAYMENTS_ESCROW_ENABLED` — all defaulting **OFF / free**. Server guards and UI both read the flag (features render as hidden or "coming soon" until on). Activation = set the flag + add credentials, **no deploy-time code change**.
+- **Provider adapters.** Every contract-gated integration (identity verification, OTP channel, KYB lookup, payments/payouts) sits behind a small adapter interface; the app codes against the interface, the concrete provider is wired when its contract lands. Going live = implement/enable one adapter + set env, not touch the call sites.
+- **Schema-complete from day one.** All Phase-B columns/tables (the `verifications` ID axis, `kyc_records`, payout/IBAN, `reviews`) are created in the Phase-A migrations, so there is **no migration scramble** at activation.
+- **Honest testability caveat (two speeds of "instant").** *Software-only* capabilities (pro subscriptions on the existing Stripe `mode:"subscription"` rail, business profiles, badges, dashboards, free KBO/VIES checks) are built AND live-testable now — they just default to free/off, so turning them on is truly instant. *Contract-gated* integrations (itsme, WhatsApp-OTP, Stripe Connect payouts, paid KYB) are built to the adapter + flag but **cannot be fully smoke-tested until the credentials exist**; their activation is "add credentials + flip flag + a 10-minute smoke test" — still minutes, not a rebuild.
+
+**Consequence used throughout:** the §9 "phases" are **activation events, not build phases.** The build happens now (Phase A); Phase B / identity / payments are *switched on* when the legal-commercial gate is crossed. Every section below that touches a Phase-B capability must specify its flag name and (if external) its adapter seam.
 
 ---
 
