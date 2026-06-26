@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { apiFetch, RateLimitedError } from "@/lib/fetcher";
 import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
+import { useTrustGate } from "@/components/trust/TrustGateProvider";
 
 type FavoriteAdvert = {
   id: string;
@@ -83,17 +84,13 @@ export default function AdvertContactPanel({
     const value = t(key);
     return value === key ? fallback : value;
   };
+  const { requireTrust } = useTrustGate();
   const [startingChat, setStartingChat] = useState(false);
 
   const isOwnListing = currentUserId === seller.id;
   const sellerVerified = seller.verifiedEmail && seller.verifiedPhone;
 
   const startChat = async () => {
-    if (!currentUserId) {
-      router.push(loginHref);
-      return;
-    }
-
     if (isOwnListing || startingChat) {
       return;
     }
@@ -111,8 +108,8 @@ export default function AdvertContactPanel({
         credentials: "include",
       });
 
-      if (response.status === 401) {
-        router.push(loginHref);
+      if (response.status === 401 || response.status === 403) {
+        requireTrust("verified", () => void startChat());
         return;
       }
 
@@ -215,10 +212,10 @@ export default function AdvertContactPanel({
               {tr("contact.manage", "Manage listing")}
             </Link>
           </Button>
-        ) : currentUserId ? (
+        ) : (
           <Button
             type="button"
-            onClick={startChat}
+            onClick={() => requireTrust("verified", () => void startChat())}
             disabled={startingChat}
             className="h-11 flex-1 text-[15px]"
           >
@@ -228,13 +225,6 @@ export default function AdvertContactPanel({
               <MessageCircle className="h-4 w-4" aria-hidden="true" />
             )}
             {startingChat ? tr("contact.opening", "Opening chat…") : tr("contact.message", "Message seller")}
-          </Button>
-        ) : (
-          <Button asChild className="h-11 flex-1 text-[15px]">
-            <Link href={loginHref}>
-              <MessageCircle className="h-4 w-4" aria-hidden="true" />
-              {tr("contact.sign_in_to_message", "Sign in to message")}
-            </Link>
           </Button>
         )}
 
