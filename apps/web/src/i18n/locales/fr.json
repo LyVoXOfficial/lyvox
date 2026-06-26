@@ -421,6 +421,12 @@
     "hidden_inactive": "{count} favoris masqués car l'annonce n'est plus active.",
     "saved_listings": "Annonces enregistrées"
   },
+  "likes": {
+    "add": "J'aime",
+    "remove": "Retirer le j'aime",
+    "login_required": "Connectez-vous pour aimer",
+    "failed": "Impossible de mettre à jour le j'aime"
+  },
   "comparison": {
     "title": "Comparer les annonces",
     "instructions_title": "Comment comparer",

@@ -421,6 +421,12 @@
     "hidden_inactive": "{count} favorieten verborgen omdat de advertentie niet meer actief is.",
     "saved_listings": "Opgeslagen advertenties"
   },
+  "likes": {
+    "add": "Leuk",
+    "remove": "Like verwijderen",
+    "login_required": "Log in om te liken",
+    "failed": "Kon like niet bijwerken"
+  },
   "comparison": {
     "title": "Advertenties vergelijken",
     "instructions_title": "Hoe vergelijken?",

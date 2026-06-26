@@ -421,6 +421,12 @@
     "hidden_inactive": "{count} Favoriten ausgeblendet, weil die Anzeige nicht mehr aktiv ist.",
     "saved_listings": "Gespeicherte Anzeigen"
   },
+  "likes": {
+    "add": "Gefällt mir",
+    "remove": "Like entfernen",
+    "login_required": "Zum Liken anmelden",
+    "failed": "Like konnte nicht aktualisiert werden"
+  },
   "comparison": {
     "title": "Anzeigen vergleichen",
     "instructions_title": "So vergleichen Sie",

@@ -421,6 +421,12 @@
     "hidden_inactive": "{count} favorites hidden because the advert is no longer active.",
     "saved_listings": "Saved listings"
   },
+  "likes": {
+    "add": "Like",
+    "remove": "Remove like",
+    "login_required": "Sign in to like listings",
+    "failed": "Could not update like"
+  },
   "comparison": {
     "title": "Compare adverts",
     "instructions_title": "How to compare",
