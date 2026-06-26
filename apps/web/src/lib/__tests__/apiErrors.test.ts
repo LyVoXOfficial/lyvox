@@ -4,6 +4,7 @@ import {
   createSuccessResponse,
   handleSupabaseError,
   safeJsonParse,
+  mapBusinessUniqueViolation,
   ApiErrorCode,
   type ApiErrorResponse,
   type ApiSuccessResponse,
@@ -208,6 +209,60 @@ describe("apiErrors", () => {
       expect(ApiErrorCode.CREATE_FAILED).toBe("CREATE_FAILED");
       expect(ApiErrorCode.EMAIL_IN_USE).toBe("EMAIL_IN_USE");
       expect(ApiErrorCode.OTP_NOT_FOUND).toBe("OTP_NOT_FOUND");
+    });
+
+    it("should have all new business onboarding error codes", () => {
+      expect(ApiErrorCode.BUSINESS_NOT_FOUND).toBe("BUSINESS_NOT_FOUND");
+      expect(ApiErrorCode.KBO_IN_USE).toBe("KBO_IN_USE");
+      expect(ApiErrorCode.VAT_IN_USE).toBe("VAT_IN_USE");
+      expect(ApiErrorCode.ENTITY_VERIFICATION_PENDING).toBe("ENTITY_VERIFICATION_PENDING");
+      expect(ApiErrorCode.ENTITY_VERIFICATION_FAILED).toBe("ENTITY_VERIFICATION_FAILED");
+    });
+  });
+
+  describe("mapBusinessUniqueViolation", () => {
+    it("returns KBO_IN_USE for a 23505 on businesses_kbo_number_key", () => {
+      const err = {
+        code: "23505",
+        message: 'duplicate key value violates unique constraint "businesses_kbo_number_key"',
+      };
+      expect(mapBusinessUniqueViolation(err)).toBe(ApiErrorCode.KBO_IN_USE);
+    });
+
+    it("returns VAT_IN_USE for a 23505 on businesses_vat_number_key", () => {
+      const err = {
+        code: "23505",
+        message: 'duplicate key value violates unique constraint "businesses_vat_number_key"',
+      };
+      expect(mapBusinessUniqueViolation(err)).toBe(ApiErrorCode.VAT_IN_USE);
+    });
+
+    it("returns null for a 23505 on a different constraint", () => {
+      const err = {
+        code: "23505",
+        message: 'duplicate key value violates unique constraint "profiles_email_key"',
+      };
+      expect(mapBusinessUniqueViolation(err)).toBeNull();
+    });
+
+    it("returns null for a non-23505 error even if message contains constraint name", () => {
+      const err = {
+        code: "23503",
+        message: "businesses_kbo_number_key foreign key violation",
+      };
+      expect(mapBusinessUniqueViolation(err)).toBeNull();
+    });
+
+    it("returns null for null/undefined input", () => {
+      expect(mapBusinessUniqueViolation(null)).toBeNull();
+      expect(mapBusinessUniqueViolation(undefined)).toBeNull();
+    });
+
+    it("returns KBO_IN_USE when code is absent but message matches unique constraint pattern + kbo key", () => {
+      const err = {
+        message: 'unique constraint "businesses_kbo_number_key" violated',
+      };
+      expect(mapBusinessUniqueViolation(err)).toBe(ApiErrorCode.KBO_IN_USE);
     });
   });
 });

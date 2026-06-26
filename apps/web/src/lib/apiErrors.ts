@@ -23,6 +23,13 @@ export enum ApiErrorCode {
   RATE_LIMITED = "RATE_LIMITED",
   VERIFICATION_REQUIRED = "VERIFICATION_REQUIRED",
 
+  // Business onboarding
+  BUSINESS_NOT_FOUND = "BUSINESS_NOT_FOUND",
+  KBO_IN_USE = "KBO_IN_USE",
+  VAT_IN_USE = "VAT_IN_USE",
+  ENTITY_VERIFICATION_PENDING = "ENTITY_VERIFICATION_PENDING",
+  ENTITY_VERIFICATION_FAILED = "ENTITY_VERIFICATION_FAILED",
+
   // Server errors (5xx)
   SIGNUP_FAILED = "SIGNUP_FAILED",
   SERVICE_ROLE_MISSING = "SERVICE_ROLE_MISSING",
@@ -212,6 +219,30 @@ export function handleSupabaseError(
     status: defaultStatus,
     detail: errorMessage ? `${errorMessage} (${errorCode})` : `Unknown error: ${errorCode}`,
   });
+}
+
+/**
+ * Maps a Supabase/Postgres 23505 unique-violation error to a specific business
+ * ApiErrorCode by inspecting the constraint name in the error message.
+ *
+ * Returns:
+ *  - KBO_IN_USE    when the violated constraint is businesses_kbo_number_key
+ *  - VAT_IN_USE    when the violated constraint is businesses_vat_number_key
+ *  - null          for any other error (caller should fall through to handleSupabaseError)
+ *
+ * Usage: call BEFORE handleSupabaseError when handling INSERT/RPC that touches
+ * the businesses table, so you can return the precise 409 code.
+ */
+export function mapBusinessUniqueViolation(
+  error: { message?: string; code?: string } | null | undefined,
+): ApiErrorCode | null {
+  if (!error) return null;
+  const isUnique = error.code === "23505" || /unique constraint/i.test(error.message ?? "");
+  if (!isUnique) return null;
+  const msg = error.message ?? "";
+  if (msg.includes("businesses_kbo_number_key")) return ApiErrorCode.KBO_IN_USE;
+  if (msg.includes("businesses_vat_number_key")) return ApiErrorCode.VAT_IN_USE;
+  return null;
 }
 
 /**
