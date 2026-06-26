@@ -15,7 +15,7 @@ const localeNames: Record<Locale, string> = {
   en: "English",
   ru: "Russian",
   nl: "Nederlands",
-  fr: "Francais",
+  fr: "Français",
   de: "Deutsch",
 };
 
@@ -43,15 +43,14 @@ export default function LanguageSwitcher() {
 
   return (
     <Select value={locale} onValueChange={handleLocaleChange}>
-      <SelectTrigger className="h-10 w-[150px] rounded-md border-border/80 bg-card shadow-sm">
-        <Globe className="mr-2 h-4 w-4" aria-hidden="true" />
+      <SelectTrigger
+        className="h-10 w-auto gap-1.5 rounded-md border-border/80 bg-card shadow-sm"
+        aria-label={localeNames[locale]}
+      >
+        <Globe className="h-4 w-4" aria-hidden="true" />
+        {/* Trigger shows just the locale code (never truncates); full names live in the dropdown. */}
         <SelectValue>
-          <span className="flex items-center gap-2">
-            <span className="rounded border border-border px-1.5 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground">
-              {locale}
-            </span>
-            <span>{localeNames[locale]}</span>
-          </span>
+          <span className="text-sm font-semibold uppercase">{locale}</span>
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
