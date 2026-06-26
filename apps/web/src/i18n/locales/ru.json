@@ -1178,6 +1178,18 @@
     "password": "Пароль",
     "signing_in": "Вход…",
     "login_failed": "Не удалось войти. Проверьте почту и пароль.",
-    "signed_in": "Вы вошли."
+    "signed_in": "Вы вошли.",
+    "phone": "Номер телефона",
+    "phone_invalid": "Введите корректный номер.",
+    "send_code": "Отправить код",
+    "sending": "Отправка…",
+    "code_send_error": "Не удалось отправить код.",
+    "code_sent": "Код отправлен.",
+    "code": "Код из SMS",
+    "code_required": "Введите код из SMS.",
+    "verify": "Подтвердить",
+    "verifying": "Проверка…",
+    "code_incorrect": "Неверный код.",
+    "phone_verified": "Телефон подтверждён."
   }
 }

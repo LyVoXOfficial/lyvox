@@ -1178,6 +1178,18 @@
     "password": "Wachtwoord",
     "signing_in": "Inloggen…",
     "login_failed": "Inloggen mislukt. Controleer e-mail en wachtwoord.",
-    "signed_in": "Ingelogd."
+    "signed_in": "Ingelogd.",
+    "phone": "Telefoonnummer",
+    "phone_invalid": "Voer een geldig nummer in.",
+    "send_code": "Code versturen",
+    "sending": "Versturen…",
+    "code_send_error": "Kon de code niet versturen.",
+    "code_sent": "Code verstuurd.",
+    "code": "Sms-code",
+    "code_required": "Voer de sms-code in.",
+    "verify": "Verifiëren",
+    "verifying": "Verifiëren…",
+    "code_incorrect": "De code is onjuist.",
+    "phone_verified": "Telefoon geverifieerd."
   }
 }

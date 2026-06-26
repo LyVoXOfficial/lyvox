@@ -1178,6 +1178,18 @@
     "password": "Password",
     "signing_in": "Signing in…",
     "login_failed": "Sign in failed. Check your email and password.",
-    "signed_in": "Signed in."
+    "signed_in": "Signed in.",
+    "phone": "Phone number",
+    "phone_invalid": "Enter a valid phone number.",
+    "send_code": "Send code",
+    "sending": "Sending…",
+    "code_send_error": "Could not send the code.",
+    "code_sent": "Code sent.",
+    "code": "SMS code",
+    "code_required": "Enter the SMS code.",
+    "verify": "Verify",
+    "verifying": "Verifying…",
+    "code_incorrect": "The code is incorrect.",
+    "phone_verified": "Phone verified."
   }
 }

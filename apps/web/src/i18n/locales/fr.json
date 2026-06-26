@@ -1178,6 +1178,18 @@
     "password": "Mot de passe",
     "signing_in": "Connexion…",
     "login_failed": "Échec de la connexion. Vérifiez l'e-mail et le mot de passe.",
-    "signed_in": "Connecté."
+    "signed_in": "Connecté.",
+    "phone": "Numéro de téléphone",
+    "phone_invalid": "Entrez un numéro valide.",
+    "send_code": "Envoyer le code",
+    "sending": "Envoi…",
+    "code_send_error": "Impossible d'envoyer le code.",
+    "code_sent": "Code envoyé.",
+    "code": "Code SMS",
+    "code_required": "Entrez le code SMS.",
+    "verify": "Vérifier",
+    "verifying": "Vérification…",
+    "code_incorrect": "Le code est incorrect.",
+    "phone_verified": "Téléphone vérifié."
   }
 }

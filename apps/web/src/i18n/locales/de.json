@@ -1178,6 +1178,18 @@
     "password": "Passwort",
     "signing_in": "Anmeldung…",
     "login_failed": "Anmeldung fehlgeschlagen. E-Mail und Passwort prüfen.",
-    "signed_in": "Angemeldet."
+    "signed_in": "Angemeldet.",
+    "phone": "Telefonnummer",
+    "phone_invalid": "Gültige Nummer eingeben.",
+    "send_code": "Code senden",
+    "sending": "Senden…",
+    "code_send_error": "Code konnte nicht gesendet werden.",
+    "code_sent": "Code gesendet.",
+    "code": "SMS-Code",
+    "code_required": "SMS-Code eingeben.",
+    "verify": "Bestätigen",
+    "verifying": "Wird geprüft…",
+    "code_incorrect": "Der Code ist falsch.",
+    "phone_verified": "Telefon bestätigt."
   }
 }
