@@ -211,6 +211,30 @@ export type Database = {
           },
         ]
       }
+      badges_awarded: {
+        Row: {
+          subject_type: string
+          subject_id: string
+          badge: string
+          awarded_by: string | null
+          awarded_at: string
+        }
+        Insert: {
+          subject_type: string
+          subject_id: string
+          badge: string
+          awarded_by?: string | null
+          awarded_at?: string
+        }
+        Update: {
+          subject_type?: string
+          subject_id?: string
+          badge?: string
+          awarded_by?: string | null
+          awarded_at?: string
+        }
+        Relationships: []
+      }
       benefits: {
         Row: {
           advert_id: string | null
