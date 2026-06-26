@@ -28,7 +28,11 @@ export default function TrustGatePhone({ onVerified }: { onVerified: () => void 
         credentials: "include", body: JSON.stringify({ phone: phone.trim() }),
       });
       const body = await res.json().catch(() => ({ ok: false }));
-      if (!res.ok || !body?.ok) { toast.error(tr("trust.code_send_error", "Could not send the code.")); return; }
+      if (!res.ok || !body?.ok) {
+        if (body?.error === "PHONE_ALREADY_REGISTERED") { toast.error(tr("trust.phone_already_registered", "This number is already linked to another account.")); return; }
+        toast.error(tr("trust.code_send_error", "Could not send the code."));
+        return;
+      }
       toast.success(tr("trust.code_sent", "Code sent."));
       setStep("code");
     } catch {
@@ -49,7 +53,11 @@ export default function TrustGatePhone({ onVerified }: { onVerified: () => void 
         credentials: "include", body: JSON.stringify({ code: code.trim(), phone: phone.trim() }),
       });
       const body = await res.json().catch(() => ({ ok: false }));
-      if (!res.ok || !body?.ok) { toast.error(tr("trust.code_incorrect", "The code is incorrect.")); return; }
+      if (!res.ok || !body?.ok) {
+        if (body?.error === "PHONE_ALREADY_REGISTERED") { toast.error(tr("trust.phone_already_registered", "This number is already linked to another account.")); return; }
+        toast.error(tr("trust.code_incorrect", "The code is incorrect."));
+        return;
+      }
       toast.success(tr("trust.phone_verified", "Phone verified."));
       onVerified();
     } catch {

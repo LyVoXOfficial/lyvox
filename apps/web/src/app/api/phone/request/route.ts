@@ -1,5 +1,6 @@
 import { randomBytes, createHmac } from "crypto";
 import { supabaseServer } from "@/lib/supabaseServer";
+import { supabaseService } from "@/lib/supabaseService";
 import { createRateLimiter, withRateLimit, getClientIp } from "@/lib/rateLimiter";
 import {
   createErrorResponse,
@@ -71,6 +72,32 @@ const baseHandler = async (req: Request) => {
     return createErrorResponse(ApiErrorCode.UNAUTH, { status: 401 });
   }
 
+  // Best-effort pre-check: the e164 column is globally UNIQUE, so at most one
+  // phones row can own a given number. If that row belongs to ANOTHER user,
+  // reject early with a dedicated, localizable error — before any Twilio lookup,
+  // OTP insert or SMS send. We never reject a user re-using THEIR OWN number,
+  // and we never echo the other user's data. On any failure (query error or a
+  // missing service-role key falling back to an RLS-scoped client that can't
+  // see other users' rows) we simply continue: the UNIQUE constraint and the
+  // 23505 fallback below remain the real source of truth.
+  try {
+    const service = await supabaseService();
+    const existingPhone = await service
+      .from("phones")
+      .select("user_id")
+      .eq("e164", phone.trim())
+      .maybeSingle();
+    if (
+      !existingPhone.error &&
+      existingPhone.data &&
+      existingPhone.data.user_id !== user.id
+    ) {
+      return createErrorResponse(ApiErrorCode.PHONE_ALREADY_REGISTERED, { status: 409 });
+    }
+  } catch {
+    // Pre-check is best-effort; fall through to the constraint-backed upsert.
+  }
+
   let lookup: Record<string, unknown> | null = null;
   if (process.env.TWILIO_LOOKUP_URL && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
     try {
@@ -96,6 +123,12 @@ const baseHandler = async (req: Request) => {
 
   const upsertPhonesResult = await supabase.from("phones").upsert(phoneRecord);
   if (upsertPhonesResult.error) {
+    // Race-safe fallback: if the e164 UNIQUE constraint was violated (the number
+    // is owned by another account, possibly registered between our pre-check and
+    // this write), surface the dedicated error rather than the generic save failure.
+    if (upsertPhonesResult.error.code === "23505") {
+      return createErrorResponse(ApiErrorCode.PHONE_ALREADY_REGISTERED, { status: 409 });
+    }
     return handleSupabaseError(upsertPhonesResult.error, ApiErrorCode.PHONE_SAVE_FAILED);
   }
 

@@ -1541,6 +1541,7 @@
     "verifying": "Verifiëren…",
     "code_incorrect": "De code is onjuist.",
     "phone_verified": "Telefoon geverifieerd.",
+    "phone_already_registered": "Dit telefoonnummer is al gekoppeld aan een ander account.",
     "gate_title_auth": "Log in om door te gaan",
     "gate_body_auth": "Maak een gratis account of log in om door te gaan.",
     "gate_title_phone": "Verifieer je telefoon",

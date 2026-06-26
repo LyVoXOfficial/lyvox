@@ -1541,6 +1541,7 @@
     "verifying": "Verifying…",
     "code_incorrect": "The code is incorrect.",
     "phone_verified": "Phone verified.",
+    "phone_already_registered": "This phone number is already linked to another account.",
     "gate_title_auth": "Sign in to continue",
     "gate_body_auth": "Create a free account or sign in to continue.",
     "gate_title_phone": "Verify your phone",

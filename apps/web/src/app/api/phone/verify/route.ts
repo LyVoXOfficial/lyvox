@@ -114,6 +114,12 @@ const baseHandler = async (req: Request) => {
     .update(phoneUpdate)
     .eq("user_id", user.id);
   if (phoneUpdateError) {
+    // Defensive: setting verified=true touches only the user's own row and never
+    // mutates e164, so this should not raise a UNIQUE violation. Map it anyway so
+    // the dedicated error is returned if the constraint ever fires here.
+    if (phoneUpdateError.code === "23505") {
+      return createErrorResponse(ApiErrorCode.PHONE_ALREADY_REGISTERED, { status: 409 });
+    }
     return handleSupabaseError(phoneUpdateError, ApiErrorCode.PHONE_UPDATE_FAILED);
   }
 

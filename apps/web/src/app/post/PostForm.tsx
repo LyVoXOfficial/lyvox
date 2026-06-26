@@ -1146,6 +1146,9 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
 
       const requestResult = await requestResponse.json();
       if (!requestResult.ok) {
+        if (requestResult.error === "PHONE_ALREADY_REGISTERED") {
+          throw new Error(t("trust.phone_already_registered"));
+        }
         throw new Error(requestResult.message || requestResult.error || "Failed to send OTP");
       }
 
@@ -1186,6 +1189,9 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
 
       const verifyResult = await verifyResponse.json();
       if (!verifyResult.ok) {
+        if (verifyResult.error === "PHONE_ALREADY_REGISTERED") {
+          throw new Error(t("trust.phone_already_registered"));
+        }
         throw new Error(verifyResult.message || verifyResult.error || "Invalid verification code");
       }
 
