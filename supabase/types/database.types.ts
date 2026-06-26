@@ -256,6 +256,126 @@ export type Database = {
           },
         ]
       }
+      business_members: {
+        Row: {
+          accepted_at: string | null
+          business_id: string
+          created_at: string
+          invited_by: string | null
+          role: string
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          business_id: string
+          created_at?: string
+          invited_by?: string | null
+          role?: string
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          business_id?: string
+          created_at?: string
+          invited_by?: string | null
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_members_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_members_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      businesses: {
+        Row: {
+          address_line: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          created_by: string | null
+          email: string
+          entity_verified: boolean
+          id: string
+          kbo_number: string | null
+          legal_form: string | null
+          legal_name: string
+          phone_e164: string | null
+          postcode: string | null
+          status: string
+          trade_name: string | null
+          updated_at: string
+          vat_liable: boolean
+          vat_number: string | null
+        }
+        Insert: {
+          address_line?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          email: string
+          entity_verified?: boolean
+          id?: string
+          kbo_number?: string | null
+          legal_form?: string | null
+          legal_name: string
+          phone_e164?: string | null
+          postcode?: string | null
+          status?: string
+          trade_name?: string | null
+          updated_at?: string
+          vat_liable?: boolean
+          vat_number?: string | null
+        }
+        Update: {
+          address_line?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          entity_verified?: boolean
+          id?: string
+          kbo_number?: string | null
+          legal_form?: string | null
+          legal_name?: string
+          phone_e164?: string | null
+          postcode?: string | null
+          status?: string
+          trade_name?: string | null
+          updated_at?: string
+          vat_liable?: boolean
+          vat_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "businesses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       catalog_field_options: {
         Row: {
           code: string
