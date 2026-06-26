@@ -53,6 +53,7 @@ type AdvertContactPanelProps = {
   loginHref: string;
   editHref: string;
   sellerName: string;
+  canSeeSeller: boolean;
   className?: string;
 };
 
@@ -76,6 +77,7 @@ export default function AdvertContactPanel({
   loginHref,
   editHref,
   sellerName,
+  canSeeSeller,
   className,
 }: AdvertContactPanelProps) {
   const router = useRouter();
@@ -171,7 +173,7 @@ export default function AdvertContactPanel({
               <UserRound className="h-5 w-5" aria-hidden="true" />
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-bold text-foreground">{sellerName}</p>
+              <p className="truncate text-sm font-bold text-foreground">{canSeeSeller ? sellerName : tr("seller_gate.name_hidden", "Verified users only")}</p>
               <p className="text-xs text-muted-foreground">
                 {seller.activeAdverts} {tr("contact.active_listings", "active listings")}
               </p>

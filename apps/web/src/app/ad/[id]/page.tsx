@@ -530,7 +530,7 @@ export default async function AdvertPage({ params }: PageProps) {
     seller: {
       "@type": "Organization",
       "@id": `${BASE_URL}/user/${data.seller.id}`,
-      name: data.seller.displayName ?? "LyVoX seller",
+      name: "LyVoX seller",
     },
     itemCondition: "https://schema.org/UsedCondition",
     datePosted: data.advert.created_at ?? undefined,
@@ -984,6 +984,7 @@ export default async function AdvertPage({ params }: PageProps) {
               loginHref={loginHref}
               editHref={editHref}
               sellerName={sellerName}
+              canSeeSeller={canSeeSeller}
             />
           </div>
         </div>
