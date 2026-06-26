@@ -9,7 +9,7 @@ const limiter = createRateLimiter({
   prefix: "top-adverts",
 });
 
-// GET /api/top-adverts - Get top adverts by views + favorites
+// GET /api/top-adverts - Get top adverts by views + likes + favorites
 async function baseHandler(request: Request) {
   const supabase = await supabaseServer();
   

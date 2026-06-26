@@ -111,7 +111,10 @@ const baseHandler = async (request: Request) => {
     }) ?? [];
 
   const ids = results.map((r) => r.id as string);
-  const [imageMap, likeMap] = await Promise.all([resolveFirstImages(ids), resolveLikeCounts(ids)]);
+  const [imageMap, likeMap] = await Promise.all([
+    resolveFirstImages(ids, { cap: params.limit }),
+    resolveLikeCounts(ids, { cap: params.limit }),
+  ]);
   const itemsWithImages = results.map((r) => ({
     ...r,
     image: imageMap.get(r.id as string) ?? null,

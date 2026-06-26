@@ -46,7 +46,7 @@ describe("GET /api/search", () => {
     expect(body.ok).toBe(true);
     expect(body.data.items[0].image).toBe("signed:adv-1/first.jpg");
     expect(body.data.items[0].seller_verified).toBe(true);
-    expect(resolveFirstImagesMock).toHaveBeenCalledWith(["adv-1"]);
+    expect(resolveFirstImagesMock).toHaveBeenCalledWith(["adv-1"], { cap: 24 });
   });
 
   it("sets image to null when no media is found", async () => {
