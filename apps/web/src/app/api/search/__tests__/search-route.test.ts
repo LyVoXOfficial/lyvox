@@ -70,4 +70,58 @@ describe("GET /api/search", () => {
     const body = await res.json();
     expect(body.data.items[0].like_count).toBe(3);
   });
+
+  it("projects to card fields — strips bloat (description, etc.) but keeps deck fields", async () => {
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          id: "adv-1",
+          user_id: "user-9",
+          category_id: "cat-7",
+          title: "Bike",
+          description: "A long description that should never ship to the client",
+          price: 50,
+          currency: "EUR",
+          condition: "used",
+          status: "active",
+          location_id: "loc-3",
+          location: "Gent",
+          created_at: "2026-06-01T00:00:00Z",
+          updated_at: "2026-06-02T00:00:00Z",
+          seller_verified: true,
+          total_count: 1,
+          relevance_rank: 0.5,
+        },
+      ],
+      error: null,
+    });
+
+    const res = await GET(new Request("https://x.test/api/search?limit=24"));
+    const body = await res.json();
+    const item = body.data.items[0];
+
+    // Bloat / internal shape stripped server-side.
+    expect(item.description).toBeUndefined();
+    expect(item.relevance_rank).toBeUndefined();
+    expect(item.status).toBeUndefined();
+    expect(item.condition).toBeUndefined();
+    expect(item.updated_at).toBeUndefined();
+    expect(item.location_id).toBeUndefined();
+    expect(item.total_count).toBeUndefined();
+
+    // Deck card (mapSearchItemToDeckCard) depends on these — must NOT be stripped.
+    expect(item.user_id).toBe("user-9");
+    expect(item.category_id).toBe("cat-7");
+
+    // Card fields preserved.
+    expect(item).toMatchObject({
+      id: "adv-1",
+      title: "Bike",
+      price: 50,
+      currency: "EUR",
+      location: "Gent",
+      created_at: "2026-06-01T00:00:00Z",
+      seller_verified: true,
+    });
+  });
 });

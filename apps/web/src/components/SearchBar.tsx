@@ -117,7 +117,9 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&limit=6`);
+        // instant=1 routes to the higher-limit typeahead bucket so rapid keystrokes
+        // don't exhaust the main search rate limit and block a real submission.
+        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&limit=6&instant=1`);
         if (!res.ok) return;
         const body = await res.json();
         if (!cancelled && body.ok && body.data) setInstant(body.data.items);

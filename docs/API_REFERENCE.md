@@ -426,10 +426,10 @@ All media routes use the `ad-media` bucket; `MEDIA_LIMIT_PER_ADVERT = 12`. Auth 
 
 ### GET /api/search
 - Auth: none (public)
-- Rate limit: yes — per IP, 60/60s (`search:ip`, env `RATE_LIMIT_SEARCH_IP_PER_MIN`)
-- Request (query, `searchAdvertsQuerySchema`): `q?` (1–200), `category_id?` (uuid), `price_min?`/`price_max?` (numeric; min≤max), `location?` (≤200), `verified_only?` (true/1/yes), `lat?`/`lng?` (paired; valid coordinate ranges), `radius_km?` (>0, ≤1000, default 50), `sort_by?` (relevance|price_asc|price_desc|created_at_asc|created_at_desc, default created_at_desc), `page?` (default 0), `limit?` (default 24, max 100)
-- Behavior: RPC `search_adverts`; strips per-row `total_count`, coerces `seller_verified`.
-- Response: `{ items: [...], total, page, limit, hasMore }`. Errors: validation, `FETCH_FAILED`.
+- Rate limit: yes — per IP, 60/60s (`search:ip`, env `RATE_LIMIT_SEARCH_IP_PER_MIN`). Instant/typeahead requests (`instant=1`) use a separate higher bucket, 240/60s (`search:instant:ip`, env `RATE_LIMIT_SEARCH_INSTANT_IP_PER_MIN`).
+- Request (query, `searchAdvertsQuerySchema`): `q?` (1–200), `category_id?` (uuid), `price_min?`/`price_max?` (numeric; min≤max), `location?` (≤200), `condition?` (new|used|for_parts), `verified_only?` (true/1/yes), `lat?`/`lng?` (paired; valid coordinate ranges), `radius_km?` (>0, ≤1000, default 50), `sort_by?` (relevance|price_asc|price_desc|created_at_asc|created_at_desc, default created_at_desc), `page?` (default 0), `limit?` (default 24, max 100). `instant?` (1/true) — typeahead flag, only affects rate-limit bucket.
+- Behavior: RPC `search_adverts`; projects each row to card fields (drops `description`, `condition`, `status`, `location_id`, `updated_at`, `relevance_rank`, `total_count`); coerces `seller_verified`; attaches signed `image` + `like_count`.
+- Response: `{ items: [{ id, user_id, category_id, title, price, currency, location, created_at, seller_verified, image, like_count }], total, page, limit, hasMore }`. Errors: validation, `FETCH_FAILED`.
 
 ---
 
