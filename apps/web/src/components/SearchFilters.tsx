@@ -869,10 +869,13 @@ export default function SearchFilters({
 
       {/* Category Filter */}
       <div>
-        <div className="flex items-center justify-between mb-3">
-          <Label className="text-sm font-semibold">
+        <div className="flex items-center justify-between mb-2.5">
+          <p
+            className="font-bold uppercase tracking-widest text-muted-foreground"
+            style={{ fontSize: "12px", letterSpacing: "0.05em" }}
+          >
             {tr("search.category", "Category")}
-          </Label>
+          </p>
           {selectedCategory && (
             <Button
               variant="ghost"
@@ -909,9 +912,12 @@ export default function SearchFilters({
 
       {/* Price Range Filter */}
       <div>
-        <Label className="text-sm font-semibold mb-3 block">
-          {tr("search.price", "Price")}
-        </Label>
+        <p
+          className="mb-3 font-bold uppercase tracking-widest text-muted-foreground"
+          style={{ fontSize: "12px", letterSpacing: "0.05em" }}
+        >
+          {tr("search.price", "Price (€)")}
+        </p>
         <div className="space-y-3">
           <Slider
             value={priceRange}
@@ -951,18 +957,44 @@ export default function SearchFilters({
         </div>
       </div>
 
-      {/* Verified Sellers Filter */}
-      <div>
-        <Label className="text-sm font-semibold mb-3 block">
-          {tr("search.verifiedOnly", "Verified sellers only")}
-        </Label>
+      {/* Verified Sellers Filter — toggle-switch style (mockup line 361), same handler wiring */}
+      <div
+        className="border-t border-border/70"
+        style={{ paddingTop: "16px", marginTop: "4px" }}
+      >
         <label
           htmlFor="verified-only"
-          className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border border-border/70 bg-background p-3 shadow-[var(--shadow-soft)] transition-colors hover:border-primary/30"
+          className="flex cursor-pointer items-center gap-3 font-semibold"
+          style={{ fontSize: "13.5px" }}
         >
+          {/* Toggle pill (CSS-only, no JS needed beyond the existing Checkbox state) */}
+          <span
+            className="relative shrink-0 transition-colors"
+            style={{
+              width: "36px",
+              height: "21px",
+              borderRadius: "999px",
+              background: verifiedOnly ? "var(--primary)" : "var(--border)",
+            }}
+            aria-hidden="true"
+          >
+            <span
+              className="absolute top-[2px] transition-all"
+              style={{
+                width: "17px",
+                height: "17px",
+                borderRadius: "999px",
+                background: "#fff",
+                right: verifiedOnly ? "2px" : undefined,
+                left: verifiedOnly ? undefined : "2px",
+              }}
+            />
+          </span>
+          {/* Hidden real checkbox for accessibility/state */}
           <Checkbox
             id="verified-only"
             checked={verifiedOnly}
+            className="sr-only"
             onCheckedChange={(checked) => {
               const value = checked === true;
               setVerifiedOnly(value);
@@ -978,47 +1010,71 @@ export default function SearchFilters({
               });
             }}
           />
-          <span className="flex items-center gap-1.5 text-sm text-muted-foreground leading-snug font-normal">
-            <ShieldCheck className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-            {tr("search.verifiedOnlyHelper", "Show listings from sellers with verified email and phone")}
-          </span>
+          {tr("search.verifiedOnly", "Verified sellers only")}
         </label>
       </div>
 
-      {/* Condition Filter */}
-      <div className="space-y-2">
-        <p className="text-sm font-semibold">{tr("search.condition", "Condition")}</p>
-        {([
-          ["new", tr("search.condition_new", "New")],
-          ["used", tr("search.condition_used", "Used")],
-          ["for_parts", tr("search.condition_for_parts", "For parts")],
-        ] as const).map(([value, label]) => (
-          <label key={value} className="flex items-center gap-2 text-sm">
-            <Checkbox
-              checked={condition === value}
-              onCheckedChange={(checked) => {
-                const newCondition = checked ? value : null;
-                setCondition(newCondition);
-                applyFilters({
-                  category_id: selectedCategory?.id || null,
-                  price_min: priceRange[0] > 0 ? priceRange[0] : null,
-                  price_max: priceRange[1] < 10000 ? priceRange[1] : null,
-                  location: location || null,
-                  catalog_fields: dynamicFilters,
-                  verified_only: verifiedOnly,
-                  condition: newCondition,
-                  sort_by: sortBy,
-                });
-              }}
-            />
-            {label}
-          </label>
-        ))}
+      {/* Condition Filter — pill-style (mockup line 353-357), same state/handler wiring */}
+      <div>
+        <p
+          className="mb-2.5 font-bold uppercase tracking-widest text-muted-foreground"
+          style={{ fontSize: "12px", letterSpacing: "0.05em" }}
+        >
+          {tr("search.condition", "Condition")}
+        </p>
+        <div className="flex flex-wrap gap-[7px]">
+          {([
+            ["new", tr("search.condition_new", "New")],
+            ["used", tr("search.condition_used", "Used")],
+            ["for_parts", tr("search.condition_for_parts", "For parts")],
+          ] as const).map(([value, label]) => {
+            const isActive = condition === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => {
+                  const newCondition = isActive ? null : value;
+                  setCondition(newCondition);
+                  applyFilters({
+                    category_id: selectedCategory?.id || null,
+                    price_min: priceRange[0] > 0 ? priceRange[0] : null,
+                    price_max: priceRange[1] < 10000 ? priceRange[1] : null,
+                    location: location || null,
+                    catalog_fields: dynamicFilters,
+                    verified_only: verifiedOnly,
+                    condition: newCondition,
+                    sort_by: sortBy,
+                  });
+                }}
+                className="inline-flex items-center font-bold transition"
+                style={{
+                  height: "30px",
+                  padding: "0 12px",
+                  borderRadius: "999px",
+                  fontSize: "12px",
+                  background: isActive
+                    ? "oklch(0.56 0.13 178 / 0.12)"
+                    : "var(--card)",
+                  border: isActive ? "none" : "1px solid var(--border)",
+                  color: isActive ? "var(--priD)" : "var(--foreground)",
+                }}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Sort Filter */}
       <div className="space-y-2">
-        <p className="text-sm font-semibold">{tr("search.sort", "Sort")}</p>
+        <p
+          className="font-bold uppercase tracking-widest text-muted-foreground"
+          style={{ fontSize: "12px", letterSpacing: "0.05em" }}
+        >
+          {tr("search.sort", "Sort")}
+        </p>
         <Select value={sortBy} onValueChange={(newSortBy) => {
           setSortBy(newSortBy);
           applyFilters({
@@ -1122,33 +1178,61 @@ export default function SearchFilters({
     </div>
   );
 
-  // Sidebar variant (desktop)
+  // Sidebar variant (desktop) — styled to mockup rail card (lines 344-362)
   if (actualVariant === "sidebar") {
     return (
-      <aside className="w-72 shrink-0 rounded-2xl border border-border/70 bg-card p-5 shadow-[var(--shadow-card)]">
-        <div className="mb-5 flex items-center gap-2">
-          <SlidersHorizontal className="h-4 w-4 text-primary" aria-hidden="true" />
-          <h2 className="text-lg font-extrabold tracking-tight">{tr("search.filters", "Filters")}</h2>
+      <aside
+        className="w-full shrink-0"
+        style={{
+          background: "var(--card)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--r)",
+          padding: "20px",
+          boxShadow: "var(--shS)",
+        }}
+      >
+        {/* Rail header: "Filters" + "Clear all" */}
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="font-extrabold" style={{ fontSize: "16px" }}>
+            {tr("search.filters", "Filters")}
+          </h2>
+          <button
+            type="button"
+            onClick={handleClearAll}
+            className="text-xs font-semibold transition hover:opacity-70"
+            style={{ fontSize: "12.5px", color: "var(--priD)" }}
+          >
+            {tr("search.clear", "Clear all")}
+          </button>
         </div>
         {filtersContent}
-        <div className="mt-6 border-t border-border/70 pt-4">{filtersFooter}</div>
+        <div className="mt-5 border-t border-border/70 pt-4">{filtersFooter}</div>
       </aside>
     );
   }
 
-  // Drawer variant (mobile)
+  // Drawer variant (mobile) — styled to mockup filter pill (line 389)
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
-        <Button variant="outline" className="h-11 w-full gap-2 rounded-xl md:hidden">
-          <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+        <button
+          type="button"
+          className="inline-flex items-center gap-1.5 font-bold text-white transition hover:opacity-90"
+          style={{
+            height: "34px",
+            padding: "0 13px",
+            borderRadius: "999px",
+            background: "var(--gC)",
+            fontSize: "12.5px",
+            whiteSpace: "nowrap",
+          }}
+        >
+          <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
           {tr("search.filters", "Filters")}
           {activeFilters.length > 0 && (
-            <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
-              {activeFilters.length}
-            </span>
+            <span className="ml-0.5">· {activeFilters.length}</span>
           )}
-        </Button>
+        </button>
       </SheetTrigger>
       <SheetContent
         side="left"

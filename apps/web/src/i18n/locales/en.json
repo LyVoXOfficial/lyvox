@@ -132,7 +132,9 @@
     "clearFilters": "Clear filters",
     "browseCategories": "Browse categories",
     "emptyBrowse": "Browse categories or try a different search term to find what you need.",
-    "emptyWithFilters": "Try removing some filters or broadening your price range."
+    "emptyWithFilters": "Try removing some filters or broadening your price range.",
+    "inBelgium": "in Belgium",
+    "applied": "Applied"
   },
   "contact": {
     "price": "Price",

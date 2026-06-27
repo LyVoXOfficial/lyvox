@@ -132,7 +132,9 @@
     "clearFilters": "Filter zurücksetzen",
     "browseCategories": "Kategorien durchsuchen",
     "emptyBrowse": "Durchsuchen Sie Kategorien oder versuchen Sie einen anderen Suchbegriff, um das Passende zu finden.",
-    "emptyWithFilters": "Versuchen Sie, einige Filter zu entfernen oder Ihren Preisbereich zu erweitern."
+    "emptyWithFilters": "Versuchen Sie, einige Filter zu entfernen oder Ihren Preisbereich zu erweitern.",
+    "inBelgium": "in Belgien",
+    "applied": "Angewendet"
   },
   "contact": {
     "price": "Preis",

@@ -29,6 +29,12 @@ type AdsGridProps = {
     label: string;
     variant?: "default" | "outline" | "secondary" | "ghost";
   };
+  /**
+   * Optional Tailwind grid-cols classes to override the default 2→3→4 layout.
+   * Pass e.g. "grid-cols-2 sm:grid-cols-3" for the search page (3-col desktop in
+   * the rail+results layout where the rail already takes ~262px).
+   */
+  gridColsClass?: string;
 };
 
 export default function AdsGrid({
@@ -37,6 +43,7 @@ export default function AdsGrid({
   emptyDescription,
   primaryAction,
   secondaryAction,
+  gridColsClass = "grid-cols-2 sm:grid-cols-3 md:grid-cols-4",
 }: AdsGridProps) {
   if (!items?.length) {
     return (
@@ -50,7 +57,7 @@ export default function AdsGrid({
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:gap-4">
+    <div className={`grid gap-3 lg:gap-4 ${gridColsClass}`}>
       {items.map((item) => (
         <AdCard key={item.id} {...item} />
       ))}

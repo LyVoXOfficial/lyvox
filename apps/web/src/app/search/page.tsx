@@ -453,142 +453,207 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="py-2 md:py-4">
-      <div className="flex flex-col gap-6 lg:flex-row">
-        {/* Filters Sidebar */}
-        <aside className="hidden shrink-0 lg:sticky lg:top-24 lg:block lg:self-start">
+    <div className="py-4 md:py-6">
+      {/* ── Results header card (full-width, above the rail+grid) ────────────── */}
+      <div
+        className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        style={{
+          background: "var(--card)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--r)",
+          padding: "16px 20px",
+          boxShadow: "var(--shS)",
+        }}
+      >
+        {/* Left: title + count */}
+        <div className="min-w-0">
+          <h1
+            className="font-extrabold tracking-tight leading-tight"
+            style={{ fontSize: "21px", letterSpacing: "-0.02em" }}
+          >
+            {query ? (
+              <>
+                {query}{" "}
+                <span className="font-semibold text-muted-foreground">
+                  {translate("search.inBelgium", "in Belgium")}
+                </span>
+              </>
+            ) : (
+              translate("search.results", "Search results")
+            )}
+          </h1>
+          {!loading && (
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {total > 0
+                ? t("search.showing", { start: startItem, end: endItem, total }) ||
+                  `Showing ${startItem}–${endItem} of ${total}`
+                : t("search.noResults") || "No results found"}
+            </p>
+          )}
+        </div>
+
+        {/* Right: sort dropdown + SaveSearch + Discover + mobile filter button */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Sort selector — mockup shows it here on desktop */}
+          <Select value={sortBy} onValueChange={handleSortChange}>
+            <SelectTrigger
+              className="h-10 gap-1.5 font-semibold text-sm"
+              style={{
+                borderRadius: "var(--rm)",
+                border: "1px solid var(--border)",
+                background: "var(--secondary)",
+                minWidth: "170px",
+              }}
+            >
+              <SelectValue placeholder={t("search.sort") || "Sort"} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="relevance">
+                {t("search.sortRelevance") || "Relevance"}
+              </SelectItem>
+              <SelectItem value="price_asc">
+                {t("search.sortPriceAsc") || "Price: Low to High"}
+              </SelectItem>
+              <SelectItem value="price_desc">
+                {t("search.sortPriceDesc") || "Price: High to Low"}
+              </SelectItem>
+              <SelectItem value="created_at_desc">
+                {t("search.sortNewest") || "Newest first"}
+              </SelectItem>
+              <SelectItem value="created_at_asc">
+                {t("search.sortOldest") || "Oldest first"}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
+          <SaveSearchButton
+            query={query}
+            filters={{
+              category_id: categoryId,
+              price_min: priceMin ? Number(priceMin) : null,
+              price_max: priceMax ? Number(priceMax) : null,
+              location,
+              verified_only: verifiedOnlyFilter || null,
+              condition: condition || null,
+              sort_by: sortBy,
+            }}
+          />
+
+          <Link
+            href="/discover"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground transition hover:text-primary"
+            style={{
+              height: "40px",
+              padding: "0 14px",
+              borderRadius: "var(--rm)",
+              border: "1px solid var(--border)",
+              background: "var(--secondary)",
+            }}
+          >
+            {t("discover.enter")}
+          </Link>
+
+          {/* Mobile-only: Filters drawer trigger */}
+          <div className="lg:hidden">
+            <SearchFilters
+              variant="drawer"
+              open={filtersOpen}
+              onOpenChange={setFiltersOpen}
+              onFiltersChange={handleFiltersChange}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Applied-filter chips (below header, full-width) */}
+      {activeFilterChips.length > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
+            {translate("search.applied", "Applied")}
+          </span>
+          {activeFilterChips.map((chip) => (
+            <button
+              key={chip.key}
+              type="button"
+              onClick={() => clearParams(chip.params)}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-secondary-foreground transition hover:text-primary"
+              style={{
+                height: "30px",
+                padding: "0 12px",
+                borderRadius: "999px",
+                border: "1px solid var(--border)",
+                background: "var(--secondary)",
+              }}
+            >
+              {chip.label}
+              <X className="h-3 w-3" aria-hidden="true" />
+            </button>
+          ))}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push("/search")}
+            className="h-7 px-2 text-xs"
+            style={{ color: "var(--priD)" }}
+          >
+            {t("search.clear") || "Clear all"}
+          </Button>
+        </div>
+      )}
+
+      {/* ── 2-column layout: left rail (desktop) + results ─────────────────── */}
+      <div className="flex items-start gap-[22px]">
+        {/* Left filter rail — sticky, desktop only */}
+        <aside className="hidden lg:block shrink-0 lg:sticky lg:top-24 lg:self-start" style={{ width: "262px" }}>
           <SearchFilters variant="sidebar" onFiltersChange={handleFiltersChange} />
         </aside>
 
-        {/* Main Content */}
-        <main className="flex-1 min-w-0">
-          {/* Header with sort and mobile filters */}
-          <div className="mb-5 rounded-xl border border-border/70 bg-card p-4 shadow-[var(--shadow-soft)]">
-          <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-            <div className="flex-1">
-              <h1 className="text-2xl font-extrabold tracking-tight">
-                {query
-                  ? t("search.resultsFor", { query }) || `Results for "${query}"`
-                  : t("search.results") || "Search results"}
-              </h1>
-              {!loading && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  {total > 0
-                    ? t("search.showing", { start: startItem, end: endItem, total }) ||
-                      `Showing ${startItem}-${endItem} of ${total}`
-                    : t("search.noResults") || "No results found"}
-                </p>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Link
-                href="/discover"
-                className="inline-flex items-center gap-1.5 rounded-md border border-border/80 bg-card px-3 py-2 text-sm font-medium text-foreground transition hover:border-primary/40"
-              >
-                {t("discover.enter")}
-              </Link>
-
-              <SaveSearchButton
-                query={query}
-                filters={{
-                  category_id: categoryId,
-                  price_min: priceMin ? Number(priceMin) : null,
-                  price_max: priceMax ? Number(priceMax) : null,
-                  location,
-                  verified_only: verifiedOnlyFilter || null,
-                  condition: condition || null,
-                  sort_by: sortBy,
-                }}
-              />
-
-              {/* Mobile filters button */}
-              <div className="lg:hidden">
-                <SearchFilters
-                  variant="drawer"
-                  open={filtersOpen}
-                  onOpenChange={setFiltersOpen}
-                  onFiltersChange={handleFiltersChange}
-                />
-              </div>
-
-              {/* Sort selector */}
-              <Select value={sortBy} onValueChange={handleSortChange}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder={t("search.sort") || "Sort"} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="relevance">
-                    {t("search.sortRelevance") || "Relevance"}
-                  </SelectItem>
-                  <SelectItem value="price_asc">
-                    {t("search.sortPriceAsc") || "Price: low to high"}
-                  </SelectItem>
-                  <SelectItem value="price_desc">
-                    {t("search.sortPriceDesc") || "Price: high to low"}
-                  </SelectItem>
-                  <SelectItem value="created_at_desc">
-                    {t("search.sortNewest") || "Newest first"}
-                  </SelectItem>
-                  <SelectItem value="created_at_asc">
-                    {t("search.sortOldest") || "Oldest first"}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          {activeFilterChips.length > 0 && (
-            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border/70 pt-3">
-              <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
-                Applied
-              </span>
-              {activeFilterChips.map((chip) => (
-                <button
-                  key={chip.key}
-                  type="button"
-                  onClick={() => clearParams(chip.params)}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-border bg-secondary/70 px-2.5 py-1 text-xs font-medium text-secondary-foreground transition hover:border-primary/30 hover:text-primary"
-                >
-                  {chip.label}
-                  <X className="h-3 w-3" aria-hidden="true" />
-                </button>
-              ))}
-              <Button variant="ghost" size="sm" onClick={() => router.push("/search")} className="h-7 px-2 text-xs">
-                {t("search.clear") || "Clear"}
-              </Button>
-            </div>
-          )}
-          </div>
-
+        {/* Results area */}
+        <main className="min-w-0 flex-1">
           {/* Loading state */}
           {loading && (
-            <div className="flex items-center justify-center rounded-md border border-border/80 bg-card py-16">
+            <div
+              className="flex items-center justify-center py-16"
+              style={{
+                background: "var(--card)",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--r)",
+                boxShadow: "var(--shS)",
+              }}
+            >
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           )}
 
           {/* Error state */}
           {error && !loading && (
-            <div className="rounded-md border border-destructive/50 bg-destructive/10 p-6 text-center">
+            <div
+              className="p-6 text-center"
+              style={{
+                background: "oklch(0.97 0.04 24 / 0.15)",
+                border: "1px solid oklch(0.80 0.12 24 / 0.40)",
+                borderRadius: "var(--r)",
+              }}
+            >
               <p className="text-sm text-destructive">{error}</p>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => fetchResults()}
-                className="mt-2"
+                className="mt-3"
               >
                 {t("common.retry") || "Retry"}
               </Button>
             </div>
           )}
 
-          {/* Results — AdsGrid renders a buyer-friendly empty state (with actions)
-              when there are no matches, the #1 churn moment. */}
+          {/* Results grid — 2-col mobile, 3-col desktop (rail already takes 262px) */}
           {!loading && !error && (
             <>
               <AdsGrid
                 items={isMobile ? allResults : results}
+                gridColsClass="grid-cols-2 lg:grid-cols-3"
                 emptyTitle={translate("search.emptyTitle", "Nothing matched your search")}
                 emptyDescription={
                   activeFilterChips.length > 0
@@ -615,7 +680,7 @@ export default function SearchPage() {
                     : undefined
                 }
               />
-              
+
               {/* Pagination (desktop only) */}
               {!isMobile && totalPages > 1 && (
                 <div className="mt-8">
@@ -646,7 +711,7 @@ export default function SearchPage() {
                           }}
                           aria-disabled={currentPage === totalPages - 1}
                           className={cn(
-                            currentPage === totalPages - 1 && "pointer-events-none opacity-50"
+                            currentPage === totalPages - 1 && "pointer-events-none opacity-50",
                           )}
                         />
                       </PaginationItem>

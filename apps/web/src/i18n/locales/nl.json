@@ -132,7 +132,9 @@
     "clearFilters": "Filters wissen",
     "browseCategories": "Bekijk categorieën",
     "emptyBrowse": "Bekijk categorieën of probeer een andere zoekterm om te vinden wat u zoekt.",
-    "emptyWithFilters": "Probeer enkele filters te verwijderen of uw prijsbereik te verruimen."
+    "emptyWithFilters": "Probeer enkele filters te verwijderen of uw prijsbereik te verruimen.",
+    "inBelgium": "in België",
+    "applied": "Toegepast"
   },
   "contact": {
     "price": "Prijs",
