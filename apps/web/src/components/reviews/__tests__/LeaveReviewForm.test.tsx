@@ -21,27 +21,14 @@ vi.mock("@/lib/fetcher", () => ({
   RateLimitedError: class RateLimitedError extends Error {},
 }));
 
-// Minimal messages for i18n
-const messages = {
-  reviews: {
-    leave_title: "Leave a Review",
-    rating_label: "Rating",
-    comment_label: "Comment (optional)",
-    comment_placeholder: "Share your experience...",
-    submit: "Submit review",
-    success: "Review submitted!",
-    must_contact: "You can review this seller after contacting them about this listing.",
-    already: "You've already reviewed this listing.",
-    self: "You cannot review your own listing.",
-    error: "Something went wrong. Please try again.",
-    aggregate_count: "{n} reviews",
-    no_reviews: "No reviews yet",
-  },
-};
+// Mock useI18n — t() returns the key so tr() falls through to the English fallback
+vi.mock("@/i18n", () => ({
+  useI18n: () => ({ t: (k: string) => k }),
+}));
 
 describe("<LeaveReviewForm />", () => {
   it("submit button is disabled until a star rating is chosen", () => {
-    render(<LeaveReviewForm advertId="ad-uuid-123" messages={messages} />);
+    render(<LeaveReviewForm advertId="ad-uuid-123" />);
     const submitBtn = screen.getByRole("button", { name: /submit review/i });
     expect(submitBtn).toBeTruthy();
     // Before clicking a star, the button should be disabled
@@ -49,8 +36,8 @@ describe("<LeaveReviewForm />", () => {
   });
 
   it("submit button becomes enabled after choosing a star rating", async () => {
-    render(<LeaveReviewForm advertId="ad-uuid-123" messages={messages} />);
-    // Click the 3rd star (aria-label or data-rating="3")
+    render(<LeaveReviewForm advertId="ad-uuid-123" />);
+    // Click the 3rd star (aria-label "3 star")
     const stars = screen.getAllByRole("button", { name: /star/i });
     fireEvent.click(stars[2]); // 3rd star = rating 3
     const submitBtn = screen.getByRole("button", { name: /submit review/i });
@@ -63,7 +50,7 @@ describe("<LeaveReviewForm />", () => {
       json: async () => ({ ok: true, data: { review_id: "rv-1" } }),
     });
 
-    render(<LeaveReviewForm advertId="ad-uuid-456" messages={messages} />);
+    render(<LeaveReviewForm advertId="ad-uuid-456" />);
 
     // Choose rating 4
     const stars = screen.getAllByRole("button", { name: /star/i });
@@ -97,7 +84,7 @@ describe("<LeaveReviewForm />", () => {
       json: async () => ({ ok: false, error: "NO_CONVERSATION" }),
     });
 
-    render(<LeaveReviewForm advertId="ad-uuid-789" messages={messages} />);
+    render(<LeaveReviewForm advertId="ad-uuid-789" />);
 
     const stars = screen.getAllByRole("button", { name: /star/i });
     fireEvent.click(stars[0]); // rating 1
@@ -114,13 +101,13 @@ describe("<LeaveReviewForm />", () => {
     expect(toast.error).not.toHaveBeenCalled();
   });
 
-  it("shows success toast and resets form on 200 response", async () => {
+  it("shows success toast and hides form on 200 response", async () => {
     apiFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ ok: true, data: { review_id: "rv-2" } }),
     });
 
-    render(<LeaveReviewForm advertId="ad-uuid-ok" messages={messages} />);
+    render(<LeaveReviewForm advertId="ad-uuid-ok" />);
 
     const stars = screen.getAllByRole("button", { name: /star/i });
     fireEvent.click(stars[4]); // rating 5
@@ -128,7 +115,7 @@ describe("<LeaveReviewForm />", () => {
     fireEvent.click(screen.getByRole("button", { name: /submit review/i }));
 
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith("Review submitted!");
+      expect(toast.success).toHaveBeenCalledWith("Your review has been submitted!");
     });
   });
 });

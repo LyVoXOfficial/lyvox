@@ -6,31 +6,18 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { apiFetch } from "@/lib/fetcher";
-
-type Messages = {
-  reviews: {
-    leave_title: string;
-    rating_label: string;
-    comment_label: string;
-    comment_placeholder: string;
-    submit: string;
-    success: string;
-    must_contact: string;
-    already: string;
-    self: string;
-    error: string;
-    aggregate_count: string;
-    no_reviews: string;
-  };
-};
+import { useI18n } from "@/i18n";
 
 type Props = {
   advertId: string;
-  messages: Messages;
 };
 
-export function LeaveReviewForm({ advertId, messages }: Props) {
-  const r = messages.reviews;
+export function LeaveReviewForm({ advertId }: Props) {
+  const { t } = useI18n();
+  const tr = (key: string, fallback: string) => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
 
   const [rating, setRating] = useState<number>(0);
   const [hovered, setHovered] = useState<number>(0);
@@ -64,24 +51,24 @@ export function LeaveReviewForm({ advertId, messages }: Props) {
       const body = await res.json();
 
       if (res.ok && body.ok) {
-        toast.success(r.success);
+        toast.success(tr("reviews.success", "Your review has been submitted!"));
         setSubmitted(true);
         return;
       }
 
-      // Map error codes
+      // Map error codes to inline messages or generic toast
       const code: string = body?.error ?? "";
       if (code === "NO_CONVERSATION") {
-        setInlineError(r.must_contact);
+        setInlineError(tr("reviews.must_contact", "You can review this seller after contacting them about this listing."));
       } else if (code === "ALREADY_REVIEWED") {
-        setInlineError(r.already);
+        setInlineError(tr("reviews.already", "You've already reviewed this listing."));
       } else if (code === "CANNOT_REVIEW_SELF") {
-        setInlineError(r.self);
+        setInlineError(tr("reviews.self", "You cannot review your own listing."));
       } else {
-        toast.error(r.error);
+        toast.error(tr("reviews.error", "Something went wrong. Please try again."));
       }
     } catch {
-      toast.error(r.error);
+      toast.error(tr("reviews.error", "Something went wrong. Please try again."));
     } finally {
       setSubmitting(false);
     }
@@ -94,12 +81,14 @@ export function LeaveReviewForm({ advertId, messages }: Props) {
       onSubmit={handleSubmit}
       className="rounded-md border border-border/80 bg-card p-4 shadow-sm space-y-4"
     >
-      <h3 className="text-base font-medium">{r.leave_title}</h3>
+      <h3 className="text-base font-medium">
+        {tr("reviews.leave_title", "Leave a Review")}
+      </h3>
 
       {/* Star selector */}
       <div>
         <label className="block text-sm font-medium text-foreground mb-1">
-          {r.rating_label}
+          {tr("reviews.rating_label", "Rating")}
         </label>
         <div className="flex gap-1">
           {[1, 2, 3, 4, 5].map((n) => (
@@ -127,12 +116,12 @@ export function LeaveReviewForm({ advertId, messages }: Props) {
       {/* Comment */}
       <div>
         <label className="block text-sm font-medium text-foreground mb-1">
-          {r.comment_label}
+          {tr("reviews.comment_label", "Comment (optional)")}
         </label>
         <Textarea
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          placeholder={r.comment_placeholder}
+          placeholder={tr("reviews.comment_placeholder", "Share your experience with this seller...")}
           maxLength={1000}
           rows={3}
         />
@@ -148,7 +137,7 @@ export function LeaveReviewForm({ advertId, messages }: Props) {
         disabled={!rating || submitting}
         className="w-full"
       >
-        {r.submit}
+        {tr("reviews.submit", "Submit review")}
       </Button>
     </form>
   );
