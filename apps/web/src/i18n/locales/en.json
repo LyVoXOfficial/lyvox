@@ -1766,6 +1766,7 @@
     "functional_desc": "Recently viewed, taste preferences, saved searches, seen adverts.",
     "analytics_label": "Analytics",
     "analytics_desc": "Aggregate usage statistics (no analytics lib active yet).",
-    "save_prefs": "Save preferences"
+    "save_prefs": "Save preferences",
+    "cancel": "Cancel"
   }
 }

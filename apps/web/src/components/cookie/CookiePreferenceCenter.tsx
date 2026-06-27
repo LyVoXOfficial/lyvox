@@ -64,7 +64,12 @@ export function CookiePreferenceCenter() {
 
   return (
     <Dialog open={preferencesOpen} onOpenChange={(open) => !open && closePreferences()}>
-      <DialogContent showCloseButton={false} className="sm:max-w-lg">
+      <DialogContent
+        showCloseButton={false}
+        className="sm:max-w-lg"
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>
             {tr("cookie.prefs_title", "Cookie preferences")}
@@ -176,9 +181,19 @@ export function CookiePreferenceCenter() {
               {tr("cookie.accept_all", "Accept all")}
             </Button>
           </div>
-          <Button type="button" variant="default" size="sm" onClick={handleSave}>
-            {tr("cookie.save_prefs", "Save preferences")}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={closePreferences}
+            >
+              {tr("cookie.cancel", "Cancel")}
+            </Button>
+            <Button type="button" variant="default" size="sm" onClick={handleSave}>
+              {tr("cookie.save_prefs", "Save preferences")}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

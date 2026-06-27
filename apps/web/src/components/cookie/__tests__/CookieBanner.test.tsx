@@ -164,3 +164,101 @@ describe("CookiePreferenceCenter — fresh visitor toggle defaults", () => {
     });
   });
 });
+
+describe("CookiePreferenceCenter — mixed-toggle save and dismissal", () => {
+  beforeEach(() => {
+    clearConsentCookie();
+  });
+
+  it("saves functional=true, analytics=false when only Functional is toggled ON then Save is clicked", async () => {
+    render(<AppWithConsent />);
+
+    // Open the preference center
+    const customizeBtn = await screen.findByRole("button", { name: /customize/i });
+    fireEvent.click(customizeBtn);
+
+    // Toggle Functional ON, leave Analytics OFF
+    await waitFor(() => {
+      const functionalSwitch = screen.getByRole("switch", { name: /functional/i });
+      expect(functionalSwitch).toHaveAttribute("aria-checked", "false");
+    });
+
+    const functionalSwitch = screen.getByRole("switch", { name: /functional/i });
+    fireEvent.click(functionalSwitch);
+
+    await waitFor(() => {
+      expect(functionalSwitch).toHaveAttribute("aria-checked", "true");
+    });
+
+    const analyticsSwitch = screen.getByRole("switch", { name: /analytics/i });
+    expect(analyticsSwitch).toHaveAttribute("aria-checked", "false");
+
+    // Click Save preferences
+    const saveBtn = screen.getByRole("button", { name: /save preferences/i });
+    fireEvent.click(saveBtn);
+
+    // Preference center should close
+    await waitFor(() => {
+      expect(screen.queryByRole("button", { name: /save preferences/i })).toBeNull();
+    });
+
+    // Verify persisted consent: functional=true, analytics=false
+    const consent = readConsent();
+    expect(consent).not.toBeNull();
+    expect(consent!.functional).toBe(true);
+    expect(consent!.analytics).toBe(false);
+  });
+
+  it("Cancel closes the preference center without writing consent (readConsent stays null)", async () => {
+    render(<AppWithConsent />);
+
+    // Open the preference center
+    const customizeBtn = await screen.findByRole("button", { name: /customize/i });
+    fireEvent.click(customizeBtn);
+
+    // Wait for the dialog to be open
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /cancel/i })).toBeTruthy();
+    });
+
+    // Sanity: no consent written yet
+    expect(readConsent()).toBeNull();
+
+    // Click Cancel — should close without writing
+    const cancelBtn = screen.getByRole("button", { name: /cancel/i });
+    fireEvent.click(cancelBtn);
+
+    // Dialog should close
+    await waitFor(() => {
+      expect(screen.queryByRole("button", { name: /cancel/i })).toBeNull();
+    });
+
+    // Consent must NOT have been written
+    expect(readConsent()).toBeNull();
+  });
+
+  it("pressing Esc does NOT close the preference center (implicit dismissal is blocked)", async () => {
+    render(<AppWithConsent />);
+
+    // Open the preference center
+    const customizeBtn = await screen.findByRole("button", { name: /customize/i });
+    fireEvent.click(customizeBtn);
+
+    // Wait for dialog open
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /save preferences/i })).toBeTruthy();
+    });
+
+    // Fire Escape key
+    fireEvent.keyDown(document.activeElement ?? document.body, {
+      key: "Escape",
+      code: "Escape",
+      keyCode: 27,
+    });
+
+    // Dialog must still be open — Save preferences button is still present
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /save preferences/i })).toBeTruthy();
+    });
+  });
+});

@@ -1766,6 +1766,7 @@
     "functional_desc": "Articles récemment consultés, préférences, recherches sauvegardées, annonces vues.",
     "analytics_label": "Analytiques",
     "analytics_desc": "Statistiques d'utilisation agrégées (aucune bibliothèque d'analyse active pour l'instant).",
-    "save_prefs": "Enregistrer les préférences"
+    "save_prefs": "Enregistrer les préférences",
+    "cancel": "Annuler"
   }
 }

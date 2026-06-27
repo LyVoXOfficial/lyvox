@@ -1766,6 +1766,7 @@
     "functional_desc": "Onlangs bekeken, smaakvoorkeuren, opgeslagen zoekopdrachten, geziene advertenties.",
     "analytics_label": "Analytisch",
     "analytics_desc": "Geaggregeerde gebruiksstatistieken (nog geen analysebibliotheek actief).",
-    "save_prefs": "Voorkeuren opslaan"
+    "save_prefs": "Voorkeuren opslaan",
+    "cancel": "Annuleren"
   }
 }

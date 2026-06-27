@@ -60,13 +60,14 @@ export function CookieBanner() {
         {/* Buttons — EQUAL prominence: same variant ("secondary") + same size */}
         <div className="flex flex-wrap gap-2 shrink-0">
           {/* Customize — link-style, does NOT imply consent */}
-          <button
+          <Button
             type="button"
+            variant="link"
+            size="sm"
             onClick={openPreferences}
-            className="text-xs underline underline-offset-2 hover:text-foreground text-muted-foreground transition-colors px-1"
           >
             {tr("cookie.customize", "Customize")}
-          </button>
+          </Button>
 
           {/*
            * EQUAL PROMINENCE: both buttons use variant="secondary" + size="sm".
