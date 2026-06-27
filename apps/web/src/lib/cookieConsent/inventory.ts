@@ -30,9 +30,9 @@ export const STORAGE_INVENTORY: {
     lib: "lib/cookieConsent/store.ts",
   },
   {
-    key: "lyvox:errorLog",
+    key: "app_logs",
     category: "necessary",
-    purpose: "Operational error logging — legitimate interest, not behavioural",
+    purpose: "Operational error logging (sessionStorage, development-only) — legitimate interest, no production persistence",
     lib: "lib/errorLogger.ts",
   },
   // ── Functional ───────────────────────────────────────────────────────────

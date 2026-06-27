@@ -53,6 +53,8 @@
     "legal": "Legal",
     "terms": "Terms",
     "privacy": "Privacy",
+    "cookies": "Cookies",
+    "cookie_settings": "Cookie settings",
     "gdpr": "GDPR",
     "safety": "Safety",
     "social": "Follow us",
@@ -1767,6 +1769,10 @@
     "analytics_label": "Analytics",
     "analytics_desc": "Aggregate usage statistics (no analytics lib active yet).",
     "save_prefs": "Save preferences",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "policy_title": "Cookie Policy",
+    "policy_intro": "This page lists all cookies and browser storage items used by LyVoX, grouped by category. Necessary items are always active; others require your consent.",
+    "policy_draft_note": "This policy is a working draft. Full legal text will be added before public launch.",
+    "manage": "Manage cookie settings"
   }
 }

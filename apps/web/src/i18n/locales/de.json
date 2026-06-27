@@ -53,6 +53,8 @@
     "legal": "Rechtliches",
     "terms": "Bedingungen",
     "privacy": "Datenschutz",
+    "cookies": "Cookies",
+    "cookie_settings": "Cookie-Einstellungen",
     "gdpr": "DSGVO",
     "safety": "Sicherheit",
     "social": "Folgen Sie uns",
@@ -1767,6 +1769,10 @@
     "analytics_label": "Analyse",
     "analytics_desc": "Aggregierte Nutzungsstatistiken (noch keine Analysebibliothek aktiv).",
     "save_prefs": "Einstellungen speichern",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "policy_title": "Cookie-Richtlinie",
+    "policy_intro": "Diese Seite listet alle Cookies und Browser-Speicherelemente auf, die LyVoX verwendet, gruppiert nach Kategorie. Notwendige Elemente sind immer aktiv; andere erfordern Ihre Zustimmung.",
+    "policy_draft_note": "Diese Richtlinie ist ein Arbeitsentwurf. Der vollständige rechtliche Text wird vor dem öffentlichen Start hinzugefügt.",
+    "manage": "Cookie-Einstellungen verwalten"
   }
 }

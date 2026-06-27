@@ -53,6 +53,8 @@
     "legal": "Juridisch",
     "terms": "Voorwaarden",
     "privacy": "Privacy",
+    "cookies": "Cookies",
+    "cookie_settings": "Cookie-instellingen",
     "gdpr": "GDPR",
     "safety": "Veiligheid",
     "social": "Volg ons",
@@ -1767,6 +1769,10 @@
     "analytics_label": "Analytisch",
     "analytics_desc": "Geaggregeerde gebruiksstatistieken (nog geen analysebibliotheek actief).",
     "save_prefs": "Voorkeuren opslaan",
-    "cancel": "Annuleren"
+    "cancel": "Annuleren",
+    "policy_title": "Cookiebeleid",
+    "policy_intro": "Deze pagina geeft een overzicht van alle cookies en browseropslagitems die LyVoX gebruikt, gegroepeerd per categorie. Noodzakelijke items zijn altijd actief; andere vereisen uw toestemming.",
+    "policy_draft_note": "Dit beleid is een werkversie. De volledige juridische tekst wordt toegevoegd vóór de publieke lancering.",
+    "manage": "Cookie-instellingen beheren"
   }
 }
