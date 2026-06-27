@@ -138,6 +138,34 @@ describe("POST /api/business", () => {
     expect(body.error).toBe("KBO_IN_USE");
   });
 
+  it("(d2) 409 VAT_IN_USE when create_business returns 23505 on vat key", async () => {
+    getUserMock.mockResolvedValue({ data: { user: { id: "user-1" } } });
+    isViewerVerifiedMock.mockResolvedValue(true);
+    rpcMock.mockResolvedValue({
+      data: null,
+      error: {
+        code: "23505",
+        message: 'duplicate key value violates unique constraint "businesses_vat_number_key"',
+      },
+    });
+    const res = await POST(jsonReq(VALID_BODY));
+    expect(res.status).toBe(409);
+    const body = await res.json();
+    expect(body.ok).toBe(false);
+    expect(body.error).toBe("VAT_IN_USE");
+  });
+
+  it("(d3) 401 (not 400) when unauthenticated request has invalid body", async () => {
+    getUserMock.mockResolvedValue({ data: { user: null } });
+    const res = await POST(
+      jsonReq({ kbo_number: "bad", vat_liable: "not-a-bool" }),
+    );
+    expect(res.status).toBe(401);
+    const body = await res.json();
+    expect(body.ok).toBe(false);
+    expect(body.error).toBe("UNAUTHENTICATED");
+  });
+
   it("(e) 200 happy path vat_liable=true: business_id, status active, vies pending, verifications insert called", async () => {
     getUserMock.mockResolvedValue({ data: { user: { id: "user-1" } } });
     isViewerVerifiedMock.mockResolvedValue(true);

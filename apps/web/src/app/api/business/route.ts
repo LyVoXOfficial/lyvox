@@ -25,7 +25,26 @@ const getUserId = async (req: Request): Promise<string | null> => {
 };
 
 const baseHandler = async (req: Request): Promise<Response> => {
-  // Step 1: Parse and validate body
+  // Step 1: Auth check
+  const supabase = await supabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return createErrorResponse(ApiErrorCode.UNAUTHENTICATED, { status: 401 });
+  }
+
+  // Phone verification required
+  const verified = await isViewerVerified(supabase, user.id);
+  if (!verified) {
+    return createErrorResponse(ApiErrorCode.VERIFICATION_REQUIRED, {
+      status: 403,
+      detail: "phone",
+    });
+  }
+
+  // Step 2: Parse and validate body
   const parseResult = await safeJsonParse<unknown>(req);
   if (!parseResult.success) {
     return parseResult.response;
@@ -51,25 +70,6 @@ const baseHandler = async (req: Request): Promise<Response> => {
     phone_e164,
     withdrawal_terms,
   } = validationResult.data;
-
-  // Step 2: Auth check
-  const supabase = await supabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return createErrorResponse(ApiErrorCode.UNAUTHENTICATED, { status: 401 });
-  }
-
-  // Phone verification required
-  const verified = await isViewerVerified(supabase, user.id);
-  if (!verified) {
-    return createErrorResponse(ApiErrorCode.VERIFICATION_REQUIRED, {
-      status: 403,
-      detail: "phone",
-    });
-  }
 
   // Step 3: Create business via RPC
   // create_business is not in the generated types, so we cast via unknown
