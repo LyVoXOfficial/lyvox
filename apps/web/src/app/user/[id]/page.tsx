@@ -1,9 +1,7 @@
 import { supabaseServer } from "@/lib/supabaseServer";
 import { notFound } from "next/navigation";
 import { getI18nProps } from "@/i18n/server";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star, CheckCircle, Mail, Phone, Calendar, Building2, ShieldCheck, BadgeCheck, CreditCard } from "lucide-react";
+import { Star, Mail, Phone, Calendar, Building2, ShieldCheck, BadgeCheck, CreditCard } from "lucide-react";
 import { formatDate } from "@/i18n/format";
 import { ProfileAdvertsList } from "@/components/profile/ProfileAdvertsList";
 import { ProfileReviewsList } from "@/components/profile/ProfileReviewsList";
@@ -302,7 +300,7 @@ function badgeI18nKey(badge: SellerBadge): string {
 }
 
 /**
- * Per-badge visual style following the mockup (lines 67-69):
+ * Per-badge visual style following the mockup (lines 586-589):
  *   verified_business / id_verified → trust-gradient pill (white text, teal→mint)
  *   vat_registered                  → teal-tint pill (oklch(0.56 0.13 178/.12) bg, --priD text)
  *   phone_verified / email_verified → --sec bg + border pill (--mintI text)
@@ -318,10 +316,10 @@ function SellerBadgePill({
   const baseStyle: React.CSSProperties = {
     display: "inline-flex",
     alignItems: "center",
-    height: "26px",
-    padding: "0 11px",
+    height: "28px",
+    padding: "0 12px",
     borderRadius: "999px",
-    fontSize: "11.5px",
+    fontSize: "12px",
     fontWeight: 700,
   };
 
@@ -331,7 +329,7 @@ function SellerBadgePill({
       return (
         <span
           className="lyvox-trust-gradient"
-          style={{ ...baseStyle, color: "#fff" }}
+          style={{ ...baseStyle, color: "#fff", boxShadow: "0 2px 8px oklch(0.55 0.12 172 / 0.3)" }}
         >
           {label}
         </span>
@@ -445,7 +443,6 @@ export default async function PublicProfilePage({
   const businessHasPublicName = isBusiness && business !== null;
 
   let headerName: string;
-  let avatarSeed: string;
   let avatarInitial: string;
 
   if (businessHasPublicName) {
@@ -453,14 +450,13 @@ export default async function PublicProfilePage({
     const publicName = business!.trade_name ?? business!.legal_name;
     headerName = publicName;
     // Use a generic "B" initial for business — do NOT use personal display_name/avatar
-    avatarSeed = "Business";
     avatarInitial = "B";
   } else {
     // физ (individual) path — apply the existing identity gate
     headerName = canSeeIdentity
       ? display_name || t("profile.anonymous")
       : t("seller_gate.name_hidden");
-    avatarSeed = canSeeIdentity && display_name ? display_name : "User";
+    // avatarInitial is gated: when not canSeeIdentity → "U" (no personal data)
     avatarInitial = canSeeIdentity && display_name ? display_name.charAt(0).toUpperCase() : "U";
   }
 
@@ -482,182 +478,293 @@ export default async function PublicProfilePage({
     ? reviews
     : reviews.map((r) => ({ ...r, author: r.author ? { ...r.author, display_name: null } : null }));
 
+  // Suppress unused warning — trust_score is loaded and available for future use
+  void trust_score;
+
   return (
-    <main className="container mx-auto max-w-5xl space-y-8 p-4 md:p-8">
-      {/* Profile Header */}
-      <div className="flex flex-col items-center gap-6 md:flex-row">
-        {businessHasPublicName ? (
-          /* Business avatar: generic building icon — personal avatar stays private */
-          <div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-primary bg-muted">
-            <Building2 className="h-10 w-10 text-muted-foreground" aria-hidden="true" />
-          </div>
-        ) : (
-          <Avatar className="h-24 w-24 border-2 border-primary">
-            <AvatarImage
-              src={`https://api.dicebear.com/8.x/initials/svg?seed=${avatarSeed}`}
-            />
-            <AvatarFallback>{avatarInitial}</AvatarFallback>
-          </Avatar>
-        )}
-        <div className="flex-1 text-center md:text-left">
-          <h1 className="text-3xl font-bold">{headerName}</h1>
-          {/* Aggregate rating — only show when reviews exist (0 reviews = 5.0 DB default, don't surface) */}
-          {reviews_count > 0 && rating !== null ? (
-            <div className="mt-1 flex items-center justify-center gap-1.5 text-sm text-muted-foreground md:justify-start">
-              <Star className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden="true" />
-              <span className="font-medium text-foreground">{rating}</span>
-              <span aria-hidden="true">·</span>
-              {/* t() here doesn't do param substitution — render count inline */}
-              <span>{t("reviews.aggregate_count").replace("{n}", String(reviews_count))}</span>
+    <main className="mx-auto w-full max-w-[1200px] px-4 py-6 md:px-6 md:py-8">
+
+      {/* ── Trust header card (mockup lines 578-601) ── */}
+      <section
+        className="relative mb-6 overflow-hidden"
+        style={{
+          border: "1px solid var(--border)",
+          borderRadius: "var(--r)",
+          boxShadow: "var(--shC)",
+        }}
+      >
+        {/* Radial gradient mesh background */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(50% 120% at 12% 0%, oklch(0.90 0.10 168 / 0.50), transparent 60%), radial-gradient(40% 120% at 90% 10%, oklch(0.78 0.12 200 / 0.28), transparent 60%), var(--card)",
+          }}
+        />
+
+        {/* Header content */}
+        <div
+          className="relative flex flex-wrap items-start gap-4 p-5 md:gap-5 md:p-6"
+          style={{ flexWrap: "wrap" }}
+        >
+          {/* Avatar — gradient square with initials (mockup line 581) */}
+          {businessHasPublicName ? (
+            <div
+              className="lyvox-trust-gradient flex flex-none items-center justify-center text-white"
+              style={{
+                width: "72px",
+                height: "72px",
+                borderRadius: "20px",
+                fontSize: "26px",
+                fontWeight: 800,
+                boxShadow: "var(--shC)",
+              }}
+              aria-hidden="true"
+            >
+              <Building2 className="h-8 w-8" />
             </div>
-          ) : reviews_count === 0 ? (
-            <div className="mt-1 text-sm text-muted-foreground text-center md:text-left">
-              {t("reviews.no_reviews")}
+          ) : (
+            <div
+              className="lyvox-trust-gradient flex flex-none items-center justify-center text-white"
+              style={{
+                width: "72px",
+                height: "72px",
+                borderRadius: "20px",
+                fontSize: "26px",
+                fontWeight: 800,
+                boxShadow: "var(--shC)",
+              }}
+              aria-label={headerName}
+            >
+              {avatarInitial}
             </div>
-          ) : null}
-          <div className="flex flex-wrap justify-center gap-2 pt-2 md:justify-start">
-            {/* Seller-type chip */}
-            {isBusiness ? (
-              /* Business seller → --mintI coloured label (mockup line 223) */
-              <span
+          )}
+
+          {/* Name, rating, type chip, badges */}
+          <div className="min-w-0 flex-1">
+            {/* Name + verification shield */}
+            <div className="mb-1 flex flex-wrap items-center gap-2">
+              <h1
                 style={{
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  color: "var(--mintI)",
+                  font: "800 22px/1.2 Inter, system-ui, sans-serif",
+                  letterSpacing: "-0.02em",
+                  margin: 0,
                 }}
               >
-                {t("profile.business_seller")}
-              </span>
-            ) : (
-              /* Private seller → grey-dot neutral chip (mockup line 207) */
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  fontSize: "12.5px",
-                  fontWeight: 700,
-                  color: "var(--mintI)",
-                }}
-              >
+                {headerName}
+              </h1>
+              {(canSeeIdentity || businessHasPublicName) && (badges.length > 0) && (
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--primary)" strokeWidth="2.6" aria-hidden="true">
+                  <path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z" />
+                  <path d="M9 12l2 2 4-4" />
+                </svg>
+              )}
+            </div>
+
+            {/* Seller-type chip + aggregate rating + member-since (mockup line 584) */}
+            <div className="mb-3 flex flex-wrap items-center gap-3">
+              {isBusiness ? (
+                /* Business seller → trust-gradient pill */
                 <span
+                  className="lyvox-trust-gradient inline-flex items-center"
                   style={{
-                    width: "7px",
-                    height: "7px",
+                    height: "25px",
+                    padding: "0 12px",
                     borderRadius: "999px",
-                    background: "oklch(0.62 0.025 198)",
-                    flexShrink: 0,
+                    color: "#fff",
+                    fontSize: "12px",
+                    fontWeight: 700,
                   }}
+                >
+                  {t("profile.business_seller")}
+                </span>
+              ) : (
+                /* Private seller → grey-dot neutral chip */
+                <span
+                  className="inline-flex items-center gap-[6px]"
+                  style={{ fontSize: "13px", fontWeight: 600, color: "var(--mintI)" }}
+                >
+                  <span
+                    style={{
+                      width: "7px",
+                      height: "7px",
+                      borderRadius: "999px",
+                      background: "oklch(0.62 0.025 198)",
+                      flexShrink: 0,
+                    }}
+                  />
+                  {t("profile.private_seller")}
+                </span>
+              )}
+
+              {/* Aggregate ★ rating */}
+              {reviews_count > 0 && rating !== null ? (
+                <span className="inline-flex items-center gap-[5px]" style={{ fontSize: "13.5px", fontWeight: 600 }}>
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="var(--amber)" aria-hidden="true">
+                    <path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z" />
+                  </svg>
+                  <strong style={{ fontWeight: 800 }}>{rating}</strong>
+                  <span style={{ color: "var(--muted-foreground)", fontWeight: 500 }}>
+                    · {t("reviews.aggregate_count").replace("{n}", String(reviews_count))}
+                  </span>
+                </span>
+              ) : reviews_count === 0 ? (
+                <span style={{ fontSize: "13px", color: "var(--muted-foreground)", fontWeight: 500 }}>
+                  {t("reviews.no_reviews")}
+                </span>
+              ) : null}
+
+              {/* Member since */}
+              {created_at && (
+                <span style={{ fontSize: "13px", color: "var(--muted-foreground)", fontWeight: 500 }}>
+                  <Calendar
+                    className="mr-1 inline h-[13px] w-[13px]"
+                    aria-hidden="true"
+                    style={{ verticalAlign: "-0.1em" }}
+                  />
+                  {t("profile.member_since")}{" "}
+                  {formatDate(created_at, locale, { year: "numeric", month: "short" })}
+                </span>
+              )}
+            </div>
+
+            {/* Trust badge row (mockup lines 585-590) */}
+            <div className="flex flex-wrap gap-2">
+              {badges.map((badge) => (
+                <SellerBadgePill
+                  key={badge}
+                  badge={badge}
+                  label={
+                    <>
+                      <BadgeIcon badge={badge} />
+                      {t(badgeI18nKey(badge))}
+                    </>
+                  }
                 />
-                {t("profile.private_seller")}
-              </span>
-            )}
-            {/* Trust badge row — derived, capped at 3, replaces ad-hoc email/phone/trusted cluster */}
-            {badges.map((badge) => (
-              <SellerBadgePill key={badge} badge={badge} label={
-                <>
-                  <BadgeIcon badge={badge} />
-                  {t(badgeI18nKey(badge))}
-                </>
-              } />
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+
+        {/* Tab-strip (Listings / Reviews count) — decorative, non-interactive (mockup lines 597-601) */}
+        <div
+          className="relative flex"
+          style={{ borderTop: "1px solid var(--border)" }}
+        >
+          <span
+            style={{
+              padding: "13px 22px",
+              font: "700 13.5px Inter, system-ui, sans-serif",
+              color: "var(--priD)",
+              borderBottom: "2px solid var(--primary)",
+            }}
+          >
+            {t("profile.user_listings")}{" "}
+            <span style={{ color: "var(--muted-foreground)", fontWeight: 600 }}>{adverts_count}</span>
+          </span>
+          {reviews_count > 0 && (
+            <span
+              style={{
+                padding: "13px 22px",
+                font: "600 13.5px Inter, system-ui, sans-serif",
+                color: "var(--muted-foreground)",
+              }}
+            >
+              {t("profile.reviews")}{" "}
+              <span style={{ fontWeight: 500 }}>{reviews_count}</span>
+            </span>
+          )}
+        </div>
+      </section>
 
       {/* Identity gate for физ (individual) profiles only.
           Business profiles: the legal name is already public — no gate needed. */}
       {!businessHasPublicName && !canSeeIdentity && <SellerIdentityGate />}
 
-      {/* DSA Trader Panel — public for all viewers (юр only) */}
-      {businessHasPublicName && (
-        <TraderPanel business={business!} t={tPanel} locale={locale} />
-      )}
+      {/* ── Main content: listings grid (left) + sidebar (right) ── */}
+      {/* Desktop: 2-col layout (listings | sidebar); Mobile: stacked */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_320px] md:items-start lg:grid-cols-[1fr_330px]">
 
-      {/* Stats & Info */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("profile.trust_score")}</CardTitle>
-            <Star className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{trust_score}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("profile.verification")}</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="flex flex-col gap-1 text-sm">
-            <div className="flex items-center gap-2">
-              <Mail
-                className={`h-4 w-4 ${verified_email ? "text-green-500" : "text-muted-foreground"}`}
-              />
-              <span>{t("profile.email")}</span>
+        {/* LEFT: listings grid */}
+        <div>
+          {active_adverts.length > 0 ? (
+            <ProfileAdvertsList adverts={active_adverts} variant="grid" />
+          ) : (
+            <div
+              className="flex items-center justify-center py-16 text-center text-muted-foreground"
+              style={{
+                border: "1px dashed var(--border)",
+                borderRadius: "var(--r)",
+              }}
+            >
+              <p style={{ font: "500 14px Inter, system-ui, sans-serif" }}>
+                {t("profile.no_adverts_found")}
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Phone
-                className={`h-4 w-4 ${verified_phone ? "text-green-500" : "text-muted-foreground"}`}
-              />
-              <span>{t("profile.phone")}</span>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("profile.member_since")}</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {created_at
-                ? formatDate(created_at, locale, { year: "numeric", month: "short" })
-                : "-"}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("profile.active_listings")}</CardTitle>
-            <Star className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{adverts_count}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Listings and Reviews */}
-      {(active_adverts.length > 0 || reviews.length > 0) && (
-        <div className="space-y-6">
-          {active_adverts.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  {t("profile.user_listings")} ({adverts_count})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ProfileAdvertsList adverts={active_adverts} />
-              </CardContent>
-            </Card>
-          )}
-          {reviews.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  {t("profile.user_reviews")} ({reviews_count})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ProfileReviewsList reviews={displayReviews} />
-              </CardContent>
-            </Card>
           )}
         </div>
-      )}
+
+        {/* RIGHT: sidebar — TraderPanel (юр) + reviews */}
+        <div className="flex flex-col gap-4">
+
+          {/* DSA Trader Panel — public for all viewers (юр only) */}
+          {businessHasPublicName && (
+            <TraderPanel business={business!} t={tPanel} locale={locale} />
+          )}
+
+          {/* Reviews sidebar panel (mockup lines 622-625) */}
+          {reviews_count > 0 && rating !== null ? (
+            <section
+              style={{
+                background: "var(--card)",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--r)",
+                padding: "18px",
+                boxShadow: "var(--shS)",
+              }}
+            >
+              {/* Aggregate score */}
+              <div className="mb-3 flex items-baseline gap-2">
+                <span
+                  style={{ font: "800 30px/1 Inter, system-ui, sans-serif", letterSpacing: "-0.02em" }}
+                >
+                  {rating}
+                </span>
+                <span className="flex gap-0.5">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <svg key={i} viewBox="0 0 24 24" width="14" height="14" fill={i <= Math.round(rating) ? "var(--amber)" : "var(--muted-foreground)"} aria-hidden="true">
+                      <path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z" />
+                    </svg>
+                  ))}
+                </span>
+                <span style={{ fontSize: "12px", color: "var(--muted-foreground)", fontWeight: 500 }}>
+                  {reviews_count}
+                </span>
+              </div>
+
+              {/* Reviews list */}
+              <ProfileReviewsList reviews={displayReviews} />
+            </section>
+          ) : reviews_count === 0 ? (
+            /* No reviews yet — minimal placeholder */
+            <section
+              style={{
+                background: "var(--card)",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--r)",
+                padding: "18px",
+                boxShadow: "var(--shS)",
+              }}
+            >
+              <p style={{ fontSize: "13px", color: "var(--muted-foreground)", margin: 0 }}>
+                {t("reviews.no_reviews")}
+              </p>
+            </section>
+          ) : null}
+        </div>
+      </div>
     </main>
   );
 }
