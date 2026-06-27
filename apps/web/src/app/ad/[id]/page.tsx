@@ -23,6 +23,7 @@ import { getFirstImage } from "@/lib/media/getFirstImage";
 import type { Tables } from "@/lib/supabaseTypes";
 import { TraderPanel } from "@/components/business/TraderPanel";
 import type { BusinessPublicData } from "@/components/business/TraderPanel";
+import { LeaveReviewForm } from "@/components/reviews/LeaveReviewForm";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -738,6 +739,30 @@ export default async function AdvertPage({ params }: PageProps) {
 
       {data.businessData ? (
         <TraderPanel business={data.businessData} t={translate} locale={locale} />
+      ) : null}
+
+      {/* Leave a review — shown only to signed-in viewers who are NOT the advert owner.
+          The API chat-gate handles eligibility; NO_CONVERSATION surfaces as an inline message. */}
+      {currentUserId && currentUserId !== data.seller.id ? (
+        <LeaveReviewForm
+          advertId={data.advert.id}
+          messages={{
+            reviews: {
+              leave_title: translate("reviews.leave_title", "Leave a Review"),
+              rating_label: translate("reviews.rating_label", "Rating"),
+              comment_label: translate("reviews.comment_label", "Comment (optional)"),
+              comment_placeholder: translate("reviews.comment_placeholder", "Share your experience with this seller..."),
+              submit: translate("reviews.submit", "Submit review"),
+              success: translate("reviews.success", "Your review has been submitted!"),
+              must_contact: translate("reviews.must_contact", "You can review this seller after contacting them about this listing."),
+              already: translate("reviews.already", "You've already reviewed this listing."),
+              self: translate("reviews.self", "You cannot review your own listing."),
+              error: translate("reviews.error", "Something went wrong. Please try again."),
+              aggregate_count: translate("reviews.aggregate_count", "{n} reviews"),
+              no_reviews: translate("reviews.no_reviews", "No reviews yet"),
+            },
+          }}
+        />
       ) : null}
 
       {showDetails ? (

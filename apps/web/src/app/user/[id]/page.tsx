@@ -430,6 +430,20 @@ export default async function PublicProfilePage({
         )}
         <div className="flex-1 text-center md:text-left">
           <h1 className="text-3xl font-bold">{headerName}</h1>
+          {/* Aggregate rating — only show when reviews exist (0 reviews = 5.0 DB default, don't surface) */}
+          {reviews_count > 0 && rating !== null ? (
+            <div className="mt-1 flex items-center justify-center gap-1.5 text-sm text-muted-foreground md:justify-start">
+              <Star className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden="true" />
+              <span className="font-medium text-foreground">{rating}</span>
+              <span aria-hidden="true">·</span>
+              {/* t() here doesn't do param substitution — render count inline */}
+              <span>{t("reviews.aggregate_count").replace("{n}", String(reviews_count))}</span>
+            </div>
+          ) : reviews_count === 0 ? (
+            <div className="mt-1 text-sm text-muted-foreground text-center md:text-left">
+              {t("reviews.no_reviews")}
+            </div>
+          ) : null}
           <div className="flex flex-wrap justify-center gap-2 pt-2 md:justify-start">
             {/* Seller-type chip */}
             {isBusiness ? (

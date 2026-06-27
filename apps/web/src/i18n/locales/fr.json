@@ -1843,5 +1843,19 @@
     "invite_error": "L'invitation n'a pas pu être envoyée",
     "removed_ok": "Membre supprimé",
     "accepted_ok": "Invitation acceptée"
+  },
+  "reviews": {
+    "leave_title": "Laisser un avis",
+    "rating_label": "Note",
+    "comment_label": "Commentaire (facultatif)",
+    "comment_placeholder": "Partagez votre expérience avec ce vendeur...",
+    "submit": "Soumettre l'avis",
+    "success": "Votre avis a été soumis !",
+    "must_contact": "Vous pouvez évaluer ce vendeur après l'avoir contacté à propos de cette annonce.",
+    "already": "Vous avez déjà évalué cette annonce.",
+    "self": "Vous ne pouvez pas évaluer votre propre annonce.",
+    "error": "Une erreur s'est produite. Veuillez réessayer.",
+    "aggregate_count": "{n} avis",
+    "no_reviews": "Aucun avis pour l'instant"
   }
 }

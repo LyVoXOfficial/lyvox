@@ -1843,5 +1843,19 @@
     "invite_error": "Uitnodiging kon niet worden verstuurd",
     "removed_ok": "Lid verwijderd",
     "accepted_ok": "Uitnodiging geaccepteerd"
+  },
+  "reviews": {
+    "leave_title": "Laat een beoordeling achter",
+    "rating_label": "Beoordeling",
+    "comment_label": "Opmerking (optioneel)",
+    "comment_placeholder": "Deel uw ervaring met deze verkoper...",
+    "submit": "Beoordeling indienen",
+    "success": "Uw beoordeling is ingediend!",
+    "must_contact": "U kunt deze verkoper beoordelen nadat u contact heeft opgenomen over deze advertentie.",
+    "already": "U heeft deze advertentie al beoordeeld.",
+    "self": "U kunt uw eigen advertentie niet beoordelen.",
+    "error": "Er is iets misgegaan. Probeer het opnieuw.",
+    "aggregate_count": "{n} beoordelingen",
+    "no_reviews": "Nog geen beoordelingen"
   }
 }

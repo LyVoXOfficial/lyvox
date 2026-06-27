@@ -1843,5 +1843,19 @@
     "invite_error": "Einladung konnte nicht gesendet werden",
     "removed_ok": "Mitglied entfernt",
     "accepted_ok": "Einladung angenommen"
+  },
+  "reviews": {
+    "leave_title": "Bewertung abgeben",
+    "rating_label": "Bewertung",
+    "comment_label": "Kommentar (optional)",
+    "comment_placeholder": "Teilen Sie Ihre Erfahrung mit diesem Verkäufer...",
+    "submit": "Bewertung absenden",
+    "success": "Ihre Bewertung wurde eingereicht!",
+    "must_contact": "Sie können diesen Verkäufer bewerten, nachdem Sie ihn bezüglich dieses Inserats kontaktiert haben.",
+    "already": "Sie haben dieses Inserat bereits bewertet.",
+    "self": "Sie können Ihr eigenes Inserat nicht bewerten.",
+    "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+    "aggregate_count": "{n} Bewertungen",
+    "no_reviews": "Noch keine Bewertungen"
   }
 }

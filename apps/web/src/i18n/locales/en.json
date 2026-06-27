@@ -1843,5 +1843,19 @@
     "invite_error": "Could not send invitation",
     "removed_ok": "Member removed",
     "accepted_ok": "Invitation accepted"
+  },
+  "reviews": {
+    "leave_title": "Leave a Review",
+    "rating_label": "Rating",
+    "comment_label": "Comment (optional)",
+    "comment_placeholder": "Share your experience with this seller...",
+    "submit": "Submit review",
+    "success": "Your review has been submitted!",
+    "must_contact": "You can review this seller after contacting them about this listing.",
+    "already": "You've already reviewed this listing.",
+    "self": "You cannot review your own listing.",
+    "error": "Something went wrong. Please try again.",
+    "aggregate_count": "{n} reviews",
+    "no_reviews": "No reviews yet"
   }
 }
