@@ -161,7 +161,7 @@ export default function ChatListClient({ conversations }: ChatListClientProps) {
                 {/* Main content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-0.5">
-                    <span className={`text-sm font-semibold truncate ${unread ? "text-foreground" : "text-foreground"}`}>
+                    <span className="text-sm font-semibold truncate text-foreground">
                       {peerName}
                     </span>
                     {conversation.last_message_at && (
