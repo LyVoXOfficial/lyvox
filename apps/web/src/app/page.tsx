@@ -462,7 +462,7 @@ export default async function Home() {
                 </div>
               </div>
 
-              {/* Business listings (derived: free ads count as proxy; label is the key stat) */}
+              {/* Free listings */}
               <div className="flex items-center gap-[14px]">
                 <span
                   className="grid shrink-0 place-items-center"
@@ -475,7 +475,8 @@ export default async function Home() {
                   }}
                 >
                   <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
-                    <path d="M3 12h4l2 5 4-12 2 7h6" />
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v5l3 3" />
                   </svg>
                 </span>
                 <div>
@@ -483,7 +484,7 @@ export default async function Home() {
                     {freeAds.length.toLocaleString()}
                   </div>
                   <div className="mt-1 text-muted-foreground" style={{ fontSize: "13px" }}>
-                    {t("home.stat_business_label")}
+                    {t("home.stat_free_label")}
                   </div>
                 </div>
               </div>
@@ -549,13 +550,8 @@ export default async function Home() {
         {/* ── TOP SELLERS ─────────────────────────────────────────────── */}
         <TopSellersCarousel />
 
-        {/* ── TOP ADVERT (fold into AdCard with Boost badge) ──────────── */}
-        <section className="space-y-4">
-          <SectionTitle>{t("home.top_advert")}</SectionTitle>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:gap-4">
-            <TopAdvertCard />
-          </div>
-        </section>
+        {/* ── TOP ADVERT — section title + card owned by TopAdvertCard ── */}
+        <TopAdvertCard />
 
         {/* ── FREE ADS (kept from original) ───────────────────────────── */}
         <section className="space-y-4">

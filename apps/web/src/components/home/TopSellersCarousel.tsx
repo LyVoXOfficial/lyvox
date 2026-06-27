@@ -81,18 +81,16 @@ function SellerCard({ seller, tr }: { seller: TopSeller; tr: (k: string, fb: str
           )}
         </div>
 
-        {/* Seller type label */}
+        {/* Seller type label — all sellers in this view are verified (view WHERE requires both) */}
         <div
           className="font-semibold"
           style={{
             fontSize: "12px",
-            color: isFullyVerified(seller) ? "var(--mintI)" : "var(--muted-foreground)",
+            color: "var(--mintI)",
             margin: "3px 0 2px",
           }}
         >
-          {isFullyVerified(seller)
-            ? tr("home.business_seller", "Business seller")
-            : tr("home.private_seller", "Private seller")}
+          {tr("home.verified_seller", "Verified seller")}
         </div>
 
         {/* Rating */}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import AdCard from "@/components/ad-card";
+import { useI18n } from "@/i18n";
 
 type TopAdvert = {
   id: string;
@@ -19,11 +20,14 @@ type TopAdvert = {
 /**
  * TopAdvertCard — fetches from /api/top-adverts and renders the #1 advert
  * through the standard AdCard with a synthetic "boost" benefit badge.
+ * Owns its section header so the title never orphans when data is empty.
  * All data-fetch and route (/api/top-adverts) logic is preserved unchanged.
  */
 export default function TopAdvertCard() {
   const [advert, setAdvert] = useState<TopAdvert | null>(null);
   const [loading, setLoading] = useState(true);
+  const { t } = useI18n();
+  const tr = (k: string, fb: string) => { const v = t(k); return v === k ? fb : v; };
 
   useEffect(() => {
     async function load() {
@@ -34,7 +38,7 @@ export default function TopAdvertCard() {
           setAdvert(body.data.adverts[0]);
         }
       } catch {
-        // silent — card just won't render
+        // silent — section won't render
       } finally {
         setLoading(false);
       }
@@ -43,22 +47,28 @@ export default function TopAdvertCard() {
   }, []);
 
   if (loading) {
-    // Skeleton matching AdCard dimensions
+    // Skeleton matching AdCard dimensions — no orphan title during load
     return (
-      <div
-        className="animate-pulse overflow-hidden rounded-[var(--r)] border border-border bg-card"
-        style={{ boxShadow: "var(--shS)" }}
-      >
-        <div className="bg-muted" style={{ aspectRatio: "4/3" }} />
-        <div className="space-y-2 p-[14px]">
-          <div className="h-5 w-1/3 rounded bg-muted" />
-          <div className="h-4 w-full rounded bg-muted" />
-          <div className="h-3 w-2/3 rounded bg-muted" />
+      <section className="space-y-4">
+        <div className="h-7 w-40 animate-pulse rounded bg-muted" />
+        <div className="max-w-[280px]">
+          <div
+            className="animate-pulse overflow-hidden rounded-[var(--r)] border border-border bg-card"
+            style={{ boxShadow: "var(--shS)" }}
+          >
+            <div className="bg-muted" style={{ aspectRatio: "4/3" }} />
+            <div className="space-y-2 p-[14px]">
+              <div className="h-5 w-1/3 rounded bg-muted" />
+              <div className="h-4 w-full rounded bg-muted" />
+              <div className="h-3 w-2/3 rounded bg-muted" />
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
     );
   }
 
+  // Nothing to show — return null (no orphan header because title is inside)
   if (!advert) return null;
 
   // Synthesise a "boost" benefit so BenefitsBadge renders the amber Boost pill
@@ -70,15 +80,26 @@ export default function TopAdvertCard() {
   ];
 
   return (
-    <AdCard
-      id={advert.id}
-      title={advert.title}
-      price={advert.price}
-      currency={advert.currency}
-      location={advert.location}
-      image={advert.image}
-      likeCount={advert.like_count}
-      benefits={boostBenefit}
-    />
+    <section className="space-y-4">
+      <h2
+        className="font-extrabold tracking-tight text-foreground"
+        style={{ fontSize: "22px", letterSpacing: "-0.02em", margin: 0 }}
+      >
+        {tr("home.top_advert", "Top advert")}
+      </h2>
+      {/* Single card — not wrapped in a grid to avoid 1/4-width single-item awkwardness */}
+      <div className="max-w-[280px]">
+        <AdCard
+          id={advert.id}
+          title={advert.title}
+          price={advert.price}
+          currency={advert.currency}
+          location={advert.location}
+          image={advert.image}
+          likeCount={advert.like_count}
+          benefits={boostBenefit}
+        />
+      </div>
+    </section>
   );
 }
