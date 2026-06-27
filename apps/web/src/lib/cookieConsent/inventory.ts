@@ -35,6 +35,12 @@ export const STORAGE_INVENTORY: {
     purpose: "Operational error logging (sessionStorage, development-only) — legitimate interest, no production persistence",
     lib: "lib/errorLogger.ts",
   },
+  {
+    key: "comparison-instructions-dismissed",
+    category: "necessary",
+    purpose: "Remembers the visitor dismissed the favourites-comparison help hint (UI preference)",
+    lib: "components/comparison/ComparisonInstructions.tsx",
+  },
   // ── Functional ───────────────────────────────────────────────────────────
   {
     key: "lyvox:recentlyViewed",
