@@ -9,6 +9,7 @@ import { ProOnboardingWizard } from "./ProOnboardingWizard";
 import { BusinessCabinet } from "./BusinessCabinet";
 import { isCapabilityEnabled } from "@/lib/capabilities";
 import { signMediaUrls } from "@/lib/media/signMediaUrls";
+import { isPro } from "@/lib/billing/proStatus";
 import type { ProfileAdvert } from "@/lib/profileTypes";
 import type { BusinessMember } from "./BusinessCabinet";
 
@@ -97,6 +98,15 @@ export default async function ProPage() {
     .maybeSingle();
 
   if (business) {
+    // Load the current user's Pro status
+    const { data: profileRow } = await supabase
+      .from("profiles")
+      .select("pro_until")
+      .eq("id", user.id)
+      .maybeSingle();
+    const proUntil = profileRow?.pro_until ?? null;
+    const userIsPro = isPro({ pro_until: proUntil });
+
     // Load listings for this business (active, with media, limit 20)
     const { data: advertRows } = await supabase
       .from("adverts")
@@ -178,6 +188,8 @@ export default async function ProPage() {
           listings={listings}
           members={members}
           proSubscriptionsEnabled={isCapabilityEnabled("pro_subscriptions")}
+          isPro={userIsPro}
+          proUntil={proUntil}
           locale={locale}
           messages={messages}
         />

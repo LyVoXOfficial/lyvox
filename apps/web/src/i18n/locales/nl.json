@@ -1721,6 +1721,11 @@
       "unnamed_member": "Lid",
       "upgrade_heading": "Upgrade naar Pro",
       "upgrade_body": "Ontgrendel geavanceerde verkopersfuncties met een Pro-abonnement.",
+      "upgrade": {
+        "cta": "Upgraden naar Pro",
+        "active_until": "Pro actief tot",
+        "error": "Upgrade kon niet worden gestart. Probeer het opnieuw."
+      },
       "edit": {
         "heading": "Bedrijfsgegevens bewerken",
         "trade_name": "Handelsnaam",

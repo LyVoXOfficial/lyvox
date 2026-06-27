@@ -1721,6 +1721,11 @@
       "unnamed_member": "Mitglied",
       "upgrade_heading": "Auf Pro upgraden",
       "upgrade_body": "Schalten Sie erweiterte Verkäuferfunktionen mit einem Pro-Abonnement frei.",
+      "upgrade": {
+        "cta": "Auf Pro upgraden",
+        "active_until": "Pro aktiv bis",
+        "error": "Upgrade konnte nicht gestartet werden. Bitte versuchen Sie es erneut."
+      },
       "edit": {
         "heading": "Unternehmensdaten bearbeiten",
         "trade_name": "Handelsname",

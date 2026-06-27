@@ -1721,6 +1721,11 @@
       "unnamed_member": "Membre",
       "upgrade_heading": "Passer à Pro",
       "upgrade_body": "Débloquez des fonctionnalités vendeur avancées avec un abonnement Pro.",
+      "upgrade": {
+        "cta": "Passer à Pro",
+        "active_until": "Pro actif jusqu'au",
+        "error": "Impossible de démarrer la mise à niveau. Veuillez réessayer."
+      },
       "edit": {
         "heading": "Modifier les informations de l'entreprise",
         "trade_name": "Nom commercial",

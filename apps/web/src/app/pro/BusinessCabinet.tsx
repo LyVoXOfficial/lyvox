@@ -5,7 +5,9 @@ import { ProfileAdvertsList } from "@/components/profile/ProfileAdvertsList";
 import { deriveSellerBadges } from "@/lib/profile/sellerBadges";
 import type { ProfileAdvert } from "@/lib/profileTypes";
 import type { Locale } from "@/lib/i18n";
+import { formatDate } from "@/i18n/format";
 import { BusinessEditForm } from "./BusinessEditForm";
+import { UpgradeProButton } from "./UpgradeProButton";
 
 export type BusinessMember = {
   user_id: string;
@@ -26,6 +28,8 @@ type Props = {
   listings: ProfileAdvert[];
   members: BusinessMember[];
   proSubscriptionsEnabled: boolean;
+  isPro: boolean;
+  proUntil: string | null;
   locale: Locale;
   messages: Record<string, any>;
 };
@@ -35,6 +39,8 @@ export function BusinessCabinet({
   listings,
   members,
   proSubscriptionsEnabled,
+  isPro,
+  proUntil,
   locale,
   messages,
 }: Props) {
@@ -150,7 +156,7 @@ export function BusinessCabinet({
         </CardContent>
       </Card>
 
-      {/* Upgrade to Pro CTA — flag-gated, hidden when pro_subscriptions is OFF */}
+      {/* Upgrade to Pro CTA / Pro status — flag-gated, hidden when pro_subscriptions is OFF */}
       {proSubscriptionsEnabled && (
         <Card className="border-primary/30 bg-primary/5">
           <CardHeader>
@@ -162,9 +168,19 @@ export function BusinessCabinet({
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              {tf("pro.cabinet.upgrade_body", "Unlock advanced seller features with a Pro subscription.")}
-            </p>
+            {isPro && proUntil ? (
+              <p className="text-sm font-medium text-primary">
+                {tf("pro.cabinet.upgrade.active_until", "Pro active until")}{" "}
+                {formatDate(proUntil, locale, { dateStyle: "medium" })}
+              </p>
+            ) : (
+              <>
+                <p className="mb-3 text-sm text-muted-foreground">
+                  {tf("pro.cabinet.upgrade_body", "Unlock advanced seller features with a Pro subscription.")}
+                </p>
+                <UpgradeProButton locale={locale} messages={messages} />
+              </>
+            )}
           </CardContent>
         </Card>
       )}

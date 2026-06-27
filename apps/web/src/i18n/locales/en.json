@@ -1721,6 +1721,11 @@
       "unnamed_member": "Member",
       "upgrade_heading": "Upgrade to Pro",
       "upgrade_body": "Unlock advanced seller features with a Pro subscription.",
+      "upgrade": {
+        "cta": "Upgrade to Pro",
+        "active_until": "Pro active until",
+        "error": "Could not start upgrade. Please try again."
+      },
       "edit": {
         "heading": "Edit business details",
         "trade_name": "Trade name",
