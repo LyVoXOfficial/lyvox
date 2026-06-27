@@ -80,7 +80,8 @@
     "action": "action",
     "confirm": "Confirmer",
     "close": "Fermer",
-    "recent": "Récent"
+    "recent": "Récent",
+    "imprint": "Mentions légales"
   },
   "filters": {
     "sort_by": "Trier par",
@@ -1774,6 +1775,37 @@
     "policy_intro": "Cette page répertorie tous les cookies et éléments de stockage du navigateur utilisés par LyVoX, regroupés par catégorie. Les éléments nécessaires sont toujours actifs ; les autres nécessitent votre consentement.",
     "policy_draft_note": "Cette politique est une ébauche de travail. Le texte juridique complet sera ajouté avant le lancement public.",
     "manage": "Gérer les paramètres des cookies"
+  },
+  "legal": {
+    "draft_notice": "⚠ Brouillon — ce contenu est en attente d'une révision juridique finale et n'est pas encore juridiquement contraignant.",
+    "privacy_title": "Politique de confidentialité",
+    "privacy_intro": "Cette politique explique comment LyVoX traite les données personnelles conformément au RGPD.",
+    "terms_title": "Conditions d'utilisation",
+    "terms_intro": "Ces conditions régissent votre utilisation de LyVoX. Il s'agit d'un brouillon en attente de révision juridique finale.",
+    "imprint_title": "Mentions légales",
+    "rights_title": "Vos droits RGPD",
+    "ropa_title": "Registre des activités de traitement (Art.30 RGPD)",
+    "ropa_col_purpose": "Finalité",
+    "ropa_col_basis": "Base légale",
+    "ropa_col_data": "Catégories de données",
+    "ropa_col_processors": "Sous-traitants",
+    "ropa_col_retention": "Conservation",
+    "controller_title": "Responsable du traitement",
+    "processors_title": "Sous-traitants (Art.28)",
+    "section_collection": "Collecte des données",
+    "section_sharing": "Partage des données",
+    "section_security": "Sécurité",
+    "section_changes": "Modifications de cette politique",
+    "terms_service_desc": "Description du service",
+    "terms_acceptable_use": "Utilisation acceptable",
+    "terms_report_illegal": "Signalement de contenu illicite (DSA Art.16)",
+    "terms_paid_ranking": "Classement payant et boosts",
+    "terms_liability": "Responsabilité",
+    "terms_governing_law": "Droit applicable et juridiction",
+    "terms_contact": "Contact",
+    "imprint_identity": "Identité de l'entité",
+    "imprint_dsa_contact": "Point de contact unique DSA Art.11",
+    "imprint_platform": "Description de la plateforme"
   },
   "account": {
     "delete": {

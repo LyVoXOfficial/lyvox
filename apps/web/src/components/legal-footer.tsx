@@ -38,6 +38,7 @@ export default function LegalFooter() {
             <li><Link className="hover:text-foreground" href="/legal/terms">{translate("common.terms", "Terms")}</Link></li>
             <li><Link className="hover:text-foreground" href="/legal/privacy">{translate("common.privacy", "Privacy")}</Link></li>
             <li><Link className="hover:text-foreground" href="/legal/cookies">{translate("common.cookies", "Cookies")}</Link></li>
+            <li><Link className="hover:text-foreground" href="/legal/imprint">{translate("common.imprint", "Imprint")}</Link></li>
             <li>
               <button
                 type="button"

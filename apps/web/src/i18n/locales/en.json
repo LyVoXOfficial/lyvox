@@ -80,7 +80,8 @@
     "action": "action",
     "confirm": "Confirm",
     "close": "Close",
-    "recent": "Recent"
+    "recent": "Recent",
+    "imprint": "Imprint"
   },
   "filters": {
     "sort_by": "Sort by",
@@ -1774,6 +1775,37 @@
     "policy_intro": "This page lists all cookies and browser storage items used by LyVoX, grouped by category. Necessary items are always active; others require your consent.",
     "policy_draft_note": "This policy is a working draft. Full legal text will be added before public launch.",
     "manage": "Manage cookie settings"
+  },
+  "legal": {
+    "draft_notice": "⚠ Draft — this content is pending final legal review and is not yet legally binding.",
+    "privacy_title": "Privacy Policy",
+    "privacy_intro": "This policy explains how LyVoX processes personal data in accordance with GDPR.",
+    "terms_title": "Terms of Service",
+    "terms_intro": "These terms govern your use of LyVoX. They are a working draft pending final legal review.",
+    "imprint_title": "Imprint",
+    "rights_title": "Your GDPR Rights",
+    "ropa_title": "Record of Processing Activities (ROPA)",
+    "ropa_col_purpose": "Purpose",
+    "ropa_col_basis": "Lawful Basis",
+    "ropa_col_data": "Data Categories",
+    "ropa_col_processors": "Processors",
+    "ropa_col_retention": "Retention",
+    "controller_title": "Data Controller",
+    "processors_title": "Sub-processors",
+    "section_collection": "Data Collection",
+    "section_sharing": "Data Sharing",
+    "section_security": "Security",
+    "section_changes": "Changes to this Policy",
+    "terms_service_desc": "Service Description",
+    "terms_acceptable_use": "Acceptable Use",
+    "terms_report_illegal": "Reporting Illegal Content (DSA Art.16)",
+    "terms_paid_ranking": "Paid Ranking & Boost Disclosure",
+    "terms_liability": "Liability",
+    "terms_governing_law": "Governing Law & Jurisdiction",
+    "terms_contact": "Contact",
+    "imprint_identity": "Entity Identity",
+    "imprint_dsa_contact": "DSA Art.11 Single Point of Contact",
+    "imprint_platform": "Platform Description"
   },
   "account": {
     "delete": {

@@ -80,7 +80,8 @@
     "action": "actie",
     "confirm": "Bevestigen",
     "close": "Sluiten",
-    "recent": "Recent"
+    "recent": "Recent",
+    "imprint": "Colofon"
   },
   "filters": {
     "sort_by": "Sorteren op",
@@ -1774,6 +1775,37 @@
     "policy_intro": "Deze pagina geeft een overzicht van alle cookies en browseropslagitems die LyVoX gebruikt, gegroepeerd per categorie. Noodzakelijke items zijn altijd actief; andere vereisen uw toestemming.",
     "policy_draft_note": "Dit beleid is een werkversie. De volledige juridische tekst wordt toegevoegd vóór de publieke lancering.",
     "manage": "Cookie-instellingen beheren"
+  },
+  "legal": {
+    "draft_notice": "⚠ Concept — deze inhoud is in afwachting van definitieve juridische beoordeling en is nog niet juridisch bindend.",
+    "privacy_title": "Privacybeleid",
+    "privacy_intro": "Dit beleid legt uit hoe LyVoX persoonsgegevens verwerkt overeenkomstig de AVG.",
+    "terms_title": "Gebruiksvoorwaarden",
+    "terms_intro": "Deze voorwaarden regelen uw gebruik van LyVoX. Dit is een werkversie in afwachting van definitieve juridische beoordeling.",
+    "imprint_title": "Colofon",
+    "rights_title": "Uw AVG-rechten",
+    "ropa_title": "Register van verwerkingsactiviteiten (AVG Art.30)",
+    "ropa_col_purpose": "Doel",
+    "ropa_col_basis": "Rechtsgrond",
+    "ropa_col_data": "Gegevenscategorieën",
+    "ropa_col_processors": "Verwerkers",
+    "ropa_col_retention": "Bewaartermijn",
+    "controller_title": "Verwerkingsverantwoordelijke",
+    "processors_title": "Sub-verwerkers",
+    "section_collection": "Gegevensverzameling",
+    "section_sharing": "Gegevensdeling",
+    "section_security": "Beveiliging",
+    "section_changes": "Wijzigingen in dit beleid",
+    "terms_service_desc": "Dienstomschrijving",
+    "terms_acceptable_use": "Aanvaardbaar gebruik",
+    "terms_report_illegal": "Melding van illegale inhoud (DSA Art.16)",
+    "terms_paid_ranking": "Betaalde rangschikking en boosts",
+    "terms_liability": "Aansprakelijkheid",
+    "terms_governing_law": "Toepasselijk recht en bevoegde rechter",
+    "terms_contact": "Contact",
+    "imprint_identity": "Identiteit van de entiteit",
+    "imprint_dsa_contact": "DSA Art.11 enkel contactpunt",
+    "imprint_platform": "Platformbeschrijving"
   },
   "account": {
     "delete": {

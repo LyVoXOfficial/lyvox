@@ -80,7 +80,8 @@
     "action": "Aktion",
     "confirm": "Bestätigen",
     "close": "Schließen",
-    "recent": "Kürzlich"
+    "recent": "Kürzlich",
+    "imprint": "Impressum"
   },
   "filters": {
     "sort_by": "Sortieren nach",
@@ -1774,6 +1775,37 @@
     "policy_intro": "Diese Seite listet alle Cookies und Browser-Speicherelemente auf, die LyVoX verwendet, gruppiert nach Kategorie. Notwendige Elemente sind immer aktiv; andere erfordern Ihre Zustimmung.",
     "policy_draft_note": "Diese Richtlinie ist ein Arbeitsentwurf. Der vollständige rechtliche Text wird vor dem öffentlichen Start hinzugefügt.",
     "manage": "Cookie-Einstellungen verwalten"
+  },
+  "legal": {
+    "draft_notice": "⚠ Entwurf — dieser Inhalt steht unter dem Vorbehalt der abschließenden rechtlichen Prüfung und ist noch nicht rechtsverbindlich.",
+    "privacy_title": "Datenschutzerklärung",
+    "privacy_intro": "Diese Richtlinie erklärt, wie LyVoX personenbezogene Daten gemäß der DSGVO verarbeitet.",
+    "terms_title": "Nutzungsbedingungen",
+    "terms_intro": "Diese Bedingungen regeln Ihre Nutzung von LyVoX. Es handelt sich um einen Entwurf, der auf die abschließende rechtliche Prüfung wartet.",
+    "imprint_title": "Impressum",
+    "rights_title": "Ihre DSGVO-Rechte",
+    "ropa_title": "Verzeichnis der Verarbeitungstätigkeiten (Art.30 DSGVO)",
+    "ropa_col_purpose": "Zweck",
+    "ropa_col_basis": "Rechtsgrundlage",
+    "ropa_col_data": "Datenkategorien",
+    "ropa_col_processors": "Auftragsverarbeiter",
+    "ropa_col_retention": "Speicherdauer",
+    "controller_title": "Verantwortlicher",
+    "processors_title": "Auftragsverarbeiter (Art.28)",
+    "section_collection": "Datenerhebung",
+    "section_sharing": "Datenweitergabe",
+    "section_security": "Sicherheit",
+    "section_changes": "Änderungen dieser Richtlinie",
+    "terms_service_desc": "Leistungsbeschreibung",
+    "terms_acceptable_use": "Zulässige Nutzung",
+    "terms_report_illegal": "Meldung illegaler Inhalte (DSA Art.16)",
+    "terms_paid_ranking": "Bezahltes Ranking und Boosts",
+    "terms_liability": "Haftung",
+    "terms_governing_law": "Anwendbares Recht und Gerichtsstand",
+    "terms_contact": "Kontakt",
+    "imprint_identity": "Unternehmensidentität",
+    "imprint_dsa_contact": "DSA Art.11 zentrale Kontaktstelle",
+    "imprint_platform": "Plattformbeschreibung"
   },
   "account": {
     "delete": {
