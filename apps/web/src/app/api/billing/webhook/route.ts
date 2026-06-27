@@ -28,6 +28,82 @@ function periodEndISO(sub: Stripe.Subscription): string | null {
   return new Date(ts * 1000).toISOString();
 }
 
+// ── F1: webhook_events helper ─────────────────────────────────────────────────
+// The table is new (migration 20260628100000); not yet in generated types.
+// Run `pnpm gen:types` after applying the migration to remove this cast.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnySupabase = { from: (table: string) => any };
+
+/**
+ * F1 idempotency gate.
+ *
+ * Returns "process"  → handle the event (first delivery OR retry of a failure).
+ * Returns "skip"     → event already processed successfully; return 200 early.
+ *
+ * Design: we INSERT the event_id on arrival. processed_at is set to now() ONLY
+ * after the business-effect succeeds, so a crash between INSERT and UPDATE leaves
+ * processed_at = NULL — Stripe retries will be admitted through the gate and
+ * re-run the handler. A successfully completed event has processed_at IS NOT NULL
+ * and is immediately skipped on re-delivery.
+ */
+async function idempotencyGate(
+  supabase: AnySupabase,
+  event: Stripe.Event,
+): Promise<"process" | "skip"> {
+  const we = supabase.from("webhook_events");
+
+  // Attempt to record this event. ignoreDuplicates: true → ON CONFLICT DO NOTHING.
+  // data will be [{event_id}] on insert, [] on conflict.
+  const { data: newRows } = await we
+    .upsert(
+      {
+        provider: "stripe",
+        event_id: event.id,
+        type: event.type,
+        payload: event,
+        received_at: new Date().toISOString(),
+      },
+      { onConflict: "event_id", ignoreDuplicates: true },
+    )
+    .select("event_id");
+
+  const isFirstDelivery = Array.isArray(newRows) && newRows.length > 0;
+  if (isFirstDelivery) {
+    return "process";
+  }
+
+  // Conflict: event_id already exists. Determine if it was processed successfully.
+  const { data: existing } = await we
+    .select("processed_at")
+    .eq("event_id", event.id)
+    .maybeSingle();
+
+  if (existing?.processed_at) {
+    console.log(`Webhook ${event.id} already processed — skipping`);
+    return "skip";
+  }
+
+  // processed_at is NULL: prior delivery failed → let this retry through.
+  return "process";
+}
+
+/** Mark an event as fully processed. Called AFTER business logic succeeds. */
+async function markWebhookProcessed(
+  supabase: AnySupabase,
+  eventId: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from("webhook_events")
+    .update({ processed_at: new Date().toISOString() })
+    .eq("event_id", eventId);
+
+  if (error) {
+    // Non-fatal: the business effect already happened. Log so we can monitor
+    // events stuck with processed_at=NULL in the webhook_events table.
+    console.error(`Failed to mark webhook ${eventId} processed:`, error);
+  }
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const signature = req.headers.get("stripe-signature");
@@ -62,6 +138,12 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = await supabaseService();
+
+  // ── F1: Idempotency gate ──────────────────────────────────────────────────
+  const gate = await idempotencyGate(supabase as unknown as AnySupabase, event);
+  if (gate === "skip") {
+    return createSuccessResponse({ received: true, skipped: true });
+  }
 
   try {
     switch (event.type) {
@@ -121,7 +203,7 @@ export async function POST(req: NextRequest) {
           break;
         }
 
-        // Check if purchase already processed (idempotency)
+        // Check if purchase already processed (idempotency at business-logic level)
         const { data: existingPurchase } = await supabase
           .from("purchases")
           .select("id, status")
@@ -355,9 +437,13 @@ export async function POST(req: NextRequest) {
         console.log(`Unhandled event type: ${event.type}`);
     }
 
+    // ── F1: Mark as fully processed — set AFTER business logic succeeds ──────
+    await markWebhookProcessed(supabase as unknown as AnySupabase, event.id);
+
     return createSuccessResponse({ received: true });
   } catch (error) {
     console.error("Webhook processing error:", error);
+    // processed_at intentionally NOT set — Stripe will retry and we'll re-run.
     return createErrorResponse(ApiErrorCode.INTERNAL_ERROR, {
       status: 500,
       detail: "Webhook processing failed",
