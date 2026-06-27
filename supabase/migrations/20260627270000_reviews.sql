@@ -50,11 +50,16 @@ begin
   if v_subject is null then raise exception 'ADVERT_NOT_FOUND' using errcode = 'P0001'; end if;
   if v_subject = v_reviewer then raise exception 'CANNOT_REVIEW_SELF' using errcode = 'P0001'; end if;
 
-  -- CHAT GATE: the reviewer must have participated in a conversation about this advert.
+  -- CHAT GATE (anti-forge): require a conversation about this advert where BOTH the reviewer AND the
+  -- seller (subject) are participants. RLS on conversation_participants only lets a user add THEMSELVES
+  -- (auth.uid()=user_id), so an attacker cannot forge a conversation that includes the seller — they can
+  -- only add themselves. Requiring the seller-as-participant therefore defeats the forge where an attacker
+  -- self-inserts into a conversation about a victim's advert they never actually contacted.
   if not exists (
     select 1 from public.conversations c
-    join public.conversation_participants cp on cp.conversation_id = c.id
-    where c.advert_id = p_advert_id and cp.user_id = v_reviewer
+    join public.conversation_participants cp_r on cp_r.conversation_id = c.id and cp_r.user_id = v_reviewer
+    join public.conversation_participants cp_s on cp_s.conversation_id = c.id and cp_s.user_id = v_subject
+    where c.advert_id = p_advert_id
   ) then
     raise exception 'NO_CONVERSATION' using errcode = 'P0001';
   end if;
