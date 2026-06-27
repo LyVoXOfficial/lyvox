@@ -1,0 +1,82 @@
+// Cookie / localStorage inventory for LyVoX ePrivacy compliance.
+// Belgian Act 13 Jun 2005 Art.129 / ePrivacy 2002/58 Art.5(3).
+// This file is the single source of truth for the cookie policy page (§1.6).
+
+export type ConsentCategory = "necessary" | "functional" | "analytics";
+
+export const STORAGE_INVENTORY: {
+  key: string;
+  category: ConsentCategory;
+  purpose: string;
+  lib: string;
+}[] = [
+  // ── Necessary ────────────────────────────────────────────────────────────
+  {
+    key: "sb-*",
+    category: "necessary",
+    purpose: "Supabase authentication session (access + refresh tokens)",
+    lib: "lib/supabaseClient.ts",
+  },
+  {
+    key: "cf-turnstile-*",
+    category: "necessary",
+    purpose: "Cloudflare Turnstile bot-protection challenge state",
+    lib: "Cloudflare Turnstile (external)",
+  },
+  {
+    key: "lyvox_cookie_consent",
+    category: "necessary",
+    purpose: "Stores the visitor's cookie consent preferences (this consent record itself)",
+    lib: "lib/cookieConsent/store.ts",
+  },
+  {
+    key: "lyvox:errorLog",
+    category: "necessary",
+    purpose: "Operational error logging — legitimate interest, not behavioural",
+    lib: "lib/errorLogger.ts",
+  },
+  // ── Functional ───────────────────────────────────────────────────────────
+  {
+    key: "lyvox:recentlyViewed",
+    category: "functional",
+    purpose: "Recently viewed adverts for the discovery feed (personalisation)",
+    lib: "lib/recentlyViewed.ts",
+  },
+  {
+    key: "lyvox:taste",
+    category: "functional",
+    purpose: "Anonymous taste model weights (likes/passes) for swipe-deck ranking",
+    lib: "lib/taste.ts",
+  },
+  {
+    key: "lyvox:recentSearches",
+    category: "functional",
+    purpose: "Recent search queries shown in the search bar dropdown",
+    lib: "lib/recentSearches.ts",
+  },
+  {
+    key: "lyvox:savedSearches",
+    category: "functional",
+    purpose: "Locally saved searches for anonymous visitors",
+    lib: "lib/savedSearches.ts",
+  },
+  {
+    key: "lyvox:seenAdverts",
+    category: "functional",
+    purpose: "Set of advert IDs already shown in the swipe deck (deduplication)",
+    lib: "lib/seenAdverts.ts",
+  },
+];
+
+/**
+ * The exact localStorage keys used by the 5 functional discovery libs.
+ * Any `localStorage.setItem` call for these keys must be gated on `hasConsent("functional")`.
+ * Keep in sync with the KEY constants in each lib file.
+ */
+export const GATED_KEYS: string[] = [
+  "lyvox:recentlyViewed", // lib/recentlyViewed.ts
+  "lyvox:taste",          // lib/taste.ts
+  "lyvox:recentSearches", // lib/recentSearches.ts
+  "lyvox:savedSearches",  // lib/savedSearches.ts
+  "lyvox:seenAdverts",    // lib/seenAdverts.ts
+];
