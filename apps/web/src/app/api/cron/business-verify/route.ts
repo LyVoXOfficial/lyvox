@@ -20,28 +20,36 @@ export async function GET(request: Request) {
 
   const service = await supabaseService();
 
-  // Select vies:pending rows where next_retry_at is NULL (first attempt) or has elapsed.
-  // PostgREST jsonb path filter: evidence->>'next_retry_at'
-  const now = new Date().toISOString();
+  // Fetch pending VIES rows ordered oldest-first. Due-ness filtering is done in JS
+  // (see below) to avoid interpolating an ISO timestamp with `.`/`:`/`Z` characters
+  // into the PostgREST `.or()` grammar which can misparse them (I2).
   const { data: rows, error } = await service
     .from("verifications")
     .select("subject_id, evidence")
     .eq("method", "vies")
     .eq("status", "pending")
-    .or(`evidence->>next_retry_at.is.null,evidence->>next_retry_at.lte.${now}`)
+    .order("created_at", { ascending: true })
     .limit(LIMIT);
 
   if (error) {
     return createErrorResponse(ApiErrorCode.FETCH_FAILED, { status: 500, detail: error.message });
   }
 
-  const pendingRows = (rows ?? []) as Array<{ subject_id: string; evidence: Record<string, unknown> }>;
+  const pendingRows = (rows ?? []) as Array<{ subject_id: string; evidence: Record<string, unknown> | null }>;
+
+  // Filter to rows whose retry window has elapsed. A row is DUE when evidence.next_retry_at
+  // is absent (first attempt) or its scheduled time is <= now.
+  const now = new Date();
+  const dueRows = pendingRows.filter((row) => {
+    const nextRetryAt = row.evidence?.next_retry_at as string | null | undefined;
+    return nextRetryAt == null || new Date(nextRetryAt) <= now;
+  });
 
   let verified = 0;
   let failed = 0;
   let pending = 0;
 
-  for (const row of pendingRows) {
+  for (const row of dueRows) {
     try {
       const result = await runViesVerification(service, row.subject_id);
       if (result.status === "verified") verified++;
@@ -54,7 +62,7 @@ export async function GET(request: Request) {
   }
 
   return createSuccessResponse({
-    processed: pendingRows.length,
+    processed: dueRows.length,
     verified,
     failed,
     pending,

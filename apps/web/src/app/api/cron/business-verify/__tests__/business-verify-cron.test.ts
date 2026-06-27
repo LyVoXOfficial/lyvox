@@ -29,12 +29,12 @@ function req(auth?: string) {
   return new Request("https://x.test/api/cron/business-verify", { headers });
 }
 
-/** A chainable `.from("verifications").select(...).eq(...).or(...).limit(...)` mock */
-function makeVerificationsMock(rows: Array<{ subject_id: string; evidence: Record<string, unknown> }>) {
+/** A chainable `.from("verifications").select(...).eq(...).order(...).limit(...)` mock */
+function makeVerificationsMock(rows: Array<{ subject_id: string; evidence: Record<string, unknown> | null }>) {
   const chain = {
     select: () => chain,
     eq: () => chain,
-    or: () => chain,
+    order: () => chain,
     limit: async () => ({ data: rows, error: null }),
   };
   return chain;
@@ -141,6 +141,35 @@ describe("GET /api/cron/business-verify", () => {
     expect(body.data.failed).toBe(1);
     expect(body.data.verified).toBe(0);
     expect(body.data.pending).toBe(0);
+  });
+
+  it("JS due-ness filter: skips future-scheduled row, processes null and past rows", async () => {
+    const futureIso = new Date(Date.now() + 86_400_000).toISOString(); // 24 h from now
+    const pastIso = new Date(Date.now() - 86_400_000).toISOString();   // 24 h ago
+
+    const rows = [
+      { subject_id: "biz-null",   evidence: {} },                              // no next_retry_at → due
+      { subject_id: "biz-past",   evidence: { next_retry_at: pastIso } },      // elapsed → due
+      { subject_id: "biz-future", evidence: { next_retry_at: futureIso } },    // not yet → skipped
+    ];
+    serviceFromMock.mockReturnValue(makeVerificationsMock(rows));
+
+    runViesVerificationMock.mockResolvedValue({
+      method: "vies", status: "verified", entity_verified: true,
+      business_status: "active", evidence: {},
+    });
+
+    const res = await GET(req("Bearer testsecret"));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+
+    // Only 2 DUE rows processed; future row is skipped
+    expect(body.data.processed).toBe(2);
+    expect(body.data.verified).toBe(2);
+    expect(runViesVerificationMock).toHaveBeenCalledTimes(2);
+    expect(runViesVerificationMock).toHaveBeenCalledWith(expect.anything(), "biz-null");
+    expect(runViesVerificationMock).toHaveBeenCalledWith(expect.anything(), "biz-past");
+    expect(runViesVerificationMock).not.toHaveBeenCalledWith(expect.anything(), "biz-future");
   });
 
   it("continues processing subsequent rows even if one throws", async () => {
