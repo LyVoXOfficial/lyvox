@@ -54,6 +54,8 @@ export const registerSchema = z
       .string()
       .regex(/^(en|nl|fr|ru|de)$/i, "Language must be one of: en, nl, fr, ru, de.")
       .optional(),
+
+    turnstileToken: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match.",

@@ -11,17 +11,27 @@ import {
 } from "@/lib/apiErrors";
 import { validateRequest } from "@/lib/validations";
 import { registerSchema } from "@/lib/validations/auth";
+import { createRateLimiter, withRateLimit, getClientIp } from "@/lib/rateLimiter";
+import { isDisposableEmail } from "@/lib/antifraud/disposableEmail";
+import { verifyTurnstile } from "@/lib/antifraud/turnstile";
 
 export const runtime = "nodejs";
 
-export async function POST(request: Request) {
+const registerIpLimiter = createRateLimiter({
+  limit: 5,
+  windowSec: 60,
+  prefix: "register:ip",
+});
+
+const baseHandler = async (req: Request) => {
   const parseResult = await safeJsonParse<{
     email?: string;
     password?: string;
     confirmPassword?: string;
     consents?: { terms?: boolean; privacy?: boolean; marketing?: boolean };
     locale?: string;
-  }>(request);
+    turnstileToken?: string;
+  }>(req);
   if (!parseResult.success) {
     return parseResult.response;
   }
@@ -31,10 +41,25 @@ export async function POST(request: Request) {
     return validationResult.response;
   }
 
-  const { email, password, consents } = validationResult.data;
+  const { email, password, consents, turnstileToken } = validationResult.data;
   const locale = resolveLocale(validationResult.data.locale);
+
+  // Guard 1: Disposable email check
+  if (isDisposableEmail(email)) {
+    return createErrorResponse(ApiErrorCode.DISPOSABLE_EMAIL, { status: 400 });
+  }
+
+  // Guard 2: Turnstile CAPTCHA verification (no-op when TURNSTILE_SECRET_KEY is unset)
+  const turnstileResult = await verifyTurnstile(turnstileToken, getClientIp(req));
+  if (!turnstileResult.ok) {
+    return createErrorResponse(ApiErrorCode.CAPTCHA_FAILED, {
+      status: 403,
+      detail: turnstileResult.codes.join(","),
+    });
+  }
+
   const supabase = await supabaseServer();
-  const origin = new URL(request.url).origin;
+  const origin = new URL(req.url).origin;
   const redirect = new URL("/auth/callback", origin);
   redirect.searchParams.set("next", "/onboarding");
 
@@ -97,7 +122,7 @@ export async function POST(request: Request) {
     return handleSupabaseError(profileUpsert.error, ApiErrorCode.PROFILE_UPSERT_FAILED);
   }
 
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
   await service.from("logs").insert({
     user_id: user.id,
     action: "consent_accept",
@@ -115,4 +140,9 @@ export async function POST(request: Request) {
     },
     201,
   );
-}
+};
+
+export const POST = withRateLimit(baseHandler, {
+  limiter: registerIpLimiter,
+  makeKey: (req) => getClientIp(req),
+});
