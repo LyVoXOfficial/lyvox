@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import Script from "next/script";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
@@ -15,6 +16,15 @@ import { supportedLocales, type Locale } from "@/lib/i18n";
 import { useDebounce } from "@/hooks/useDebounce";
 import { supabase } from "@/lib/supabaseClient";
 import { logger } from "@/lib/errorLogger";
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (el: HTMLElement, opts: Record<string, unknown>) => string;
+      reset?: (id?: string) => void;
+    };
+  }
+}
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -40,6 +50,8 @@ type FormValues = {
 type Props = {
   initialLocale: Locale;
 };
+
+const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export default function RegisterForm({ initialLocale }: Props) {
   const [locale, setLocale] = useState<Locale>(initialLocale);
@@ -69,6 +81,11 @@ export default function RegisterForm({ initialLocale }: Props) {
   const [checkingEmail, setCheckingEmail] = useState(false);
   const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
   const [socialLoading, setSocialLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [scriptLoaded, setScriptLoaded] = useState(false);
+
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | null>(null);
 
   const emailValue = watch("email");
   const debouncedEmail = useDebounce(emailValue, 500);
@@ -112,6 +129,20 @@ export default function RegisterForm({ initialLocale }: Props) {
 
     checkEmailAvailability();
   }, [debouncedEmail, messages.errorEmailInUse, setError, clearErrors]);
+
+  // Render Turnstile widget after script loads (explicit-render mode).
+  // The effect runs unconditionally; the guard inside keeps logic off when not configured.
+  useEffect(() => {
+    if (!siteKey || !scriptLoaded || !turnstileRef.current) return;
+    if (widgetIdRef.current) return; // already rendered — guard against StrictMode double-effect
+
+    widgetIdRef.current = window.turnstile?.render(turnstileRef.current, {
+      sitekey: siteKey,
+      callback: (token: string) => setTurnstileToken(token),
+      "error-callback": () => setTurnstileToken(null),
+      "expired-callback": () => setTurnstileToken(null),
+    }) ?? null;
+  }, [scriptLoaded]);
 
   const handleSocialRegister = async (provider: "google" | "facebook") => {
     setSocialLoading(true);
@@ -194,6 +225,7 @@ export default function RegisterForm({ initialLocale }: Props) {
             marketing: values.marketing,
           },
           locale,
+          turnstileToken: turnstileToken ?? undefined,
         }),
       });
 
@@ -213,6 +245,11 @@ export default function RegisterForm({ initialLocale }: Props) {
           setError("email", { type: "manual", message: messages.emailError });
         } else if (errorCode === "SERVICE_ROLE_MISSING") {
           errorMessage = messages.errorService;
+        } else if (errorCode === "DISPOSABLE_EMAIL") {
+          errorMessage = messages.disposableEmailError;
+          setError("email", { type: "manual", message: messages.disposableEmailError });
+        } else if (errorCode === "CAPTCHA_FAILED" || errorCode === "CAPTCHA_REQUIRED") {
+          errorMessage = messages.captchaError;
         } else if (payload?.detail) {
           // Surface the real reason (e.g. a password the auth server rejected as weak/breached, or a
           // rate limit) instead of a vague generic message the user can't act on.
@@ -239,6 +276,14 @@ export default function RegisterForm({ initialLocale }: Props) {
 
   return (
     <Card className="w-full rounded-2xl border border-border/70 shadow-[var(--shadow-card)]">
+      {siteKey && (
+        <Script
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+          async
+          defer
+          onLoad={() => setScriptLoaded(true)}
+        />
+      )}
       <CardHeader className="gap-4 sm:grid-cols-[1fr_auto]">
         <div className="space-y-2.5">
           <div className="inline-flex items-center gap-2 rounded-full lyvox-trust-gradient px-3 py-1 text-xs font-semibold text-white shadow-[var(--shadow-soft)]">
@@ -403,6 +448,8 @@ export default function RegisterForm({ initialLocale }: Props) {
               <p className="text-sm text-destructive">{messages.consentsError}</p>
             )}
           </div>
+
+          {siteKey && <div ref={turnstileRef} />}
 
           <Button type="submit" disabled={submitting} className="h-11 rounded-xl lyvox-cta-gradient text-primary-foreground shadow-[var(--shadow-card)]">
             {submitting ? (

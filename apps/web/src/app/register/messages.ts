@@ -34,6 +34,8 @@ type RegisterMessages = {
   emailAvailable: string;
   loginPrompt: string;
   loginLink: string;
+  disposableEmailError: string;
+  captchaError: string;
 };
 
 const englishMessages: RegisterMessages = {
@@ -77,6 +79,8 @@ const englishMessages: RegisterMessages = {
   emailAvailable: "Available",
   loginPrompt: "Already have an account?",
   loginLink: "Sign in",
+  disposableEmailError: "Please use a non-disposable email address.",
+  captchaError: "Please complete the verification.",
 };
 
 export const registerMessages: Record<Locale, RegisterMessages> = {
@@ -122,6 +126,8 @@ export const registerMessages: Record<Locale, RegisterMessages> = {
     emailAvailable: "Disponible",
     loginPrompt: "Vous avez deja un compte ?",
     loginLink: "Se connecter",
+    disposableEmailError: "Veuillez utiliser une adresse email non jetable.",
+    captchaError: "Veuillez completer la verification.",
   },
   nl: {
     trustedSetup: "Vertrouwde accountconfiguratie",
@@ -164,6 +170,8 @@ export const registerMessages: Record<Locale, RegisterMessages> = {
     emailAvailable: "Beschikbaar",
     loginPrompt: "Heb je al een account?",
     loginLink: "Inloggen",
+    disposableEmailError: "Gebruik een niet-wegwerp e-mailadres.",
+    captchaError: "Voltooi de verificatie.",
   },
   ru: {
     trustedSetup: "Настройка проверенного аккаунта",
@@ -206,6 +214,8 @@ export const registerMessages: Record<Locale, RegisterMessages> = {
     emailAvailable: "Доступен",
     loginPrompt: "Уже есть аккаунт?",
     loginLink: "Войти",
+    disposableEmailError: "Используйте не одноразовый адрес электронной почты.",
+    captchaError: "Пройдите проверку.",
   },
   de: {
     trustedSetup: "Vertrauenswuerdige Kontoeinrichtung",
@@ -248,6 +258,8 @@ export const registerMessages: Record<Locale, RegisterMessages> = {
     emailAvailable: "Verfuegbar",
     loginPrompt: "Sie haben bereits ein Konto?",
     loginLink: "Anmelden",
+    disposableEmailError: "Bitte verwenden Sie eine nicht-wegwerfbare E-Mail-Adresse.",
+    captchaError: "Bitte schliessen Sie die Verifizierung ab.",
   },
 };
 
