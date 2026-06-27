@@ -1836,8 +1836,10 @@ export type Database = {
           itsme_verified: boolean | null
           notification_preferences: Json | null
           phone: string | null
+          pro_until: string | null
           rating: number | null
           seller_type: string
+          stripe_customer_id: string | null
           total_deals: number | null
           verified_email: boolean | null
           verified_phone: boolean | null
@@ -1853,8 +1855,10 @@ export type Database = {
           itsme_verified?: boolean | null
           notification_preferences?: Json | null
           phone?: string | null
+          pro_until?: string | null
           rating?: number | null
           seller_type?: string
+          stripe_customer_id?: string | null
           total_deals?: number | null
           verified_email?: boolean | null
           verified_phone?: boolean | null
@@ -1870,8 +1874,10 @@ export type Database = {
           itsme_verified?: boolean | null
           notification_preferences?: Json | null
           phone?: string | null
+          pro_until?: string | null
           rating?: number | null
           seller_type?: string
+          stripe_customer_id?: string | null
           total_deals?: number | null
           verified_email?: boolean | null
           verified_phone?: boolean | null
