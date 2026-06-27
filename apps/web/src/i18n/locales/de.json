@@ -1682,6 +1682,12 @@
       "verified_business": "Verifiziertes Unternehmen",
       "vat_registered": "Umsatzsteuerregistriert"
     },
+    "done": {
+      "verified": "Ihr Unternehmen ist verifiziert — das Badge 'Verifiziertes Unternehmen' ist jetzt auf Ihren Anzeigen aktiv.",
+      "failed": "Wir konnten Ihre Umsatzsteuer-ID nicht automatisch prüfen — unser Team wird dies prüfen und Ihr Badge in Kürze aktualisieren.",
+      "pending": "Verifizierung läuft — Ihre Umsatzsteuer-ID wird bei VIES geprüft. Ihre Anzeigen sind in der Zwischenzeit aktiv.",
+      "na": "Ein Administrator wird Ihre Registrierung bestätigen (keine Umsatzsteuer-ID). Ihre Anzeigen sind in der Zwischenzeit aktiv."
+    },
     "panel": {
       "title": "Gewerblicher Verkäufer",
       "legal_name": "Firmenname",

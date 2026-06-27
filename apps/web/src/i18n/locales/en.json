@@ -1682,6 +1682,12 @@
       "verified_business": "Verified Business",
       "vat_registered": "VAT Registered"
     },
+    "done": {
+      "verified": "Your business is verified — the Verified Business badge is now active on your listings.",
+      "failed": "We couldn't verify your VAT number automatically — our team will review it and update your badge shortly.",
+      "pending": "Verification in progress — your VAT number is being checked with VIES. Your listings are active in the meantime.",
+      "na": "An admin will confirm your registration (no VAT number). Your listings are active in the meantime."
+    },
     "panel": {
       "title": "Professional seller",
       "legal_name": "Company name",

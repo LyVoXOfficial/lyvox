@@ -38,7 +38,8 @@ type FormData = {
 type SubmitResult = {
   business_id: string;
   status: string;
-  verification: { vies: "pending" | "n/a" };
+  entity_verified: boolean;
+  verification: { vies: "verified" | "failed" | "pending" | "n/a" };
 };
 
 // ---- Validation helpers (light client-side only) --------------------------
@@ -214,6 +215,18 @@ function WizardInner() {
 
   if (submitResult) {
     const vies = submitResult.verification?.vies;
+
+    let descriptionText: string;
+    if (vies === "verified") {
+      descriptionText = tr("pro.done.verified", "Your business is verified — the Verified Business badge is now active on your listings.");
+    } else if (vies === "failed") {
+      descriptionText = tr("pro.done.failed", "We couldn't verify your VAT number automatically — our team will review it and update your badge shortly.");
+    } else if (vies === "pending") {
+      descriptionText = tr("pro.done.pending", "Verification in progress — your VAT number is being checked with VIES. Your listings are active in the meantime.");
+    } else {
+      descriptionText = tr("pro.done.na", "An admin will confirm your registration (no VAT number). Your listings are active in the meantime.");
+    }
+
     return (
       <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
         <CardHeader>
@@ -221,11 +234,7 @@ function WizardInner() {
             <CheckCircle className="h-5 w-5" aria-hidden="true" />
           </div>
           <CardTitle>{tr("pro.submit.success", "Your business account has been created!")}</CardTitle>
-          <CardDescription>
-            {vies === "pending"
-              ? tr("pro.status.pending", "Your VAT number is being verified with VIES. You can publish listings while verification is in progress.")
-              : tr("pro.status.admin_review", "An admin will review and confirm your business registration shortly.")}
-          </CardDescription>
+          <CardDescription>{descriptionText}</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">

@@ -6,12 +6,27 @@ const getUserMock = vi.fn();
 const fromMock = vi.fn();
 const rpcMock = vi.fn();
 
+// Service-role client mock (separate from cookie client)
+const serviceFromMock = vi.fn();
+
+const runViesVerificationMock = vi.fn();
+
 vi.mock("@/lib/supabaseServer", () => ({
   supabaseServer: async () => ({
     auth: { getUser: getUserMock },
     from: fromMock,
     rpc: rpcMock,
   }),
+}));
+
+vi.mock("@/lib/supabaseService", () => ({
+  supabaseService: async () => ({
+    from: serviceFromMock,
+  }),
+}));
+
+vi.mock("@/lib/verification/runViesVerification", () => ({
+  runViesVerification: (...args: unknown[]) => runViesVerificationMock(...args),
 }));
 
 vi.mock("@/lib/rateLimiter", () => ({
@@ -64,25 +79,12 @@ function jsonReq(body: unknown) {
   });
 }
 
-// Build a chainable Supabase mock for .from(table).update(...).eq(...)
-function makeUpdateChain(error: unknown = null) {
-  return {
-    update: () => ({
-      eq: async () => ({ error }),
-    }),
-  };
-}
-
-function makeInsertChain(error: unknown = null) {
-  return {
-    insert: vi.fn(async () => ({ error })),
-  };
-}
-
 beforeEach(() => {
   getUserMock.mockReset();
   fromMock.mockReset();
   rpcMock.mockReset();
+  serviceFromMock.mockReset();
+  runViesVerificationMock.mockReset();
   isViewerVerifiedMock.mockReset();
 });
 
@@ -166,13 +168,12 @@ describe("POST /api/business", () => {
     expect(body.error).toBe("UNAUTHENTICATED");
   });
 
-  it("(e) 200 happy path vat_liable=true: business_id, status active, vies pending, verifications insert called", async () => {
+  it("(e) 200 happy path vat_liable=true: verifications insert goes through SERVICE client, inline verify result reflected", async () => {
     getUserMock.mockResolvedValue({ data: { user: { id: "user-1" } } });
     isViewerVerifiedMock.mockResolvedValue(true);
     rpcMock.mockResolvedValue({ data: "biz-uuid-1", error: null });
 
-    const verificationsInsert = vi.fn(async () => ({ error: null }));
-
+    // Cookie client: businesses + profiles (no verifications insert here anymore)
     fromMock.mockImplementation((table: string) => {
       if (table === "businesses") {
         return {
@@ -188,10 +189,25 @@ describe("POST /api/business", () => {
           }),
         };
       }
+      throw new Error("unexpected table on cookie client: " + table);
+    });
+
+    // Service-role client: verifications insert
+    const verificationsInsert = vi.fn(async () => ({ error: null }));
+    serviceFromMock.mockImplementation((table: string) => {
       if (table === "verifications") {
         return { insert: verificationsInsert };
       }
-      throw new Error("unexpected table: " + table);
+      throw new Error("unexpected table on service client: " + table);
+    });
+
+    // runViesVerification returns verified
+    runViesVerificationMock.mockResolvedValue({
+      method: "vies",
+      status: "verified",
+      entity_verified: true,
+      business_status: "active",
+      evidence: {},
     });
 
     const res = await POST(jsonReq(VALID_BODY));
@@ -200,17 +216,24 @@ describe("POST /api/business", () => {
     expect(body.ok).toBe(true);
     expect(body.data.business_id).toBe("biz-uuid-1");
     expect(body.data.status).toBe("active");
-    expect(body.data.entity_verified).toBe(false);
-    expect(body.data.verification.vies).toBe("pending");
+    expect(body.data.entity_verified).toBe(true);
+    expect(body.data.verification.vies).toBe("verified");
+
+    // Verifications insert MUST have gone through the service-role client
     expect(verificationsInsert).toHaveBeenCalledOnce();
+
+    // runViesVerification called with the service client and business_id
+    expect(runViesVerificationMock).toHaveBeenCalledOnce();
+    expect(runViesVerificationMock).toHaveBeenCalledWith(
+      expect.objectContaining({ from: serviceFromMock }),
+      "biz-uuid-1",
+    );
   });
 
-  it("(f) 200 happy path vat_liable=false: vies n/a, no verifications insert", async () => {
+  it("(f) 200 happy path vat_liable=false: vies n/a, no verifications insert, runViesVerification NOT called", async () => {
     getUserMock.mockResolvedValue({ data: { user: { id: "user-1" } } });
     isViewerVerifiedMock.mockResolvedValue(true);
     rpcMock.mockResolvedValue({ data: "biz-uuid-2", error: null });
-
-    const verificationsInsert = vi.fn(async () => ({ error: null }));
 
     fromMock.mockImplementation((table: string) => {
       if (table === "businesses") {
@@ -227,10 +250,16 @@ describe("POST /api/business", () => {
           }),
         };
       }
+      throw new Error("unexpected table on cookie client: " + table);
+    });
+
+    // Service client should not be called for verifications insert in no-vat path
+    const verificationsInsert = vi.fn(async () => ({ error: null }));
+    serviceFromMock.mockImplementation((table: string) => {
       if (table === "verifications") {
         return { insert: verificationsInsert };
       }
-      throw new Error("unexpected table: " + table);
+      throw new Error("unexpected table on service client: " + table);
     });
 
     const res = await POST(jsonReq(VALID_BODY_NO_VAT));
@@ -241,6 +270,9 @@ describe("POST /api/business", () => {
     expect(body.data.status).toBe("active");
     expect(body.data.entity_verified).toBe(false);
     expect(body.data.verification.vies).toBe("n/a");
+
+    // Neither verifications insert nor runViesVerification should be called
     expect(verificationsInsert).not.toHaveBeenCalled();
+    expect(runViesVerificationMock).not.toHaveBeenCalled();
   });
 });

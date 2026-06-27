@@ -1682,6 +1682,12 @@
       "verified_business": "Entreprise vérifiée",
       "vat_registered": "Assujetti à la TVA"
     },
+    "done": {
+      "verified": "Votre entreprise est vérifiée — le badge « Entreprise vérifiée » est maintenant actif sur vos annonces.",
+      "failed": "Nous n'avons pas pu vérifier votre numéro de TVA automatiquement — notre équipe l'examinera et mettra à jour votre badge prochainement.",
+      "pending": "Vérification en cours — votre numéro de TVA est en cours de vérification auprès du VIES. Vos annonces sont actives entre-temps.",
+      "na": "Un administrateur confirmera votre inscription (pas de numéro de TVA). Vos annonces sont actives entre-temps."
+    },
     "panel": {
       "title": "Vendeur professionnel",
       "legal_name": "Dénomination sociale",

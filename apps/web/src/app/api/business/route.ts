@@ -1,4 +1,5 @@
 import { supabaseServer } from "@/lib/supabaseServer";
+import { supabaseService } from "@/lib/supabaseService";
 import { createRateLimiter, withRateLimit, getClientIp } from "@/lib/rateLimiter";
 import {
   createErrorResponse,
@@ -11,6 +12,7 @@ import {
 import { validateRequest } from "@/lib/validations";
 import { createBusinessSchema } from "@/lib/validations/business";
 import { isViewerVerified } from "@/lib/auth/requireVerified";
+import { runViesVerification } from "@/lib/verification/runViesVerification";
 
 export const runtime = "nodejs";
 
@@ -132,9 +134,12 @@ const baseHandler = async (req: Request): Promise<Response> => {
     return handleSupabaseError(profileError, ApiErrorCode.INTERNAL_ERROR);
   }
 
-  // Step 6: Insert vies:pending verification row if vat_liable
+  // Service-role client for RLS-gated writes (verifications table has no INSERT policy for users)
+  const service = await supabaseService();
+
+  // Step 6: Insert vies:pending verification row if vat_liable (must use service role — no user INSERT policy)
   if (vat_liable) {
-    const { error: verError } = await supabase.from("verifications").insert({
+    const { error: verError } = await service.from("verifications").insert({
       subject_type: "business",
       subject_id: business_id,
       method: "vies",
@@ -157,13 +162,19 @@ const baseHandler = async (req: Request): Promise<Response> => {
     return handleSupabaseError(publishError, ApiErrorCode.INTERNAL_ERROR);
   }
 
-  // Step 8: Return success
+  // Step 8 (I1): Inline VIES check for vat_liable businesses — gives "Verified Business" badge in seconds
+  let verifyResult: Awaited<ReturnType<typeof runViesVerification>> | null = null;
+  if (vat_liable) {
+    verifyResult = await runViesVerification(service, business_id);
+  }
+
+  // Step 9: Return success with inline verify outcome
   return createSuccessResponse({
     business_id,
-    status: "active",
-    entity_verified: false,
+    status: verifyResult?.business_status ?? "active",
+    entity_verified: verifyResult?.entity_verified ?? false,
     verification: {
-      vies: vat_liable ? "pending" : "n/a",
+      vies: vat_liable ? (verifyResult?.status ?? "pending") : "n/a",
     },
   });
 };

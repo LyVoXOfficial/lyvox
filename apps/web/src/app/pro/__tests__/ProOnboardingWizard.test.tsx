@@ -97,6 +97,12 @@ const messages = {
       verified: "Verified business",
       failed: "Verification failed",
     },
+    done: {
+      verified: "Your business is verified — badge active.",
+      failed: "Could not verify VAT — team will review.",
+      pending: "Verification in progress.",
+      na: "Admin will confirm registration.",
+    },
     badge: {
       verified_business: "Verified Business",
       vat_registered: "VAT Registered",

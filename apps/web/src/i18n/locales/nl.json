@@ -1682,6 +1682,12 @@
       "verified_business": "Geverifieerd bedrijf",
       "vat_registered": "Btw-geregistreerd"
     },
+    "done": {
+      "verified": "Uw bedrijf is geverifieerd — het badge 'Geverifieerd bedrijf' is nu actief op uw advertenties.",
+      "failed": "We konden uw btw-nummer niet automatisch verifiëren — ons team zal dit nakijken en uw badge binnenkort bijwerken.",
+      "pending": "Verificatie bezig — uw btw-nummer wordt gecontroleerd bij VIES. Uw advertenties zijn ondertussen actief.",
+      "na": "Een beheerder zal uw registratie bevestigen (geen btw-nummer). Uw advertenties zijn ondertussen actief."
+    },
     "panel": {
       "title": "Professionele verkoper",
       "legal_name": "Bedrijfsnaam",
