@@ -107,6 +107,17 @@ function makeBizUpdate(error: unknown = null) {
   };
 }
 
+// from("businesses").select("entity_verified, status").eq("id", id).single()
+function makeBizReRead(row: { entity_verified: boolean; status: string } | null, error: unknown = null) {
+  return {
+    select: () => ({
+      eq: () => ({
+        single: async () => ({ data: row, error }),
+      }),
+    }),
+  };
+}
+
 beforeEach(() => {
   getUserMock.mockReset();
   serviceFromMock.mockReset();
@@ -165,8 +176,12 @@ describe("POST /api/admin/business/[id]/approve", () => {
           // First call: existence check
           return makeBizExistsFetch(true);
         }
-        // Second call: update status='active'
-        return makeBizUpdate(null);
+        if (bizCallCount === 2) {
+          // Second call: update status='active'
+          return makeBizUpdate(null);
+        }
+        // Third call: re-read actual DB values
+        return makeBizReRead({ entity_verified: true, status: "active" });
       }
       if (table === "verifications") {
         // First verifications call: select existing row → none found (insert path)
@@ -219,7 +234,9 @@ describe("POST /api/admin/business/[id]/approve", () => {
       if (table === "businesses") {
         bizCallCount++;
         if (bizCallCount === 1) return makeBizExistsFetch(true);
-        return makeBizUpdate(null);
+        if (bizCallCount === 2) return makeBizUpdate(null);
+        // Third call: re-read actual DB values
+        return makeBizReRead({ entity_verified: true, status: "active" });
       }
       if (table === "verifications") {
         return {

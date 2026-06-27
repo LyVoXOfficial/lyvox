@@ -202,6 +202,46 @@ describe("GET /api/business/[id]", () => {
     expect(body.data.badges.vat_registered).toBe(true);
   });
 
+  it("(e) authenticated non-member + active → public subset; created_by and self_certified_ip absent; is_business_member=false", async () => {
+    // Logged-in user with no admin role
+    getUserMock.mockResolvedValue({ data: { user: { id: "non-member-user" } } });
+    // is_business_member RPC returns false (non-member)
+    cookieRpcMock.mockResolvedValue({ data: false, error: null });
+
+    serviceFromMock.mockImplementation((table: string) => {
+      if (table === "businesses") return makeBusinessFetch(ACTIVE_BUSINESS);
+      throw new Error("unexpected table: " + table);
+    });
+
+    const res = await GET(makeGet(), makeContext());
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+
+    const biz = body.data.business;
+
+    // Public subset fields present
+    expect(biz.legal_name).toBe("Test BV");
+    expect(biz.entity_verified).toBe(true);
+    expect(biz.withdrawal_terms).toBe("14-day right of withdrawal.");
+
+    // Private fields absent (same as anonymous)
+    expect(biz.created_by).toBeUndefined();
+    expect(biz.self_certified_ip).toBeUndefined();
+
+    // Badges present
+    expect(body.data.badges).toEqual({
+      verified_business: true,
+      vat_registered: true,
+    });
+
+    // Member RPC was called (non-member check ran) and returned false
+    expect(cookieRpcMock).toHaveBeenCalled();
+
+    // No verifications field (private branch not taken)
+    expect(body.data.verifications).toBeUndefined();
+  });
+
   it("(d2) admin → full row without is_business_member check", async () => {
     getUserMock.mockResolvedValue({
       data: { user: { id: "admin-user", app_metadata: { role: "admin" } } },

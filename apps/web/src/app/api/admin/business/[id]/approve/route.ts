@@ -104,9 +104,20 @@ export async function POST(
     return createErrorResponse(ApiErrorCode.INTERNAL_ERROR, { status: 500 });
   }
 
+  // ── Re-read actual DB values (trigger fires synchronously) ─────────────────
+  const { data: updated, error: reReadError } = await service
+    .from("businesses")
+    .select("entity_verified, status")
+    .eq("id", id)
+    .single();
+
+  if (reReadError || !updated) {
+    return createErrorResponse(ApiErrorCode.INTERNAL_ERROR, { status: 500 });
+  }
+
   return createSuccessResponse({
-    entity_verified: true,
-    business_status: "active",
+    entity_verified: (updated as { entity_verified: boolean; status: string }).entity_verified,
+    business_status: (updated as { entity_verified: boolean; status: string }).status,
     method: "kbo",
   });
 }
