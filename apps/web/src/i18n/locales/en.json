@@ -1718,8 +1718,32 @@
       "team_heading": "Team",
       "team_empty": "No team members yet.",
       "pending_invite": "Pending invite",
+      "unnamed_member": "Member",
       "upgrade_heading": "Upgrade to Pro",
-      "upgrade_body": "Unlock advanced seller features with a Pro subscription."
+      "upgrade_body": "Unlock advanced seller features with a Pro subscription.",
+      "edit": {
+        "heading": "Edit business details",
+        "trade_name": "Trade name",
+        "trade_name_placeholder": "Your brand or shop name",
+        "legal_form": "Legal form",
+        "legal_form_placeholder": "e.g. BV, NV, Eenmanszaak",
+        "address_line": "Street and number",
+        "address_line_placeholder": "Wetstraat 1",
+        "postcode": "Postcode",
+        "city": "City",
+        "country": "Country",
+        "email": "Business email",
+        "phone_e164": "Business phone",
+        "withdrawal_terms": "Withdrawal & return policy",
+        "withdrawal_terms_placeholder": "Consumers have the right to withdraw from a purchase within 14 days...",
+        "returns_url": "Returns policy URL (optional)",
+        "save": "Save changes",
+        "success": "Business details updated successfully",
+        "error_forbidden": "Only the business owner can edit these details",
+        "error_generic": "Something went wrong. Please try again.",
+        "postcode_invalid": "Belgian postcode must be 4 digits (1000–9999)",
+        "email_invalid": "Please enter a valid email address"
+      }
     }
   }
 }

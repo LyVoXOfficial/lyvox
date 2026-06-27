@@ -1718,8 +1718,32 @@
       "team_heading": "Équipe",
       "team_empty": "Aucun membre d'équipe pour l'instant.",
       "pending_invite": "Invitation en attente",
+      "unnamed_member": "Membre",
       "upgrade_heading": "Passer à Pro",
-      "upgrade_body": "Débloquez des fonctionnalités vendeur avancées avec un abonnement Pro."
+      "upgrade_body": "Débloquez des fonctionnalités vendeur avancées avec un abonnement Pro.",
+      "edit": {
+        "heading": "Modifier les informations de l'entreprise",
+        "trade_name": "Nom commercial",
+        "trade_name_placeholder": "Votre marque ou nom de boutique",
+        "legal_form": "Forme juridique",
+        "legal_form_placeholder": "ex. BV, NV, Eenmanszaak",
+        "address_line": "Rue et numéro",
+        "address_line_placeholder": "Rue de la Loi 1",
+        "postcode": "Code postal",
+        "city": "Ville",
+        "country": "Pays",
+        "email": "E-mail professionnel",
+        "phone_e164": "Téléphone professionnel",
+        "withdrawal_terms": "Politique de rétractation et de retour",
+        "withdrawal_terms_placeholder": "Les consommateurs ont le droit de se rétracter d'un achat dans les 14 jours...",
+        "returns_url": "URL de la politique de retour (optionnel)",
+        "save": "Enregistrer les modifications",
+        "success": "Informations de l'entreprise mises à jour avec succès",
+        "error_forbidden": "Seul le propriétaire de l'entreprise peut modifier ces informations",
+        "error_generic": "Une erreur s'est produite. Veuillez réessayer.",
+        "postcode_invalid": "Le code postal belge doit comporter 4 chiffres (1000–9999)",
+        "email_invalid": "Veuillez saisir une adresse e-mail valide"
+      }
     }
   }
 }

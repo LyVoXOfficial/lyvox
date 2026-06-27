@@ -5,6 +5,7 @@ import { ProfileAdvertsList } from "@/components/profile/ProfileAdvertsList";
 import { deriveSellerBadges } from "@/lib/profile/sellerBadges";
 import type { ProfileAdvert } from "@/lib/profileTypes";
 import type { Locale } from "@/lib/i18n";
+import { BusinessEditForm } from "./BusinessEditForm";
 
 export type BusinessMember = {
   user_id: string;
@@ -20,6 +21,7 @@ type Props = {
     vat_liable: boolean;
     vat_number: string | null;
     entity_verified: boolean;
+    returns_url: string | null;
   };
   listings: ProfileAdvert[];
   members: BusinessMember[];
@@ -89,17 +91,24 @@ export function BusinessCabinet({
       {/* Trader info summary */}
       <TraderPanel business={business} t={tf} locale={locale} />
 
-      {/* Edit affordance — T3 will add <BusinessEditForm> here */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{tf("pro.cabinet.edit_heading", "Edit business details")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            {tf("pro.cabinet.edit_coming", "Business detail editing will be available here.")}
-          </p>
-        </CardContent>
-      </Card>
+      {/* Edit form */}
+      <BusinessEditForm
+        businessId={business.id}
+        initial={{
+          trade_name: business.trade_name ?? null,
+          legal_form: business.legal_form ?? null,
+          address_line: business.address_line ?? null,
+          postcode: business.postcode ?? null,
+          city: business.city ?? null,
+          country: business.country ?? null,
+          email: business.email ?? null,
+          phone_e164: business.phone_e164 ?? null,
+          withdrawal_terms: business.withdrawal_terms ?? null,
+          returns_url: business.returns_url ?? null,
+        }}
+        locale={locale}
+        messages={messages}
+      />
 
       {/* Listings */}
       <Card>
@@ -130,7 +139,7 @@ export function BusinessCabinet({
                 <li key={member.user_id} className="flex items-center justify-between py-2 text-sm">
                   <span className="font-medium text-foreground">
                     {member.accepted_at
-                      ? (member.display_name ?? member.user_id)
+                      ? (member.display_name ?? tf("pro.cabinet.unnamed_member", "Member"))
                       : tf("pro.cabinet.pending_invite", "Pending invite")}
                   </span>
                   <span className="capitalize text-muted-foreground">{member.role}</span>

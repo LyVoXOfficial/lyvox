@@ -1718,8 +1718,32 @@
       "team_heading": "Team",
       "team_empty": "Nog geen teamleden.",
       "pending_invite": "Uitnodiging in behandeling",
+      "unnamed_member": "Lid",
       "upgrade_heading": "Upgrade naar Pro",
-      "upgrade_body": "Ontgrendel geavanceerde verkopersfuncties met een Pro-abonnement."
+      "upgrade_body": "Ontgrendel geavanceerde verkopersfuncties met een Pro-abonnement.",
+      "edit": {
+        "heading": "Bedrijfsgegevens bewerken",
+        "trade_name": "Handelsnaam",
+        "trade_name_placeholder": "Uw merk- of winkelnaam",
+        "legal_form": "Rechtsvorm",
+        "legal_form_placeholder": "bijv. BV, NV, Eenmanszaak",
+        "address_line": "Straat en nummer",
+        "address_line_placeholder": "Wetstraat 1",
+        "postcode": "Postcode",
+        "city": "Stad",
+        "country": "Land",
+        "email": "Zakelijk e-mailadres",
+        "phone_e164": "Zakelijk telefoonnummer",
+        "withdrawal_terms": "Herroepings- en retourbeleid",
+        "withdrawal_terms_placeholder": "Consumenten hebben het recht om een aankoop binnen 14 dagen te herroepen...",
+        "returns_url": "URL retourbeleid (optioneel)",
+        "save": "Wijzigingen opslaan",
+        "success": "Bedrijfsgegevens succesvol bijgewerkt",
+        "error_forbidden": "Alleen de eigenaar van het bedrijf kan deze gegevens bewerken",
+        "error_generic": "Er is iets misgegaan. Probeer het opnieuw.",
+        "postcode_invalid": "Belgische postcode moet 4 cijfers zijn (1000–9999)",
+        "email_invalid": "Voer een geldig e-mailadres in"
+      }
     }
   }
 }

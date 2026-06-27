@@ -90,7 +90,7 @@ export default async function ProPage() {
   const { data: business } = await supabase
     .from("businesses")
     .select(
-      "id, legal_name, trade_name, legal_form, address_line, postcode, city, country, kbo_number, vat_number, vat_liable, email, phone_e164, withdrawal_terms, self_certified_at, entity_verified, status",
+      "id, legal_name, trade_name, legal_form, address_line, postcode, city, country, kbo_number, vat_number, vat_liable, email, phone_e164, withdrawal_terms, returns_url, self_certified_at, entity_verified, status",
     )
     .eq("created_by", user.id)
     .eq("status", "active")
