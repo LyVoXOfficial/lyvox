@@ -118,7 +118,7 @@ SEO + Security задокументированы и ждут последним
 | F5 DSA-роль/PoC | ⛔ не начато | — |
 | F6 analytics_events sink | ⛔ не начато | — |
 | F7 generation_id + resolveGeneration | ⛔ не начато | — |
-| F8 серверный client-IP | ⛔ не начато | — |
+| **F8** серверный client-IP | ✅ | 7a4de19 |
 | F9 fraud-engine в рантайм | ⛔ не начато | — |
 | F10 itsme_sub uniqueness | ⛔ не начато | — |
 | F11 дедуп advert_views | ⛔ не начато | — |
