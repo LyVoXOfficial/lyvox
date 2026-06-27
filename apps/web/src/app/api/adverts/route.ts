@@ -43,8 +43,9 @@ export async function POST(req?: Request) {
       if (body && typeof body.business_id === "string" && body.business_id.length > 0) {
         businessId = body.business_id;
       }
-    } catch {
+    } catch (err) {
       // body is optional — ignore parse errors
+      if (process.env.NODE_ENV !== "production") console.warn("[POST /api/adverts] body parse failed", err);
     }
   }
 

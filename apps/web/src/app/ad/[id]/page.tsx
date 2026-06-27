@@ -67,7 +67,6 @@ type BusinessPublicData = {
   country: string | null;
   kbo_number: string | null;
   vat_number: string | null;
-  vat_liable: boolean;
   email: string;
   phone_e164: string | null;
   withdrawal_terms: string | null;
@@ -1645,7 +1644,7 @@ async function loadAdvertData(
       const { data: bizRow } = await anonDb
         .from("businesses")
         .select(
-          "legal_name,trade_name,legal_form,address_line,postcode,city,country,kbo_number,vat_number,vat_liable,email,phone_e164,withdrawal_terms,self_certified_at,entity_verified",
+          "legal_name,trade_name,legal_form,address_line,postcode,city,country,kbo_number,vat_number,email,phone_e164,withdrawal_terms,self_certified_at,entity_verified",
         )
         .eq("id", businessIdFromAdvert)
         .maybeSingle();

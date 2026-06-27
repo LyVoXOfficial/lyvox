@@ -120,4 +120,53 @@ describe("POST /api/adverts — business gate (T17)", () => {
     await POST(undefined);
     expect(canSellMock).not.toHaveBeenCalled();
   });
+
+  it("proceeds to INSERT with business_id when canSellAsBusiness returns ok:true", async () => {
+    const USER_ID = "u-biz-ok";
+    const BIZ_ID = "biz-uuid-ok";
+
+    getUserMock.mockResolvedValue({ data: { user: { id: USER_ID } } });
+    canSellMock.mockResolvedValue({ ok: true });
+
+    // Capture the row passed to insert so we can assert business_id is included
+    let capturedInsertRow: Record<string, unknown> | null = null;
+    const advertsChain: Record<string, unknown> = {};
+    advertsChain.insert = (row: Record<string, unknown>) => {
+      capturedInsertRow = row;
+      return advertsChain;
+    };
+    advertsChain.select = () => advertsChain;
+    advertsChain.single = async () => ({
+      data: { id: "advert-new-1", status: "draft", category_id: "cat-1" },
+      error: null,
+    });
+
+    // Table-aware from() mock: adverts chain captures insert args; other tables return a category row.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (fromMock as any).mockImplementation((table: string) =>
+      table === "adverts"
+        ? advertsChain
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        : makeChainable({ data: { id: "cat-1" } as any, error: null }),
+    );
+
+    const res = await POST(jsonReq({ business_id: BIZ_ID }));
+
+    // Gate was called with the right arguments
+    expect(canSellMock).toHaveBeenCalledWith(
+      expect.anything(),
+      USER_ID,
+      BIZ_ID,
+    );
+
+    // The inserted draft carried business_id
+    expect(capturedInsertRow).not.toBeNull();
+    expect(capturedInsertRow!.business_id).toBe(BIZ_ID);
+
+    // Route returned success
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+    expect(body.data.advert.id).toBe("advert-new-1");
+  });
 });
