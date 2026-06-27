@@ -36,6 +36,14 @@ type RegisterMessages = {
   loginLink: string;
   disposableEmailError: string;
   captchaError: string;
+  heroHeadline: string;
+  heroSubtext: string;
+  heroSignal1: string;
+  heroSignal2: string;
+  heroSignal3: string;
+  tabRegister: string;
+  tabLogin: string;
+  formSubtitle: string;
 };
 
 const englishMessages: RegisterMessages = {
@@ -81,6 +89,14 @@ const englishMessages: RegisterMessages = {
   loginLink: "Sign in",
   disposableEmailError: "Please use a non-disposable email address.",
   captchaError: "Please complete the verification.",
+  heroHeadline: "Join a marketplace built on trust.",
+  heroSubtext: "One verified identity per person. Clear seller labels. Real moderation behind every conversation.",
+  heroSignal1: "Identity-verified sellers",
+  heroSignal2: "Private & business labels",
+  heroSignal3: "Human dispute support",
+  tabRegister: "Register",
+  tabLogin: "Log in",
+  formSubtitle: "Free to join · sell in minutes",
 };
 
 export const registerMessages: Record<Locale, RegisterMessages> = {
@@ -128,6 +144,14 @@ export const registerMessages: Record<Locale, RegisterMessages> = {
     loginLink: "Se connecter",
     disposableEmailError: "Veuillez utiliser une adresse email non jetable.",
     captchaError: "Veuillez completer la verification.",
+    heroHeadline: "Rejoignez un marketplace de confiance.",
+    heroSubtext: "Une identite verifiee par personne. Des labels vendeurs clairs. Une moderation humaine.",
+    heroSignal1: "Vendeurs verifies",
+    heroSignal2: "Labels prive et professionnel",
+    heroSignal3: "Support humain des litiges",
+    tabRegister: "S'inscrire",
+    tabLogin: "Se connecter",
+    formSubtitle: "Gratuit · vendez en quelques minutes",
   },
   nl: {
     trustedSetup: "Vertrouwde accountconfiguratie",
@@ -172,6 +196,14 @@ export const registerMessages: Record<Locale, RegisterMessages> = {
     loginLink: "Inloggen",
     disposableEmailError: "Gebruik een niet-wegwerp e-mailadres.",
     captchaError: "Voltooi de verificatie.",
+    heroHeadline: "Word lid van een betrouwbare marketplace.",
+    heroSubtext: "Een geverifieerde identiteit per persoon. Duidelijke verkoperlabels. Echte moderatie.",
+    heroSignal1: "Identiteitsverificatie voor verkopers",
+    heroSignal2: "Prive en zakelijke labels",
+    heroSignal3: "Menselijke geschillenondersteuning",
+    tabRegister: "Registreren",
+    tabLogin: "Inloggen",
+    formSubtitle: "Gratis lid worden · verkoop in minuten",
   },
   ru: {
     trustedSetup: "Настройка проверенного аккаунта",
@@ -216,6 +248,14 @@ export const registerMessages: Record<Locale, RegisterMessages> = {
     loginLink: "Войти",
     disposableEmailError: "Используйте не одноразовый адрес электронной почты.",
     captchaError: "Пройдите проверку.",
+    heroHeadline: "Присоединяйтесь к маркетплейсу, построенному на доверии.",
+    heroSubtext: "Одна подтверждённая личность на человека. Чёткие метки продавцов. Реальная модерация.",
+    heroSignal1: "Верифицированные продавцы",
+    heroSignal2: "Метки частных и бизнес-продавцов",
+    heroSignal3: "Человеческая поддержка в спорах",
+    tabRegister: "Регистрация",
+    tabLogin: "Войти",
+    formSubtitle: "Бесплатно · начните продавать за минуты",
   },
   de: {
     trustedSetup: "Vertrauenswuerdige Kontoeinrichtung",
@@ -260,6 +300,14 @@ export const registerMessages: Record<Locale, RegisterMessages> = {
     loginLink: "Anmelden",
     disposableEmailError: "Bitte verwenden Sie eine nicht-wegwerfbare E-Mail-Adresse.",
     captchaError: "Bitte schliessen Sie die Verifizierung ab.",
+    heroHeadline: "Treten Sie einem Marktplatz bei, der auf Vertrauen aufgebaut ist.",
+    heroSubtext: "Eine verifizierte Identitaet pro Person. Klare Verkaeuferkennzeichnung. Echte Moderation.",
+    heroSignal1: "Identitaetsverifizierte Verkaeufer",
+    heroSignal2: "Privat- und Geschaeftslabels",
+    heroSignal3: "Menschlicher Streitbeistandsdienst",
+    tabRegister: "Registrieren",
+    tabLogin: "Anmelden",
+    formSubtitle: "Kostenlos beitreten · in Minuten verkaufen",
   },
 };
 

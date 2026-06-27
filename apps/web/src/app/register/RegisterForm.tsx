@@ -9,7 +9,6 @@ import { FaFacebook, FaGoogle } from "react-icons/fa";
 import { CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { localeLabels, registerMessages } from "./messages";
 import { supportedLocales, type Locale } from "@/lib/i18n";
@@ -283,7 +282,7 @@ export default function RegisterForm({ initialLocale }: Props) {
     : "/login";
 
   return (
-    <Card className="w-full rounded-2xl border border-border/70 shadow-[var(--shadow-card)]">
+    <div className="overflow-hidden rounded-[var(--r)] border border-border/70 shadow-[var(--shadow-card)] md:grid md:grid-cols-[1fr_1.05fr]">
       {siteKey && (
         <Script
           src="https://challenges.cloudflare.com/turnstile/v0/api.js"
@@ -292,37 +291,112 @@ export default function RegisterForm({ initialLocale }: Props) {
           onLoad={() => setScriptLoaded(true)}
         />
       )}
-      <CardHeader className="gap-4 sm:grid-cols-[1fr_auto]">
-        <div className="space-y-2.5">
-          <div className="inline-flex items-center gap-2 rounded-full lyvox-trust-gradient px-3 py-1 text-xs font-semibold text-white shadow-[var(--shadow-soft)]">
-            <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-            {messages.trustedSetup}
-          </div>
-          <CardTitle className="text-2xl font-extrabold tracking-tight">{messages.title}</CardTitle>
-          <CardDescription className="max-w-xl">{messages.intro}</CardDescription>
-        </div>
-        <label className="text-sm text-muted-foreground">
-          <span className="block text-xs font-medium uppercase tracking-wide">{messages.languageLabel}</span>
-          <select
-            className="mt-1 h-10 w-full min-w-36 rounded-xl border border-border bg-background px-3 text-sm text-foreground shadow-[var(--shadow-soft)] focus:outline-none focus:ring-4 focus:ring-primary/12 sm:w-36"
-            value={locale}
-            onChange={(event) => setLocale(event.target.value as Locale)}
-          >
-            {supportedLocales.map((code) => (
-              <option key={code} value={code}>
-                {localeLabels[code]}
-              </option>
-            ))}
-          </select>
-        </label>
-      </CardHeader>
 
-      <CardContent className="space-y-6">
-        <div className="grid gap-3 sm:grid-cols-2">
+      {/* ── LEFT: trust-gradient hero ─────────────────────────────────── */}
+      <div className="lyvox-cta-gradient relative flex flex-col justify-between overflow-hidden px-8 py-10 text-white md:px-10 md:py-11">
+        {/* decorative radial blobs */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(50% 45% at 20% 12%, oklch(0.92 0.10 168 / 0.5), transparent 70%), radial-gradient(50% 50% at 90% 95%, oklch(0.70 0.13 200 / 0.45), transparent 70%)",
+          }}
+          aria-hidden="true"
+        />
+
+        {/* top: logo + headline */}
+        <div className="relative">
+          <span className="mb-10 flex items-center gap-2.5 text-[23px] font-extrabold tracking-tight">
+            <span className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-xl bg-white/[0.18] backdrop-blur-sm">
+              <ShieldCheck className="h-[21px] w-[21px] stroke-white" aria-hidden="true" />
+            </span>
+            LyVoX
+          </span>
+          <h1 className="mb-3.5 max-w-[13ch] text-[30px] font-extrabold leading-[1.2] tracking-tight">
+            {messages.heroHeadline}
+          </h1>
+          <p className="max-w-[34ch] text-[14.5px] leading-[1.6] opacity-[0.92]">
+            {messages.heroSubtext}
+          </p>
+        </div>
+
+        {/* bottom: trust signals */}
+        <div className="relative mt-10 flex flex-col gap-3.5 md:mt-0">
+          {/* signal 1: identity-verified sellers */}
+          <div className="flex items-center gap-2.5">
+            <span className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-[10px] bg-white/[0.16]">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="white" strokeWidth="2.2" aria-hidden="true">
+                <path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z" />
+                <path d="M9 12l2 2 4-4" />
+              </svg>
+            </span>
+            <span className="text-[13.5px] font-semibold">{messages.heroSignal1}</span>
+          </div>
+          {/* signal 2: private & business labels */}
+          <div className="flex items-center gap-2.5">
+            <span className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-[10px] bg-white/[0.16]">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="white" strokeWidth="2.2" aria-hidden="true">
+                <path d="M3 7h18v13H3zM3 7l3-4h12l3 4M9 12h6" />
+              </svg>
+            </span>
+            <span className="text-[13.5px] font-semibold">{messages.heroSignal2}</span>
+          </div>
+          {/* signal 3: human dispute support */}
+          <div className="flex items-center gap-2.5">
+            <span className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-[10px] bg-white/[0.16]">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="white" strokeWidth="2.2" aria-hidden="true">
+                <path d="M8 10h8M8 14h5" />
+                <path d="M21 12a9 9 0 11-3.5-7.1L21 3v6h-6" />
+              </svg>
+            </span>
+            <span className="text-[13.5px] font-semibold">{messages.heroSignal3}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── RIGHT: form column ────────────────────────────────────────── */}
+      <div className="bg-card px-8 py-10 md:px-10 md:py-11">
+        {/* segmented Register / Log in tab */}
+        <div className="mb-6 inline-flex gap-[3px] rounded-full bg-muted p-1">
+          <span className="inline-flex h-[34px] items-center rounded-full bg-card px-5 text-[13px] font-bold text-foreground shadow-[var(--shS)]">
+            {messages.tabRegister}
+          </span>
+          <Link
+            href={loginHref}
+            className="inline-flex h-[34px] items-center rounded-full px-5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {messages.tabLogin}
+          </Link>
+        </div>
+
+        {/* form heading */}
+        <h2 className="mb-1 text-[22px] font-extrabold tracking-tight">{messages.title}</h2>
+        <p className="mb-6 text-[13px] font-medium text-muted-foreground">{messages.formSubtitle}</p>
+
+        {/* language selector */}
+        <div className="mb-5">
+          <label className="text-sm text-muted-foreground">
+            <span className="block text-xs font-medium uppercase tracking-wide">{messages.languageLabel}</span>
+            <select
+              className="mt-1 h-10 w-full min-w-36 rounded-[var(--rm)] border border-border bg-background px-3 text-sm text-foreground shadow-[var(--shS)] focus:outline-none focus:ring-4 focus:ring-primary/12 sm:w-40"
+              value={locale}
+              onChange={(event) => setLocale(event.target.value as Locale)}
+            >
+              {supportedLocales.map((code) => (
+                <option key={code} value={code}>
+                  {localeLabels[code]}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        {/* social OAuth */}
+        <div className="mb-5 grid gap-3 sm:grid-cols-2">
           <Button
             type="button"
             variant="outline"
-            className="h-11 rounded-xl shadow-[var(--shadow-soft)]"
+            className="h-11 rounded-[var(--rm)] shadow-[var(--shS)]"
             onClick={() => handleSocialRegister("google")}
             disabled={socialLoading || submitting}
           >
@@ -332,7 +406,7 @@ export default function RegisterForm({ initialLocale }: Props) {
           <Button
             type="button"
             variant="outline"
-            className="h-11 rounded-xl shadow-[var(--shadow-soft)]"
+            className="h-11 rounded-[var(--rm)] shadow-[var(--shS)]"
             onClick={() => handleSocialRegister("facebook")}
             disabled={socialLoading || submitting}
           >
@@ -341,7 +415,8 @@ export default function RegisterForm({ initialLocale }: Props) {
           </Button>
         </div>
 
-        <div className="relative">
+        {/* divider */}
+        <div className="relative mb-5">
           <div className="absolute inset-0 flex items-center" aria-hidden="true">
             <div className="w-full border-t border-border" />
           </div>
@@ -350,9 +425,11 @@ export default function RegisterForm({ initialLocale }: Props) {
           </div>
         </div>
 
+        {/* email/password/consents form */}
         <form className="grid gap-4" onSubmit={onSubmit} noValidate>
+          {/* email */}
           <div className="grid gap-2">
-            <label className="text-sm font-medium" htmlFor="email">
+            <label className="text-[12px] font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="email">
               {messages.emailLabel}
             </label>
             <div className="relative">
@@ -364,10 +441,10 @@ export default function RegisterForm({ initialLocale }: Props) {
                 {...register("email", { required: messages.emailError })}
                 className={
                   emailAvailable === false
-                    ? "rounded-xl border-destructive pr-28 focus-visible:ring-4 focus-visible:ring-destructive/20"
+                    ? "h-[46px] rounded-[var(--rm)] border-destructive pr-28 focus-visible:ring-4 focus-visible:ring-destructive/20"
                     : emailAvailable === true
-                      ? "rounded-xl border-primary pr-28 focus-visible:ring-4 focus-visible:ring-primary/12"
-                      : "rounded-xl pr-28 focus-visible:ring-4 focus-visible:ring-primary/12"
+                      ? "h-[46px] rounded-[var(--rm)] border-primary pr-28 focus-visible:ring-4 focus-visible:ring-primary/12"
+                      : "h-[46px] rounded-[var(--rm)] pr-28 focus-visible:ring-4 focus-visible:ring-primary/12"
                 }
               />
               {checkingEmail && (
@@ -385,8 +462,9 @@ export default function RegisterForm({ initialLocale }: Props) {
             {errors.email?.message ? <p className="text-sm text-destructive">{String(errors.email.message)}</p> : null}
           </div>
 
+          {/* password */}
           <div className="grid gap-2">
-            <label className="text-sm font-medium" htmlFor="password">
+            <label className="text-[12px] font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="password">
               {messages.passwordLabel}
             </label>
             <Input
@@ -394,9 +472,9 @@ export default function RegisterForm({ initialLocale }: Props) {
               type="password"
               autoComplete="new-password"
               {...register("password", { required: messages.passwordError })}
-              className="rounded-xl focus-visible:ring-4 focus-visible:ring-primary/12"
+              className="h-[46px] rounded-[var(--rm)] focus-visible:ring-4 focus-visible:ring-primary/12"
             />
-            <div className="rounded-xl border border-border/70 bg-muted/40 p-3.5 shadow-[var(--shadow-soft)]">
+            <div className="rounded-[var(--rm)] border border-border/70 bg-muted/40 p-3.5 shadow-[var(--shS)]">
               <p className="text-sm text-muted-foreground">{messages.passwordHint}</p>
               <ul className="mt-2 grid gap-1.5 text-sm text-muted-foreground sm:grid-cols-2">
                 {messages.passwordChecklist.map((item) => (
@@ -410,8 +488,9 @@ export default function RegisterForm({ initialLocale }: Props) {
             {errors.password?.message ? <p className="text-sm text-destructive">{String(errors.password.message)}</p> : null}
           </div>
 
+          {/* confirm password */}
           <div className="grid gap-2">
-            <label className="text-sm font-medium" htmlFor="confirmPassword">
+            <label className="text-[12px] font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="confirmPassword">
               {messages.confirmPasswordLabel}
             </label>
             <Input
@@ -419,14 +498,15 @@ export default function RegisterForm({ initialLocale }: Props) {
               type="password"
               autoComplete="new-password"
               {...register("confirmPassword", { required: messages.confirmPasswordError })}
-              className="rounded-xl focus-visible:ring-4 focus-visible:ring-primary/12"
+              className="h-[46px] rounded-[var(--rm)] focus-visible:ring-4 focus-visible:ring-primary/12"
             />
             {errors.confirmPassword?.message ? (
               <p className="text-sm text-destructive">{String(errors.confirmPassword.message)}</p>
             ) : null}
           </div>
 
-          <div className="grid gap-3 rounded-xl border border-border/70 bg-muted/30 p-4 shadow-[var(--shadow-soft)]">
+          {/* consents — terms + privacy + marketing in exact DOM order (test-critical) */}
+          <div className="grid gap-3 rounded-[var(--rm)] border border-border/70 bg-muted/30 p-4 shadow-[var(--shS)]">
             <span className="text-sm font-semibold text-foreground">{messages.consentsTitle}</span>
             <label className="flex items-start gap-3 text-sm text-muted-foreground">
               <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0 accent-primary" {...register("terms")} />
@@ -457,9 +537,15 @@ export default function RegisterForm({ initialLocale }: Props) {
             )}
           </div>
 
+          {/* Turnstile — only renders when siteKey is configured (do NOT render a fake box) */}
           {siteKey && <div ref={turnstileRef} />}
 
-          <Button type="submit" disabled={submitting} className="h-11 rounded-xl lyvox-cta-gradient text-primary-foreground shadow-[var(--shadow-card)]">
+          {/* CTA — text-white is correct: gradient is dark-teal in both themes */}
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="h-[50px] rounded-[var(--rm)] lyvox-cta-gradient text-white shadow-[0_5px_16px_oklch(0.55_0.13_178_/_0.38)] mt-0.5"
+          >
             {submitting ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
@@ -470,14 +556,15 @@ export default function RegisterForm({ initialLocale }: Props) {
             )}
           </Button>
         </form>
-      </CardContent>
 
-      <CardFooter className="justify-center border-t border-border/70 pt-5 text-sm text-muted-foreground">
-        {messages.loginPrompt}{" "}
-        <Link href={loginHref} className="ml-1 font-medium text-primary underline-offset-4 hover:underline">
-          {messages.loginLink}
-        </Link>
-      </CardFooter>
-    </Card>
+        {/* footer login link */}
+        <p className="mt-5 text-center text-[12.5px] text-muted-foreground">
+          {messages.loginPrompt}{" "}
+          <Link href={loginHref} className="font-semibold text-primary underline-offset-4 hover:underline">
+            {messages.loginLink}
+          </Link>
+        </p>
+      </div>
+    </div>
   );
 }
