@@ -1,4 +1,4 @@
-import { randomBytes, createHmac } from "crypto";
+import { randomBytes, createHmac, randomInt } from "crypto";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { createRateLimiter, withRateLimit, getClientIp } from "@/lib/rateLimiter";
@@ -178,7 +178,7 @@ const baseHandler = async (req: Request) => {
     return handleSupabaseError(deactivatePrevious.error, ApiErrorCode.OTP_CLEANUP_FAILED);
   }
 
-  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const code = String(randomInt(100000, 1000000));
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
   const salt = randomBytes(16).toString("hex");
   const codeHash = createHmac("sha256", salt).update(code).digest("hex");

@@ -52,7 +52,7 @@ export default async function ChatListPage() {
     (conversations || []).map(async (participant) => {
       const conv = participant.conversations as {
         id: string;
-        created_by: string;
+        created_by: string | null;
         advert_id: string | null;
         last_message_at: string | null;
         created_at: string;

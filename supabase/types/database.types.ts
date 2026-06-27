@@ -760,7 +760,7 @@ export type Database = {
         Update: {
           advert_id?: string | null
           created_at?: string | null
-          created_by?: string
+          created_by?: string | null
           id?: string
           last_message_at?: string | null
           updated_at?: string | null
@@ -1580,7 +1580,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          author_id?: string
+          author_id?: string | null
           body?: string
           conversation_id?: string
           created_at?: string | null
@@ -2127,7 +2127,7 @@ export type Database = {
           provider_session_id?: string | null
           status?: string
           updated_at?: string | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
