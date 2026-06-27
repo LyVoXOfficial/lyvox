@@ -63,7 +63,10 @@ export default function UserMenu() {
           cache: "no-store",
           credentials: "include",
         });
-        const data: MeResponse = await response.json().catch(() => ({ user: null, phone: null }));
+        const json = await response.json().catch(() => null);
+        // /api/me wraps its payload in the createSuccessResponse {ok,data} envelope;
+        // unwrap to the inner payload (tolerant of a flat shape too).
+        const data: MeResponse = (json?.data ?? json ?? { user: null, phone: null }) as MeResponse;
         const verifiedFromPhone = typeof data?.phone?.verified === "boolean" ? data.phone.verified : null;
         const verifiedFallback = typeof data?.verifiedPhone === "boolean" ? data.verifiedPhone : null;
         if (!cancelled) {

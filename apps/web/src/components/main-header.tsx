@@ -91,7 +91,10 @@ export default function MainHeader() {
           cache: "no-store",
           credentials: "include",
         });
-        const data: MeResponse = await response.json().catch(() => ({ user: null }));
+        const json = await response.json().catch(() => null);
+        // /api/me wraps its payload in the createSuccessResponse {ok,data} envelope;
+        // unwrap to the inner payload (tolerant of a flat shape too).
+        const data: MeResponse = (json?.data ?? json ?? { user: null }) as MeResponse;
         session = hasUserPayload(data);
         setHasSession(session);
       } catch {
