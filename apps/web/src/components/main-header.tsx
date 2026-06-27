@@ -186,11 +186,12 @@ export default function MainHeader() {
         {/* Search pill — flex-1 */}
         <SearchBar variant="header" className="min-w-0 flex-1" />
 
-        {/* Language + Avatar */}
+        {/* Language + Bell + Avatar */}
         <div className="flex shrink-0 items-center gap-2">
           <div className="[&_button]:h-[30px] [&_button]:rounded-full [&_button]:border-border [&_button]:bg-card [&_button]:px-[10px] [&_button]:text-[12px] [&_button]:font-semibold [&_button]:text-muted-foreground">
             <LanguageSwitcher />
           </div>
+          <NotificationBell />
           <UserMenu />
         </div>
       </div>
