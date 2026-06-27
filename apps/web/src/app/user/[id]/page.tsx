@@ -4,7 +4,7 @@ import { getI18nProps } from "@/i18n/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star, CheckCircle, Mail, Phone, Calendar } from "lucide-react";
+import { Star, CheckCircle, Mail, Phone, Calendar, Building2, ShieldCheck, BadgeCheck, CreditCard } from "lucide-react";
 import { formatDate } from "@/i18n/format";
 import { ProfileAdvertsList } from "@/components/profile/ProfileAdvertsList";
 import { ProfileReviewsList } from "@/components/profile/ProfileReviewsList";
@@ -12,6 +12,8 @@ import { logger } from "@/lib/errorLogger";
 import { signMediaUrls } from "@/lib/media/signMediaUrls";
 import { isViewerVerified } from "@/lib/auth/requireVerified";
 import SellerIdentityGate from "@/components/trust/SellerIdentityGate";
+import { deriveSellerBadges, type SellerBadge } from "@/lib/profile/sellerBadges";
+import { TraderPanel, type BusinessPublicData } from "@/components/business/TraderPanel";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -27,6 +29,8 @@ type PublicProfileData = {
   trust_score: number;
   adverts_count: number;
   reviews_count: number;
+  seller_type: "individual" | "business" | null;
+  itsme_verified: boolean | null;
   active_adverts: Array<{
     id: string;
     title: string;
@@ -49,12 +53,12 @@ type PublicProfileData = {
 
 async function loadPublicProfileData(userId: string): Promise<PublicProfileData | null> {
   const supabase = await supabaseServer();
-  
+
   // Load public profile fields only (RLS will enforce this)
   // Note: We explicitly select only public fields - phone and consents are excluded
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("id, display_name, created_at, verified_email, verified_phone")
+    .select("id, display_name, created_at, verified_email, verified_phone, seller_type, itsme_verified")
     .eq("id", userId)
     .maybeSingle();
 
@@ -172,6 +176,8 @@ async function loadPublicProfileData(userId: string): Promise<PublicProfileData 
     created_at: profile.created_at,
     verified_email: profile.verified_email,
     verified_phone: profile.verified_phone,
+    seller_type: (profile.seller_type as "individual" | "business" | null) ?? null,
+    itsme_verified: profile.itsme_verified ?? null,
     trust_score: trustScore,
     adverts_count: adverts.length, // For now, we show count of loaded adverts (limited to 12)
     reviews_count: reviewsList.length, // For now, we show count of loaded reviews (limited to 20)
@@ -194,6 +200,72 @@ async function loadPublicProfileData(userId: string): Promise<PublicProfileData 
   };
 }
 
+async function loadActiveBusiness(userId: string): Promise<BusinessPublicData | null> {
+  const supabase = await supabaseServer();
+  // RLS biz_public_read allows anon to read active businesses — safe for all viewers
+  const { data, error } = await supabase
+    .from("businesses")
+    .select(
+      "legal_name, trade_name, legal_form, address_line, postcode, city, country, kbo_number, vat_number, email, phone_e164, withdrawal_terms, self_certified_at, entity_verified"
+    )
+    .eq("created_by", userId)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (error) {
+    logger.warn("Could not load business data for public profile", {
+      component: "PublicUserPage",
+      action: "loadActiveBusiness",
+      metadata: { userId },
+      error,
+    });
+    return null;
+  }
+
+  return data as BusinessPublicData | null;
+}
+
+/** Icon mapping for each badge kind */
+function BadgeIcon({ badge }: { badge: SellerBadge }) {
+  switch (badge) {
+    case "verified_business":
+      return <ShieldCheck className="mr-1 h-3 w-3" />;
+    case "vat_registered":
+      return <CreditCard className="mr-1 h-3 w-3" />;
+    case "id_verified":
+      return <BadgeCheck className="mr-1 h-3 w-3" />;
+    case "phone_verified":
+      return <Phone className="mr-1 h-3 w-3" />;
+    case "email_verified":
+      return <Mail className="mr-1 h-3 w-3" />;
+    case "established_seller":
+      return <Star className="mr-1 h-3 w-3" />;
+  }
+}
+
+/** i18n key for each badge (must exist in all 5 locale files) */
+function badgeI18nKey(badge: SellerBadge): string {
+  switch (badge) {
+    case "verified_business":
+      return "profile.badge_verified_business";
+    case "vat_registered":
+      return "profile.badge_vat_registered";
+    case "id_verified":
+      return "profile.badge_id_verified";
+    case "phone_verified":
+      return "profile.phone_verified";
+    case "email_verified":
+      return "profile.email_verified";
+    case "established_seller":
+      return "profile.badge_established_seller";
+  }
+}
+
+/** Whether a badge uses the trust-gradient style (identity/business) vs neutral */
+function isTrustBadge(badge: SellerBadge): boolean {
+  return badge !== "established_seller";
+}
+
 export default async function PublicProfilePage({
   params,
 }: {
@@ -203,6 +275,12 @@ export default async function PublicProfilePage({
   const { locale, messages } = await getI18nProps();
   const t = (key: string) =>
     key.split(".").reduce<any>((acc, p) => (acc ? acc[p] : undefined), messages) ?? key;
+
+  // Wrapper for TraderPanel which expects t(key, fallback) signature
+  const tPanel = (key: string, fallback: string): string => {
+    const result = t(key);
+    return result === key ? fallback : result;
+  };
 
   // Validate UUID format
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -226,7 +304,13 @@ export default async function PublicProfilePage({
     reviews_count,
     active_adverts,
     reviews,
+    seller_type,
+    itsme_verified,
   } = profile;
+
+  // Load business data if this is a business seller (readable by anyone via biz_public_read RLS)
+  const isBusiness = seller_type === "business";
+  const business = isBusiness ? await loadActiveBusiness(id) : null;
 
   // Identity gate (verified-only model): unverified viewers don't see the owner's
   // identity (name/avatar). Listings stay public. Fail-closed for anonymous viewers.
@@ -241,11 +325,43 @@ export default async function PublicProfilePage({
   const viewerVerified = currentUserId ? await isViewerVerified(supabase, currentUserId) : false;
   const canSeeIdentity = viewerVerified || isOwnProfile;
 
-  const headerName = canSeeIdentity
-    ? display_name || t("profile.anonymous")
-    : t("seller_gate.name_hidden");
-  const avatarSeed = canSeeIdentity && display_name ? display_name : "User";
-  const avatarInitial = canSeeIdentity && display_name ? display_name.charAt(0).toUpperCase() : "U";
+  // §0 privacy regime:
+  // - юр (business) with loaded business: legal/trade name is PUBLIC (DSA Art. 30(7)).
+  //   Show the business legal name as the header — not gated. Never leak the personal display_name.
+  // - физ (individual) or business with no active business row: existing identity gate applies.
+  const businessHasPublicName = isBusiness && business !== null;
+
+  let headerName: string;
+  let avatarSeed: string;
+  let avatarInitial: string;
+
+  if (businessHasPublicName) {
+    // Business legal name is always public — NOT behind the identity gate
+    const publicName = business!.trade_name ?? business!.legal_name;
+    headerName = publicName;
+    // Use a generic "B" initial for business — do NOT use personal display_name/avatar
+    avatarSeed = "Business";
+    avatarInitial = "B";
+  } else {
+    // физ (individual) path — apply the existing identity gate
+    headerName = canSeeIdentity
+      ? display_name || t("profile.anonymous")
+      : t("seller_gate.name_hidden");
+    avatarSeed = canSeeIdentity && display_name ? display_name : "User";
+    avatarInitial = canSeeIdentity && display_name ? display_name.charAt(0).toUpperCase() : "U";
+  }
+
+  // Compute trust badges
+  const badges = deriveSellerBadges({
+    sellerType: isBusiness ? "business" : "individual",
+    verifiedEmail: verified_email ?? false,
+    verifiedPhone: verified_phone ?? false,
+    idVerified: itsme_verified ?? false,
+    entityVerified: business?.entity_verified ?? false,
+    hasVat: !!business?.vat_number,
+    createdAt: created_at,
+    activeListings: active_adverts.length,
+  });
 
   // Hide review authors' identities from unverified viewers too (same verified-only model as the
   // profile owner). Redact at the data boundary — names must not reach the client component's HTML.
@@ -257,34 +373,56 @@ export default async function PublicProfilePage({
     <main className="container mx-auto max-w-5xl space-y-8 p-4 md:p-8">
       {/* Profile Header */}
       <div className="flex flex-col items-center gap-6 md:flex-row">
-        <Avatar className="h-24 w-24 border-2 border-primary">
-          <AvatarImage
-            src={`https://api.dicebear.com/8.x/initials/svg?seed=${avatarSeed}`}
-          />
-          <AvatarFallback>{avatarInitial}</AvatarFallback>
-        </Avatar>
+        {businessHasPublicName ? (
+          /* Business avatar: generic building icon — personal avatar stays private */
+          <div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-primary bg-muted">
+            <Building2 className="h-10 w-10 text-muted-foreground" aria-hidden="true" />
+          </div>
+        ) : (
+          <Avatar className="h-24 w-24 border-2 border-primary">
+            <AvatarImage
+              src={`https://api.dicebear.com/8.x/initials/svg?seed=${avatarSeed}`}
+            />
+            <AvatarFallback>{avatarInitial}</AvatarFallback>
+          </Avatar>
+        )}
         <div className="flex-1 text-center md:text-left">
           <h1 className="text-3xl font-bold">{headerName}</h1>
           <div className="flex flex-wrap justify-center gap-2 pt-2 md:justify-start">
-            <Badge variant="secondary">{t("profile.member")}</Badge>
-            {verified_email && (
-              <Badge variant="secondary">
-                <Mail className="mr-1 h-3 w-3" /> {t("profile.email_verified")}
+            {/* Seller-type chip */}
+            {isBusiness ? (
+              <Badge className="lyvox-trust-gradient text-white">
+                {t("profile.business_seller")}
               </Badge>
+            ) : (
+              <Badge variant="secondary">{t("profile.private_seller")}</Badge>
             )}
-            {verified_phone && (
-              <Badge variant="secondary">
-                <Phone className="mr-1 h-3 w-3" /> {t("profile.phone_verified")}
-              </Badge>
-            )}
-            {trust_score > 50 && (
-              <Badge variant="secondary">{t("profile.trusted_seller")}</Badge>
+            {/* Trust badge row — derived, capped at 3, replaces ad-hoc email/phone/trusted cluster */}
+            {badges.map((badge) =>
+              isTrustBadge(badge) ? (
+                <Badge key={badge} className="lyvox-trust-gradient text-white">
+                  <BadgeIcon badge={badge} />
+                  {t(badgeI18nKey(badge))}
+                </Badge>
+              ) : (
+                <Badge key={badge} variant="secondary">
+                  <BadgeIcon badge={badge} />
+                  {t(badgeI18nKey(badge))}
+                </Badge>
+              )
             )}
           </div>
         </div>
       </div>
 
-      {!canSeeIdentity && <SellerIdentityGate />}
+      {/* Identity gate for физ (individual) profiles only.
+          Business profiles: the legal name is already public — no gate needed. */}
+      {!businessHasPublicName && !canSeeIdentity && <SellerIdentityGate />}
+
+      {/* DSA Trader Panel — public for all viewers (юр only) */}
+      {businessHasPublicName && (
+        <TraderPanel business={business!} t={tPanel} locale={locale} />
+      )}
 
       {/* Stats & Info */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
