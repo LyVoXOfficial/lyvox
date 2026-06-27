@@ -12,7 +12,12 @@ import { cn } from "@/lib/utils";
 import { getRecentSearches, addRecentSearch, removeRecentSearch } from "@/lib/recentSearches";
 
 type SearchBarProps = {
-  variant?: "default" | "compact";
+  /**
+   * "default"  — tall pill + external "Find" button (home hero)
+   * "compact"  — pill only, no submit button
+   * "header"   — pill with an internal round gradient submit button (main header)
+   */
+  variant?: "default" | "compact" | "header";
   className?: string;
   onSubmit?: (query: string) => void;
 };
@@ -219,6 +224,140 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
   };
 
   const isCompact = variant === "compact";
+  const isHeader = variant === "header";
+
+  /**
+   * "header" variant: single pill containing search-icon + input + round gradient submit button.
+   * All submit/autocomplete behaviour is unchanged; only the chrome is different.
+   */
+  if (isHeader) {
+    return (
+      <form onSubmit={handleSubmit} className={cn("relative flex min-w-0 flex-1", className)}>
+        <div className="flex flex-1 items-center gap-[10px] rounded-full border border-border bg-card px-4 py-0 shadow-[var(--shS)]" style={{ height: 45 }}>
+          <Search className="h-[18px] w-[18px] shrink-0 text-muted-foreground pointer-events-none" aria-hidden="true" />
+          <input
+            ref={inputRef}
+            type="search"
+            value={search}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setSelectedIndex(-1);
+              setShowAutocomplete(event.target.value.trim().length > 0);
+            }}
+            onFocus={() => {
+              setFocused(true);
+              if (filteredCategories.length > 0) setShowAutocomplete(true);
+            }}
+            onBlur={() => setTimeout(() => setFocused(false), 150)}
+            onKeyDown={handleKeyDown}
+            placeholder={t("common.search") || "Search listings across Belgium…"}
+            aria-label={t("common.search") || "Search listings"}
+            aria-autocomplete="list"
+            aria-expanded={isAutocompleteOpen}
+            className="min-w-0 flex-1 border-0 bg-transparent text-[14.5px] text-foreground outline-none placeholder:text-muted-foreground"
+          />
+          {/* Round gradient submit button — inside the pill */}
+          <button
+            type="submit"
+            aria-label={t("common.find") || "Search"}
+            className="lyvox-cta-gradient grid shrink-0 place-items-center rounded-full"
+            style={{ width: 33, height: 33 }}
+          >
+            <ArrowRight className="h-4 w-4 text-white" aria-hidden="true" />
+          </button>
+        </div>
+
+        {/* Autocomplete dropdown — positioned relative to the form */}
+        {isAutocompleteOpen && (
+          <div
+            ref={autocompleteRef}
+            className="absolute left-0 right-0 top-full z-50 mt-2 max-h-72 overflow-y-auto rounded-xl border border-border/70 bg-card shadow-[var(--shadow-hi)]"
+            role="listbox"
+          >
+            {instant.length > 0 && (
+              <div className="border-b border-border/60 py-1">
+                <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {tr("search.instant_results", "Listings")}
+                </p>
+                {instant.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => router.push(`/ad/${item.id}`)}
+                    className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-secondary/60"
+                  >
+                    <span className="lyvox-image-placeholder flex h-10 w-10 shrink-0 overflow-hidden rounded-md">
+                      {item.image ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={item.image} alt="" className="h-full w-full object-cover" />
+                      ) : null}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-sm">{item.title}</span>
+                    {typeof item.price === "number" && (
+                      <span className="shrink-0 text-sm font-semibold">
+                        {item.price} {item.currency ?? "EUR"}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {focused && debouncedSearch.trim().length < 2 && recent.length > 0 && (
+              <div className="py-1">
+                <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {tr("search.recent_searches", "Recent searches")}
+                </p>
+                {recent.map((q) => (
+                  <div key={q} className="flex items-center justify-between px-3 py-1.5 hover:bg-secondary/60">
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/search?q=${encodeURIComponent(q)}`)}
+                      className="min-w-0 flex-1 truncate text-left text-sm"
+                    >
+                      {q}
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={tr("search.remove_recent", "Remove")}
+                      onClick={() => setRecent(removeRecentSearch(q))}
+                      className="ml-2 shrink-0 text-muted-foreground hover:text-foreground"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {showAutocomplete && filteredCategories.map((category, index) => (
+              <Link
+                key={category.id}
+                href={`/c/${category.path}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleCategorySelect(category);
+                }}
+                className={cn(
+                  "block cursor-pointer border-b px-4 py-3 transition last:border-b-0 hover:bg-secondary/70",
+                  selectedIndex === index && "bg-secondary"
+                )}
+                role="option"
+                aria-selected={selectedIndex === index}
+              >
+                <div className="flex items-center gap-2">
+                  {category.icon && (
+                    <span className="text-lg" aria-hidden="true">{category.icon}</span>
+                  )}
+                  <span className="text-sm font-medium">{getLocalizedCategoryName(category, locale)}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </form>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className={className}>
@@ -251,7 +390,7 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
               isCompact ? "h-10 pl-10 pr-4 text-sm" : "h-12 pl-11 pr-4 text-sm md:text-base"
             )}
           />
-          
+
           {/* Autocomplete dropdown */}
           {isAutocompleteOpen && (
             <div

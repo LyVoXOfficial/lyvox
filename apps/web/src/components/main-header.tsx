@@ -2,9 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, Menu, Plus, ShieldCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { ChevronDown, Plus } from "lucide-react";
 import CategoryTree from "@/components/CategoryTree";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import NotificationBell from "@/components/NotificationBell";
@@ -26,12 +24,18 @@ const hasUserPayload = (payload: MeResponse | { user?: unknown } | null | undefi
   return !!(payload as { user?: unknown }).user;
 };
 
+/** Hamburger / menu lines icon used in the Categories chip */
+const MenuLinesIcon = () => (
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+    <path d="M4 6h16M4 12h16M4 18h16" />
+  </svg>
+);
+
 export default function MainHeader() {
   const { t } = useI18n();
   const router = useRouter();
   const [hasSession, setHasSession] = useState<boolean | null>(null);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const categoriesDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -112,80 +116,84 @@ export default function MainHeader() {
   };
 
   return (
-    <div className="sticky top-0 z-40 border-b border-border/75 bg-background/95 shadow-[0_1px_0_rgba(15,23,42,0.03)] backdrop-blur supports-[backdrop-filter]:bg-background/85">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4">
+    <header
+      className="sticky top-0 z-40 border-b border-border"
+      style={{
+        background: "oklch(1 0 0 / .85)",
+        backdropFilter: "saturate(1.4) blur(14px)",
+        WebkitBackdropFilter: "saturate(1.4) blur(14px)",
+      }}
+    >
+      {/* ── Desktop layout ─────────────────────────────── */}
+      <div className="mx-auto hidden max-w-[1200px] items-center gap-[14px] px-6 md:flex" style={{ height: 66 }}>
+        {/* Logo */}
         <div className="shrink-0">
-          <SiteLogo />
+          <SiteLogo size="md" />
         </div>
 
-        <div ref={categoriesDropdownRef} className="relative hidden md:block">
-          <Button
-            variant="outline"
-            onClick={() => setCategoriesOpen((value) => !value)}
-            className="h-10 gap-2 border-border/80 bg-card px-3 shadow-sm"
+        {/* Categories chip */}
+        <div ref={categoriesDropdownRef} className="relative shrink-0">
+          <button
+            type="button"
+            onClick={() => setCategoriesOpen((v) => !v)}
+            className="inline-flex h-[43px] items-center gap-[7px] rounded-[var(--rm)] border border-border bg-card px-[14px] text-[14px] font-semibold text-foreground transition-colors hover:bg-secondary"
             aria-expanded={categoriesOpen}
             aria-haspopup="true"
           >
+            <MenuLinesIcon />
             {t("common.categories") || "Categories"}
-            <ChevronDown
-              className={cn("h-4 w-4 transition-transform", categoriesOpen && "rotate-180")}
-              aria-hidden="true"
-            />
-          </Button>
+          </button>
           {categoriesOpen && (
-            <div className="absolute left-0 top-full z-50 mt-2 w-[360px] overflow-hidden rounded-md border border-border/80 bg-card shadow-xl">
+            <div className="absolute left-0 top-full z-50 mt-2 w-[360px] overflow-hidden rounded-[var(--r)] border border-border bg-card shadow-[var(--shHi)]">
               <CategoryTree variant="dropdown" onCategorySelect={() => setCategoriesOpen(false)} />
             </div>
           )}
         </div>
 
-        <div className="min-w-0 flex-1">
-          <SearchBar className="w-full" />
+        {/* Search pill — flex-1 */}
+        <SearchBar variant="header" className="min-w-0 flex-1" />
+
+        {/* Language chip */}
+        <div className="shrink-0 [&_button]:h-[43px] [&_button]:rounded-[var(--rm)] [&_button]:border-border [&_button]:bg-card [&_button]:px-[12px] [&_button]:text-[13px] [&_button]:font-semibold [&_button]:text-muted-foreground">
+          <LanguageSwitcher />
         </div>
 
-        <div className="hidden shrink-0 items-center gap-2 md:flex">
-          <LanguageSwitcher />
-          <Button onClick={handlePostClick} className="h-10 gap-2 px-4 shadow-sm">
-            <Plus className="h-4 w-4" aria-hidden="true" />
-            {t("common.post") || "Post listing"}
-          </Button>
-          <div className="hidden items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-medium text-emerald-700 xl:flex">
-            <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-            {t("nav.trust_first") || "Trust-first"}
+        {/* Post a listing CTA */}
+        <button
+          type="button"
+          onClick={handlePostClick}
+          className="lyvox-cta-gradient inline-flex h-[44px] shrink-0 items-center gap-[7px] rounded-[var(--rm)] border-0 px-[17px] text-[14px] font-bold text-white"
+          style={{ boxShadow: "0 4px 14px oklch(0.55 0.13 178 / .35)" }}
+        >
+          <Plus className="h-[17px] w-[17px]" aria-hidden="true" />
+          {t("common.post") || "Post a listing"}
+        </button>
+
+        {/* Notification bell + Avatar */}
+        <NotificationBell />
+        <UserMenu />
+      </div>
+
+      {/* ── Mobile layout: logo + search + lang + avatar ───
+           Categories and Post are accessible via the bottom nav (/c and /post).
+           No hamburger needed; the Sheet drawer is removed to match the mockup. */}
+      <div className="flex items-center justify-between gap-3 px-4 py-3 md:hidden">
+        {/* Logo (small variant) */}
+        <div className="shrink-0">
+          <SiteLogo size="sm" />
+        </div>
+
+        {/* Search pill — flex-1 */}
+        <SearchBar variant="header" className="min-w-0 flex-1" />
+
+        {/* Language + Avatar */}
+        <div className="flex shrink-0 items-center gap-2">
+          <div className="[&_button]:h-[30px] [&_button]:rounded-full [&_button]:border-border [&_button]:bg-card [&_button]:px-[10px] [&_button]:text-[12px] [&_button]:font-semibold [&_button]:text-muted-foreground">
+            <LanguageSwitcher />
           </div>
-          <NotificationBell />
           <UserMenu />
         </div>
-
-        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden" aria-label="Menu">
-              <Menu className="h-5 w-5" aria-hidden="true" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-80 overflow-y-auto">
-            <div className="mt-4 flex min-h-full flex-col gap-5">
-              <div className="flex items-center justify-between">
-                <SiteLogo />
-              </div>
-              <CategoryTree variant="drawer" onCategorySelect={() => setMobileMenuOpen(false)} />
-              <div className="mt-auto space-y-3 border-t border-border pt-4">
-                <div className="px-2">
-                  <LanguageSwitcher />
-                </div>
-                <Button onClick={handlePostClick} className="w-full gap-2">
-                  <Plus className="h-4 w-4" aria-hidden="true" />
-                  {t("common.post") || "Post listing"}
-                </Button>
-                <div className="flex items-center justify-between gap-3 px-2">
-                  <NotificationBell />
-                  <UserMenu />
-                </div>
-              </div>
-            </div>
-          </SheetContent>
-        </Sheet>
       </div>
-    </div>
+    </header>
   );
 }
