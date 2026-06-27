@@ -15,6 +15,7 @@ export * from "./notifications";
 export * from "./phone";
 export * from "./profile";
 export * from "./reports";
+export * from "./reviews";
 export * from "./search";
 
 /**

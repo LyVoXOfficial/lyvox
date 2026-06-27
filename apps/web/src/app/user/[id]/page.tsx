@@ -26,6 +26,7 @@ type PublicProfileData = {
   created_at: string | null;
   verified_email: boolean | null;
   verified_phone: boolean | null;
+  rating: number | null;
   trust_score: number;
   adverts_count: number;
   reviews_count: number;
@@ -58,7 +59,7 @@ async function loadPublicProfileData(userId: string): Promise<PublicProfileData 
   // Note: We explicitly select only public fields - phone and consents are excluded
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("id, display_name, created_at, verified_email, verified_phone, seller_type, itsme_verified")
+    .select("id, display_name, created_at, verified_email, verified_phone, seller_type, itsme_verified, rating")
     .eq("id", userId)
     .maybeSingle();
 
@@ -100,9 +101,11 @@ async function loadPublicProfileData(userId: string): Promise<PublicProfileData 
     .order("created_at", { ascending: false })
     .limit(12);
 
-  // Load reviews via profile relationship (if reviews table exists)
-  // Note: reviews_received is expected to be a foreign key relationship or view
-  // If it doesn't exist, this will return empty array
+  // Load reviews via two-step fetch:
+  // Step 1: fetch reviews rows where subject_id = userId (with count for aggregate)
+  // Step 2: resolve reviewer display_names from profiles by reviewer_id
+  // We avoid a PostgREST embed because reviews.reviewer_id FK targets auth.users,
+  // not profiles, so the embed would fail with PGRST200.
   let reviewsList: Array<{
     id: string;
     rating: number;
@@ -111,29 +114,66 @@ async function loadPublicProfileData(userId: string): Promise<PublicProfileData 
     author: { display_name: string | null } | null;
   }> = [];
 
-  try {
-    // Try to load reviews via profile relationship (same approach as protected profile)
-    const { data: profileWithReviews } = await supabase
-      .from("profiles")
-      .select(
-        `
-        reviews:reviews_received(id, rating, comment, created_at, author:author_id(display_name))
-      `
-      )
-      .eq("id", userId)
-      .maybeSingle();
+  // reviews table is not yet in generated DB types (T1 adds it); cast to bypass tsc
+  type ReviewRow = {
+    id: string;
+    rating: number;
+    comment: string | null;
+    created_at: string | null;
+    reviewer_id: string | null;
+  };
+  type UntypedClient = {
+    from: (table: string) => {
+      select: (cols: string) => {
+        eq: (col: string, val: string) => {
+          order: (col: string, opts: { ascending: boolean }) => {
+            limit: (n: number) => Promise<{ data: ReviewRow[] | null; error: unknown }>;
+          };
+        };
+      };
+    };
+  };
 
-    if (profileWithReviews && Array.isArray(profileWithReviews.reviews)) {
-      reviewsList = profileWithReviews.reviews.map((review: any) => ({
+  try {
+    const untypedClient = supabase as unknown as UntypedClient;
+    const { data: rawReviews, error: reviewsError } = await untypedClient
+      .from("reviews")
+      .select("id, rating, comment, created_at, reviewer_id")
+      .eq("subject_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (reviewsError) {
+      logger.warn("Could not load reviews", {
+        component: "PublicUserPage",
+        action: "loadReviews",
+        metadata: { userId },
+        error: reviewsError,
+      });
+    } else if (rawReviews && rawReviews.length > 0) {
+      // Resolve reviewer display_names from profiles
+      const reviewerIds = [...new Set(rawReviews.map((r) => r.reviewer_id).filter((id): id is string => !!id))];
+      const { data: reviewerProfiles } = await supabase
+        .from("profiles")
+        .select("id, display_name")
+        .in("id", reviewerIds);
+
+      const profileMap = new Map<string, string | null>(
+        (reviewerProfiles ?? []).map((p) => [p.id, p.display_name])
+      );
+
+      reviewsList = rawReviews.map((review) => ({
         id: review.id,
         rating: review.rating,
-        comment: review.comment,
+        comment: review.comment ?? null,
         created_at: review.created_at ?? "",
-        author: review.author ? { display_name: review.author.display_name } : null,
+        author: review.reviewer_id
+          ? { display_name: profileMap.get(review.reviewer_id) ?? null }
+          : null,
       }));
     }
   } catch (error) {
-    // If reviews table/view doesn't exist, just continue with empty reviews
+    // Defensive: if reviews table doesn't exist yet, continue with empty list
     logger.warn("Could not load reviews (table may not exist yet)", {
       component: "PublicUserPage",
       action: "loadReviews",
@@ -176,11 +216,12 @@ async function loadPublicProfileData(userId: string): Promise<PublicProfileData 
     created_at: profile.created_at,
     verified_email: profile.verified_email,
     verified_phone: profile.verified_phone,
+    rating: (profile as unknown as { rating?: number | null }).rating ?? null,
     seller_type: (profile.seller_type as "individual" | "business" | null) ?? null,
     itsme_verified: profile.itsme_verified ?? null,
     trust_score: trustScore,
-    adverts_count: adverts.length, // For now, we show count of loaded adverts (limited to 12)
-    reviews_count: reviewsList.length, // For now, we show count of loaded reviews (limited to 20)
+    adverts_count: adverts.length, // count of loaded adverts (limited to 12)
+    reviews_count: reviewsList.length, // count of loaded reviews (limited to 20)
     active_adverts: adverts.map((ad) => ({
       id: ad.id,
       title: ad.title,
@@ -299,6 +340,7 @@ export default async function PublicProfilePage({
     created_at,
     verified_email,
     verified_phone,
+    rating,
     trust_score,
     adverts_count,
     reviews_count,
