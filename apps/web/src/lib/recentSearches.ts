@@ -1,8 +1,11 @@
+import { hasConsent } from "@/lib/cookieConsent/store";
+
 const KEY = "lyvox:recentSearches";
 const CAP = 8;
 
 function read(): string[] {
   if (typeof window === "undefined") return [];
+  if (!hasConsent("functional")) return [];
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return [];
@@ -15,6 +18,7 @@ function read(): string[] {
 
 function write(items: string[]): void {
   if (typeof window === "undefined") return;
+  if (!hasConsent("functional")) return;
   try {
     window.localStorage.setItem(KEY, JSON.stringify(items));
   } catch {

@@ -1,8 +1,42 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { getSeenAdverts, addSeenAdverts, isSeen, clearSeenAdverts } from "../seenAdverts";
+import { writeConsent } from "@/lib/cookieConsent/store";
 
-describe("seenAdverts", () => {
-  beforeEach(() => clearSeenAdverts());
+const KEY = "lyvox:seenAdverts";
+
+function clearConsentCookie() {
+  document.cookie = "lyvox_cookie_consent=; path=/; max-age=0";
+}
+
+describe("seenAdverts — consent gate (no consent)", () => {
+  beforeEach(() => {
+    clearConsentCookie();
+    clearSeenAdverts();
+  });
+
+  it("write path: addSeenAdverts does NOT persist to localStorage without functional consent", () => {
+    addSeenAdverts(["a", "b"]);
+    expect(window.localStorage.getItem(KEY)).toBeNull();
+  });
+
+  it("read path: getSeenAdverts returns empty Set without functional consent", () => {
+    // Seed stale data
+    window.localStorage.setItem(KEY, JSON.stringify(["stale1", "stale2"]));
+    expect(getSeenAdverts().size).toBe(0);
+  });
+
+  it("read path: isSeen returns false without functional consent (even if stale data exists)", () => {
+    window.localStorage.setItem(KEY, JSON.stringify(["seen-id"]));
+    expect(isSeen("seen-id")).toBe(false);
+  });
+});
+
+describe("seenAdverts — with functional consent granted", () => {
+  beforeEach(() => {
+    clearConsentCookie();
+    writeConsent({ functional: true, analytics: false });
+    clearSeenAdverts();
+  });
 
   it("records and reports seen ids", () => {
     addSeenAdverts(["a", "b", "c"]);

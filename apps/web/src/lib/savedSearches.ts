@@ -2,6 +2,8 @@
 // anonymous localStorage mirror + the pure matching predicate used in tests and (future) local
 // new-count. Mirrors the search route's filter semantics. SSR/private-mode safe.
 
+import { hasConsent } from "@/lib/cookieConsent/store";
+
 export type SavedSearchFilters = {
   category_id?: string | null;
   price_min?: number | null;
@@ -80,6 +82,7 @@ function newId(): string {
 
 function read(): LocalSavedSearch[] {
   if (typeof window === "undefined") return [];
+  if (!hasConsent("functional")) return [];
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return [];
@@ -92,6 +95,7 @@ function read(): LocalSavedSearch[] {
 
 function write(items: LocalSavedSearch[]): void {
   if (typeof window === "undefined") return;
+  if (!hasConsent("functional")) return;
   try {
     window.localStorage.setItem(KEY, JSON.stringify(items));
   } catch {

@@ -1,3 +1,5 @@
+import { hasConsent } from "@/lib/cookieConsent/store";
+
 export type RecentAdvert = {
   id: string;
   title: string;
@@ -12,6 +14,7 @@ const CAP = 20;
 
 function readStore(): RecentAdvert[] {
   if (typeof window === "undefined") return [];
+  if (!hasConsent("functional")) return [];
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return [];
@@ -24,6 +27,7 @@ function readStore(): RecentAdvert[] {
 
 function writeStore(items: RecentAdvert[]): void {
   if (typeof window === "undefined") return;
+  if (!hasConsent("functional")) return;
   try {
     window.localStorage.setItem(KEY, JSON.stringify(items));
   } catch {

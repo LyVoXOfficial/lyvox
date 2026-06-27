@@ -1,11 +1,14 @@
 // Tracks advert ids the swipe deck has already shown, so refreshes don't repeat cards.
 // localStorage-backed, FIFO-capped, SSR/private-mode safe (mirrors lib/recentlyViewed.ts).
 
+import { hasConsent } from "@/lib/cookieConsent/store";
+
 const KEY = "lyvox:seenAdverts";
 const CAP = 500;
 
 function read(): string[] {
   if (typeof window === "undefined") return [];
+  if (!hasConsent("functional")) return [];
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return [];
@@ -18,6 +21,7 @@ function read(): string[] {
 
 function write(ids: string[]): void {
   if (typeof window === "undefined") return;
+  if (!hasConsent("functional")) return;
   try {
     window.localStorage.setItem(KEY, JSON.stringify(ids));
   } catch {

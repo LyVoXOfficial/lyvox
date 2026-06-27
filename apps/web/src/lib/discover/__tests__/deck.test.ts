@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { mapSearchItemToDeckCard, rerankByTaste, filterUnseen, DROPS, type DeckCard } from "../deck";
 import { recordSignal, resetTaste } from "@/lib/taste";
 import { addSeenAdverts, clearSeenAdverts } from "@/lib/seenAdverts";
+import { writeConsent } from "@/lib/cookieConsent/store";
 
 const dc = (over: Partial<DeckCard>): DeckCard => ({
   id: "x",
@@ -20,6 +21,9 @@ const dc = (over: Partial<DeckCard>): DeckCard => ({
 
 describe("deck", () => {
   beforeEach(() => {
+    // Grant functional consent so taste + seenAdverts localStorage access works
+    document.cookie = "lyvox_cookie_consent=; path=/; max-age=0";
+    writeConsent({ functional: true, analytics: false });
     resetTaste();
     clearSeenAdverts();
   });

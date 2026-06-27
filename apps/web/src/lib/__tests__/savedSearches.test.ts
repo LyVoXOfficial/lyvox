@@ -7,6 +7,9 @@ import {
   type SavedSearchFilters,
   type MatchableAdvert,
 } from "../savedSearches";
+import { writeConsent } from "@/lib/cookieConsent/store";
+
+const KEY = "lyvox:savedSearches";
 
 const advert = (over: Partial<MatchableAdvert> = {}): MatchableAdvert => ({
   categoryId: "cat1",
@@ -19,6 +22,11 @@ const advert = (over: Partial<MatchableAdvert> = {}): MatchableAdvert => ({
   ...over,
 });
 
+function clearConsentCookie() {
+  document.cookie = "lyvox_cookie_consent=; path=/; max-age=0";
+}
+
+// Pure predicate — no localStorage, no consent needed
 describe("savedSearchMatches", () => {
   it("matches when all filters are empty", () => {
     expect(savedSearchMatches({}, null, advert())).toBe(true);
@@ -65,9 +73,35 @@ describe("savedSearchMatches", () => {
   });
 });
 
-describe("local saved searches store", () => {
+describe("local saved searches store — consent gate (no consent)", () => {
   beforeEach(() => {
+    clearConsentCookie();
     window.localStorage.clear();
+  });
+
+  it("write path: addLocalSavedSearch does NOT persist to localStorage without functional consent", () => {
+    addLocalSavedSearch({ name: "A", query: "a", filters: {} });
+    expect(window.localStorage.getItem(KEY)).toBeNull();
+  });
+
+  it("write path: removeLocalSavedSearch does NOT write to localStorage without functional consent", () => {
+    removeLocalSavedSearch("any-id");
+    expect(window.localStorage.getItem(KEY)).toBeNull();
+  });
+
+  it("read path: getLocalSavedSearches returns [] without functional consent", () => {
+    // Seed stale data
+    window.localStorage.setItem(KEY, JSON.stringify([{ id: "x", name: "Old", query: null, filters: {}, created_at: "" }]));
+    expect(getLocalSavedSearches()).toEqual([]);
+  });
+});
+
+describe("local saved searches store — with functional consent granted", () => {
+  beforeEach(() => {
+    clearConsentCookie();
+    writeConsent({ functional: true, analytics: false });
+    window.localStorage.clear();
+    // Re-grant after clear (writeConsent sets a cookie, not localStorage, so it survives clear)
   });
 
   it("adds and lists newest-first", () => {

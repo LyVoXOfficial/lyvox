@@ -4,6 +4,8 @@
 // the deck reranks candidates by that score. Cold start (no signal) → every score 0 → source order.
 // No ML, no server, no new table. SSR/private-mode safe.
 
+import { hasConsent } from "@/lib/cookieConsent/store";
+
 export type TasteCard = {
   categoryId: string | null;
   sellerId: string | null;
@@ -20,6 +22,7 @@ type Weights = Record<string, number>;
 
 function read(): Weights {
   if (typeof window === "undefined") return {};
+  if (!hasConsent("functional")) return {};
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return {};
@@ -32,6 +35,7 @@ function read(): Weights {
 
 function write(weights: Weights): void {
   if (typeof window === "undefined") return;
+  if (!hasConsent("functional")) return;
   try {
     window.localStorage.setItem(KEY, JSON.stringify(weights));
   } catch {

@@ -5,9 +5,44 @@ import {
   removeRecentSearch,
   clearRecentSearches,
 } from "@/lib/recentSearches";
+import { writeConsent } from "@/lib/cookieConsent/store";
 
-describe("recentSearches", () => {
-  beforeEach(() => clearRecentSearches());
+const KEY = "lyvox:recentSearches";
+
+function clearConsentCookie() {
+  document.cookie = "lyvox_cookie_consent=; path=/; max-age=0";
+}
+
+describe("recentSearches — consent gate (no consent)", () => {
+  beforeEach(() => {
+    clearConsentCookie();
+    clearRecentSearches();
+  });
+
+  it("write path: addRecentSearch does NOT persist to localStorage without functional consent", () => {
+    addRecentSearch("bike");
+    expect(window.localStorage.getItem(KEY)).toBeNull();
+  });
+
+  it("write path: removeRecentSearch does NOT write to localStorage without functional consent", () => {
+    addRecentSearch("bike"); // no-op write
+    removeRecentSearch("bike"); // must not persist either
+    expect(window.localStorage.getItem(KEY)).toBeNull();
+  });
+
+  it("read path: getRecentSearches returns [] without functional consent", () => {
+    // Seed stale data
+    window.localStorage.setItem(KEY, JSON.stringify(["stale"]));
+    expect(getRecentSearches()).toEqual([]);
+  });
+});
+
+describe("recentSearches — with functional consent granted", () => {
+  beforeEach(() => {
+    clearConsentCookie();
+    writeConsent({ functional: true, analytics: false });
+    clearRecentSearches();
+  });
 
   it("returns [] initially", () => {
     expect(getRecentSearches()).toEqual([]);

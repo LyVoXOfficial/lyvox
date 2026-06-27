@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { recordSignal, scoreCard, resetTaste, getTasteWeights, type TasteCard } from "../taste";
+import { writeConsent } from "@/lib/cookieConsent/store";
+
+const KEY = "lyvox:taste";
 
 const card = (over: Partial<TasteCard> = {}): TasteCard => ({
   categoryId: "cat1",
@@ -9,8 +12,39 @@ const card = (over: Partial<TasteCard> = {}): TasteCard => ({
   ...over,
 });
 
-describe("taste", () => {
-  beforeEach(() => resetTaste());
+function clearConsentCookie() {
+  document.cookie = "lyvox_cookie_consent=; path=/; max-age=0";
+}
+
+describe("taste — consent gate (no consent)", () => {
+  beforeEach(() => {
+    clearConsentCookie();
+    resetTaste();
+  });
+
+  it("write path: recordSignal does NOT persist weights to localStorage without functional consent", () => {
+    recordSignal(card(), "like");
+    expect(window.localStorage.getItem(KEY)).toBeNull();
+  });
+
+  it("read path: getTasteWeights returns {} without functional consent", () => {
+    // Seed stale data
+    window.localStorage.setItem(KEY, JSON.stringify({ "cat:cat1": 5 }));
+    expect(getTasteWeights()).toEqual({});
+  });
+
+  it("read path: scoreCard returns 0 without functional consent (ignores stale data)", () => {
+    window.localStorage.setItem(KEY, JSON.stringify({ "cat:cat1": 10 }));
+    expect(scoreCard(card())).toBe(0);
+  });
+});
+
+describe("taste — with functional consent granted", () => {
+  beforeEach(() => {
+    clearConsentCookie();
+    writeConsent({ functional: true, analytics: false });
+    resetTaste();
+  });
 
   it("cold start scores every card 0", () => {
     expect(scoreCard(card())).toBe(0);
