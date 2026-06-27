@@ -178,7 +178,9 @@ export async function POST(req: NextRequest) {
                           product.code.startsWith("reserve") ? "reserve" :
                           product.code.startsWith("highlight") ? "highlight" : null;
 
-        if (benefitType) {
+        if (benefitType && purchase.user_id) {
+          // purchase.user_id is nullable after GDPR erasure; skip benefit
+          // creation if the account has been erased (no user to grant it to).
           // Calculate valid_until based on product code
           let validUntil = new Date();
           if (product.code.includes("7d")) {

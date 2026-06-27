@@ -7,7 +7,8 @@ import type { RealtimeChannel } from "@supabase/supabase-js";
 export interface Message {
   id: number;
   conversation_id: string;
-  author_id: string;
+  // nullable after GDPR erasure: tombstoned messages have author_id=null (body='[deleted]')
+  author_id: string | null;
   body: string;
   created_at: string;
   updated_at?: string;

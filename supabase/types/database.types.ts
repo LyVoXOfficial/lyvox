@@ -744,7 +744,7 @@ export type Database = {
         Row: {
           advert_id: string | null
           created_at: string | null
-          created_by: string
+          created_by: string | null
           id: string
           last_message_at: string | null
           updated_at: string | null
@@ -1564,7 +1564,7 @@ export type Database = {
       }
       messages: {
         Row: {
-          author_id: string
+          author_id: string | null
           body: string
           conversation_id: string
           created_at: string | null
@@ -2101,7 +2101,7 @@ export type Database = {
           provider_session_id: string | null
           status: string
           updated_at: string | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           amount_cents: number
@@ -4292,6 +4292,13 @@ export type Database = {
           slug: string
           years_available: number[]
         }[]
+      }
+      // Hand-added: GDPR erasure function (migration 20260627240000_erasure.sql).
+      // SECURITY DEFINER, granted to service_role only. Raises P0001/ACTIVE_BUSINESS
+      // if the user owns an active business.
+      erase_user_data: {
+        Args: { p_user_id: string }
+        Returns: undefined
       }
     }
     Enums: {

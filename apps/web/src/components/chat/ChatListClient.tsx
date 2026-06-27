@@ -19,7 +19,8 @@ interface Conversation {
     id: number;
     body: string;
     created_at: string;
-    author_id: string;
+    // nullable after GDPR erasure (tombstoned messages have author_id=null)
+    author_id: string | null;
   } | null;
   last_message_at: string | null;
   created_at: string;
