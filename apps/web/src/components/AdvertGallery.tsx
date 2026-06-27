@@ -30,8 +30,12 @@ export default function AdvertGallery({ images }: AdvertGalleryProps) {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-[var(--shadow-card)]">
+    <div className="space-y-3">
+      {/* Main image — 16/11 aspect ratio per mockup, rounded --r */}
+      <div
+        className="relative overflow-hidden border border-border/70"
+        style={{ aspectRatio: "16/11", borderRadius: "var(--r)" }}
+      >
         {activeImage?.url ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
@@ -39,26 +43,46 @@ export default function AdvertGallery({ images }: AdvertGalleryProps) {
             alt={activeImage?.alt || "Advert image"}
             width={activeImage?.width ?? undefined}
             height={activeImage?.height ?? undefined}
-            className="aspect-[4/3] max-h-[460px] w-full object-cover"
+            className="h-full w-full object-cover"
           />
         ) : (
-          <div className="lyvox-image-placeholder flex aspect-[4/3] max-h-[460px] w-full items-center justify-center">
+          <div className="lyvox-image-placeholder flex h-full w-full items-center justify-center">
             <ShieldCheck className="h-16 w-16 text-white/85" aria-hidden="true" />
           </div>
         )}
+
+        {/* Counter pill — overlaid bottom-right */}
+        {normalized.length > 1 ? (
+          <span
+            className="absolute bottom-3.5 right-3.5 inline-flex items-center gap-1.5 px-3 font-semibold text-white"
+            style={{
+              height: "30px",
+              borderRadius: "999px",
+              background: "oklch(0.18 0.02 200 / 0.55)",
+              fontSize: "12.5px",
+              backdropFilter: "blur(4px)",
+            }}
+          >
+            {activeIndex + 1} / {normalized.length}
+          </span>
+        ) : null}
       </div>
 
+      {/* Thumbnail strip — 6-column, --rm border-radius */}
       {normalized.length > 1 ? (
-        <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
+        <div className="grid grid-cols-6 gap-2.5">
           {normalized.map((image, index) => (
             <button
               key={image.id ?? `${image.url}-${index}`}
               type="button"
               onClick={() => handleSelect(index)}
               className={cn(
-                "relative overflow-hidden rounded-lg border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                index === activeIndex ? "ring-2 ring-primary" : "opacity-80 hover:opacity-100",
+                "relative aspect-square overflow-hidden border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                index === activeIndex
+                  ? "border-2 border-primary"
+                  : "border-border/70 opacity-80 hover:opacity-100",
               )}
+              style={{ borderRadius: "var(--rm)" }}
               aria-label={image.alt || `Preview ${index + 1}`}
             >
               {image.url ? (
@@ -66,10 +90,10 @@ export default function AdvertGallery({ images }: AdvertGalleryProps) {
                 <img
                   src={image.url}
                   alt={image.alt || `Preview ${index + 1}`}
-                  className="aspect-square w-full object-cover"
+                  className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="lyvox-image-placeholder flex aspect-square w-full items-center justify-center">
+                <div className="lyvox-image-placeholder flex h-full w-full items-center justify-center">
                   <ShieldCheck className="h-5 w-5 text-white/85" aria-hidden="true" />
                 </div>
               )}

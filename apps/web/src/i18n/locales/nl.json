@@ -151,7 +151,10 @@
     "safer_1": "Houd betaling en levering binnen LyVoX.",
     "safer_2": "Controleer het item en de verkoper voordat u betaalt.",
     "too_many": "Te veel pogingen. Probeer het zo opnieuw.",
-    "error_generic": "Kon het gesprek niet openen"
+    "error_generic": "Kon het gesprek niet openen",
+    "safety_tip": "Een snelle veiligheidscontrole bevestigt dat u een echt account bent, en opent daarna een privéchat. LyVoX verwerkt nooit betalingen.",
+    "phone_verified": "Telefoon geverifieerd",
+    "business_seller": "Zakelijke verkoper"
   },
   "home": {
     "hero_tag": "LyVoX België marktplaats",

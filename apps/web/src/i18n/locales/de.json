@@ -151,7 +151,10 @@
     "safer_1": "Halten Sie Zahlung und Lieferung innerhalb von LyVoX.",
     "safer_2": "Prüfen Sie Artikel und Verkäufer, bevor Sie zahlen.",
     "too_many": "Zu viele Versuche. Bitte gleich erneut versuchen.",
-    "error_generic": "Gespräch konnte nicht geöffnet werden"
+    "error_generic": "Gespräch konnte nicht geöffnet werden",
+    "safety_tip": "Eine kurze Sicherheitsprüfung bestätigt, dass Sie ein echtes Konto sind, und öffnet dann einen privaten Chat. LyVoX wickelt keine Zahlungen ab.",
+    "phone_verified": "Telefon verifiziert",
+    "business_seller": "Gewerblicher Verkäufer"
   },
   "home": {
     "hero_tag": "LyVoX Belgien Marktplatz",

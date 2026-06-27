@@ -151,7 +151,10 @@
     "safer_1": "Keep payment and delivery discussion inside LyVoX.",
     "safer_2": "Inspect the item and seller signals before sending money.",
     "too_many": "Too many chat attempts. Try again shortly.",
-    "error_generic": "Could not open the conversation"
+    "error_generic": "Could not open the conversation",
+    "safety_tip": "A quick safety check confirms you're a real account, then opens a private chat. LyVoX never handles payment.",
+    "phone_verified": "Phone-verified",
+    "business_seller": "Business seller"
   },
   "home": {
     "hero_tag": "LyVoX Belgium marketplace",

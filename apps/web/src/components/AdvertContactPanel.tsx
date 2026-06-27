@@ -5,19 +5,15 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
-  CalendarDays,
   Loader2,
-  LockKeyhole,
-  MapPin,
   MessageCircle,
   PencilLine,
+  Phone,
   ShieldCheck,
-  UserRound,
 } from "lucide-react";
 
 import FavoriteToggle from "@/components/favorites/FavoriteToggle";
 import ReportButton from "@/components/ReportButton";
-import { Button } from "@/components/ui/button";
 import { apiFetch, RateLimitedError } from "@/lib/fetcher";
 import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
@@ -54,6 +50,7 @@ type AdvertContactPanelProps = {
   editHref: string;
   sellerName: string;
   canSeeSeller: boolean;
+  isBusiness?: boolean;
   className?: string;
 };
 
@@ -78,6 +75,7 @@ export default function AdvertContactPanel({
   editHref,
   sellerName,
   canSeeSeller,
+  isBusiness = false,
   className,
 }: AdvertContactPanelProps) {
   const router = useRouter();
@@ -91,6 +89,17 @@ export default function AdvertContactPanel({
 
   const isOwnListing = currentUserId === seller.id;
   const sellerVerified = seller.verifiedEmail && seller.verifiedPhone;
+
+  // Derive seller initials for avatar
+  const displayedName = canSeeSeller ? sellerName : tr("seller_gate.name_hidden", "Verified users only");
+  const initials = canSeeSeller && sellerName
+    ? sellerName
+        .split(" ")
+        .slice(0, 2)
+        .map((w) => w[0] ?? "")
+        .join("")
+        .toUpperCase()
+    : "?";
 
   const startChat = async () => {
     if (isOwnListing || startingChat) {
@@ -139,126 +148,208 @@ export default function AdvertContactPanel({
 
   return (
     <aside
-      className={cn(
-        "space-y-4 rounded-xl border border-border/70 bg-card p-5 shadow-[var(--shadow-card)]",
-        className,
-      )}
+      className={cn("border border-border/70 bg-card", className)}
+      style={{
+        borderRadius: "var(--r)",
+        padding: "20px",
+        boxShadow: "var(--shC)",
+      }}
     >
-      <div className="space-y-1">
-        <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
-          {tr("contact.price", "Price")}
-        </p>
-        <p className="text-3xl font-extrabold tracking-tight text-foreground">{priceText}</p>
-      </div>
-
-      <div className="grid gap-2 text-sm text-muted-foreground">
-        <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-primary" aria-hidden="true" />
-          <span>{locationText}</span>
-        </div>
-        {createdText ? (
-          <div className="flex items-center gap-2">
-            <CalendarDays className="h-4 w-4 text-primary" aria-hidden="true" />
-            <span>
-              {tr("contact.posted", "Posted")} {createdText}
+      {/* ── Seller avatar + name row ── */}
+      <div className="mb-[15px] flex items-center gap-[13px]">
+        <span
+          className="lyvox-trust-gradient flex shrink-0 items-center justify-center text-white"
+          style={{
+            width: "52px",
+            height: "52px",
+            borderRadius: "16px",
+            font: "800 18px Inter",
+          }}
+          aria-hidden="true"
+        >
+          {initials}
+        </span>
+        <div className="min-w-0">
+          <div className="flex items-center gap-[7px]">
+            <span
+              className="truncate text-foreground"
+              style={{ font: "800 17px Inter" }}
+            >
+              {displayedName}
             </span>
+            {sellerVerified ? (
+              <ShieldCheck
+                className="h-4 w-4 shrink-0 text-primary"
+                aria-hidden="true"
+              />
+            ) : null}
           </div>
-        ) : null}
+          {isBusiness ? (
+            <span
+              className="lyvox-trust-gradient mt-[5px] inline-flex items-center text-white"
+              style={{
+                height: "22px",
+                padding: "0 10px",
+                borderRadius: "999px",
+                font: "700 11px Inter",
+              }}
+            >
+              {tr("contact.business_seller", "Business seller")}
+            </span>
+          ) : null}
+        </div>
       </div>
 
-      <div className="rounded-xl border border-border/60 bg-muted/40 p-3.5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-card text-primary shadow-[var(--shadow-soft)]">
-              <UserRound className="h-5 w-5" aria-hidden="true" />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-bold text-foreground">{canSeeSeller ? sellerName : tr("seller_gate.name_hidden", "Verified users only")}</p>
-              <p className="text-xs text-muted-foreground">
-                {seller.activeAdverts} {tr("contact.active_listings", "active listings")}
-              </p>
-            </div>
-          </div>
+      {/* ── Trust badge row ── */}
+      {(sellerVerified || seller.verifiedPhone) ? (
+        <div
+          className="mb-[18px] flex flex-wrap gap-[7px]"
+        >
           {sellerVerified ? (
-            <span className="lyvox-trust-gradient inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold text-white">
-              <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+            <span
+              className="lyvox-trust-gradient inline-flex items-center gap-[5px] text-white"
+              style={{
+                height: "27px",
+                padding: "0 11px",
+                borderRadius: "999px",
+                font: "700 11.5px Inter",
+                boxShadow: "0 2px 8px oklch(0.55 0.12 172 / 0.30)",
+              }}
+            >
+              <ShieldCheck className="h-3 w-3" aria-hidden="true" />
               {tr("contact.verified", "Verified")}
             </span>
-          ) : (
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">
+          ) : null}
+          {seller.verifiedPhone ? (
+            <span
+              className="inline-flex items-center gap-[5px] border border-border"
+              style={{
+                height: "27px",
+                padding: "0 11px",
+                borderRadius: "999px",
+                background: "var(--sec)",
+                color: "var(--mintI)",
+                font: "700 11.5px Inter",
+              }}
+            >
+              <Phone className="h-3 w-3" aria-hidden="true" />
+              {tr("contact.phone_verified", "Phone-verified")}
+            </span>
+          ) : null}
+          {!sellerVerified ? (
+            <span
+              className="inline-flex items-center"
+              style={{
+                height: "27px",
+                padding: "0 11px",
+                borderRadius: "999px",
+                background: "oklch(0.83 0.14 72 / 0.15)",
+                color: "var(--amberI)",
+                font: "700 11.5px Inter",
+              }}
+            >
               {tr("contact.checks_pending", "Checks pending")}
             </span>
-          )}
+          ) : null}
         </div>
-
-        <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-          <div className="rounded-lg bg-card px-2.5 py-1.5">
-            <span className="text-muted-foreground">{tr("contact.email", "Email")}</span>
-            <p className={cn("font-bold", seller.verifiedEmail ? "text-primary" : "text-muted-foreground")}>
-              {seller.verifiedEmail ? tr("contact.verified", "Verified") : tr("contact.not_verified", "Not verified")}
-            </p>
-          </div>
-          <div className="rounded-lg bg-card px-2.5 py-1.5">
-            <span className="text-muted-foreground">{tr("contact.phone", "Phone")}</span>
-            <p className={cn("font-bold", seller.verifiedPhone ? "text-primary" : "text-muted-foreground")}>
-              {seller.verifiedPhone ? tr("contact.verified", "Verified") : tr("contact.not_verified", "Not verified")}
-            </p>
-          </div>
+      ) : (
+        <div className="mb-[18px]">
+          <span
+            className="inline-flex items-center"
+            style={{
+              height: "27px",
+              padding: "0 11px",
+              borderRadius: "999px",
+              background: "oklch(0.83 0.14 72 / 0.15)",
+              color: "var(--amberI)",
+              font: "700 11.5px Inter",
+            }}
+          >
+            {tr("contact.checks_pending", "Checks pending")}
+          </span>
         </div>
-      </div>
+      )}
 
-      <div className="flex gap-2">
-        {isOwnListing ? (
-          <Button asChild className="h-11 flex-1 text-[15px]">
-            <Link href={editHref}>
-              <PencilLine className="h-4 w-4" aria-hidden="true" />
-              {tr("contact.manage", "Manage listing")}
-            </Link>
-          </Button>
-        ) : (
-          <Button
+      {/* ── Contact CTA / Manage listing ── */}
+      {isOwnListing ? (
+        <Link
+          href={editHref}
+          className="mb-[11px] flex w-full items-center justify-center gap-[9px] text-white"
+          style={{
+            height: "50px",
+            borderRadius: "var(--rm)",
+            background: "var(--gC)",
+            font: "700 15.5px Inter",
+            boxShadow: "0 5px 16px oklch(0.55 0.13 178 / 0.38)",
+          }}
+        >
+          <PencilLine className="h-[19px] w-[19px]" aria-hidden="true" />
+          {tr("contact.manage", "Manage listing")}
+        </Link>
+      ) : (
+        <div className="mb-[11px] flex gap-2">
+          <button
             type="button"
             onClick={() => requireTrust("verified", () => void startChat())}
             disabled={startingChat}
-            className="h-11 flex-1 text-[15px]"
+            className={cn(
+              "flex flex-1 items-center justify-center gap-[9px] text-white transition-opacity",
+              startingChat && "opacity-70",
+            )}
+            style={{
+              height: "50px",
+              borderRadius: "var(--rm)",
+              background: "var(--gC)",
+              border: 0,
+              font: "700 15.5px Inter",
+              cursor: "pointer",
+              boxShadow: "0 5px 16px oklch(0.55 0.13 178 / 0.38)",
+            }}
           >
             {startingChat ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              <Loader2 className="h-[19px] w-[19px] animate-spin" aria-hidden="true" />
             ) : (
-              <MessageCircle className="h-4 w-4" aria-hidden="true" />
+              <MessageCircle className="h-[19px] w-[19px]" aria-hidden="true" />
             )}
             {startingChat ? tr("contact.opening", "Opening chat…") : tr("contact.message", "Message seller")}
-          </Button>
-        )}
-
-        <FavoriteToggle
-          advert={advert}
-          variant="overlay"
-          className="h-11 w-11 rounded-xl"
-        />
-      </div>
-
-      <div className="flex justify-end">
-        <ReportButton advertId={advert.id} />
-      </div>
-
-      <div className="rounded-xl border border-primary/15 bg-primary/5 p-3.5">
-        <div className="flex items-start gap-2">
-          <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-          <div>
-            <p className="text-sm font-bold text-foreground">{tr("contact.safer_title", "Safer deal checklist")}</p>
-            <ul className="mt-2 space-y-1.5 text-xs text-muted-foreground">
-              <li className="flex gap-2">
-                <LockKeyhole className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                {tr("contact.safer_1", "Keep payment and delivery discussion inside LyVoX.")}
-              </li>
-              <li className="flex gap-2">
-                <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                {tr("contact.safer_2", "Inspect the item and seller signals before sending money.")}
-              </li>
-            </ul>
-          </div>
+          </button>
+          <FavoriteToggle
+            advert={advert}
+            variant="overlay"
+            className="h-[50px] w-[50px] rounded-[13px]"
+          />
         </div>
+      )}
+
+      {/* ── Safety tip row ── */}
+      <div
+        className="mb-[13px] flex items-center gap-[8px]"
+        style={{
+          padding: "10px 12px",
+          background: "oklch(0.56 0.13 178 / 0.06)",
+          border: "1px solid oklch(0.56 0.13 178 / 0.16)",
+          borderRadius: "var(--rs)",
+        }}
+      >
+        <ShieldCheck
+          className="h-4 w-4 shrink-0"
+          style={{ color: "var(--priD)" }}
+          aria-hidden="true"
+        />
+        <span
+          className="leading-snug"
+          style={{ font: "500 11.5px/1.4 Inter", color: "var(--priD)" }}
+        >
+          {tr(
+            "contact.safety_tip",
+            "A quick safety check confirms you’re a real account, then opens a private chat. LyVoX never handles payment.",
+          )}
+        </span>
+      </div>
+
+      {/* ── Report link — centered ── */}
+      <div className="flex items-center justify-center">
+        <ReportButton advertId={advert.id} />
       </div>
     </aside>
   );

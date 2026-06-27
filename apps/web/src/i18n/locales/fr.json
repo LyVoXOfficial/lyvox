@@ -151,7 +151,10 @@
     "safer_1": "Gardez le paiement et la livraison sur LyVoX.",
     "safer_2": "Inspectez l'article et le vendeur avant de payer.",
     "too_many": "Trop de tentatives. Réessayez bientôt.",
-    "error_generic": "Impossible d'ouvrir la conversation"
+    "error_generic": "Impossible d'ouvrir la conversation",
+    "safety_tip": "Une vérification rapide confirme que vous êtes un vrai compte, puis ouvre un chat privé. LyVoX ne gère jamais le paiement.",
+    "phone_verified": "Téléphone vérifié",
+    "business_seller": "Vendeur professionnel"
   },
   "home": {
     "hero_tag": "Place de marché LyVoX Belgique",

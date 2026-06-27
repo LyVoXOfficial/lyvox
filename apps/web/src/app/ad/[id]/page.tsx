@@ -24,6 +24,7 @@ import type { Tables } from "@/lib/supabaseTypes";
 import { TraderPanel } from "@/components/business/TraderPanel";
 import type { BusinessPublicData } from "@/components/business/TraderPanel";
 import { LeaveReviewForm } from "@/components/reviews/LeaveReviewForm";
+import AdvertMobileContactBar from "@/components/AdvertMobileContactBar";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -622,44 +623,20 @@ export default async function AdvertPage({ params }: PageProps) {
       <script {...getJsonLdScriptProps(productJsonLd)} />
       <script {...getJsonLdScriptProps(breadcrumbJsonLd)} />
       <div className="space-y-8">
-        <header className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground">
-            {data.category ? (
-              <span className="rounded-md bg-muted px-2 py-1">
-                {resolveCategoryName(data.category)}
-              </span>
-            ) : null}
+        {/* Breadcrumb nav */}
+        <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground">
+          {data.category ? (
             <span className="rounded-md bg-muted px-2 py-1">
-              {sellerVerified
-                ? translate("advert.verified_seller", "Verified seller")
-                : translate("advert.seller_checks_pending", "Seller checks pending")}
+              {resolveCategoryName(data.category)}
             </span>
-            {data.benefits.length > 0 ? <BenefitsBadge benefits={data.benefits} /> : null}
-          </div>
+          ) : null}
+          {data.benefits.length > 0 ? <BenefitsBadge benefits={data.benefits} /> : null}
+        </div>
 
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="max-w-4xl space-y-3">
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-                {data.advert.title}
-              </h1>
-              <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5">
-                  <MapPin className="h-4 w-4 text-primary" aria-hidden="true" />
-                  {locationText}
-                </span>
-                {createdText ? (
-                  <span className="inline-flex items-center gap-1.5">
-                    <Clock className="h-4 w-4 text-primary" aria-hidden="true" />
-                    {translate("advert.posted", "Posted")} {createdText}
-                  </span>
-                ) : null}
-              </div>
-            </div>
-            <LikeToggle advertId={data.advert.id} initialCount={likeCount} variant="inline" />
-          </div>
-        </header>
-
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+        {/* 2-col grid: left (1fr) / right sticky (372px) */}
+        <div
+          className="grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_372px]"
+        >
           <main className="space-y-6">
           <RecentlyViewedRecorder
             advert={{
@@ -673,6 +650,54 @@ export default async function AdvertPage({ params }: PageProps) {
           />
           <AdvertGallery images={galleryImages} />
 
+          {/* Condition pill + location + date meta */}
+          <div className="flex flex-wrap items-center gap-[10px]">
+            <span
+              className="inline-flex items-center"
+              style={{
+                height: "27px",
+                padding: "0 12px",
+                borderRadius: "999px",
+                background: "oklch(0.56 0.13 178 / 0.12)",
+                color: "var(--priD)",
+                font: "700 12px Inter",
+              }}
+            >
+              {sellerVerified
+                ? translate("advert.verified_seller", "Verified seller")
+                : translate("advert.seller_checks_pending", "Seller checks pending")}
+            </span>
+            <span className="inline-flex items-center gap-[5px] text-muted-foreground" style={{ font: "500 13px Inter" }}>
+              <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+              {locationText}
+            </span>
+            {createdText ? (
+              <span className="text-muted-foreground" style={{ font: "500 13px Inter" }}>
+                · {translate("advert.posted", "Posted")} {createdText}
+              </span>
+            ) : null}
+          </div>
+
+          {/* Title + price + LikeToggle */}
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <h1
+                className="tracking-tight text-foreground"
+                style={{ font: "800 28px/1.2 Inter", letterSpacing: "-0.02em" }}
+              >
+                {data.advert.title}
+              </h1>
+              <LikeToggle advertId={data.advert.id} initialCount={likeCount} variant="inline" />
+            </div>
+            <div
+              className="tracking-tight text-foreground"
+              style={{ font: "800 32px Inter", letterSpacing: "-0.02em" }}
+            >
+              {priceText}
+            </div>
+          </div>
+
+          {/* Description */}
           <section className="rounded-md border border-border/80 bg-card p-4 shadow-sm">
             <h2 className="mb-2 text-lg font-medium">
               {translate("advert.description", "Description")}
@@ -736,16 +761,6 @@ export default async function AdvertPage({ params }: PageProps) {
               </span>
             </div>
           </section>
-
-      {data.businessData ? (
-        <TraderPanel business={data.businessData} t={translate} locale={locale} />
-      ) : null}
-
-      {/* Leave a review — shown only to signed-in viewers who are NOT the advert owner.
-          The API chat-gate handles eligibility; NO_CONVERSATION surfaces as an inline message. */}
-      {currentUserId && currentUserId !== data.seller.id ? (
-        <LeaveReviewForm advertId={data.advert.id} />
-      ) : null}
 
       {showDetails ? (
         <AdvertDetails
@@ -988,7 +1003,7 @@ export default async function AdvertPage({ params }: PageProps) {
 
           </main>
 
-          <div className="lg:sticky lg:top-24">
+          <div className="flex flex-col gap-4 lg:sticky lg:top-5">
             <AdvertContactPanel
               advert={favoriteAdvert}
               seller={canSeeSeller ? data.seller : { ...data.seller, displayName: null }}
@@ -1000,8 +1015,19 @@ export default async function AdvertPage({ params }: PageProps) {
               editHref={editHref}
               sellerName={canSeeSeller ? sellerName : ""}
               canSeeSeller={canSeeSeller}
+              isBusiness={!!data.businessData}
             />
+            {data.businessData ? (
+              <TraderPanel business={data.businessData} t={translate} locale={locale} />
+            ) : null}
           </div>
+        </div>
+
+        {/* Reviews + leave-review form — below the grid, max-width 760px */}
+        <div className="max-w-[760px] space-y-5">
+          {currentUserId && currentUserId !== data.seller.id ? (
+            <LeaveReviewForm advertId={data.advert.id} />
+          ) : null}
         </div>
 
       {similarAdverts.length ? (
@@ -1011,6 +1037,15 @@ export default async function AdvertPage({ params }: PageProps) {
         />
       ) : null}
     </div>
+
+    {/* Mobile sticky Contact bar (lg:hidden) — wired to same startChat flow */}
+    <AdvertMobileContactBar
+      advertId={data.advert.id}
+      sellerId={data.seller.id}
+      currentUserId={currentUserId}
+      priceText={priceText}
+      editHref={editHref}
+    />
     </>
   );
   } catch (error) {
