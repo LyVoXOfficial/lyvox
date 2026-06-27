@@ -2,7 +2,6 @@ import { supabaseServer } from "@/lib/supabaseServer";
 import { notFound } from "next/navigation";
 import { getI18nProps } from "@/i18n/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star, CheckCircle, Mail, Phone, Calendar, Building2, ShieldCheck, BadgeCheck, CreditCard } from "lucide-react";
 import { formatDate } from "@/i18n/format";
@@ -302,9 +301,81 @@ function badgeI18nKey(badge: SellerBadge): string {
   }
 }
 
-/** Whether a badge uses the trust-gradient style (identity/business) vs neutral */
-function isTrustBadge(badge: SellerBadge): boolean {
-  return badge !== "established_seller";
+/**
+ * Per-badge visual style following the mockup (lines 67-69):
+ *   verified_business / id_verified → trust-gradient pill (white text, teal→mint)
+ *   vat_registered                  → teal-tint pill (oklch(0.56 0.13 178/.12) bg, --priD text)
+ *   phone_verified / email_verified → --sec bg + border pill (--mintI text)
+ *   established_seller              → neutral secondary pill
+ */
+function SellerBadgePill({
+  badge,
+  label,
+}: {
+  badge: SellerBadge;
+  label: React.ReactNode;
+}) {
+  const baseStyle: React.CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    height: "26px",
+    padding: "0 11px",
+    borderRadius: "999px",
+    fontSize: "11.5px",
+    fontWeight: 700,
+  };
+
+  switch (badge) {
+    case "verified_business":
+    case "id_verified":
+      return (
+        <span
+          className="lyvox-trust-gradient"
+          style={{ ...baseStyle, color: "#fff" }}
+        >
+          {label}
+        </span>
+      );
+    case "vat_registered":
+      return (
+        <span
+          style={{
+            ...baseStyle,
+            background: "oklch(0.56 0.13 178 / 0.12)",
+            color: "var(--priD)",
+          }}
+        >
+          {label}
+        </span>
+      );
+    case "phone_verified":
+    case "email_verified":
+      return (
+        <span
+          style={{
+            ...baseStyle,
+            background: "var(--sec)",
+            color: "var(--mintI)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          {label}
+        </span>
+      );
+    case "established_seller":
+    default:
+      return (
+        <span
+          style={{
+            ...baseStyle,
+            background: "var(--muted)",
+            color: "var(--muted-foreground)",
+          }}
+        >
+          {label}
+        </span>
+      );
+  }
 }
 
 export default async function PublicProfilePage({
@@ -447,26 +518,49 @@ export default async function PublicProfilePage({
           <div className="flex flex-wrap justify-center gap-2 pt-2 md:justify-start">
             {/* Seller-type chip */}
             {isBusiness ? (
-              <Badge className="lyvox-trust-gradient text-white">
+              /* Business seller → --mintI coloured label (mockup line 223) */
+              <span
+                style={{
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  color: "var(--mintI)",
+                }}
+              >
                 {t("profile.business_seller")}
-              </Badge>
+              </span>
             ) : (
-              <Badge variant="secondary">{t("profile.private_seller")}</Badge>
+              /* Private seller → grey-dot neutral chip (mockup line 207) */
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontSize: "12.5px",
+                  fontWeight: 700,
+                  color: "var(--mintI)",
+                }}
+              >
+                <span
+                  style={{
+                    width: "7px",
+                    height: "7px",
+                    borderRadius: "999px",
+                    background: "oklch(0.62 0.025 198)",
+                    flexShrink: 0,
+                  }}
+                />
+                {t("profile.private_seller")}
+              </span>
             )}
             {/* Trust badge row — derived, capped at 3, replaces ad-hoc email/phone/trusted cluster */}
-            {badges.map((badge) =>
-              isTrustBadge(badge) ? (
-                <Badge key={badge} className="lyvox-trust-gradient text-white">
+            {badges.map((badge) => (
+              <SellerBadgePill key={badge} badge={badge} label={
+                <>
                   <BadgeIcon badge={badge} />
                   {t(badgeI18nKey(badge))}
-                </Badge>
-              ) : (
-                <Badge key={badge} variant="secondary">
-                  <BadgeIcon badge={badge} />
-                  {t(badgeI18nKey(badge))}
-                </Badge>
-              )
-            )}
+                </>
+              } />
+            ))}
           </div>
         </div>
       </div>

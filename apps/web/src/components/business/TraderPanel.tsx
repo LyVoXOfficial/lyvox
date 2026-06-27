@@ -33,13 +33,37 @@ export function TraderPanel({ business, t, locale }: Props) {
           {t("pro.panel.title", "Professional seller")}
         </h2>
         {business.entity_verified ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+          /* Verified Business → trust-gradient pill (white shield, teal→mint) */
+          <span
+            className="lyvox-trust-gradient inline-flex items-center gap-[5px]"
+            style={{
+              height: "26px",
+              padding: "0 11px",
+              borderRadius: "999px",
+              fontSize: "11.5px",
+              fontWeight: 700,
+              color: "#fff",
+            }}
+          >
             <ShieldCheck className="h-3 w-3" aria-hidden="true" />
             {t("pro.panel.badge_verified", "Verified Business")}
           </span>
         ) : null}
         {business.vat_number && business.entity_verified ? (
-          <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+          /* VAT-registered → teal-tint pill (--priD text, oklch bg) */
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              height: "26px",
+              padding: "0 11px",
+              borderRadius: "999px",
+              background: "oklch(0.56 0.13 178 / 0.12)",
+              color: "var(--priD)",
+              fontSize: "11.5px",
+              fontWeight: 700,
+            }}
+          >
             {t("pro.panel.badge_vat", "VAT-registered")}
           </span>
         ) : null}

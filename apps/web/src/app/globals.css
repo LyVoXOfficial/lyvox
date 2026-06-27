@@ -50,6 +50,31 @@
   --radius: 0.95rem;
   --background: oklch(0.985 0.008 196);
   --foreground: oklch(0.22 0.03 200);
+
+  /* ── LyVoX redesign tokens (additive — do NOT edit existing tokens above) ── */
+  /* Deep teal (darker primary for text/accents) */
+  --priD: oklch(0.46 0.13 180);
+  /* Deep mint (dark text on mint surfaces) */
+  --mintI: oklch(0.40 0.10 172);
+  /* Amber palette */
+  --amber: oklch(0.83 0.14 72);
+  --amberI: oklch(0.46 0.12 58);
+  /* Accent cyan */
+  --cyan: #11BDF9;
+  /* Secondary surface (already aliased to --secondary above; explicit var for clarity) */
+  --sec: oklch(0.955 0.018 192);
+  /* Danger (destructive alias in design tokens) */
+  --danger: oklch(0.58 0.19 24);
+  /* Radius scale (--radius stays for shadcn; these are for redesigned components) */
+  --r: 20px;
+  --rm: 13px;
+  --rs: 9px;
+  /* Shadows (--shS = small/pill; --shC = card default; --shHi = hover elevation) */
+  --shS: 0 1px 2px oklch(0.5 0.05 220 / 0.06), 0 1px 3px oklch(0.5 0.05 220 / 0.05);
+  --shC: 0 1px 2px oklch(0.45 0.06 220 / 0.05), 0 10px 26px oklch(0.45 0.06 220 / 0.07);
+  --shHi: 0 18px 44px oklch(0.42 0.08 210 / 0.16);
+  /* CTA gradient var (the .lyvox-cta-gradient class already has a formula; --gC is the token) */
+  --gC: linear-gradient(180deg, oklch(0.60 0.13 177), var(--priD));
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.22 0.03 200);
   --popover: oklch(1 0 0);
@@ -84,6 +109,22 @@
 .dark {
   --background: oklch(0.19 0.022 205);
   --foreground: oklch(0.97 0.01 190);
+
+  /* ── LyVoX redesign tokens — dark mode equivalents ── */
+  --priD: oklch(0.62 0.13 178);
+  --mintI: oklch(0.72 0.10 172);
+  --amber: oklch(0.83 0.14 72);
+  --amberI: oklch(0.70 0.12 60);
+  --cyan: #11BDF9;
+  --sec: oklch(0.29 0.03 200);
+  --danger: oklch(0.70 0.19 24);
+  --r: 20px;
+  --rm: 13px;
+  --rs: 9px;
+  --shS: 0 1px 2px oklch(0.1 0.03 220 / 0.30), 0 1px 3px oklch(0.1 0.03 220 / 0.25);
+  --shC: 0 1px 2px oklch(0.1 0.03 220 / 0.25), 0 10px 26px oklch(0.1 0.03 220 / 0.35);
+  --shHi: 0 18px 44px oklch(0.08 0.04 210 / 0.50);
+  --gC: linear-gradient(180deg, oklch(0.60 0.13 177), var(--priD));
   --card: oklch(0.235 0.025 205);
   --card-foreground: oklch(0.97 0.01 190);
   --popover: oklch(0.235 0.025 205);

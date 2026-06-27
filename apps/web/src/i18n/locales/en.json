@@ -559,6 +559,8 @@
     "verified_seller_tooltip": "Email and phone verified",
     "location_unknown": "Location not specified",
     "price_not_set": "Price not set",
+    "free": "Free",
+    "private_seller": "Private",
     "seller_labels": {
       "unknown": "Seller",
       "member_since": "Member since",

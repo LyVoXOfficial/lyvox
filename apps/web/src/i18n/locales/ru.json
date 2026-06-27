@@ -559,6 +559,8 @@
     "verified_seller_tooltip": "Email и телефон подтверждены",
     "location_unknown": "Местоположение не указано",
     "price_not_set": "Цена не указана",
+    "free": "Бесплатно",
+    "private_seller": "Частное",
     "seller_labels": {
       "unknown": "Продавец",
       "member_since": "На платформе с",
