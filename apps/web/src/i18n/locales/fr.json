@@ -1774,5 +1774,24 @@
     "policy_intro": "Cette page répertorie tous les cookies et éléments de stockage du navigateur utilisés par LyVoX, regroupés par catégorie. Les éléments nécessaires sont toujours actifs ; les autres nécessitent votre consentement.",
     "policy_draft_note": "Cette politique est une ébauche de travail. Le texte juridique complet sera ajouté avant le lancement public.",
     "manage": "Gérer les paramètres des cookies"
+  },
+  "account": {
+    "delete": {
+      "section_title": "Zone dangereuse",
+      "explain": "Supprime éfinitivement votre compte, vos annonces, vos photos et votre profil. Les messages de chat que vous avez envoyés sont remplacés par « [supprimé] » afin que votre interlocuteur conserve le fil de la conversation. Certaines données sont conservées conformément aux obligations légales.",
+      "retained_note": "Conservé en vertu d’une obligation légale de conservation : données de facturation et factures (~7 ans, anonymisées) ; documents de vérification d’identité soumis à une durée de conservation légale ; aucune autre donnée personnelle n’est conservée.",
+      "button": "Supprimer mon compte",
+      "dialog_title": "Supprimer définitivement votre compte ?",
+      "type_confirm": "Tapez DELETE pour confirmer",
+      "password_label": "Mot de passe actuel",
+      "confirm": "Supprimer le compte",
+      "cancel": "Annuler",
+      "success": "Votre compte a été définitivement supprimé.",
+      "active_business": "Transférez ou clôturez votre entreprise avant de supprimer votre compte.",
+      "wrong_password": "Mot de passe incorrect.",
+      "error": "Une erreur s’est produite. Veuillez réessayer.",
+      "download_data": "Télécharger vos données",
+      "download_data_desc": "Téléchargez une copie de votre enregistrement de consentement et de données avant de partir."
+    }
   }
 }

@@ -1774,5 +1774,24 @@
     "policy_intro": "Deze pagina geeft een overzicht van alle cookies en browseropslagitems die LyVoX gebruikt, gegroepeerd per categorie. Noodzakelijke items zijn altijd actief; andere vereisen uw toestemming.",
     "policy_draft_note": "Dit beleid is een werkversie. De volledige juridische tekst wordt toegevoegd vóór de publieke lancering.",
     "manage": "Cookie-instellingen beheren"
+  },
+  "account": {
+    "delete": {
+      "section_title": "Gevarenzone",
+      "explain": "Verwijdert permanent uw account, advertenties, foto’s en profiel. Chatberichten die u heeft verzonden worden vervangen door „[verwijderd]‟ zodat de andere persoon de thread behoudt. Sommige gegevens worden bewaard zoals wettelijk vereist.",
+      "retained_note": "Bewaard op grond van wettelijke bewaarplicht: facturerings- en factuurgegevens (~7 jaar, geanonimiseerd); ID-verificatiegegevens onderworpen aan wettelijke bewaartermijn; geen andere persoonsgegevens worden bewaard.",
+      "button": "Mijn account verwijderen",
+      "dialog_title": "Uw account permanent verwijderen?",
+      "type_confirm": "Typ DELETE ter bevestiging",
+      "password_label": "Huidig wachtwoord",
+      "confirm": "Account verwijderen",
+      "cancel": "Annuleren",
+      "success": "Uw account is permanent verwijderd.",
+      "active_business": "Draag uw bedrijf over of sluit het voordat u uw account verwijdert.",
+      "wrong_password": "Onjuist wachtwoord.",
+      "error": "Er is iets misgegaan. Probeer het opnieuw.",
+      "download_data": "Uw gegevens downloaden",
+      "download_data_desc": "Download een kopie van uw toestemmings- en gegevensrecord voordat u vertrekt."
+    }
   }
 }

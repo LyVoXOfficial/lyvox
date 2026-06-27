@@ -31,6 +31,7 @@ import { TOTPSettings } from "@/components/TOTPSettings";
 import { supabase } from "@/lib/supabaseClient";
 import { useI18n } from "@/i18n";
 import { WebAuthnNotAvailableNotice } from "./mfa-notice";
+import { DeleteAccountSection } from "./DeleteAccountSection";
 
 interface Session {
   id: string;
@@ -422,6 +423,8 @@ export function SecuritySettingsClient() {
           </ul>
         </CardContent>
       </Card>
+
+      <DeleteAccountSection />
 
       <AlertDialog open={showRevokeAllDialog} onOpenChange={setShowRevokeAllDialog}>
         <AlertDialogContent className="rounded-2xl">

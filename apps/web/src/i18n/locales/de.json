@@ -1774,5 +1774,24 @@
     "policy_intro": "Diese Seite listet alle Cookies und Browser-Speicherelemente auf, die LyVoX verwendet, gruppiert nach Kategorie. Notwendige Elemente sind immer aktiv; andere erfordern Ihre Zustimmung.",
     "policy_draft_note": "Diese Richtlinie ist ein Arbeitsentwurf. Der vollständige rechtliche Text wird vor dem öffentlichen Start hinzugefügt.",
     "manage": "Cookie-Einstellungen verwalten"
+  },
+  "account": {
+    "delete": {
+      "section_title": "Gefahrenzone",
+      "explain": "Löscht Ihr Konto, Ihre Anzeigen, Fotos und Ihr Profil dauerhaft. Von Ihnen gesendete Chat-Nachrichten werden durch „[gelöscht]“ ersetzt, damit der andere Teilnehmer den Thread behält. Einige Daten werden gemäß gesetzlicher Vorgaben aufbewahrt.",
+      "retained_note": "Aufbewahrung aufgrund gesetzlicher Pflicht: Abrechnungs- und Rechnungsunterlagen (~7 Jahre, anonymisiert); ID-Verifizierungsunterlagen mit gesetzlicher Aufbewahrungspflicht; keine weiteren personenbezogenen Daten werden gespeichert.",
+      "button": "Mein Konto löschen",
+      "dialog_title": "Ihr Konto dauerhaft löschen?",
+      "type_confirm": "Geben Sie DELETE zur Bestätigung ein",
+      "password_label": "Aktuelles Passwort",
+      "confirm": "Konto löschen",
+      "cancel": "Abbrechen",
+      "success": "Ihr Konto wurde dauerhaft gelöscht.",
+      "active_business": "Übertragen oder schließen Sie Ihr Unternehmen, bevor Sie Ihr Konto löschen.",
+      "wrong_password": "Falsches Passwort.",
+      "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+      "download_data": "Ihre Daten herunterladen",
+      "download_data_desc": "Laden Sie eine Kopie Ihres Einwilligungs- und Datenprotokolls herunter, bevor Sie gehen."
+    }
   }
 }

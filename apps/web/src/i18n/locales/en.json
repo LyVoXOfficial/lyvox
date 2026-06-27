@@ -1774,5 +1774,24 @@
     "policy_intro": "This page lists all cookies and browser storage items used by LyVoX, grouped by category. Necessary items are always active; others require your consent.",
     "policy_draft_note": "This policy is a working draft. Full legal text will be added before public launch.",
     "manage": "Manage cookie settings"
+  },
+  "account": {
+    "delete": {
+      "section_title": "Danger zone",
+      "explain": "Permanently deletes your account, listings, photos and profile. Chat messages you sent are replaced with “[deleted]” so the other person keeps their thread. Some records are kept as required by law.",
+      "retained_note": "Kept under legal retention: billing and invoice records (~7 years, anonymised); ID-verification records subject to a legal hold; no other personal data is retained.",
+      "button": "Delete my account",
+      "dialog_title": "Permanently delete your account?",
+      "type_confirm": "Type DELETE to confirm",
+      "password_label": "Current password",
+      "confirm": "Delete account",
+      "cancel": "Cancel",
+      "success": "Your account has been permanently deleted.",
+      "active_business": "Transfer or close your business before deleting your account.",
+      "wrong_password": "Incorrect password.",
+      "error": "Something went wrong. Please try again.",
+      "download_data": "Download your data",
+      "download_data_desc": "Download a copy of your consent and data record before you leave."
+    }
   }
 }
