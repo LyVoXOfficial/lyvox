@@ -4,11 +4,16 @@ const getUserMock = vi.fn();
 const isVerifiedMock = vi.fn();
 const canSellMock = vi.fn();
 const checkBlockedMock = vi.fn();
-// fromMock controls the supabase `.from()` behaviour per-test
+// fromMock controls the cookie supabase `.from()` behaviour per-test (categories lookup)
 const fromMock = vi.fn(() => ({}));
+// serviceFromMock controls the service-role supabase `.from()` (adverts insert)
+const serviceFromMock = vi.fn(() => ({}));
 
 vi.mock("@/lib/supabaseServer", () => ({
   supabaseServer: async () => ({ auth: { getUser: getUserMock }, from: fromMock }),
+}));
+vi.mock("@/lib/supabaseService", () => ({
+  supabaseService: async () => ({ from: serviceFromMock }),
 }));
 vi.mock("@/lib/auth/requireVerified", () => ({ isViewerVerified: (...a: unknown[]) => isVerifiedMock(...(a as [])) }));
 vi.mock("@/lib/auth/canSellAsBusiness", () => ({ canSellAsBusiness: (...a: unknown[]) => canSellMock(...(a as [])) }));
@@ -46,6 +51,7 @@ describe("POST /api/adverts verification gate", () => {
     canSellMock.mockReset();
     checkBlockedMock.mockReset();
     fromMock.mockReset().mockReturnValue({});
+    serviceFromMock.mockReset().mockReturnValue({});
   });
 
   it("403 VERIFICATION_REQUIRED when signed in but unverified", async () => {
@@ -71,6 +77,7 @@ describe("POST /api/adverts — business gate (T17)", () => {
     canSellMock.mockReset();
     checkBlockedMock.mockReset();
     fromMock.mockReset();
+    serviceFromMock.mockReset();
     // Default: user is verified, not blocked
     isVerifiedMock.mockResolvedValue(true);
     checkBlockedMock.mockResolvedValue({ isBlocked: false });
@@ -121,7 +128,7 @@ describe("POST /api/adverts — business gate (T17)", () => {
     expect(canSellMock).not.toHaveBeenCalled();
   });
 
-  it("proceeds to INSERT with business_id when canSellAsBusiness returns ok:true", async () => {
+  it("proceeds to INSERT with business_id when canSellAsBusiness returns ok:true — INSERT is on service-role client", async () => {
     const USER_ID = "u-biz-ok";
     const BIZ_ID = "biz-uuid-ok";
 
@@ -141,14 +148,21 @@ describe("POST /api/adverts — business gate (T17)", () => {
       error: null,
     });
 
-    // Table-aware from() mock: adverts chain captures insert args; other tables return a category row.
+    // Cookie client (fromMock): only categories lookup — returns a category row, NOT adverts.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (fromMock as any).mockImplementation((table: string) =>
-      table === "adverts"
-        ? advertsChain
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        : makeChainable({ data: { id: "cat-1" } as any, error: null }),
-    );
+    (fromMock as any).mockImplementation((table: string) => {
+      // The cookie client should NEVER be called with "adverts" after this change
+      if (table === "adverts") throw new Error("BUG: adverts insert must use service-role client, not cookie client");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return makeChainable({ data: { id: "cat-1" } as any, error: null });
+    });
+
+    // Service-role client (serviceFromMock): handles adverts insert
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (serviceFromMock as any).mockImplementation((table: string) => {
+      if (table === "adverts") return advertsChain;
+      return makeChainable();
+    });
 
     const res = await POST(jsonReq({ business_id: BIZ_ID }));
 
@@ -158,6 +172,9 @@ describe("POST /api/adverts — business gate (T17)", () => {
       USER_ID,
       BIZ_ID,
     );
+
+    // The insert went through the service-role client
+    expect(serviceFromMock).toHaveBeenCalledWith("adverts");
 
     // The inserted draft carried business_id
     expect(capturedInsertRow).not.toBeNull();

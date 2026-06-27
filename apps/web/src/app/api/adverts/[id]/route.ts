@@ -206,7 +206,7 @@ export async function PATCH(
   }
 
   if (Object.keys(updates).length > 0) {
-    const { error: updateError } = await supabase
+    const { error: updateError } = await service
       .from("adverts")
       .update(updates)
       .eq("id", advertId);

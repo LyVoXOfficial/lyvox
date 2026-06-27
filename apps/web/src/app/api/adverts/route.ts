@@ -1,4 +1,5 @@
 import { supabaseServer } from "@/lib/supabaseServer";
+import { supabaseService } from "@/lib/supabaseService";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -90,7 +91,8 @@ export async function POST(req?: Request) {
     ...(businessId ? { business_id: businessId } : {}),
   };
 
-  const { data, error } = await supabase
+  const service = await supabaseService();
+  const { data, error } = await service
     .from("adverts")
     .insert(draft)
     .select("id, status, category_id")
