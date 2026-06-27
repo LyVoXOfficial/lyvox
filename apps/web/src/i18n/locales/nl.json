@@ -1750,5 +1750,22 @@
         "email_invalid": "Voer een geldig e-mailadres in"
       }
     }
+  },
+  "cookie": {
+    "banner_title": "Wij gebruiken cookies",
+    "banner_body": "Wij gebruiken cookies om uw ervaring te verbeteren. U kunt accepteren, weigeren of uw voorkeuren aanpassen.",
+    "accept_all": "Alles accepteren",
+    "reject_all": "Alles weigeren",
+    "customize": "Aanpassen",
+    "learn_more": "Meer info",
+    "prefs_title": "Cookievoorkeuren",
+    "necessary_label": "Noodzakelijk",
+    "necessary_desc": "Authenticatie, beveiliging en dit toestemmingsrecord.",
+    "necessary_always": "Altijd actief",
+    "functional_label": "Functioneel",
+    "functional_desc": "Onlangs bekeken, smaakvoorkeuren, opgeslagen zoekopdrachten, geziene advertenties.",
+    "analytics_label": "Analytisch",
+    "analytics_desc": "Geaggregeerde gebruiksstatistieken (nog geen analysebibliotheek actief).",
+    "save_prefs": "Voorkeuren opslaan"
   }
 }

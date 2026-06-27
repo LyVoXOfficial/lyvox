@@ -11,6 +11,9 @@ import ViewportBottomSpacer from "@/components/viewport-bottom-spacer";
 import { I18nProvider } from "@/i18n";
 import { getI18nProps } from "@/i18n/server";
 import { TrustGateProvider } from "@/components/trust/TrustGateProvider";
+import { CookieConsentProvider } from "@/components/cookie/CookieConsentProvider";
+import { CookieBanner } from "@/components/cookie/CookieBanner";
+import { CookiePreferenceCenter } from "@/components/cookie/CookiePreferenceCenter";
 import { Toaster } from "sonner";
 
 // `viewport-fit: cover` is required for the `env(safe-area-inset-*)` paddings
@@ -87,18 +90,23 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     <html lang={locale}>
       <body className="min-h-screen flex flex-col">
         <I18nProvider locale={locale} messages={messages}>
-          <FavoritesProvider>
-            <LikesProvider>
-              <TrustGateProvider>
-                <TopBar />
-                <MainHeader />
-                <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-4 md:py-6 pb-[calc(64px+env(safe-area-inset-bottom))]">{children}</main>
-                <LegalFooter />
-                <ViewportBottomSpacer />
-                <BottomNav />
-              </TrustGateProvider>
-            </LikesProvider>
-          </FavoritesProvider>
+          <CookieConsentProvider>
+            <FavoritesProvider>
+              <LikesProvider>
+                <TrustGateProvider>
+                  <TopBar />
+                  <MainHeader />
+                  <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-4 md:py-6 pb-[calc(64px+env(safe-area-inset-bottom))]">{children}</main>
+                  <LegalFooter />
+                  <ViewportBottomSpacer />
+                  <BottomNav />
+                </TrustGateProvider>
+              </LikesProvider>
+            </FavoritesProvider>
+            {/* Cookie consent banner + preference center — available app-wide */}
+            <CookieBanner />
+            <CookiePreferenceCenter />
+          </CookieConsentProvider>
         </I18nProvider>
         {/* Global toast container — without this, every toast.* call across the app is silently dropped. */}
         <Toaster position="top-center" richColors closeButton />

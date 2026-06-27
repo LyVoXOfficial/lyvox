@@ -1750,5 +1750,22 @@
         "email_invalid": "Please enter a valid email address"
       }
     }
+  },
+  "cookie": {
+    "banner_title": "We use cookies",
+    "banner_body": "We use cookies to improve your experience. You can accept, reject, or customise your preferences.",
+    "accept_all": "Accept all",
+    "reject_all": "Reject all",
+    "customize": "Customize",
+    "learn_more": "Learn more",
+    "prefs_title": "Cookie preferences",
+    "necessary_label": "Necessary",
+    "necessary_desc": "Authentication, security, and this consent record.",
+    "necessary_always": "Always active",
+    "functional_label": "Functional",
+    "functional_desc": "Recently viewed, taste preferences, saved searches, seen adverts.",
+    "analytics_label": "Analytics",
+    "analytics_desc": "Aggregate usage statistics (no analytics lib active yet).",
+    "save_prefs": "Save preferences"
   }
 }

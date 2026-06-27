@@ -1750,5 +1750,22 @@
         "email_invalid": "Veuillez saisir une adresse e-mail valide"
       }
     }
+  },
+  "cookie": {
+    "banner_title": "Nous utilisons des cookies",
+    "banner_body": "Nous utilisons des cookies pour améliorer votre expérience. Vous pouvez accepter, refuser ou personnaliser vos préférences.",
+    "accept_all": "Tout accepter",
+    "reject_all": "Tout refuser",
+    "customize": "Personnaliser",
+    "learn_more": "En savoir plus",
+    "prefs_title": "Préférences de cookies",
+    "necessary_label": "Nécessaires",
+    "necessary_desc": "Authentification, sécurité et cet enregistrement de consentement.",
+    "necessary_always": "Toujours actifs",
+    "functional_label": "Fonctionnels",
+    "functional_desc": "Articles récemment consultés, préférences, recherches sauvegardées, annonces vues.",
+    "analytics_label": "Analytiques",
+    "analytics_desc": "Statistiques d'utilisation agrégées (aucune bibliothèque d'analyse active pour l'instant).",
+    "save_prefs": "Enregistrer les préférences"
   }
 }

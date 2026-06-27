@@ -1750,5 +1750,22 @@
         "email_invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
       }
     }
+  },
+  "cookie": {
+    "banner_title": "Wir verwenden Cookies",
+    "banner_body": "Wir verwenden Cookies, um Ihre Erfahrung zu verbessern. Sie können akzeptieren, ablehnen oder Ihre Einstellungen anpassen.",
+    "accept_all": "Alle akzeptieren",
+    "reject_all": "Alle ablehnen",
+    "customize": "Anpassen",
+    "learn_more": "Mehr erfahren",
+    "prefs_title": "Cookie-Einstellungen",
+    "necessary_label": "Notwendig",
+    "necessary_desc": "Authentifizierung, Sicherheit und diese Einwilligungsaufzeichnung.",
+    "necessary_always": "Immer aktiv",
+    "functional_label": "Funktional",
+    "functional_desc": "Zuletzt angesehen, Geschmackspräferenzen, gespeicherte Suchen, gesehene Anzeigen.",
+    "analytics_label": "Analyse",
+    "analytics_desc": "Aggregierte Nutzungsstatistiken (noch keine Analysebibliothek aktiv).",
+    "save_prefs": "Einstellungen speichern"
   }
 }
