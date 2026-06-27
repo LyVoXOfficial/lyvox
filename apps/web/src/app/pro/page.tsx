@@ -251,9 +251,10 @@ export default async function ProPage() {
           return (
             <div
               key={inv.business_id}
-              className="rounded-md border border-primary/20 bg-primary/5 p-4"
+              className="overflow-hidden rounded-[var(--r)] border border-border bg-card p-5"
+              style={{ boxShadow: "var(--shC)" }}
             >
-              <p className="mb-3 text-sm font-medium text-foreground">
+              <p className="mb-4 text-[15px] font-extrabold text-foreground">
                 {bizName}
               </p>
               <TeamManager
