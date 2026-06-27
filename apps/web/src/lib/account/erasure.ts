@@ -57,18 +57,28 @@ export async function eraseAccount(
   // so the media table rows are still present for enumeration (CASCADE via
   // auth.users → adverts → media will fire in step 3).
   try {
-    const { data: advertRows } = await service
+    const { data: advertRows, error: advertError } = await service
       .from("adverts")
       .select("id")
       .eq("user_id", userId);
 
+    // Supabase query errors are returned on `.error` (not thrown), so the outer
+    // catch would miss them — log explicitly. Non-fatal: fall through to step 3.
+    if (advertError) {
+      console.error("[eraseAccount] adverts enumeration failed (non-fatal):", advertError);
+    }
+
     const advertIds = (advertRows ?? []).map((r) => r.id as string);
 
     if (advertIds.length > 0) {
-      const { data: mediaRows } = await service
+      const { data: mediaRows, error: mediaError } = await service
         .from("media")
         .select("url")
         .in("advert_id", advertIds);
+
+      if (mediaError) {
+        console.error("[eraseAccount] media enumeration failed (non-fatal):", mediaError);
+      }
 
       // Only storage paths — skip full http(s) URLs (those are CDN-signed
       // references, not bucket-relative paths). Mirror the convention used in
