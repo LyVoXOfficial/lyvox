@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { logger } from "@/lib/errorLogger";
+import { supabaseService } from "@/lib/supabaseService";
 import type { Database } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
@@ -120,7 +121,10 @@ export async function GET(request: NextRequest) {
         const itsmeKycLevel =
           data.user.user_metadata?.kyc_level || data.user.app_metadata?.kyc_level || "basic";
 
-        const { error: profileError } = await supabase
+        // itsme_verified and itsme_kyc_level are trust columns restricted to service-role
+        // after the lock_profiles_columns migration — use the service-role client here.
+        const svc = await supabaseService();
+        const { error: profileError } = await svc
           .from("profiles")
           .update({
             itsme_verified: true,
