@@ -449,6 +449,56 @@ describe("POST /api/billing/webhook", () => {
     expect(subscriptionsRetrieveMock).not.toHaveBeenCalled();
   });
 
+  // ── customer.subscription.updated (active, empty items) → 200, no DB write ─
+  it("(j) customer.subscription.updated with empty items.data returns 200 and skips pro_until write", async () => {
+    // A subscription with items.data = [] has no current_period_end.
+    // The webhook must return 200 (not 500) and must NOT write pro_until.
+    const emptyItemsSub = {
+      id: "sub_empty_items",
+      object: "subscription",
+      customer: "cus_empty_items",
+      status: "active" as Stripe.Subscription.Status,
+      items: {
+        object: "list",
+        data: [], // <-- the edge case: no subscription items
+        has_more: false,
+        url: "",
+      },
+    } as unknown as Stripe.Subscription;
+
+    constructEventMock.mockReturnValue({
+      type: "customer.subscription.updated",
+      data: { object: emptyItemsSub },
+    } as Stripe.Event);
+
+    const updateSpy = vi.fn();
+    fromServiceMock.mockImplementation((table: string) => {
+      if (table === "profiles") {
+        return {
+          update: (data: unknown) => {
+            updateSpy(data);
+            return {
+              eq: async () => ({ error: null }),
+            };
+          },
+        };
+      }
+      throw new Error("Unexpected table: " + table);
+    });
+
+    const res = await POST(
+      makeWebhookReq() as unknown as import("next/server").NextRequest
+    );
+    const resBody = await res.json();
+
+    // Must return 200, not 500
+    expect(res.status).toBe(200);
+    expect(resBody.ok).toBe(true);
+
+    // Must NOT have written pro_until (DB update skipped entirely)
+    expect(updateSpy).not.toHaveBeenCalled();
+  });
+
   // ── Existing boost path (mode=payment) still works ───────────────────────
   it("(i) checkout.session.completed with mode=payment runs boost logic (existing path)", async () => {
     constructEventMock.mockReturnValue({

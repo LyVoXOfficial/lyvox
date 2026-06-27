@@ -14,11 +14,16 @@ export const runtime = "nodejs";
  * Returns the ISO string for the end of the current billing period.
  * In Stripe v19, current_period_end lives on the first SubscriptionItem,
  * not on the Subscription object itself.
+ *
+ * Returns null (and logs) when current_period_end is missing or not a number
+ * (e.g. the subscription has no items yet) so callers can skip the DB write
+ * gracefully instead of propagating an exception to the POST try/catch.
  */
-function periodEndISO(sub: Stripe.Subscription): string {
+function periodEndISO(sub: Stripe.Subscription): string | null {
   const ts = sub.items.data[0]?.current_period_end;
   if (typeof ts !== "number") {
-    throw new Error("Unable to determine current_period_end from subscription");
+    console.error(`periodEndISO: no current_period_end on sub ${sub.id}`);
+    return null;
   }
   return new Date(ts * 1000).toISOString();
 }
@@ -82,6 +87,13 @@ export async function POST(req: NextRequest) {
             session.subscription as string
           );
           const proUntil = periodEndISO(sub);
+
+          if (proUntil === null) {
+            console.error(
+              `checkout.session.completed: skipping pro_until update for sub ${session.subscription} — no current_period_end`
+            );
+            break;
+          }
 
           const { error: profileError } = await supabase
             .from("profiles")
@@ -224,9 +236,19 @@ export async function POST(req: NextRequest) {
           "active",
           "trialing",
         ];
-        const proUntil = activeStatuses.includes(sub.status)
-          ? periodEndISO(sub)
-          : null;
+
+        let proUntil: string | null;
+        if (activeStatuses.includes(sub.status)) {
+          proUntil = periodEndISO(sub);
+          if (proUntil === null) {
+            console.error(
+              `customer.subscription.updated: skipping pro_until update for sub ${sub.id} — no current_period_end`
+            );
+            break;
+          }
+        } else {
+          proUntil = null;
+        }
 
         const { error: profileError } = await supabase
           .from("profiles")
@@ -273,6 +295,13 @@ export async function POST(req: NextRequest) {
         const sub = await stripe.subscriptions.retrieve(subRef as string);
         const proUntil = periodEndISO(sub);
         const customerId = invoice.customer as string;
+
+        if (proUntil === null) {
+          console.error(
+            `invoice.paid: skipping pro_until update for sub ${subRef} — no current_period_end`
+          );
+          break;
+        }
 
         const { error: profileError } = await supabase
           .from("profiles")
