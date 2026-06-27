@@ -27,6 +27,7 @@ export const createBusinessSchema = z
     email: z.string().trim().email(),
     phone_e164: z.string().trim().optional(),
     withdrawal_terms: z.string().trim().min(1).max(2000),
+    returns_url: z.string().url().max(500).optional().or(z.literal("")),
     self_certified: z.literal(true),
   })
   .superRefine((data, ctx) => {

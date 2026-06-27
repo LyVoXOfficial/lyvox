@@ -208,4 +208,42 @@ describe("createBusinessSchema", () => {
       expect(result.success).toBe(false);
     });
   });
+
+  describe("returns_url validation", () => {
+    it("passes when returns_url is a valid URL", () => {
+      const result = createBusinessSchema.safeParse({
+        ...BASE_VALID,
+        returns_url: "https://mycompany.be/returns",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it("passes when returns_url is an empty string", () => {
+      const result = createBusinessSchema.safeParse({
+        ...BASE_VALID,
+        returns_url: "",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it("passes when returns_url is omitted", () => {
+      const result = createBusinessSchema.safeParse({
+        ...BASE_VALID,
+        // returns_url omitted
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it("fails when returns_url is a non-URL non-empty string", () => {
+      const result = createBusinessSchema.safeParse({
+        ...BASE_VALID,
+        returns_url: "not-a-url",
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const paths = result.error.issues.map((i) => i.path[0]);
+        expect(paths).toContain("returns_url");
+      }
+    });
+  });
 });

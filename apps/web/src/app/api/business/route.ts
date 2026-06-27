@@ -69,6 +69,7 @@ const baseHandler = async (req: Request): Promise<Response> => {
     email,
     phone_e164,
     withdrawal_terms,
+    returns_url,
   } = validationResult.data;
 
   // Step 3: Create business via RPC
@@ -111,6 +112,7 @@ const baseHandler = async (req: Request): Promise<Response> => {
       vat_liable,
       email,
       withdrawal_terms,
+      ...(returns_url ? { returns_url } : {}),
       self_certified_at: selfCertifiedAt,
       self_certified_ip: selfCertifiedIp,
     })
