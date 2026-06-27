@@ -83,6 +83,12 @@ const baseHandler = async (req: Request) => {
   }
   const e164 = belgianResult.e164;
 
+  // Service-role client for all phones / phone_otps writes (and the pre-check
+  // SELECT). After the DB migration, authenticated/anon will have no
+  // INSERT/UPDATE/DELETE on these tables; using service-role now means the code
+  // works unchanged before and after the migration is applied.
+  const service = await supabaseService();
+
   // Best-effort pre-check: the e164 column is globally UNIQUE, so at most one
   // phones row can own a given number. If that row belongs to ANOTHER user,
   // reject early with a dedicated, localizable error — before any Twilio lookup,
@@ -92,7 +98,6 @@ const baseHandler = async (req: Request) => {
   // see other users' rows) we simply continue: the UNIQUE constraint and the
   // 23505 fallback below remain the real source of truth.
   try {
-    const service = await supabaseService();
     const existingPhone = await service
       .from("phones")
       .select("user_id")
@@ -151,7 +156,7 @@ const baseHandler = async (req: Request) => {
     lookup: lookup as TablesInsert<"phones">["lookup"],
   };
 
-  const upsertPhonesResult = await supabase.from("phones").upsert(phoneRecord);
+  const upsertPhonesResult = await service.from("phones").upsert(phoneRecord);
   if (upsertPhonesResult.error) {
     // Race-safe fallback: if the e164 UNIQUE constraint was violated (the number
     // is owned by another account, possibly registered between our pre-check and
@@ -163,7 +168,7 @@ const baseHandler = async (req: Request) => {
   }
 
   // Ensure only one active OTP per user/phone pair
-  const deactivatePrevious = await supabase
+  const deactivatePrevious = await service
     .from("phone_otps")
     .update({ used: true })
     .eq("user_id", user.id)
@@ -190,7 +195,7 @@ const baseHandler = async (req: Request) => {
     used: false,
   };
 
-  const { error: otpError } = await supabase.from("phone_otps").insert(otpInsert);
+  const { error: otpError } = await service.from("phone_otps").insert(otpInsert);
   if (otpError) {
     return handleSupabaseError(otpError, ApiErrorCode.OTP_CREATE_FAILED);
   }

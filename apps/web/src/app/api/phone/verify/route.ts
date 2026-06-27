@@ -1,5 +1,6 @@
 import { createHmac } from "crypto";
 import { supabaseServer } from "@/lib/supabaseServer";
+import { supabaseService } from "@/lib/supabaseService";
 import { createRateLimiter, withRateLimit, getClientIp } from "@/lib/rateLimiter";
 import {
   createErrorResponse,
@@ -82,7 +83,12 @@ const baseHandler = async (req: Request) => {
   }
   const e164 = belgianResult.e164;
 
-  const { data: rows, error } = await supabase
+  // Service-role client for all phone_otps / phones writes (and the OTP read).
+  // After the DB migration, authenticated/anon will have no INSERT/UPDATE/DELETE
+  // on these tables; the service-role client bypasses RLS so these ops still work.
+  const service = await supabaseService();
+
+  const { data: rows, error } = await service
     .from("phone_otps")
     .select("*")
     .eq("user_id", user.id)
@@ -110,15 +116,15 @@ const baseHandler = async (req: Request) => {
   const computedHash = createHmac("sha256", otp.code_salt).update(code.trim()).digest("hex");
   if (otp.code_hash !== computedHash) {
     const updateAttempt: TablesUpdate<"phone_otps"> = { attempts: (otp.attempts ?? 0) + 1 };
-    await supabase.from("phone_otps").update(updateAttempt).eq("id", otp.id);
+    await service.from("phone_otps").update(updateAttempt).eq("id", otp.id);
     return createErrorResponse(ApiErrorCode.OTP_INVALID, { status: 400 });
   }
 
   const markUsed: TablesUpdate<"phone_otps"> = { used: true };
-  await supabase.from("phone_otps").update(markUsed).eq("id", otp.id);
+  await service.from("phone_otps").update(markUsed).eq("id", otp.id);
 
   const phoneUpdate: TablesUpdate<"phones"> = { verified: true };
-  const { error: phoneUpdateError } = await supabase
+  const { error: phoneUpdateError } = await service
     .from("phones")
     .update(phoneUpdate)
     .eq("user_id", user.id);
@@ -137,6 +143,7 @@ const baseHandler = async (req: Request) => {
     action: "phone_verify",
     details: { e164: e164, otp_last_four: otp.code_last_four },
   };
+  // logs is NOT being locked — keep the cookie client here.
   const { error: logError } = await supabase.from("logs").insert(logEntry);
   if (logError) {
     console.warn("PHONE_VERIFY_LOG_FAILED", logError.message);
