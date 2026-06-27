@@ -97,11 +97,18 @@ const baseHandler = async (req: Request): Promise<Response> => {
 
   const business_id = rpcData as string;
 
-  // Step 4: Update business with remaining fields + self-certification
+  // Service-role client for all writes that touch locked or audit columns
+  // (verifications has no INSERT policy for users; after the column grant,
+  // authenticated cannot update vat_liable / self_certified_* / status)
+  const service = await supabaseService();
+
+  // Step 4: Update business with remaining fields + self-certification (service-role —
+  // vat_liable, self_certified_at, self_certified_ip are locked/audit columns not
+  // grantable to authenticated; only owner-editable columns stay grantable)
   const selfCertifiedAt = new Date().toISOString();
   const selfCertifiedIp = getClientIp(req);
 
-  const { error: updateError } = await supabase
+  const { error: updateError } = await service
     .from("businesses")
     .update({
       trade_name: trade_name ?? null,
@@ -134,9 +141,6 @@ const baseHandler = async (req: Request): Promise<Response> => {
     return handleSupabaseError(profileError, ApiErrorCode.INTERNAL_ERROR);
   }
 
-  // Service-role client for RLS-gated writes (verifications table has no INSERT policy for users)
-  const service = await supabaseService();
-
   // Step 6: Insert vies:pending verification row if vat_liable (must use service role — no user INSERT policy)
   if (vat_liable) {
     const { error: verError } = await service.from("verifications").insert({
@@ -153,7 +157,9 @@ const baseHandler = async (req: Request): Promise<Response> => {
   }
 
   // Step 7: Provisional publish — set status='active' (B0 passed, D3)
-  const { error: publishError } = await supabase
+  // Must use service-role: authenticated role cannot update the status column
+  // after the column-scoped grant (20260627200000_lock_businesses_columns.sql)
+  const { error: publishError } = await service
     .from("businesses")
     .update({ status: "active" })
     .eq("id", business_id);

@@ -173,15 +173,8 @@ describe("POST /api/business", () => {
     isViewerVerifiedMock.mockResolvedValue(true);
     rpcMock.mockResolvedValue({ data: "biz-uuid-1", error: null });
 
-    // Cookie client: businesses + profiles (no verifications insert here anymore)
+    // Cookie client: profiles only (businesses writes moved to service-role after column grant)
     fromMock.mockImplementation((table: string) => {
-      if (table === "businesses") {
-        return {
-          update: () => ({
-            eq: async () => ({ error: null }),
-          }),
-        };
-      }
       if (table === "profiles") {
         return {
           update: () => ({
@@ -192,9 +185,16 @@ describe("POST /api/business", () => {
       throw new Error("unexpected table on cookie client: " + table);
     });
 
-    // Service-role client: verifications insert
+    // Service-role client: businesses (steps 4 + 7) + verifications insert
     const verificationsInsert = vi.fn(async () => ({ error: null }));
     serviceFromMock.mockImplementation((table: string) => {
+      if (table === "businesses") {
+        return {
+          update: () => ({
+            eq: async () => ({ error: null }),
+          }),
+        };
+      }
       if (table === "verifications") {
         return { insert: verificationsInsert };
       }
@@ -235,14 +235,8 @@ describe("POST /api/business", () => {
     isViewerVerifiedMock.mockResolvedValue(true);
     rpcMock.mockResolvedValue({ data: "biz-uuid-2", error: null });
 
+    // Cookie client: profiles only (businesses writes moved to service-role after column grant)
     fromMock.mockImplementation((table: string) => {
-      if (table === "businesses") {
-        return {
-          update: () => ({
-            eq: async () => ({ error: null }),
-          }),
-        };
-      }
       if (table === "profiles") {
         return {
           update: () => ({
@@ -253,9 +247,16 @@ describe("POST /api/business", () => {
       throw new Error("unexpected table on cookie client: " + table);
     });
 
-    // Service client should not be called for verifications insert in no-vat path
+    // Service client: businesses (steps 4 + 7); verifications insert not called (no-vat path)
     const verificationsInsert = vi.fn(async () => ({ error: null }));
     serviceFromMock.mockImplementation((table: string) => {
+      if (table === "businesses") {
+        return {
+          update: () => ({
+            eq: async () => ({ error: null }),
+          }),
+        };
+      }
       if (table === "verifications") {
         return { insert: verificationsInsert };
       }
