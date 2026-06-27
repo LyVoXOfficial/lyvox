@@ -4,7 +4,8 @@
  * Security invariants (T3):
  * - No user session → 401, no write to profiles
  * - User present but phone_confirmed_at is null → 403, no write to profiles
- * - User present AND phone_confirmed_at set → 200, profiles.update({verified_phone:true}) via service-role
+ * - User present, phone_confirmed_at set, but phone is NOT a Belgian mobile → 403, no write to profiles
+ * - User present AND phone_confirmed_at set with a valid Belgian mobile → 200, profiles.update({verified_phone:true}) via service-role
  */
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
@@ -99,7 +100,7 @@ describe("POST /api/phone/confirm-native — security-role enforcement", () => {
   it("(b) 403 when user exists but phone_confirmed_at is null — no profiles write", async () => {
     getUserMock.mockResolvedValue({ data: { user: { id: USER_ID } } });
     getUserByIdMock.mockResolvedValue({
-      data: { user: { id: USER_ID, phone_confirmed_at: null } },
+      data: { user: { id: USER_ID, phone_confirmed_at: null, phone: "+32470123456" } },
       error: null,
     });
 
@@ -127,13 +128,40 @@ describe("POST /api/phone/confirm-native — security-role enforcement", () => {
     expect(serviceFromMock).not.toHaveBeenCalledWith("profiles");
   });
 
-  it("(c) 200 + profiles.update({verified_phone:true}) via service-role when phone_confirmed_at is set", async () => {
+  it("(c) 403 + no profiles write when phone_confirmed_at is set but phone is NOT a Belgian mobile", async () => {
     getUserMock.mockResolvedValue({ data: { user: { id: USER_ID } } });
     getUserByIdMock.mockResolvedValue({
       data: {
         user: {
           id: USER_ID,
           phone_confirmed_at: "2026-06-27T10:00:00.000Z",
+          // A French mobile number — valid E.164 but not Belgian
+          phone: "+33612345678",
+        },
+      },
+      error: null,
+    });
+
+    const res = await POST(makeRequest());
+
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.ok).toBe(false);
+    expect(body.error).toBe("PHONE_NOT_BELGIAN_MOBILE");
+
+    // profiles must never be touched
+    expect(serviceFromMock).not.toHaveBeenCalledWith("profiles");
+  });
+
+  it("(d) 200 + profiles.update({verified_phone:true}) via service-role when phone_confirmed_at is set and phone is a valid Belgian mobile", async () => {
+    getUserMock.mockResolvedValue({ data: { user: { id: USER_ID } } });
+    getUserByIdMock.mockResolvedValue({
+      data: {
+        user: {
+          id: USER_ID,
+          phone_confirmed_at: "2026-06-27T10:00:00.000Z",
+          // A valid Belgian mobile in E.164 (as Supabase stores it)
+          phone: "+32470123456",
         },
       },
       error: null,

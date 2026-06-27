@@ -1,4 +1,5 @@
 import { supabaseServer } from "@/lib/supabaseServer";
+import { supabaseService } from "@/lib/supabaseService";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import {
   createErrorResponse,
@@ -133,6 +134,11 @@ const baseHandler = async (req: Request) => {
   const successUrl = `${baseUrl}/billing/success?session_id={CHECKOUT_SESSION_ID}`;
   const cancelUrl = `${baseUrl}/billing/cancel`;
 
+  // Service-role client for purchases UPDATEs: the cookie client's RLS only
+  // allows SELECT-own + admin on purchases, so cookie-client UPDATEs are
+  // silently filtered to 0 rows. Service-role bypasses RLS and actually persists.
+  const service = await supabaseService();
+
   try {
     const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
@@ -160,8 +166,8 @@ const baseHandler = async (req: Request) => {
       },
     });
 
-    // Update purchase with session ID
-    const { error: updateError } = await supabase
+    // Update purchase with session ID via service-role (RLS has no UPDATE policy for cookie client)
+    const { error: updateError } = await service
       .from("purchases")
       .update({ provider_session_id: session.id })
       .eq("id", purchase.id);
@@ -176,9 +182,9 @@ const baseHandler = async (req: Request) => {
     });
   } catch (error) {
     console.error("Stripe checkout session creation failed:", error);
-    
-    // Update purchase status to failed
-    await supabase
+
+    // Update purchase status to failed via service-role (RLS has no UPDATE policy for cookie client)
+    await service
       .from("purchases")
       .update({ status: "failed" })
       .eq("id", purchase.id);

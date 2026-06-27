@@ -6,6 +6,7 @@ import {
   handleSupabaseError,
   ApiErrorCode,
 } from "@/lib/apiErrors";
+import { parseBelgianMobile } from "@/lib/validations/belgianPhone";
 
 export const runtime = "nodejs";
 
@@ -30,7 +31,22 @@ export async function POST(_req: Request): Promise<Response> {
     return createErrorResponse(ApiErrorCode.VERIFICATION_REQUIRED, { status: 403 });
   }
 
-  // Step 3: phone confirmed — write verified_phone via service-role only
+  // Step 3: Belgian-mobile gate — mirror the format check from api/phone/request.
+  // Supabase stores phones in E.164 (e.g. "+32470123456"); parseBelgianMobile
+  // accepts E.164 via libphonenumber-js so no conversion is needed.
+  // NOTE: VoIP-block parity (Twilio Lookup) is not applied here to avoid the
+  // external call; the format check is the key regulatory gate (DSA / Belgian
+  // mobile-only policy). VoIP blocking could be added here in a future pass.
+  const confirmedPhone = data.user.phone;
+  if (!confirmedPhone) {
+    return createErrorResponse(ApiErrorCode.VERIFICATION_REQUIRED, { status: 403 });
+  }
+  const phoneCheck = parseBelgianMobile(confirmedPhone);
+  if (!phoneCheck.ok) {
+    return createErrorResponse(ApiErrorCode.PHONE_NOT_BELGIAN_MOBILE, { status: 403 });
+  }
+
+  // Step 4: phone confirmed and passes Belgian-mobile check — write via service-role only
   const { error: updateError } = await service
     .from("profiles")
     .update({ verified_phone: true })

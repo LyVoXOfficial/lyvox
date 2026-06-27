@@ -70,7 +70,7 @@ export const updateBusinessSchema = z.object({
   country: z.string().trim().length(2).optional(),
   email: z.string().trim().email().optional(),
   phone_e164: z.string().trim().optional(),
-  withdrawal_terms: z.string().trim().max(2000).optional(),
+  withdrawal_terms: z.string().trim().min(1).max(2000).optional(),
   returns_url: z.string().url().max(500).optional().or(z.literal("")),
 });
 
