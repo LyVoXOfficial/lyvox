@@ -4,9 +4,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
-  BadgeCheck,
   Loader2,
   MessageSquare,
+  Plus,
   Send,
   ShieldCheck,
   TriangleAlert,
@@ -14,8 +14,6 @@ import {
   WifiOff,
 } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -221,33 +219,51 @@ export default function ChatWindow({
   return (
     <div className="container mx-auto max-w-6xl px-0 sm:px-4 sm:py-6">
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <Card className="flex min-h-[calc(100dvh-7.5rem)] flex-col overflow-hidden rounded-none border-x-0 border-border/70 py-0 shadow-[var(--shadow-soft)] sm:min-h-[calc(100vh-9rem)] sm:rounded-2xl sm:border-x">
+        {/* ── Thread column ────────────────────────────────────────────── */}
+        <Card className="flex min-h-[calc(100dvh-7.5rem)] flex-col overflow-hidden rounded-none border-x-0 border-border/70 py-0 shadow-[var(--shadow-soft)] sm:min-h-[calc(100vh-9rem)] sm:rounded-[var(--r)] sm:border-x">
+          {/* Header */}
           <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-border/70 bg-card/95 px-4 py-3 backdrop-blur">
-            <Button asChild variant="ghost" size="icon" aria-label={translate("chat.back", "Back to messages")}>
+            <Button
+              asChild
+              variant="ghost"
+              size="icon"
+              className="shrink-0 rounded-full"
+              aria-label={translate("chat.back", "Back to messages")}
+            >
               <Link href="/chat">
                 <ArrowLeft className="h-5 w-5" aria-hidden="true" />
               </Link>
             </Button>
-            <Avatar className="h-10 w-10">
-              <AvatarImage src="" />
-              <AvatarFallback>{getInitials(peerName)}</AvatarFallback>
-            </Avatar>
+
+            {/* Peer avatar — trust-gradient tile */}
+            <div
+              className="lyvox-trust-gradient flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--rm)] text-sm font-bold text-white"
+              aria-hidden="true"
+            >
+              {getInitials(peerName)}
+            </div>
+
+            {/* Peer name only — no badge, no shield, no response-time */}
             <div className="min-w-0 flex-1">
               <h1 className="truncate text-base font-extrabold tracking-tight">{peerName}</h1>
-              {advert ? (
-                <p className="truncate text-sm text-muted-foreground">{advert.title}</p>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  {translate("chat.direct_conversation", "Direct conversation")}
-                </p>
-              )}
             </div>
+
+            {/* Connection indicator — keep all wiring, restyle only */}
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              title={isConnected ? translate("chat.connected", "Live connection") : translate("chat.disconnected", "Reconnect")}
-              aria-label={isConnected ? translate("chat.connected", "Live connection") : translate("chat.disconnected", "Reconnect")}
+              className="shrink-0 rounded-full"
+              title={
+                isConnected
+                  ? translate("chat.connected", "Live connection")
+                  : translate("chat.disconnected", "Reconnect")
+              }
+              aria-label={
+                isConnected
+                  ? translate("chat.connected", "Live connection")
+                  : translate("chat.disconnected", "Reconnect")
+              }
               onClick={isConnected ? undefined : reconnect}
               disabled={isConnected}
             >
@@ -259,9 +275,10 @@ export default function ChatWindow({
             </Button>
           </div>
 
+          {/* Message list */}
           <div
             ref={messagesContainerRef}
-            className="flex-1 space-y-4 overflow-y-auto px-4 py-4"
+            className="flex-1 space-y-3 overflow-y-auto px-4 py-4"
             onScroll={(event) => {
               const target = event.target as HTMLDivElement;
               if (target.scrollTop === 0 && hasMore) {
@@ -269,35 +286,73 @@ export default function ChatWindow({
               }
             }}
           >
+            {/* Load-more button */}
             {hasMore ? (
-              <div className="flex justify-center">
+              <div className="flex justify-center py-1">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="rounded-full"
+                  className="rounded-full text-xs"
                   onClick={() => void loadMoreMessages()}
                   disabled={isLoadingMore}
                 >
                   {isLoadingMore ? (
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
                   ) : (
-                    <MessageSquare className="h-4 w-4" aria-hidden="true" />
+                    <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
                   )}
                   {translate("chat.loading_more", "Load earlier messages")}
                 </Button>
               </div>
             ) : null}
 
+            {/* History error */}
             {historyError ? (
-              <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
-                {historyError}
+              <div className="flex items-start gap-2 rounded-[var(--rs)] border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                <span>{historyError}</span>
               </div>
             ) : null}
 
+            {/* Listing reference card — inline at thread top */}
+            {advert ? (
+              <div className="rounded-[var(--rm)] border border-border/60 bg-secondary/40 p-3">
+                <div className="flex items-center gap-3">
+                  {/* Small gradient image placeholder */}
+                  <div className="lyvox-image-placeholder h-12 w-12 shrink-0 rounded-[var(--rs)]" aria-hidden="true" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold leading-tight">{advert.title}</p>
+                    {advertPrice ? (
+                      <p className="mt-0.5 text-sm font-extrabold text-primary">{advertPrice}</p>
+                    ) : null}
+                  </div>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 rounded-full text-xs"
+                  >
+                    <Link href={`/ad/${advert.id}`}>
+                      {translate("chat.view_listing", "View listing")}
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+
+            {/* Safety check pill — generic conversation property, NOT a per-peer claim */}
+            <div className="flex justify-center py-1">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1 text-xs text-muted-foreground shadow-[var(--shS)]">
+                <ShieldCheck className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                {translate("chat.safety_check_pill", "Safety check passed · chat opened securely")}
+              </span>
+            </div>
+
+            {/* Empty state */}
             {messages.length === 0 ? (
-              <div className="flex min-h-[260px] flex-col items-center justify-center text-center">
-                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <div className="flex min-h-[200px] flex-col items-center justify-center text-center">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-[var(--rm)] lyvox-trust-gradient text-white">
                   <MessageSquare className="h-6 w-6" aria-hidden="true" />
                 </div>
                 <h2 className="text-lg font-extrabold tracking-tight">
@@ -312,30 +367,38 @@ export default function ChatWindow({
               </div>
             ) : (
               messages.map((message) => {
+                // isOwn is false for null author_id (GDPR tombstone safety)
                 const isOwn = message.author_id === currentUserId;
                 return (
                   <div
                     key={message.id}
-                    className={`flex gap-3 ${isOwn ? "flex-row-reverse" : ""}`}
+                    className={`flex gap-2.5 ${isOwn ? "flex-row-reverse" : ""}`}
                   >
+                    {/* Incoming avatar */}
                     {!isOwn ? (
-                      <Avatar className="h-8 w-8 shrink-0">
-                        <AvatarImage src="" />
-                        <AvatarFallback>{getInitials(peerName)}</AvatarFallback>
-                      </Avatar>
-                    ) : null}
-                    <div className={`flex max-w-[78%] flex-col ${isOwn ? "items-end" : "items-start"}`}>
                       <div
-                        className={`rounded-2xl px-4 py-2.5 shadow-[var(--shadow-soft)] ${
+                        className="lyvox-trust-gradient mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--rs)] text-xs font-bold text-white"
+                        aria-hidden="true"
+                      >
+                        {getInitials(peerName)}
+                      </div>
+                    ) : null}
+
+                    <div className={`flex max-w-[78%] flex-col ${isOwn ? "items-end" : "items-start"}`}>
+                      {/* Bubble */}
+                      <div
+                        className={[
+                          "px-4 py-2.5 shadow-[var(--shS)]",
                           isOwn
-                            ? "rounded-br-md bg-primary text-primary-foreground"
-                            : "rounded-bl-md bg-muted text-foreground"
-                        }`}
+                            ? "lyvox-cta-gradient rounded-2xl rounded-br-sm text-white"
+                            : "rounded-2xl rounded-bl-sm border border-border/70 bg-card text-foreground",
+                        ].join(" ")}
                       >
                         <p className="whitespace-pre-wrap break-words text-sm leading-6">
                           {message.body}
                         </p>
                       </div>
+                      {/* Timestamp */}
                       <span className="mt-1 px-1 text-xs text-muted-foreground">
                         {formatDate(message.created_at, locale, "short")}
                       </span>
@@ -347,14 +410,24 @@ export default function ChatWindow({
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Composer — preserve mobile clearance exactly */}
           <div className="sticky bottom-[calc(56px+env(safe-area-inset-bottom))] z-10 border-t border-border/70 bg-card/95 px-4 py-3 backdrop-blur md:bottom-0">
             {sendError ? (
-              <div className="mb-2 flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-2 text-xs text-destructive">
+              <div className="mb-2 flex items-start gap-2 rounded-[var(--rs)] border border-destructive/30 bg-destructive/5 p-2 text-xs text-destructive">
                 <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                 <span>{sendError}</span>
               </div>
             ) : null}
+
             <div className="flex items-end gap-2">
+              {/* "+" affordance — decorative, non-interactive per brief */}
+              <div
+                className="mb-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/70 text-muted-foreground"
+                aria-hidden="true"
+              >
+                <Plus className="h-4 w-4" />
+              </div>
+
               <Textarea
                 value={inputValue}
                 onChange={(event) => setInputValue(event.target.value)}
@@ -365,12 +438,14 @@ export default function ChatWindow({
                 rows={1}
                 className="max-h-36 min-h-11 resize-none rounded-2xl px-4 py-2.5 focus-visible:ring-4 focus-visible:ring-primary/12"
               />
+
+              {/* Circular gradient send button */}
               <Button
                 type="button"
                 size="icon"
                 onClick={() => void handleSend()}
                 disabled={!inputValue.trim() || isSending}
-                className="h-11 w-11 shrink-0 rounded-full"
+                className="h-11 w-11 shrink-0 rounded-full lyvox-cta-gradient border-0 text-white hover:opacity-90 disabled:opacity-50"
               >
                 {isSending ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -380,6 +455,7 @@ export default function ChatWindow({
                 <span className="sr-only">{translate("chat.send", "Send")}</span>
               </Button>
             </div>
+
             {realtimeError ? (
               <p className="mt-2 text-xs text-muted-foreground">
                 {translate("chat.realtime_warning", "Live updates are reconnecting. You can still send messages.")}
@@ -388,18 +464,17 @@ export default function ChatWindow({
           </div>
         </Card>
 
+        {/* ── Right aside ────────────────────────────────────────────── */}
         <aside className="space-y-4 px-4 sm:px-0">
+          {/* Listing context card — desktop aside; listing also shown inline above */}
           {advert ? (
-            <Card className="rounded-xl border-border/70 py-0 shadow-[var(--shadow-soft)]">
+            <Card className="rounded-[var(--r)] border-border/60 py-0 shadow-[var(--shC)]">
               <CardContent className="space-y-3 p-4">
-                <Badge variant="secondary" className="rounded-full">
-                  <BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" />
-                  {translate("chat.listing_context", "Listing context")}
-                </Badge>
+                <div className="lyvox-image-placeholder h-28 w-full rounded-[var(--rm)]" aria-hidden="true" />
                 <div>
                   <h2 className="text-sm font-extrabold tracking-tight leading-5">{advert.title}</h2>
                   {advertPrice ? (
-                    <p className="mt-1 text-lg font-extrabold tracking-tight">{advertPrice}</p>
+                    <p className="mt-1 text-lg font-extrabold tracking-tight text-primary">{advertPrice}</p>
                   ) : null}
                 </div>
                 <Button asChild variant="outline" className="w-full rounded-full">
@@ -411,7 +486,8 @@ export default function ChatWindow({
             </Card>
           ) : null}
 
-          <Card className="rounded-xl border-border/70 py-0 shadow-[var(--shadow-soft)]">
+          {/* Safety-guidance card — MUST be kept (founder #1 priority) */}
+          <Card className="rounded-[var(--r)] border-border/60 py-0 shadow-[var(--shC)]">
             <CardContent className="space-y-3 p-4">
               <div className="flex items-start gap-2">
                 <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />

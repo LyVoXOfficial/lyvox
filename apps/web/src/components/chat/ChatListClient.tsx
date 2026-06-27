@@ -3,10 +3,8 @@
 import Link from "next/link";
 import { ArrowRight, MessageSquare, Plus, Search, ShieldCheck } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useI18n } from "@/i18n";
 import { formatCurrency } from "@/i18n/format";
 import { formatDate } from "@/lib/i18n/formatDate";
@@ -63,16 +61,18 @@ export default function ChatListClient({ conversations }: ChatListClientProps) {
   if (conversations.length === 0) {
     return (
       <div className="container mx-auto max-w-5xl px-4 py-8">
-        <section className="rounded-md border border-border/80 bg-card p-6 shadow-sm">
+        <section
+          className="rounded-[var(--r)] border border-border/60 bg-card p-8 shadow-[var(--shC)]"
+        >
           <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-md bg-primary/10 text-primary">
-              <MessageSquare className="h-6 w-6" aria-hidden="true" />
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[var(--rm)] lyvox-trust-gradient text-white">
+              <MessageSquare className="h-7 w-7" aria-hidden="true" />
             </div>
-            <Badge variant="secondary" className="mb-3">
+            <Badge variant="secondary" className="mb-3 rounded-full gap-1.5 px-3 py-1">
               <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
               {translate("chat.empty.badge", "Safe conversations")}
             </Badge>
-            <h1 className="text-2xl font-semibold tracking-tight">
+            <h1 className="text-2xl font-extrabold tracking-tight">
               {translate("chat.empty.title", "No conversations yet")}
             </h1>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -81,14 +81,14 @@ export default function ChatListClient({ conversations }: ChatListClientProps) {
                 "When you message a seller from a listing, the conversation will appear here with the advert context and safety history.",
               )}
             </p>
-            <div className="mt-5 flex flex-wrap justify-center gap-2">
-              <Button asChild>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Button asChild className="rounded-full lyvox-cta-gradient border-0 text-white hover:opacity-90">
                 <Link href="/search">
                   <Search className="h-4 w-4" aria-hidden="true" />
                   {translate("chat.empty.find_listing", "Find listings")}
                 </Link>
               </Button>
-              <Button asChild variant="outline">
+              <Button asChild variant="outline" className="rounded-full">
                 <Link href="/post">
                   <Plus className="h-4 w-4" aria-hidden="true" />
                   {translate("chat.empty.post_listing", "Post advert")}
@@ -105,11 +105,11 @@ export default function ChatListClient({ conversations }: ChatListClientProps) {
     <div className="container mx-auto max-w-5xl px-4 py-8">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <Badge variant="secondary" className="mb-3">
+          <Badge variant="secondary" className="mb-3 rounded-full gap-1.5 px-3 py-1">
             <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
             {translate("chat.safety_badge", "In-platform deal record")}
           </Badge>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="text-2xl font-extrabold tracking-tight">
             {translate("chat.title", "Messages")}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -119,7 +119,7 @@ export default function ChatListClient({ conversations }: ChatListClientProps) {
             )}
           </p>
         </div>
-        <Button asChild variant="outline">
+        <Button asChild variant="outline" className="rounded-full">
           <Link href="/search">
             <Search className="h-4 w-4" aria-hidden="true" />
             {translate("chat.find_listing", "Find listings")}
@@ -127,7 +127,7 @@ export default function ChatListClient({ conversations }: ChatListClientProps) {
         </Button>
       </header>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         {conversations.map((conversation) => {
           const unread = hasUnread(conversation);
           const peerName = conversation.peer?.display_name || translate("chat.unknown_user", "LyVoX user");
@@ -140,54 +140,64 @@ export default function ChatListClient({ conversations }: ChatListClientProps) {
               : null;
 
           return (
-            <Link key={conversation.id} href={`/chat/${conversation.id}`}>
-              <Card
-                className={`rounded-md py-0 transition-colors hover:bg-muted/40 ${
-                  unread ? "border-primary/70 ring-1 ring-primary/20" : "border-border/80"
-                }`}
+            <Link key={conversation.id} href={`/chat/${conversation.id}`} className="block">
+              <div
+                className={[
+                  "flex items-center gap-4 rounded-[var(--rm)] border px-4 py-3.5 transition-colors",
+                  "hover:bg-secondary/60",
+                  unread
+                    ? "border-l-[3px] border-l-primary border-r-border/60 border-t-border/60 border-b-border/60 bg-primary/5"
+                    : "border-border/60 bg-card",
+                ].join(" ")}
               >
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src="" />
-                      <AvatarFallback>{getInitials(peerName)}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <h3 className="font-semibold truncate">{peerName}</h3>
-                        {conversation.last_message_at && (
-                          <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-                            {formatDate(conversation.last_message_at, locale, "relative")}
-                          </span>
-                        )}
-                      </div>
-                      {conversation.advert && (
-                        <div className="mb-1 flex min-w-0 flex-wrap items-center gap-2">
-                          <p className="truncate text-sm text-muted-foreground">
-                            {conversation.advert.title}
-                          </p>
-                          {advertPrice ? (
-                            <span className="rounded-md bg-muted px-1.5 py-0.5 text-xs font-medium text-foreground">
-                              {advertPrice}
-                            </span>
-                          ) : null}
-                        </div>
-                      )}
-                      <p className={`text-sm truncate ${unread ? "font-medium" : "text-muted-foreground"}`}>
-                        {messagePreview}
-                      </p>
-                    </div>
-                    {unread ? (
-                      <div className="mt-1 flex shrink-0 items-center gap-2">
-                        <span className="h-2 w-2 rounded-full bg-primary" />
-                        <ArrowRight className="h-4 w-4 text-primary" aria-hidden="true" />
-                      </div>
-                    ) : (
-                      <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                {/* Avatar tile — trust gradient with white initials */}
+                <div
+                  className="lyvox-trust-gradient flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--rm)] text-sm font-bold text-white"
+                  aria-hidden="true"
+                >
+                  {getInitials(peerName)}
+                </div>
+
+                {/* Main content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-0.5">
+                    <span className={`text-sm font-semibold truncate ${unread ? "text-foreground" : "text-foreground"}`}>
+                      {peerName}
+                    </span>
+                    {conversation.last_message_at && (
+                      <span className="text-xs text-muted-foreground whitespace-nowrap ml-3 shrink-0">
+                        {formatDate(conversation.last_message_at, locale, "relative")}
+                      </span>
                     )}
                   </div>
-                </CardContent>
-              </Card>
+                  {conversation.advert && (
+                    <div className="flex min-w-0 items-center gap-2 mb-0.5">
+                      <p className="truncate text-xs text-muted-foreground">
+                        {conversation.advert.title}
+                      </p>
+                      {advertPrice ? (
+                        <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+                          {advertPrice}
+                        </span>
+                      ) : null}
+                    </div>
+                  )}
+                  <p className={`text-sm truncate ${unread ? "font-medium text-foreground" : "text-muted-foreground"}`}>
+                    {messagePreview}
+                  </p>
+                </div>
+
+                {/* Unread dot + arrow */}
+                <div className="flex shrink-0 items-center gap-1.5 ml-1">
+                  {unread && (
+                    <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
+                  )}
+                  <ArrowRight
+                    className={`h-4 w-4 ${unread ? "text-primary" : "text-muted-foreground"}`}
+                    aria-hidden="true"
+                  />
+                </div>
+              </div>
             </Link>
           );
         })}
