@@ -1600,5 +1600,88 @@
     "signin_prompt": "Meld u aan om zoekopdrachten op alle apparaten op te slaan en meldingen te krijgen.",
     "alert_title": "Nieuwe resultaten: {name}",
     "alert_body": "{count} nieuw(e) zoekertje(s) komen overeen met uw opgeslagen zoekopdracht."
+  },
+  "pro": {
+    "title": "Professionele verkoper worden",
+    "signin_required": "Meld u aan om uw bedrijf te registreren en professioneel te verkopen op LyVoX.",
+    "verify_title": "Telefoonverificatie vereist",
+    "verify_body": "Een geverifieerd telefoonnummer is vereist om u te registreren als professionele verkoper. Dit houdt onze marktplaats betrouwbaar voor alle kopers.",
+    "step": "Stap",
+    "of": "van",
+    "next": "Volgende",
+    "back": "Terug",
+    "submit": "Registratie indienen",
+    "submit_label": "Registratie indienen",
+    "intro": {
+      "heading": "Bedrijfsidentiteit",
+      "body": "Registreer uw bedrijf op LyVoX voor professionele verkopersfuncties, een geverifieerd bedrijfsbadge en volledige naleving van de Belgische consumentenwetgeving.",
+      "requires_phone": "Een geverifieerd telefoonnummer is vereist om professionele verkoper te worden."
+    },
+    "identity": {
+      "legal_name": "Officiële naam",
+      "legal_name_placeholder": "Geregistreerde bedrijfsnaam",
+      "trade_name": "Handelsnaam (optioneel)",
+      "trade_name_placeholder": "Naam van uw merk of winkel",
+      "legal_form": "Rechtsvorm",
+      "legal_form_placeholder": "Selecteer rechtsvorm (optioneel)",
+      "required": "Dit veld is verplicht"
+    },
+    "legal_form": {
+      "eenmanszaak": "Eenmanszaak / Entreprise individuelle",
+      "other": "Andere"
+    },
+    "reg": {
+      "kbo": "KBO / CBE-nummer",
+      "kbo_invalid": "Ongeldig KBO-nummer (10 cijfers, MOD-97-controle)",
+      "vat_liable": "Dit bedrijf is btw-plichtig",
+      "vat": "Btw-nummer",
+      "vat_invalid": "Ongeldig Belgisch btw-nummer"
+    },
+    "contact": {
+      "heading": "Contactgegevens",
+      "email": "Zakelijk e-mailadres",
+      "phone": "Zakelijk telefoonnummer (optioneel)"
+    },
+    "address": {
+      "heading": "Bedrijfsadres",
+      "line": "Straat en huisnummer",
+      "line_placeholder": "Wetstraat 1",
+      "postcode": "Postcode",
+      "postcode_invalid": "Belgische postcode moet 4 cijfers bevatten (1000–9999)",
+      "city": "Stad",
+      "country": "Land"
+    },
+    "terms": {
+      "heading": "Consumentenwetgeving",
+      "withdrawal": "Herroepings- en retourbeleid",
+      "withdrawal_help": "De Belgische consumentenwetgeving (CEL VI.45/VI.83) verplicht u consumenten een herroepingsrecht van 14 dagen te bieden. Beschrijf uw herroepings- en retourbeleid.",
+      "withdrawal_placeholder": "Consumenten hebben het recht om binnen 14 dagen van een aankoop af te zien zonder opgave van redenen...",
+      "returns_url": "URL retourbeleid (optioneel)"
+    },
+    "certify": {
+      "label": "Ik bevestig dat de verstrekte informatie juist en volledig is. Ik ben een gemachtigde vertegenwoordiger van dit bedrijf en aanvaard de verantwoordelijkheid voor naleving van de Belgische consumentenwetgeving.",
+      "required": "U moet deze certificering bevestigen"
+    },
+    "review": {
+      "heading": "Controleren en bevestigen",
+      "body": "Controleer uw gegevens voor het indienen."
+    },
+    "submit": {
+      "success": "Uw bedrijfsaccount is aangemaakt!",
+      "error": "Er is iets misgegaan. Probeer het opnieuw.",
+      "duplicate": "Dit bedrijf is al geregistreerd op LyVoX.",
+      "verify_phone": "Verifieer eerst uw telefoonnummer."
+    },
+    "status": {
+      "pending": "Uw btw-nummer wordt geverifieerd via VIES. U kunt advertenties plaatsen terwijl de verificatie loopt.",
+      "admin_review": "Een beheerder zal uw bedrijfsregistratie binnenkort beoordelen en bevestigen.",
+      "active_note": "Uw bedrijf is nu actief. Het geverifieerde badge verschijnt zodra de verificatie is voltooid.",
+      "verified": "Geverifieerd bedrijf",
+      "failed": "Verificatie mislukt"
+    },
+    "badge": {
+      "verified_business": "Geverifieerd bedrijf",
+      "vat_registered": "Btw-geregistreerd"
+    }
   }
 }

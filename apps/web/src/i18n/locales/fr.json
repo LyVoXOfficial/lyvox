@@ -1600,5 +1600,88 @@
     "signin_prompt": "Connectez-vous pour enregistrer vos recherches sur tous vos appareils et recevoir des alertes.",
     "alert_title": "Nouveaux résultats : {name}",
     "alert_body": "{count} nouvelle(s) annonce(s) correspondent à votre recherche enregistrée."
+  },
+  "pro": {
+    "title": "Devenir vendeur professionnel",
+    "signin_required": "Connectez-vous pour enregistrer votre entreprise et commencer à vendre professionnellement sur LyVoX.",
+    "verify_title": "Vérification du téléphone requise",
+    "verify_body": "Un numéro de téléphone vérifié est requis pour vous inscrire en tant que vendeur professionnel. Cela garantit la fiabilité de notre marketplace pour tous les acheteurs.",
+    "step": "Étape",
+    "of": "sur",
+    "next": "Suivant",
+    "back": "Retour",
+    "submit": "Soumettre l'inscription",
+    "submit_label": "Soumettre l'inscription",
+    "intro": {
+      "heading": "Identité de l'entreprise",
+      "body": "Enregistrez votre entreprise sur LyVoX pour accéder aux fonctionnalités vendeur professionnel, un badge d'entreprise vérifiée et la conformité totale au droit belge de la consommation.",
+      "requires_phone": "Un numéro de téléphone vérifié est requis pour devenir vendeur professionnel."
+    },
+    "identity": {
+      "legal_name": "Dénomination sociale",
+      "legal_name_placeholder": "Nom légal enregistré de l'entreprise",
+      "trade_name": "Nom commercial (optionnel)",
+      "trade_name_placeholder": "Nom de votre marque ou boutique",
+      "legal_form": "Forme juridique",
+      "legal_form_placeholder": "Sélectionner la forme juridique (optionnel)",
+      "required": "Ce champ est obligatoire"
+    },
+    "legal_form": {
+      "eenmanszaak": "Eenmanszaak / Entreprise individuelle",
+      "other": "Autre"
+    },
+    "reg": {
+      "kbo": "Numéro KBO / BCE",
+      "kbo_invalid": "Numéro KBO invalide (10 chiffres, contrôle MOD-97)",
+      "vat_liable": "Cette entreprise est assujettie à la TVA",
+      "vat": "Numéro de TVA",
+      "vat_invalid": "Numéro de TVA belge invalide"
+    },
+    "contact": {
+      "heading": "Informations de contact",
+      "email": "E-mail professionnel",
+      "phone": "Téléphone professionnel (optionnel)"
+    },
+    "address": {
+      "heading": "Adresse professionnelle",
+      "line": "Rue et numéro",
+      "line_placeholder": "Rue de la Loi 1",
+      "postcode": "Code postal",
+      "postcode_invalid": "Le code postal belge doit comporter 4 chiffres (1000–9999)",
+      "city": "Ville",
+      "country": "Pays"
+    },
+    "terms": {
+      "heading": "Conditions légales consommateur",
+      "withdrawal": "Politique de rétractation et de retour",
+      "withdrawal_help": "Le droit belge de la consommation (CEL VI.45/VI.83) vous oblige à offrir aux consommateurs un droit de rétractation de 14 jours. Décrivez votre politique de rétractation et de retour.",
+      "withdrawal_placeholder": "Le consommateur dispose d'un délai de 14 jours pour se rétracter sans avoir à justifier de motifs...",
+      "returns_url": "URL de la politique de retour (optionnel)"
+    },
+    "certify": {
+      "label": "Je confirme que les informations fournies sont exactes et complètes. Je suis un représentant autorisé de cette entreprise et j'accepte la responsabilité du respect des obligations du droit belge de la consommation.",
+      "required": "Vous devez confirmer cette certification"
+    },
+    "review": {
+      "heading": "Vérifier et confirmer",
+      "body": "Veuillez vérifier vos informations avant de soumettre."
+    },
+    "submit": {
+      "success": "Votre compte professionnel a été créé !",
+      "error": "Une erreur s'est produite. Veuillez réessayer.",
+      "duplicate": "Cette entreprise est déjà enregistrée sur LyVoX.",
+      "verify_phone": "Veuillez d'abord vérifier votre numéro de téléphone."
+    },
+    "status": {
+      "pending": "Votre numéro de TVA est en cours de vérification via VIES. Vous pouvez publier des annonces pendant la vérification.",
+      "admin_review": "Un administrateur examinera et confirmera votre inscription sous peu.",
+      "active_note": "Votre entreprise est maintenant active. Le badge vérifié apparaîtra une fois la vérification terminée.",
+      "verified": "Entreprise vérifiée",
+      "failed": "Échec de la vérification"
+    },
+    "badge": {
+      "verified_business": "Entreprise vérifiée",
+      "vat_registered": "Assujetti à la TVA"
+    }
   }
 }

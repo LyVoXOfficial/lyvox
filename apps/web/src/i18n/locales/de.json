@@ -1600,5 +1600,88 @@
     "signin_prompt": "Melden Sie sich an, um Suchen geräteübergreifend zu speichern und Benachrichtigungen zu erhalten.",
     "alert_title": "Neue Treffer: {name}",
     "alert_body": "{count} neue Anzeige(n) passen zu Ihrer gespeicherten Suche."
+  },
+  "pro": {
+    "title": "Professioneller Verkäufer werden",
+    "signin_required": "Melden Sie sich an, um Ihr Unternehmen zu registrieren und professionell auf LyVoX zu verkaufen.",
+    "verify_title": "Telefonverifizierung erforderlich",
+    "verify_body": "Für die Registrierung als professioneller Verkäufer ist eine verifizierte Telefonnummer erforderlich. Das gewährleistet die Vertrauenswürdigkeit unseres Marktplatzes für alle Käufer.",
+    "step": "Schritt",
+    "of": "von",
+    "next": "Weiter",
+    "back": "Zurück",
+    "submit": "Registrierung einreichen",
+    "submit_label": "Registrierung einreichen",
+    "intro": {
+      "heading": "Unternehmensidentität",
+      "body": "Registrieren Sie Ihr Unternehmen auf LyVoX für professionelle Verkäuferfunktionen, ein verifiziertes Unternehmensabzeichen und vollständige Compliance mit dem belgischen Verbraucherrecht.",
+      "requires_phone": "Eine verifizierte Telefonnummer ist erforderlich, um professioneller Verkäufer zu werden."
+    },
+    "identity": {
+      "legal_name": "Firmenname",
+      "legal_name_placeholder": "Eingetragener Unternehmensname",
+      "trade_name": "Handelsname (optional)",
+      "trade_name_placeholder": "Name Ihrer Marke oder Ihres Shops",
+      "legal_form": "Rechtsform",
+      "legal_form_placeholder": "Rechtsform auswählen (optional)",
+      "required": "Dieses Feld ist erforderlich"
+    },
+    "legal_form": {
+      "eenmanszaak": "Eenmanszaak / Einzelunternehmen",
+      "other": "Sonstige"
+    },
+    "reg": {
+      "kbo": "KBO / CBE-Nummer",
+      "kbo_invalid": "Ungültige KBO-Nummer (10 Ziffern, MOD-97-Prüfung)",
+      "vat_liable": "Dieses Unternehmen ist umsatzsteuerpflichtig",
+      "vat": "Umsatzsteuer-Identifikationsnummer",
+      "vat_invalid": "Ungültige belgische Umsatzsteuer-Identifikationsnummer"
+    },
+    "contact": {
+      "heading": "Kontaktdaten",
+      "email": "Geschäftliche E-Mail",
+      "phone": "Geschäftstelefon (optional)"
+    },
+    "address": {
+      "heading": "Geschäftsadresse",
+      "line": "Straße und Hausnummer",
+      "line_placeholder": "Wetstraat 1",
+      "postcode": "Postleitzahl",
+      "postcode_invalid": "Belgische Postleitzahl muss 4 Ziffern enthalten (1000–9999)",
+      "city": "Stadt",
+      "country": "Land"
+    },
+    "terms": {
+      "heading": "Verbraucherrechtliche Bedingungen",
+      "withdrawal": "Widerrufs- und Rückgaberichtlinie",
+      "withdrawal_help": "Das belgische Verbraucherrecht (CEL VI.45/VI.83) verpflichtet Sie, Verbrauchern ein 14-tägiges Widerrufsrecht einzuräumen. Beschreiben Sie Ihre Widerrufs- und Rückgaberichtlinie.",
+      "withdrawal_placeholder": "Verbraucher haben das Recht, innerhalb von 14 Tagen ohne Angabe von Gründen vom Kauf zurückzutreten...",
+      "returns_url": "URL der Rückgaberichtlinie (optional)"
+    },
+    "certify": {
+      "label": "Ich bestätige, dass die angegebenen Informationen korrekt und vollständig sind. Ich bin ein bevollmächtigter Vertreter dieses Unternehmens und übernehme die Verantwortung für die Einhaltung der belgischen Verbraucherrechtsvorschriften.",
+      "required": "Sie müssen diese Zertifizierung bestätigen"
+    },
+    "review": {
+      "heading": "Überprüfen und bestätigen",
+      "body": "Bitte überprüfen Sie Ihre Angaben vor dem Einreichen."
+    },
+    "submit": {
+      "success": "Ihr Geschäftskonto wurde erstellt!",
+      "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+      "duplicate": "Dieses Unternehmen ist bereits auf LyVoX registriert.",
+      "verify_phone": "Bitte verifizieren Sie zuerst Ihre Telefonnummer."
+    },
+    "status": {
+      "pending": "Ihre Umsatzsteuer-ID wird über VIES geprüft. Sie können Anzeigen veröffentlichen, während die Überprüfung läuft.",
+      "admin_review": "Ein Administrator wird Ihre Unternehmensregistrierung in Kürze prüfen und bestätigen.",
+      "active_note": "Ihr Unternehmen ist jetzt aktiv. Das verifizierte Abzeichen erscheint, sobald die Verifizierung abgeschlossen ist.",
+      "verified": "Verifiziertes Unternehmen",
+      "failed": "Verifizierung fehlgeschlagen"
+    },
+    "badge": {
+      "verified_business": "Verifiziertes Unternehmen",
+      "vat_registered": "Umsatzsteuerregistriert"
+    }
   }
 }

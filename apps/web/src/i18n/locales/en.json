@@ -1600,5 +1600,88 @@
     "signin_prompt": "Sign in to save searches across devices and get alerts.",
     "alert_title": "New matches: {name}",
     "alert_body": "{count} new listing(s) match your saved search."
+  },
+  "pro": {
+    "title": "Become a professional seller",
+    "signin_required": "Sign in to register your business and start selling professionally on LyVoX.",
+    "verify_title": "Phone verification required",
+    "verify_body": "A verified phone number is required to register as a professional seller. This keeps our marketplace trustworthy for all buyers.",
+    "step": "Step",
+    "of": "of",
+    "next": "Next",
+    "back": "Back",
+    "submit": "Submit registration",
+    "submit_label": "Submit registration",
+    "intro": {
+      "heading": "Company identity",
+      "body": "Register your company on LyVoX to unlock professional seller features, a verified business badge, and full compliance with Belgian consumer law.",
+      "requires_phone": "A verified phone number is required to become a professional seller."
+    },
+    "identity": {
+      "legal_name": "Legal name",
+      "legal_name_placeholder": "Registered company name",
+      "trade_name": "Trade name (optional)",
+      "trade_name_placeholder": "Your brand or shop name",
+      "legal_form": "Legal form",
+      "legal_form_placeholder": "Select legal form (optional)",
+      "required": "This field is required"
+    },
+    "legal_form": {
+      "eenmanszaak": "Eenmanszaak / Entreprise individuelle",
+      "other": "Other"
+    },
+    "reg": {
+      "kbo": "KBO / CBE number",
+      "kbo_invalid": "Invalid KBO number (10 digits, MOD-97 check)",
+      "vat_liable": "This company is VAT-registered",
+      "vat": "VAT number",
+      "vat_invalid": "Invalid Belgian VAT number"
+    },
+    "contact": {
+      "heading": "Contact information",
+      "email": "Business email",
+      "phone": "Business phone (optional)"
+    },
+    "address": {
+      "heading": "Business address",
+      "line": "Street and number",
+      "line_placeholder": "Wetstraat 1",
+      "postcode": "Postcode",
+      "postcode_invalid": "Belgian postcode must be 4 digits (1000–9999)",
+      "city": "City",
+      "country": "Country"
+    },
+    "terms": {
+      "heading": "Consumer law terms",
+      "withdrawal": "Withdrawal & return policy",
+      "withdrawal_help": "Belgian consumer law (CEL VI.45/VI.83) requires you to offer a 14-day right of withdrawal to consumers. Describe your withdrawal and return policy.",
+      "withdrawal_placeholder": "Consumers have the right to withdraw from a purchase within 14 days without giving a reason...",
+      "returns_url": "Returns policy URL (optional)"
+    },
+    "certify": {
+      "label": "I confirm that the information provided is accurate and complete. I am an authorised representative of this business and I accept responsibility for compliance with Belgian consumer law obligations.",
+      "required": "You must confirm this certification"
+    },
+    "review": {
+      "heading": "Review and confirm",
+      "body": "Please review your information before submitting."
+    },
+    "submit": {
+      "success": "Your business account has been created!",
+      "error": "Something went wrong. Please try again.",
+      "duplicate": "This company is already registered on LyVoX.",
+      "verify_phone": "Please verify your phone number first."
+    },
+    "status": {
+      "pending": "Your VAT number is being verified with VIES. You can publish listings while verification is in progress.",
+      "admin_review": "An admin will review and confirm your business registration shortly.",
+      "active_note": "Your business is now active. The verified badge will appear once verification is complete.",
+      "verified": "Verified business",
+      "failed": "Verification failed"
+    },
+    "badge": {
+      "verified_business": "Verified Business",
+      "vat_registered": "VAT Registered"
+    }
   }
 }
