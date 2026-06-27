@@ -4,8 +4,12 @@ import { hasAdminRole } from "@/lib/adminRole";
 import {
   createErrorResponse,
   createSuccessResponse,
+  handleSupabaseError,
+  safeJsonParse,
   ApiErrorCode,
 } from "@/lib/apiErrors";
+import { validateRequest } from "@/lib/validations";
+import { updateBusinessSchema } from "@/lib/validations/business";
 
 export const runtime = "nodejs";
 
@@ -160,4 +164,83 @@ export async function GET(
     business: buildPublicSubset(business),
     badges: computeBadges(business),
   });
+}
+
+// ─── PATCH /api/business/[id] — owner edits trader fields ────────────────────
+
+type RpcClient = {
+  rpc: (
+    fn: string,
+    args: { b_id: string; min_role: string },
+  ) => Promise<{ data: boolean | null; error: null }>;
+};
+
+export async function PATCH(
+  req: Request,
+  context: { params: Promise<{ id: string }> },
+): Promise<Response> {
+  const { id } = await context.params;
+
+  // ── Auth: require signed-in user ───────────────────────────────────────────
+  const cookieClient = await supabaseServer();
+  const {
+    data: { user },
+  } = await cookieClient.auth.getUser();
+
+  if (!user) {
+    return createErrorResponse(ApiErrorCode.UNAUTH, { status: 401 });
+  }
+
+  // ── 404: check existence via service role (bypasses RLS) ──────────────────
+  const service = await supabaseService();
+  const { data: existingRow, error: fetchError } = await service
+    .from("businesses")
+    .select("id")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (fetchError || !existingRow) {
+    return createErrorResponse(ApiErrorCode.BUSINESS_NOT_FOUND, { status: 404 });
+  }
+
+  // ── Ownership check via cookie client (RLS) ────────────────────────────────
+  const { data: isOwner } = await (cookieClient as unknown as RpcClient).rpc(
+    "is_business_member",
+    { b_id: id, min_role: "owner" },
+  );
+
+  if (!isOwner) {
+    return createErrorResponse(ApiErrorCode.FORBIDDEN, { status: 403 });
+  }
+
+  // ── Parse + validate body ──────────────────────────────────────────────────
+  const parseResult = await safeJsonParse(req);
+  if (!parseResult.success) {
+    return parseResult.response;
+  }
+
+  const validationResult = validateRequest(updateBusinessSchema, parseResult.data);
+  if (!validationResult.success) {
+    return validationResult.response;
+  }
+
+  // Build update object: only keys present in validated data (zod strips locked fields)
+  const updateObj = validationResult.data as Record<string, unknown>;
+
+  // Skip update if nothing to change
+  if (Object.keys(updateObj).length === 0) {
+    return createSuccessResponse({ ok: true });
+  }
+
+  // ── Apply update via cookie client (RLS biz_owner_write allows owner) ─────
+  const { error: updateError } = await cookieClient
+    .from("businesses")
+    .update(updateObj)
+    .eq("id", id);
+
+  if (updateError) {
+    return handleSupabaseError(updateError, ApiErrorCode.UPDATE_FAILED);
+  }
+
+  return createSuccessResponse({ ok: true });
 }

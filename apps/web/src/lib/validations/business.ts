@@ -49,3 +49,29 @@ export const createBusinessSchema = z
   });
 
 export type CreateBusinessInput = z.infer<typeof createBusinessSchema>;
+
+/**
+ * Zod schema for PATCH /api/business/[id] — owner edits trader fields.
+ * ALL fields optional (partial update).
+ * Locked identity/verification fields (legal_name, kbo_number, vat_number,
+ * vat_liable, status, entity_verified, created_by) are intentionally absent —
+ * zod strips unknown keys by default, so sending them is a no-op.
+ */
+export const updateBusinessSchema = z.object({
+  trade_name: z.string().trim().max(200).optional(),
+  legal_form: z.string().trim().max(100).optional(),
+  address_line: z.string().trim().min(1).max(300).optional(),
+  postcode: z
+    .string()
+    .trim()
+    .regex(/^[1-9]\d{3}$/, { message: "Belgian postcode must be 4 digits starting with 1-9" })
+    .optional(),
+  city: z.string().trim().min(1).max(100).optional(),
+  country: z.string().trim().length(2).optional(),
+  email: z.string().trim().email().optional(),
+  phone_e164: z.string().trim().optional(),
+  withdrawal_terms: z.string().trim().max(2000).optional(),
+  returns_url: z.string().url().max(500).optional().or(z.literal("")),
+});
+
+export type UpdateBusinessInput = z.infer<typeof updateBusinessSchema>;
