@@ -1707,6 +1707,19 @@
       "certified_on": "Certifié le",
       "badge_verified": "Entreprise vérifiée",
       "badge_vat": "Assujetti à la TVA"
+    },
+    "cabinet": {
+      "business_seller_chip": "Vendeur professionnel",
+      "verified": "Entreprise vérifiée",
+      "pending": "Vérification en attente",
+      "edit_heading": "Modifier les informations de l'entreprise",
+      "edit_coming": "La modification des informations de l'entreprise sera disponible ici.",
+      "listings_heading": "Annonces de l'entreprise",
+      "team_heading": "Équipe",
+      "team_empty": "Aucun membre d'équipe pour l'instant.",
+      "pending_invite": "Invitation en attente",
+      "upgrade_heading": "Passer à Pro",
+      "upgrade_body": "Débloquez des fonctionnalités vendeur avancées avec un abonnement Pro."
     }
   }
 }

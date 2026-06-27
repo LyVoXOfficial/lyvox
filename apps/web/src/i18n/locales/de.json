@@ -1707,6 +1707,19 @@
       "certified_on": "Selbst zertifiziert am",
       "badge_verified": "Verifiziertes Unternehmen",
       "badge_vat": "Umsatzsteuerregistriert"
+    },
+    "cabinet": {
+      "business_seller_chip": "Gewerblicher Verkäufer",
+      "verified": "Verifiziertes Unternehmen",
+      "pending": "Verifizierung ausstehend",
+      "edit_heading": "Unternehmensdaten bearbeiten",
+      "edit_coming": "Die Bearbeitung von Unternehmensdaten wird hier verfügbar sein.",
+      "listings_heading": "Unternehmensanzeigen",
+      "team_heading": "Team",
+      "team_empty": "Noch keine Teammitglieder.",
+      "pending_invite": "Einladung ausstehend",
+      "upgrade_heading": "Auf Pro upgraden",
+      "upgrade_body": "Schalten Sie erweiterte Verkäuferfunktionen mit einem Pro-Abonnement frei."
     }
   }
 }

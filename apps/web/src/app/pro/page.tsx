@@ -6,6 +6,11 @@ import { ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProOnboardingWizard } from "./ProOnboardingWizard";
+import { BusinessCabinet } from "./BusinessCabinet";
+import { isCapabilityEnabled } from "@/lib/capabilities";
+import { signMediaUrls } from "@/lib/media/signMediaUrls";
+import type { ProfileAdvert } from "@/lib/profileTypes";
+import type { BusinessMember } from "./BusinessCabinet";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -77,6 +82,105 @@ export default async function ProPage() {
             </Button>
           </CardContent>
         </Card>
+      </main>
+    );
+  }
+
+  // Load the signed-in user's active business
+  const { data: business } = await supabase
+    .from("businesses")
+    .select(
+      "id, legal_name, trade_name, legal_form, address_line, postcode, city, country, kbo_number, vat_number, vat_liable, email, phone_e164, withdrawal_terms, self_certified_at, entity_verified, status",
+    )
+    .eq("created_by", user.id)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (business) {
+    // Load listings for this business (active, with media, limit 20)
+    const { data: advertRows } = await supabase
+      .from("adverts")
+      .select("id, title, price, status, created_at, location")
+      .eq("business_id", business.id)
+      .eq("status", "active")
+      .limit(20);
+
+    const rawAdverts = advertRows ?? [];
+
+    // Fetch and sign media for these adverts
+    let listings: ProfileAdvert[] = [];
+    if (rawAdverts.length > 0) {
+      const { data: mediaRows } = await supabase
+        .from("media")
+        .select("advert_id, url, sort")
+        .in(
+          "advert_id",
+          rawAdverts.map((a) => a.id),
+        );
+
+      const signedMedia = mediaRows?.length ? await signMediaUrls(mediaRows) : [];
+
+      const mediaByAdvert = signedMedia.reduce<
+        Record<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>>
+      >((acc, m) => {
+        if (!acc[m.advert_id]) acc[m.advert_id] = [];
+        acc[m.advert_id].push({
+          url: m.signedUrl ?? null,
+          signedUrl: m.signedUrl ?? null,
+          sort: m.sort ?? null,
+        });
+        return acc;
+      }, {});
+
+      listings = rawAdverts.map((a) => ({
+        id: a.id,
+        title: a.title,
+        price: a.price ? Number(a.price) : null,
+        status: a.status ?? null,
+        created_at: a.created_at ?? "",
+        location: a.location ?? null,
+        media: mediaByAdvert[a.id] ?? [],
+      }));
+    }
+
+    // Load team members (two-step: business_members → profiles)
+    const { data: memberRows } = await supabase
+      .from("business_members")
+      .select("user_id, role, accepted_at")
+      .eq("business_id", business.id);
+
+    const rawMembers = memberRows ?? [];
+    let members: BusinessMember[] = [];
+
+    if (rawMembers.length > 0) {
+      const userIds = rawMembers.map((m) => m.user_id);
+      const { data: profileRows } = await supabase
+        .from("profiles")
+        .select("id, display_name")
+        .in("id", userIds);
+
+      const displayNameMap = new Map<string, string | null>(
+        (profileRows ?? []).map((p) => [p.id, p.display_name]),
+      );
+
+      members = rawMembers.map((m) => ({
+        user_id: m.user_id,
+        role: m.role,
+        accepted_at: m.accepted_at ?? null,
+        display_name: displayNameMap.get(m.user_id) ?? null,
+      }));
+    }
+
+    return (
+      <main className="container mx-auto max-w-3xl p-4">
+        <BusinessCabinet
+          business={business}
+          listings={listings}
+          members={members}
+          proSubscriptionsEnabled={isCapabilityEnabled("pro_subscriptions")}
+          locale={locale}
+          messages={messages}
+        />
       </main>
     );
   }

@@ -1707,6 +1707,19 @@
       "certified_on": "Zelfgecertificeerd op",
       "badge_verified": "Geverifieerd bedrijf",
       "badge_vat": "Btw-geregistreerd"
+    },
+    "cabinet": {
+      "business_seller_chip": "Zakelijke verkoper",
+      "verified": "Geverifieerd bedrijf",
+      "pending": "Verificatie in behandeling",
+      "edit_heading": "Bedrijfsgegevens bewerken",
+      "edit_coming": "Bewerking van bedrijfsgegevens zal hier beschikbaar zijn.",
+      "listings_heading": "Bedrijfsadvertenties",
+      "team_heading": "Team",
+      "team_empty": "Nog geen teamleden.",
+      "pending_invite": "Uitnodiging in behandeling",
+      "upgrade_heading": "Upgrade naar Pro",
+      "upgrade_body": "Ontgrendel geavanceerde verkopersfuncties met een Pro-abonnement."
     }
   }
 }

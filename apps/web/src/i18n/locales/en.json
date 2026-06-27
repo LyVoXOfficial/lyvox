@@ -1707,6 +1707,19 @@
       "certified_on": "Self-certified on",
       "badge_verified": "Verified Business",
       "badge_vat": "VAT-registered"
+    },
+    "cabinet": {
+      "business_seller_chip": "Business seller",
+      "verified": "Verified business",
+      "pending": "Verification pending",
+      "edit_heading": "Edit business details",
+      "edit_coming": "Business detail editing will be available here.",
+      "listings_heading": "Business listings",
+      "team_heading": "Team",
+      "team_empty": "No team members yet.",
+      "pending_invite": "Pending invite",
+      "upgrade_heading": "Upgrade to Pro",
+      "upgrade_body": "Unlock advanced seller features with a Pro subscription."
     }
   }
 }
