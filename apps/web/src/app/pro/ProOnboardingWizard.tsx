@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { apiFetch } from "@/lib/fetcher";
 import { toast } from "sonner";
-import { CheckCircle, Loader2 } from "lucide-react";
+import { CheckCircle, Loader2, ShieldCheck } from "lucide-react";
 
 // ---- Types ----------------------------------------------------------------
 
@@ -228,12 +228,14 @@ function WizardInner() {
     }
 
     return (
-      <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
+      <Card className="overflow-hidden rounded-[var(--r)] border-border/70" style={{ boxShadow: "var(--shC)" }}>
         <CardHeader>
-          <div className="mb-2 flex size-10 items-center justify-center rounded-md bg-green-100 text-green-700 dark:bg-green-900/60 dark:text-green-200">
+          <div className="mb-2 flex size-10 items-center justify-center rounded-[var(--rm)] bg-green-100 text-green-700 dark:bg-green-900/60 dark:text-green-200">
             <CheckCircle className="h-5 w-5" aria-hidden="true" />
           </div>
-          <CardTitle>{tr("pro.submit.success", "Your business account has been created!")}</CardTitle>
+          <CardTitle className="text-xl font-extrabold">
+            {tr("pro.submit.success", "Your business account has been created!")}
+          </CardTitle>
           <CardDescription>{descriptionText}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -253,15 +255,24 @@ function WizardInner() {
         <span className="text-sm font-medium text-muted-foreground">
           {tr("pro.step", "Step")} {currentStep} {tr("pro.of", "of")} {TOTAL_STEPS}
         </span>
-        <span className="text-sm font-bold text-primary tabular-nums">
+        <span className="text-sm font-bold tabular-nums" style={{ color: "var(--priD)" }}>
           {Math.round((currentStep / TOTAL_STEPS) * 100)}%
         </span>
       </div>
-      <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
-        <div
-          className="h-2.5 rounded-full bg-primary transition-all duration-300"
-          style={{ width: `${(currentStep / TOTAL_STEPS) * 100}%` }}
-        />
+      {/* Segmented dots */}
+      <div className="flex gap-1.5">
+        {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+          <div
+            key={i}
+            className="h-[5px] flex-1 rounded-full transition-all duration-300"
+            style={{
+              background:
+                i < currentStep
+                  ? "var(--gC)"
+                  : "var(--muted)",
+            }}
+          />
+        ))}
       </div>
     </div>
   );
@@ -269,12 +280,54 @@ function WizardInner() {
   const ErrorMsg = ({ field }: { field: string }) =>
     errors[field] ? <p className="mt-1 text-xs text-destructive">{errors[field]}</p> : null;
 
+  // ---- Shared footer nav --------------------------------------------------
+
+  const FooterNav = ({ isSubmit = false }: { isSubmit?: boolean }) => (
+    <CardFooter className="flex justify-between gap-3">
+      {currentStep > 1 ? (
+        <Button variant="outline" onClick={handleBack} disabled={isLoading} className="rounded-[var(--rm)]">
+          {tr("pro.back", "Back")}
+        </Button>
+      ) : (
+        <span />
+      )}
+      {isSubmit ? (
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={isLoading || !formData.self_certified}
+          className="inline-flex h-[46px] items-center gap-2 rounded-[var(--rm)] px-6 text-sm font-extrabold text-white disabled:opacity-50"
+          style={{ background: "var(--gC)" }}
+        >
+          {isLoading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+          {tr("pro.submit_label", "Submit registration")}
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={handleNext}
+          className="inline-flex h-[46px] items-center gap-2 rounded-[var(--rm)] px-6 text-sm font-extrabold text-white"
+          style={{ background: "var(--gC)" }}
+        >
+          {tr("pro.next", "Next")}
+        </button>
+      )}
+    </CardFooter>
+  );
+
   // ---- Step 1: Intro + legal form + trade name ---------------------------
 
   if (currentStep === 1) {
     return (
-      <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
+      <Card className="overflow-hidden rounded-[var(--r)] border-border/70" style={{ boxShadow: "var(--shC)" }}>
         <CardHeader>
+          {/* Icon badge */}
+          <div
+            className="mb-3 flex size-10 items-center justify-center rounded-[var(--rm)]"
+            style={{ background: "oklch(0.9 0.1 168 / 0.5)", color: "var(--priD)" }}
+          >
+            <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+          </div>
           <CardTitle className="text-2xl font-extrabold tracking-tight">
             {tr("pro.title", "Become a professional seller")}
           </CardTitle>
@@ -287,7 +340,7 @@ function WizardInner() {
           <div className="space-y-2">
             <Label htmlFor="legal_form">{tr("pro.identity.legal_form", "Legal form")}</Label>
             <Select value={formData.legal_form} onValueChange={(v) => setField("legal_form", v)}>
-              <SelectTrigger id="legal_form">
+              <SelectTrigger id="legal_form" className="rounded-[var(--rm)]">
                 <SelectValue placeholder={tr("pro.identity.legal_form_placeholder", "Select legal form (optional)")} />
               </SelectTrigger>
               <SelectContent>
@@ -307,14 +360,11 @@ function WizardInner() {
               value={formData.trade_name}
               onChange={(e) => setField("trade_name", e.target.value)}
               placeholder={tr("pro.identity.trade_name_placeholder", "Your brand or shop name")}
+              className="rounded-[var(--rm)]"
             />
           </div>
         </CardContent>
-        <CardFooter className="flex justify-end">
-          <Button size="lg" onClick={handleNext}>
-            {tr("pro.next", "Next")}
-          </Button>
-        </CardFooter>
+        <FooterNav />
       </Card>
     );
   }
@@ -323,7 +373,7 @@ function WizardInner() {
 
   if (currentStep === 2) {
     return (
-      <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
+      <Card className="overflow-hidden rounded-[var(--r)] border-border/70" style={{ boxShadow: "var(--shC)" }}>
         <CardHeader>
           <CardTitle className="text-2xl font-extrabold tracking-tight">
             {tr("pro.intro.heading", "Company identity")}
@@ -338,6 +388,7 @@ function WizardInner() {
               value={formData.legal_name}
               onChange={(e) => setField("legal_name", e.target.value)}
               placeholder={tr("pro.identity.legal_name_placeholder", "Registered company name")}
+              className="rounded-[var(--rm)]"
             />
             <ErrorMsg field="legal_name" />
           </div>
@@ -348,6 +399,7 @@ function WizardInner() {
               value={formData.kbo_number}
               onChange={(e) => setField("kbo_number", e.target.value)}
               placeholder="0123456789"
+              className="rounded-[var(--rm)]"
             />
             <ErrorMsg field="kbo_number" />
           </div>
@@ -367,15 +419,13 @@ function WizardInner() {
                 value={formData.vat_number}
                 onChange={(e) => setField("vat_number", e.target.value)}
                 placeholder="BE0123456789"
+                className="rounded-[var(--rm)]"
               />
               <ErrorMsg field="vat_number" />
             </div>
           )}
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={handleBack}>{tr("pro.back", "Back")}</Button>
-          <Button size="lg" onClick={handleNext}>{tr("pro.next", "Next")}</Button>
-        </CardFooter>
+        <FooterNav />
       </Card>
     );
   }
@@ -384,7 +434,7 @@ function WizardInner() {
 
   if (currentStep === 3) {
     return (
-      <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
+      <Card className="overflow-hidden rounded-[var(--r)] border-border/70" style={{ boxShadow: "var(--shC)" }}>
         <CardHeader>
           <CardTitle className="text-2xl font-extrabold tracking-tight">
             {tr("pro.contact.heading", "Contact information")}
@@ -400,6 +450,7 @@ function WizardInner() {
               value={formData.email}
               onChange={(e) => setField("email", e.target.value)}
               placeholder="info@yourcompany.be"
+              className="rounded-[var(--rm)]"
             />
             <ErrorMsg field="email" />
           </div>
@@ -411,13 +462,11 @@ function WizardInner() {
               value={formData.phone_e164}
               onChange={(e) => setField("phone_e164", e.target.value)}
               placeholder="+32 2 000 00 00"
+              className="rounded-[var(--rm)]"
             />
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={handleBack}>{tr("pro.back", "Back")}</Button>
-          <Button size="lg" onClick={handleNext}>{tr("pro.next", "Next")}</Button>
-        </CardFooter>
+        <FooterNav />
       </Card>
     );
   }
@@ -426,7 +475,7 @@ function WizardInner() {
 
   if (currentStep === 4) {
     return (
-      <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
+      <Card className="overflow-hidden rounded-[var(--r)] border-border/70" style={{ boxShadow: "var(--shC)" }}>
         <CardHeader>
           <CardTitle className="text-2xl font-extrabold tracking-tight">
             {tr("pro.address.heading", "Business address")}
@@ -441,6 +490,7 @@ function WizardInner() {
               value={formData.address_line}
               onChange={(e) => setField("address_line", e.target.value)}
               placeholder={tr("pro.address.line_placeholder", "Wetstraat 1")}
+              className="rounded-[var(--rm)]"
             />
             <ErrorMsg field="address_line" />
           </div>
@@ -453,6 +503,7 @@ function WizardInner() {
                 onChange={(e) => setField("postcode", e.target.value)}
                 placeholder="1000"
                 maxLength={4}
+                className="rounded-[var(--rm)]"
               />
               <ErrorMsg field="postcode" />
             </div>
@@ -463,6 +514,7 @@ function WizardInner() {
                 value={formData.city}
                 onChange={(e) => setField("city", e.target.value)}
                 placeholder="Brussels"
+                className="rounded-[var(--rm)]"
               />
               <ErrorMsg field="city" />
             </div>
@@ -475,13 +527,11 @@ function WizardInner() {
               onChange={(e) => setField("country", e.target.value)}
               placeholder="BE"
               maxLength={2}
+              className="rounded-[var(--rm)]"
             />
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={handleBack}>{tr("pro.back", "Back")}</Button>
-          <Button size="lg" onClick={handleNext}>{tr("pro.next", "Next")}</Button>
-        </CardFooter>
+        <FooterNav />
       </Card>
     );
   }
@@ -490,7 +540,7 @@ function WizardInner() {
 
   if (currentStep === 5) {
     return (
-      <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
+      <Card className="overflow-hidden rounded-[var(--r)] border-border/70" style={{ boxShadow: "var(--shC)" }}>
         <CardHeader>
           <CardTitle className="text-2xl font-extrabold tracking-tight">
             {tr("pro.terms.heading", "Consumer law terms")}
@@ -509,6 +559,7 @@ function WizardInner() {
               onChange={(e) => setField("withdrawal_terms", e.target.value)}
               placeholder={tr("pro.terms.withdrawal_placeholder", "Consumers have the right to withdraw from a purchase within 14 days without giving a reason...")}
               rows={5}
+              className="rounded-[var(--rm)]"
             />
             <ErrorMsg field="withdrawal_terms" />
           </div>
@@ -520,13 +571,11 @@ function WizardInner() {
               value={formData.returns_url}
               onChange={(e) => setField("returns_url", e.target.value)}
               placeholder="https://yourcompany.be/returns"
+              className="rounded-[var(--rm)]"
             />
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={handleBack}>{tr("pro.back", "Back")}</Button>
-          <Button size="lg" onClick={handleNext}>{tr("pro.next", "Next")}</Button>
-        </CardFooter>
+        <FooterNav />
       </Card>
     );
   }
@@ -534,7 +583,7 @@ function WizardInner() {
   // ---- Step 6: Review + self-certification + submit ----------------------
 
   return (
-    <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
+    <Card className="overflow-hidden rounded-[var(--r)] border-border/70" style={{ boxShadow: "var(--shC)" }}>
       <CardHeader>
         <CardTitle className="text-2xl font-extrabold tracking-tight">
           {tr("pro.review.heading", "Review and confirm")}
@@ -545,7 +594,7 @@ function WizardInner() {
       </CardHeader>
       <CardContent className="space-y-4">
         <ProgressBar />
-        <div className="rounded-lg border border-border/70 bg-muted/30 p-4 text-sm space-y-2">
+        <div className="rounded-[var(--rm)] border border-border/70 bg-muted/30 p-4 text-sm space-y-2">
           <div><span className="font-medium">{tr("pro.identity.legal_name", "Legal name")}:</span> {formData.legal_name}</div>
           {formData.trade_name && (
             <div><span className="font-medium">{tr("pro.identity.trade_name", "Trade name")}:</span> {formData.trade_name}</div>
@@ -563,7 +612,7 @@ function WizardInner() {
             {formData.address_line}, {formData.postcode} {formData.city}, {formData.country}
           </div>
         </div>
-        <div className="flex items-start gap-3 rounded-lg border border-border/70 bg-muted/30 p-4">
+        <div className="flex items-start gap-3 rounded-[var(--rm)] border border-border/70 bg-muted/30 p-4">
           <Checkbox
             id="self_certified"
             checked={formData.self_certified}
@@ -576,15 +625,7 @@ function WizardInner() {
         </div>
         <ErrorMsg field="self_certified" />
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button variant="outline" onClick={handleBack} disabled={isLoading}>
-          {tr("pro.back", "Back")}
-        </Button>
-        <Button size="lg" onClick={handleSubmit} disabled={isLoading || !formData.self_certified}>
-          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
-          {tr("pro.submit_label", "Submit registration")}
-        </Button>
-      </CardFooter>
+      <FooterNav isSubmit />
     </Card>
   );
 }

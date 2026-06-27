@@ -192,7 +192,7 @@ export default async function ProPage() {
           : "member";
 
     return (
-      <main className="container mx-auto max-w-3xl p-4">
+      <main className="container mx-auto max-w-5xl p-4">
         <BusinessCabinet
           business={business}
           listings={listings}

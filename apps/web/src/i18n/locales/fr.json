@@ -1773,7 +1773,11 @@
         "error_generic": "Une erreur s'est produite. Veuillez réessayer.",
         "postcode_invalid": "Le code postal belge doit comporter 4 chiffres (1000–9999)",
         "email_invalid": "Veuillez saisir une adresse e-mail valide"
-      }
+      },
+      "page_title": "Espace professionnel",
+      "page_subtitle": "Gérez votre vitrine, votre équipe et la vérification",
+      "active_listings_label": "Annonces actives",
+      "new_listing": "Nouvelle annonce"
     }
   },
   "cookie": {

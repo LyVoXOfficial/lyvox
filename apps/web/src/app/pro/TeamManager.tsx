@@ -26,6 +26,17 @@ type Props = {
   messages: Record<string, any>;
 };
 
+// ---- Helpers ----------------------------------------------------------------
+
+/** Derive up to 2-char initials from a display name. */
+function initials(name: string | null | undefined): string {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  return parts.length >= 2
+    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    : name.slice(0, 2).toUpperCase();
+}
+
 // ---- Inner component (needs I18n context) -----------------------------------
 
 function TeamManagerInner({
@@ -144,7 +155,10 @@ function TeamManagerInner({
     <div className="space-y-4">
       {/* ── Accept invitation banner ────────────────────────────────────────── */}
       {viewerPendingRow && (
-        <div className="rounded-md border border-primary/30 bg-primary/5 p-4">
+        <div
+          className="rounded-[var(--rm)] border border-primary/30 p-4"
+          style={{ background: "oklch(0.56 0.13 178 / 0.06)" }}
+        >
           <Button
             onClick={handleAccept}
             disabled={accepting}
@@ -162,47 +176,109 @@ function TeamManagerInner({
       )}
 
       {/* ── Member list ─────────────────────────────────────────────────────── */}
-      <ul className="divide-y divide-border/50">
+      <ul className="flex flex-col gap-[11px]">
         {members.map((member) => {
           const isPending = member.accepted_at == null;
           const isOwnerRow = member.role === "owner";
           const isSelf = member.user_id === viewerId;
           const showRemove = canManage && !isOwnerRow && !isSelf;
+          const memberName = member.display_name ?? tr("team.title", "Team");
+          const memberInitials = initials(member.display_name);
 
           return (
             <li
               key={member.user_id}
-              className="flex items-center justify-between py-2 text-sm"
+              className="flex items-center gap-[10px]"
             >
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-foreground">
-                  {member.display_name ?? tr("team.title", "Team")}
+              {/* Avatar */}
+              {isPending ? (
+                /* Pending: dashed ring + plus icon */
+                <span
+                  className="grid size-[34px] shrink-0 place-items-center rounded-full text-muted-foreground"
+                  style={{
+                    background: "var(--muted)",
+                    border: "1px dashed var(--border)",
+                  }}
+                  aria-hidden="true"
+                >
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 8v8M8 12h8" />
+                    <circle cx="12" cy="12" r="9" />
+                  </svg>
                 </span>
-                {isPending && (
-                  <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+              ) : (
+                /* Active: gradient or sec surface */
+                <span
+                  className={
+                    isOwnerRow
+                      ? "lyvox-trust-gradient grid size-[34px] shrink-0 place-items-center rounded-full text-[12px] font-bold text-white"
+                      : "grid size-[34px] shrink-0 place-items-center rounded-full border border-border text-[12px] font-bold"
+                  }
+                  style={
+                    isOwnerRow
+                      ? undefined
+                      : { background: "var(--sec)", color: "var(--priD)" }
+                  }
+                  aria-hidden="true"
+                >
+                  {memberInitials}
+                </span>
+              )}
+
+              {/* Name */}
+              <div className="flex-1 min-w-0">
+                <div className="truncate text-[13px] font-bold text-foreground">
+                  {memberName}
+                </div>
+              </div>
+
+              {/* Role / status chip */}
+              <div className="flex items-center gap-2 shrink-0">
+                {isPending ? (
+                  <span
+                    className="inline-flex h-[23px] items-center rounded-full px-[10px] text-[11px] font-bold"
+                    style={{
+                      background: "oklch(0.86 0.13 72 / 0.35)",
+                      color: "var(--amberI)",
+                    }}
+                  >
                     {tr("team.pending", "Pending")}
                   </span>
+                ) : (
+                  <span
+                    className="inline-flex h-[23px] items-center rounded-full px-[10px] text-[11px] font-bold capitalize"
+                    style={
+                      isOwnerRow
+                        ? {
+                            background: "oklch(0.56 0.13 178 / 0.12)",
+                            color: "var(--priD)",
+                          }
+                        : {
+                            background: "var(--muted)",
+                            border: "1px solid var(--border)",
+                            color: "var(--muted-foreground)",
+                          }
+                    }
+                  >
+                    {member.role}
+                  </span>
                 )}
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="capitalize text-muted-foreground">{member.role}</span>
+
+                {/* Remove button */}
                 {showRemove && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
+                  <button
+                    type="button"
                     onClick={() => handleRemove(member.user_id)}
                     disabled={removingId === member.user_id}
-                    className="h-7 px-2 text-destructive hover:text-destructive"
+                    className="inline-flex h-7 items-center gap-1 rounded-md px-2 text-[11px] font-semibold text-destructive opacity-70 hover:opacity-100 disabled:opacity-40"
                   >
                     {removingId === member.user_id ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                      <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
                     ) : (
-                      <>
-                        <UserMinus className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
-                        {tr("team.remove", "Remove")}
-                      </>
+                      <UserMinus className="h-3 w-3" aria-hidden="true" />
                     )}
-                  </Button>
+                    {tr("team.remove", "Remove")}
+                  </button>
                 )}
               </div>
             </li>
@@ -212,15 +288,21 @@ function TeamManagerInner({
 
       {/* ── Invite form (owner/admin only) ───────────────────────────────────── */}
       {canManage && (
-        <form onSubmit={handleInvite} className="space-y-3 border-t border-border/50 pt-4">
-          <p className="text-sm font-medium text-foreground">
+        <form
+          onSubmit={handleInvite}
+          className="space-y-3 border-t border-border/50 pt-4"
+        >
+          <p className="text-sm font-semibold text-foreground">
             {tr("team.invite", "Invite member")}
           </p>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="flex-1 space-y-1">
-              <Label htmlFor="team_invite_email">
-                {tr("team.email_label", "Email address")}
-              </Label>
+          {/* Email + invite row */}
+          <div className="space-y-1">
+            <Label htmlFor="team_invite_email">
+              {tr("team.email_label", "Email address")}
+            </Label>
+          </div>
+          <div className="flex gap-2">
+            <div className="flex-1">
               <Input
                 id="team_invite_email"
                 type="email"
@@ -229,36 +311,46 @@ function TeamManagerInner({
                   setInviteEmail(e.target.value);
                   setInviteError(null);
                 }}
-                placeholder="colleague@example.com"
+                placeholder="colleague@email.com"
                 required
+                className="h-[42px] rounded-[var(--rm)]"
               />
             </div>
-            <div className="space-y-1">
-              <Label htmlFor="team_invite_role">
-                {tr("team.role_label", "Role")}
-              </Label>
-              <select
-                id="team_invite_role"
-                value={inviteRole}
-                onChange={(e) =>
-                  setInviteRole(e.target.value as "member" | "admin")
-                }
-                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring sm:w-36"
-              >
-                <option value="member">{tr("team.role_member", "Member")}</option>
-                <option value="admin">{tr("team.role_admin", "Admin")}</option>
-              </select>
-            </div>
+            <button
+              type="submit"
+              disabled={inviting}
+              className="inline-flex h-[42px] items-center rounded-[var(--rm)] border-0 px-4 text-[13px] font-bold text-white disabled:opacity-70"
+              style={{ background: "var(--gC)" }}
+            >
+              {inviting ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : (
+                tr("team.invite_btn", "Invite")
+              )}
+            </button>
           </div>
+
+          {/* Role selector (below the compact row, visible when needed) */}
+          <div className="flex items-center gap-2">
+            <Label htmlFor="team_invite_role" className="text-xs text-muted-foreground shrink-0">
+              {tr("team.role_label", "Role")}
+            </Label>
+            <select
+              id="team_invite_role"
+              value={inviteRole}
+              onChange={(e) =>
+                setInviteRole(e.target.value as "member" | "admin")
+              }
+              className="flex h-8 rounded-[var(--rm)] border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              <option value="member">{tr("team.role_member", "Member")}</option>
+              <option value="admin">{tr("team.role_admin", "Admin")}</option>
+            </select>
+          </div>
+
           {inviteError && (
             <p className="text-sm text-destructive">{inviteError}</p>
           )}
-          <Button type="submit" disabled={inviting}>
-            {inviting && (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-            )}
-            {tr("team.invite_btn", "Invite")}
-          </Button>
         </form>
       )}
     </div>

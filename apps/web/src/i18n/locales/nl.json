@@ -1773,7 +1773,11 @@
         "error_generic": "Er is iets misgegaan. Probeer het opnieuw.",
         "postcode_invalid": "Belgische postcode moet 4 cijfers zijn (1000–9999)",
         "email_invalid": "Voer een geldig e-mailadres in"
-      }
+      },
+      "page_title": "Bedrijfskabinet",
+      "page_subtitle": "Beheer uw winkel, team en verificatie",
+      "active_listings_label": "Actieve advertenties",
+      "new_listing": "Nieuwe advertentie"
     }
   },
   "cookie": {

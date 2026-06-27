@@ -1773,7 +1773,11 @@
         "error_generic": "Something went wrong. Please try again.",
         "postcode_invalid": "Belgian postcode must be 4 digits (1000–9999)",
         "email_invalid": "Please enter a valid email address"
-      }
+      },
+      "page_title": "Business cabinet",
+      "page_subtitle": "Manage your shopfront, team and verification",
+      "active_listings_label": "Active listings",
+      "new_listing": "New listing"
     }
   },
   "cookie": {
