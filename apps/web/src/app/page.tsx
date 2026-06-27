@@ -23,6 +23,7 @@ import { getJsonLdScriptProps } from "@/lib/seo";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { signMediaUrls } from "@/lib/media/signMediaUrls";
 import { getFirstImage } from "@/lib/media/getFirstImage";
+import { resolveLikeCounts } from "@/lib/likeCounts";
 import type { AdvertCard } from "@/lib/advertCards";
 
 export const revalidate = 60;
@@ -145,7 +146,11 @@ async function getFreeAds(supabase: SupabaseClient): Promise<AdListItem[]> {
         )
       : Promise.resolve(new Map<string, string>());
 
-  const [{ data: profilesData }, mediaMap] = await Promise.all([profilesPromise, mediaPromise]);
+  const [{ data: profilesData }, mediaMap, likeMap] = await Promise.all([
+    profilesPromise,
+    mediaPromise,
+    resolveLikeCounts(freeIds),
+  ]);
 
   const verifiedMap = new Map<string, boolean>();
   if (profilesData) {
@@ -166,7 +171,7 @@ async function getFreeAds(supabase: SupabaseClient): Promise<AdListItem[]> {
     createdAt: ad.created_at ?? null,
     image: mediaMap.get(ad.id) ?? null,
     sellerVerified: verifiedMap.get(ad.user_id ?? "") ?? false,
-    likeCount: 0,
+    likeCount: likeMap.get(ad.id) ?? 0,
   }));
 }
 
@@ -210,7 +215,11 @@ async function getLatestAds(supabase: SupabaseClient): Promise<AdvertCard[]> {
         )
       : Promise.resolve(new Map<string, string>());
 
-  const [{ data: profilesData }, mediaMap] = await Promise.all([profilesPromise, mediaPromise]);
+  const [{ data: profilesData }, mediaMap, likeMap] = await Promise.all([
+    profilesPromise,
+    mediaPromise,
+    resolveLikeCounts(adIds),
+  ]);
 
   const verifiedMap = new Map<string, boolean>();
   if (profilesData) {
@@ -231,7 +240,7 @@ async function getLatestAds(supabase: SupabaseClient): Promise<AdvertCard[]> {
     createdAt: ad.created_at ?? null,
     image: mediaMap.get(ad.id) ?? null,
     sellerVerified: verifiedMap.get(ad.user_id ?? "") ?? false,
-    likeCount: 0,
+    likeCount: likeMap.get(ad.id) ?? 0,
   }));
 }
 
