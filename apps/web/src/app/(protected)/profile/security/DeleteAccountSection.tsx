@@ -127,7 +127,7 @@ export function DeleteAccountSection() {
             </p>
           </div>
           <Button variant="outline" size="sm" asChild>
-            <a href="/api/profile/consents?format=download" download>
+            <a href="/api/account/export" download>
               <Download className="size-4" aria-hidden="true" />
               {tr("account.delete.download_data", "Download your data")}
             </a>
