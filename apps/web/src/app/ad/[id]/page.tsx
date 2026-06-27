@@ -622,7 +622,7 @@ export default async function AdvertPage({ params }: PageProps) {
     <>
       <script {...getJsonLdScriptProps(productJsonLd)} />
       <script {...getJsonLdScriptProps(breadcrumbJsonLd)} />
-      <div className="space-y-8">
+      <div className="space-y-8 pb-[160px] lg:pb-0">
         {/* Breadcrumb nav */}
         <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground">
           {data.category ? (
@@ -1008,10 +1008,6 @@ export default async function AdvertPage({ params }: PageProps) {
               advert={favoriteAdvert}
               seller={canSeeSeller ? data.seller : { ...data.seller, displayName: null }}
               currentUserId={currentUserId}
-              priceText={priceText}
-              locationText={locationText}
-              createdText={createdText || null}
-              loginHref={loginHref}
               editHref={editHref}
               sellerName={canSeeSeller ? sellerName : ""}
               canSeeSeller={canSeeSeller}

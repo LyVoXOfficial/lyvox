@@ -84,7 +84,7 @@ export default function AdvertMobileContactBar({
       style={{
         bottom: "76px",
         height: "66px",
-        background: "oklch(1 0 0 / 0.97)",
+        background: "color-mix(in oklch, var(--background) 97%, transparent)",
         backdropFilter: "blur(10px)",
         borderTop: "1px solid var(--border)",
       }}

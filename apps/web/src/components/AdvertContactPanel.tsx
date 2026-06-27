@@ -43,10 +43,6 @@ type AdvertContactPanelProps = {
   advert: FavoriteAdvert;
   seller: SellerSummary;
   currentUserId: string | null;
-  priceText: string;
-  locationText: string;
-  createdText: string | null;
-  loginHref: string;
   editHref: string;
   sellerName: string;
   canSeeSeller: boolean;
@@ -68,10 +64,6 @@ export default function AdvertContactPanel({
   advert,
   seller,
   currentUserId,
-  priceText,
-  locationText,
-  createdText,
-  loginHref,
   editHref,
   sellerName,
   canSeeSeller,
