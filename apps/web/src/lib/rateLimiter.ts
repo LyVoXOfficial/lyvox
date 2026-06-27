@@ -189,31 +189,41 @@ const build429 = ({ limit, reset, retryAfterSec }: RateLimitResult): Response =>
   return response;
 };
 
+/**
+ * F8: Returns the real client IP from a trusted source.
+ *
+ * Priority:
+ * 1. x-vercel-forwarded-for — set by Vercel's edge from the TCP socket;
+ *    clients cannot spoof this (unlike x-forwarded-for which they can prepend).
+ * 2. request.ip — Next.js/Vercel platform property, same trust level.
+ * 3. x-forwarded-for — trusted only in non-Vercel environments (local dev,
+ *    other proxies). On Vercel a client can inject arbitrary values here,
+ *    so it must NOT be used as the primary rate-limit key.
+ */
 export function getClientIp(req: Request): string | null {
   const headers = req.headers;
 
-  const forwarded = headers.get("x-forwarded-for") ?? headers.get("X-Forwarded-For");
-  const forwardedIp = firstIpFromList(forwarded);
-  if (forwardedIp) return forwardedIp;
+  // Vercel sets this from the socket — not spoofable by the end client.
+  const vercelIp = headers.get("x-vercel-forwarded-for");
+  if (vercelIp) return vercelIp.trim();
 
-  const realIp =
-    headers.get("x-real-ip") ??
-    headers.get("cf-connecting-ip") ??
-    headers.get("x-client-ip") ??
-    headers.get("fastly-client-ip") ??
-    headers.get("true-client-ip");
-  if (realIp) return realIp.trim();
-
+  // Next.js NextRequest.ip — same Vercel-side trust level.
   const reqAny = req as unknown as { ip?: string | string[] | null };
   if (typeof reqAny.ip === "string" && reqAny.ip) {
     return reqAny.ip;
   }
   if (Array.isArray(reqAny.ip)) {
-    return reqAny.ip.find((item) => item)?.toString() ?? null;
+    const found = reqAny.ip.find((item) => item);
+    if (found) return found.toString();
   }
 
+  // Non-Vercel fallback (local dev, CI, other platforms).
+  // x-forwarded-for is client-spoofable on Vercel — only use it here.
+  const forwarded = headers.get("x-forwarded-for");
+  if (forwarded) return firstIpFromList(forwarded);
+
   return null;
-};
+}
 
 const firstIpFromList = (value: string | null): string | null => {
   if (!value) return null;
