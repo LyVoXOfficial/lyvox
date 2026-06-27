@@ -16,8 +16,9 @@ type SearchBarProps = {
    * "default"  — tall pill + external "Find" button (home hero)
    * "compact"  — pill only, no submit button
    * "header"   — pill with an internal round gradient submit button (main header)
+   * "hero"     — large pill (h-14/56px) with internal labeled "Search" gradient button (redesign home hero)
    */
-  variant?: "default" | "compact" | "header";
+  variant?: "default" | "compact" | "header" | "hero";
   className?: string;
   onSubmit?: (query: string) => void;
 };
@@ -225,6 +226,141 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
 
   const isCompact = variant === "compact";
   const isHeader = variant === "header";
+  const isHero = variant === "hero";
+
+  /**
+   * "hero" variant: large pill (h-14 / 56px) with search icon left, flex input, and a labeled
+   * "Search →" gradient button inside the pill right. Same behaviour as "header".
+   */
+  if (isHero) {
+    return (
+      <form onSubmit={handleSubmit} className={cn("relative w-full", className)}>
+        <div
+          className="flex w-full items-center gap-[10px] rounded-full border border-border bg-card shadow-[var(--shC)]"
+          style={{ height: 56, padding: "0 7px 0 20px" }}
+        >
+          <Search className="h-[21px] w-[21px] shrink-0 text-muted-foreground pointer-events-none" aria-hidden="true" />
+          <input
+            ref={inputRef}
+            type="search"
+            value={search}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setSelectedIndex(-1);
+              setShowAutocomplete(event.target.value.trim().length > 0);
+            }}
+            onFocus={() => {
+              setFocused(true);
+              if (filteredCategories.length > 0) setShowAutocomplete(true);
+            }}
+            onBlur={() => setTimeout(() => setFocused(false), 150)}
+            onKeyDown={handleKeyDown}
+            placeholder={t("common.search") || "e.g. iPhone 15, road bike, sofa…"}
+            aria-label={t("common.search") || "Search listings"}
+            aria-autocomplete="list"
+            aria-expanded={isAutocompleteOpen}
+            className="min-w-0 flex-1 border-0 bg-transparent text-[16px] text-foreground outline-none placeholder:text-muted-foreground"
+          />
+          {/* Labeled "Search →" pill button inside the hero pill */}
+          <button
+            type="submit"
+            className="lyvox-cta-gradient inline-flex shrink-0 items-center gap-2 rounded-full font-bold text-primary-foreground"
+            style={{ height: 42, padding: "0 22px", fontSize: "15px" }}
+          >
+            {tr("common.find", "Search")}
+            <ArrowRight className="h-[15px] w-[15px]" aria-hidden="true" />
+          </button>
+        </div>
+
+        {/* Autocomplete dropdown */}
+        {isAutocompleteOpen && (
+          <div
+            ref={autocompleteRef}
+            className="absolute left-0 right-0 top-full z-50 mt-2 max-h-72 overflow-y-auto rounded-xl border border-border/70 bg-card shadow-[var(--shadow-hi)]"
+            role="listbox"
+          >
+            {instant.length > 0 && (
+              <div className="border-b border-border/60 py-1">
+                <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {tr("search.instant_results", "Listings")}
+                </p>
+                {instant.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => router.push(`/ad/${item.id}`)}
+                    className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-secondary/60"
+                  >
+                    <span className="lyvox-image-placeholder flex h-10 w-10 shrink-0 overflow-hidden rounded-md">
+                      {item.image ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={item.image} alt="" className="h-full w-full object-cover" />
+                      ) : null}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-sm">{item.title}</span>
+                    {typeof item.price === "number" && (
+                      <span className="shrink-0 text-sm font-semibold">
+                        {item.price} {item.currency ?? "EUR"}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+            {focused && debouncedSearch.trim().length < 2 && recent.length > 0 && (
+              <div className="py-1">
+                <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {tr("search.recent_searches", "Recent searches")}
+                </p>
+                {recent.map((q) => (
+                  <div key={q} className="flex items-center justify-between px-3 py-1.5 hover:bg-secondary/60">
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/search?q=${encodeURIComponent(q)}`)}
+                      className="min-w-0 flex-1 truncate text-left text-sm"
+                    >
+                      {q}
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={tr("search.remove_recent", "Remove")}
+                      onClick={() => setRecent(removeRecentSearch(q))}
+                      className="ml-2 shrink-0 text-muted-foreground hover:text-foreground"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {showAutocomplete && filteredCategories.map((category, index) => (
+              <Link
+                key={category.id}
+                href={`/c/${category.path}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleCategorySelect(category);
+                }}
+                className={cn(
+                  "block cursor-pointer border-b px-4 py-3 transition last:border-b-0 hover:bg-secondary/70",
+                  selectedIndex === index && "bg-secondary"
+                )}
+                role="option"
+                aria-selected={selectedIndex === index}
+              >
+                <div className="flex items-center gap-2">
+                  {category.icon && (
+                    <span className="text-lg" aria-hidden="true">{category.icon}</span>
+                  )}
+                  <span className="text-sm font-medium">{getLocalizedCategoryName(category, locale)}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </form>
+    );
+  }
 
   /**
    * "header" variant: single pill containing search-icon + input + round gradient submit button.

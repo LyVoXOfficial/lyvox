@@ -172,7 +172,21 @@
     "top_advert": "TOP Advertentie",
     "deals": "deals",
     "adverts": "advertenties",
-    "seller": "Verkoper"
+    "seller": "Verkoper",
+    "hero_eyebrow": "België · 5 talen",
+    "hero_headline_prefix": "Kopen & verkopen met",
+    "hero_trust_phrase": "mensen die je kunt vertrouwen.",
+    "recommended_now": "Aanbevolen nu",
+    "see_all": "Alles zien",
+    "top_sellers_title": "Top verkopers",
+    "top_sellers_subtitle": "geverifieerd deze week",
+    "stat_active_label": "actieve advertenties",
+    "stat_verified_label": "geverifieerde verkopers",
+    "stat_business_label": "zakelijke advertenties",
+    "category_vehicles": "Voertuigen",
+    "category_home": "Wonen",
+    "business_seller": "Zakelijke verkoper",
+    "private_seller": "Particuliere verkoper"
   },
   "post": {
     "not_found": "Advertentie niet gevonden",

@@ -172,7 +172,21 @@
     "top_advert": "TOP Annonce",
     "deals": "transactions",
     "adverts": "annonces",
-    "seller": "Vendeur"
+    "seller": "Vendeur",
+    "hero_eyebrow": "Belgique · 5 langues",
+    "hero_headline_prefix": "Achetez & vendez avec",
+    "hero_trust_phrase": "des personnes de confiance.",
+    "recommended_now": "Recommandé maintenant",
+    "see_all": "Tout voir",
+    "top_sellers_title": "Meilleurs vendeurs",
+    "top_sellers_subtitle": "vérifiés cette semaine",
+    "stat_active_label": "annonces actives",
+    "stat_verified_label": "vendeurs vérifiés",
+    "stat_business_label": "annonces professionnelles",
+    "category_vehicles": "Véhicules",
+    "category_home": "Maison",
+    "business_seller": "Vendeur professionnel",
+    "private_seller": "Vendeur particulier"
   },
   "post": {
     "not_found": "Annonce introuvable",

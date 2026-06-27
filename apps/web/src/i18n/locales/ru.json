@@ -172,7 +172,21 @@
     "top_advert": "ТОП Объявление",
     "deals": "сделок",
     "adverts": "объявлений",
-    "seller": "Продавец"
+    "seller": "Продавец",
+    "hero_eyebrow": "Бельгия · 5 языков",
+    "hero_headline_prefix": "Покупайте и продавайте с",
+    "hero_trust_phrase": "людьми, которым доверяете.",
+    "recommended_now": "Рекомендуем сейчас",
+    "see_all": "Смотреть все",
+    "top_sellers_title": "Топ продавцы",
+    "top_sellers_subtitle": "верифицированы на этой неделе",
+    "stat_active_label": "активных объявлений",
+    "stat_verified_label": "верифицированных продавцов",
+    "stat_business_label": "бизнес-объявлений",
+    "category_vehicles": "Транспорт",
+    "category_home": "Дом",
+    "business_seller": "Бизнес-продавец",
+    "private_seller": "Частный продавец"
   },
   "post": {
     "not_found": "Объявление не найдено",
