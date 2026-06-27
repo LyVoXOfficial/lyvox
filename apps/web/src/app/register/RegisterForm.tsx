@@ -256,6 +256,14 @@ export default function RegisterForm({ initialLocale }: Props) {
           errorMessage = payload.detail;
         }
         toast.error(errorMessage);
+        // Turnstile tokens are single-use: the server consumes the token during
+        // `verifyTurnstile`, so any failure after that check (e.g. EMAIL_IN_USE,
+        // WEAK_PASSWORD, profile-upsert error) leaves a spent token in state.
+        // Re-submitting with the same spent token → 403 CAPTCHA_FAILED, wedging
+        // the user until the token expires (~5 min) or a full page reload.
+        // Reset the widget now so the next attempt gets a fresh token.
+        window.turnstile?.reset?.(widgetIdRef.current ?? undefined);
+        setTurnstileToken(null);
         return;
       }
 

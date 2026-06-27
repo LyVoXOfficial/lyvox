@@ -44,6 +44,8 @@ beforeEach(() => {
   toast.success.mockReset();
   toast.error.mockReset();
   routerMock.push.mockReset();
+  // Reset turnstile global between tests
+  delete (window as Window & typeof globalThis).turnstile;
 });
 
 describe("<RegisterForm />", () => {
@@ -87,6 +89,50 @@ describe("<RegisterForm />", () => {
     expect(toast.success).toHaveBeenCalledWith("Check your inbox", {
       description: expect.any(String),
     });
+  });
+
+  it("resets Turnstile widget and clears token after a failed registration", async () => {
+    // Simulate a widget already rendered — widgetIdRef would hold this id
+    const resetMock = vi.fn();
+    (window as Window & typeof globalThis).turnstile = {
+      render: vi.fn().mockReturnValue("widget-abc"),
+      reset: resetMock,
+    };
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      json: () => Promise.resolve({ ok: false, error: "EMAIL_IN_USE" }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<RegisterForm initialLocale="en" />);
+
+    fireEvent.change(screen.getByLabelText("Email"), {
+      target: { value: "taken@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText("Password"), {
+      target: { value: "Password!123" },
+    });
+    fireEvent.change(screen.getByLabelText("Confirm password"), {
+      target: { value: "Password!123" },
+    });
+
+    const checkboxes = screen.getAllByRole("checkbox");
+    fireEvent.click(checkboxes[0]);
+    fireEvent.click(checkboxes[1]);
+
+    fireEvent.click(screen.getByRole("button", { name: "Create account" }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalled();
+    });
+
+    // Error toast shown, no redirect
+    expect(routerMock.push).not.toHaveBeenCalled();
+    expect(toast.error).toHaveBeenCalled();
+
+    // Turnstile widget was reset so the next attempt gets a fresh token
+    expect(resetMock).toHaveBeenCalled();
   });
 
   it("shows an error toast when consents are missing", async () => {
