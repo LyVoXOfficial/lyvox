@@ -25,12 +25,14 @@ type AdvertItem = {
 };
 
 type Props = {
-  params: { path: string[] };
-  searchParams: { sort?: string };
+  params: Promise<{ path: string[] }>;
+  searchParams: Promise<{ sort?: string }>;
 };
 
 export default async function CategoryPage({ params, searchParams }: Props) {
-  const slugPath = Array.isArray(params.path) ? params.path.join("/") : "";
+  const { path } = await params;
+  const { sort: sortParam } = await searchParams;
+  const slugPath = Array.isArray(path) ? path.join("/") : "";
   if (!slugPath) {
     notFound();
   }
@@ -85,7 +87,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const children = (childData as Category[] | null) ?? [];
 
   // Handle sorting
-  const sort = searchParams.sort || "date-desc";
+  const sort = sortParam || "date-desc";
   let orderBy: { column: string; ascending: boolean };
   
   switch (sort) {
