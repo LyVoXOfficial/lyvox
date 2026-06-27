@@ -358,7 +358,10 @@ export default function RegisterForm({ initialLocale }: Props) {
       <div className="bg-card px-8 py-10 md:px-10 md:py-11">
         {/* segmented Register / Log in tab */}
         <div className="mb-6 inline-flex gap-[3px] rounded-full bg-muted p-1">
-          <span className="inline-flex h-[34px] items-center rounded-full bg-card px-5 text-[13px] font-bold text-foreground shadow-[var(--shS)]">
+          <span
+            aria-current="page"
+            className="inline-flex h-[34px] items-center rounded-full bg-card px-5 text-[13px] font-bold text-foreground shadow-[var(--shS)]"
+          >
             {messages.tabRegister}
           </span>
           <Link
