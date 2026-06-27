@@ -1681,6 +1681,20 @@
     "badge": {
       "verified_business": "Verified Business",
       "vat_registered": "VAT Registered"
+    },
+    "panel": {
+      "title": "Professional seller",
+      "legal_name": "Company name",
+      "trade_name": "Trading name",
+      "legal_form": "Legal form",
+      "address": "Address",
+      "kbo_number": "Enterprise number",
+      "vat_number": "VAT number",
+      "contact": "Contact",
+      "withdrawal_terms": "Withdrawal & returns policy",
+      "certified_on": "Self-certified on",
+      "badge_verified": "Verified Business",
+      "badge_vat": "VAT-registered"
     }
   }
 }

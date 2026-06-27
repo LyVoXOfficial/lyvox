@@ -54,7 +54,26 @@ type AdvertRecord = Pick<
   | "location"
   | "created_at"
   | "status"
+  | "business_id"
 >;
+
+type BusinessPublicData = {
+  legal_name: string;
+  trade_name: string | null;
+  legal_form: string | null;
+  address_line: string | null;
+  postcode: string | null;
+  city: string | null;
+  country: string | null;
+  kbo_number: string | null;
+  vat_number: string | null;
+  vat_liable: boolean;
+  email: string;
+  phone_e164: string | null;
+  withdrawal_terms: string | null;
+  self_certified_at: string | null;
+  entity_verified: boolean;
+};
 
 type Messages = Record<string, any>;
 type TFunction = (key: string, params?: Record<string, string | number>) => string;
@@ -177,6 +196,7 @@ type AdvertData = {
     benefit_type: string;
     valid_until: string;
   }>;
+  businessData: BusinessPublicData | null;
 };
 
 type SimilarAdvertItem = {
@@ -731,6 +751,105 @@ export default async function AdvertPage({ params }: PageProps) {
             </div>
           </section>
 
+      {data.businessData ? (
+        <section className="rounded-md border border-border/80 bg-card p-4 shadow-sm">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <h2 className="text-lg font-medium">
+              {translate("pro.panel.title", "Professional seller")}
+            </h2>
+            {data.businessData.entity_verified ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+                <ShieldCheck className="h-3 w-3" aria-hidden="true" />
+                {translate("pro.panel.badge_verified", "Verified Business")}
+              </span>
+            ) : null}
+            {data.businessData.vat_number && data.businessData.entity_verified ? (
+              <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                {translate("pro.panel.badge_vat", "VAT-registered")}
+              </span>
+            ) : null}
+          </div>
+          <dl className="space-y-2 text-sm">
+            <div>
+              <dt className="text-xs font-medium text-muted-foreground">
+                {translate("pro.panel.legal_name", "Company name")}
+              </dt>
+              <dd className="text-foreground">
+                {data.businessData.legal_name}
+                {data.businessData.trade_name ? ` (${data.businessData.trade_name})` : null}
+              </dd>
+            </div>
+            {data.businessData.legal_form ? (
+              <div>
+                <dt className="text-xs font-medium text-muted-foreground">
+                  {translate("pro.panel.legal_form", "Legal form")}
+                </dt>
+                <dd className="text-foreground">{data.businessData.legal_form}</dd>
+              </div>
+            ) : null}
+            {data.businessData.address_line ? (
+              <div>
+                <dt className="text-xs font-medium text-muted-foreground">
+                  {translate("pro.panel.address", "Address")}
+                </dt>
+                <dd className="text-foreground">
+                  {data.businessData.address_line}
+                  {data.businessData.postcode || data.businessData.city
+                    ? `, ${[data.businessData.postcode, data.businessData.city].filter(Boolean).join(" ")}`
+                    : null}
+                  {data.businessData.country ? `, ${data.businessData.country}` : null}
+                </dd>
+              </div>
+            ) : null}
+            {data.businessData.kbo_number ? (
+              <div>
+                <dt className="text-xs font-medium text-muted-foreground">
+                  {translate("pro.panel.kbo_number", "Enterprise number")}
+                </dt>
+                <dd className="text-foreground">{data.businessData.kbo_number}</dd>
+              </div>
+            ) : null}
+            {data.businessData.vat_number ? (
+              <div>
+                <dt className="text-xs font-medium text-muted-foreground">
+                  {translate("pro.panel.vat_number", "VAT number")}
+                </dt>
+                <dd className="text-foreground">BE {data.businessData.vat_number}</dd>
+              </div>
+            ) : null}
+            <div>
+              <dt className="text-xs font-medium text-muted-foreground">
+                {translate("pro.panel.contact", "Contact")}
+              </dt>
+              <dd className="text-foreground">
+                {data.businessData.email}
+                {data.businessData.phone_e164 ? ` · ${data.businessData.phone_e164}` : null}
+              </dd>
+            </div>
+            {data.businessData.withdrawal_terms ? (
+              <div>
+                <dt className="text-xs font-medium text-muted-foreground">
+                  {translate("pro.panel.withdrawal_terms", "Withdrawal & returns policy")}
+                </dt>
+                <dd className="mt-0.5 whitespace-pre-wrap text-xs leading-5 text-foreground/80">
+                  {data.businessData.withdrawal_terms}
+                </dd>
+              </div>
+            ) : null}
+            {data.businessData.self_certified_at ? (
+              <div>
+                <dt className="text-xs font-medium text-muted-foreground">
+                  {translate("pro.panel.certified_on", "Self-certified on")}
+                </dt>
+                <dd className="text-foreground/80 text-xs">
+                  {formatDate(data.businessData.self_certified_at, locale)}
+                </dd>
+              </div>
+            ) : null}
+          </dl>
+        </section>
+      ) : null}
+
       {showDetails ? (
         <AdvertDetails
           title={translate("advert.vehicle_specs", "Vehicle specifications")}
@@ -1236,7 +1355,7 @@ async function loadAdvertData(
     const { data: advertRows, error: advertError } = await svc
       .from("adverts")
       .select(
-        "id,user_id,category_id,title,description,price,currency,location,created_at,status",
+        "id,user_id,category_id,title,description,price,currency,location,created_at,status,business_id",
       )
       .eq("id", advertId)
       .limit(1);
@@ -1516,6 +1635,28 @@ async function loadAdvertData(
     valid_until: b.valid_until,
   }));
 
+  // Load DSA trader-info panel: public subset for business adverts (T16)
+  // Uses anon/cookie client so RLS biz_public_read enforces status='active' — no extra filter needed.
+  let businessData: BusinessPublicData | null = null;
+  const businessIdFromAdvert = advert.business_id ?? null;
+  if (businessIdFromAdvert) {
+    try {
+      const anonDb = await supabaseServer();
+      const { data: bizRow } = await anonDb
+        .from("businesses")
+        .select(
+          "legal_name,trade_name,legal_form,address_line,postcode,city,country,kbo_number,vat_number,vat_liable,email,phone_e164,withdrawal_terms,self_certified_at,entity_verified",
+        )
+        .eq("id", businessIdFromAdvert)
+        .maybeSingle();
+      if (bizRow) {
+        businessData = bizRow as BusinessPublicData;
+      }
+    } catch (err) {
+      console.warn("Failed to load business panel data", { advertId, businessId: businessIdFromAdvert, err });
+    }
+  }
+
   advertDebug("loadAdvertData:completed", {
     advertId,
     mediaCount: media.length,
@@ -1523,6 +1664,7 @@ async function loadAdvertData(
     breadcrumbs: categoryBreadcrumbs.length,
     vehicleOptions: vehicleOptions.length,
     benefitsCount: benefits.length,
+    hasBusinessPanel: Boolean(businessData),
   });
 
   return {
@@ -1540,6 +1682,7 @@ async function loadAdvertData(
     category,
     categoryBreadcrumbs,
     benefits,
+    businessData,
   };
   } catch (error) {
     console.error("loadAdvertData unexpected error", { advertId, error });

@@ -1681,6 +1681,20 @@
     "badge": {
       "verified_business": "Verifiziertes Unternehmen",
       "vat_registered": "Umsatzsteuerregistriert"
+    },
+    "panel": {
+      "title": "Gewerblicher Verkäufer",
+      "legal_name": "Firmenname",
+      "trade_name": "Handelsname",
+      "legal_form": "Rechtsform",
+      "address": "Adresse",
+      "kbo_number": "Unternehmensnummer",
+      "vat_number": "Umsatzsteuer-ID",
+      "contact": "Kontakt",
+      "withdrawal_terms": "Widerrufs- und Rückgaberecht",
+      "certified_on": "Selbst zertifiziert am",
+      "badge_verified": "Verifiziertes Unternehmen",
+      "badge_vat": "Umsatzsteuerregistriert"
     }
   }
 }

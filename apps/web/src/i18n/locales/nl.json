@@ -1681,6 +1681,20 @@
     "badge": {
       "verified_business": "Geverifieerd bedrijf",
       "vat_registered": "Btw-geregistreerd"
+    },
+    "panel": {
+      "title": "Professionele verkoper",
+      "legal_name": "Bedrijfsnaam",
+      "trade_name": "Handelsnaam",
+      "legal_form": "Rechtsvorm",
+      "address": "Adres",
+      "kbo_number": "Ondernemingsnummer",
+      "vat_number": "Btw-nummer",
+      "contact": "Contact",
+      "withdrawal_terms": "Herroepings- en retourbeleid",
+      "certified_on": "Zelfgecertificeerd op",
+      "badge_verified": "Geverifieerd bedrijf",
+      "badge_vat": "Btw-geregistreerd"
     }
   }
 }

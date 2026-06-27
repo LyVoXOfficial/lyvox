@@ -1681,6 +1681,20 @@
     "badge": {
       "verified_business": "Entreprise vérifiée",
       "vat_registered": "Assujetti à la TVA"
+    },
+    "panel": {
+      "title": "Vendeur professionnel",
+      "legal_name": "Dénomination sociale",
+      "trade_name": "Nom commercial",
+      "legal_form": "Forme juridique",
+      "address": "Adresse",
+      "kbo_number": "Numéro d'entreprise",
+      "vat_number": "Numéro de TVA",
+      "contact": "Contact",
+      "withdrawal_terms": "Politique de rétractation et de retour",
+      "certified_on": "Certifié le",
+      "badge_verified": "Entreprise vérifiée",
+      "badge_vat": "Assujetti à la TVA"
     }
   }
 }

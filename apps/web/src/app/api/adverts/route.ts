@@ -8,10 +8,11 @@ import {
 import type { TablesInsert } from "@/lib/supabaseTypes";
 import { checkUserBlocked } from "@/lib/fraud/checkUserBlocked";
 import { isViewerVerified } from "@/lib/auth/requireVerified";
+import { canSellAsBusiness } from "@/lib/auth/canSellAsBusiness";
 
 export const runtime = "nodejs";
 
-export async function POST() {
+export async function POST(req?: Request) {
   const supabase = await supabaseServer();
   const {
     data: { user },
@@ -32,6 +33,30 @@ export async function POST() {
       status: 403,
       detail: blockCheck.reason || "Account is temporarily blocked",
     });
+  }
+
+  // Parse optional business_id from request body
+  let businessId: string | null = null;
+  if (req) {
+    try {
+      const body = await req.json();
+      if (body && typeof body.business_id === "string" && body.business_id.length > 0) {
+        businessId = body.business_id;
+      }
+    } catch {
+      // body is optional — ignore parse errors
+    }
+  }
+
+  // If posting as a business, enforce canSellAsBusiness gate
+  if (businessId) {
+    const check = await canSellAsBusiness(supabase, user.id, businessId);
+    if (!check.ok) {
+      return createErrorResponse(ApiErrorCode.VERIFICATION_REQUIRED, {
+        status: 403,
+        detail: check.reason,
+      });
+    }
   }
 
   const { data: defaultCategory, error: categoryError } = await supabase
@@ -61,6 +86,7 @@ export async function POST() {
     title: "Черновик объявления",
     status: "draft",
     currency: "EUR",
+    ...(businessId ? { business_id: businessId } : {}),
   };
 
   const { data, error } = await supabase
