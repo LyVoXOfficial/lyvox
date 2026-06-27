@@ -31,6 +31,19 @@ const chatStartIpLimiter = createRateLimiter({
   bucketId: "global",
 });
 
+// Type cast for the untyped start_conversation rpc
+type StartConversationArgs = {
+  p_advert_id: string;
+  p_peer_id: string;
+};
+
+type RpcClient = {
+  rpc: (
+    fn: "start_conversation",
+    args: StartConversationArgs,
+  ) => Promise<{ data: string | null; error: { message?: string; code?: string } | null }>;
+};
+
 const baseHandler = async (req: Request) => {
   const supabase = await supabaseServer();
   const {
@@ -57,136 +70,84 @@ const baseHandler = async (req: Request) => {
 
   const { advert_id, peer_id } = validationResult.data;
 
-  // Cannot start conversation with yourself
-  if (peer_id === user.id) {
+  // advert_id is required to use the start_conversation rpc
+  if (!advert_id) {
     return createErrorResponse(ApiErrorCode.BAD_INPUT, {
       status: 400,
-      detail: "Cannot start conversation with yourself",
+      detail: "advert_id is required to start a conversation",
     });
   }
 
-  // If advert_id is provided, verify it exists and is active
-  if (advert_id) {
-    const { data: advert, error: advertError } = await supabase
-      .from("adverts")
-      .select("id, user_id, status")
-      .eq("id", advert_id)
-      .maybeSingle();
+  // Verify the advert exists and is active before calling the rpc
+  const { data: advert, error: advertError } = await supabase
+    .from("adverts")
+    .select("id, status")
+    .eq("id", advert_id)
+    .maybeSingle();
 
-    if (advertError) {
-      return handleSupabaseError(advertError, ApiErrorCode.FETCH_FAILED);
+  if (advertError) {
+    return handleSupabaseError(advertError, ApiErrorCode.FETCH_FAILED);
+  }
+
+  if (!advert) {
+    return createErrorResponse(ApiErrorCode.NOT_FOUND, {
+      status: 404,
+      detail: "Advert not found",
+    });
+  }
+
+  if (advert.status !== "active") {
+    return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+      status: 400,
+      detail: "Cannot start conversation for inactive advert",
+    });
+  }
+
+  // Call the SECURITY DEFINER rpc — it creates both participants, is idempotent,
+  // and verifies the peer relationship (one party must be the advert owner).
+  const typedClient = supabase as unknown as RpcClient;
+  const { data: convId, error: rpcError } = await typedClient.rpc("start_conversation", {
+    p_advert_id: advert_id,
+    p_peer_id: peer_id,
+  });
+
+  if (rpcError) {
+    const msg = rpcError.message ?? "";
+
+    if (msg.includes("CANNOT_CHAT_SELF")) {
+      return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+        status: 400,
+        detail: "Cannot start conversation with yourself",
+      });
     }
-
-    if (!advert) {
+    if (msg.includes("ADVERT_NOT_FOUND")) {
       return createErrorResponse(ApiErrorCode.NOT_FOUND, {
         status: 404,
         detail: "Advert not found",
       });
     }
-
-    if (advert.status !== "active") {
-      return createErrorResponse(ApiErrorCode.BAD_INPUT, {
-        status: 400,
-        detail: "Cannot start conversation for inactive advert",
-      });
-    }
-
-    // Verify peer_id is the advert owner (if advert_id is provided)
-    if (advert.user_id !== peer_id && user.id !== advert.user_id) {
+    if (msg.includes("INVALID_PEER")) {
       return createErrorResponse(ApiErrorCode.FORBIDDEN, {
         status: 403,
         detail: "Cannot start conversation with this user for this advert",
       });
     }
-  }
-
-  // Check if conversation already exists
-  // For advert-based conversations, check by advert_id and participants
-  // For direct conversations, check by participants only
-  let existingConversation;
-  if (advert_id) {
-    const { data: conversations, error: findError } = await supabase
-      .from("conversations")
-      .select("id, conversation_participants!inner(user_id)")
-      .eq("advert_id", advert_id)
-      .limit(1);
-
-    if (findError) {
-      return handleSupabaseError(findError, ApiErrorCode.FETCH_FAILED);
+    if (msg.includes("auth required")) {
+      return createErrorResponse(ApiErrorCode.UNAUTH, { status: 401 });
     }
 
-    // Check if both users are participants
-    existingConversation = conversations?.find((conv) => {
-      const participants = conv.conversation_participants as Array<{ user_id: string }>;
-      const userIds = participants.map((p) => p.user_id);
-      return userIds.includes(user.id) && userIds.includes(peer_id);
-    });
-  } else {
-    // For direct conversations, find by participants
-    const { data: conversations, error: findError } = await supabase
-      .from("conversations")
-      .select("id, conversation_participants!inner(user_id)")
-      .is("advert_id", null)
-      .limit(100); // Get more to filter client-side
-
-    if (findError) {
-      return handleSupabaseError(findError, ApiErrorCode.FETCH_FAILED);
-    }
-
-    existingConversation = conversations?.find((conv) => {
-      const participants = conv.conversation_participants as Array<{ user_id: string }>;
-      const userIds = participants.map((p) => p.user_id);
-      return userIds.includes(user.id) && userIds.includes(peer_id) && userIds.length === 2;
-    });
+    return createErrorResponse(ApiErrorCode.INTERNAL_ERROR, { status: 500 });
   }
 
-  if (existingConversation) {
-    return createSuccessResponse({
-      conversation_id: existingConversation.id,
-      created: false,
-    });
-  }
-
-  // Create new conversation
-  const { data: newConversation, error: createError } = await supabase
-    .from("conversations")
-    .insert({
-      created_by: user.id,
-      advert_id: advert_id ?? null,
-    })
-    .select("id")
-    .single();
-
-  if (createError) {
-    return handleSupabaseError(createError, ApiErrorCode.CREATE_FAILED);
-  }
-
-  // Add participants
-  const participants = [
-    { conversation_id: newConversation.id, user_id: user.id, role: "owner" as const },
-    { conversation_id: newConversation.id, user_id: peer_id, role: "peer" as const },
-  ];
-
-  const { error: participantsError } = await supabase
-    .from("conversation_participants")
-    .insert(participants);
-
-  if (participantsError) {
-    // Rollback: delete conversation if participants insert fails
-    await supabase.from("conversations").delete().eq("id", newConversation.id);
-    return handleSupabaseError(participantsError, ApiErrorCode.CREATE_FAILED);
-  }
-
-  // Log action
+  // Log action (best-effort)
   await supabase.from("logs").insert({
     user_id: user.id,
     action: "chat_start",
-    details: { conversation_id: newConversation.id, peer_id, advert_id } as never,
+    details: { conversation_id: convId, peer_id, advert_id } as never,
   });
 
   return createSuccessResponse({
-    conversation_id: newConversation.id,
-    created: true,
+    conversation_id: convId,
   });
 };
 
@@ -206,4 +167,3 @@ export const POST = withRateLimit(withUserLimit, {
   limiter: chatStartIpLimiter,
   makeKey: (_req, _userId, ip) => (ip ? ip : null),
 });
-
