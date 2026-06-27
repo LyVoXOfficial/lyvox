@@ -10,6 +10,19 @@ import Stripe from "stripe";
 
 export const runtime = "nodejs";
 
+/**
+ * Returns the ISO string for the end of the current billing period.
+ * In Stripe v19, current_period_end lives on the first SubscriptionItem,
+ * not on the Subscription object itself.
+ */
+function periodEndISO(sub: Stripe.Subscription): string {
+  const ts = sub.items.data[0]?.current_period_end;
+  if (typeof ts !== "number") {
+    throw new Error("Unable to determine current_period_end from subscription");
+  }
+  return new Date(ts * 1000).toISOString();
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const signature = req.headers.get("stripe-signature");
@@ -49,6 +62,45 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
+
+        // ── Pro subscription checkout ────────────────────────────────────────
+        if (
+          session.mode === "subscription" ||
+          session.metadata?.plan === "pro"
+        ) {
+          const userId =
+            session.client_reference_id ?? session.metadata?.user_id;
+          if (!userId) {
+            console.error(
+              "Pro subscription checkout: missing user id (client_reference_id / metadata.user_id)"
+            );
+            break;
+          }
+
+          const stripe = getStripe();
+          const sub = await stripe.subscriptions.retrieve(
+            session.subscription as string
+          );
+          const proUntil = periodEndISO(sub);
+
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .update({
+              stripe_customer_id: session.customer as string,
+              pro_until: proUntil,
+            })
+            .eq("id", userId);
+
+          if (profileError) {
+            console.error(
+              "Failed to update profile for pro subscription:",
+              profileError
+            );
+          }
+          break;
+        }
+
+        // ── One-time boost / payment checkout (existing logic) ───────────────
         const purchaseId = session.client_reference_id;
         const metadata = session.metadata || {};
 
@@ -108,7 +160,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Create benefits based on product type
-        const benefitType = product.code.startsWith("boost") ? "boost" : 
+        const benefitType = product.code.startsWith("boost") ? "boost" :
                           product.code.startsWith("premium") ? "premium" :
                           product.code.startsWith("hide_phone") ? "hide_phone" :
                           product.code.startsWith("reserve") ? "reserve" :
@@ -165,6 +217,77 @@ export async function POST(req: NextRequest) {
         break;
       }
 
+      case "customer.subscription.updated": {
+        const sub = event.data.object as Stripe.Subscription;
+        const customerId = sub.customer as string;
+        const activeStatuses: Stripe.Subscription.Status[] = [
+          "active",
+          "trialing",
+        ];
+        const proUntil = activeStatuses.includes(sub.status)
+          ? periodEndISO(sub)
+          : null;
+
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({ pro_until: proUntil })
+          .eq("stripe_customer_id", customerId);
+
+        if (profileError) {
+          console.error(
+            "Failed to update profile on subscription.updated:",
+            profileError
+          );
+        }
+        break;
+      }
+
+      case "customer.subscription.deleted": {
+        const sub = event.data.object as Stripe.Subscription;
+        const customerId = sub.customer as string;
+
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({ pro_until: null })
+          .eq("stripe_customer_id", customerId);
+
+        if (profileError) {
+          console.error(
+            "Failed to update profile on subscription.deleted:",
+            profileError
+          );
+        }
+        break;
+      }
+
+      case "invoice.paid": {
+        const invoice = event.data.object as Stripe.Invoice;
+        const subRef =
+          invoice.parent?.subscription_details?.subscription;
+        if (!subRef) {
+          // Not a subscription invoice — ignore
+          break;
+        }
+
+        const stripe = getStripe();
+        const sub = await stripe.subscriptions.retrieve(subRef as string);
+        const proUntil = periodEndISO(sub);
+        const customerId = invoice.customer as string;
+
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({ pro_until: proUntil })
+          .eq("stripe_customer_id", customerId);
+
+        if (profileError) {
+          console.error(
+            "Failed to update profile on invoice.paid:",
+            profileError
+          );
+        }
+        break;
+      }
+
       case "payment_intent.succeeded": {
         // This is handled by checkout.session.completed, but we can log it
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
@@ -174,7 +297,7 @@ export async function POST(req: NextRequest) {
 
       case "payment_intent.payment_failed": {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        
+
         // Try to find purchase by payment_intent_id
         const { data: purchase } = await supabase
           .from("purchases")
