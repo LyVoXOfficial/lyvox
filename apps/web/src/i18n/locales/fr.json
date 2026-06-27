@@ -1825,5 +1825,23 @@
       "download_data": "Télécharger vos données",
       "download_data_desc": "Téléchargez une copie de votre enregistrement de consentement et de données avant de partir."
     }
+  },
+  "team": {
+    "title": "Équipe",
+    "invite": "Inviter un membre",
+    "email_label": "Adresse e-mail",
+    "role_label": "Rôle",
+    "role_member": "Membre",
+    "role_admin": "Administrateur",
+    "invite_btn": "Inviter",
+    "pending": "En attente",
+    "remove": "Supprimer",
+    "accept_invite": "Accepter l'invitation pour {business}",
+    "invited_ok": "Invitation envoyée",
+    "user_not_found": "L'utilisateur doit d'abord s'inscrire",
+    "already_member": "Déjà membre",
+    "invite_error": "L'invitation n'a pas pu être envoyée",
+    "removed_ok": "Membre supprimé",
+    "accepted_ok": "Invitation acceptée"
   }
 }

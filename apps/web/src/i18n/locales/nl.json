@@ -1825,5 +1825,23 @@
       "download_data": "Uw gegevens downloaden",
       "download_data_desc": "Download een kopie van uw toestemmings- en gegevensrecord voordat u vertrekt."
     }
+  },
+  "team": {
+    "title": "Team",
+    "invite": "Lid uitnodigen",
+    "email_label": "E-mailadres",
+    "role_label": "Rol",
+    "role_member": "Lid",
+    "role_admin": "Beheerder",
+    "invite_btn": "Uitnodigen",
+    "pending": "In afwachting",
+    "remove": "Verwijderen",
+    "accept_invite": "Uitnodiging accepteren voor {business}",
+    "invited_ok": "Uitnodiging verstuurd",
+    "user_not_found": "Gebruiker moet zich eerst registreren",
+    "already_member": "Al een lid",
+    "invite_error": "Uitnodiging kon niet worden verstuurd",
+    "removed_ok": "Lid verwijderd",
+    "accepted_ok": "Uitnodiging geaccepteerd"
   }
 }

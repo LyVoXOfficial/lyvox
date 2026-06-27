@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProOnboardingWizard } from "./ProOnboardingWizard";
 import { BusinessCabinet } from "./BusinessCabinet";
+import { TeamManager } from "./TeamManager";
 import { isCapabilityEnabled } from "@/lib/capabilities";
 import { signMediaUrls } from "@/lib/media/signMediaUrls";
 import { isPro } from "@/lib/billing/proStatus";
@@ -181,18 +182,93 @@ export default async function ProPage() {
       }));
     }
 
+    // Derive the viewer's role in this business
+    const viewerMemberRow = members.find((m) => m.user_id === user.id);
+    const viewerRole: "owner" | "admin" | "member" =
+      viewerMemberRow?.role === "owner"
+        ? "owner"
+        : viewerMemberRow?.role === "admin"
+          ? "admin"
+          : "member";
+
     return (
       <main className="container mx-auto max-w-3xl p-4">
         <BusinessCabinet
           business={business}
           listings={listings}
           members={members}
+          viewerId={user.id}
+          viewerRole={viewerRole}
           proSubscriptionsEnabled={isCapabilityEnabled("pro_subscriptions")}
           isPro={userIsPro}
           proUntil={proUntil}
           locale={locale}
           messages={messages}
         />
+      </main>
+    );
+  }
+
+  // ── No owned business — check for pending invites to other businesses ──────
+  // An invitee lands on this page but has no business of their own. We show
+  // any pending invites at the top so the Accept banner is reachable.
+  const { data: pendingInviteRows } = await supabase
+    .from("business_members")
+    .select("business_id, role, accepted_at")
+    .eq("user_id", user.id)
+    .is("accepted_at", null)
+    .limit(5);
+
+  if (pendingInviteRows && pendingInviteRows.length > 0) {
+    // Load names of those businesses
+    const businessIds = pendingInviteRows.map((r) => r.business_id);
+    const { data: pendingBusinessRows } = await supabase
+      .from("businesses")
+      .select("id, legal_name, trade_name")
+      .in("id", businessIds);
+
+    const bizNameMap = new Map<string, string>(
+      (pendingBusinessRows ?? []).map((b) => [
+        b.id,
+        b.trade_name ?? b.legal_name ?? b.id,
+      ]),
+    );
+
+    return (
+      <main className="container mx-auto max-w-3xl p-4 space-y-4">
+        {pendingInviteRows.map((inv) => {
+          const bizName = bizNameMap.get(inv.business_id) ?? inv.business_id;
+          // Minimal member list — just the viewer's pending row so TeamManager
+          // shows the Accept banner without leaking full team data.
+          const pendingMembers: BusinessMember[] = [
+            {
+              user_id: user.id,
+              role: inv.role ?? "member",
+              accepted_at: null,
+              display_name: null,
+            },
+          ];
+          return (
+            <div
+              key={inv.business_id}
+              className="rounded-md border border-primary/20 bg-primary/5 p-4"
+            >
+              <p className="mb-3 text-sm font-medium text-foreground">
+                {bizName}
+              </p>
+              <TeamManager
+                businessId={inv.business_id}
+                businessName={bizName}
+                members={pendingMembers}
+                viewerId={user.id}
+                viewerRole="member"
+                locale={locale}
+                messages={messages}
+              />
+            </div>
+          );
+        })}
+        <ProOnboardingWizard locale={locale} messages={messages} />
       </main>
     );
   }

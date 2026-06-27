@@ -1825,5 +1825,23 @@
       "download_data": "Download your data",
       "download_data_desc": "Download a copy of your consent and data record before you leave."
     }
+  },
+  "team": {
+    "title": "Team",
+    "invite": "Invite member",
+    "email_label": "Email address",
+    "role_label": "Role",
+    "role_member": "Member",
+    "role_admin": "Admin",
+    "invite_btn": "Invite",
+    "pending": "Pending",
+    "remove": "Remove",
+    "accept_invite": "Accept invitation to {business}",
+    "invited_ok": "Invitation sent",
+    "user_not_found": "User must register first",
+    "already_member": "Already a member",
+    "invite_error": "Could not send invitation",
+    "removed_ok": "Member removed",
+    "accepted_ok": "Invitation accepted"
   }
 }

@@ -8,6 +8,7 @@ import type { Locale } from "@/lib/i18n";
 import { formatDate } from "@/i18n/format";
 import { BusinessEditForm } from "./BusinessEditForm";
 import { UpgradeProButton } from "./UpgradeProButton";
+import { TeamManager } from "./TeamManager";
 
 export type BusinessMember = {
   user_id: string;
@@ -27,6 +28,8 @@ type Props = {
   };
   listings: ProfileAdvert[];
   members: BusinessMember[];
+  viewerId: string;
+  viewerRole: "owner" | "admin" | "member";
   proSubscriptionsEnabled: boolean;
   isPro: boolean;
   proUntil: string | null;
@@ -38,6 +41,8 @@ export function BusinessCabinet({
   business,
   listings,
   members,
+  viewerId,
+  viewerRole,
   proSubscriptionsEnabled,
   isPro,
   proUntil,
@@ -135,24 +140,15 @@ export function BusinessCabinet({
           </div>
         </CardHeader>
         <CardContent>
-          {members.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              {tf("pro.cabinet.team_empty", "No team members yet.")}
-            </p>
-          ) : (
-            <ul className="divide-y divide-border/50">
-              {members.map((member) => (
-                <li key={member.user_id} className="flex items-center justify-between py-2 text-sm">
-                  <span className="font-medium text-foreground">
-                    {member.accepted_at
-                      ? (member.display_name ?? tf("pro.cabinet.unnamed_member", "Member"))
-                      : tf("pro.cabinet.pending_invite", "Pending invite")}
-                  </span>
-                  <span className="capitalize text-muted-foreground">{member.role}</span>
-                </li>
-              ))}
-            </ul>
-          )}
+          <TeamManager
+            businessId={business.id}
+            businessName={business.trade_name ?? business.legal_name ?? ""}
+            members={members}
+            viewerId={viewerId}
+            viewerRole={viewerRole}
+            locale={locale}
+            messages={messages}
+          />
         </CardContent>
       </Card>
 
