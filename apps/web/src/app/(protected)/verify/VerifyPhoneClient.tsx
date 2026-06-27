@@ -82,8 +82,11 @@ export function VerifyPhoneClient({ userId, currentPhone }: Props) {
       if (error) {
         toast.error(tr("verify.code_incorrect", "The code is incorrect. Try again."));
       } else {
-        await supabase.from("profiles").update({ verified_phone: true }).eq("id", userId);
-
+        const res = await fetch("/api/phone/confirm-native", { method: "POST" });
+        if (!res.ok) {
+          toast.error(tr("verify.code_verify_error", "Could not verify the code."));
+          return;
+        }
         toast.success(tr("verify.phone_verified", "Phone number verified."));
         window.location.reload();
       }
