@@ -12,7 +12,7 @@ export type DeckCard = {
   price: number | null;
   currency: string | null;
   location: string | null;
-  image: string | null;
+  images: string[];
   createdAt: string | null;
   sellerVerified: boolean;
   likeCount: number;
@@ -27,6 +27,7 @@ type RawSearchItem = {
   currency?: string | null;
   location?: string | null;
   image?: string | null;
+  images?: string[] | null;
   created_at?: string | null;
   seller_verified?: boolean | null;
   like_count?: number | null;
@@ -35,13 +36,19 @@ type RawSearchItem = {
 };
 
 export function mapSearchItemToDeckCard(item: RawSearchItem): DeckCard {
+  const images =
+    Array.isArray(item.images) && item.images.length > 0
+      ? item.images
+      : item.image
+        ? [item.image]
+        : [];
   return {
     id: item.id,
     title: item.title,
     price: item.price ?? null,
     currency: item.currency ?? null,
     location: item.location ?? null,
-    image: item.image ?? null,
+    images,
     createdAt: item.created_at ?? null,
     sellerVerified: Boolean(item.seller_verified),
     likeCount: item.like_count ?? 0,

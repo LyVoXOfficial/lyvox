@@ -13,7 +13,7 @@ export type TasteCard = {
   price: number | null;
 };
 
-export type TasteSignal = "like" | "favorite" | "pass";
+export type TasteSignal = "like" | "favorite" | "pass" | "down" | "contact";
 
 const KEY = "lyvox:taste";
 const PRICE_BAND = 50;
@@ -52,13 +52,23 @@ function dimensionKeys(card: TasteCard): string[] {
   return keys;
 }
 
-const DELTA: Record<TasteSignal, number> = { like: 1, favorite: 2, pass: -1 };
+const DELTA: Record<TasteSignal, number> = { like: 1, favorite: 2, pass: -1, down: -2, contact: 2 };
 
 export function recordSignal(card: TasteCard, kind: TasteSignal): void {
   const delta = DELTA[kind];
   const weights = read();
   for (const k of dimensionKeys(card)) {
     weights[k] = (weights[k] ?? 0) + delta;
+  }
+  write(weights);
+}
+
+/** Roll back a previously recorded signal (for undo). */
+export function undoSignal(card: TasteCard, kind: TasteSignal): void {
+  const delta = DELTA[kind];
+  const weights = read();
+  for (const k of dimensionKeys(card)) {
+    weights[k] = (weights[k] ?? 0) - delta;
   }
   write(weights);
 }

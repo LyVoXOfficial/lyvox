@@ -47,6 +47,13 @@ export function addSeenAdverts(ids: string[]): void {
   write(capped);
 }
 
+/** Remove a single id from the seen list (for undo). */
+export function removeSeen(id: string): void {
+  const existing = read();
+  const filtered = existing.filter((v) => v !== id);
+  if (filtered.length !== existing.length) write(filtered);
+}
+
 export function clearSeenAdverts(): void {
   if (typeof window === "undefined") return;
   try {
