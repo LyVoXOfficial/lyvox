@@ -90,7 +90,6 @@ async function trackView(
     {
       advert_id: advertId,
       user_id: user?.id ?? null,
-      ip_address: ip ?? null,
       user_agent: userAgent,
       viewer_key: viewerKey,
       view_hour: viewHour,

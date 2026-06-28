@@ -133,4 +133,12 @@ describe("POST /api/adverts/[id]/view — F11 dedup", () => {
     expect(body.ok).toBe(true);
     expect(body.data.message).toMatch(/failed.*non-critical/i);
   });
+
+  it("does not write raw ip_address to advert_views (B4 GDPR)", async () => {
+    getUserMock.mockResolvedValue({ data: { user: null } });
+    await POST(makeReq(), makeCtx());
+
+    const [row] = upsertMock.mock.calls[0] as [Record<string, unknown>, unknown];
+    expect(row).not.toHaveProperty("ip_address");
+  });
 });
