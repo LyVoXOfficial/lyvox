@@ -92,6 +92,25 @@ JSON-LD generators live in `lib/seo/catalog/` (one file per category domain: `co
 - After schema changes: `pnpm gen:types` to regenerate `supabase/types/database.types.ts`.
 - Import DB types via `lib/supabaseTypes.ts` (`Tables<'table_name'>`, `TablesInsert<>`, `TablesUpdate<>`).
 
+## Code navigation via graphify
+
+The codebase has a pre-built knowledge graph at `graphify-out/` (rebuilt automatically after each commit via `.husky/post-commit`).
+
+**Rule: before any broad search or exploration, consult the graph first.**
+
+1. **Orient** — read `graphify-out/wiki/index.md` for a community map of the codebase, then open the relevant community article under `graphify-out/wiki/` to see which files, functions, and god-nodes belong to that cluster.
+2. **Query** — use graph commands to navigate:
+   - `/graphify query "how does rate limiting work"` — BFS traversal, broad context
+   - `/graphify explain "withRateLimit"` — plain-language explanation of a node
+   - `/graphify path "AdvertContactPanel" "ChatStartResponse"` — shortest path between two symbols
+3. **Drill** — only then open specific files with `Grep`/`Read` to get exact lines and make edits.
+4. **Staleness** — the graph is rebuilt on commit. If it diverges from the code (renamed files, new modules), trust the code and suggest `/graphify apps/web/src --update` to refresh.
+
+**God nodes** (most connected — check these first when debugging cross-cutting issues):
+consult `graphify-out/GRAPH_REPORT.md` → "God Nodes" section for the current top list.
+
+**Do NOT** run broad `Grep` sweeps across `apps/web/src` before checking the graph; the graph finds clusters, call chains, and bridge nodes that plain text search misses.
+
 ## Key blockers / golden rules
 
 - **⛔ No production money-flow code** until F3 (PSD2/AML legal gate) is closed — see `docs/features/escrow-legal-gate.md`. Schema design and provider abstraction are allowed.
