@@ -8,6 +8,8 @@ import {
 } from "@/lib/apiErrors";
 import { validateRequest } from "@/lib/validations";
 import { createReviewSchema } from "@/lib/validations/reviews";
+import { trackServerEvent } from "@/lib/analytics/trackServerEvent";
+import { ANALYTICS_EVENTS } from "@/lib/analytics/events";
 
 export const runtime = "nodejs";
 
@@ -122,7 +124,13 @@ const baseHandler = async (req: Request): Promise<Response> => {
     return createErrorResponse(ApiErrorCode.INTERNAL_ERROR, { status: 500 });
   }
 
-  // 5. Success
+  // 5. Success — fire analytics event (best-effort, non-blocking)
+  void trackServerEvent(
+    ANALYTICS_EVENTS.REVIEW_CREATED,
+    { advert_id, rating },
+    { userId: user.id, dedupKey: `review:${advert_id}:${user.id}` },
+  );
+
   return createSuccessResponse({ review_id: data });
 };
 
