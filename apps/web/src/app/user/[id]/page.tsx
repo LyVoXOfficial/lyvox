@@ -11,6 +11,8 @@ import { isViewerVerified } from "@/lib/auth/requireVerified";
 import SellerIdentityGate from "@/components/trust/SellerIdentityGate";
 import { deriveSellerBadges, type SellerBadge } from "@/lib/profile/sellerBadges";
 import { TraderPanel, type BusinessPublicData } from "@/components/business/TraderPanel";
+import { TrustScoreBadge } from "@/components/trust/TrustScoreBadge";
+import { TrustScoreCard } from "@/components/trust/TrustScoreCard";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -25,6 +27,7 @@ type PublicProfileData = {
   verified_phone: boolean | null;
   rating: number | null;
   trust_score: number;
+  last_computed_at: string | null;
   adverts_count: number;
   reviews_count: number;
   seller_type: "individual" | "business" | null;
@@ -71,13 +74,15 @@ async function loadPublicProfileData(userId: string): Promise<PublicProfileData 
   }
 
   // Load trust score (public read access via RLS)
-  const { data: trustScoreData } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- last_computed_at not yet in generated types (B5)
+  const { data: trustScoreData } = await (supabase as any)
     .from("trust_score")
-    .select("score")
+    .select("score, last_computed_at")
     .eq("user_id", userId)
-    .maybeSingle();
+    .maybeSingle() as { data: { score: number; last_computed_at: string | null } | null };
 
   const trustScore = trustScoreData?.score ?? 0;
+  const lastComputedAt = trustScoreData?.last_computed_at ?? null;
 
   // Load active adverts count and sample (only active for public view)
   const { data: activeAdverts } = await supabase
@@ -217,6 +222,7 @@ async function loadPublicProfileData(userId: string): Promise<PublicProfileData 
     seller_type: (profile.seller_type as "individual" | "business" | null) ?? null,
     itsme_verified: profile.itsme_verified ?? null,
     trust_score: trustScore,
+    last_computed_at: lastComputedAt,
     adverts_count: adverts.length, // count of loaded adverts (limited to 12)
     reviews_count: reviewsList.length, // count of loaded reviews (limited to 20)
     active_adverts: adverts.map((ad) => ({
@@ -411,6 +417,7 @@ export default async function PublicProfilePage({
     verified_phone,
     rating,
     trust_score,
+    last_computed_at,
     adverts_count,
     reviews_count,
     active_adverts,
@@ -477,9 +484,6 @@ export default async function PublicProfilePage({
   const displayReviews = canSeeIdentity
     ? reviews
     : reviews.map((r) => ({ ...r, author: r.author ? { ...r.author, display_name: null } : null }));
-
-  // Suppress unused warning — trust_score is loaded and available for future use
-  void trust_score;
 
   return (
     <main className="mx-auto w-full max-w-[1200px] px-4 py-6 md:px-6 md:py-8">
@@ -644,6 +648,8 @@ export default async function PublicProfilePage({
                   }
                 />
               ))}
+              {/* Trust tier badge — always visible to all visitors */}
+              <TrustScoreBadge score={trust_score} t={t} />
             </div>
           </div>
         </div>
@@ -706,8 +712,22 @@ export default async function PublicProfilePage({
           )}
         </div>
 
-        {/* RIGHT: sidebar — TraderPanel (юр) + reviews */}
+        {/* RIGHT: sidebar — Trust card + TraderPanel (юр) + reviews */}
         <div className="flex flex-col gap-4">
+
+          {/* Trust & Reputation card — visible to all visitors */}
+          <TrustScoreCard
+            score={trust_score}
+            lastComputedAt={last_computed_at}
+            verifiedEmail={verified_email ?? false}
+            verifiedPhone={verified_phone ?? false}
+            itsmeVerified={itsme_verified ?? false}
+            createdAt={created_at}
+            activeListingsCount={active_adverts.length}
+            isOwnProfile={isOwnProfile}
+            locale={locale}
+            t={t}
+          />
 
           {/* DSA Trader Panel — public for all viewers (юр only) */}
           {businessHasPublicName && (
