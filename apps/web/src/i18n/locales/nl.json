@@ -134,7 +134,11 @@
     "emptyBrowse": "Bekijk categorieГ«n of probeer een andere zoekterm om te vinden wat u zoekt.",
     "emptyWithFilters": "Probeer enkele filters te verwijderen of uw prijsbereik te verruimen.",
     "inBelgium": "in BelgiГ«",
-    "applied": "Toegepast"
+    "applied": "Toegepast",
+    "allResults": "Alle resultaten",
+    "removeFilter": "Filter verwijderen",
+    "zeroResultSaveTitle": "Ontvang een melding bij nieuwe overeenkomsten",
+    "loadMore": "Meer laden"
   },
   "contact": {
     "price": "Prijs",
@@ -1475,7 +1479,11 @@
     "subcategories": "SubcategorieГ«n",
     "listings": "Advertenties",
     "noListings": "Er zijn nog geen actieve advertenties in deze categorie. Plaats als eerste een advertentie.",
-    "no_categories": "Geen categorieГ«n beschikbaar."
+    "no_categories": "Geen categorieГ«n beschikbaar.",
+    "searchWithFilters": "Zoeken met filters",
+    "prevPage": "Vorige pagina",
+    "nextPage": "Volgende pagina",
+    "page": "Pagina {page} van {total}"
   },
   "report": {
     "button": "Melden",

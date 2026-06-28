@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useI18n } from "@/i18n";
@@ -10,6 +10,7 @@ import { logger } from "@/lib/errorLogger";
 import { mapSearchItemToCard } from "@/lib/advertCards";
 import AdsGrid from "@/components/ads-grid";
 import { AdsGridSkeleton } from "@/components/marketplace-grid-states";
+import { ANALYTICS_EVENTS } from "@/lib/analytics/events";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -29,6 +30,8 @@ import {
 } from "@/components/ui/pagination";
 import { Loader2, SlidersHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const ANTI_SOCIAL_THRESHOLD = 10;
 
 type SearchResult = {
   id: string;
@@ -173,9 +176,26 @@ export default function SearchPage() {
       const formattedResults: SearchResult[] = data.data.items.map(mapSearchItemToCard);
 
       setResults(formattedResults);
-
       setTotal(data.data.total);
       setHasMore(data.data.hasMore);
+
+      // Fire analytics only on new searches (not pagination fetches)
+      if (page === 0) {
+        const hasFilters = Boolean(categoryId || priceMin || priceMax || location || verifiedOnlyFilter || condition);
+        void fetch("/api/analytics/track", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            event_name: ANALYTICS_EVENTS.SEARCH_PERFORMED,
+            props: {
+              result_count: data.data.total,
+              zero_result: data.data.total === 0,
+              sort: sortBy,
+              has_filters: hasFilters,
+            },
+          }),
+        }).catch(() => {});
+      }
     } catch (err) {
       logger.error("Search error", {
         component: "SearchPage",
@@ -291,6 +311,9 @@ export default function SearchPage() {
     router.push(`/search?${params.toString()}`);
   };
 
+  // Sentinel ref for IntersectionObserver-based infinite scroll
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
   // Infinite scroll for mobile - load more results
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [allResults, setAllResults] = useState<SearchResult[]>([]);
@@ -324,37 +347,34 @@ export default function SearchPage() {
     }
   }, [results, isMobile, page]);
 
-  // Infinite scroll handler
+  // Clear isLoadingMore when a fetch completes
+  useEffect(() => {
+    if (!loading) setIsLoadingMore(false);
+  }, [loading]);
+
+  // IntersectionObserver-based infinite scroll sentinel
   useEffect(() => {
     if (!isMobile || !hasMore || loading || isLoadingMore) return;
 
-    let scrollTimer: NodeJS.Timeout;
-    const handleScroll = () => {
-      clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(() => {
-        const scrollHeight = document.documentElement.scrollHeight;
-        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-        const clientHeight = document.documentElement.clientHeight;
+    const el = sentinelRef.current;
+    if (!el) return;
 
-        // Load more when user is 300px from bottom
-        if (scrollHeight - scrollTop - clientHeight < 300 && !isLoadingMore) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
           setIsLoadingMore(true);
           const nextPage = page + 1;
           const params = new URLSearchParams(searchParams.toString());
           params.set("page", nextPage.toString());
           router.push(`/search?${params.toString()}`, { scroll: false });
-          // Reset loading flag after fetch completes
-          setTimeout(() => setIsLoadingMore(false), 2000);
         }
-      }, 100);
-    };
+      },
+      { rootMargin: "300px" },
+    );
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      clearTimeout(scrollTimer);
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [isMobile, hasMore, loading, page, isLoadingMore, searchParams, router]);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isMobile, hasMore, loading, isLoadingMore, page, searchParams, router]);
 
   // Calculate pagination info
   const totalPages = Math.ceil(total / limit);
@@ -482,14 +502,19 @@ export default function SearchPage() {
               translate("search.results", "Search results")
             )}
           </h1>
-          {!loading && (
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              {total > 0
-                ? t("search.showing", { start: startItem, end: endItem, total }) ||
-                  `Showing ${startItem}–${endItem} of ${total}`
-                : t("search.noResults") || "No results found"}
-            </p>
-          )}
+          <p
+            className="mt-0.5 text-sm text-muted-foreground"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {!loading && (total > 0
+              ? (total < ANTI_SOCIAL_THRESHOLD
+                ? translate("search.allResults", "All results")
+                : t("search.showing", { start: startItem, end: endItem, total }) ||
+                  `Showing ${startItem}–${endItem} of ${total}`)
+              : !loading && (t("search.noResults") || "No results found")
+            )}
+          </p>
         </div>
 
         {/* Right: sort dropdown + SaveSearch + Discover + mobile filter button */}
@@ -576,6 +601,7 @@ export default function SearchPage() {
             <button
               key={chip.key}
               type="button"
+              aria-label={`${translate("search.removeFilter", "Remove filter")}: ${chip.label}`}
               onClick={() => clearParams(chip.params)}
               className="inline-flex items-center gap-1.5 text-xs font-medium text-secondary-foreground transition hover:text-primary"
               style={{
@@ -611,18 +637,10 @@ export default function SearchPage() {
 
         {/* Results area */}
         <main className="min-w-0 flex-1">
-          {/* Loading state */}
+          {/* Loading state — skeleton grid matches real layout */}
           {loading && (
-            <div
-              className="flex items-center justify-center py-16"
-              style={{
-                background: "var(--card)",
-                border: "1px solid var(--border)",
-                borderRadius: "var(--r)",
-                boxShadow: "var(--shS)",
-              }}
-            >
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <div aria-busy="true" aria-label={translate("common.loading", "Loading...")}>
+              <AdsGridSkeleton count={8} />
             </div>
           )}
 
@@ -648,37 +666,63 @@ export default function SearchPage() {
             </div>
           )}
 
+          {/* Zero-result state — retention CTA with SaveSearch */}
+          {!loading && !error && total === 0 && (
+            <div
+              className="space-y-5 p-8 text-center"
+              style={{
+                background: "var(--card)",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--r)",
+                boxShadow: "var(--shS)",
+              }}
+            >
+              <div className="space-y-2">
+                <p className="text-base font-semibold">
+                  {translate("search.emptyTitle", "Nothing matched your search")}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {activeFilterChips.length > 0
+                    ? translate("search.emptyWithFilters", "Try removing some filters or broadening your price range.")
+                    : translate("search.emptyBrowse", "Browse categories or try a different search term to find what you need.")}
+                </p>
+              </div>
+              <div className="flex flex-col items-center gap-3">
+                <p className="text-sm font-medium text-muted-foreground">
+                  {translate("search.zeroResultSaveTitle", "Get notified when new matches appear")}
+                </p>
+                <SaveSearchButton
+                  query={query}
+                  filters={{
+                    category_id: categoryId,
+                    price_min: priceMin ? Number(priceMin) : null,
+                    price_max: priceMax ? Number(priceMax) : null,
+                    location,
+                    verified_only: verifiedOnlyFilter || null,
+                    condition: condition || null,
+                    sort_by: sortBy,
+                  }}
+                />
+              </div>
+              <div className="flex flex-wrap justify-center gap-2">
+                {activeFilterChips.length > 0 && (
+                  <Button variant="outline" size="sm" onClick={() => router.push("/search")}>
+                    {translate("search.clearFilters", "Clear filters")}
+                  </Button>
+                )}
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/">{translate("search.browseCategories", "Browse categories")}</Link>
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Results grid — 2-col mobile, 3-col desktop (rail already takes 262px) */}
-          {!loading && !error && (
+          {!loading && !error && total > 0 && (
             <>
               <AdsGrid
                 items={isMobile ? allResults : results}
                 gridColsClass="grid-cols-2 lg:grid-cols-3"
-                emptyTitle={translate("search.emptyTitle", "Nothing matched your search")}
-                emptyDescription={
-                  activeFilterChips.length > 0
-                    ? translate(
-                        "search.emptyWithFilters",
-                        "Try removing some filters or broadening your price range.",
-                      )
-                    : translate(
-                        "search.emptyBrowse",
-                        "Browse categories or try a different search term to find what you need.",
-                      )
-                }
-                primaryAction={{
-                  href: "/",
-                  label: translate("search.browseCategories", "Browse categories"),
-                }}
-                secondaryAction={
-                  activeFilterChips.length > 0
-                    ? {
-                        href: "/search",
-                        label: translate("search.clearFilters", "Clear filters"),
-                        variant: "outline",
-                      }
-                    : undefined
-                }
               />
 
               {/* Pagination (desktop only) */}
@@ -720,9 +764,13 @@ export default function SearchPage() {
                 </div>
               )}
 
-              {/* Infinite scroll indicator (mobile) */}
+              {/* IntersectionObserver sentinel for mobile infinite scroll */}
               {isMobile && hasMore && (
-                <div className="mt-8 flex items-center justify-center">
+                <div
+                  ref={sentinelRef}
+                  className="mt-8 flex items-center justify-center"
+                  aria-hidden="true"
+                >
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
               )}
