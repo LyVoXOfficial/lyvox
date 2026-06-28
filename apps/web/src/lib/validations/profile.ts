@@ -9,11 +9,19 @@ export const getUserAdvertsQuerySchema = z.object({
   status: z.enum(["all", "active", "draft", "archived"]).optional().default("all"),
 });
 
+const discoverPrefsSchema = z.object({
+  mode: z.enum(["standard", "simple", "buttons"]).optional(),
+  haptics: z.boolean().optional(),
+  ask_reason_down: z.boolean().optional(),
+  confirm_actions: z.boolean().optional(),
+});
+
 /**
- * Schema for updating profile display name
+ * Schema for updating profile display name and discover preferences
  */
 export const updateProfileSchema = z.object({
   display_name: z.string().trim().min(1).max(100).optional(),
+  discover_prefs: discoverPrefsSchema.optional(),
 });
 
 /**

@@ -1630,7 +1630,41 @@
       "cheapest": "Moins chers"
     },
     "error_title": "Une erreur s'est produite",
-    "error_body": "Impossible de charger plus d'annonces."
+    "error_body": "Impossible de charger plus d'annonces.",
+    "less_like_this": "Moins de ça",
+    "undo": "Annuler",
+    "verified_seller": "Vendeur vérifié",
+    "new_badge": "Nouveau",
+    "safe_deal_available": "Transaction sécurisée disponible",
+    "empty_cta_reset": "Afficher à nouveau",
+    "empty_cta_drop": "Essayer une autre collection",
+    "reason": {
+      "too_expensive": "Trop cher",
+      "wrong_category": "Mauvaise catégorie",
+      "already_have": "Je l'ai déjà",
+      "hide_seller": "Masquer le vendeur",
+      "not_interested": "Pas intéressé"
+    },
+    "coach": {
+      "title": "Comment fonctionne Discover",
+      "right": "Glisser à droite — j'aime",
+      "left": "Glisser à gauche — passer",
+      "up": "Glisser vers le haut — actions",
+      "down": "Glisser vers le bas — moins de ça",
+      "tap": "Appuyer — ouvrir l'annonce",
+      "cta": "Compris"
+    },
+    "settings": {
+      "title": "Paramètres Discover",
+      "mode": "Mode de contrôle",
+      "standard": "Standard (4 directions)",
+      "simple": "Simple (gauche/droite)",
+      "buttons": "Boutons seulement",
+      "haptics": "Retour vibratoire",
+      "ask_reason": "Demander pourquoi sur ‘Moins de ça’",
+      "confirm_actions": "Confirmer les actions"
+    },
+    "trust_anchor": "Chattez et payez uniquement sur LyVoX — c’est plus sûr."
   },
   "saved": {
     "save_button": "Enregistrer la recherche",

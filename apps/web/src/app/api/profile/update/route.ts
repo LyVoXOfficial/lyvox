@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     return createErrorResponse(ApiErrorCode.UNAUTH, { status: 401 });
   }
 
-  const parseResult = await safeJsonParse<{ display_name?: unknown }>(req);
+  const parseResult = await safeJsonParse<{ display_name?: unknown; discover_prefs?: unknown }>(req);
   if (!parseResult.success) {
     return parseResult.response;
   }
@@ -31,14 +31,14 @@ export async function POST(req: Request) {
     return validationResult.response;
   }
 
-  const { display_name } = validationResult.data;
+  const { display_name, discover_prefs } = validationResult.data;
 
-  const payload = {
-    id: user.id,
-    display_name: display_name ?? null,
-  };
+  const payload: Record<string, unknown> = { id: user.id };
+  if (display_name !== undefined) payload.display_name = display_name;
+  if (discover_prefs !== undefined) payload.discover_prefs = discover_prefs;
 
-  const { error } = await supabase.from("profiles").upsert(payload, {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await supabase.from("profiles").upsert(payload as any, {
     onConflict: "id",
   });
 

@@ -1630,7 +1630,41 @@
       "cheapest": "GГјnstigste"
     },
     "error_title": "Etwas ist schiefgelaufen",
-    "error_body": "Weitere Anzeigen konnten nicht geladen werden."
+    "error_body": "Weitere Anzeigen konnten nicht geladen werden.",
+    "less_like_this": "Weniger davon",
+    "undo": "Rückgängig",
+    "verified_seller": "Verifizierter Verkäufer",
+    "new_badge": "Neu",
+    "safe_deal_available": "Sicheres Geschäft verfügbar",
+    "empty_cta_reset": "Erneut anzeigen",
+    "empty_cta_drop": "Andere Kollektion ausprobieren",
+    "reason": {
+      "too_expensive": "Zu teuer",
+      "wrong_category": "Falsche Kategorie",
+      "already_have": "Habe ich bereits",
+      "hide_seller": "Verkäufer ausblenden",
+      "not_interested": "Kein Interesse"
+    },
+    "coach": {
+      "title": "So funktioniert Discover",
+      "right": "Rechts wischen — gefällt mir",
+      "left": "Links wischen — überspringen",
+      "up": "Nach oben wischen — Aktionen",
+      "down": "Nach unten wischen — weniger davon",
+      "tap": "Tippen — Inserat öffnen",
+      "cta": "Verstanden"
+    },
+    "settings": {
+      "title": "Discover-Einstellungen",
+      "mode": "Steuerungsmodus",
+      "standard": "Standard (4 Richtungen)",
+      "simple": "Einfach (links/rechts)",
+      "buttons": "Nur Schaltflächen",
+      "haptics": "Vibrationsrückmeldung",
+      "ask_reason": "Warum bei ‘Weniger davon’ fragen",
+      "confirm_actions": "Aktionen bestätigen"
+    },
+    "trust_anchor": "Chatten und zahlen Sie nur auf LyVoX — so sind Sie sicherer."
   },
   "saved": {
     "save_button": "Suche speichern",

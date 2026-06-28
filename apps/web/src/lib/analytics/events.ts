@@ -16,6 +16,28 @@ export const ANALYTICS_EVENTS = {
   /** User liked / bookmarked an advert. props: { advert_id } */
   ADVERT_LIKED: "advert_liked",
 
+  // ── Discover (swipe deck) events — PRD 01 ────────────────────────────────
+  /** User opened the Discover swipe deck. props: { drop } */
+  DISCOVER_OPEN: "discover_open",
+  /** User swiped in the deck. props: { direction, advert_id, category_id, seller_verified, position_in_session, via, dwell_ms } */
+  DISCOVER_SWIPE: "discover_swipe",
+  /** User undid a swipe. props: { undone_direction, advert_id } */
+  DISCOVER_UNDO: "discover_undo",
+  /** User opened the listing from the action sheet. props: { advert_id } */
+  DISCOVER_ACTION_OPEN: "discover_action_open",
+  /** User started a message from the action sheet. props: { advert_id, with_offer } */
+  DISCOVER_ACTION_MESSAGE: "discover_action_message",
+  /** User paged through photos on a card. props: { advert_id, photo_index } */
+  DISCOVER_PHOTO_PAGED: "discover_photo_paged",
+  /** User changed the active Drop. props: { from, to } */
+  DISCOVER_DROP_CHANGE: "discover_drop_change",
+  /** Deck reached empty state. props: { drop, reason: end|error } */
+  DISCOVER_EMPTY: "discover_empty",
+  /** User dismissed the coach-mark. props: {} */
+  DISCOVER_COACHMARK_DISMISSED: "discover_coachmark_dismissed",
+  /** User changed discover settings. props: { mode, haptics, ask_reason_down, confirm_actions } */
+  DISCOVER_PREFS_CHANGED: "discover_prefs_changed",
+
   // ── Contact funnel ────────────────────────────────────────────────────────
   /** User tapped "Contact seller" — conversation created. props: { advert_id, conversation_id } */
   CONTACT_START: "contact_start",

@@ -8,6 +8,11 @@ const fromMock = vi.fn();
 vi.mock("@/lib/supabaseServer", () => ({
   supabaseServer: async () => ({
     auth: { getUser: getUserMock },
+  }),
+}));
+
+vi.mock("@/lib/supabaseService", () => ({
+  supabaseService: async () => ({
     from: fromMock,
   }),
 }));
