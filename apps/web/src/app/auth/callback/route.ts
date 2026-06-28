@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { logger } from "@/lib/errorLogger";
 import { supabaseService } from "@/lib/supabaseService";
-import type { Database } from "@/lib/supabaseTypes";
+import type { Database, TablesUpdate } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
 
@@ -142,12 +142,13 @@ export async function GET(request: NextRequest) {
         // after the lock_profiles_columns migration — use the service-role client here.
         const svc = await supabaseService();
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const updatePayload: any = {
+        // itsme_sub is a new column (migration 20260628110000); not yet in generated
+        // DB types. The intersection adds it temporarily — remove after pnpm gen:types.
+        type ItsmeProfileUpdate = TablesUpdate<"profiles"> & { itsme_sub?: string };
+        const updatePayload: ItsmeProfileUpdate = {
           itsme_verified: true,
           itsme_kyc_level: itsmeKycLevel,
         };
-        // Only write itsme_sub when present (not yet in generated DB types; run pnpm gen:types)
         if (itsmeSub) {
           updatePayload.itsme_sub = itsmeSub;
         }

@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { getStripe } from "@/lib/stripe/client";
 import { supabaseService } from "@/lib/supabaseService";
 import {
@@ -28,12 +29,6 @@ function periodEndISO(sub: Stripe.Subscription): string | null {
   return new Date(ts * 1000).toISOString();
 }
 
-// ── F1: webhook_events helper ─────────────────────────────────────────────────
-// The table is new (migration 20260628100000); not yet in generated types.
-// Run `pnpm gen:types` after applying the migration to remove this cast.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnySupabase = { from: (table: string) => any };
-
 /**
  * F1 idempotency gate.
  *
@@ -45,9 +40,13 @@ type AnySupabase = { from: (table: string) => any };
  * processed_at = NULL — Stripe retries will be admitted through the gate and
  * re-run the handler. A successfully completed event has processed_at IS NOT NULL
  * and is immediately skipped on re-delivery.
+ *
+ * webhook_events is a new table (migration 20260628100000); not yet in generated
+ * types. SupabaseClient without explicit type params accepts any table name.
+ * Run `pnpm gen:types` after applying the migration to get full type safety here.
  */
 async function idempotencyGate(
-  supabase: AnySupabase,
+  supabase: SupabaseClient,
   event: Stripe.Event,
 ): Promise<"process" | "skip"> {
   const we = supabase.from("webhook_events");
@@ -89,7 +88,7 @@ async function idempotencyGate(
 
 /** Mark an event as fully processed. Called AFTER business logic succeeds. */
 async function markWebhookProcessed(
-  supabase: AnySupabase,
+  supabase: SupabaseClient,
   eventId: string,
 ): Promise<void> {
   const { error } = await supabase
@@ -140,7 +139,7 @@ export async function POST(req: NextRequest) {
   const supabase = await supabaseService();
 
   // ── F1: Idempotency gate ──────────────────────────────────────────────────
-  const gate = await idempotencyGate(supabase as unknown as AnySupabase, event);
+  const gate = await idempotencyGate(supabase, event);
   if (gate === "skip") {
     return createSuccessResponse({ received: true, skipped: true });
   }
@@ -438,7 +437,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ── F1: Mark as fully processed — set AFTER business logic succeeds ──────
-    await markWebhookProcessed(supabase as unknown as AnySupabase, event.id);
+    await markWebhookProcessed(supabase, event.id);
 
     return createSuccessResponse({ received: true });
   } catch (error) {

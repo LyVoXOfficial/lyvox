@@ -21,6 +21,10 @@ const eslintConfig = [
       react: pluginReact,
       "react-hooks": pluginReactHooks,
       "@next/next": nextPlugin,
+      // Register typescript-eslint plugin so @typescript-eslint/* rules resolve.
+      // Previously missing — caused "Definition for rule not found" on all eslint-disable
+      // comments referencing @typescript-eslint/* rules.
+      "@typescript-eslint": tseslint.plugin,
     },
     languageOptions: {
       globals: {
@@ -45,6 +49,16 @@ const eslintConfig = [
       ...nextPlugin.configs.recommended.rules,
       ...nextPlugin.configs["core-web-vitals"].rules,
       "react/react-in-jsx-scope": "off",
+      // Rule active as warn (not error) because the codebase has ~177 pre-existing any
+      // usages that were never checked before (plugin was not registered). Promoting to
+      // "error" would block every CI run. Fix pre-existing violations in tech-debt pass;
+      // do not introduce NEW any without an eslint-disable comment explaining why.
+      "@typescript-eslint/no-explicit-any": "warn",
+      // TODO(tech-debt): eslint-plugin-react-hooks v7.0.1 introduced this rule;
+      // existing useEffect patterns in SearchBar, CookieConsent*, RecentlyViewed
+      // synchronously call setState inside effects, which is now flagged.
+      // Track in docs/MASTER_TODO.md — refactor before upgrading hooks plugin again.
+      "react-hooks/set-state-in-effect": "warn",
     },
   },
 ];

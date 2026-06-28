@@ -108,7 +108,19 @@ SEO + Security задокументированы и ждут последним
 ## 11. Что дальше
 Закрывать **фундаменты F1–F14** (порядок в их файле): первыми — внешне-долгие F3/F4/F5 (юр-гейт, GDPR-артефакты, DSA-роль), параллельно дешёвые F1/F8/F10, затем под текущий фокус F7/F13/F12/F14 (фикс 1996, вкладки, SEO/structured data, trust). После закрытия фундамента область переводится из 🔄 в ✅ в матрице §8.
 
-## 12. Прогресс по фундаментам (2026-06-28)
+## 12. Tech-debt ESLint (2026-06-28)
+| Файл | Проблема | Правило | Приоритет |
+|---|---|---|---|
+| `SearchBar.tsx` | `setRecent(...)` внутри `useEffect` без внешней подписки | `react-hooks/set-state-in-effect` (warn) | P2 |
+| `CookieConsentProvider.tsx` | `syncConsent()` внутри `useEffect` | `react-hooks/set-state-in-effect` (warn) | P2 |
+| `CookiePreferenceCenter.tsx` | `setFunctional`/`setAnalytics` внутри `useEffect` | `react-hooks/set-state-in-effect` (warn) | P2 |
+| `RecentlyViewed.tsx` | `setItems(getRecentlyViewed())` внутри `useEffect` | `react-hooks/set-state-in-effect` (warn) | P2 |
+
+> **Контекст:** правило появилось в `eslint-plugin-react-hooks` v7.0.1. Все четыре паттерна — `useState` для чтения из localStorage при маунте через `useEffect` — технически вызывают лишний ре-рендер, но не ломают работу. Правильное решение: заменить `useEffect + setState` на `useSyncExternalStore` или `useState(() => readFromStorage())` (lazy initializer). Refactor перед следующим бампом плагина.
+
+**`@typescript-eslint/no-explicit-any` (warn) — ~177 мест, P2.** Правило было исторически ВЫКЛЮЧЕНО (плагин `@typescript-eslint` не был зарегистрирован в flat config). При регистрации плагина (2026-06-28) все pre-existing `any` стали видимы. Переведено в `"warn"`, чтобы не блокировать CI. Правильное решение: планомерно заменять `any` на точные типы — в первую очередь в тестах и API-маршрутах. Новый `any` без eslint-disable-комментария с объяснением — запрещён.
+
+## 12b. Прогресс по фундаментам (2026-06-28)
 | Тикет | Статус | Коммит |
 |---|---|---|
 | **F1** webhook_events идемпотентность | ✅ | f2e9cfb |
