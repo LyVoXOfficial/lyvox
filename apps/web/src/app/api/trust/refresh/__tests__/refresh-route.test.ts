@@ -81,6 +81,9 @@ beforeEach(() => {
 });
 
 describe("POST /api/trust/refresh — F14", () => {
+  // Rate limit is keyed by authenticated user ID (not IP) — see withRateLimit getUserId option in route.ts.
+  // The rateLimiter mock here bypasses the rate limit entirely; the per-user key logic is an integration
+  // concern tested implicitly by the withRateLimit + rateLimiter unit tests in lib/rateLimiter.test.ts.
   it("401 when not authenticated", async () => {
     getUserMock.mockResolvedValue({ data: { user: null } });
     const res = await POST(makeReq());

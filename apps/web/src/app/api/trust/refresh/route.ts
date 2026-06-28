@@ -87,5 +87,12 @@ async function handleRefresh(_req: Request): Promise<Response> {
 
 export const POST = withRateLimit(handleRefresh, {
   limiter: refreshLimiter,
-  makeKey: (_req, _userId, ip) => ip ?? "anonymous",
+  getUserId: async (_req) => {
+    const supabase = await supabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user?.id ?? null;
+  },
+  makeKey: (_req, userId, ip) => userId ?? ip ?? "anonymous",
 });
