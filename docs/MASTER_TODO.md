@@ -133,7 +133,7 @@ SEO + Security задокументированы и ждут последним
 | **F8** серверный client-IP | ✅ | 7a4de19 |
 | **F9** fraud-engine в рантайм | ✅ | df704f7 |
 | **F10** itsme_sub uniqueness | ✅ | 61d73c5 |
-| **F11** дедуп advert_views | ✅ | TBD |
+| **F11** дедуп advert_views | ✅ | cf032f4 |
 | **F12** JSON-LD генераторы подключить | ✅ | 109ccf4, 2ff3836 |
 | **F13** catalog_groups + ARIA-tabs | ✅ | f17df42 |
 | F14 trust-score формула | ⛔ не начато | — |
