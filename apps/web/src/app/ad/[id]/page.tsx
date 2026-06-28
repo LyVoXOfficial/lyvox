@@ -14,6 +14,8 @@ import { getI18nProps, getInitialLocale } from "@/i18n/server";
 import { type Locale } from "@/lib/i18n";
 import { getJsonLdScriptProps } from "@/lib/seo";
 import { generateSlug, truncateDescription } from "@/lib/seo/catalog/common";
+import { buildListingJsonLd } from "@/lib/seo/catalog/listingJsonLd";
+import { detectCategoryType } from "@/lib/utils/categoryDetector";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { isViewerVerified } from "@/lib/auth/requireVerified";
@@ -519,33 +521,38 @@ export default async function AdvertPage({ params }: PageProps) {
     itemListElement: breadcrumbElements,
   };
 
-  const productJsonLd = {
-    "@context": "https://schema.org",
-    "@type": data.make ? "Car" : "Product",
-    name: data.advert.title,
-    description: data.advert.description ?? undefined,
-    sku: data.advert.id,
+  // F12: per-category structured data via the listing JSON-LD dispatcher.
+  // Domain is derived from the category path; a vehicle make forces the vehicle
+  // branch even if the category slug is ambiguous.
+  const listingDomain = data.make
+    ? "vehicle"
+    : detectCategoryType(data.category?.path ?? data.category?.slug ?? "");
+
+  const productJsonLd = buildListingJsonLd({
+    domain: listingDomain,
+    id: data.advert.id,
+    title: data.advert.title,
+    description: data.advert.description ?? null,
     url: canonicalUrl,
-    image: imageUrls,
-    brand: brandName ? { "@type": "Brand", name: brandName } : undefined,
-    color: colorName ?? undefined,
-    offers: priceValue !== null
-      ? {
-          "@type": "Offer",
-          price: priceValue,
-          priceCurrency: data.advert.currency ?? "EUR",
-          availability: "https://schema.org/InStock",
-          url: canonicalUrl,
-        }
-      : undefined,
-    seller: {
-      "@type": "Organization",
-      name: "LyVoX seller",
+    images: imageUrls,
+    price: priceValue,
+    currency: data.advert.currency ?? "EUR",
+    location: data.advert.location ?? null,
+    createdAt: data.advert.created_at ?? null,
+    specifics: data.specifics,
+    vehicle: {
+      brandName,
+      modelName,
+      colorName,
     },
-    itemCondition: "https://schema.org/UsedCondition",
-    datePosted: data.advert.created_at ?? undefined,
-    locationCreated: data.advert.location ?? undefined,
-  };
+    seller: {
+      // Real seller node (was a hardcoded "LyVoX seller" stub): business →
+      // Organization, private → Person. businessData present iff this is a B2C ad.
+      displayName: data.seller.displayName,
+      isBusiness: Boolean(data.businessData),
+      businessName: data.businessData?.trade_name ?? data.businessData?.legal_name ?? null,
+    },
+  });
 
   const showDetails = detailItems.length > 0 || optionLabels.length > 0;
   const showGeneration = Boolean(data.selectedGeneration);
@@ -1294,7 +1301,11 @@ async function loadAdvertData(
       )
       .eq("id", advertId)
       .limit(1);
-    const advert = Array.isArray(advertRows) ? (advertRows[0] as AdvertRecord | undefined) : undefined;
+    // generation_id (F7) is not yet in generated DB types — cast through unknown.
+    // Run `pnpm gen:types` after applying migration 20260628120000.
+    const advert = Array.isArray(advertRows)
+      ? (advertRows[0] as unknown as AdvertRecord | undefined)
+      : undefined;
 
     if (advertError) {
       console.error("Failed to load advert record", { advertId, error: advertError });
