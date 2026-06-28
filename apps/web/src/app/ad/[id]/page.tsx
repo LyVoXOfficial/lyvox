@@ -27,6 +27,10 @@ import { TraderPanel } from "@/components/business/TraderPanel";
 import type { BusinessPublicData } from "@/components/business/TraderPanel";
 import { LeaveReviewForm } from "@/components/reviews/LeaveReviewForm";
 import AdvertMobileContactBar from "@/components/AdvertMobileContactBar";
+import { KeySpecsStrip } from "@/components/ad/KeySpecsStrip";
+import { DocumentBadges } from "@/components/ad/DocumentBadges";
+import { CatalogDetailsSection } from "@/components/ad/CatalogDetailsSection";
+import { loadCatalogGroups } from "@/lib/catalog/loadCatalogGroups";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -524,6 +528,16 @@ export default async function AdvertPage({ params }: PageProps) {
     ? "vehicle"
     : detectCategoryType(data.category?.path ?? data.category?.slug ?? "");
 
+  // F13: load catalog group/field schema for readonly detail display.
+  let catalogGroups: Awaited<ReturnType<typeof loadCatalogGroups>>["groups"] = [];
+  let catalogFields: Awaited<ReturnType<typeof loadCatalogGroups>>["fields"] = {};
+  try {
+    const svcForCatalog = await supabaseService();
+    ({ groups: catalogGroups, fields: catalogFields } = await loadCatalogGroups(listingDomain, svcForCatalog));
+  } catch {
+    // Non-fatal: falls back to AdvertDetails legacy renderer below
+  }
+
   const productJsonLd = buildListingJsonLd({
     domain: listingDomain,
     id: data.advert.id,
@@ -704,6 +718,24 @@ export default async function AdvertPage({ params }: PageProps) {
             </div>
           </div>
 
+          {/* Key-specs strip: per-category priority chips */}
+          <KeySpecsStrip
+            categoryType={listingDomain}
+            specifics={data.specifics ?? {}}
+            locale={locale}
+            makeName={getMakeName(data.make)}
+            modelName={getModelName(data.model)}
+            location={data.advert.location ?? null}
+            t={translate}
+          />
+
+          {/* Document badges: Car-Pass / EPC / Safety / Microchip */}
+          <DocumentBadges
+            categoryType={listingDomain}
+            specifics={data.specifics ?? {}}
+            t={translate}
+          />
+
           {/* Description */}
           <section className="rounded-md border border-border/80 bg-card p-4 shadow-sm">
             <h2 className="mb-2 text-lg font-medium">
@@ -769,7 +801,15 @@ export default async function AdvertPage({ params }: PageProps) {
             </div>
           </section>
 
-      {showDetails ? (
+      {/* F13: catalog groups renderer (tabs/sections); falls back to legacy flat list */}
+      {catalogGroups.length > 0 ? (
+        <CatalogDetailsSection
+          groups={catalogGroups}
+          fields={catalogFields}
+          values={data.specifics ?? {}}
+          locale={locale}
+        />
+      ) : showDetails ? (
         <AdvertDetails
           title={translate("advert.vehicle_specs", "Vehicle specifications")}
           details={detailItems}
@@ -778,233 +818,251 @@ export default async function AdvertPage({ params }: PageProps) {
         />
       ) : null}
 
-      {showGeneration && data.selectedGeneration ? (
+      {/* KB block: generation + insights with disclaimer, or ambiguous generation CTA */}
+      {(showGeneration && data.selectedGeneration) || showInsights ? (
         <section className="rounded-md border border-border/80 bg-card p-4 shadow-sm">
           <h2 className="mb-4 text-lg font-medium">
-            {translate("advert.generation.title", "Generation")}
+            {translate("advert.insights.title", "Model information")}
           </h2>
 
-          <div className="space-y-4">
-            {data.selectedGeneration.code ? (
-              <div>
-                <span className="text-sm font-semibold">
-                  {translate("advert.generation.code", "Code")}:{" "}
-                  {data.selectedGeneration.code}
-                </span>
-                {data.selectedGeneration.facelift ? (
-                  <span className="ml-2 text-xs text-muted-foreground">
-                    ({translate("advert.generation.facelift", "Facelift")})
+          {showGeneration && data.selectedGeneration ? (
+            <div className="mb-4 space-y-4">
+              {data.selectedGeneration.code ? (
+                <div>
+                  <span className="text-sm font-semibold">
+                    {translate("advert.generation.code", "Code")}:{" "}
+                    {data.selectedGeneration.code}
                   </span>
-                ) : null}
-              </div>
-            ) : null}
+                  {data.selectedGeneration.facelift ? (
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      ({translate("advert.generation.facelift", "Facelift")})
+                    </span>
+                  ) : null}
+                </div>
+              ) : null}
 
-            {data.selectedGeneration.start_year ||
-            data.selectedGeneration.end_year ? (
-              <div className="text-sm text-muted-foreground">
-                {translate("advert.generation.years", "Production years")}:{" "}
-                {data.selectedGeneration.start_year}
-                {data.selectedGeneration.end_year
-                  ? ` - ${data.selectedGeneration.end_year}`
-                  : ` - ${translate("advert.generation.present", "present")}`}
-              </div>
-            ) : null}
+              {data.selectedGeneration.start_year || data.selectedGeneration.end_year ? (
+                <div className="text-sm text-muted-foreground">
+                  {translate("advert.generation.years", "Production years")}:{" "}
+                  {data.selectedGeneration.start_year}
+                  {data.selectedGeneration.end_year
+                    ? ` - ${data.selectedGeneration.end_year}`
+                    : ` - ${translate("advert.generation.present", "present")}`}
+                </div>
+              ) : null}
 
-            {generationLocale?.summary ? (
-              <p className="text-sm text-foreground/90">
-                {generationLocale.summary}
-              </p>
-            ) : null}
+              {generationLocale?.summary ? (
+                <p className="text-sm text-foreground/90">{generationLocale.summary}</p>
+              ) : null}
 
-            {generationLocale?.pros.length ? (
-              <div>
-                <h3 className="mb-2 text-sm font-semibold text-green-600 dark:text-green-400">
-                  {translate("advert.insights.pros", "Pros")}
-                </h3>
-                <ul className="space-y-1 text-sm">
-                  {generationLocale.pros.map((item, index) => (
-                    <li key={`${item}-${index}`} className="flex items-start gap-2">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" aria-hidden="true" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
+              {generationLocale?.pros.length ? (
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold text-green-600 dark:text-green-400">
+                    {translate("advert.insights.pros", "Pros")}
+                  </h3>
+                  <ul className="space-y-1 text-sm">
+                    {generationLocale.pros.map((item, index) => (
+                      <li key={`${item}-${index}`} className="flex items-start gap-2">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" aria-hidden="true" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
 
-            {generationLocale?.cons.length ? (
-              <div>
-                <h3 className="mb-2 text-sm font-semibold text-red-600 dark:text-red-400">
-                  {translate("advert.insights.cons", "Cons")}
-                </h3>
-                <ul className="space-y-1 text-sm">
-                  {generationLocale.cons.map((item, index) => (
-                    <li key={`${item}-${index}`} className="flex items-start gap-2">
-                      <CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" aria-hidden="true" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
+              {generationLocale?.cons.length ? (
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold text-red-600 dark:text-red-400">
+                    {translate("advert.insights.cons", "Cons")}
+                  </h3>
+                  <ul className="space-y-1 text-sm">
+                    {generationLocale.cons.map((item, index) => (
+                      <li key={`${item}-${index}`} className="flex items-start gap-2">
+                        <CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" aria-hidden="true" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
 
-            {generationLocale?.inspectionTips.length ? (
-              <div>
-                <h3 className="mb-2 text-sm font-semibold">
-                  {translate("advert.insights.inspection_tips", "Inspection tips")}
-                </h3>
-                <ul className="list-inside list-disc space-y-1 text-sm">
-                  {generationLocale.inspectionTips.map((item, index) => (
-                    <li key={`${item}-${index}`}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
+              {generationLocale?.inspectionTips.length ? (
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold">
+                    {translate("advert.insights.inspection_tips", "Inspection tips")}
+                  </h3>
+                  <ul className="list-inside list-disc space-y-1 text-sm">
+                    {generationLocale.inspectionTips.map((item, index) => (
+                      <li key={`${item}-${index}`}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
 
-            {data.selectedGeneration.production_countries?.length ? (
-              <div>
-                <h3 className="mb-2 text-sm font-semibold">
-                  {translate("advert.generation.production_countries", "Production countries")}
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {data.selectedGeneration.production_countries.map(
-                    (country, index) => (
+              {data.selectedGeneration.production_countries?.length ? (
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold">
+                    {translate("advert.generation.production_countries", "Production countries")}
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {data.selectedGeneration.production_countries.map((country, index) => (
                       <span
                         key={`${country}-${index}`}
                         className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium"
                       >
                         {country}
                       </span>
-                    ),
-                  )}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ) : null}
-          </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {showInsights && data.insights ? (
+            <div className="space-y-6">
+              {translatedInsights?.pros.length ? (
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold text-green-600 dark:text-green-400">
+                    {translate("advert.insights.pros", "Pros")}
+                  </h3>
+                  <ul className="space-y-1 text-sm">
+                    {translatedInsights.pros.map((item, index) => (
+                      <li key={`${item}-${index}`} className="flex items-start gap-2">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" aria-hidden="true" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {translatedInsights?.cons.length ? (
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold text-red-600 dark:text-red-400">
+                    {translate("advert.insights.cons", "Cons")}
+                  </h3>
+                  <ul className="space-y-1 text-sm">
+                    {translatedInsights.cons.map((item, index) => (
+                      <li key={`${item}-${index}`} className="flex items-start gap-2">
+                        <CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" aria-hidden="true" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {translatedInsights?.inspectionTips.length ? (
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold">
+                    {translate("advert.insights.inspection_tips", "Inspection tips")}
+                  </h3>
+                  <ul className="list-inside list-disc space-y-1 text-sm">
+                    {translatedInsights.inspectionTips.map((item, index) => (
+                      <li key={`${item}-${index}`}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {translatedInsights?.notableFeatures.length ? (
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold">
+                    {translate("advert.insights.notable_features", "Notable features")}
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {translatedInsights.notableFeatures.map((item, index) => (
+                      <span
+                        key={`${item}-${index}`}
+                        className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {translatedInsights?.engineExamples.length ? (
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold">
+                    {translate("advert.insights.engine_examples", "Engine examples")}
+                  </h3>
+                  <ul className="space-y-1 text-sm">
+                    {translatedInsights.engineExamples.map((item, index) => (
+                      <li key={`${item}-${index}`}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {translatedInsights?.commonIssues.length ? (
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold">
+                    {translate("advert.insights.common_issues", "Common issues")}
+                  </h3>
+                  <ul className="list-inside list-disc space-y-1 text-sm text-orange-600 dark:text-orange-400">
+                    {translatedInsights.commonIssues.map((item, index) => (
+                      <li key={`${item}-${index}`}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {showScores ? (
+                <div className="flex gap-4 border-t pt-2">
+                  {reliabilityScoreDisplay !== null ? (
+                    <div>
+                      <span className="text-xs text-muted-foreground">
+                        {translate("advert.insights.reliability", "Reliability")}:{" "}
+                      </span>
+                      <span className="text-sm font-medium">{reliabilityScoreDisplay}</span>
+                    </div>
+                  ) : null}
+                  {popularityScoreDisplay !== null ? (
+                    <div>
+                      <span className="text-xs text-muted-foreground">
+                        {translate("advert.insights.popularity", "Popularity")}:{" "}
+                      </span>
+                      <span className="text-sm font-medium">{popularityScoreDisplay}</span>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {/* KB disclaimer — always visible when KB content is shown */}
+          <p className="mt-4 border-t pt-3 text-xs text-muted-foreground">
+            {translate(
+              "advert.kb.disclaimer",
+              "Reference info. LyVoX knowledge base — general model information, not a guarantee for this specific item.",
+            )}
+          </p>
         </section>
-      ) : null}
-
-      {showInsights && data.insights ? (
+      ) : listingDomain === "vehicle" && data.generations && data.generations.length > 0 ? (
+        /* Ambiguous generation CTA — bug #1996 fix: no silent guess on the detail page */
         <section className="rounded-md border border-border/80 bg-card p-4 shadow-sm">
-          <h2 className="mb-4 text-lg font-medium">
-            {translate("advert.insights.title", "Model insights")}
+          <h2 className="mb-2 text-lg font-medium">
+            {translate("advert.kb.no_generation_title", "About this model")}
           </h2>
-
-          <div className="space-y-6">
-            {translatedInsights?.pros.length ? (
-              <div>
-                <h3 className="mb-2 text-sm font-semibold text-green-600 dark:text-green-400">
-                  {translate("advert.insights.pros", "Pros")}
-                </h3>
-                <ul className="space-y-1 text-sm">
-                  {translatedInsights.pros.map((item, index) => (
-                    <li key={`${item}-${index}`} className="flex items-start gap-2">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" aria-hidden="true" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-
-            {translatedInsights?.cons.length ? (
-              <div>
-                <h3 className="mb-2 text-sm font-semibold text-red-600 dark:text-red-400">
-                  {translate("advert.insights.cons", "Cons")}
-                </h3>
-                <ul className="space-y-1 text-sm">
-                  {translatedInsights.cons.map((item, index) => (
-                    <li key={`${item}-${index}`} className="flex items-start gap-2">
-                      <CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" aria-hidden="true" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-
-            {translatedInsights?.inspectionTips.length ? (
-              <div>
-                <h3 className="mb-2 text-sm font-semibold">
-                  {translate("advert.insights.inspection_tips", "Inspection tips")}
-                </h3>
-                <ul className="list-inside list-disc space-y-1 text-sm">
-                  {translatedInsights.inspectionTips.map((item, index) => (
-                    <li key={`${item}-${index}`}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-
-            {translatedInsights?.notableFeatures.length ? (
-              <div>
-                <h3 className="mb-2 text-sm font-semibold">
-                  {translate("advert.insights.notable_features", "Notable features")}
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {translatedInsights.notableFeatures.map((item, index) => (
-                    <span
-                      key={`${item}-${index}`}
-                      className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            {translatedInsights?.engineExamples.length ? (
-              <div>
-                <h3 className="mb-2 text-sm font-semibold">
-                  {translate("advert.insights.engine_examples", "Engine examples")}
-                </h3>
-                <ul className="space-y-1 text-sm">
-                  {translatedInsights.engineExamples.map((item, index) => (
-                    <li key={`${item}-${index}`}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-
-            {translatedInsights?.commonIssues.length ? (
-              <div>
-                <h3 className="mb-2 text-sm font-semibold">
-                  {translate("advert.insights.common_issues", "Common issues")}
-                </h3>
-                <ul className="list-inside list-disc space-y-1 text-sm text-orange-600 dark:text-orange-400">
-                  {translatedInsights.commonIssues.map((item, index) => (
-                    <li key={`${item}-${index}`}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-
-            {showScores ? (
-              <div className="flex gap-4 border-t pt-2">
-                {reliabilityScoreDisplay !== null ? (
-                  <div>
-                    <span className="text-xs text-muted-foreground">
-                      {translate("advert.insights.reliability", "Reliability")}:{" "}
-                    </span>
-                    <span className="text-sm font-medium">
-                      {reliabilityScoreDisplay}
-                    </span>
-                  </div>
-                ) : null}
-                {popularityScoreDisplay !== null ? (
-                  <div>
-                    <span className="text-xs text-muted-foreground">
-                      {translate("advert.insights.popularity", "Popularity")}:{" "}
-                    </span>
-                    <span className="text-sm font-medium">
-                      {popularityScoreDisplay}
-                    </span>
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
+          <p className="text-sm text-muted-foreground">
+            {translate(
+              "advert.kb.no_generation_body",
+              "The production generation was not specified. Edit the listing to add it and unlock model insights.",
+            )}
+          </p>
+          {editHref ? (
+            <a
+              href={editHref}
+              className="mt-3 inline-flex items-center text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              {translate("advert.kb.no_generation_edit_link", "Edit listing")} →
+            </a>
+          ) : null}
+          {/* TODO §13: KB for non-transport categories (electronics/pets/fashion) */}
         </section>
       ) : null}
 
