@@ -42,6 +42,7 @@
 
 ## 8. Безопасность, приватность, комплаенс
 - **GDPR (export/delete/anonymise, retention, DSAR), ePrivacy (cookies/consent), DSA (apeal/трейдер — смежно).** APD/GBA (Бельгия) для профайлинга ([[16-account-takeover-protection]]).
+- **B4 (2026-06-29):** `advert_views.ip_address` анонимизировано в проде через миграцию `20260629210000` — IPv4 → /24, IPv6 → /48; новые строки пишут `NULL`. Rate-limit и дедуп используют `viewer_key` (md5-хэш) и IP из runtime-запроса — не из БД. Адресует F4 retention: сырые IP посетителей больше не хранятся.
 
 ## 9. Аналитика
 - Число/время DSAR, отписки, cookie-consent распределение.

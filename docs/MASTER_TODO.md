@@ -146,14 +146,16 @@ SEO + Security задокументированы и ждут последним
 | B2 props size-limit (max 20 keys) | ✅ | 57199b1 |
 | B3 dedup-key namespace (`s:`/`c:`) | ✅ | 57199b1 |
 | B6 trust score UI + per-user rate-limit | ✅ | c6af0f6 |
+| B4 IP anonymisation (advert_views) | ✅ | 35d4f57 |
+| B1 UNIQUE(reviewer_id, subject_id) | ✅ | ffdb138 |
 
 ## 13. Blockers / tech-debt из batch-2
 
 | # | Описание | Приоритет |
 |---|---|---|
-| B1 | **`UNIQUE(reviewer_id, subject_id)` на `reviews`** — DB-level anti-stacking constraint не добавлен, т.к. существующие строки могут конфликтовать (нельзя удалять данные). Текущий guard: EXISTS-check в `create_review()`. Для хардена: дедублировать через seed-purge, затем добавить constraint в отдельной миграции. | P1 |
+| B1 | ~~**`UNIQUE(reviewer_id, subject_id)` на `reviews`**~~ ✅ **ЗАКРЫТ** — миграция `20260629220000`: CTE-дедуп (MAX(created_at) на пару, удалены только дубли), затем idempotent `ALTER TABLE ADD CONSTRAINT reviews_unique_reviewer_subject`. RAISE NOTICE выводит счёт удалённых строк для аудита. Commit: `ffdb138`. | — |
 | B2 | **`analytics_events.props` без size-limit** — клиентский `POST /api/analytics/track` принимает произвольный JSON в `props`; Next.js ограничивает body до ~1 MB, но явного лимита нет. Добавить `z.string().max(2048)` на сериализованный props или `z.record()` с ограничением числа ключей. Файл: `apps/web/src/app/api/analytics/track/route.ts`. | P2 |
 | B3 | **Dedup-key spoofing** — аутентифицированный пользователь может послать через `/api/analytics/track` `dedup_key: "contact_start:<uuid>"` и вытеснить сервер-сайд событие через `ON CONFLICT DO NOTHING`. Сервер всегда пишет первым, но race-window < 100 мс существует. Решение: разделить namespaces: server-dedup-ключи с prefix `s:`, client-ключи с `c:` — server-ключи в клиентском API запрещены. | P2 |
-| B4 | **`advert_views.ip_address` — plaintext PII** — IPv4 адреса хранятся в открытом виде (pre-existing, не F11). GDPR требует либо анонимизации (обрезка последнего октета), либо обоснования хранения в DPIA. Отнести в F4 (GDPR RoPA). | P1 |
+| B4 | ~~**`advert_views.ip_address` — plaintext PII**~~ ✅ **ЗАКРЫТ** — миграция `20260629210000`: IPv4 → /24, IPv6 → /48 для существующих строк; новые строки пишут `NULL` (ip_address убран из view-роута). Rate-limit и дедуп не затронуты (используют runtime-IP и viewer_key). Commit: `35d4f57`. | — |
 | B5 | **`pnpm gen:types` нужен перед деплоем** — `analytics_events`, `viewer_key`, `view_hour`, `trust_score.last_computed_at` не в `database.types.ts`; все `as any` касты временные. После `supabase db push` и `pnpm gen:types` касты убрать. | P0 (перед prod-деплоем) |
 | B6 | ~~**T37 UI-бейджи не подключены**~~ ✅ **ЗАКРЫТ** — `TrustScoreBadge` (header) + `TrustScoreCard` (sidebar) подключены; per-user rate-limit на `/api/trust/refresh` исправлен; 10 новых тестов + i18n все 5 локалей. Commit: `c6af0f6`. | — |
