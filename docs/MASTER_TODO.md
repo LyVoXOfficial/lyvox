@@ -131,7 +131,7 @@ SEO + Security задокументированы и ждут последним
 | F6 analytics_events sink | ⛔ не начато | — |
 | **F7** generation_id + resolveGeneration | ✅ | 53c7b31 |
 | **F8** серверный client-IP | ✅ | 7a4de19 |
-| F9 fraud-engine в рантайм | ⛔ не начато | — |
+| **F9** fraud-engine в рантайм | ✅ | TBD |
 | **F10** itsme_sub uniqueness | ✅ | 61d73c5 |
 | F11 дедуп advert_views | ⛔ не начато | — |
 | **F12** JSON-LD генераторы подключить | ✅ | 109ccf4, 2ff3836 |

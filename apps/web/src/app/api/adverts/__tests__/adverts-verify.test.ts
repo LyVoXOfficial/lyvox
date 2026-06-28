@@ -4,6 +4,7 @@ const getUserMock = vi.fn();
 const isVerifiedMock = vi.fn();
 const canSellMock = vi.fn();
 const checkBlockedMock = vi.fn();
+const invokeFraudCheckMock = vi.fn();
 // fromMock controls the cookie supabase `.from()` behaviour per-test (categories lookup)
 const fromMock = vi.fn(() => ({}));
 // serviceFromMock controls the service-role supabase `.from()` (adverts insert)
@@ -18,6 +19,7 @@ vi.mock("@/lib/supabaseService", () => ({
 vi.mock("@/lib/auth/requireVerified", () => ({ isViewerVerified: (...a: unknown[]) => isVerifiedMock(...(a as [])) }));
 vi.mock("@/lib/auth/canSellAsBusiness", () => ({ canSellAsBusiness: (...a: unknown[]) => canSellMock(...(a as [])) }));
 vi.mock("@/lib/fraud/checkUserBlocked", () => ({ checkUserBlocked: (...a: unknown[]) => checkBlockedMock(...(a as [])) }));
+vi.mock("@/lib/fraud/invokeFraudCheck", () => ({ invokeFraudCheck: (...a: unknown[]) => invokeFraudCheckMock(...(a as [])) }));
 
 const { POST } = await import("../route");
 
@@ -76,11 +78,13 @@ describe("POST /api/adverts — business gate (T17)", () => {
     isVerifiedMock.mockReset();
     canSellMock.mockReset();
     checkBlockedMock.mockReset();
+    invokeFraudCheckMock.mockReset();
     fromMock.mockReset();
     serviceFromMock.mockReset();
-    // Default: user is verified, not blocked
+    // Default: user is verified, not blocked, fraud check passes
     isVerifiedMock.mockResolvedValue(true);
     checkBlockedMock.mockResolvedValue({ isBlocked: false });
+    invokeFraudCheckMock.mockResolvedValue({ blocked: false, flagged: false });
   });
 
   it("403 VERIFICATION_REQUIRED with detail=membership when canSellAsBusiness returns membership", async () => {
@@ -185,5 +189,43 @@ describe("POST /api/adverts — business gate (T17)", () => {
     const body = await res.json();
     expect(body.ok).toBe(true);
     expect(body.data.advert.id).toBe("advert-new-1");
+  });
+});
+
+describe("POST /api/adverts — F9 fraud gate", () => {
+  beforeEach(() => {
+    getUserMock.mockReset();
+    isVerifiedMock.mockReset();
+    canSellMock.mockReset();
+    checkBlockedMock.mockReset();
+    invokeFraudCheckMock.mockReset();
+    fromMock.mockReset();
+    serviceFromMock.mockReset();
+    isVerifiedMock.mockResolvedValue(true);
+    invokeFraudCheckMock.mockResolvedValue({ blocked: false, flagged: false });
+  });
+
+  it("403 FORBIDDEN when user is blocked (failClosed scenario)", async () => {
+    getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
+    checkBlockedMock.mockResolvedValue({
+      isBlocked: true,
+      blockedUntil: "2999-01-01T00:00:00Z",
+      reason: "Account flagged for fraud",
+    });
+    const res = await POST();
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.error).toBe("FORBIDDEN");
+    // detail is the reason string returned by checkUserBlocked
+    expect(body.detail).toBe("Account flagged for fraud");
+  });
+
+  it("calls checkUserBlocked with failClosed:true on every create", async () => {
+    getUserMock.mockResolvedValue({ data: { user: { id: "u-fc" } } });
+    checkBlockedMock.mockResolvedValue({ isBlocked: false });
+    // categories lookup → null → route returns CATEGORY_LOOKUP_FAILED, but checkBlocked was already called
+    fromMock.mockReturnValue(makeChainable());
+    await POST(undefined);
+    expect(checkBlockedMock).toHaveBeenCalledWith("u-fc", { failClosed: true });
   });
 });

@@ -267,6 +267,13 @@ export async function PATCH(
     await service.from("logs").insert(audit);
   }
 
+  // On publish: run advert-level fraud rules (price-anomaly, pattern checks) so
+  // bait pricing and suspicious listings are flagged/queued-for-review in runtime.
+  if (isPublishing) {
+    const { invokeFraudCheck } = await import("@/lib/fraud/invokeFraudCheck");
+    await invokeFraudCheck({ check_type: "advert", advert_id: advertId });
+  }
+
   return createSuccessResponse({});
 }
 
