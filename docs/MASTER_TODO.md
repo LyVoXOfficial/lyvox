@@ -128,7 +128,7 @@ SEO + Security задокументированы и ждут последним
 | F3 PSD2/AML legal-gate | ⛔ не начато | — |
 | F4 GDPR RoPA/DPIA | ⛔ не начато | — |
 | F5 DSA-роль/PoC | ⛔ не начато | — |
-| **F6** analytics_events sink | ✅ | TBD |
+| **F6** analytics_events sink | ✅ | f91b9e4 |
 | **F7** generation_id + resolveGeneration | ✅ | 53c7b31 |
 | **F8** серверный client-IP | ✅ | 7a4de19 |
 | **F9** fraud-engine в рантайм | ✅ | df704f7 |
