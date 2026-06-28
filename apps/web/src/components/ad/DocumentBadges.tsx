@@ -1,17 +1,12 @@
 import { BadgeCheck } from "lucide-react";
 
-type TFunction = (key: string, params?: Record<string, string | number>) => string;
+type TFunction = (key: string, fallback: string) => string;
 
 type Props = {
   categoryType: string;
   specifics: Record<string, any>;
   t: TFunction;
 };
-
-function translateFallback(t: TFunction, key: string, fallback: string): string {
-  const result = t(key);
-  return result === key ? fallback : result;
-}
 
 function isTruthy(value: unknown): boolean {
   if (value === null || value === undefined || value === "" || value === false) return false;
@@ -29,7 +24,7 @@ export function DocumentBadges({ categoryType, specifics, t }: Props) {
   if (categoryType === "vehicle") {
     if (isTruthy(specifics.car_pass) || isTruthy(specifics.has_car_pass)) {
       badges.push({
-        label: translateFallback(t, "advert.document_badge.car_pass", "Car-Pass"),
+        label: t("advert.document_badge.car_pass", "Car-Pass"),
         color: "text-emerald-700 bg-emerald-50 border-emerald-200",
       });
     }
@@ -39,7 +34,7 @@ export function DocumentBadges({ categoryType, specifics, t }: Props) {
     const epc = specifics.epc_rating ?? specifics.peb_rating ?? specifics.epc ?? null;
     if (epc) {
       badges.push({
-        label: `${translateFallback(t, "advert.document_badge.epc", "EPC")} ${String(epc).toUpperCase()}`,
+        label: `${t("advert.document_badge.epc", "EPC")} ${String(epc).toUpperCase()}`,
         color: "text-blue-700 bg-blue-50 border-blue-200",
       });
     }
@@ -48,7 +43,7 @@ export function DocumentBadges({ categoryType, specifics, t }: Props) {
   if (categoryType === "baby_kids") {
     if (isTruthy(specifics.safety_certified)) {
       badges.push({
-        label: translateFallback(t, "advert.document_badge.safety_certified", "Safety certified"),
+        label: t("advert.document_badge.safety_certified", "Safety certified"),
         color: "text-violet-700 bg-violet-50 border-violet-200",
       });
     }
@@ -57,7 +52,7 @@ export function DocumentBadges({ categoryType, specifics, t }: Props) {
   if (categoryType === "pets") {
     if (isTruthy(specifics.microchip) || isTruthy(specifics.chipped)) {
       badges.push({
-        label: translateFallback(t, "advert.document_badge.microchip", "Microchipped"),
+        label: t("advert.document_badge.microchip", "Microchipped"),
         color: "text-teal-700 bg-teal-50 border-teal-200",
       });
     }

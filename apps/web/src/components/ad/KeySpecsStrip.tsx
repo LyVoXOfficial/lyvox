@@ -1,6 +1,6 @@
 import type { Locale } from "@/lib/i18n";
 
-type TFunction = (key: string, params?: Record<string, string | number>) => string;
+type TFunction = (key: string, fallback: string) => string;
 
 type Props = {
   categoryType: string;
@@ -11,11 +11,6 @@ type Props = {
   location: string | null;
   t: TFunction;
 };
-
-function translateFallback(t: TFunction, key: string, fallback: string): string {
-  const result = t(key);
-  return result === key ? fallback : result;
-}
 
 function formatMileage(value: unknown, locale: Locale): string | null {
   const num = Number(value);
@@ -51,7 +46,7 @@ function translateSpec(t: TFunction, value: string): string {
     awd:       ["advert.value_awd", "AWD"],
   };
   const entry = MAP[String(value).toLowerCase()];
-  return entry ? translateFallback(t, entry[0], entry[1]) : String(value);
+  return entry ? t(entry[0], entry[1]) : String(value);
 }
 
 function buildVehicleChips(
@@ -91,7 +86,7 @@ function buildRealEstateChips(
   const area = specValue(specifics, "area_m2", "area");
   if (area) chips.push(`${area} m²`);
   const rooms = specValue(specifics, "rooms");
-  if (rooms) chips.push(`${rooms} ${translateFallback(t, "advert.rooms", "rooms")}`);
+  if (rooms) chips.push(`${rooms} ${t("advert.rooms", "rooms")}`);
   if (location && chips.length < 5) chips.push(location);
   return chips;
 }
@@ -149,10 +144,10 @@ function buildPetsChips(
   const breed = specValue(specifics, "pet_breed", "breed");
   if (breed) chips.push(String(breed));
   const age = specValue(specifics, "age_months");
-  if (age) chips.push(`${age} ${translateFallback(t, "advert.months", "mo")}`);
+  if (age) chips.push(`${age} ${t("advert.months", "mo")}`);
   const vaccinated = specValue(specifics, "vaccinated");
   if (vaccinated === true || vaccinated === "true" || vaccinated === "yes") {
-    chips.push(translateFallback(t, "advert.vaccinated", "Vaccinated"));
+    chips.push(t("advert.vaccinated", "Vaccinated"));
   }
   return chips;
 }
@@ -197,7 +192,7 @@ export function KeySpecsStrip({
   return (
     <div
       role="list"
-      aria-label={translateFallback(t, "advert.key_specs_label", "Key specifications")}
+      aria-label={t("advert.key_specs_label", "Key specifications")}
       className="flex flex-wrap items-center gap-2"
     >
       {visible.map((chip, i) => (
