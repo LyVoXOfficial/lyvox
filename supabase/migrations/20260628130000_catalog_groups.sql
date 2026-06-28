@@ -31,6 +31,7 @@ CREATE INDEX IF NOT EXISTS catalog_groups_domain_idx ON public.catalog_groups (d
 
 -- RLS: public read; no policies = service-role write only
 ALTER TABLE public.catalog_groups ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "catalog_groups_public_read" ON public.catalog_groups;
 CREATE POLICY "catalog_groups_public_read" ON public.catalog_groups
   FOR SELECT USING (true);
 

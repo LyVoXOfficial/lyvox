@@ -19,10 +19,13 @@ create index if not exists reviews_subject_idx on public.reviews(subject_id);
 alter table public.reviews enable row level security;
 
 -- Reviews are public to read.
+drop policy if exists reviews_public_read on public.reviews;
 create policy reviews_public_read on public.reviews for select using (true);
 -- No INSERT policy for normal roles: inserts go ONLY through create_review() (SECURITY DEFINER), which gates.
 -- Owner may edit/delete their own review.
+drop policy if exists reviews_owner_update on public.reviews;
 create policy reviews_owner_update on public.reviews for update using (reviewer_id = auth.uid()) with check (reviewer_id = auth.uid());
+drop policy if exists reviews_owner_delete on public.reviews;
 create policy reviews_owner_delete on public.reviews for delete using (reviewer_id = auth.uid());
 
 -- Column-lock lesson: by default authenticated/anon get table-wide INSERT/UPDATE. Force INSERT through the rpc;

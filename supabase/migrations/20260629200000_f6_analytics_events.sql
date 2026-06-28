@@ -31,6 +31,7 @@ alter table public.analytics_events enable row level security;
 
 -- Authenticated users may insert their own events (user_id = auth.uid() or anonymous).
 -- Service-role bypasses RLS for server-written events.
+drop policy if exists analytics_events_user_insert on public.analytics_events;
 create policy analytics_events_user_insert
   on public.analytics_events for insert
   to authenticated

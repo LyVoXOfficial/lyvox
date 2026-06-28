@@ -16,25 +16,25 @@ begin;
 
 -- 1. messages.author_id -> nullable + SET NULL (tombstone preserves the counterparty's thread)
 alter table public.messages alter column author_id drop not null;
-alter table public.messages drop constraint messages_author_id_fkey;
+alter table public.messages drop constraint if exists messages_author_id_fkey;
 alter table public.messages add constraint messages_author_id_fkey
   foreign key (author_id) references auth.users(id) on delete set null;
 
 -- 2. purchases.user_id -> nullable + SET NULL (retain financial fields for the 7y accounting duty, anonymized)
 alter table public.purchases alter column user_id drop not null;
-alter table public.purchases drop constraint purchases_user_id_fkey;
+alter table public.purchases drop constraint if exists purchases_user_id_fkey;
 alter table public.purchases add constraint purchases_user_id_fkey
   foreign key (user_id) references auth.users(id) on delete set null;
 
 -- 3. badges_awarded.awarded_by -> SET NULL (was NO ACTION, blocked admin deletion)
-alter table public.badges_awarded drop constraint badges_awarded_awarded_by_fkey;
+alter table public.badges_awarded drop constraint if exists badges_awarded_awarded_by_fkey;
 alter table public.badges_awarded add constraint badges_awarded_awarded_by_fkey
   foreign key (awarded_by) references auth.users(id) on delete set null;
 
 -- 3b. conversations.created_by -> nullable + SET NULL (preserve a 2-party thread the erased user started;
 --     chat access is participant-based, not created_by, so null created_by is safe)
 alter table public.conversations alter column created_by drop not null;
-alter table public.conversations drop constraint conversations_created_by_fkey;
+alter table public.conversations drop constraint if exists conversations_created_by_fkey;
 alter table public.conversations add constraint conversations_created_by_fkey
   foreign key (created_by) references auth.users(id) on delete set null;
 
