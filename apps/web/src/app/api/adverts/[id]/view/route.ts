@@ -2,6 +2,8 @@ import { createHash } from "crypto";
 import { z } from "zod";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
+import { trackServerEvent } from "@/lib/analytics/trackServerEvent";
+import { ANALYTICS_EVENTS } from "@/lib/analytics/events";
 import {
   createSuccessResponse,
   createErrorResponse,
@@ -110,6 +112,12 @@ async function trackView(
       advert_id: advertId,
     });
   }
+
+  // F6: funnel event — fire-and-forget (already non-critical like the view insert above)
+  await trackServerEvent(ANALYTICS_EVENTS.ADVERT_VIEWED, { advert_id: advertId }, {
+    userId: user?.id,
+    dedupKey: `view:${advertId}:${viewerKey}:${viewHour}`,
+  });
 
   const { data: viewCount, error: viewCountError } = await supabase.rpc(
     "get_advert_view_count",

@@ -128,7 +128,7 @@ SEO + Security задокументированы и ждут последним
 | F3 PSD2/AML legal-gate | ⛔ не начато | — |
 | F4 GDPR RoPA/DPIA | ⛔ не начато | — |
 | F5 DSA-роль/PoC | ⛔ не начато | — |
-| F6 analytics_events sink | ⛔ не начато | — |
+| **F6** analytics_events sink | ✅ | TBD |
 | **F7** generation_id + resolveGeneration | ✅ | 53c7b31 |
 | **F8** серверный client-IP | ✅ | 7a4de19 |
 | **F9** fraud-engine в рантайм | ✅ | df704f7 |
@@ -136,7 +136,7 @@ SEO + Security задокументированы и ждут последним
 | **F11** дедуп advert_views | ✅ | cf032f4 |
 | **F12** JSON-LD генераторы подключить | ✅ | 109ccf4, 2ff3836 |
 | **F13** catalog_groups + ARIA-tabs | ✅ | f17df42 |
-| **F14** trust-score формула | ✅ | TBD |
+| **F14** trust-score формула | ✅ | 5419c53 |
 
 ## 13. Blockers / tech-debt из batch-2
 

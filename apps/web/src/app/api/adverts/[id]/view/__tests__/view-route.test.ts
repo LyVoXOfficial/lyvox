@@ -80,7 +80,8 @@ describe("POST /api/adverts/[id]/view — F11 dedup", () => {
     getUserMock.mockResolvedValue({ data: { user: { id: "user-uuid-1" } } });
     await POST(makeReq(), makeCtx());
 
-    expect(upsertMock).toHaveBeenCalledTimes(1);
+    // calls[0] = advert_views upsert; calls[1] = analytics_events upsert (F6)
+    expect(upsertMock).toHaveBeenCalledTimes(2);
     const [row] = upsertMock.mock.calls[0] as [Record<string, unknown>, unknown];
     expect(row.viewer_key).toBe("user:user-uuid-1");
   });

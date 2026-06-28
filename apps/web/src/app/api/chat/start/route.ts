@@ -1,5 +1,7 @@
 import { supabaseServer } from "@/lib/supabaseServer";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import { trackServerEvent } from "@/lib/analytics/trackServerEvent";
+import { ANALYTICS_EVENTS } from "@/lib/analytics/events";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -145,6 +147,17 @@ const baseHandler = async (req: Request) => {
     action: "chat_start",
     details: { conversation_id: convId, peer_id, advert_id } as never,
   });
+
+  // F6: funnel event — fire-and-forget, non-critical
+  await trackServerEvent(
+    ANALYTICS_EVENTS.CONTACT_START,
+    { advert_id, conversation_id: convId },
+    {
+      userId: user.id,
+      // One contact_start per (user, conversation) — convId uniquely identifies it
+      dedupKey: `contact_start:${convId}`,
+    },
+  );
 
   return createSuccessResponse({
     conversation_id: convId,
