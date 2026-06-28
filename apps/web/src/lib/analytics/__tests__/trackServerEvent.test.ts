@@ -32,7 +32,8 @@ describe("trackServerEvent", () => {
     const [row, opts] = upsertMock.mock.calls[0] as [Record<string, unknown>, Record<string, unknown>];
     expect(row.event_name).toBe("advert_viewed");
     expect(row.user_id).toBe("user-123");
-    expect(row.dedup_key).toBe("view:abc:user-123:12345");
+    // B3: server dedup_keys are stored with 's:' prefix
+    expect(row.dedup_key).toBe("s:view:abc:user-123:12345");
     expect((row.props as Record<string, unknown>).advert_id).toBe("abc");
     expect(opts.ignoreDuplicates).toBe(true);
     expect(opts.onConflict).toBe("dedup_key");

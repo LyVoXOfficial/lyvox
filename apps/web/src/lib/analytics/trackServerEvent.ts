@@ -30,7 +30,9 @@ export async function trackServerEvent(
         user_id: opts.userId ?? null,
         session_id: opts.sessionId ?? null,
         props,
-        dedup_key: opts.dedupKey ?? null,
+        // B3: server keys are namespaced 's:' so they can never be pre-empted by
+        // client-supplied 'c:' keys from POST /api/analytics/track.
+        dedup_key: opts.dedupKey ? `s:${opts.dedupKey}` : null,
       },
       {
         onConflict: "dedup_key",

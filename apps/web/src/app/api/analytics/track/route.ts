@@ -13,14 +13,24 @@ export const runtime = "nodejs";
 
 const VALID_EVENT_NAMES = new Set<string>(Object.values(ANALYTICS_EVENTS));
 
+// B2: props size-bounded to prevent DB bloat (max 20 keys, string values ≤512 chars)
+const propValueSchema = z.union([
+  z.string().max(512),
+  z.number(),
+  z.boolean(),
+  z.null(),
+]);
+
 const eventSchema = z.object({
   event_name: z.string().refine((v) => VALID_EVENT_NAMES.has(v), {
     message: "Unknown event_name",
   }),
   session_id: z.string().min(1).max(128).optional(),
-  // z.record in Zod v4 requires explicit key type
-  props: z.record(z.string(), z.unknown()).optional(),
-  dedup_key: z.string().max(255).optional(),
+  props: z.record(z.string().max(64), propValueSchema)
+    .refine((obj) => Object.keys(obj).length <= 20, { message: "Too many props keys (max 20)" })
+    .optional(),
+  // B3: client keys are namespaced with 'c:' to prevent collision with server 's:' keys
+  dedup_key: z.string().max(248).optional(),
 });
 
 const analyticsLimiter = createRateLimiter({
@@ -51,6 +61,11 @@ async function handleTrack(req: Request) {
   const supabase = await supabaseServer();
   const { data: { user } } = await supabase.auth.getUser();
 
+  // B3: prefix client-supplied dedup_key with 'c:' so it never collides with
+  // server-written keys (prefixed 's:' by trackServerEvent). Prevents a
+  // authenticated client from pre-empting server funnel events.
+  const storedDedupKey = dedup_key ? `c:${dedup_key}` : null;
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- analytics_events not yet in generated types; remove after pnpm gen:types
   const { error } = await (supabase as any).from("analytics_events").upsert(
     {
@@ -58,7 +73,7 @@ async function handleTrack(req: Request) {
       user_id: user?.id ?? null,
       session_id: session_id ?? null,
       props,
-      dedup_key: dedup_key ?? null,
+      dedup_key: storedDedupKey,
     },
     {
       onConflict: "dedup_key",

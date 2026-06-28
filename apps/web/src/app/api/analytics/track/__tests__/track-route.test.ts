@@ -74,7 +74,7 @@ describe("POST /api/analytics/track — F6", () => {
     expect(row.user_id).toBe("user-abc");
   });
 
-  it("passes session_id and dedup_key through", async () => {
+  it("passes session_id and prefixes dedup_key with 'c:' (B3 namespace)", async () => {
     await POST(makeReq({
       event_name: "swipe_right",
       session_id: "sess-123",
@@ -83,6 +83,13 @@ describe("POST /api/analytics/track — F6", () => {
     }));
     const [row] = upsertMock.mock.calls[0] as [Record<string, unknown>, unknown];
     expect(row.session_id).toBe("sess-123");
-    expect(row.dedup_key).toBe("swipe:abc:sess-123");
+    // Client keys are stored with 'c:' prefix to prevent collision with server 's:' keys
+    expect(row.dedup_key).toBe("c:swipe:abc:sess-123");
+  });
+
+  it("400 when props has more than 20 keys (B2 size limit)", async () => {
+    const bigProps = Object.fromEntries(Array.from({ length: 21 }, (_, i) => [`k${i}`, "v"]));
+    const res = await POST(makeReq({ event_name: "advert_viewed", props: bigProps }));
+    expect(res.status).toBe(400);
   });
 });
