@@ -136,4 +136,10 @@ SEO + Security задокументированы и ждут последним
 | **F11** дедуп advert_views | ✅ | cf032f4 |
 | **F12** JSON-LD генераторы подключить | ✅ | 109ccf4, 2ff3836 |
 | **F13** catalog_groups + ARIA-tabs | ✅ | f17df42 |
-| F14 trust-score формула | ⛔ не начато | — |
+| **F14** trust-score формула | ✅ | TBD |
+
+## 13. Blockers / tech-debt из batch-2
+
+| # | Описание | Приоритет |
+|---|---|---|
+| B1 | **`UNIQUE(reviewer_id, subject_id)` на `reviews`** — DB-level anti-stacking constraint не добавлен, т.к. существующие строки могут конфликтовать (нельзя удалять данные). Текущий guard: EXISTS-check в `create_review()`. Для хардена: дедублировать руками через seed-purge, затем добавить constraint в отдельной миграции. | P1 |
