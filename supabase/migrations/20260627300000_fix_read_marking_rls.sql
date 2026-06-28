@@ -7,6 +7,7 @@
 begin;
 
 -- C1: notifications — a user may mark their OWN notifications read (read_at only).
+drop policy if exists notifications_user_mark_read on public.notifications;
 create policy notifications_user_mark_read on public.notifications
   for update to authenticated
   using (auth.uid() = user_id)
@@ -15,6 +16,7 @@ revoke update on public.notifications from authenticated, anon;
 grant update (read_at) on public.notifications to authenticated;
 
 -- C2: conversation_participants — a participant may update their OWN read marker / mute (never role).
+drop policy if exists cp_user_mark_read on public.conversation_participants;
 create policy cp_user_mark_read on public.conversation_participants
   for update to authenticated
   using (user_id = auth.uid())

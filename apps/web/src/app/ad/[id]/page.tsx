@@ -14,6 +14,8 @@ import { getI18nProps, getInitialLocale } from "@/i18n/server";
 import { type Locale } from "@/lib/i18n";
 import { getJsonLdScriptProps } from "@/lib/seo";
 import { generateSlug, truncateDescription } from "@/lib/seo/catalog/common";
+import { buildListingJsonLd } from "@/lib/seo/catalog/listingJsonLd";
+import { detectCategoryType } from "@/lib/utils/categoryDetector";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { isViewerVerified } from "@/lib/auth/requireVerified";
@@ -515,33 +517,38 @@ export default async function AdvertPage({ params }: PageProps) {
     itemListElement: breadcrumbElements,
   };
 
-  const productJsonLd = {
-    "@context": "https://schema.org",
-    "@type": data.make ? "Car" : "Product",
-    name: data.advert.title,
-    description: data.advert.description ?? undefined,
-    sku: data.advert.id,
+  // F12: per-category structured data via the listing JSON-LD dispatcher.
+  // Domain is derived from the category path; a vehicle make forces the vehicle
+  // branch even if the category slug is ambiguous.
+  const listingDomain = data.make
+    ? "vehicle"
+    : detectCategoryType(data.category?.path ?? data.category?.slug ?? "");
+
+  const productJsonLd = buildListingJsonLd({
+    domain: listingDomain,
+    id: data.advert.id,
+    title: data.advert.title,
+    description: data.advert.description ?? null,
     url: canonicalUrl,
-    image: imageUrls,
-    brand: brandName ? { "@type": "Brand", name: brandName } : undefined,
-    color: colorName ?? undefined,
-    offers: priceValue !== null
-      ? {
-          "@type": "Offer",
-          price: priceValue,
-          priceCurrency: data.advert.currency ?? "EUR",
-          availability: "https://schema.org/InStock",
-          url: canonicalUrl,
-        }
-      : undefined,
-    seller: {
-      "@type": "Organization",
-      name: "LyVoX seller",
+    images: imageUrls,
+    price: priceValue,
+    currency: data.advert.currency ?? "EUR",
+    location: data.advert.location ?? null,
+    createdAt: data.advert.created_at ?? null,
+    specifics: data.specifics,
+    vehicle: {
+      brandName,
+      modelName,
+      colorName,
     },
-    itemCondition: "https://schema.org/UsedCondition",
-    datePosted: data.advert.created_at ?? undefined,
-    locationCreated: data.advert.location ?? undefined,
-  };
+    seller: {
+      // Real seller node (was a hardcoded "LyVoX seller" stub): business →
+      // Organization, private → Person. businessData present iff this is a B2C ad.
+      displayName: data.seller.displayName,
+      isBusiness: Boolean(data.businessData),
+      businessName: data.businessData?.trade_name ?? data.businessData?.legal_name ?? null,
+    },
+  });
 
   const showDetails = detailItems.length > 0 || optionLabels.length > 0;
   const showGeneration = Boolean(data.selectedGeneration);
@@ -1212,38 +1219,41 @@ async function loadVehicleInsights(
 function determineGeneration(
   generations: VehicleGeneration[],
   specifics: Record<string, any>,
+  advertGenerationId?: string | null,
 ): VehicleGeneration | null {
-  if (!generations.length) {
-    return null;
+  if (!generations.length) return null;
+
+  // F7 fix: prefer the normalized FK column (explicit seller choice).
+  const fkId = advertGenerationId ?? null;
+  if (fkId) {
+    const match = generations.find((g) => g.id === fkId);
+    if (match) return match;
   }
 
-  const generationId = specifics.generation_id
-    ? String(specifics.generation_id)
-    : null;
-  if (generationId) {
-    const match = generations.find((generation) => generation.id === generationId);
-    if (match) {
-      return match;
-    }
+  // Backward compat: try JSONB specifics.generation_id (pre-F7 records).
+  const jsonbId = specifics.generation_id ? String(specifics.generation_id) : null;
+  if (jsonbId) {
+    const match = generations.find((g) => g.id === jsonbId);
+    if (match) return match;
   }
 
+  // Year-range fallback — ONLY when result is unambiguous.
+  // Bug #1996: .find() silently returned the first match when multiple
+  // generations overlap the same year (e.g. 1996 BMW 5-Series: E34 ends
+  // 1996, E39 starts 1996). Now we filter all matches and return null for
+  // ambiguous cases — the seller must pick explicitly in the form.
   const advertYear = parseAdvertYear(specifics.year);
   if (advertYear) {
-    const match = generations.find((generation) => {
-      const startMatch =
-        generation.start_year === null || generation.start_year <= advertYear;
-      const endMatch =
-        generation.end_year === null || generation.end_year >= advertYear;
-      return startMatch && endMatch;
+    const matching = generations.filter((g) => {
+      const startOk = g.start_year === null || g.start_year <= advertYear;
+      const endOk = g.end_year === null || g.end_year >= advertYear;
+      return startOk && endOk;
     });
-    if (match) {
-      return match;
-    }
+    if (matching.length === 1) return matching[0]; // unique → safe to show
+    // ambiguous (>1) or none (0) → fall through, don't guess
   }
 
-  if (generations.length === 1) {
-    return generations[0];
-  }
+  if (generations.length === 1) return generations[0];
 
   return null;
 }
@@ -1486,10 +1496,27 @@ async function loadAdvertData(
     }
   }
 
-  const selectedGeneration = determineGeneration(generations, specifics);
+  // F7: read the generation_id FK in an ISOLATED, error-tolerant query.
+  // Deploy-safety: if migration 20260628120000 has not been applied yet, this
+  // column does not exist and PostgREST returns an error — but it cannot take
+  // down the page because it is separate from the main advert load. When the
+  // column is absent we fall back to the JSONB specifics.generation_id below.
+  let advertGenerationId: string | null = null;
+  if (modelId) {
+    const { data: genRow } = await svc
+      .from("adverts")
+      .select("generation_id")
+      .eq("id", advertId)
+      .maybeSingle();
+    advertGenerationId =
+      (genRow as { generation_id?: string | null } | null)?.generation_id ?? null;
+  }
+
+  const selectedGeneration = determineGeneration(generations, specifics, advertGenerationId);
 
   let insights: VehicleInsights | null = null;
   const insightsGenerationId =
+    advertGenerationId ??
     specifics.generation_id ??
     selectedGeneration?.id ??
     null;

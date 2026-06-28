@@ -1,6 +1,7 @@
 export const runtime = "nodejs";
 export const revalidate = 60;
 
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { supabaseService } from "@/lib/supabaseService";
 import type { Category } from "@/lib/types";
@@ -9,9 +10,54 @@ import AdsGrid from "@/components/ads-grid";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import CategoryFilters from "@/components/category/CategoryFilters";
 import { buildCategoryBreadcrumbs, getLocalizedCategoryName } from "@/lib/breadcrumbs";
-import { getI18nProps } from "@/i18n/server";
+import { getI18nProps, getInitialLocale } from "@/i18n/server";
 import { signMediaUrls } from "@/lib/media/signMediaUrls";
 import { getFirstImage } from "@/lib/media/getFirstImage";
+import { getJsonLdScriptProps } from "@/lib/seo";
+
+const BASE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  "https://lyvox.be";
+
+// F12: per-category SEO metadata (was absent — /c/* had no canonical/title/desc).
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { path } = await params;
+  const slugPath = Array.isArray(path) ? path.join("/") : "";
+  if (!slugPath) return {};
+
+  const supabase = await supabaseService();
+  const { data: current } = await supabase
+    .from("categories")
+    .select("name_ru,name_en,name_nl,name_fr,name_de,slug,path")
+    .eq("path", slugPath)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  if (!current) return {};
+
+  const [locale, { messages }] = await Promise.all([getInitialLocale(), getI18nProps()]);
+  const name = getLocalizedCategoryName(current as Category, locale);
+
+  const descTemplate =
+    (messages as Record<string, Record<string, string>>)?.category?.seoDescription ??
+    "Browse {category} listings on LyVoX.";
+  const description = descTemplate.replace("{category}", name);
+  const canonical = `${BASE_URL}/c/${slugPath}`;
+
+  return {
+    title: `${name} | LyVoX`,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      title: `${name} | LyVoX`,
+      description,
+      url: canonical,
+      type: "website",
+      siteName: "LyVoX",
+    },
+  };
+}
 
 type AdvertItem = {
   id: string;
@@ -189,8 +235,46 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
   const currentName = getLocalizedCategoryName(typedCurrent, locale);
 
+  // F12: BreadcrumbList JSON-LD (Home → … → current category).
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: t("category.allCategories", "All categories"),
+        item: `${BASE_URL}/c`,
+      },
+      ...breadcrumbItems.map((crumb, index) => ({
+        "@type": "ListItem",
+        position: index + 2,
+        name: crumb.label,
+        item: `${BASE_URL}${crumb.href}`,
+      })),
+    ],
+  };
+
+  // F12: ItemList JSON-LD of the listings on this page (helps category indexation).
+  const itemListJsonLd = adverts.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: currentName,
+        numberOfItems: adverts.length,
+        itemListElement: adverts.map((advert, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          url: `${BASE_URL}/ad/${advert.id}`,
+          name: advert.title,
+        })),
+      }
+    : null;
+
   return (
     <div className="space-y-6">
+      <script {...getJsonLdScriptProps(breadcrumbJsonLd)} />
+      {itemListJsonLd ? <script {...getJsonLdScriptProps(itemListJsonLd)} /> : null}
       <Breadcrumbs
         items={breadcrumbItems}
         homeLabel={t("category.allCategories", "All categories")}

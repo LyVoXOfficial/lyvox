@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LyVoX — Карточки товара по категориям (раскладка + KB)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:oklch(0.985 0.008 196);--fg:oklch(0.22 0.03 200);--card:#fff;--muted:oklch(0.96 0.012 192);--mutedfg:oklch(0.5 0.03 198);--primary:oklch(0.56 0.13 178);--priD:oklch(0.46 0.13 180);--accent:oklch(0.9 0.1 168);--accentfg:oklch(0.4 0.1 172);--amberI:oklch(0.46 0.12 58);--border:oklch(0.91 0.012 198);--danger:oklch(0.58 0.19 24);--rm:13px;--shC:0 1px 2px oklch(0.45 0.06 220/.05),0 10px 26px oklch(0.45 0.06 220/.07);--shHi:0 18px 44px oklch(0.42 0.08 210/.16);--gC:linear-gradient(180deg,oklch(0.60 0.13 177),var(--priD))}
+*{box-sizing:border-box}body{margin:0;background:#eef4f2;color:var(--fg);font-family:Inter,system-ui,sans-serif}
+.wrap{max-width:1280px;margin:0 auto;padding:28px 20px 80px}
+.doc-h{background:var(--gC);color:#fff;border-radius:20px;padding:24px 26px;box-shadow:var(--shHi);margin-bottom:18px}
+.doc-h h1{margin:0 0 6px;font-size:23px;font-weight:800}.doc-h p{margin:0;opacity:.92;font-size:14px;max-width:780px;line-height:1.5}
+.sec{margin:32px 0}.sec>h2{font-size:20px;font-weight:800;margin:0 0 4px}.sec>.lead{color:#3b5a52;font-size:14px;margin:0 0 16px;max-width:840px;line-height:1.55}
+.stage{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap}
+.frame-label{font-size:12px;font-weight:700;color:#5a766e;text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px}
+.desktop{width:720px;max-width:100%}.browser{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;box-shadow:var(--shC)}
+.bbar{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#f2f7f5;border-bottom:1px solid var(--border)}.dot{width:10px;height:10px;border-radius:50%}.bbar .u{flex:1;margin-left:8px;background:#fff;border:1px solid var(--border);border-radius:8px;font-size:11px;color:#6b837c;padding:4px 10px}
+.phone{width:300px}.screen{border:8px solid #0f2a24;border-radius:34px;overflow:hidden;background:#fff;box-shadow:var(--shHi);position:relative}.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:20px;background:#0f2a24;border-radius:0 0 14px 14px;z-index:5}
+.vp{height:600px;overflow:auto;position:relative;background:var(--bg)}.vp.dt{height:540px}
+.app{font-size:13px}.hdr{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border-bottom:1px solid var(--border)}.logo{display:flex;align-items:center;gap:7px;font-weight:800;color:var(--priD);font-size:15px}.logo .m{width:22px;height:22px;border-radius:7px;background:var(--gC);display:grid;place-items:center;color:#fff;font-size:12px}
+.srch{flex:1;background:var(--muted);border:1px solid var(--border);border-radius:999px;padding:7px 12px;color:var(--mutedfg);font-size:12px}
+.btn{border:none;border-radius:999px;padding:8px 14px;font-weight:700;font-size:12px;cursor:pointer}.btn.pri{background:var(--gC);color:#fff}.btn.gho{background:#fff;border:1px solid var(--border);color:var(--priD)}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;background:#fff;border:1px solid var(--border);color:#345}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--accent);color:var(--accentfg)}.badge.v{background:#e8f6ee;color:#1f7a47}.badge.doc{background:#eef1ff;color:#3a45a8}
+.ph{background:linear-gradient(135deg,#cfe6dd,#b6d8cc);border-radius:var(--rm)}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--rm);box-shadow:var(--shC)}
+.muted{color:var(--mutedfg)}.p{font-weight:800;color:var(--priD)}
+.keyspecs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.tabs2{display:flex;gap:4px;border-bottom:2px solid var(--border);margin:10px 0 0;overflow:auto}
+.tabs2 .t{font-size:12px;font-weight:700;padding:8px 12px;color:#5a766e;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tabs2 .t.on{color:var(--priD);border-color:var(--primary)}
+.spec{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:12px;margin-top:10px}
+.spec .r{display:flex;justify-content:space-between;border-bottom:1px dashed var(--border);padding:4px 0}.spec .r .k{color:var(--mutedfg)}.spec .r .v{font-weight:600}
+.kb{border:1px solid #cfe6dd;background:#f4fbf8;border-radius:var(--rm);padding:12px;margin-top:6px}
+.kb h4{margin:0 0 4px;font-size:13px;color:var(--priD)}
+.kb .ref{font-size:10px;color:#6b837c;margin-bottom:8px}
+.kb .cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kb ul{margin:4px 0 0;padding-left:16px}.kb li{font-size:11.5px;margin:3px 0;line-height:1.4}
+.kb .pro li::marker{color:#19a05b}.kb .con li::marker{color:#c0392b}
+.tag{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:var(--danger);border-radius:6px;padding:1px 7px;margin-right:6px}.tag.fix{background:var(--primary)}.tag.new{background:var(--amberI)}
+.changes{background:#fff;border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:12px;padding:14px 16px;margin-top:14px}.changes b{font-size:13px;color:var(--priD)}.changes ul{margin:8px 0 0;padding-left:18px}.changes li{font-size:13px;line-height:1.55;margin:4px 0;color:#2b423c}
+.bottomnav{position:sticky;bottom:0;height:54px;background:#fff;border-top:1px solid var(--border);display:flex;justify-content:space-around;align-items:center;font-size:9px;color:#789}.bottomnav .ic{width:18px;height:18px;border-radius:6px;background:#eaf3ef;display:block;margin:0 auto 2px}
+hr.s{border:none;border-top:1px solid var(--border);margin:8px 0}
+/* ambiguity modal */
+.modalwrap{position:relative;border:1px dashed var(--amberI);background:#fff7e6;border-radius:var(--rm);padding:14px;max-width:560px}
+.choice{display:flex;gap:10px;margin-top:8px}
+.choice .c{flex:1;border:2px solid var(--border);border-radius:12px;padding:10px;background:#fff;cursor:pointer}
+.choice .c.on{border-color:var(--primary);box-shadow:var(--shC)}
+.choice .c .y{font-size:11px;color:var(--mutedfg)}
+.overlapbar{height:18px;background:var(--muted);border-radius:6px;position:relative;margin:6px 0}
+.overlapbar span{position:absolute;height:100%;border-radius:6px;opacity:.7;font-size:9px;color:#fff;display:flex;align-items:center;padding-left:6px;font-weight:700}
+@media(max-width:840px){.desktop{width:100%}}
+</style></head>
+<body><div class="wrap">
+<div class="doc-h"><h1>LyVoX — Карточки товара по категориям</h1><p>Раскладка «вкладки vs секции», поля, подача и база знаний. Транспорт = вкладки (много групп + KB поколения), мода = секции (мало полей). Плюс — фикс бага 1996 (чузер поколения при переходном годе). Палитра проекта. Прототип; см. spec <b>docs/features/62-listing-detail-per-category.md</b>.</p></div>
+
+<!-- TRANSPORT TABBED -->
+<section class="sec"><h2>1. Транспорт — раскладка во вкладках</h2>
+<p class="lead">Сканируемая шапка (галерея + цена + <b>key-specs strip</b> + trust-панель), детали — во вкладках: Обзор · Характеристики · Состояние и история · Об этой модели (KB) · Продавец. KB привязана к <b>поколению</b>, а не к модели.</p>
+<div class="stage">
+  <div class="desktop"><p class="frame-label">Desktop · вкладка «Об этой модели» (KB)</p>
+   <div class="browser"><div class="bbar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span class="u">www.lyvox.be/ad/…/bmw-5-series-2008</span></div>
+    <div class="vp dt app">
+     <div class="hdr"><div class="logo"><span class="m">L</span>LyVoX</div><div class="srch">🔎 Поиск…</div><div class="pill">🌐 NL</div></div>
+     <div style="padding:14px">
+      <div class="muted" style="font-size:11px">Транспорт › Легковые › BMW › 5 Series</div>
+      <div style="display:flex;gap:14px;margin-top:8px">
+       <div style="flex:1.5">
+        <div class="ph" style="height:190px"></div>
+        <div style="display:flex;gap:6px;margin-top:6px"><div class="ph" style="height:42px;width:56px"></div><div class="ph" style="height:42px;width:56px"></div><div class="ph" style="height:42px;width:56px"></div></div>
+        <div style="display:flex;gap:6px;align-items:center;margin-top:10px"><span class="badge v">✓ Verified</span><span class="badge doc">📄 Car-Pass</span></div>
+        <div style="font-size:20px;font-weight:800;margin-top:6px">BMW 5 Series 2008 · <span style="color:#5a766e;font-weight:600;font-size:14px">E60 (2003–2010)</span></div>
+        <div class="p" style="font-size:22px">13 000 €</div>
+        <!-- KEY SPECS STRIP -->
+        <div class="keyspecs"><span class="pill">📅 2008</span><span class="pill">🛣 180 000 км</span><span class="pill">⛽ Дизель</span><span class="pill">⚙ АКПП</span><span class="pill">🚗 Седан</span><span class="pill">📍 Gent</span></div>
+        <!-- TABS -->
+        <div class="tabs2"><span class="t">Обзор</span><span class="t">Характеристики</span><span class="t">Состояние и история</span><span class="t on">Об этой модели</span><span class="t">Продавец</span></div>
+        <div class="kb">
+          <h4>BMW 5 Series — поколение E60 (2003–2010)</h4>
+          <div class="ref">Справочно · база знаний LyVoX · привязано к поколению</div>
+          <div class="cols">
+            <div><b style="font-size:11px;color:#19a05b">Плюсы</b><ul class="pro"><li>Комфорт и управляемость</li><li>Дизели экономичны</li><li>Богатые комплектации</li></ul></div>
+            <div><b style="font-size:11px;color:#c0392b">Минусы</b><ul class="con"><li>Электроника iDrive ранних лет</li><li>Дорогое обслуживание</li></ul></div>
+          </div>
+          <hr class="s">
+          <b style="font-size:11px;color:var(--priD)">⚠ Частые проблемы</b><ul><li>Маслосъёмные колпачки на M57</li><li>Сажевый фильтр (DPF) на дизелях</li></ul>
+          <b style="font-size:11px;color:var(--priD)">🔍 На что смотреть при осмотре</b><ul><li>История ТО и Car-Pass (реальный пробег)</li><li>Работа АКПП на прогреве</li></ul>
+          <div style="margin-top:8px"><span class="badge">Надёжность 7/10</span></div>
+        </div>
+       </div>
+       <div style="flex:1"><div class="card" style="padding:14px"><div style="display:flex;gap:8px;align-items:center"><span class="badge v">?</span><b style="font-size:13px">Связь — для подтверждённых</b></div><div style="margin:8px 0;display:flex;gap:6px"><span class="badge v">🛡 Проверен</span><span class="badge v">📞 Телефон</span></div><button class="btn pri" style="width:100%">💬 Написать продавцу</button><div style="font-size:10px;color:var(--amberI);background:#fff7e6;border:1px dashed var(--amberI);border-radius:8px;padding:6px;margin-top:8px">🔒 Продавец откроется после подтверждения телефона</div><hr class="s"><b style="font-size:12px">Безопасная сделка</b><div class="muted" style="font-size:11px">Оплата в холд · трекинг · возврат <span class="tag new">escrow</span></div></div></div>
+      </div>
+     </div>
+    </div></div>
+  </div>
+  <div class="phone"><p class="frame-label">Mobile · вкладки → сегмент-контрол</p>
+   <div class="screen"><div class="notch"></div><div class="vp app">
+    <div class="ph" style="height:160px;border-radius:0"></div>
+    <div style="padding:12px">
+     <div style="display:flex;gap:5px"><span class="badge v">✓ Verified</span><span class="badge doc">📄 Car-Pass</span></div>
+     <div style="font-weight:800;font-size:16px;margin-top:6px">BMW 5 Series 2008</div>
+     <div class="muted" style="font-size:11px">E60 (2003–2010)</div>
+     <div class="p" style="font-size:19px">13 000 €</div>
+     <div class="keyspecs"><span class="pill">2008</span><span class="pill">180 000 км</span><span class="pill">Дизель</span><span class="pill">АКПП</span></div>
+     <div class="tabs2" style="margin-top:6px"><span class="t on">Обзор</span><span class="t">Хар-ки</span><span class="t">История</span><span class="t">Модель</span></div>
+     <div class="spec"><div class="r"><span class="k">Год</span><span class="v">2008</span></div><div class="r"><span class="k">Пробег</span><span class="v">180 000</span></div><div class="r"><span class="k">Топливо</span><span class="v">Дизель</span></div><div class="r"><span class="k">КПП</span><span class="v">АКПП</span></div><div class="r"><span class="k">Кузов</span><span class="v">Седан</span></div><div class="r"><span class="k">Цвет</span><span class="v">Серый</span></div></div>
+    </div>
+    <div style="position:sticky;bottom:54px;background:#fff;border-top:1px solid var(--border);padding:8px 12px;display:flex;gap:8px"><div style="flex:1"><div class="p">13 000 €</div><div class="muted" style="font-size:9px">🛡 Safe-deal</div></div><button class="btn pri">💬 Написать</button></div>
+    <div class="bottomnav"><div><span class="ic"></span>Главная</div><div><span class="ic"></span>Поиск</div><div><span class="ic"></span>Discover</div><div><span class="ic"></span>Чат</div><div><span class="ic"></span>Ещё</div></div>
+   </div></div>
+  </div>
+</div>
+<div class="changes"><b>Что меняем</b><ul>
+  <li><span class="tag fix">FIX</span>Шапка с key-specs strip — решение «смотреть/нет» за 2 сек.</li>
+  <li>Тяжёлые группы разнесены по вкладкам — нет простыни.</li>
+  <li>KB «Об этой модели» = инсайты поколения (pros/cons/проблемы/осмотр/надёжность), помечено «справочно».</li>
+  <li>В заголовке и автокомплите показываем поколение с годами (E60 (2003–2010)).</li>
+</ul></div>
+</section>
+
+<!-- AMBIGUITY FIX -->
+<section class="sec"><h2>2. Фикс бага 1996 — чузер поколения</h2>
+<p class="lead">Переходный год попадает в два поколения сразу. Система <b>не выбирает молча</b> — показывает выбор с отличиями. Это общий приём для всех «диапазонных» справочников.</p>
+<div class="modalwrap">
+  <b style="font-size:14px;color:var(--amberI)">⚠ Уточните поколение</b>
+  <div style="font-size:12px;margin:6px 0">BMW 5 Series <b>1996</b> выпускался в двух поколениях — выберите верное:</div>
+  <div class="overlapbar"><span style="left:0;width:55%;background:#7a9">E34 1988–1996</span><span style="left:48%;width:52%;background:var(--primary)">E39 1995–2003</span></div>
+  <div class="choice">
+    <div class="c"><b style="font-size:13px">E34</b> <span class="y">1988–1996</span><div style="font-size:11px;margin-top:4px">Прямоугульные фары, «акулий нос». Последний год выпуска.</div></div>
+    <div class="c on"><b style="font-size:13px">E39</b> <span class="y">1995–2003</span><div style="font-size:11px;margin-top:4px">Овальные фары, новый кузов. Первый год выпуска. <span class="badge v">похоже на ваши фото</span></div></div>
+  </div>
+  <div style="font-size:11px;color:#6b837c;margin-top:8px">Выбранное поколение сохраняется в объявлении явно (generation_id) — KB больше не «уплывёт».</div>
+</div>
+<div class="changes"><b>Логика</b><ul>
+  <li>Кандидаты: <code>start ≤ year ≤ end (или end = NULL)</code>. 1 → авто-выбор + «изменить»; &gt;1 → этот чузер; 0 → ближайшие/«неизвестно».</li>
+  <li>Хранить <code>generation_id</code> явно, не ре-деривить из года.</li>
+  <li>Тот же приём: device_models (год релиза), property (год постройки), fashion (коллекция).</li>
+</ul></div>
+</section>
+
+<!-- FASHION SECTIONS -->
+<section class="sec"><h2>3. Мода / личные вещи — раскладка секциями</h2>
+<p class="lead">Полей мало → вкладки избыточны. Один скролл со сворачиваемыми секциями; на мобайле — аккордеон. KB лёгкая: конвертер размеров и (для премиум-брендов) «как проверить подлинность».</p>
+<div class="stage">
+  <div class="desktop"><p class="frame-label">Desktop</p>
+   <div class="browser"><div class="bbar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span class="u">www.lyvox.be/ad/…/nike-air-max</span></div>
+    <div class="vp dt app">
+     <div class="hdr"><div class="logo"><span class="m">L</span>LyVoX</div><div class="srch">🔎 Поиск…</div></div>
+     <div style="padding:14px;display:flex;gap:14px">
+      <div style="flex:1.4">
+       <div class="ph" style="height:200px"></div>
+       <div style="display:flex;gap:5px;margin-top:8px"><span class="badge v">✓ Verified</span></div>
+       <div style="font-weight:800;font-size:18px;margin-top:6px">Nike Air Max 90 — 42 EU</div>
+       <div class="p" style="font-size:20px">75 €</div>
+       <div class="keyspecs"><span class="pill">👟 Обувь</span><span class="pill">Nike</span><span class="pill">42 EU</span><span class="pill">Б/у — отлично</span></div>
+       <!-- sections -->
+       <div class="card" style="padding:12px;margin-top:10px"><b style="font-size:12px">Характеристики ▾</b><div class="spec"><div class="r"><span class="k">Бренд</span><span class="v">Nike</span></div><div class="r"><span class="k">Размер</span><span class="v">42 EU · 8.5 UK · 9.5 US</span></div><div class="r"><span class="k">Цвет</span><span class="v">Белый/серый</span></div><div class="r"><span class="k">Материал</span><span class="v">Кожа/текстиль</span></div></div></div>
+       <div class="card" style="padding:12px;margin-top:8px"><b style="font-size:12px">Состояние ▸</b> <span class="muted" style="font-size:11px">(свёрнуто)</span></div>
+       <div class="kb"><h4>Размер 42 EU</h4><div class="ref">Справочно · конвертер размеров</div><div style="font-size:11.5px">EU 42 · UK 8.5 · US 9.5 · стопа ~26.5 см</div><hr class="s"><b style="font-size:11px;color:var(--priD)">Подлинность Nike — на что смотреть</b><ul><li>Ровные швы, чёткий логотип, артикул на бирке совпадает с коробкой</li></ul></div>
+      </div>
+      <div style="flex:1"><div class="card" style="padding:14px"><button class="btn pri" style="width:100%">💬 Написать продавцу</button><div class="muted" style="font-size:11px;margin-top:8px">🛡 Safe-deal · доставка Bpost</div></div></div>
+     </div>
+    </div></div>
+  </div>
+  <div class="phone"><p class="frame-label">Mobile · аккордеон</p>
+   <div class="screen"><div class="notch"></div><div class="vp app">
+    <div class="ph" style="height:170px;border-radius:0"></div>
+    <div style="padding:12px">
+     <span class="badge v">✓ Verified</span>
+     <div style="font-weight:800;font-size:16px;margin-top:6px">Nike Air Max 90</div>
+     <div class="p" style="font-size:18px">75 €</div>
+     <div class="keyspecs"><span class="pill">42 EU</span><span class="pill">Nike</span><span class="pill">Б/у</span></div>
+     <div class="card" style="padding:10px;margin-top:8px"><b style="font-size:12px">Характеристики ▾</b><div class="spec"><div class="r"><span class="k">Размер</span><span class="v">42 EU</span></div><div class="r"><span class="k">Цвет</span><span class="v">Белый</span></div></div></div>
+     <div class="card" style="padding:10px;margin-top:8px"><b style="font-size:12px">Состояние ▸</b></div>
+     <div class="card" style="padding:10px;margin-top:8px"><b style="font-size:12px">Размер 42: EU/UK/US ▸</b></div>
+    </div>
+    <div style="position:sticky;bottom:54px;background:#fff;border-top:1px solid var(--border);padding:8px 12px;display:flex;gap:8px"><div style="flex:1" class="p">75 €</div><button class="btn pri">💬 Написать</button></div>
+    <div class="bottomnav"><div><span class="ic"></span>Главная</div><div><span class="ic"></span>Поиск</div><div><span class="ic"></span>Discover</div><div><span class="ic"></span>Чат</div><div><span class="ic"></span>Ещё</div></div>
+   </div></div>
+  </div>
+</div>
+<div class="changes"><b>Что меняем</b><ul>
+  <li>Секции + аккордеон вместо вкладок — для коротких категорий проще.</li>
+  <li>Key-specs strip (размер/бренд/состояние) — всё важное сразу.</li>
+  <li>Лёгкая KB: конвертер размеров EU/UK/US + советы по подлинности для премиум-брендов.</li>
+</ul></div>
+</section>
+
+<footer style="margin-top:36px;color:#5a766e;font-size:12px;border-top:1px solid var(--border);padding-top:16px">LyVoX · Карточки по категориям · прототип в палитре проекта · спек: docs/features/62-listing-detail-per-category.md</footer>
+</div></body></html>

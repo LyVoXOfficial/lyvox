@@ -9,6 +9,8 @@ import {
 } from "@/lib/apiErrors";
 import { validateRequest } from "@/lib/validations";
 import { createReportSchema } from "@/lib/validations/reports";
+import { trackServerEvent } from "@/lib/analytics/trackServerEvent";
+import { ANALYTICS_EVENTS } from "@/lib/analytics/events";
 
 export const runtime = "nodejs";
 
@@ -105,6 +107,12 @@ const baseHandler = async (req: Request) => {
     action: "report_create",
     details: { advert_id, reason } as never,
   });
+
+  void trackServerEvent(
+    ANALYTICS_EVENTS.REPORT_SUBMITTED,
+    { target_id: advert_id, reason },
+    { userId: user.id, dedupKey: `report:${advert_id}:${user.id}` },
+  );
 
   return createSuccessResponse({});
 };

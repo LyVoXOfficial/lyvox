@@ -42,8 +42,9 @@ const baseHandler = async (req: Request) => {
     return createErrorResponse(ApiErrorCode.UNAUTH, { status: 401 });
   }
 
-  // Check if user is blocked (fail closed: a payment must not proceed if we
-  // can't confirm the account is in good standing)
+  // checkUserBlocked(failClosed) is sufficient here: checkout = pro-billing boost,
+  // NOT escrow money-flow (F3 gate). invoking fraud-detection would re-run velocity
+  // rules already triggered on advert create/publish, adding latency for no gain.
   const { checkUserBlocked } = await import("@/lib/fraud/checkUserBlocked");
   const blockCheck = await checkUserBlocked(user.id, { failClosed: true });
   if (blockCheck.isBlocked) {

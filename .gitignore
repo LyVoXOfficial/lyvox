@@ -191,3 +191,6 @@ Thumbs.db
 # cloud-design handoff bundle (local reference)
 docs/design/handoff/
 *handoff*.zip
+
+# graphify knowledge graph output (local-only, rebuilt by git hook)
+graphify-out/

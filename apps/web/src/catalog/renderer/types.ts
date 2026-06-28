@@ -41,6 +41,10 @@ export type CatalogSchemaGroup = {
   title_i18n_key?: string;
   description_i18n_key?: string;
   layout?: "single" | "double" | "grid";
+  // F13: display mode from catalog_groups table; injected server-side when loading schema
+  display?: "tab" | "section";
+  tab_key?: string;
+  tab_order?: number;
   fields?: CatalogSchemaField[];
   [key: string]: unknown;
 };

@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { logger } from "@/lib/errorLogger";
 import { supabaseService } from "@/lib/supabaseService";
-import type { Database } from "@/lib/supabaseTypes";
+import type { Database, TablesUpdate } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
 
@@ -121,18 +121,79 @@ export async function GET(request: NextRequest) {
         const itsmeKycLevel =
           data.user.user_metadata?.kyc_level || data.user.app_metadata?.kyc_level || "basic";
 
+        // F10: Extract the itsme sub (OIDC subject identifier).
+        // Stable per human identity; used to enforce one-person-one-account.
+        // Primary source: identities array (set by Supabase from OIDC id_token).
+        // Fallback: user_metadata.sub (Supabase copies OIDC claims there).
+        const itsmeSub: string | null =
+          data.user.identities?.find((i) => i.provider === "itsme")?.id ??
+          (data.user.user_metadata?.sub as string | undefined) ??
+          null;
+
+        if (!itsmeSub) {
+          logger.error("itsme callback: sub claim absent from user data", {
+            component: "AuthCallback",
+            action: "updateItsmeProfile",
+            metadata: { userId: data.user.id },
+          });
+        }
+
         // itsme_verified and itsme_kyc_level are trust columns restricted to service-role
         // after the lock_profiles_columns migration — use the service-role client here.
         const svc = await supabaseService();
+
+        // itsme_sub is a new column (migration 20260628110000); not yet in generated
+        // DB types. The intersection adds it temporarily — remove after pnpm gen:types.
+        type ItsmeProfileUpdate = TablesUpdate<"profiles"> & { itsme_sub?: string };
+        const updatePayload: ItsmeProfileUpdate = {
+          itsme_verified: true,
+          itsme_kyc_level: itsmeKycLevel,
+        };
+        if (itsmeSub) {
+          updatePayload.itsme_sub = itsmeSub;
+        }
+
         const { error: profileError } = await svc
           .from("profiles")
-          .update({
-            itsme_verified: true,
-            itsme_kyc_level: itsmeKycLevel,
-          })
+          .update(updatePayload)
           .eq("id", data.user.id);
 
         if (profileError) {
+          // F10: Hard-reject identity collision.
+          // Another account already has this itsme_sub — someone tried to link the same
+          // itsme identity to two different accounts (link-ATO attempt or data error).
+          const isSubCollision =
+            profileError.code === "23505" &&
+            (profileError.message.includes("profiles_itsme_sub_key") ||
+              profileError.message.includes("itsme_sub"));
+
+          if (isSubCollision) {
+            logger.error("itsme_sub collision: identity already linked to another account", {
+              component: "AuthCallback",
+              action: "updateItsmeProfile",
+              metadata: { userId: data.user.id },
+            });
+
+            // Force-sign-out this session so the attacker cannot use it.
+            try {
+              await svc.auth.admin.signOut(data.user.id, "global");
+            } catch (signOutError) {
+              logger.error("Failed to sign out after itsme_sub collision", {
+                component: "AuthCallback",
+                action: "signOutOnCollision",
+                error: signOutError,
+              });
+            }
+
+            const errorUrl = new URL("/login", url.origin);
+            errorUrl.searchParams.set("error", "identity_conflict");
+            errorUrl.searchParams.set(
+              "message",
+              "This itsme identity is already associated with a different account. Contact support if this is unexpected.",
+            );
+            return NextResponse.redirect(errorUrl);
+          }
+
           logger.error("Failed to update profile with Itsme verification", {
             component: "AuthCallback",
             action: "updateItsmeProfile",
@@ -148,6 +209,7 @@ export async function GET(request: NextRequest) {
             metadata: {
               userId: data.user.id,
               kycLevel: itsmeKycLevel,
+              subPresent: !!itsmeSub,
             },
           });
         }

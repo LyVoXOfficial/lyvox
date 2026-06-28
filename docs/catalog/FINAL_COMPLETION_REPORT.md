@@ -1,3 +1,5 @@
+> ⚠ УСТАРЕЛО — этот файл больше не ведётся. Единый источник правды: [docs/MASTER_TODO.md](../MASTER_TODO.md). Сведено туда; можно удалить.
+
 # 🎉 LyVoX Catalog System - Final Completion Report
 
 **Date**: 2025-01-05  

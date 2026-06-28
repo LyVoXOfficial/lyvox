@@ -107,13 +107,51 @@ function makeUpdateChain(
 }
 
 /**
+ * F1: webhook_events table mock.
+ *
+ * @param isFirstDelivery  true  → upsert returns [{event_id}] (first delivery)
+ *                         false → upsert returns [] (conflict / duplicate)
+ * @param alreadyProcessed true  → existing row has processed_at set (skip)
+ *                         false → processed_at is null (retry of failed event)
+ */
+function makeWebhookEventsChain(
+  options: { isFirstDelivery?: boolean; alreadyProcessed?: boolean } = {}
+) {
+  const { isFirstDelivery = true, alreadyProcessed = false } = options;
+  return {
+    // Called as: supabase.from("webhook_events").upsert({...}, {...}).select("event_id")
+    upsert: (_data: unknown, _opts: unknown) => ({
+      select: (_cols: string) =>
+        Promise.resolve({
+          data: isFirstDelivery ? [{ event_id: "evt_test" }] : [],
+          error: null,
+        }),
+    }),
+    // Called as: supabase.from("webhook_events").select("processed_at").eq(...).maybeSingle()
+    // (only reached when isFirstDelivery = false)
+    select: (_cols: string) => ({
+      eq: (_col: string, _val: unknown) => ({
+        maybeSingle: () =>
+          Promise.resolve({
+            data: {
+              processed_at: alreadyProcessed
+                ? new Date(1000000000000).toISOString()
+                : null,
+            },
+            error: null,
+          }),
+      }),
+    }),
+    // Called as: supabase.from("webhook_events").update({...}).eq("event_id", ...)
+    update: (_data: unknown) => ({
+      eq: (_col: string, _val: unknown) => Promise.resolve({ error: null }),
+    }),
+  };
+}
+
+/**
  * Build the full supabase fluent chain needed by the boost (payment) path.
- * purchases table: select → eq → maybeSingle (idempotency check)
- *                  update → eq (status update)
- *                  select → eq → single (fetch details)
- * products table: select → eq → single
- * benefits table: insert
- * logs table: insert
+ * Now includes webhook_events table support (F1).
  */
 function makeBoostSupabaseImpl() {
   const purchaseSelectMaybeSingleCalled: unknown[] = [];
@@ -121,6 +159,9 @@ function makeBoostSupabaseImpl() {
   let selectCallCount = 0;
 
   return (table: string) => {
+    if (table === "webhook_events") {
+      return makeWebhookEventsChain();
+    }
     if (table === "purchases") {
       return {
         select: (_cols: string) => {
@@ -234,6 +275,7 @@ describe("POST /api/billing/webhook", () => {
     });
 
     constructEventMock.mockReturnValue({
+      id: "evt_c",
       type: "checkout.session.completed",
       data: {
         object: {
@@ -251,6 +293,7 @@ describe("POST /api/billing/webhook", () => {
     const updateSpy = vi.fn();
     const eqSpy = vi.fn();
     fromServiceMock.mockImplementation((table: string) => {
+      if (table === "webhook_events") return makeWebhookEventsChain();
       if (table === "profiles") return makeUpdateChain(updateSpy, eqSpy);
       throw new Error("Unexpected table: " + table);
     });
@@ -286,6 +329,7 @@ describe("POST /api/billing/webhook", () => {
     });
 
     constructEventMock.mockReturnValue({
+      id: "evt_d",
       type: "customer.subscription.updated",
       data: { object: sub },
     } as Stripe.Event);
@@ -293,6 +337,7 @@ describe("POST /api/billing/webhook", () => {
     const updateSpy = vi.fn();
     const eqSpy = vi.fn();
     fromServiceMock.mockImplementation((table: string) => {
+      if (table === "webhook_events") return makeWebhookEventsChain();
       if (table === "profiles") return makeUpdateChain(updateSpy, eqSpy);
       throw new Error("Unexpected table: " + table);
     });
@@ -320,6 +365,7 @@ describe("POST /api/billing/webhook", () => {
     });
 
     constructEventMock.mockReturnValue({
+      id: "evt_e",
       type: "customer.subscription.updated",
       data: { object: sub },
     } as Stripe.Event);
@@ -327,6 +373,7 @@ describe("POST /api/billing/webhook", () => {
     const updateSpy = vi.fn();
     const eqSpy = vi.fn();
     fromServiceMock.mockImplementation((table: string) => {
+      if (table === "webhook_events") return makeWebhookEventsChain();
       if (table === "profiles") return makeUpdateChain(updateSpy, eqSpy);
       throw new Error("Unexpected table: " + table);
     });
@@ -353,6 +400,7 @@ describe("POST /api/billing/webhook", () => {
     });
 
     constructEventMock.mockReturnValue({
+      id: "evt_f",
       type: "customer.subscription.deleted",
       data: { object: sub },
     } as Stripe.Event);
@@ -360,6 +408,7 @@ describe("POST /api/billing/webhook", () => {
     const updateSpy = vi.fn();
     const eqSpy = vi.fn();
     fromServiceMock.mockImplementation((table: string) => {
+      if (table === "webhook_events") return makeWebhookEventsChain();
       if (table === "profiles") return makeUpdateChain(updateSpy, eqSpy);
       throw new Error("Unexpected table: " + table);
     });
@@ -385,6 +434,7 @@ describe("POST /api/billing/webhook", () => {
     });
 
     constructEventMock.mockReturnValue({
+      id: "evt_g",
       type: "invoice.paid",
       data: {
         object: {
@@ -403,6 +453,7 @@ describe("POST /api/billing/webhook", () => {
     const updateSpy = vi.fn();
     const eqSpy = vi.fn();
     fromServiceMock.mockImplementation((table: string) => {
+      if (table === "webhook_events") return makeWebhookEventsChain();
       if (table === "profiles") return makeUpdateChain(updateSpy, eqSpy);
       throw new Error("Unexpected table: " + table);
     });
@@ -426,6 +477,7 @@ describe("POST /api/billing/webhook", () => {
   // ── invoice.paid without subscription → no-op ────────────────────────────
   it("(h) invoice.paid without subscription reference is a no-op", async () => {
     constructEventMock.mockReturnValue({
+      id: "evt_h",
       type: "invoice.paid",
       data: {
         object: {
@@ -435,8 +487,10 @@ describe("POST /api/billing/webhook", () => {
       },
     } as Stripe.Event);
 
-    fromServiceMock.mockImplementation(() => {
-      throw new Error("Should not touch supabase for non-subscription invoice");
+    fromServiceMock.mockImplementation((table: string) => {
+      // webhook_events is always accessed by F1 gate — allow it
+      if (table === "webhook_events") return makeWebhookEventsChain();
+      throw new Error("Should not touch supabase for non-subscription invoice: " + table);
     });
 
     const res = await POST(
@@ -451,8 +505,6 @@ describe("POST /api/billing/webhook", () => {
 
   // ── customer.subscription.updated (active, empty items) → 200, no DB write ─
   it("(j) customer.subscription.updated with empty items.data returns 200 and skips pro_until write", async () => {
-    // A subscription with items.data = [] has no current_period_end.
-    // The webhook must return 200 (not 500) and must NOT write pro_until.
     const emptyItemsSub = {
       id: "sub_empty_items",
       object: "subscription",
@@ -460,19 +512,21 @@ describe("POST /api/billing/webhook", () => {
       status: "active" as Stripe.Subscription.Status,
       items: {
         object: "list",
-        data: [], // <-- the edge case: no subscription items
+        data: [],
         has_more: false,
         url: "",
       },
     } as unknown as Stripe.Subscription;
 
     constructEventMock.mockReturnValue({
+      id: "evt_j",
       type: "customer.subscription.updated",
       data: { object: emptyItemsSub },
     } as Stripe.Event);
 
     const updateSpy = vi.fn();
     fromServiceMock.mockImplementation((table: string) => {
+      if (table === "webhook_events") return makeWebhookEventsChain();
       if (table === "profiles") {
         return {
           update: (data: unknown) => {
@@ -491,17 +545,16 @@ describe("POST /api/billing/webhook", () => {
     );
     const resBody = await res.json();
 
-    // Must return 200, not 500
     expect(res.status).toBe(200);
     expect(resBody.ok).toBe(true);
-
-    // Must NOT have written pro_until (DB update skipped entirely)
+    // profiles.update must NOT be called when current_period_end is missing
     expect(updateSpy).not.toHaveBeenCalled();
   });
 
   // ── Existing boost path (mode=payment) still works ───────────────────────
   it("(i) checkout.session.completed with mode=payment runs boost logic (existing path)", async () => {
     constructEventMock.mockReturnValue({
+      id: "evt_i",
       type: "checkout.session.completed",
       data: {
         object: {
@@ -524,8 +577,88 @@ describe("POST /api/billing/webhook", () => {
 
     expect(res.status).toBe(200);
     expect(resBody.ok).toBe(true);
-
-    // Stripe subscriptions.retrieve must NOT be called for boost path
     expect(subscriptionsRetrieveMock).not.toHaveBeenCalled();
+  });
+
+  // ── F1: Duplicate delivery of already-processed event → 200 skipped ───────
+  it("(k) skips business logic and returns skipped:true when event already has processed_at", async () => {
+    constructEventMock.mockReturnValue({
+      id: "evt_k_duplicate",
+      type: "customer.subscription.updated",
+      data: {
+        object: makeSubscriptionStub({ customer: "cus_dup", status: "active" }),
+      },
+    } as Stripe.Event);
+
+    const profilesUpdateSpy = vi.fn();
+    fromServiceMock.mockImplementation((table: string) => {
+      if (table === "webhook_events") {
+        // Simulate: conflict on upsert (not first delivery), and processed_at is set
+        return makeWebhookEventsChain({ isFirstDelivery: false, alreadyProcessed: true });
+      }
+      // profiles should NOT be touched for a skipped event
+      if (table === "profiles") {
+        return {
+          update: (data: unknown) => {
+            profilesUpdateSpy(data);
+            return { eq: async () => ({ error: null }) };
+          },
+        };
+      }
+      throw new Error("Unexpected table for duplicate event: " + table);
+    });
+
+    const res = await POST(
+      makeWebhookReq() as unknown as import("next/server").NextRequest
+    );
+    const resBody = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(resBody.ok).toBe(true);
+    expect(resBody.data.skipped).toBe(true);
+    // Business logic (profiles update) must NOT have run
+    expect(profilesUpdateSpy).not.toHaveBeenCalled();
+  });
+
+  // ── F1: Retry of failed delivery (processed_at=null) → re-runs business logic
+  it("(l) re-runs business logic when event_id exists but processed_at is null (prior failure)", async () => {
+    const periodEnd = 1800000099;
+    const sub = makeSubscriptionStub({
+      customer: "cus_retry",
+      status: "active",
+      current_period_end: periodEnd,
+    });
+
+    constructEventMock.mockReturnValue({
+      id: "evt_l_retry",
+      type: "customer.subscription.updated",
+      data: { object: sub },
+    } as Stripe.Event);
+
+    const updateSpy = vi.fn();
+    const eqSpy = vi.fn();
+    fromServiceMock.mockImplementation((table: string) => {
+      if (table === "webhook_events") {
+        // Simulate: conflict on upsert (not first delivery), but processed_at is NULL
+        // (prior delivery failed) → gate returns "process" so business logic runs
+        return makeWebhookEventsChain({ isFirstDelivery: false, alreadyProcessed: false });
+      }
+      if (table === "profiles") return makeUpdateChain(updateSpy, eqSpy);
+      throw new Error("Unexpected table: " + table);
+    });
+
+    const res = await POST(
+      makeWebhookReq() as unknown as import("next/server").NextRequest
+    );
+    const resBody = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(resBody.ok).toBe(true);
+    expect(resBody.data.skipped).toBeUndefined();
+    // Business logic DID run
+    expect(updateSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ pro_until: new Date(periodEnd * 1000).toISOString() })
+    );
+    expect(eqSpy).toHaveBeenCalledWith("stripe_customer_id", "cus_retry");
   });
 });

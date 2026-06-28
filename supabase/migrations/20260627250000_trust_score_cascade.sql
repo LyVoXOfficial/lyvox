@@ -4,7 +4,7 @@
 -- Without this, deleteUser fails for any user that has a trust_score row (i.e. essentially all of them).
 
 begin;
-alter table public.trust_score drop constraint trust_score_user_id_fkey;
+alter table public.trust_score drop constraint if exists trust_score_user_id_fkey;
 alter table public.trust_score add constraint trust_score_user_id_fkey
   foreign key (user_id) references auth.users(id) on delete cascade;
 commit;

@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LyVoX — Макеты редизайна (дизайн · раскладка · функционал)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:oklch(0.985 0.008 196); --fg:oklch(0.22 0.03 200);
+  --card:#fff; --muted:oklch(0.96 0.012 192); --mutedfg:oklch(0.5 0.03 198);
+  --primary:oklch(0.56 0.13 178); --priD:oklch(0.46 0.13 180); --prifg:oklch(0.99 0.02 180);
+  --accent:oklch(0.9 0.1 168); --accentfg:oklch(0.4 0.1 172);
+  --amber:oklch(0.83 0.14 72); --amberI:oklch(0.46 0.12 58);
+  --border:oklch(0.91 0.012 198); --danger:oklch(0.58 0.19 24);
+  --r:20px; --rm:13px; --rs:9px;
+  --shC:0 1px 2px oklch(0.45 0.06 220/.05),0 10px 26px oklch(0.45 0.06 220/.07);
+  --shHi:0 18px 44px oklch(0.42 0.08 210/.16);
+  --gC:linear-gradient(180deg,oklch(0.60 0.13 177),var(--priD));
+}
+*{box-sizing:border-box}
+body{margin:0;background:#eef4f2;color:var(--fg);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1280px;margin:0 auto;padding:28px 20px 80px}
+/* ── doc header ── */
+.doc-h{background:var(--gC);color:#fff;border-radius:var(--r);padding:26px 28px;box-shadow:var(--shHi);margin-bottom:18px}
+.doc-h h1{margin:0 0 6px;font-size:24px;font-weight:800;letter-spacing:-.02em}
+.doc-h p{margin:0;opacity:.92;font-size:14px;max-width:760px;line-height:1.5}
+.tabs{position:sticky;top:0;z-index:30;display:flex;gap:8px;flex-wrap:wrap;background:#eef4f2cc;backdrop-filter:blur(8px);padding:12px 4px;margin:0 -4px 14px;border-bottom:1px solid var(--border)}
+.tabs a{font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;background:#fff;border:1px solid var(--border);color:var(--priD)}
+.tabs a:hover{border-color:var(--primary)}
+/* ── section ── */
+.sec{margin:34px 0}
+.sec>h2{font-size:20px;font-weight:800;letter-spacing:-.02em;margin:0 0 4px}
+.sec>.lead{color:#3b5a52;font-size:14px;margin:0 0 16px;max-width:820px;line-height:1.55}
+.stage{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap}
+.changes{background:#fff;border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:12px;padding:14px 16px;margin-top:14px}
+.changes b{font-size:13px;color:var(--priD)}
+.changes ul{margin:8px 0 0;padding-left:18px}
+.changes li{font-size:13px;line-height:1.55;margin:4px 0;color:#2b423c}
+.tag{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:var(--danger);border-radius:6px;padding:1px 7px;margin-right:6px;vertical-align:middle}
+.tag.fix{background:var(--primary)} .tag.new{background:var(--amberI)}
+/* ── device frames ── */
+.frame-label{font-size:12px;font-weight:700;color:#5a766e;text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px}
+.desktop{width:760px;max-width:100%}
+.browser{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;box-shadow:var(--shC)}
+.bbar{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#f2f7f5;border-bottom:1px solid var(--border)}
+.dot{width:10px;height:10px;border-radius:50%}
+.bbar .u{flex:1;margin-left:8px;background:#fff;border:1px solid var(--border);border-radius:8px;font-size:11px;color:#6b837c;padding:4px 10px}
+.phone{width:300px}
+.screen{border:8px solid #0f2a24;border-radius:34px;overflow:hidden;background:#fff;box-shadow:var(--shHi);position:relative}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:20px;background:#0f2a24;border-radius:0 0 14px 14px;z-index:5}
+.vp{height:560px;overflow:hidden;position:relative;background:var(--bg)}
+.vp.dt{height:480px}
+.scroll-note{font-size:11px;color:#7a938b;text-align:center;margin-top:6px}
+/* ── shared UI atoms ── */
+.app{font-size:13px;color:var(--fg);background:var(--bg);height:100%}
+.strip{background:var(--priD);color:#dff3ec;font-size:10.5px;display:flex;gap:14px;justify-content:center;padding:5px 8px}
+.strip span{display:inline-flex;gap:4px;align-items:center;opacity:.95}
+.hdr{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:7px;font-weight:800;color:var(--priD);font-size:15px}
+.logo .m{width:22px;height:22px;border-radius:7px;background:var(--gC);display:grid;place-items:center;color:#fff;font-size:12px}
+.srch{flex:1;display:flex;align-items:center;gap:7px;background:var(--muted);border:1px solid var(--border);border-radius:999px;padding:7px 12px;color:var(--mutedfg);font-size:12px}
+.btn{border:none;border-radius:999px;padding:8px 14px;font-weight:700;font-size:12px;cursor:pointer}
+.btn.pri{background:var(--gC);color:#fff}
+.btn.gho{background:#fff;border:1px solid var(--border);color:var(--priD)}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:6px 11px;border-radius:999px;background:#fff;border:1px solid var(--border);color:#345}
+.pill.on{background:var(--primary);color:#fff;border-color:transparent}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--accent);color:var(--accentfg)}
+.badge.v{background:#e8f6ee;color:#1f7a47}
+.h1{font-size:25px;font-weight:800;letter-spacing:-.02em;line-height:1.12;margin:0}
+.h1 .em{color:var(--primary)}
+.muted{color:var(--mutedfg)}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--rm);box-shadow:var(--shC)}
+.grid{display:grid;gap:10px}
+.lcard{background:#fff;border:1px solid var(--border);border-radius:var(--rm);overflow:hidden}
+.lcard .ph{height:84px;background:linear-gradient(135deg,#cfe6dd,#b6d8cc);position:relative}
+.lcard .ph .vb{position:absolute;left:6px;top:6px}
+.lcard .ph .fav{position:absolute;right:6px;top:6px;width:22px;height:22px;border-radius:50%;background:#fff9;display:grid;place-items:center;font-size:11px}
+.lcard .b{padding:7px 9px}
+.lcard .t{font-size:11.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lcard .p{font-size:13px;font-weight:800;color:var(--priD);margin-top:2px}
+.lcard .m{font-size:10px;color:var(--mutedfg);margin-top:2px;display:flex;gap:6px}
+.bottomnav{position:absolute;left:0;right:0;bottom:0;height:60px;background:#fff;border-top:1px solid var(--border);display:flex;justify-content:space-around;align-items:center;font-size:9.5px;color:#789;padding-bottom:4px}
+.bottomnav .it{display:flex;flex-direction:column;align-items:center;gap:3px}
+.bottomnav .it.on{color:var(--primary);font-weight:700}
+.bottomnav .ic{width:20px;height:20px;border-radius:7px;background:#eaf3ef;display:grid;place-items:center;font-size:11px}
+.bottomnav .it.on .ic{background:var(--primary);color:#fff}
+.fab{position:absolute;right:14px;bottom:74px;width:46px;height:46px;border-radius:50%;background:var(--gC);color:#fff;display:grid;place-items:center;font-size:20px;box-shadow:var(--shHi)}
+.callout{position:relative;border:1px dashed var(--amberI);background:#fff7e6;border-radius:8px;font-size:10px;color:var(--amberI);padding:5px 8px;font-weight:600}
+.sub{font-size:12px;color:#42615a}
+.sectitle{font-size:13px;font-weight:800;margin:0}
+.link{color:var(--primary);font-weight:700;font-size:11px}
+.coach{position:absolute;inset:0;background:#0d241fcc;color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;text-align:center;padding:20px;z-index:8}
+.coach .arrows{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:11px;max-width:230px}
+.coach .arrows div{background:#ffffff1a;border:1px solid #ffffff33;border-radius:8px;padding:7px}
+.stamp{position:absolute;top:16px;font-size:15px;font-weight:800;border:2px solid;border-radius:8px;padding:3px 9px;transform:rotate(-8deg)}
+hr.s{border:none;border-top:1px solid var(--border);margin:8px 0}
+@media(max-width:840px){.desktop{width:100%}.vp.dt{height:420px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="doc-h">
+    <h1>LyVoX — Макеты редизайна</h1>
+    <p>Дизайн · раскладка · функционал. Все ключевые страницы в desktop + mobile, в фирменной палитре LyVoX (teal/mint, Inter, скруглённые карточки). Каждый блок учитывает выводы аудита (см. <b>docs/features/audit/</b>). Цветные пометки: <span class="tag fix">FIX</span> правка по аудиту, <span class="tag new">NEW</span> новый функционал. Это статичный прототип «как должно выглядеть», не рабочий код.</p>
+  </div>
+
+  <div class="tabs">
+    <a href="#home">🏠 Главная</a>
+    <a href="#discover">🔀 Discover</a>
+    <a href="#search">🔎 Поиск</a>
+    <a href="#ad">🚗 Карточка</a>
+    <a href="#post">➕ Подача</a>
+    <a href="#profile">👤 Профиль</a>
+  </div>
+
+  <!-- ===================== HOME ===================== -->
+  <section class="sec" id="home">
+    <h2>1. Главная</h2>
+    <p class="lead">Первый экран продаёт доверие <i>и</i> сразу показывает товар. Убрали «4/4/1» (анти-соц-доказательство на пустом маркете), один поиск вместо двух, витрина объявлений поднята выше фолда, trust-полоса остаётся и на мобайле.</p>
+    <div class="stage">
+      <!-- DESKTOP -->
+      <div class="desktop">
+        <p class="frame-label">Desktop</p>
+        <div class="browser">
+          <div class="bbar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span class="u">www.lyvox.be</span></div>
+          <div class="vp dt app" style="overflow:auto">
+            <div class="strip"><span>🛡 Проверенные продавцы</span><span>⚖ Модерация против мошенничества</span><span>📍 Местные сделки в Бельгии</span></div>
+            <div class="hdr">
+              <div class="logo"><span class="m">L</span>LyVoX</div>
+              <div class="pill">☰ Категории</div>
+              <div class="srch">🔎 Поиск объявлений по Бельгии…</div>
+              <div class="pill">🌐 NL</div>
+              <button class="btn pri">＋ Подать объявление</button>
+              <div class="pill">🔔</div><div class="pill">👤</div>
+            </div>
+            <div style="padding:16px">
+              <div style="display:flex;gap:16px;align-items:stretch">
+                <div style="flex:1.3">
+                  <div class="badge">Бельгия · 5 языков</div>
+                  <h1 class="h1" style="margin-top:8px">Покупайте и продавайте<br>с <span class="em">людьми, которым<br>доверяете</span>.</h1>
+                  <p class="sub" style="max-width:340px">Проверенные продавцы, безопасная переписка и местные сделки — всё внутри платформы.</p>
+                  <div style="display:flex;gap:8px;margin-top:10px">
+                    <button class="btn pri">Смотреть объявления →</button>
+                    <button class="btn gho">Продать вещь</button>
+                  </div>
+                  <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">
+                    <span class="pill">🚗 Транспорт</span><span class="pill">📱 Электроника</span><span class="pill on">🛡 Проверенные</span><span class="pill">🏠 Дом</span>
+                  </div>
+                </div>
+                <!-- trust card instead of empty stats -->
+                <div class="card" style="flex:1;padding:14px">
+                  <div class="sectitle">Как LyVoX защищает сделку</div>
+                  <span class="callout" style="display:inline-block;margin:6px 0"><b>FIX:</b> вместо счётчиков «4/4/1»</span>
+                  <hr class="s">
+                  <div style="display:flex;gap:9px;align-items:flex-start;margin:7px 0"><div class="badge v">✓</div><div><b style="font-size:12px">Проверка личности</b><div class="sub">itsme / телефон — продавец реальный</div></div></div>
+                  <div style="display:flex;gap:9px;align-items:flex-start;margin:7px 0"><div class="badge v">€</div><div><b style="font-size:12px">Безопасная оплата</b><div class="sub">деньги в холде до получения</div></div></div>
+                  <div style="display:flex;gap:9px;align-items:flex-start;margin:7px 0"><div class="badge v">⚑</div><div><b style="font-size:12px">Анти-скам в чате</b><div class="sub">блок внешних ссылок и подсказки</div></div></div>
+                </div>
+              </div>
+              <!-- showcase above fold -->
+              <div style="display:flex;justify-content:space-between;align-items:center;margin:18px 0 8px">
+                <div class="sectitle">Свежее в Бельгии <span class="tag fix">FIX: витрина выше фолда</span></div><span class="link">Все объявления →</span>
+              </div>
+              <div class="grid" style="grid-template-columns:repeat(4,1fr)">
+                <div class="lcard"><div class="ph"><span class="badge v vb">✓ Verified</span><span class="fav">♡</span></div><div class="b"><div class="t">BMW 5 Series 2008</div><div class="p">13 000 €</div><div class="m">📍 Gent · 👍 12</div></div></div>
+                <div class="lcard"><div class="ph"><span class="fav">♡</span></div><div class="b"><div class="t">iPhone 13 128GB</div><div class="p">380 €</div><div class="m">📍 Antwerpen</div></div></div>
+                <div class="lcard"><div class="ph"><span class="badge v vb">✓</span><span class="fav">♡</span></div><div class="b"><div class="t">Vélo de ville Btwin</div><div class="p">140 €</div><div class="m">📍 Liège</div></div></div>
+                <div class="lcard"><div class="ph"><span class="fav">♡</span></div><div class="b"><div class="t">Canapé 3 places</div><div class="p">220 €</div><div class="m">📍 Brugge</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="scroll-note">↕ окно прокручивается</p>
+      </div>
+      <!-- MOBILE -->
+      <div class="phone">
+        <p class="frame-label">Mobile</p>
+        <div class="screen"><div class="notch"></div><div class="vp app" style="overflow:auto">
+          <div class="strip" style="font-size:9px"><span>🛡 Проверенные</span><span>⚖ Анти-фрод</span></div>
+          <div class="hdr" style="padding:8px 10px"><div class="logo" style="font-size:13px"><span class="m">L</span>LyVoX</div><div style="flex:1"></div><div class="pill">🌐</div><div class="pill">👤</div></div>
+          <div style="padding:12px">
+            <div class="srch" style="margin-bottom:10px">🔎 Поиск по Бельгии…</div>
+            <div class="badge">Бельгия · 5 языков</div>
+            <h1 class="h1" style="font-size:21px;margin-top:6px">Покупайте у тех,<br>кому <span class="em">доверяете</span>.</h1>
+            <div style="display:flex;gap:6px;margin-top:10px"><button class="btn pri" style="flex:1">Смотреть</button><button class="btn gho" style="flex:1">Продать</button></div>
+            <div style="display:flex;gap:6px;margin-top:10px;overflow:auto"><span class="pill on">🛡 Проверенные</span><span class="pill">🚗 Транспорт</span><span class="pill">📱 Электро</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 8px"><div class="sectitle">Свежее рядом</div><span class="link">Все →</span></div>
+            <div class="grid" style="grid-template-columns:1fr 1fr">
+              <div class="lcard"><div class="ph"><span class="badge v vb">✓</span><span class="fav">♡</span></div><div class="b"><div class="t">BMW 5 Series</div><div class="p">13 000 €</div><div class="m">📍 Gent</div></div></div>
+              <div class="lcard"><div class="ph"><span class="fav">♡</span></div><div class="b"><div class="t">iPhone 13</div><div class="p">380 €</div><div class="m">📍 Antwerpen</div></div></div>
+            </div>
+          </div>
+          <div style="height:64px"></div>
+          <div class="fab">＋</div>
+          <div class="bottomnav"><div class="it on"><span class="ic">🏠</span>Главная</div><div class="it"><span class="ic">🔎</span>Поиск</div><div class="it"><span class="ic">🔀</span>Discover</div><div class="it"><span class="ic">💬</span>Чат</div><div class="it"><span class="ic">☰</span>Ещё</div></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="changes">
+      <b>Что изменено и почему</b>
+      <ul>
+        <li><span class="tag fix">FIX</span>Счётчики «4/4/1» заменены карточкой «Как LyVoX защищает сделку» — на пустом маркете цифры работали как анти-соц-доказательство.</li>
+        <li><span class="tag fix">FIX</span>Один поиск: на desktop основной — в hero, в шапке компактный; на мобайле один в hero. Убран дубль.</li>
+        <li><span class="tag fix">FIX</span>Витрина свежих объявлений поднята сразу под hero (раньше — ниже двух каруселей).</li>
+        <li><span class="tag fix">FIX</span>Trust-полоса показывается и на мобайле (сжатая), а не только на desktop.</li>
+        <li>Двойной CTA «Смотреть / Продать» — для покупателя и продавца сразу (рост и спроса, и supply).</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===================== DISCOVER ===================== -->
+  <section class="sec" id="discover">
+    <h2>2. Discover (свайп-лента)</h2>
+    <p class="lead">Карточка всегда есть (не пустой старт), 4 направления свайпа с подсказками, кнопка отмены, и одноразовый coach-mark при первом входе (см. PRD&nbsp;01 + помощник навигации&nbsp;61).</p>
+    <div class="stage">
+      <!-- DESKTOP discover -->
+      <div class="desktop">
+        <p class="frame-label">Desktop</p>
+        <div class="browser">
+          <div class="bbar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span class="u">www.lyvox.be/discover</span></div>
+          <div class="vp dt app" style="overflow:auto">
+            <div class="hdr"><div class="logo"><span class="m">L</span>LyVoX</div><div class="srch">🔎 Поиск…</div><div class="pill">🌐 NL</div><div class="pill">👤</div></div>
+            <div style="padding:14px;text-align:center">
+              <div style="display:flex;justify-content:center;gap:8px;align-items:center"><div class="sectitle" style="font-size:16px">Свайп-режим</div><span class="pill" style="margin-left:6px">❓ Помощь</span></div>
+              <p class="sub" style="margin:4px 0 10px">Листайте: вправо — нравится, влево — пропустить, вверх — действия, вниз — меньше такого.</p>
+              <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:12px"><span class="pill on">Только что</span><span class="pill">До €50</span><span class="pill">Проверенные</span><span class="pill">Дешевле</span><span class="pill">↺ Сбросить</span></div>
+              <div style="display:flex;gap:18px;justify-content:center;align-items:flex-start">
+                <div style="width:230px">
+                  <div class="lcard" style="position:relative;box-shadow:var(--shHi)">
+                    <div class="ph" style="height:230px"><span class="badge v vb">✓ Verified seller</span><span class="fav">♡</span><span class="stamp" style="left:14px;border-color:#19a05b;color:#19a05b;background:#19a05b22">НРАВИТСЯ</span></div>
+                    <div class="b" style="padding:10px"><div class="t" style="font-size:14px">BMW 5 Series 2008</div><div class="p" style="font-size:16px">13 000 €</div><div class="m">📍 Gent · 👍 12 · 🛡 Safe-deal</div></div>
+                  </div>
+                  <div style="display:flex;justify-content:center;gap:12px;margin-top:12px">
+                    <div class="pill" style="width:42px;height:42px;border-radius:50%;justify-content:center;color:#c0392b;border-color:#f0c4bd">✕</div>
+                    <div class="pill" style="width:36px;height:36px;border-radius:50%;justify-content:center;color:#b08400;border-color:#ecd9a0">↓</div>
+                    <div class="pill" style="width:38px;height:38px;border-radius:50%;justify-content:center;color:#2a7;border-color:#bfe3d2">↑</div>
+                    <div class="pill" style="width:42px;height:42px;border-radius:50%;justify-content:center;background:#eafaf1;color:#19a05b;border-color:#bfe3d2">👍</div>
+                  </div>
+                  <div class="pill" style="margin-top:10px"><span>↩ Вернуть карточку</span><span class="tag new" style="margin-left:6px">NEW</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- MOBILE discover with coachmark -->
+      <div class="phone">
+        <p class="frame-label">Mobile · первый вход (coach-mark)</p>
+        <div class="screen"><div class="notch"></div><div class="vp app">
+          <div class="hdr" style="padding:8px 10px"><div class="logo" style="font-size:13px"><span class="m">L</span>LyVoX</div><div style="flex:1"></div><div class="pill">❓</div></div>
+          <div style="padding:10px 12px;text-align:center"><div class="sectitle">Свайп-режим</div>
+            <div style="display:flex;gap:5px;justify-content:center;margin:8px 0;overflow:auto"><span class="pill on">Только что</span><span class="pill">До €50</span><span class="pill">Проверенные</span></div>
+          </div>
+          <div style="position:relative;height:330px;margin:0 14px">
+            <div class="lcard" style="position:absolute;inset:0;box-shadow:var(--shHi)"><div class="ph" style="height:100%"><span class="badge v vb">✓ Verified</span><span class="fav">♡</span></div>
+              <div style="position:absolute;left:0;right:0;bottom:0;padding:12px;background:linear-gradient(0deg,#000a,#0000);color:#fff"><div style="font-weight:700">BMW 5 Series 2008</div><div style="font-size:18px;font-weight:800">13 000 €</div><div style="font-size:11px;opacity:.9">📍 Gent · 🛡 Safe-deal</div></div>
+            </div>
+            <div class="coach">
+              <div style="font-weight:800;font-size:15px">Как листать</div>
+              <div class="arrows"><div>⬅️ Пропустить</div><div>➡️ Нравится</div><div>⬆️ Действия</div><div>⬇️ Меньше такого</div></div>
+              <div style="font-size:11px;opacity:.85">Тап — открыть · ↩ вернуть последнюю</div>
+              <button class="btn pri">Понятно</button>
+              <div style="font-size:10px;opacity:.7">Показывается один раз · вернуть через ❓</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:center;gap:14px;margin-top:12px"><div class="pill" style="width:40px;height:40px;border-radius:50%;justify-content:center;color:#c0392b">✕</div><div class="pill" style="width:34px;height:34px;border-radius:50%;justify-content:center">↑</div><div class="pill" style="width:40px;height:40px;border-radius:50%;justify-content:center;background:#eafaf1;color:#19a05b">👍</div></div>
+          <div class="bottomnav"><div class="it"><span class="ic">🏠</span>Главная</div><div class="it"><span class="ic">🔎</span>Поиск</div><div class="it on"><span class="ic">🔀</span>Discover</div><div class="it"><span class="ic">💬</span>Чат</div><div class="it"><span class="ic">☰</span>Ещё</div></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="changes">
+      <b>Что изменено и почему</b>
+      <ul>
+        <li><span class="tag fix">FIX</span>Дека стартует с реальной карточкой (SSR-сид), а не пустая — убирает ложное «всё просмотрено» на малом каталоге.</li>
+        <li><span class="tag new">NEW</span>4-е направление: свайп вниз = «меньше такого» (персонализация); подсказки направлений на карточке.</li>
+        <li><span class="tag new">NEW</span>Кнопка «вернуть карточку» (отмена последнего свайпа) — бесплатно.</li>
+        <li><span class="tag new">NEW</span>Одноразовый coach-mark при первом входе + кнопка «❓ Помощь» для повторного запуска (PRD 61).</li>
+        <li>Бейдж «Safe-deal» на карточке — когда появится escrow (PRD 10).</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===================== SEARCH ===================== -->
+  <section class="sec" id="search">
+    <h2>3. Поиск</h2>
+    <p class="lead">Скелетоны вместо одинокого спиннера, видимый счётчик результатов, понятные фильтры. На мобайле — липкая панель «Фильтры/Сортировка» и фильтры в нижнем листе.</p>
+    <div class="stage">
+      <div class="desktop">
+        <p class="frame-label">Desktop</p>
+        <div class="browser">
+          <div class="bbar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span class="u">www.lyvox.be/search?q=BMW</span></div>
+          <div class="vp dt app" style="overflow:auto">
+            <div class="hdr"><div class="logo"><span class="m">L</span>LyVoX</div><div class="srch">🔎 BMW</div><div class="pill">🌐 NL</div><button class="btn pri">＋ Подать</button><div class="pill">👤</div></div>
+            <div style="padding:14px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                <div><b style="font-size:16px">BMW в Бельгии</b> <span class="muted" style="font-size:12px">· 3 объявления <span class="tag fix">FIX: счётчик</span></span></div>
+                <div style="display:flex;gap:6px"><span class="pill">⇅ Сначала новые</span><span class="pill">🔖 Сохранить поиск</span><span class="pill on">🔀 Свайп</span></div>
+              </div>
+              <div style="display:flex;gap:14px">
+                <div class="card" style="width:180px;padding:12px;flex:none">
+                  <b style="font-size:12px">Фильтры</b><hr class="s">
+                  <div class="sub" style="font-weight:700;margin:6px 0 4px">Категория</div><span class="pill">Транспорт ▾</span>
+                  <div class="sub" style="font-weight:700;margin:10px 0 4px">Цена, €</div><div style="display:flex;gap:6px"><span class="pill" style="flex:1">0</span><span class="pill" style="flex:1">10000</span></div>
+                  <div style="height:6px;background:var(--muted);border-radius:6px;margin:8px 0;position:relative"><span style="position:absolute;left:0;top:-3px;width:12px;height:12px;border-radius:50%;background:var(--primary)"></span><span style="position:absolute;right:0;top:-3px;width:12px;height:12px;border-radius:50%;background:var(--primary)"></span></div>
+                  <div style="display:flex;align-items:center;gap:6px;margin:8px 0"><span style="width:30px;height:17px;border-radius:999px;background:var(--primary);position:relative"><span style="position:absolute;right:1px;top:1px;width:15px;height:15px;border-radius:50%;background:#fff"></span></span><span class="sub">Только верифицированные</span></div>
+                  <div class="sub" style="font-weight:700;margin:10px 0 4px">Состояние</div><div style="display:flex;gap:5px;flex-wrap:wrap"><span class="pill on">Б/у</span><span class="pill">Новое</span><span class="pill">Запчасти</span></div>
+                  <button class="btn pri" style="width:100%;margin-top:12px">Применить</button>
+                </div>
+                <div style="flex:1">
+                  <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+                    <div class="lcard"><div class="ph" style="height:96px"><span class="badge v vb">✓</span><span class="fav">♡</span></div><div class="b"><div class="t">BMW 5 Series 2008</div><div class="p">13 000 €</div><div class="m">📍 Gent · 🛡 Safe-deal</div></div></div>
+                    <div class="lcard"><div class="ph" style="height:96px"><span class="badge v vb">✓</span><span class="fav">♡</span></div><div class="b"><div class="t">BMW 5 Series 1996</div><div class="p">6 000 €</div><div class="m">📍 —</div></div></div>
+                    <!-- skeleton -->
+                    <div class="lcard"><div class="ph" style="height:96px;background:linear-gradient(90deg,#e9f1ee,#f5faf8,#e9f1ee)"></div><div class="b"><div style="height:9px;background:#e9f1ee;border-radius:4px;width:80%"></div><div style="height:11px;background:#e9f1ee;border-radius:4px;width:50%;margin-top:6px"></div></div></div>
+                  </div>
+                  <span class="callout" style="display:inline-block;margin-top:8px"><b>FIX:</b> скелетоны вместо одиночного спиннера</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone">
+        <p class="frame-label">Mobile</p>
+        <div class="screen"><div class="notch"></div><div class="vp app">
+          <div class="hdr" style="padding:8px 10px"><div class="srch">🔎 BMW</div></div>
+          <div style="display:flex;gap:6px;padding:8px 12px;position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--border)"><span class="pill" style="flex:1;justify-content:center">⚙ Фильтры</span><span class="pill" style="flex:1;justify-content:center">⇅ Новые</span><span class="pill">🔀</span></div>
+          <div style="padding:10px 12px"><b style="font-size:13px">BMW в Бельгии</b> <span class="muted" style="font-size:11px">· 3 объявления</span>
+            <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:8px">
+              <div class="lcard"><div class="ph"><span class="badge v vb">✓</span><span class="fav">♡</span></div><div class="b"><div class="t">BMW 5 2008</div><div class="p">13 000 €</div><div class="m">📍 Gent</div></div></div>
+              <div class="lcard"><div class="ph"><span class="fav">♡</span></div><div class="b"><div class="t">BMW 5 1996</div><div class="p">6 000 €</div><div class="m">📍 —</div></div></div>
+              <div class="lcard"><div class="ph" style="background:linear-gradient(90deg,#e9f1ee,#f5faf8,#e9f1ee)"></div><div class="b"><div style="height:8px;background:#e9f1ee;border-radius:4px;width:75%"></div><div style="height:10px;background:#e9f1ee;border-radius:4px;width:45%;margin-top:5px"></div></div></div>
+              <div class="lcard"><div class="ph" style="background:linear-gradient(90deg,#e9f1ee,#f5faf8,#e9f1ee)"></div><div class="b"><div style="height:8px;background:#e9f1ee;border-radius:4px;width:70%"></div><div style="height:10px;background:#e9f1ee;border-radius:4px;width:40%;margin-top:5px"></div></div></div>
+            </div>
+          </div>
+          <div class="bottomnav"><div class="it"><span class="ic">🏠</span>Главная</div><div class="it on"><span class="ic">🔎</span>Поиск</div><div class="it"><span class="ic">🔀</span>Discover</div><div class="it"><span class="ic">💬</span>Чат</div><div class="it"><span class="ic">☰</span>Ещё</div></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="changes"><b>Что изменено и почему</b><ul>
+      <li><span class="tag fix">FIX</span>Скелетон-сетка вместо одиночного спиннера — снимает ощущение «тормозит».</li>
+      <li><span class="tag fix">FIX</span>Виден счётчик результатов («3 объявления»).</li>
+      <li>На мобайле фильтры — в нижнем листе по кнопке; липкая панель «Фильтры/Сортировка/Свайп».</li>
+      <li>Бейдж «Safe-deal» в выдаче как фильтруемый сигнал доверия.</li>
+    </ul></div>
+  </section>
+
+  <!-- ===================== AD DETAIL ===================== -->
+  <section class="sec" id="ad">
+    <h2>4. Карточка объявления</h2>
+    <p class="lead">Это <b>эталон</b> сайта — сохраняем сильную trust-логику (продавец скрыт до верификации, анти-скам), добавляем галерею-таргеты и фикс мобильного отступа под контакт-баром.</p>
+    <div class="stage">
+      <div class="desktop">
+        <p class="frame-label">Desktop</p>
+        <div class="browser">
+          <div class="bbar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span class="u">www.lyvox.be/ad/…/bmw-5-series-2008</span></div>
+          <div class="vp dt app" style="overflow:auto">
+            <div class="hdr"><div class="logo"><span class="m">L</span>LyVoX</div><div class="srch">🔎 Поиск…</div><div class="pill">🌐 NL</div><div class="pill">👤</div></div>
+            <div style="padding:14px">
+              <div class="sub" style="margin-bottom:6px">Транспорт › Легковые › <b>BMW 5 Series</b></div>
+              <div style="display:flex;gap:14px">
+                <div style="flex:1.4">
+                  <div class="lcard"><div class="ph" style="height:220px"></div></div>
+                  <div style="display:flex;gap:6px;margin-top:6px"><div class="lcard" style="width:54px"><div class="ph" style="height:42px"></div></div><div class="lcard" style="width:54px"><div class="ph" style="height:42px"></div></div><div class="lcard" style="width:54px"><div class="ph" style="height:42px"></div></div></div>
+                  <span class="badge v" style="margin-top:8px">✓ Верифицированный продавец</span>
+                  <h1 class="h1" style="font-size:22px;margin-top:8px">BMW 5 Series 2008</h1>
+                  <div class="p" style="font-size:22px;color:var(--priD)">13 000 €</div>
+                  <div class="card" style="padding:12px;margin-top:10px"><b style="font-size:13px">Описание</b><p class="sub">Седан, бензин, 180 000 км. Car-Pass в наличии. Местоположение: Gent.</p></div>
+                </div>
+                <div style="flex:1">
+                  <div class="card" style="padding:14px">
+                    <div style="display:flex;gap:8px;align-items:center"><div class="badge v">?</div><b style="font-size:13px">Связь — только для подтверждённых</b></div>
+                    <div style="display:flex;gap:6px;margin:8px 0"><span class="badge v">🛡 Проверен</span><span class="badge v">📞 Телефон</span></div>
+                    <button class="btn pri" style="width:100%">💬 Написать продавцу</button>
+                    <div class="callout" style="margin-top:8px">🔒 Продавец и контакты открываются после подтверждения телефона. LyVoX не просит платить по ссылке.</div>
+                    <hr class="s">
+                    <b style="font-size:12px">Безопасная сделка</b>
+                    <div class="sub">Оплата в холд · отправка с трекингом · возврат при проблеме <span class="tag new">NEW: escrow</span></div>
+                    <div class="link" style="display:block;margin-top:8px">⚑ Пожаловаться</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone">
+        <p class="frame-label">Mobile · липкий контакт-бар</p>
+        <div class="screen"><div class="notch"></div><div class="vp app" style="position:relative">
+          <div class="hdr" style="padding:8px 10px"><div class="logo" style="font-size:13px"><span class="m">L</span>LyVoX</div><div style="flex:1"></div><div class="pill">⚑</div></div>
+          <div style="overflow:auto;height:calc(100% - 110px)">
+            <div class="ph" style="height:180px;background:linear-gradient(135deg,#cfe6dd,#b6d8cc)"></div>
+            <div style="padding:12px">
+              <span class="badge v">✓ Верифицированный продавец</span>
+              <div style="font-size:18px;font-weight:800;margin-top:6px">BMW 5 Series 2008</div>
+              <div class="p" style="font-size:20px">13 000 €</div>
+              <div class="card" style="padding:10px;margin-top:8px"><b style="font-size:12px">Описание</b><div class="sub">Седан, бензин, 180 000 км. Car-Pass.</div></div>
+              <div class="callout" style="margin-top:8px">🔒 Откроется после подтверждения телефона</div>
+              <div class="card" style="padding:10px;margin-top:8px"><b style="font-size:12px">Похожие</b><div class="sub">…ещё BMW рядом</div></div>
+            </div>
+          </div>
+          <!-- sticky contact bar above bottom nav -->
+          <div style="position:absolute;left:0;right:0;bottom:60px;background:#fff;border-top:1px solid var(--border);padding:8px 12px;display:flex;gap:8px;align-items:center"><div style="flex:1"><div style="font-weight:800">13 000 €</div><div class="sub" style="font-size:10px">🛡 Safe-deal доступна</div></div><button class="btn pri">💬 Написать</button></div>
+          <div class="bottomnav"><div class="it"><span class="ic">🏠</span>Главная</div><div class="it"><span class="ic">🔎</span>Поиск</div><div class="it"><span class="ic">🔀</span>Discover</div><div class="it"><span class="ic">💬</span>Чат</div><div class="it"><span class="ic">☰</span>Ещё</div></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="changes"><b>Что изменено и почему</b><ul>
+      <li><span class="tag fix">FIX</span>Контент получает нижний отступ под контакт-баром (≈142px) — раньше форма/«похожие» перекрывались.</li>
+      <li>Сохраняем эталон: продавец скрыт до верификации, анти-скам формулировки, trust-бейджи.</li>
+      <li><span class="tag new">NEW</span>Блок «Безопасная сделка» (escrow) и бейдж safe-deal — когда появится (PRD 10).</li>
+      <li>Миниатюры галереи ≥48px и крупнее — тач-таргеты.</li>
+    </ul></div>
+  </section>
+
+  <!-- ===================== POST ===================== -->
+  <section class="sec" id="post">
+    <h2>5. Подача объявления</h2>
+    <p class="lead">Облегчаем воронку: фото-первый шаг с AI-подсказкой, прогресс-степпер, и черновик можно начать <b>до</b> верификации — телефон спрашиваем только на публикации (а не до формы).</p>
+    <div class="stage">
+      <div class="desktop">
+        <p class="frame-label">Desktop</p>
+        <div class="browser">
+          <div class="bbar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span class="u">www.lyvox.be/post</span></div>
+          <div class="vp dt app" style="overflow:auto">
+            <div class="hdr"><div class="logo"><span class="m">L</span>LyVoX</div><div class="srch">🔎 Поиск…</div><div class="pill">👤</div></div>
+            <div style="padding:16px;max-width:640px;margin:0 auto">
+              <div style="display:flex;gap:6px;align-items:center;margin-bottom:12px;font-size:11px;font-weight:700">
+                <span class="badge v">1 Фото</span><span style="color:var(--border)">──</span><span class="pill on">2 Детали</span><span style="color:var(--border)">──</span><span class="pill">3 Категория</span><span style="color:var(--border)">──</span><span class="pill">4 Публикация</span>
+              </div>
+              <div class="card" style="padding:16px">
+                <b>Фото товара</b>
+                <div style="display:flex;gap:8px;margin-top:8px">
+                  <div style="width:90px;height:90px;border:2px dashed var(--primary);border-radius:12px;display:grid;place-items:center;color:var(--primary);font-size:24px">＋</div>
+                  <div class="lcard" style="width:90px"><div class="ph" style="height:90px"></div></div>
+                </div>
+                <div class="callout" style="margin-top:10px">✨ <b>NEW:</b> AI по фото предложит заголовок, категорию и цену — вы только проверите (PRD 50).</div>
+                <hr class="s">
+                <b>Заголовок</b><div class="srch" style="margin:6px 0;background:#fff">BMW 5 Series 2008 — Gent</div>
+                <b>Цена, €</b><div class="srch" style="margin:6px 0;background:#fff;width:140px">13 000</div>
+                <div style="display:flex;gap:8px;margin-top:10px"><button class="btn gho">💾 Сохранить черновик</button><button class="btn pri">Далее →</button></div>
+                <div class="callout" style="margin-top:10px;border-color:var(--primary);background:#eafaf1;color:var(--priD)">📱 <b>FIX:</b> телефон подтвердите на шаге «Публикация», а не до формы — черновик доступен сразу.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone">
+        <p class="frame-label">Mobile · мастер</p>
+        <div class="screen"><div class="notch"></div><div class="vp app">
+          <div class="hdr" style="padding:8px 10px"><span class="pill">←</span><b style="flex:1;text-align:center;font-size:13px">Новое объявление</b><span class="pill">💾</span></div>
+          <div style="padding:12px">
+            <div style="height:5px;background:var(--muted);border-radius:5px"><div style="width:50%;height:100%;background:var(--primary);border-radius:5px"></div></div>
+            <div class="sub" style="margin:6px 0 12px">Шаг 2 из 4 · Детали</div>
+            <div style="display:flex;gap:8px"><div style="width:74px;height:74px;border:2px dashed var(--primary);border-radius:12px;display:grid;place-items:center;color:var(--primary);font-size:22px">＋</div><div class="lcard" style="width:74px"><div class="ph" style="height:74px"></div></div></div>
+            <div class="callout" style="margin:10px 0">✨ AI заполнит за вас — проверьте</div>
+            <b style="font-size:12px">Заголовок</b><div class="srch" style="margin:6px 0;background:#fff">BMW 5 Series 2008</div>
+            <b style="font-size:12px">Цена €</b><div class="srch" style="margin:6px 0;background:#fff">13 000</div>
+          </div>
+          <div style="position:absolute;left:0;right:0;bottom:60px;padding:8px 12px;background:#fff;border-top:1px solid var(--border);display:flex;gap:8px"><button class="btn gho" style="flex:1">Назад</button><button class="btn pri" style="flex:1">Далее →</button></div>
+          <div class="bottomnav"><div class="it"><span class="ic">🏠</span>Главная</div><div class="it"><span class="ic">🔎</span>Поиск</div><div class="it on"><span class="ic">＋</span>Подать</div><div class="it"><span class="ic">💬</span>Чат</div><div class="it"><span class="ic">☰</span>Ещё</div></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="changes"><b>Что изменено и почему</b><ul>
+      <li><span class="tag fix">FIX</span>Черновик до верификации; телефон — только на публикации (раньше двойной барьер до формы тормозил supply).</li>
+      <li><span class="tag new">NEW</span>Фото-первый шаг + AI-подсказка (заголовок/категория/цена) — «листинг за 60с» (PRD 50).</li>
+      <li>Чёткий прогресс-степпер; крупные тач-таргеты; кнопки навигации закреплены снизу.</li>
+    </ul></div>
+  </section>
+
+  <!-- ===================== PROFILE ===================== -->
+  <section class="sec" id="profile">
+    <h2>6. Профиль</h2>
+    <p class="lead">Trust-уровень с понятным прогрессом, честные пустые состояния (не имитируем «Enabled»/пустые отзывы), быстрый доступ к объявлениям и настройкам.</p>
+    <div class="stage">
+      <div class="desktop">
+        <p class="frame-label">Desktop</p>
+        <div class="browser">
+          <div class="bbar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span class="u">www.lyvox.be/profile</span></div>
+          <div class="vp dt app" style="overflow:auto">
+            <div class="hdr"><div class="logo"><span class="m">L</span>LyVoX</div><div class="srch">🔎 Поиск…</div><div class="pill">👤</div></div>
+            <div style="padding:16px">
+              <div class="card" style="padding:16px;display:flex;gap:14px;align-items:center">
+                <div style="width:60px;height:60px;border-radius:50%;background:var(--gC);display:grid;place-items:center;color:#fff;font-size:22px;font-weight:800">Z</div>
+                <div style="flex:1">
+                  <div style="display:flex;gap:8px;align-items:center"><b style="font-size:16px">zviedre2</b><span class="badge v">✓ Телефон</span><span class="badge">Уровень: Verified</span></div>
+                  <div class="sub">Прогресс до «Trusted seller» <span class="tag new">NEW</span></div>
+                  <div style="height:6px;background:var(--muted);border-radius:6px;margin-top:6px"><div style="width:60%;height:100%;background:var(--primary);border-radius:6px"></div></div>
+                  <div class="sub" style="margin-top:4px">Осталось: itsme-верификация · 1 завершённая сделка</div>
+                </div>
+                <button class="btn gho">⚙ Настройки</button>
+              </div>
+              <div style="display:flex;gap:6px;margin:14px 0"><span class="pill on">Мои объявления</span><span class="pill">Отзывы</span><span class="pill">Избранное</span><span class="pill">Биллинг</span><span class="pill">Безопасность</span></div>
+              <div class="grid" style="grid-template-columns:repeat(4,1fr)">
+                <div class="lcard"><div class="ph" style="height:90px"><span class="badge v vb">Активно</span></div><div class="b"><div class="t">BMW 5 Series 2008</div><div class="p">13 000 €</div><div class="m">👁 42 · 👍 12</div></div></div>
+                <div class="lcard"><div class="ph" style="height:90px"></div><div class="b"><div class="t">Мужской гардероб</div><div class="p">—</div><div class="m">👁 8</div></div></div>
+                <div class="lcard" style="border-style:dashed;display:grid;place-items:center;color:var(--primary);min-height:130px">＋ Новое</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone">
+        <p class="frame-label">Mobile</p>
+        <div class="screen"><div class="notch"></div><div class="vp app">
+          <div class="hdr" style="padding:8px 10px"><b style="flex:1;text-align:center;font-size:13px">Профиль</b><span class="pill">⚙</span></div>
+          <div style="padding:12px">
+            <div class="card" style="padding:12px;text-align:center"><div style="width:54px;height:54px;border-radius:50%;background:var(--gC);margin:0 auto;display:grid;place-items:center;color:#fff;font-weight:800;font-size:20px">Z</div>
+              <div style="font-weight:800;margin-top:6px">zviedre2</div><div style="display:flex;gap:5px;justify-content:center;margin-top:4px"><span class="badge v">✓ Телефон</span><span class="badge">Verified</span></div>
+              <div style="height:6px;background:var(--muted);border-radius:6px;margin-top:8px"><div style="width:60%;height:100%;background:var(--primary);border-radius:6px"></div></div>
+              <div class="sub" style="margin-top:4px">До «Trusted»: itsme + 1 сделка</div>
+            </div>
+            <div style="display:flex;gap:5px;margin:12px 0;overflow:auto"><span class="pill on">Объявления</span><span class="pill">Отзывы</span><span class="pill">Избранное</span></div>
+            <div class="grid" style="grid-template-columns:1fr 1fr">
+              <div class="lcard"><div class="ph"><span class="badge v vb">Активно</span></div><div class="b"><div class="t">BMW 5 2008</div><div class="p">13 000 €</div><div class="m">👁 42</div></div></div>
+              <div class="lcard" style="border-style:dashed;display:grid;place-items:center;color:var(--primary);min-height:120px">＋ Новое</div>
+            </div>
+          </div>
+          <div class="bottomnav"><div class="it"><span class="ic">🏠</span>Главная</div><div class="it"><span class="ic">🔎</span>Поиск</div><div class="it"><span class="ic">🔀</span>Discover</div><div class="it"><span class="ic">💬</span>Чат</div><div class="it on"><span class="ic">👤</span>Профиль</div></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="changes"><b>Что изменено и почему</b><ul>
+      <li><span class="tag fix">FIX</span>Честные пустые состояния: пустой таб отзывов = «пока нет отзывов», без имитации «Enabled».</li>
+      <li><span class="tag new">NEW</span>Trust-уровень с прогрессом до «Trusted seller» (PRD 60) — мотивирует верификацию и сделки.</li>
+      <li>Метрики объявления (просмотры/лайки) на карточке — мостик к аналитике продавца (PRD 58).</li>
+    </ul></div>
+  </section>
+
+  <footer style="margin-top:40px;color:#5a766e;font-size:12px;border-top:1px solid var(--border);padding-top:16px">
+    LyVoX · Макеты редизайна · 2026-06-27 · статичный прототип в фирменной палитре. Источник правок: docs/features/audit/. Реализация — отдельным этапом.
+  </footer>
+</div>
+</body>
+</html>

@@ -229,6 +229,20 @@ export async function PATCH(
       if (specificsError) {
         return handleSupabaseError(specificsError, ApiErrorCode.UPDATE_FAILED);
       }
+
+      // F7: propagate generation_id from JSONB specifics to the normalized FK column.
+      // The specifics schema is Record<string,string>; we validate UUID format before writing.
+      const rawGenId = specifics.generation_id;
+      const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (rawGenId && UUID_RE.test(rawGenId)) {
+        await service.from("adverts")
+          .update({ generation_id: rawGenId })
+          .eq("id", advertId);
+      } else if (rawGenId === "" || rawGenId === null) {
+        await service.from("adverts")
+          .update({ generation_id: null })
+          .eq("id", advertId);
+      }
     } else {
       const { error: deleteSpecificsError } = await supabase
         .from("ad_item_specifics")
@@ -248,6 +262,13 @@ export async function PATCH(
       details: { advertId, from: advert.status, to: requestedStatus },
     };
     await service.from("logs").insert(audit);
+  }
+
+  // On publish: run advert-level fraud rules (price-anomaly, pattern checks) so
+  // bait pricing and suspicious listings are flagged/queued-for-review in runtime.
+  if (isPublishing) {
+    const { invokeFraudCheck } = await import("@/lib/fraud/invokeFraudCheck");
+    await invokeFraudCheck({ check_type: "advert", advert_id: advertId });
   }
 
   return createSuccessResponse({});

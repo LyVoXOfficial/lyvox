@@ -8,6 +8,7 @@ import {
 } from "@/lib/apiErrors";
 import type { TablesInsert } from "@/lib/supabaseTypes";
 import { checkUserBlocked } from "@/lib/fraud/checkUserBlocked";
+import { invokeFraudCheck } from "@/lib/fraud/invokeFraudCheck";
 import { isViewerVerified } from "@/lib/auth/requireVerified";
 import { canSellAsBusiness } from "@/lib/auth/canSellAsBusiness";
 
@@ -27,8 +28,9 @@ export async function POST(req?: Request) {
     return createErrorResponse(ApiErrorCode.VERIFICATION_REQUIRED, { status: 403, detail: "Phone verification required to publish" });
   }
 
-  // Check if user is blocked
-  const blockCheck = await checkUserBlocked(user.id);
+  // Fail-closed: a draft creation counts as a high-risk mutation — we must not
+  // wave a possibly-blocked user through on a transient DB error.
+  const blockCheck = await checkUserBlocked(user.id, { failClosed: true });
   if (blockCheck.isBlocked) {
     return createErrorResponse(ApiErrorCode.FORBIDDEN, {
       status: 403,
@@ -101,6 +103,12 @@ export async function POST(req?: Request) {
   if (error || !data) {
     return handleSupabaseError(error, ApiErrorCode.CREATE_FAILED);
   }
+
+  // Velocity check: fire user fraud rules (advert_count, account_age_activity) so
+  // bursty creation is caught in runtime and sets blocked_until for future requests.
+  // Awaited with a 5-second cap inside invokeFraudCheck — does not fire-and-forget
+  // because Vercel may kill the function after response if we void here.
+  await invokeFraudCheck({ check_type: "user", user_id: user.id });
 
   return createSuccessResponse({
     advert: {
