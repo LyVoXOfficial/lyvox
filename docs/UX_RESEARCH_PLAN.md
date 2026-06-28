@@ -1,3 +1,5 @@
+> ⚠ УСТАРЕЛО — этот файл больше не ведётся. Единый источник правды: [docs/MASTER_TODO.md](./MASTER_TODO.md). Сведено туда; можно удалить.
+
 # LyVoX — UX Research Plan
 
 _Authored 2026-06-25. Companion to the visual UI/UX review (see chat) and
