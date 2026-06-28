@@ -1942,11 +1942,12 @@
     "submit": "Submit review",
     "success": "Your review has been submitted!",
     "must_contact": "You can review this seller after contacting them about this listing.",
-    "already": "You've already reviewed this listing.",
+    "already": "You've already reviewed this seller.",
     "self": "You cannot review your own listing.",
     "error": "Something went wrong. Please try again.",
     "aggregate_count": "{n} reviews",
-    "no_reviews": "No reviews yet"
+    "no_reviews": "No reviews yet",
+    "raw_avg_note": "Raw avg: {n}"
   },
   "trust_score": {
     "tier_new": "New Seller",
@@ -1970,7 +1971,7 @@
     "improve_verify_itsme": "Verify your identity with itsme",
     "improve_all_done": "Your verifications are complete",
     "refresh_cta": "Refresh my score",
-    "refreshing": "RefreshingвЂ¦",
+    "refreshing": "Refreshing…",
     "refresh_success": "Score updated",
     "refresh_error_rate": "Try again in {min} min",
     "refresh_error": "Could not refresh. Try again."
