@@ -122,6 +122,6 @@ SEO + Security задокументированы и ждут последним
 | F9 fraud-engine в рантайм | ⛔ не начато | — |
 | **F10** itsme_sub uniqueness | ✅ | 61d73c5 |
 | F11 дедуп advert_views | ⛔ не начато | — |
-| F12 JSON-LD генераторы подключить | ⛔ не начато | — |
+| **F12** JSON-LD генераторы подключить | ✅ | 109ccf4, 2ff3836 |
 | **F13** catalog_groups + ARIA-tabs | ✅ | f17df42 |
 | F14 trust-score формула | ⛔ не начато | — |
