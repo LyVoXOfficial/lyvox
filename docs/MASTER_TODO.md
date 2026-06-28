@@ -40,7 +40,7 @@
 | ID | Задача | Приор. | Статус | Дисциплины | Отчёт | Зависит от |
 |---|---|---|---|---|---|---|
 | 01 | Свайп-система Discover (визуал+жесты+настройки) | P1 | 🟡 | UX, DEV | [features/01](features/01-discover-swipe-system.md) | 33,37 |
-| 62 | Карточки товара по категориям + базы знаний (раскладка/поля/KB/фикс сопоставления) | P1 | 🟡 | UX, DEV, DATA, CONTENT | [features/62](features/62-listing-detail-per-category.md) | 32,31 |
+| 62 | Карточки товара по категориям + базы знаний (раскладка/поля/KB/фикс сопоставления) | P1 | 🟡 | UX, DEV, DATA, CONTENT | [features/62](features/62-listing-detail-per-category.md) | 32,31 | Key-specs strip ✅, doc badges ✅, F13 CatalogGroupTabs readonly ✅, KB disclaimer ✅, ambiguous CTA #1996 ✅; non-transport KB §13 follow-up |
 | 31 | Создание объявления (8-шаг, медиа) | P0 | ✅ | UX, DEV | [features/31](features/31-listing-creation.md) | 32,38 |
 | 32 | Категорийные каталоги | P1 | ✅ | DEV, DATA, CONTENT | [features/32](features/32-category-catalogs.md) | — |
 | 33 | Поиск/фильтры/сортировки | P0 | ✅ | DEV, UX | [features/33](features/33-search.md) | 32 |

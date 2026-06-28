@@ -1,11 +1,11 @@
 # PRD: Карточки товара по категориям + базы знаний (knowledge base)
 
-> **Статус кода:** 🟡 ЧАСТИЧНО (есть гибкая схема `catalog_fields`+`group_key`, `DynamicFieldRenderer`/`FieldGroup`, авто-KB `vehicle_generation_insights`; нет вкладочной раскладки и range-aware сопоставления — баг 1996)
+> **Статус кода:** 🟡 ЧАСТИЧНО — F7/F13 foundations wired to detail page: key-specs strip ✅, document badges ✅, F13 `CatalogGroupTabs` readonly renderer ✅, KB disclaimer ✅, ambiguous-generation CTA (bug #1996) ✅; non-transport KB tables (electronics/pets/fashion) §13 follow-up
 > **⛔ Ревью-вердикт (2026-06-28): БЛОКЕР по DEV + DATA + SEO.** Баг 1996 ЖИВ в коде: `determineGeneration()` (`ad/[id]/page.tsx:1212–1248`) использует `.find()` → молчаливо берёт первого кандидата при overlap (E34 1988–1996 ∩ E39 1995–2003 на year=1996). `generation_id` нигде не хранится в нормализованной колонке (лежит в `specifics` JSONB, без FK). Раскладка вкладок нереализуема текущим `FieldGroup` (хардкодит `<h3>`-секции, нет layout-метаданных). Раздел structured data (JSON-LD per категория) отсутствует как класс, готовые генераторы `lib/seo/catalog/*` не подключены. См. финальный раздел «Ревью-требования и sign-off».
 > **Категория:** Есть (углубление [[32-category-catalogs]] и карточки [[31-listing-creation]])
 > **Приоритет:** P1
 > **Зависит от:** [[32-category-catalogs]], [[31-listing-creation]], [[42-i18n-localization]], [[17-image-verification]]
-> **Последнее обновление:** 2026-06-28
+> **Последнее обновление:** 2026-06-29
 
 Поля/таблицы/ключи — английский. Остальное — русский.
 
