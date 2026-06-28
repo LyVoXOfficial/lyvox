@@ -138,6 +138,14 @@ SEO + Security задокументированы и ждут последним
 | **F13** catalog_groups + ARIA-tabs | ✅ | f17df42 |
 | **F14** trust-score формула | ✅ | 5419c53 |
 
+### 12b. Дополнительные изменения batch-2 (после ревью)
+| Задача | Статус | Commit |
+|---|---|---|
+| T37 `POST /api/trust/refresh` + компоненты | ✅ | 6d0f2d2 |
+| F6 wire: `review_created` + `report_submitted` events | ✅ | 6d0f2d2 |
+| B2 props size-limit (max 20 keys) | ✅ | 57199b1 |
+| B3 dedup-key namespace (`s:`/`c:`) | ✅ | 57199b1 |
+
 ## 13. Blockers / tech-debt из batch-2
 
 | # | Описание | Приоритет |
@@ -147,3 +155,4 @@ SEO + Security задокументированы и ждут последним
 | B3 | **Dedup-key spoofing** — аутентифицированный пользователь может послать через `/api/analytics/track` `dedup_key: "contact_start:<uuid>"` и вытеснить сервер-сайд событие через `ON CONFLICT DO NOTHING`. Сервер всегда пишет первым, но race-window < 100 мс существует. Решение: разделить namespaces: server-dedup-ключи с prefix `s:`, client-ключи с `c:` — server-ключи в клиентском API запрещены. | P2 |
 | B4 | **`advert_views.ip_address` — plaintext PII** — IPv4 адреса хранятся в открытом виде (pre-existing, не F11). GDPR требует либо анонимизации (обрезка последнего октета), либо обоснования хранения в DPIA. Отнести в F4 (GDPR RoPA). | P1 |
 | B5 | **`pnpm gen:types` нужен перед деплоем** — `analytics_events`, `viewer_key`, `view_hour` не в `database.types.ts`; все `as any` касты временные. После `supabase db push` и `pnpm gen:types` касты убрать. | P0 (перед prod-деплоем) |
+| B6 | **T37 UI-бейджи не подключены** — `trust_score` загружается в `apps/web/src/app/user/[id]/page.tsx` (строка 80) но задавлен `void trust_score` (строка 482). `POST /api/trust/refresh` создан, но вызов на странице и отображение score/компонентов — следующий шаг T37. | P1 |
