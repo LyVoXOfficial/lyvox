@@ -1887,5 +1887,32 @@
     "error": "Er is iets misgegaan. Probeer het opnieuw.",
     "aggregate_count": "{n} beoordelingen",
     "no_reviews": "Nog geen beoordelingen"
+  },
+  "trust_score": {
+    "tier_new": "Nieuwe verkoper",
+    "tier_rising": "Vertrouwen opbouwen",
+    "tier_trusted": "Vertrouwde verkoper",
+    "tier_top": "Topverkoper",
+    "card_title": "Vertrouwen & Reputatie",
+    "score_label": "Vertrouwensscore",
+    "last_updated": "Bijgewerkt {date}",
+    "last_updated_never": "Nog niet berekend",
+    "fact_id_verified": "Identiteit geverifieerd",
+    "fact_phone_verified": "Telefoon geverifieerd",
+    "fact_email_verified": "E-mail geverifieerd",
+    "fact_deals": "Voltooide transacties",
+    "fact_deals_soon": "Beschikbaar na lancering van transacties",
+    "fact_member_since": "Lid sinds",
+    "fact_active_listings": "Actieve advertenties",
+    "improve_title": "Hoe u uw score kunt verbeteren",
+    "improve_verify_email": "Verifieer uw e-mailadres",
+    "improve_verify_phone": "Verifieer uw telefoonnummer",
+    "improve_verify_itsme": "Verifieer uw identiteit met itsme",
+    "improve_all_done": "Uw verificaties zijn volledig",
+    "refresh_cta": "Mijn score vernieuwen",
+    "refreshing": "Vernieuwen…",
+    "refresh_success": "Score bijgewerkt",
+    "refresh_error_rate": "Probeer het over {min} min opnieuw",
+    "refresh_error": "Kon niet vernieuwen. Probeer het opnieuw."
   }
 }

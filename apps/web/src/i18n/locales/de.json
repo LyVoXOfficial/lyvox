@@ -1887,5 +1887,32 @@
     "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
     "aggregate_count": "{n} Bewertungen",
     "no_reviews": "Noch keine Bewertungen"
+  },
+  "trust_score": {
+    "tier_new": "Neuer Verkäufer",
+    "tier_rising": "Vertrauen aufbauen",
+    "tier_trusted": "Vertrauenswürdiger Verkäufer",
+    "tier_top": "Top-Verkäufer",
+    "card_title": "Vertrauen & Reputation",
+    "score_label": "Vertrauensscore",
+    "last_updated": "Aktualisiert {date}",
+    "last_updated_never": "Noch nicht berechnet",
+    "fact_id_verified": "Identität verifiziert",
+    "fact_phone_verified": "Telefon verifiziert",
+    "fact_email_verified": "E-Mail verifiziert",
+    "fact_deals": "Abgeschlossene Transaktionen",
+    "fact_deals_soon": "Verfügbar nach Transaktionsstart",
+    "fact_member_since": "Mitglied seit",
+    "fact_active_listings": "Aktive Anzeigen",
+    "improve_title": "So verbessern Sie Ihren Score",
+    "improve_verify_email": "Bestätigen Sie Ihre E-Mail-Adresse",
+    "improve_verify_phone": "Bestätigen Sie Ihre Telefonnummer",
+    "improve_verify_itsme": "Bestätigen Sie Ihre Identität mit itsme",
+    "improve_all_done": "Ihre Verifizierungen sind abgeschlossen",
+    "refresh_cta": "Meinen Score aktualisieren",
+    "refreshing": "Wird aktualisiert…",
+    "refresh_success": "Score aktualisiert",
+    "refresh_error_rate": "In {min} Min. erneut versuchen",
+    "refresh_error": "Konnte nicht aktualisieren. Bitte erneut versuchen."
   }
 }

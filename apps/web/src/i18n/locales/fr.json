@@ -1887,5 +1887,32 @@
     "error": "Une erreur s'est produite. Veuillez réessayer.",
     "aggregate_count": "{n} avis",
     "no_reviews": "Aucun avis pour l'instant"
+  },
+  "trust_score": {
+    "tier_new": "Nouveau vendeur",
+    "tier_rising": "En progression",
+    "tier_trusted": "Vendeur de confiance",
+    "tier_top": "Meilleur vendeur",
+    "card_title": "Confiance & Réputation",
+    "score_label": "Score de confiance",
+    "last_updated": "Mis à jour {date}",
+    "last_updated_never": "Pas encore calculé",
+    "fact_id_verified": "Identité vérifiée",
+    "fact_phone_verified": "Téléphone vérifié",
+    "fact_email_verified": "Email vérifié",
+    "fact_deals": "Transactions complétées",
+    "fact_deals_soon": "Disponible après le lancement des transactions",
+    "fact_member_since": "Membre depuis",
+    "fact_active_listings": "Annonces actives",
+    "improve_title": "Comment améliorer votre score",
+    "improve_verify_email": "Vérifiez votre adresse email",
+    "improve_verify_phone": "Vérifiez votre numéro de téléphone",
+    "improve_verify_itsme": "Vérifiez votre identité avec itsme",
+    "improve_all_done": "Vos vérifications sont complètes",
+    "refresh_cta": "Actualiser mon score",
+    "refreshing": "Actualisation…",
+    "refresh_success": "Score mis à jour",
+    "refresh_error_rate": "Réessayez dans {min} min",
+    "refresh_error": "Impossible de rafraîchir. Réessayez."
   }
 }

@@ -1887,5 +1887,32 @@
     "error": "Something went wrong. Please try again.",
     "aggregate_count": "{n} reviews",
     "no_reviews": "No reviews yet"
+  },
+  "trust_score": {
+    "tier_new": "New Seller",
+    "tier_rising": "Building Trust",
+    "tier_trusted": "Trusted Seller",
+    "tier_top": "Top Seller",
+    "card_title": "Trust & Reputation",
+    "score_label": "Trust score",
+    "last_updated": "Updated {date}",
+    "last_updated_never": "Not yet calculated",
+    "fact_id_verified": "ID verified",
+    "fact_phone_verified": "Phone verified",
+    "fact_email_verified": "Email verified",
+    "fact_deals": "Deals completed",
+    "fact_deals_soon": "Available after deals launch",
+    "fact_member_since": "Member since",
+    "fact_active_listings": "Active listings",
+    "improve_title": "How to improve your score",
+    "improve_verify_email": "Verify your email address",
+    "improve_verify_phone": "Verify your phone number",
+    "improve_verify_itsme": "Verify your identity with itsme",
+    "improve_all_done": "Your verifications are complete",
+    "refresh_cta": "Refresh my score",
+    "refreshing": "Refreshing…",
+    "refresh_success": "Score updated",
+    "refresh_error_rate": "Try again in {min} min",
+    "refresh_error": "Could not refresh. Try again."
   }
 }
