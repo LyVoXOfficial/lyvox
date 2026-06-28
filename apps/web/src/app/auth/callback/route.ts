@@ -142,10 +142,7 @@ export async function GET(request: NextRequest) {
         // after the lock_profiles_columns migration — use the service-role client here.
         const svc = await supabaseService();
 
-        // itsme_sub is a new column (migration 20260628110000); not yet in generated
-        // DB types. The intersection adds it temporarily — remove after pnpm gen:types.
-        type ItsmeProfileUpdate = TablesUpdate<"profiles"> & { itsme_sub?: string };
-        const updatePayload: ItsmeProfileUpdate = {
+        const updatePayload: TablesUpdate<"profiles"> = {
           itsme_verified: true,
           itsme_kyc_level: itsmeKycLevel,
         };

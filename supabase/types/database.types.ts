@@ -1890,6 +1890,7 @@ export type Database = {
           blocked_until: string | null
           consents: Json | null
           created_at: string | null
+          discover_prefs: Json
           display_name: string | null
           flags: Json | null
           id: string
@@ -1910,6 +1911,7 @@ export type Database = {
           blocked_until?: string | null
           consents?: Json | null
           created_at?: string | null
+          discover_prefs?: Json
           display_name?: string | null
           flags?: Json | null
           id: string
@@ -1930,6 +1932,7 @@ export type Database = {
           blocked_until?: string | null
           consents?: Json | null
           created_at?: string | null
+          discover_prefs?: Json
           display_name?: string | null
           flags?: Json | null
           id?: string

@@ -8,6 +8,7 @@ import {
 } from "@/lib/apiErrors";
 import { validateRequest } from "@/lib/validations";
 import { updateProfileSchema } from "@/lib/validations/profile";
+import type { TablesInsert } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
 
@@ -33,12 +34,11 @@ export async function POST(req: Request) {
 
   const { display_name, discover_prefs } = validationResult.data;
 
-  const payload: Record<string, unknown> = { id: user.id };
+  const payload: TablesInsert<"profiles"> = { id: user.id };
   if (display_name !== undefined) payload.display_name = display_name;
   if (discover_prefs !== undefined) payload.discover_prefs = discover_prefs;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await supabase.from("profiles").upsert(payload as any, {
+  const { error } = await supabase.from("profiles").upsert(payload, {
     onConflict: "id",
   });
 

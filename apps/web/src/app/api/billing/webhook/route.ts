@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getStripe } from "@/lib/stripe/client";
 import { supabaseService } from "@/lib/supabaseService";
+import type { Database, Json } from "@/lib/supabaseTypes";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -41,12 +42,10 @@ function periodEndISO(sub: Stripe.Subscription): string | null {
  * re-run the handler. A successfully completed event has processed_at IS NOT NULL
  * and is immediately skipped on re-delivery.
  *
- * webhook_events is a new table (migration 20260628100000); not yet in generated
- * types. SupabaseClient without explicit type params accepts any table name.
- * Run `pnpm gen:types` after applying the migration to get full type safety here.
+ * webhook_events is covered by generated DB types after the schema push.
  */
 async function idempotencyGate(
-  supabase: SupabaseClient,
+  supabase: SupabaseClient<Database>,
   event: Stripe.Event,
 ): Promise<"process" | "skip"> {
   const we = supabase.from("webhook_events");
@@ -59,7 +58,7 @@ async function idempotencyGate(
         provider: "stripe",
         event_id: event.id,
         type: event.type,
-        payload: event,
+        payload: event as unknown as Json,
         received_at: new Date().toISOString(),
       },
       { onConflict: "event_id", ignoreDuplicates: true },
@@ -88,7 +87,7 @@ async function idempotencyGate(
 
 /** Mark an event as fully processed. Called AFTER business logic succeeds. */
 async function markWebhookProcessed(
-  supabase: SupabaseClient,
+  supabase: SupabaseClient<Database>,
   eventId: string,
 ): Promise<void> {
   const { error } = await supabase
