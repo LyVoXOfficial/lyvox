@@ -177,10 +177,8 @@ export async function PATCH(
     updates.currency = body.currency;
   }
 
-  // content_locale — DB column added in migration 20260628000001; regenerate types after db push.
   if (body.content_locale !== undefined) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (updates as any).content_locale = body.content_locale;
+    updates.content_locale = body.content_locale;
   }
 
   if (requestedStatus) {

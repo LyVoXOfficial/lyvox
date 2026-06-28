@@ -136,6 +136,7 @@ export type Database = {
           business_id: string | null
           category_id: string
           condition: string | null
+          content_locale: string | null
           created_at: string | null
           currency: string | null
           description: string | null
@@ -156,6 +157,7 @@ export type Database = {
           business_id?: string | null
           category_id: string
           condition?: string | null
+          content_locale?: string | null
           created_at?: string | null
           currency?: string | null
           description?: string | null
@@ -176,6 +178,7 @@ export type Database = {
           business_id?: string | null
           category_id?: string
           condition?: string | null
+          content_locale?: string | null
           created_at?: string | null
           currency?: string | null
           description?: string | null
