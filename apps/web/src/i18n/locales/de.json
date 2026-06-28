@@ -316,7 +316,17 @@
       "description_min": "Die Beschreibung muss mindestens 10 Zeichen lang sein",
       "media_required": "Mindestens 1 Foto ist erforderlich, um Ihre Anzeige zu verГ¶ffentlichen",
       "edit": "Bearbeiten",
-      "delete": "LГ¶schen"
+      "delete": "LГ¶schen",
+      "location_required": "Standort ist zum Veröffentlichen erforderlich",
+      "steps_remaining": "Noch {n} Schritte bis zur Veröffentlichung",
+      "one_more_step": "Noch 1 Schritt bis zur Veröffentlichung",
+      "progress_label": "Fortschritt der Anzeigenerstellung",
+      "listing_title": "Anzeigentitel",
+      "title_placeholder": "z. B. Toyota Corolla 2019 Benzin Automatik",
+      "title_hint": "10–70 Zeichen: Marke + Modell + Hauptmerkmal",
+      "description_short_hint": "Streben Sie 120+ Zeichen für bessere Sichtbarkeit an (noch {n})",
+      "verify_to_publish_title": "Telefon verifizieren um zu veröffentlichen",
+      "verify_to_publish_body": "Ihr Entwurf ist gespeichert. Verifizieren Sie Ihre Telefonnummer einmal und Sie können veröffentlichen."
     },
     "auto_save": {
       "pending": "Ungesicherte Г„nderungen",

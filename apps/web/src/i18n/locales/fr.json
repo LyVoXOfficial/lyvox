@@ -316,7 +316,17 @@
       "description_min": "La description doit contenir au moins 10 caractГЁres",
       "media_required": "Au moins 1 photo est requise pour publier votre annonce",
       "edit": "Modifier",
-      "delete": "Supprimer"
+      "delete": "Supprimer",
+      "location_required": "La localisation est requise pour publier",
+      "steps_remaining": "{n} étapes de plus pour publier",
+      "one_more_step": "Encore 1 étape pour publier",
+      "progress_label": "Progression de la création d'annonce",
+      "listing_title": "Titre de l'annonce",
+      "title_placeholder": "ex. Toyota Corolla 2019 essence automatique",
+      "title_hint": "10–70 caractères : marque + modèle + caractéristique clé",
+      "description_short_hint": "Visez 120+ caractères pour une meilleure visibilité ({n} de plus)",
+      "verify_to_publish_title": "Vérifiez votre téléphone pour publier",
+      "verify_to_publish_body": "Votre brouillon est enregistré. Vérifiez votre numéro une seule fois et vous êtes prêt à publier."
     },
     "auto_save": {
       "pending": "Modifications non enregistrГ©es",

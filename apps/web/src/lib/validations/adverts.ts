@@ -47,6 +47,11 @@ export const updateAdvertSchema = z
       .record(z.string(), z.string())
       .nullable()
       .optional(),
+
+    content_locale: z
+      .string()
+      .max(10)
+      .optional(),
   })
   .refine(
     (data) => {

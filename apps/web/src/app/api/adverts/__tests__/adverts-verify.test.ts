@@ -56,13 +56,17 @@ describe("POST /api/adverts verification gate", () => {
     serviceFromMock.mockReset().mockReturnValue({});
   });
 
-  it("403 VERIFICATION_REQUIRED when signed in but unverified", async () => {
+  it("allows draft creation for signed-in but unverified user (verification is gated at publish only)", async () => {
     getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
     isVerifiedMock.mockResolvedValue(false);
+    checkBlockedMock.mockResolvedValue({ isBlocked: false });
+    // Route proceeds past verification; categories lookup returns null → CATEGORY_LOOKUP_FAILED (not 403)
+    fromMock.mockReturnValue(makeChainable());
     const res = await POST();
-    expect(res.status).toBe(403);
+    // Unverified user must NOT get 403 VERIFICATION_REQUIRED for draft creation
+    expect(res.status).not.toBe(403);
     const body = await res.json();
-    expect(body.error).toBe("VERIFICATION_REQUIRED");
+    expect(body.error).not.toBe("VERIFICATION_REQUIRED");
   });
 
   it("401 when not signed in", async () => {

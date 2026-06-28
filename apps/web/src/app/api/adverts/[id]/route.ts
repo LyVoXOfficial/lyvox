@@ -11,6 +11,7 @@ import {
 import { validateRequest } from "@/lib/validations";
 import { updateAdvertSchema } from "@/lib/validations/adverts";
 import type { Tables, TablesInsert, TablesUpdate } from "@/lib/supabaseTypes";
+import { isViewerVerified } from "@/lib/auth/requireVerified";
 
 export const runtime = "nodejs";
 
@@ -128,8 +129,15 @@ export async function PATCH(
   const requestedStatus = body.status;
   const isPublishing = requestedStatus === "active";
 
-  // Check if user is blocked when trying to publish
+  // Publish gate: phone verification + fraud block check
   if (isPublishing) {
+    if (!(await isViewerVerified(supabase, user.id))) {
+      return createErrorResponse(ApiErrorCode.VERIFICATION_REQUIRED, {
+        status: 403,
+        detail: "Phone verification required to publish",
+      });
+    }
+
     const { checkUserBlocked } = await import("@/lib/fraud/checkUserBlocked");
     const blockCheck = await checkUserBlocked(user.id, { failClosed: true });
     if (blockCheck.isBlocked) {
@@ -169,6 +177,12 @@ export async function PATCH(
     updates.currency = body.currency;
   }
 
+  // content_locale — DB column added in migration 20260628000001; regenerate types after db push.
+  if (body.content_locale !== undefined) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (updates as any).content_locale = body.content_locale;
+  }
+
   if (requestedStatus) {
     const transitionError = enforceStatusTransition(advert.status ?? "draft", requestedStatus);
     if (transitionError) return transitionError;
@@ -195,6 +209,14 @@ export async function PATCH(
         return createErrorResponse(ApiErrorCode.BAD_INPUT, {
           status: 400,
           detail: "CONDITION_REQUIRED",
+        });
+      }
+
+      const resolvedLocation = body.location ?? advert.location;
+      if (!resolvedLocation || resolvedLocation.trim().length === 0) {
+        return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+          status: 400,
+          detail: "LOCATION_REQUIRED",
         });
       }
 

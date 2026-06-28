@@ -4,7 +4,6 @@ import { getI18nProps } from "@/i18n/server";
 import type { Category } from "@/lib/types";
 import { PostForm } from "./PostForm";
 import Link from "next/link";
-import { AlertTriangle, Mail, Phone, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -42,7 +41,6 @@ async function getAdvertForEdit(id: string, userId: string) {
     return null;
   }
 
-  // Massage the data a bit
   if (ad) {
     const specifics = (ad.ad_item_specifics as any)?.[0]?.specifics ?? {};
     const media = ad.media ?? [];
@@ -85,7 +83,6 @@ export default async function PostPage({
     return value === key ? fallback : value;
   };
 
-
   if (!user) {
     return (
       <main className="container mx-auto flex min-h-[60vh] max-w-xl items-center p-4">
@@ -109,76 +106,16 @@ export default async function PostPage({
     );
   }
 
-  // Check verification status
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("verified_email, verified_phone")
-    .eq("id", user.id)
-    .maybeSingle();
+  // isVerified uses the same predicate as the PATCH /api/adverts/[id] publish gate.
+  const isVerified = await isViewerVerified(supabase, user.id);
 
-  const verifiedEmail = profile?.verified_email ?? false;
-  // Gate on EITHER phone signal (phones.verified OR profiles.verified_phone), matching the
-  // API-level guard. Verifying through the on-page TrustGate sets only phones.verified, so reading
-  // profiles.verified_phone alone would leave a verified user blocked on this page.
-  const verifiedPhone = await isViewerVerified(supabase, user.id);
-
-  // Redirect to verification page if not verified
-  if (!verifiedEmail || !verifiedPhone) {
-    return (
-      <main className="container mx-auto flex min-h-[60vh] max-w-2xl items-center p-4">
-        <Card className="w-full rounded-md border-amber-200 bg-amber-50/80 dark:border-amber-900 dark:bg-amber-950/30">
-          <CardHeader>
-            <div className="mb-2 flex size-10 items-center justify-center rounded-md bg-amber-100 text-amber-700 dark:bg-amber-900/60 dark:text-amber-200">
-              <ShieldCheck className="h-5 w-5" aria-hidden="true" />
-            </div>
-            <CardTitle className="text-amber-950 dark:text-amber-100">
-              {tf("post.verify_title", "Verify your account before publishing")}
-            </CardTitle>
-            <CardDescription className="text-amber-800 dark:text-amber-200">
-              {tf(
-                "post.verify_body",
-                "Listings require confirmed contact details to reduce fraud and keep buyer conversations accountable.",
-              )}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <div className="space-y-2">
-              {!verifiedEmail && (
-                <p className="flex items-center gap-2 text-sm font-medium text-amber-900 dark:text-amber-100">
-                  <Mail className="h-4 w-4" aria-hidden="true" />
-                  {tf("post.email_missing", "Email confirmation is missing")}
-                </p>
-              )}
-              {!verifiedPhone && (
-                <p className="flex items-center gap-2 text-sm font-medium text-amber-900 dark:text-amber-100">
-                  <Phone className="h-4 w-4" aria-hidden="true" />
-                  {tf("post.phone_missing", "Phone verification is missing")}
-                </p>
-              )}
-            </div>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Button asChild>
-                <Link href="/verify">{tf("post.goto_verify", "Go to verification")}</Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link href="/profile">
-                  <AlertTriangle className="h-4 w-4" aria-hidden="true" />
-                  {tf("post.review_profile", "Review profile")}
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </main>
-    );
-  }
   const categories = await getCategories();
   const editId = typeof searchParams.edit === 'string' ? searchParams.edit : null;
   const advertToEdit = editId ? await getAdvertForEdit(editId, user.id) : null;
   const userPhone = await getUserPhone(user.id);
 
   if (editId && !advertToEdit) {
-     return (
+    return (
       <main className="container mx-auto p-4 text-center">
         <h1 className="text-2xl font-bold text-destructive">{t("post.not_found_or_not_owner")}</h1>
       </main>
@@ -189,12 +126,13 @@ export default async function PostPage({
 
   return (
     <main className="container mx-auto max-w-3xl p-4">
-       <PostForm
+      <PostForm
         categories={categories}
         userId={user.id}
         advertToEdit={advertToEdit}
         locale={locale}
         userPhone={userPhone}
+        isVerified={isVerified}
       />
     </main>
   );

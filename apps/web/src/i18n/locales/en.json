@@ -316,7 +316,17 @@
       "description_min": "Description must be at least 10 characters long",
       "media_required": "At least 1 photo is required to publish your advert",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "location_required": "Location is required to publish",
+      "steps_remaining": "{n} more steps to publish",
+      "one_more_step": "1 more step to publish",
+      "progress_label": "Listing completion progress",
+      "listing_title": "Listing title",
+      "title_placeholder": "e.g. Toyota Corolla 2019 petrol automatic",
+      "title_hint": "10–70 characters: brand + model + key feature",
+      "description_short_hint": "Aim for 120+ characters for better search visibility ({n} more)",
+      "verify_to_publish_title": "Verify your phone to publish",
+      "verify_to_publish_body": "Your draft is saved. Verify your phone number once and you're ready to publish."
     },
     "auto_save": {
       "pending": "Unsaved changes",
