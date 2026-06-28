@@ -134,7 +134,11 @@
     "emptyBrowse": "Browse categories or try a different search term to find what you need.",
     "emptyWithFilters": "Try removing some filters or broadening your price range.",
     "inBelgium": "in Belgium",
-    "applied": "Applied"
+    "applied": "Applied",
+    "allResults": "All results",
+    "removeFilter": "Remove filter",
+    "zeroResultSaveTitle": "Get notified when new matches appear",
+    "loadMore": "Load more"
   },
   "contact": {
     "price": "Price",
@@ -1475,7 +1479,11 @@
     "subcategories": "Subcategories",
     "listings": "Listings",
     "noListings": "There are no active listings in this category yet. Be the first to post one.",
-    "no_categories": "No categories available."
+    "no_categories": "No categories available.",
+    "searchWithFilters": "Search with filters",
+    "prevPage": "Previous page",
+    "nextPage": "Next page",
+    "page": "Page {page} of {total}"
   },
   "report": {
     "button": "Report",

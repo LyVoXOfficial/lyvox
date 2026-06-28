@@ -9,7 +9,6 @@ import { getCategoryIcon } from "@/lib/categoryIcons";
 import { ChevronRight, ChevronDown, X, MapPin, SlidersHorizontal, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -200,6 +199,7 @@ export default function SearchFilters({
     fields: {},
   });
   const [dynamicFilters, setDynamicFilters] = useState<Record<string, unknown>>({});
+  const schemaCache = useRef<Map<string, CatalogSchemaState>>(new Map());
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [condition, setCondition] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<string>("created_at_desc");
@@ -359,7 +359,35 @@ export default function SearchFilters({
       };
     }
 
+    const buildInitialFilters = (fieldMap: Record<string, CatalogFieldDefinition>) => {
+      const initialFilters: Record<string, unknown> = {};
+      searchParams.forEach((value, key) => {
+        if (!key.startsWith("catalog_field_")) return;
+        const fieldKey = key.replace("catalog_field_", "");
+        const fieldDef = fieldMap[fieldKey];
+        if (!fieldDef) return;
+        let parsed: unknown = value;
+        if (fieldDef.field_type === "number") {
+          const numericValue = Number(value);
+          if (Number.isNaN(numericValue)) return;
+          parsed = numericValue;
+        } else if (fieldDef.field_type === "boolean") {
+          parsed = value === "true";
+        }
+        initialFilters[fieldKey] = parsed;
+      });
+      return initialFilters;
+    };
+
     const loadSchema = async () => {
+      const cacheKey = selectedCategory.id;
+      const cached = schemaCache.current.get(cacheKey);
+      if (cached && !cached.loading && !cached.error) {
+        setFilterSchemaState(cached);
+        setDynamicFilters(buildInitialFilters(cached.fields));
+        return;
+      }
+
       setFilterSchemaState((prev) => ({
         ...prev,
         loading: true,
@@ -399,34 +427,15 @@ export default function SearchFilters({
         };
         const fieldMap = payload.data.fields as Record<string, CatalogFieldDefinition>;
 
-        const initialFilters: Record<string, unknown> = {};
-        searchParams.forEach((value, key) => {
-          if (!key.startsWith("catalog_field_")) return;
-          const fieldKey = key.replace("catalog_field_", "");
-          const fieldDef = fieldMap[fieldKey];
-          if (!fieldDef) return;
-
-          let parsed: unknown = value;
-          if (fieldDef.field_type === "number") {
-            const numericValue = Number(value);
-            if (Number.isNaN(numericValue)) {
-              return;
-            }
-            parsed = numericValue;
-          } else if (fieldDef.field_type === "boolean") {
-            parsed = value === "true";
-          }
-
-          initialFilters[fieldKey] = parsed;
-        });
-
-        setFilterSchemaState({
+        const newState: CatalogSchemaState = {
           loading: false,
           error: null,
           schema,
           fields: fieldMap,
-        });
-        setDynamicFilters(initialFilters);
+        };
+        schemaCache.current.set(cacheKey, newState);
+        setFilterSchemaState(newState);
+        setDynamicFilters(buildInitialFilters(fieldMap));
       } catch (error) {
         if (cancelled) return;
         setFilterSchemaState({
@@ -512,7 +521,10 @@ export default function SearchFilters({
     setShowLocationSuggestions(true);
   };
 
-  const applyFilters = (filters: SearchFiltersState) => {
+  const applyFilters = (filters: SearchFiltersState, force = false) => {
+    // In drawer mode buffer all changes until Apply / Clear-all button is pressed
+    if (actualVariant === "drawer" && !force) return;
+
     const mergedFilters: SearchFiltersState = {
       category_id: filters.category_id,
       price_min: filters.price_min,
@@ -633,7 +645,7 @@ export default function SearchFilters({
       verified_only: verifiedOnly,
       condition,
       sort_by: sortBy,
-    });
+    }, true);
   };
 
   const handleClearAll = () => {
@@ -653,7 +665,7 @@ export default function SearchFilters({
       verified_only: false,
       condition: null,
       sort_by: "created_at_desc",
-    });
+    }, true);
   };
 
   const tree = buildCategoryTree(categories);
@@ -957,17 +969,32 @@ export default function SearchFilters({
         </div>
       </div>
 
-      {/* Verified Sellers Filter — toggle-switch style (mockup line 361), same handler wiring */}
+      {/* Verified Sellers Filter — toggle-switch with proper ARIA role=switch */}
       <div
         className="border-t border-border/70"
         style={{ paddingTop: "16px", marginTop: "4px" }}
       >
-        <label
-          htmlFor="verified-only"
-          className="flex cursor-pointer items-center gap-3 font-semibold"
+        <button
+          type="button"
+          role="switch"
+          aria-checked={verifiedOnly}
+          onClick={() => {
+            const value = !verifiedOnly;
+            setVerifiedOnly(value);
+            applyFilters({
+              category_id: selectedCategory?.id || null,
+              price_min: priceRange[0] > 0 ? priceRange[0] : null,
+              price_max: priceRange[1] < 10000 ? priceRange[1] : null,
+              location: location || null,
+              catalog_fields: dynamicFilters,
+              verified_only: value,
+              condition,
+              sort_by: sortBy,
+            });
+          }}
+          className="flex w-full cursor-pointer items-center gap-3 font-semibold text-left"
           style={{ fontSize: "13.5px" }}
         >
-          {/* Toggle pill (CSS-only, no JS needed beyond the existing Checkbox state) */}
           <span
             className="relative shrink-0 transition-colors"
             style={{
@@ -990,28 +1017,8 @@ export default function SearchFilters({
               }}
             />
           </span>
-          {/* Hidden real checkbox for accessibility/state */}
-          <Checkbox
-            id="verified-only"
-            checked={verifiedOnly}
-            className="sr-only"
-            onCheckedChange={(checked) => {
-              const value = checked === true;
-              setVerifiedOnly(value);
-              applyFilters({
-                category_id: selectedCategory?.id || null,
-                price_min: priceRange[0] > 0 ? priceRange[0] : null,
-                price_max: priceRange[1] < 10000 ? priceRange[1] : null,
-                location: location || null,
-                catalog_fields: dynamicFilters,
-                verified_only: value,
-                condition,
-                sort_by: sortBy,
-              });
-            }}
-          />
           {tr("search.verifiedOnly", "Verified sellers only")}
-        </label>
+        </button>
       </div>
 
       {/* Condition Filter — pill-style (mockup line 353-357), same state/handler wiring */}

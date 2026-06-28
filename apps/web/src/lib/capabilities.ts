@@ -9,7 +9,8 @@ export type Capability =
   | "itsme"
   | "whatsapp_otp"
   | "payments_escrow"
-  | "discover_v2";
+  | "discover_v2"
+  | "boost_ranking";
 
 export const CAPABILITY_ENV: Record<Capability, string> = {
   pro_subscriptions: "CAPABILITY_PRO_SUBSCRIPTIONS",
@@ -18,6 +19,7 @@ export const CAPABILITY_ENV: Record<Capability, string> = {
   whatsapp_otp: "CAPABILITY_WHATSAPP_OTP",
   payments_escrow: "CAPABILITY_PAYMENTS_ESCROW",
   discover_v2: "CAPABILITY_DISCOVER_V2",
+  boost_ranking: "CAPABILITY_BOOST_RANKING",
 };
 
 export function isCapabilityEnabled(

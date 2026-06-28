@@ -134,7 +134,11 @@
     "emptyBrowse": "Parcourez les catГ©gories ou essayez un autre terme de recherche pour trouver ce qu'il vous faut.",
     "emptyWithFilters": "Essayez de retirer certains filtres ou d'Г©largir votre fourchette de prix.",
     "inBelgium": "en Belgique",
-    "applied": "AppliquГ©s"
+    "applied": "AppliquГ©s",
+    "allResults": "Tous les résultats",
+    "removeFilter": "Supprimer le filtre",
+    "zeroResultSaveTitle": "Recevez une notification pour les nouvelles correspondances",
+    "loadMore": "Charger plus"
   },
   "contact": {
     "price": "Prix",
@@ -1475,7 +1479,11 @@
     "subcategories": "Sous-catГ©gories",
     "listings": "Annonces",
     "noListings": "Il n'y a pas encore d'annonces actives dans cette rubrique. Soyez le premier Г  en publier une.",
-    "no_categories": "Aucune catГ©gorie disponible."
+    "no_categories": "Aucune catГ©gorie disponible.",
+    "searchWithFilters": "Rechercher avec des filtres",
+    "prevPage": "Page précédente",
+    "nextPage": "Page suivante",
+    "page": "Page {page} sur {total}"
   },
   "report": {
     "button": "Signaler",

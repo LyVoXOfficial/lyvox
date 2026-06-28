@@ -3,6 +3,7 @@ export const revalidate = 60;
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { supabaseService } from "@/lib/supabaseService";
 import type { Category } from "@/lib/types";
 import CategoryList from "@/components/category-list";
@@ -70,14 +71,18 @@ type AdvertItem = {
   sellerVerified?: boolean;
 };
 
+const PAGE_SIZE = 24;
+
 type Props = {
   params: Promise<{ path: string[] }>;
-  searchParams: Promise<{ sort?: string }>;
+  searchParams: Promise<{ sort?: string; page?: string }>;
 };
 
 export default async function CategoryPage({ params, searchParams }: Props) {
   const { path } = await params;
-  const { sort: sortParam } = await searchParams;
+  const { sort: sortParam, page: pageParam } = await searchParams;
+  const currentPage = Math.max(0, Number(pageParam || "0") || 0);
+  const pageOffset = currentPage * PAGE_SIZE;
   const slugPath = Array.isArray(path) ? path.join("/") : "";
   if (!slugPath) {
     notFound();
@@ -152,13 +157,21 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   }
 
   const adverts: AdvertItem[] = [];
-  const { data: advertsRaw } = await supabase
-    .from("adverts")
-    .select("id,title,price,currency,location,created_at,user_id")
-    .eq("category_id", typedCurrent.id)
-    .eq("status", "active")
-    .order(orderBy.column, { ascending: orderBy.ascending })
-    .limit(24);
+  const [{ data: advertsRaw }, { count: totalAdverts }] = await Promise.all([
+    supabase
+      .from("adverts")
+      .select("id,title,price,currency,location,created_at,user_id")
+      .eq("category_id", typedCurrent.id)
+      .eq("status", "active")
+      .order(orderBy.column, { ascending: orderBy.ascending })
+      .order("id", { ascending: false })
+      .range(pageOffset, pageOffset + PAGE_SIZE - 1),
+    supabase
+      .from("adverts")
+      .select("id", { count: "exact", head: true })
+      .eq("category_id", typedCurrent.id)
+      .eq("status", "active"),
+  ]);
 
   if (advertsRaw?.length) {
     const ids = advertsRaw.map((a) => a.id);
@@ -301,9 +314,17 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       )}
 
       <section className="space-y-3">
-        <h2 className="text-lg font-extrabold tracking-tight text-foreground">
-          {t("category.listings", "Listings")}
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-extrabold tracking-tight text-foreground">
+            {t("category.listings", "Listings")}
+          </h2>
+          <Link
+            href={`/search?category_id=${typedCurrent.id}`}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            {t("category.searchWithFilters", "Search with filters")} →
+          </Link>
+        </div>
         <CategoryFilters />
         {adverts.length > 0 ? (
           <AdsGrid items={adverts} />
@@ -316,6 +337,34 @@ export default async function CategoryPage({ params, searchParams }: Props) {
               )}
             </p>
           </div>
+        )}
+
+        {/* Pagination */}
+        {(totalAdverts ?? 0) > PAGE_SIZE && (
+          <nav
+            className="flex items-center justify-center gap-3 pt-4"
+            aria-label={t("category.page", `Page ${currentPage + 1} of ${Math.ceil((totalAdverts ?? 0) / PAGE_SIZE)}`)}
+          >
+            {currentPage > 0 && (
+              <Link
+                href={`/c/${slugPath}?${new URLSearchParams({ sort: sortParam || "date-desc", page: String(currentPage - 1) })}`}
+                className="rounded-lg border border-border/70 bg-card px-4 py-2 text-sm font-medium hover:bg-secondary"
+              >
+                ← {t("category.prevPage", "Previous page")}
+              </Link>
+            )}
+            <span className="text-sm text-muted-foreground">
+              {currentPage + 1} / {Math.ceil((totalAdverts ?? 0) / PAGE_SIZE)}
+            </span>
+            {(currentPage + 1) * PAGE_SIZE < (totalAdverts ?? 0) && (
+              <Link
+                href={`/c/${slugPath}?${new URLSearchParams({ sort: sortParam || "date-desc", page: String(currentPage + 1) })}`}
+                className="rounded-lg border border-border/70 bg-card px-4 py-2 text-sm font-medium hover:bg-secondary"
+              >
+                {t("category.nextPage", "Next page")} →
+              </Link>
+            )}
+          </nav>
         )}
       </section>
     </div>

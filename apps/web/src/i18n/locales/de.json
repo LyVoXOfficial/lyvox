@@ -134,7 +134,11 @@
     "emptyBrowse": "Durchsuchen Sie Kategorien oder versuchen Sie einen anderen Suchbegriff, um das Passende zu finden.",
     "emptyWithFilters": "Versuchen Sie, einige Filter zu entfernen oder Ihren Preisbereich zu erweitern.",
     "inBelgium": "in Belgien",
-    "applied": "Angewendet"
+    "applied": "Angewendet",
+    "allResults": "Alle Ergebnisse",
+    "removeFilter": "Filter entfernen",
+    "zeroResultSaveTitle": "Benachrichtigung bei neuen Treffern erhalten",
+    "loadMore": "Mehr laden"
   },
   "contact": {
     "price": "Preis",
@@ -1475,7 +1479,11 @@
     "subcategories": "Unterkategorien",
     "listings": "Anzeigen",
     "noListings": "In dieser Kategorie gibt es noch keine aktiven Anzeigen. Seien Sie der Erste, der eine verГ¶ffentlicht.",
-    "no_categories": "Keine Kategorien verfГјgbar."
+    "no_categories": "Keine Kategorien verfГјgbar.",
+    "searchWithFilters": "Mit Filtern suchen",
+    "prevPage": "Vorherige Seite",
+    "nextPage": "Nächste Seite",
+    "page": "Seite {page} von {total}"
   },
   "report": {
     "button": "Melden",

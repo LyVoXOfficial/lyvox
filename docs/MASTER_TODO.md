@@ -42,8 +42,8 @@
 | 01 | Свайп-система Discover (визуал+жесты+настройки) | P1 | 🟡 | UX, DEV | [features/01](features/01-discover-swipe-system.md) | 33,37 |
 | 62 | Карточки товара по категориям + базы знаний (раскладка/поля/KB/фикс сопоставления) | P1 | 🟡 | UX, DEV, DATA, CONTENT | [features/62](features/62-listing-detail-per-category.md) | 32,31 | Key-specs strip ✅, doc badges ✅, F13 CatalogGroupTabs readonly ✅, KB disclaimer ✅, ambiguous CTA #1996 ✅; non-transport KB §13 follow-up |
 | 31 | Создание объявления (8-шаг, медиа) | P0 | ✅ | UX, DEV | [features/31](features/31-listing-creation.md) | 32,38 |
-| 32 | Категорийные каталоги | P1 | ✅ | DEV, DATA, CONTENT | [features/32](features/32-category-catalogs.md) | — |
-| 33 | Поиск/фильтры/сортировки | P0 | ✅ | DEV, UX | [features/33](features/33-search.md) | 32 |
+| 32 | Категорийные каталоги | P1 | ✅ | DEV, DATA, CONTENT | [features/32](features/32-category-catalogs.md) | — | Пагинация `/c/*` ✅, "Поиск с фильтрами →" ✅; SEO §13 parking |
+| 33 | Поиск/фильтры/сортировки | P0 | ✅ | DEV, UX | [features/33](features/33-search.md) | 32 | AdsGridSkeleton ✅, IntersectionObserver ✅, mobile deferred-apply ✅, schema cache ✅, role=switch ✅, zero-result SaveSearch ✅, anti-social-proof ✅, SEARCH_PERFORMED analytics ✅, FTS weighted (migration pending) ✅; SEO §13 parking |
 | 34 | Дискавери-дополнения (saved-search/рек./сравнение) | P1 | 🟡 | DEV, UX | [features/34](features/34-discovery-extras.md) | 33,36 |
 | UX1 | Редизайн-фиксы страниц (home/discover/search/ad/post/profile) | P1 | ⛔ | UX, DEV | [audit/01](features/audit/01-ux-psychology-audit.md) · [макеты](features/audit/mockups/redesign-mockups.html) | — |
 | UX2 | Мобильная раскладка (bottom-nav высоты, contact-bar, тач-таргеты) | P1 | ⛔ | UX, DEV | [audit/03](features/audit/03-security-mobile-audit.md) | — |
