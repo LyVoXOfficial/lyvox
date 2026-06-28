@@ -72,6 +72,30 @@ export const STORAGE_INVENTORY: {
     purpose: "Set of advert IDs already shown in the swipe deck (deduplication)",
     lib: "lib/seenAdverts.ts",
   },
+  {
+    key: "lyvox:discover:prefs",
+    category: "functional",
+    purpose: "Discover swipe settings (mode, haptics, etc.) for anonymous visitors",
+    lib: "components/discover/SwipeDeck.tsx",
+  },
+  {
+    key: "lyvox:discover:lessCount",
+    category: "functional",
+    purpose: "Counter for how many times the visitor has used 'Less like this' (reason-prompt personalisation)",
+    lib: "components/discover/SwipeDeck.tsx",
+  },
+  {
+    key: "lyvox:discover:session",
+    category: "analytics",
+    purpose: "Session identifier (sessionStorage) for Discover analytics event batching",
+    lib: "lib/discover/discoverTrack.ts",
+  },
+  {
+    key: "lyvox:nav-help",
+    category: "necessary",
+    purpose: "Onboarding coach-mark state per section (offered/completed/skipped) — prevents repeat prompts",
+    lib: "lib/discover/navHelp.ts",
+  },
 ];
 
 /**

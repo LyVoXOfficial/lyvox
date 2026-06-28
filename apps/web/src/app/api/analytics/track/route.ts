@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { supabaseServer } from "@/lib/supabaseServer";
+import { supabaseService } from "@/lib/supabaseService";
 import {
   createSuccessResponse,
   createErrorResponse,
@@ -58,15 +59,19 @@ async function handleTrack(req: Request) {
     return createSuccessResponse({ tracked: false, reason: "event_not_live" });
   }
 
-  const supabase = await supabaseServer();
-  const { data: { user } } = await supabase.auth.getUser();
+  // Get user_id for attribution; use service role for the insert so guests (anon role)
+  // can write events — the analytics_events RLS only allows `authenticated` role but
+  // Discover is open to guests who are the primary audience (PRD 01).
+  const cookieClient = await supabaseServer();
+  const { data: { user } } = await cookieClient.auth.getUser();
+  const svc = await supabaseService();
 
   // B3: prefix client-supplied dedup_key with 'c:' so it never collides with
   // server-written keys (prefixed 's:' by trackServerEvent). Prevents a
   // authenticated client from pre-empting server funnel events.
   const storedDedupKey = dedup_key ? `c:${dedup_key}` : null;
 
-  const { error } = await supabase.from("analytics_events").upsert(
+  const { error } = await svc.from("analytics_events").upsert(
     {
       event_name,
       user_id: user?.id ?? null,
