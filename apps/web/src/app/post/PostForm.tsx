@@ -43,6 +43,7 @@ import { RealEstateFields } from "@/components/catalog/RealEstateFields";
 import { FashionFields } from "@/components/catalog/FashionFields";
 import { JobsFields } from "@/components/catalog/JobsFields";
 import { FormRenderer, type CatalogFieldDefinition, type CatalogSchema, type CatalogSchemaField } from "@/catalog/renderer";
+import TrustGatePhone from "@/components/trust/TrustGatePhone";
 
 type PostFormProps = {
   categories: Category[];
@@ -50,12 +51,13 @@ type PostFormProps = {
   advertToEdit?: any;
   locale: string;
   userPhone?: string | null;
+  isVerified?: boolean;
 };
 
 const TOTAL_STEPS = 8;
 const AUTO_SAVE_INTERVAL_MS = 30_000;
 
-export function PostForm({ categories, userId, advertToEdit, locale, userPhone }: PostFormProps) {
+export function PostForm({ categories, userId, advertToEdit, locale, userPhone, isVerified = false }: PostFormProps) {
   const { t } = useI18n();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
@@ -118,6 +120,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
       additional_phone: (specifics as Record<string, unknown>).additional_phone as string || "",
       additional_phone_verified: false, // Always reset - needs re-verification
       catalog_fields: catalogFields,
+      title: advertToEdit?.title ?? "",
     };
   };
 
@@ -166,6 +169,9 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "pending" | "saving" | "saved" | "error">("idle");
   const [autoSaveError, setAutoSaveError] = useState<string | null>(null);
   const [lastAutoSaveAt, setLastAutoSaveAt] = useState<number | null>(null);
+  // Flipped to true after the user completes inline phone verification at step 8.
+  // Allows publish to proceed without a full page reload (isVerified is server-rendered).
+  const [justVerified, setJustVerified] = useState(false);
   const [phoneVerificationOpen, setPhoneVerificationOpen] = useState(false);
   const [phoneVerificationCode, setPhoneVerificationCode] = useState("");
   const [phoneVerificationPhone, setPhoneVerificationPhone] = useState("");
@@ -908,6 +914,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           currency: "EUR",
           status: "draft",
           specifics: prepareSpecifics(),
+          content_locale: locale,
         };
 
         Object.keys(payload).forEach((key) => {
@@ -1085,6 +1092,13 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         throw new Error(t("post.form.description_min"));
       }
 
+      // Location is required to publish (PRD 31 §4)
+      if (!formData.location || formData.location.trim().length === 0) {
+        throw new Error(t("post.form.location_required") !== "post.form.location_required"
+          ? t("post.form.location_required")
+          : "Location is required to publish");
+      }
+
       // Check if at least one photo is uploaded
       try {
         const mediaResponse = await apiFetch(`/api/media/list?advertId=${id}`);
@@ -1103,21 +1117,31 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         console.warn("Media check failed:", mediaError);
       }
 
-      // Generate title
-      let title = "";
-      if (formData.make_id && formData.model_id && formData.year) {
-        const makeName = makes.find((m) => m.id === formData.make_id)?.name_en || "";
-        const modelName = models.find((m) => m.id === formData.model_id)?.name_en || "";
-        title = `${makeName} ${modelName} ${formData.year}`;
-      } else {
-        const categoryName = categories.find((c) => c.id === formData.category_id)?.[`name_${locale}` as keyof Category] as string || 
-                           categories.find((c) => c.id === formData.category_id)?.name_ru || "";
-        title = `${categoryName} - ${formData.price ? `${formData.price} EUR` : ""}`.trim();
+      // Use user-provided title, or auto-generate from category/vehicle fields
+      let title = (formData.title ?? "").trim();
+      if (!title) {
+        if (formData.make_id && formData.model_id && formData.year) {
+          const makeName = makes.find((m) => m.id === formData.make_id)?.name_en || "";
+          const modelName = models.find((m) => m.id === formData.model_id)?.name_en || "";
+          title = `${makeName} ${modelName} ${formData.year}`.trim();
+        } else {
+          const categoryName = categories.find((c) => c.id === formData.category_id)?.[`name_${locale}` as keyof Category] as string ||
+                             categories.find((c) => c.id === formData.category_id)?.name_ru || "";
+          title = `${categoryName} - ${formData.price ? `${formData.price} EUR` : ""}`.trim();
+        }
       }
-      
+
       if (title.length < 3) {
         title = categories.find((c) => c.id === formData.category_id)?.[`name_${locale}` as keyof Category] as string ||
                 categories.find((c) => c.id === formData.category_id)?.name_ru || "Advert";
+      }
+
+      // SEO: warn if title is outside 10–70 chars (soft — not a hard block; supply-first)
+      if (title.length > 0 && (title.length < 10 || title.length > 70)) {
+        const hint = t("post.form.title_hint") !== "post.form.title_hint"
+          ? t("post.form.title_hint")
+          : "Best titles are 10–70 characters: brand + model + key feature";
+        toast(hint, { description: `Current: ${title.length} chars` });
       }
 
       const payload: Record<string, unknown> = {
@@ -1130,6 +1154,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         currency: "EUR",
         status: "active",
         specifics: prepareSpecifics(),
+        content_locale: locale,
       };
 
       // Remove undefined values
@@ -1356,17 +1381,38 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
       return <p className={`mt-2 text-xs ${toneClass}`}>{message}</p>;
     };
 
+    // Calculate effective remaining steps based on category type
+    const effectiveTotal = categoryType === 'jobs' ? 5 : categoryType === 'vehicle' ? 8 : 6;
+    const stepsRemaining = Math.max(0, TOTAL_STEPS - currentStep);
+
     return (
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-muted-foreground">
-            {t("post.form.step")} {currentStep} {t("post.form.of")} {TOTAL_STEPS}
+          <span className="text-sm font-medium text-muted-foreground" aria-label={`Step ${currentStep} of ${effectiveTotal}`}>
+            {t("post.form.step")} {currentStep} {t("post.form.of")} {effectiveTotal}
           </span>
-          <span className="text-sm font-bold text-primary tabular-nums">
-            {Math.round(progress)}%
-          </span>
+          {stepsRemaining > 0 ? (
+            <span className="text-xs font-medium text-muted-foreground">
+              {stepsRemaining === 1
+                ? (t("post.form.one_more_step") !== "post.form.one_more_step" ? t("post.form.one_more_step") : "1 more step to publish")
+                : (t("post.form.steps_remaining") !== "post.form.steps_remaining"
+                    ? t("post.form.steps_remaining").replace("{n}", String(stepsRemaining))
+                    : `${stepsRemaining} more steps to publish`)}
+            </span>
+          ) : (
+            <span className="text-sm font-bold text-primary tabular-nums">
+              {Math.round(progress)}%
+            </span>
+          )}
         </div>
-        <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
+        <div
+          className="w-full bg-muted rounded-full h-2.5 overflow-hidden"
+          role="progressbar"
+          aria-valuenow={Math.round(progress)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={t("post.form.progress_label") !== "post.form.progress_label" ? t("post.form.progress_label") : "Listing completion progress"}
+        >
           <div
             className="lyvox-trust-gradient rounded-full h-2.5 transition-all duration-300"
             style={{ width: `${progress}%` }}
@@ -2498,15 +2544,53 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
         </CardHeader>
         <CardContent className="space-y-4">
           <ProgressIndicator />
+          {/* Title */}
+          <div>
+            <Label htmlFor="listing-title">
+              {t("post.form.listing_title") !== "post.form.listing_title"
+                ? t("post.form.listing_title")
+                : "Listing title"}
+              {" "}
+              <span className="text-muted-foreground text-xs font-normal">
+                ({(formData.title ?? "").length}/70)
+              </span>
+            </Label>
+            <Input
+              id="listing-title"
+              placeholder={
+                t("post.form.title_placeholder") !== "post.form.title_placeholder"
+                  ? t("post.form.title_placeholder")
+                  : "e.g. Toyota Corolla 2019 petrol automatic"
+              }
+              value={formData.title ?? ""}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              maxLength={100}
+              aria-describedby="listing-title-hint"
+            />
+            <p id="listing-title-hint" className="text-xs text-muted-foreground mt-1">
+              {t("post.form.title_hint") !== "post.form.title_hint"
+                ? t("post.form.title_hint")
+                : "10–70 characters: brand + model + key feature"}
+            </p>
+          </div>
           {/* Description */}
-               <div>
-            <Label>{t("post.form.final_description")}</Label>
+          <div>
+            <Label htmlFor="listing-description">{t("post.form.final_description")}</Label>
             <Textarea
+              id="listing-description"
               placeholder={t("post.enter_description")}
               rows={6}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              aria-describedby="listing-description-hint"
             />
+            {formData.description.length > 0 && formData.description.length < 120 && (
+              <p id="listing-description-hint" className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                {t("post.form.description_short_hint") !== "post.form.description_short_hint"
+                  ? t("post.form.description_short_hint").replace("{n}", String(120 - formData.description.length))
+                  : `Aim for 120+ characters for better search visibility (${120 - formData.description.length} more)`}
+              </p>
+            )}
           </div>
 
           {/* Photos */}
@@ -2529,14 +2613,27 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             </div>
           </div>
 
-          {/* Location */}
+          {/* Location — required to publish */}
           <div>
-            <Label>{t("post.form.final_location")}</Label>
+            <Label htmlFor="listing-location">
+              {t("post.form.final_location")}
+              {" "}<span className="text-destructive" aria-hidden="true">*</span>
+            </Label>
             <Input
+              id="listing-location"
               placeholder={t("post.location_placeholder")}
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              aria-required="true"
+              aria-describedby={!formData.location ? "location-required-hint" : undefined}
             />
+            {!formData.location && (
+              <p id="location-required-hint" className="text-xs text-muted-foreground mt-1">
+                {t("post.form.location_required") !== "post.form.location_required"
+                  ? t("post.form.location_required")
+                  : "Location is required to publish"}
+              </p>
+            )}
           </div>
 
           {/* Contact phone from profile */}
@@ -2613,8 +2710,10 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   );
 }
 
-  // Step 8: Preview
+  // Step 8: Preview + publish
   if (currentStep === 8) {
+    const canPublish = isVerified || justVerified;
+
     return (
       <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
         <CardHeader>
@@ -2624,9 +2723,10 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
           <ProgressIndicator />
           <div className="border border-border/70 bg-muted/30 rounded-xl p-4 space-y-2 shadow-[var(--shadow-soft)]">
             <h3 className="font-extrabold tracking-tight text-xl">
-              {categories.find((c) => c.id === formData.category_id) ? 
-                getCategoryName(categories.find((c) => c.id === formData.category_id)!) : 
-                t("post.category")}
+              {(formData.title ?? "").trim() ||
+                (categories.find((c) => c.id === formData.category_id)
+                  ? getCategoryName(categories.find((c) => c.id === formData.category_id)!)
+                  : t("post.category"))}
             </h3>
             <p className="text-muted-foreground">{t("post.condition")}: {t(`post.${formData.condition}`)}</p>
             {formData.price && <p className="text-lg font-semibold">{formData.price} EUR</p>}
@@ -2638,6 +2738,34 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
               {formData.year && `, ${t("post.form.year")}: ${formData.year}`}
             </p>
           </div>
+
+          {/* Inline phone verification gate — shown only when not yet verified */}
+          {!canPublish && (
+            <div
+              className="rounded-xl border border-amber-200 bg-amber-50/80 dark:border-amber-900 dark:bg-amber-950/30 p-4 space-y-3"
+              role="region"
+              aria-label={
+                t("post.form.verify_to_publish_title") !== "post.form.verify_to_publish_title"
+                  ? t("post.form.verify_to_publish_title")
+                  : "Phone verification required"
+              }
+            >
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-amber-700 dark:text-amber-300 flex-shrink-0" aria-hidden="true" />
+                <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                  {t("post.form.verify_to_publish_title") !== "post.form.verify_to_publish_title"
+                    ? t("post.form.verify_to_publish_title")
+                    : "Verify your phone to publish"}
+                </p>
+              </div>
+              <p className="text-xs text-amber-800 dark:text-amber-200">
+                {t("post.form.verify_to_publish_body") !== "post.form.verify_to_publish_body"
+                  ? t("post.form.verify_to_publish_body")
+                  : "Your draft is saved. Verify your phone number once and you're ready to publish."}
+              </p>
+              <TrustGatePhone onVerified={() => setJustVerified(true)} />
+            </div>
+          )}
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 sticky bottom-0 z-10 bg-card/95 backdrop-blur border-t border-border/70 rounded-b-2xl">
           <Button variant="outline" size="lg" onClick={handleBack} className="w-full sm:w-auto">
@@ -2687,8 +2815,9 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
             <Button
               size="lg"
               onClick={handlePublish}
-              disabled={isLoading}
-              className="lyvox-cta-gradient text-white border-0 hover:opacity-95"
+              disabled={isLoading || !canPublish}
+              aria-disabled={!canPublish}
+              className="lyvox-cta-gradient text-white border-0 hover:opacity-95 disabled:opacity-50"
             >
               {t("post.publish")}
             </Button>

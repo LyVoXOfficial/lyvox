@@ -316,7 +316,17 @@
       "description_min": "Beschrijving moet minimaal 10 tekens lang zijn",
       "media_required": "Minimaal 1 foto is vereist om uw advertentie te publiceren",
       "edit": "Bewerken",
-      "delete": "Verwijderen"
+      "delete": "Verwijderen",
+      "location_required": "Locatie is verplicht om te publiceren",
+      "steps_remaining": "Nog {n} stappen om te publiceren",
+      "one_more_step": "Nog 1 stap om te publiceren",
+      "progress_label": "Voortgang aanmaken advertentie",
+      "listing_title": "Advertentietitel",
+      "title_placeholder": "bijv. Toyota Corolla 2019 benzine automaat",
+      "title_hint": "10–70 tekens: merk + model + belangrijkste kenmerk",
+      "description_short_hint": "Streef naar 120+ tekens voor betere zoekbaarheid (nog {n})",
+      "verify_to_publish_title": "Verifieer uw telefoon om te publiceren",
+      "verify_to_publish_body": "Uw concept is opgeslagen. Verifieer uw telefoonnummer één keer en u kunt publiceren."
     },
     "auto_save": {
       "pending": "Niet-opgeslagen wijzigingen",

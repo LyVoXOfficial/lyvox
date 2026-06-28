@@ -9,7 +9,6 @@ import {
 import type { TablesInsert } from "@/lib/supabaseTypes";
 import { checkUserBlocked } from "@/lib/fraud/checkUserBlocked";
 import { invokeFraudCheck } from "@/lib/fraud/invokeFraudCheck";
-import { isViewerVerified } from "@/lib/auth/requireVerified";
 import { canSellAsBusiness } from "@/lib/auth/canSellAsBusiness";
 
 export const runtime = "nodejs";
@@ -24,10 +23,7 @@ export async function POST(req?: Request) {
     return createErrorResponse(ApiErrorCode.UNAUTHENTICATED, { status: 401 });
   }
 
-  if (!(await isViewerVerified(supabase, user.id))) {
-    return createErrorResponse(ApiErrorCode.VERIFICATION_REQUIRED, { status: 403, detail: "Phone verification required to publish" });
-  }
-
+  // Verification is NOT required to create a draft (Zeigarnik effect: gate at publish, not at form start).
   // Fail-closed: a draft creation counts as a high-risk mutation — we must not
   // wave a possibly-blocked user through on a transient DB error.
   const blockCheck = await checkUserBlocked(user.id, { failClosed: true });
