@@ -117,11 +117,11 @@ SEO + Security задокументированы и ждут последним
 | F4 GDPR RoPA/DPIA | ⛔ не начато | — |
 | F5 DSA-роль/PoC | ⛔ не начато | — |
 | F6 analytics_events sink | ⛔ не начато | — |
-| F7 generation_id + resolveGeneration | ⛔ не начато | — |
+| **F7** generation_id + resolveGeneration | ✅ | 53c7b31 |
 | **F8** серверный client-IP | ✅ | 7a4de19 |
 | F9 fraud-engine в рантайм | ⛔ не начато | — |
-| F10 itsme_sub uniqueness | ⛔ не начато | — |
+| **F10** itsme_sub uniqueness | ✅ | 61d73c5 |
 | F11 дедуп advert_views | ⛔ не начато | — |
 | F12 JSON-LD генераторы подключить | ⛔ не начато | — |
-| F13 catalog_groups + ARIA-tabs | ⛔ не начато | — |
+| **F13** catalog_groups + ARIA-tabs | ✅ | f17df42 |
 | F14 trust-score формула | ⛔ не начато | — |
