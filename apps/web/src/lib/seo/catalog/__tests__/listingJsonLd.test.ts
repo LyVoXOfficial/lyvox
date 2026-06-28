@@ -31,11 +31,13 @@ describe("buildListingJsonLd — F12 per-category structured data", () => {
   });
 
   // ── Specifics-less row (seeded ad) still produces valid Product ─────────
-  it("(b) empty specifics → valid Product with offer + seller", () => {
+  it("(b) empty specifics → valid Product with offer + nested seller", () => {
     const json = buildListingJsonLd(base({ domain: "generic", specifics: {} }));
     expect(json["@type"]).toBe("Product");
     expect(json.offers).toMatchObject({ "@type": "Offer", price: 1000, priceCurrency: "EUR" });
-    expect(json.seller).toEqual({ "@type": "Person", name: "Jane" });
+    // schema.org: seller is a property of Offer, not Product
+    expect((json.offers as Record<string, unknown>).seller).toEqual({ "@type": "Person", name: "Jane" });
+    expect(json).not.toHaveProperty("seller");
   });
 
   // ── Vehicle (rich specifics persisted) ──────────────────────────────────
@@ -166,26 +168,27 @@ describe("buildListingJsonLd — F12 per-category structured data", () => {
     expect(json.offers).toMatchObject({ price: 1000 });
   });
 
-  // ── Seller node: business → Organization ────────────────────────────────
-  it("(j) business seller → Organization with trade name", () => {
+  // ── Seller node (nested in offers): business → Organization ─────────────
+  it("(j) business seller → offers.seller Organization with trade name", () => {
     const json = buildListingJsonLd(
       base({ domain: "generic", seller: { displayName: "Jane", isBusiness: true, businessName: "Acme NV" } }),
     );
-    expect(json.seller).toEqual({ "@type": "Organization", name: "Acme NV" });
+    expect((json.offers as Record<string, unknown>).seller).toEqual({ "@type": "Organization", name: "Acme NV" });
   });
 
   it("(k) business seller without business name falls back to displayName", () => {
     const json = buildListingJsonLd(
       base({ domain: "generic", seller: { displayName: "Acme owner", isBusiness: true } }),
     );
-    expect(json.seller).toEqual({ "@type": "Organization", name: "Acme owner" });
+    expect((json.offers as Record<string, unknown>).seller).toEqual({ "@type": "Organization", name: "Acme owner" });
   });
 
-  it("(l) private seller with no display name → seller omitted", () => {
+  it("(l) private seller with no display name → offers has no seller", () => {
     const json = buildListingJsonLd(
       base({ domain: "generic", seller: { displayName: null, isBusiness: false } }),
     );
     expect(json).not.toHaveProperty("seller");
+    expect((json.offers as Record<string, unknown>).seller).toBeUndefined();
   });
 
   // ── No price → no offers ────────────────────────────────────────────────

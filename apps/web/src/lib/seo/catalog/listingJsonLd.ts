@@ -78,14 +78,18 @@ function sellerNode(seller: ListingSeller): JsonLd | undefined {
   return { "@type": "Person", name: seller.displayName };
 }
 
+// schema.org: `seller` is a property of Offer, not of Product/Car/RealEstateListing.
+// So the seller node is nested inside the offer (when both exist).
 function offerNode(input: ListingJsonLdInput): JsonLd | undefined {
   if (input.price === null) return undefined;
+  const seller = sellerNode(input.seller);
   return compact({
     "@type": "Offer",
     price: input.price,
     priceCurrency: input.currency || "EUR",
     availability: "https://schema.org/InStock",
     url: input.url,
+    seller,
   });
 }
 
@@ -142,7 +146,6 @@ function buildVehicle(input: ListingJsonLdInput): JsonLd {
     vehicleIdentificationNumber: readString(specifics, "vin"),
     itemCondition: "https://schema.org/UsedCondition",
     offers: offerNode(input),
-    seller: sellerNode(input.seller),
     datePosted: input.createdAt ?? undefined,
   });
 }
@@ -184,7 +187,6 @@ function buildRealEstate(input: ListingJsonLdInput): JsonLd {
       ? [{ "@type": "PropertyValue", name: "Energy Performance Certificate", value: epc }]
       : undefined,
     offers: offerNode(input),
-    seller: sellerNode(input.seller),
   });
 }
 
@@ -243,7 +245,6 @@ function buildProduct(input: ListingJsonLdInput, typeOverride?: string): JsonLd 
     image: input.images.length ? input.images : undefined,
     brand: brand ? { "@type": "Brand", name: brand } : undefined,
     offers: offerNode(input),
-    seller: sellerNode(input.seller),
     itemCondition: "https://schema.org/UsedCondition",
     datePosted: input.createdAt ?? undefined,
   });

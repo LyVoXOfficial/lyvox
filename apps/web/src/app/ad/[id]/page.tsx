@@ -61,11 +61,7 @@ type AdvertRecord = Pick<
   | "created_at"
   | "status"
   | "business_id"
-> & {
-  // F7: generation_id is a new FK column not yet in generated types.
-  // Run `pnpm gen:types` after applying migration 20260628120000.
-  generation_id?: string | null;
-};
+>;
 
 
 type Messages = Record<string, any>;
@@ -1297,15 +1293,11 @@ async function loadAdvertData(
     const { data: advertRows, error: advertError } = await svc
       .from("adverts")
       .select(
-        "id,user_id,category_id,title,description,price,currency,location,created_at,status,business_id,generation_id",
+        "id,user_id,category_id,title,description,price,currency,location,created_at,status,business_id",
       )
       .eq("id", advertId)
       .limit(1);
-    // generation_id (F7) is not yet in generated DB types — cast through unknown.
-    // Run `pnpm gen:types` after applying migration 20260628120000.
-    const advert = Array.isArray(advertRows)
-      ? (advertRows[0] as unknown as AdvertRecord | undefined)
-      : undefined;
+    const advert = Array.isArray(advertRows) ? (advertRows[0] as AdvertRecord | undefined) : undefined;
 
     if (advertError) {
       console.error("Failed to load advert record", { advertId, error: advertError });
@@ -1504,11 +1496,27 @@ async function loadAdvertData(
     }
   }
 
-  const selectedGeneration = determineGeneration(generations, specifics, advert.generation_id);
+  // F7: read the generation_id FK in an ISOLATED, error-tolerant query.
+  // Deploy-safety: if migration 20260628120000 has not been applied yet, this
+  // column does not exist and PostgREST returns an error — but it cannot take
+  // down the page because it is separate from the main advert load. When the
+  // column is absent we fall back to the JSONB specifics.generation_id below.
+  let advertGenerationId: string | null = null;
+  if (modelId) {
+    const { data: genRow } = await svc
+      .from("adverts")
+      .select("generation_id")
+      .eq("id", advertId)
+      .maybeSingle();
+    advertGenerationId =
+      (genRow as { generation_id?: string | null } | null)?.generation_id ?? null;
+  }
+
+  const selectedGeneration = determineGeneration(generations, specifics, advertGenerationId);
 
   let insights: VehicleInsights | null = null;
   const insightsGenerationId =
-    advert.generation_id ??
+    advertGenerationId ??
     specifics.generation_id ??
     selectedGeneration?.id ??
     null;
