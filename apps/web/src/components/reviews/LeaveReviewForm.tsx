@@ -61,7 +61,7 @@ export function LeaveReviewForm({ advertId }: Props) {
       if (code === "NO_CONVERSATION") {
         setInlineError(tr("reviews.must_contact", "You can review this seller after contacting them about this listing."));
       } else if (code === "ALREADY_REVIEWED") {
-        setInlineError(tr("reviews.already", "You've already reviewed this listing."));
+        setInlineError(tr("reviews.already", "You've already reviewed this seller."));
       } else if (code === "CANNOT_REVIEW_SELF") {
         setInlineError(tr("reviews.self", "You cannot review your own listing."));
       } else {

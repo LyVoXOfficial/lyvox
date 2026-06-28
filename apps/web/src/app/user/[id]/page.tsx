@@ -26,6 +26,7 @@ type PublicProfileData = {
   verified_email: boolean | null;
   verified_phone: boolean | null;
   rating: number | null;
+  bayesian_rating: number | null;
   trust_score: number;
   last_computed_at: string | null;
   adverts_count: number;
@@ -76,12 +77,13 @@ async function loadPublicProfileData(userId: string): Promise<PublicProfileData 
   // Load trust score (public read access via RLS)
   const { data: trustScoreData } = await supabase
     .from("trust_score")
-    .select("score, last_computed_at")
+    .select("score, last_computed_at, bayesian_rating")
     .eq("user_id", userId)
     .maybeSingle();
 
   const trustScore = trustScoreData?.score ?? 0;
   const lastComputedAt = trustScoreData?.last_computed_at ?? null;
+  const bayesianRating = (trustScoreData as unknown as { bayesian_rating?: number | null })?.bayesian_rating ?? null;
 
   // Load active adverts count and sample (only active for public view)
   const { data: activeAdverts } = await supabase
@@ -218,6 +220,7 @@ async function loadPublicProfileData(userId: string): Promise<PublicProfileData 
     verified_email: profile.verified_email,
     verified_phone: profile.verified_phone,
     rating: (profile as unknown as { rating?: number | null }).rating ?? null,
+    bayesian_rating: bayesianRating,
     seller_type: (profile.seller_type as "individual" | "business" | null) ?? null,
     itsme_verified: profile.itsme_verified ?? null,
     trust_score: trustScore,
@@ -415,6 +418,7 @@ export default async function PublicProfilePage({
     verified_email,
     verified_phone,
     rating,
+    bayesian_rating,
     trust_score,
     last_computed_at,
     adverts_count,
@@ -602,13 +606,13 @@ export default async function PublicProfilePage({
                 </span>
               )}
 
-              {/* Aggregate ★ rating */}
-              {reviews_count > 0 && rating !== null ? (
+              {/* Aggregate ★ rating — bayesian_rating as headline (anti-inflation) */}
+              {reviews_count > 0 ? (
                 <span className="inline-flex items-center gap-[5px]" style={{ fontSize: "13.5px", fontWeight: 600 }}>
                   <svg viewBox="0 0 24 24" width="15" height="15" fill="var(--amber)" aria-hidden="true">
                     <path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z" />
                   </svg>
-                  <strong style={{ fontWeight: 800 }}>{rating}</strong>
+                  <strong style={{ fontWeight: 800 }}>{bayesian_rating ?? rating}</strong>
                   <span style={{ color: "var(--muted-foreground)", fontWeight: 500 }}>
                     · {t("reviews.aggregate_count").replace("{n}", String(reviews_count))}
                   </span>
@@ -734,7 +738,7 @@ export default async function PublicProfilePage({
           )}
 
           {/* Reviews sidebar panel (mockup lines 622-625) */}
-          {reviews_count > 0 && rating !== null ? (
+          {reviews_count > 0 ? (
             <section
               style={{
                 background: "var(--card)",
@@ -744,24 +748,30 @@ export default async function PublicProfilePage({
                 boxShadow: "var(--shS)",
               }}
             >
-              {/* Aggregate score */}
-              <div className="mb-3 flex items-baseline gap-2">
+              {/* Aggregate score — bayesian_rating primary, raw avg secondary */}
+              <div className="mb-1 flex items-baseline gap-2">
                 <span
                   style={{ font: "800 30px/1 Inter, system-ui, sans-serif", letterSpacing: "-0.02em" }}
                 >
-                  {rating}
+                  {bayesian_rating ?? rating ?? 0}
                 </span>
                 <span className="flex gap-0.5">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <svg key={i} viewBox="0 0 24 24" width="14" height="14" fill={i <= Math.round(rating) ? "var(--amber)" : "var(--muted-foreground)"} aria-hidden="true">
+                    <svg key={i} viewBox="0 0 24 24" width="14" height="14" fill={i <= Math.round(bayesian_rating ?? rating ?? 0) ? "var(--amber)" : "var(--muted-foreground)"} aria-hidden="true">
                       <path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z" />
                     </svg>
                   ))}
                 </span>
                 <span style={{ fontSize: "12px", color: "var(--muted-foreground)", fontWeight: 500 }}>
-                  {reviews_count}
+                  {t("reviews.aggregate_count").replace("{n}", String(reviews_count))}
                 </span>
               </div>
+              {/* Raw average shown when it differs visibly from the bayesian-smoothed value */}
+              {rating !== null && bayesian_rating !== null && Math.abs(bayesian_rating - rating) >= 0.1 && (
+                <p style={{ fontSize: "11px", color: "var(--muted-foreground)", margin: "0 0 10px" }}>
+                  {t("reviews.raw_avg_note").replace("{n}", String(rating))}
+                </p>
+              )}
 
               {/* Reviews list */}
               <ProfileReviewsList reviews={displayReviews} />

@@ -1942,11 +1942,12 @@
     "submit": "Soumettre l'avis",
     "success": "Votre avis a Г©tГ© soumisВ !",
     "must_contact": "Vous pouvez Г©valuer ce vendeur aprГЁs l'avoir contactГ© Г  propos de cette annonce.",
-    "already": "Vous avez dГ©jГ  Г©valuГ© cette annonce.",
+    "already": "Vous avez déjà évalué ce vendeur.",
     "self": "Vous ne pouvez pas Г©valuer votre propre annonce.",
     "error": "Une erreur s'est produite. Veuillez rГ©essayer.",
     "aggregate_count": "{n} avis",
-    "no_reviews": "Aucun avis pour l'instant"
+    "no_reviews": "Aucun avis pour l'instant",
+    "raw_avg_note": "Moy. brute : {n}"
   },
   "trust_score": {
     "tier_new": "Nouveau vendeur",
@@ -1970,7 +1971,7 @@
     "improve_verify_itsme": "VГ©rifiez votre identitГ© avec itsme",
     "improve_all_done": "Vos vГ©rifications sont complГЁtes",
     "refresh_cta": "Actualiser mon score",
-    "refreshing": "ActualisationвЂ¦",
+    "refreshing": "Actualisation…",
     "refresh_success": "Score mis Г  jour",
     "refresh_error_rate": "RГ©essayez dans {min} min",
     "refresh_error": "Impossible de rafraГ®chir. RГ©essayez."

@@ -1942,11 +1942,12 @@
     "submit": "Bewertung absenden",
     "success": "Ihre Bewertung wurde eingereicht!",
     "must_contact": "Sie kГ¶nnen diesen VerkГ¤ufer bewerten, nachdem Sie ihn bezГјglich dieses Inserats kontaktiert haben.",
-    "already": "Sie haben dieses Inserat bereits bewertet.",
+    "already": "Sie haben diesen Verkäufer bereits bewertet.",
     "self": "Sie kГ¶nnen Ihr eigenes Inserat nicht bewerten.",
     "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
     "aggregate_count": "{n} Bewertungen",
-    "no_reviews": "Noch keine Bewertungen"
+    "no_reviews": "Noch keine Bewertungen",
+    "raw_avg_note": "Rohschnitt: {n}"
   },
   "trust_score": {
     "tier_new": "Neuer VerkГ¤ufer",
@@ -1970,7 +1971,7 @@
     "improve_verify_itsme": "BestГ¤tigen Sie Ihre IdentitГ¤t mit itsme",
     "improve_all_done": "Ihre Verifizierungen sind abgeschlossen",
     "refresh_cta": "Meinen Score aktualisieren",
-    "refreshing": "Wird aktualisiertвЂ¦",
+    "refreshing": "Wird aktualisiert…",
     "refresh_success": "Score aktualisiert",
     "refresh_error_rate": "In {min} Min. erneut versuchen",
     "refresh_error": "Konnte nicht aktualisieren. Bitte erneut versuchen."

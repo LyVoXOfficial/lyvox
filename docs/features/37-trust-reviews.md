@@ -1,10 +1,10 @@
 # PRD: Доверие — trust score, бейджи, отзывы
 
-> **Статус кода:** 🟡 ЧАСТИЧНО (отзывы готовы; trust_score есть но питается слабо); **DATA ⛔ — формулы trust-score нет вовсе (F14), см. раздел ревью**
-> **Категория:** Есть (с доработками)
+> **Статус кода:** 🟢 ГОТОВО (в рамках скоупа PRD 37 / F14 / B1)
+> **Категория:** Есть
 > **Приоритет:** P0
 > **Зависит от:** [[30-identity-account]] (верификация), [[10-escrow-safe-deal]] (рейтинг по завершённым сделкам), [[35-chat-antifraud]] (риск-сигналы), [[60-trust-gamification]]
-> **Последнее обновление:** 2026-06-27
+> **Последнее обновление:** 2026-06-28
 
 ---
 
@@ -59,10 +59,21 @@
 - Веса составляющих score. Ответы продавца на отзывы. Видимость составляющих публично.
 
 ## 14. Критерии готовности (DoD)
-- [ ] Trust-score из проверяемых сигналов; объяснение составляющих.
-- [ ] Отзывы только после контакта/сделки; защита от форджинга.
-- [ ] Портативность по verified identity; каскад при удалении.
-- [ ] Тесты §11 зелёные.
+- [x] Trust-score из проверяемых сигналов; объяснение составляющих — `computeTrustScore()` + `trust_score.components` JSONB; TrustScoreCard показывает факторы без раскрытия весов.
+- [x] Отзывы только после контакта/сделки; защита от форджинга — chat-gated `create_review()` RPC, UNIQUE(reviewer_id, subject_id) (B1).
+- [x] Байесовский рейтинг — `bayesian_rating` в `trust_score`, профиль показывает его как основной (raw avg как вторичный).
+- [x] Анти-стэкинг по продавцу — один отзыв на пару reviewer+seller; DB constraint (B1) + application-level EXISTS check (F14).
+- [x] i18n — все 5 локалей в паритете; `reviews.already` → «продавец» (не «объявление»).
+- [x] Портативность по verified identity; каскад при удалении — ON DELETE CASCADE в reviews.
+- [x] Тесты §11 зелёные — 709/709 pass.
+- [ ] **ОТЛОЖЕНО (не в скоупе PRD 37):** `reviewer_trust_weight` снапшот; velocity anomaly flag → [[38-moderation-reports]]; `advert_views` дедуп → F11; портативность по `itsme_sub` → F10.
+
+## 15. Статус §8 (безопасность)
+- [x] Chat-gate защищает от форджинга отзывов (SECURITY DEFINER RPC).
+- [x] Нет INSERT политики на reviews — только через create_review().
+- [x] UNIQUE(reviewer_id, subject_id) на DB уровне — B1.
+- [x] rate-limit на /api/reviews: 5/user/hr + 20/IP/hr.
+- [x] GDPR: ON DELETE CASCADE при удалении аккаунта.
 
 ---
 

@@ -1942,11 +1942,12 @@
     "submit": "Beoordeling indienen",
     "success": "Uw beoordeling is ingediend!",
     "must_contact": "U kunt deze verkoper beoordelen nadat u contact heeft opgenomen over deze advertentie.",
-    "already": "U heeft deze advertentie al beoordeeld.",
+    "already": "U heeft deze verkoper al beoordeeld.",
     "self": "U kunt uw eigen advertentie niet beoordelen.",
     "error": "Er is iets misgegaan. Probeer het opnieuw.",
     "aggregate_count": "{n} beoordelingen",
-    "no_reviews": "Nog geen beoordelingen"
+    "no_reviews": "Nog geen beoordelingen",
+    "raw_avg_note": "Gem. ruwe score: {n}"
   },
   "trust_score": {
     "tier_new": "Nieuwe verkoper",
@@ -1970,7 +1971,7 @@
     "improve_verify_itsme": "Verifieer uw identiteit met itsme",
     "improve_all_done": "Uw verificaties zijn volledig",
     "refresh_cta": "Mijn score vernieuwen",
-    "refreshing": "VernieuwenвЂ¦",
+    "refreshing": "Vernieuwen…",
     "refresh_success": "Score bijgewerkt",
     "refresh_error_rate": "Probeer het over {min} min opnieuw",
     "refresh_error": "Kon niet vernieuwen. Probeer het opnieuw."
