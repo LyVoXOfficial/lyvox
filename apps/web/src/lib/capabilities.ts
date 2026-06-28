@@ -8,7 +8,8 @@ export type Capability =
   | "stripe_identity"
   | "itsme"
   | "whatsapp_otp"
-  | "payments_escrow";
+  | "payments_escrow"
+  | "discover_v2";
 
 export const CAPABILITY_ENV: Record<Capability, string> = {
   pro_subscriptions: "CAPABILITY_PRO_SUBSCRIPTIONS",
@@ -16,6 +17,7 @@ export const CAPABILITY_ENV: Record<Capability, string> = {
   itsme: "CAPABILITY_ITSME",
   whatsapp_otp: "CAPABILITY_WHATSAPP_OTP",
   payments_escrow: "CAPABILITY_PAYMENTS_ESCROW",
+  discover_v2: "CAPABILITY_DISCOVER_V2",
 };
 
 export function isCapabilityEnabled(
