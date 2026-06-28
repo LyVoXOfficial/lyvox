@@ -59,7 +59,11 @@ type AdvertRecord = Pick<
   | "created_at"
   | "status"
   | "business_id"
->;
+> & {
+  // F7: generation_id is a new FK column not yet in generated types.
+  // Run `pnpm gen:types` after applying migration 20260628120000.
+  generation_id?: string | null;
+};
 
 
 type Messages = Record<string, any>;
@@ -1212,38 +1216,41 @@ async function loadVehicleInsights(
 function determineGeneration(
   generations: VehicleGeneration[],
   specifics: Record<string, any>,
+  advertGenerationId?: string | null,
 ): VehicleGeneration | null {
-  if (!generations.length) {
-    return null;
+  if (!generations.length) return null;
+
+  // F7 fix: prefer the normalized FK column (explicit seller choice).
+  const fkId = advertGenerationId ?? null;
+  if (fkId) {
+    const match = generations.find((g) => g.id === fkId);
+    if (match) return match;
   }
 
-  const generationId = specifics.generation_id
-    ? String(specifics.generation_id)
-    : null;
-  if (generationId) {
-    const match = generations.find((generation) => generation.id === generationId);
-    if (match) {
-      return match;
-    }
+  // Backward compat: try JSONB specifics.generation_id (pre-F7 records).
+  const jsonbId = specifics.generation_id ? String(specifics.generation_id) : null;
+  if (jsonbId) {
+    const match = generations.find((g) => g.id === jsonbId);
+    if (match) return match;
   }
 
+  // Year-range fallback — ONLY when result is unambiguous.
+  // Bug #1996: .find() silently returned the first match when multiple
+  // generations overlap the same year (e.g. 1996 BMW 5-Series: E34 ends
+  // 1996, E39 starts 1996). Now we filter all matches and return null for
+  // ambiguous cases — the seller must pick explicitly in the form.
   const advertYear = parseAdvertYear(specifics.year);
   if (advertYear) {
-    const match = generations.find((generation) => {
-      const startMatch =
-        generation.start_year === null || generation.start_year <= advertYear;
-      const endMatch =
-        generation.end_year === null || generation.end_year >= advertYear;
-      return startMatch && endMatch;
+    const matching = generations.filter((g) => {
+      const startOk = g.start_year === null || g.start_year <= advertYear;
+      const endOk = g.end_year === null || g.end_year >= advertYear;
+      return startOk && endOk;
     });
-    if (match) {
-      return match;
-    }
+    if (matching.length === 1) return matching[0]; // unique → safe to show
+    // ambiguous (>1) or none (0) → fall through, don't guess
   }
 
-  if (generations.length === 1) {
-    return generations[0];
-  }
+  if (generations.length === 1) return generations[0];
 
   return null;
 }
@@ -1283,7 +1290,7 @@ async function loadAdvertData(
     const { data: advertRows, error: advertError } = await svc
       .from("adverts")
       .select(
-        "id,user_id,category_id,title,description,price,currency,location,created_at,status,business_id",
+        "id,user_id,category_id,title,description,price,currency,location,created_at,status,business_id,generation_id",
       )
       .eq("id", advertId)
       .limit(1);
@@ -1486,10 +1493,11 @@ async function loadAdvertData(
     }
   }
 
-  const selectedGeneration = determineGeneration(generations, specifics);
+  const selectedGeneration = determineGeneration(generations, specifics, advert.generation_id);
 
   let insights: VehicleInsights | null = null;
   const insightsGenerationId =
+    advert.generation_id ??
     specifics.generation_id ??
     selectedGeneration?.id ??
     null;

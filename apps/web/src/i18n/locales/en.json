@@ -266,6 +266,8 @@
       "model_placeholder": "Select model",
       "year": "Year",
       "year_placeholder": "Select year",
+      "generation": "Generation",
+      "generation_placeholder": "Select generation",
       "steering_wheel": "Steering wheel",
       "body_type": "Body type",
       "doors": "Number of doors",

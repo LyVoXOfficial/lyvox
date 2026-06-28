@@ -266,6 +266,8 @@
       "model_placeholder": "Выберите модель",
       "year": "Год выпуска",
       "year_placeholder": "Выберите год",
+      "generation": "Поколение",
+      "generation_placeholder": "Выберите поколение",
       "steering_wheel": "Руль",
       "body_type": "Кузов",
       "doors": "Количество дверей",

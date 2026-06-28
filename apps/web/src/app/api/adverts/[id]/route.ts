@@ -229,6 +229,23 @@ export async function PATCH(
       if (specificsError) {
         return handleSupabaseError(specificsError, ApiErrorCode.UPDATE_FAILED);
       }
+
+      // F7: propagate generation_id from JSONB specifics to the normalized FK column.
+      // The specifics schema is Record<string,string>; we validate UUID format before writing.
+      const rawGenId = specifics.generation_id;
+      const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (rawGenId && UUID_RE.test(rawGenId)) {
+        // generation_id column not yet in generated types — cast to suppress TS error.
+        // Run `pnpm gen:types` after applying migration 20260628120000_adverts_generation_id.sql.
+        await (service.from("adverts") as any)
+          .update({ generation_id: rawGenId })
+          .eq("id", advertId);
+      } else if (rawGenId === "" || rawGenId === null) {
+        // Explicit clear: seller removed the generation choice.
+        await (service.from("adverts") as any)
+          .update({ generation_id: null })
+          .eq("id", advertId);
+      }
     } else {
       const { error: deleteSpecificsError } = await supabase
         .from("ad_item_specifics")

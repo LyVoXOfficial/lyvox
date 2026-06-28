@@ -266,6 +266,8 @@
       "model_placeholder": "Sélectionner le modèle",
       "year": "Année",
       "year_placeholder": "Sélectionner l'année",
+      "generation": "Génération",
+      "generation_placeholder": "Sélectionner la génération",
       "steering_wheel": "Volant",
       "body_type": "Carrosserie",
       "doors": "Nombre de portes",

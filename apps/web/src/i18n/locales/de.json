@@ -266,6 +266,8 @@
       "model_placeholder": "Modell auswählen",
       "year": "Jahr",
       "year_placeholder": "Jahr auswählen",
+      "generation": "Generation",
+      "generation_placeholder": "Generation auswählen",
       "steering_wheel": "Lenkrad",
       "body_type": "Karosserie",
       "doors": "Anzahl der Türen",

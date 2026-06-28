@@ -107,6 +107,10 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
       under_warranty: (specifics as Record<string, unknown>).under_warranty === "yes" ? true : (specifics as Record<string, unknown>).under_warranty === "no" ? false : null,
       owners_count: (specifics as Record<string, unknown>).owners_count ? parseInt(String((specifics as Record<string, unknown>).owners_count)) : null,
       vin: (specifics as Record<string, unknown>).vin as string || "",
+      // F7: prefer the normalized FK column; fall back to JSONB for pre-migration records
+      generation_id: (advertToEdit as any)?.generation_id as string
+        ?? (specifics as Record<string, unknown>).generation_id as string
+        ?? null,
       options,
       price: advertToEdit?.price ?? null,
       description: advertToEdit?.description ?? "",
@@ -154,6 +158,11 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
   const [filteredMakes, setFilteredMakes] = useState<any[]>([]);
   const [availableTransmissions, setAvailableTransmissions] = useState<string[]>([]);
   const [availableFuelTypes, setAvailableFuelTypes] = useState<string[]>([]);
+
+  // F7: generation resolution state (populated when model + year are selected)
+  type GenerationCandidate = { id: string; code: string | null; start_year: number | null; end_year: number | null; facelift: boolean | null };
+  const [generationStatus, setGenerationStatus] = useState<"idle" | "loading" | "unique" | "ambiguous" | "none">("idle");
+  const [generationCandidates, setGenerationCandidates] = useState<GenerationCandidate[]>([]);
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "pending" | "saving" | "saved" | "error">("idle");
   const [autoSaveError, setAutoSaveError] = useState<string | null>(null);
   const [lastAutoSaveAt, setLastAutoSaveAt] = useState<number | null>(null);
@@ -476,6 +485,44 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
     }
   }, [formData.model_id, models]);
 
+  // F7: resolve vehicle generation when model + year are both set
+  useEffect(() => {
+    if (!formData.model_id) {
+      setGenerationStatus("idle");
+      setGenerationCandidates([]);
+      return;
+    }
+
+    let cancelled = false;
+    setGenerationStatus("loading");
+
+    const params = new URLSearchParams({ modelId: formData.model_id });
+    if (formData.year) params.set("year", formData.year.toString());
+
+    apiFetch(`/api/catalog/resolve-generation?${params}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (cancelled) return;
+        if (json.ok) {
+          const { status, candidates } = json.data;
+          setGenerationStatus(status);
+          setGenerationCandidates(candidates ?? []);
+          if (status === "unique" && candidates?.length === 1) {
+            setFormData((prev: any) => ({ ...prev, generation_id: candidates[0].id }));
+          } else if (status !== "ambiguous") {
+            setFormData((prev: any) => ({ ...prev, generation_id: null }));
+          }
+        } else {
+          setGenerationStatus("none");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setGenerationStatus("none");
+      });
+
+    return () => { cancelled = true; };
+  }, [formData.model_id, formData.year]);
+
   // Create or get advert ID (defined before useEffect that uses it)
   const ensureAdvertId = useCallback(async (): Promise<string> => {
     if (advertId) return advertId;
@@ -686,6 +733,8 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
       if (formData.make_id) specifics.make_id = formData.make_id;
       if (formData.model_id) specifics.model_id = formData.model_id;
       if (formData.year) specifics.year = formData.year.toString();
+      // F7: persist explicit generation choice (from chooser or unique auto-resolve)
+      if ((formData as any).generation_id) specifics.generation_id = (formData as any).generation_id;
       if (formData.steering_wheel) specifics.steering_wheel = formData.steering_wheel;
       if (formData.body_type) specifics.body_type = formData.body_type;
       if (formData.doors) specifics.doors = formData.doors.toString();
@@ -1627,6 +1676,30 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone }
                   {availableYears.map((year) => (
                     <SelectItem key={year} value={year.toString()}>
                       {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* F7: Generation chooser — shown only when model+year resolves as ambiguous */}
+          {generationStatus === "ambiguous" && generationCandidates.length > 1 && (
+            <div>
+              <Label>{t("post.form.generation") || "Generation"}</Label>
+              <Select
+                value={(formData as any).generation_id || ""}
+                onValueChange={(value) => setFormData({ ...formData, generation_id: value } as any)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("post.form.generation_placeholder") || "Select generation"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {generationCandidates.map((g) => (
+                    <SelectItem key={g.id} value={g.id}>
+                      {g.code
+                        ? `${g.code}${g.facelift ? " Facelift" : ""}${g.start_year ? ` (${g.start_year}–${g.end_year ?? "…"})` : ""}`
+                        : `${g.start_year ?? "?"}–${g.end_year ?? "…"}${g.facelift ? " Facelift" : ""}`}
                     </SelectItem>
                   ))}
                 </SelectContent>

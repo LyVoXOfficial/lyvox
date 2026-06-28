@@ -266,6 +266,8 @@
       "model_placeholder": "Selecteer model",
       "year": "Jaar",
       "year_placeholder": "Selecteer jaar",
+      "generation": "Generatie",
+      "generation_placeholder": "Selecteer generatie",
       "steering_wheel": "Stuur",
       "body_type": "Carrosserie",
       "doors": "Aantal deuren",
