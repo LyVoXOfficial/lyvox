@@ -1,0 +1,129 @@
+description: |
+  LyVoX local/staging pre-customer pentest.
+  Stack: Next.js App Router, Supabase Auth/Postgres/Storage/Edge Functions, Stripe test mode, Upstash Redis.
+  Only run against LyVoX-owned local or staging targets with disposable data and test credentials. Never production.
+
+vuln_classes:
+  - injection
+  - xss
+  - auth
+  - authz
+  - ssrf
+
+exploit: "true"
+
+rules_of_engagement: |
+  - Authorized targets only: local dev through http://host.docker.internal:3000 or a LyVoX-owned staging URL.
+  - Do not run against production, real users, real PII, real payment instruments, or live PSP money movement.
+  - Use dedicated test accounts and seeded disposable data only.
+  - No password brute force; cap login attempts at 5 per account.
+  - Keep request rate under 3 requests per second per endpoint; back off for 60 seconds on 429 or provider/rate-limit responses.
+  - Do not intentionally delete accounts, delete businesses, delete listings, empty storage buckets, or trigger irreversible cleanup jobs.
+  - Treat Stripe, Supabase, Twilio, itsme, email, and external API credentials as out of scope unless configured in sandbox/test mode.
+  - Record exploit evidence with placeholders for secrets, tokens, emails, phone numbers, and database identifiers.
+  - Stop the run if it causes sustained errors, queue buildup, unexpected outbound calls, or data corruption outside disposable fixtures.
+
+pipeline:
+  retry_preset: subscription
+  max_concurrent_pipelines: 2
+
+# Fill this in only with disposable test credentials before a real run.
+# Keep the populated file untracked, for example:
+# security/shannon/lyvox-precustomer.local.yaml
+#
+# authentication:
+#   login_type: form
+#   login_url: "http://host.docker.internal:3000/login"
+#   credentials:
+#     username: "buyer-test@example.invalid"
+#     password: "replace-with-disposable-password"
+#   login_flow:
+#     - "Type $username into the email field"
+#     - "Type $password into the password field"
+#     - "Click the sign in button"
+#   success_condition:
+#     type: url_contains
+#     value: "/profile"
+
+rules:
+  avoid:
+    - description: "Production domain is out of scope"
+      type: domain
+      value: "www.lyvox.be"
+    - description: "Account deletion is destructive"
+      type: url_path
+      value: "/api/account/delete"
+    - description: "Logout disrupts shared authenticated state"
+      type: url_path
+      value: "/logout"
+    - description: "Signed payment webhooks should not be fuzzed directly"
+      type: url_path
+      value: "/api/billing/webhook"
+    - description: "Avoid creating real checkout/payment sessions outside Stripe test mode"
+      type: url_path
+      value: "/api/billing/checkout"
+    - description: "Avoid subscription changes outside Stripe test mode"
+      type: url_path
+      value: "/api/billing/subscribe"
+    - description: "Avoid phone/OTP cost and account lockout abuse during broad scans"
+      type: url_path
+      value: "/api/phone"
+    - description: "Avoid one-time OAuth/OIDC callback endpoints unless explicitly testing auth callback handling"
+      type: url_path
+      value: "/auth"
+    - description: "Out-of-scope generated or third-party code"
+      type: code_path
+      value: "node_modules/**"
+    - description: "Out-of-scope generated graph artifacts"
+      type: code_path
+      value: "graphify-out/**"
+    - description: "Out-of-scope generated Supabase types"
+      type: code_path
+      value: "supabase/types/**"
+  focus:
+    - description: "Public and authenticated API routes"
+      type: url_path
+      value: "/api"
+    - description: "Listing publication and advert management flows"
+      type: url_path
+      value: "/post"
+    - description: "Chat and contact flows"
+      type: url_path
+      value: "/chat"
+    - description: "Profile, business, and seller authorization boundaries"
+      type: url_path
+      value: "/profile"
+    - description: "API routes in source"
+      type: code_path
+      value: "apps/web/src/app/api/**"
+    - description: "Auth logic"
+      type: code_path
+      value: "apps/web/src/lib/auth/**"
+    - description: "Trust-tier logic"
+      type: code_path
+      value: "apps/web/src/lib/trust/**"
+    - description: "Fraud and blocking logic"
+      type: code_path
+      value: "apps/web/src/lib/fraud/**"
+    - description: "Rate limiting"
+      type: code_path
+      value: "apps/web/src/lib/rateLimiter.ts"
+    - description: "Server-side Supabase client"
+      type: code_path
+      value: "apps/web/src/lib/supabaseServer.ts"
+    - description: "Service-role Supabase client"
+      type: code_path
+      value: "apps/web/src/lib/supabaseService.ts"
+    - description: "API response and error helpers"
+      type: code_path
+      value: "apps/web/src/lib/apiErrors.ts"
+    - description: "Billing logic, reviewed only with Stripe test mode"
+      type: code_path
+      value: "apps/web/src/lib/billing/**"
+
+report:
+  min_severity: low
+  min_confidence: low
+  guidance: |
+    Prioritize confirmed, reproducible vulnerabilities that affect authentication, authorization, injection, XSS, SSRF, data isolation, seller/buyer trust, or payment-adjacent flows.
+    Exclude generic missing-header findings unless Shannon proves an exploit path.

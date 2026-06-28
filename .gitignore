@@ -194,3 +194,10 @@ docs/design/handoff/
 
 # graphify knowledge graph output (local-only, rebuilt by git hook)
 graphify-out/
+
+# Shannon local pentest outputs and populated configs
+.shannon/
+security/shannon/reports/
+security/shannon/workspaces/
+security/shannon/*.local.yaml
+security/shannon/*.local.yml
