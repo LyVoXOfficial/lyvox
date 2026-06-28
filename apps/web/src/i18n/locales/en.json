@@ -1630,7 +1630,41 @@
       "cheapest": "Cheapest"
     },
     "error_title": "Something went wrong",
-    "error_body": "We couldn't load more listings."
+    "error_body": "We couldn't load more listings.",
+    "less_like_this": "Less like this",
+    "undo": "Undo",
+    "verified_seller": "Verified seller",
+    "new_badge": "New",
+    "safe_deal_available": "Safe deal available",
+    "empty_cta_reset": "Show again",
+    "empty_cta_drop": "Try another collection",
+    "reason": {
+      "too_expensive": "Too expensive",
+      "wrong_category": "Wrong category",
+      "already_have": "Already have it",
+      "hide_seller": "Hide seller",
+      "not_interested": "Not interested"
+    },
+    "coach": {
+      "title": "How Discover works",
+      "right": "Swipe right — like it",
+      "left": "Swipe left — skip",
+      "up": "Swipe up — actions (message, offer)",
+      "down": "Swipe down — less like this",
+      "tap": "Tap — open listing",
+      "cta": "Got it"
+    },
+    "settings": {
+      "title": "Discover settings",
+      "mode": "Control mode",
+      "standard": "Standard (4 directions)",
+      "simple": "Simple (left/right only)",
+      "buttons": "Buttons only",
+      "haptics": "Vibration feedback",
+      "ask_reason": "Ask why on ‘Less like this’",
+      "confirm_actions": "Confirm actions"
+    },
+    "trust_anchor": "Chat and pay only on LyVoX — it’s safer."
   },
   "saved": {
     "save_button": "Save search",

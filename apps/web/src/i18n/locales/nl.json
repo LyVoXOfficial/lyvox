@@ -1630,7 +1630,41 @@
       "cheapest": "Goedkoopst"
     },
     "error_title": "Er ging iets mis",
-    "error_body": "We konden geen zoekertjes laden."
+    "error_body": "We konden geen zoekertjes laden.",
+    "less_like_this": "Minder van dit",
+    "undo": "Ongedaan maken",
+    "verified_seller": "Geverifieerde verkoper",
+    "new_badge": "Nieuw",
+    "safe_deal_available": "Veilige deal beschikbaar",
+    "empty_cta_reset": "Opnieuw tonen",
+    "empty_cta_drop": "Andere collectie proberen",
+    "reason": {
+      "too_expensive": "Te duur",
+      "wrong_category": "Verkeerde categorie",
+      "already_have": "Heb ik al",
+      "hide_seller": "Verkoper verbergen",
+      "not_interested": "Niet geïnteresseerd"
+    },
+    "coach": {
+      "title": "Hoe Discover werkt",
+      "right": "Rechts vegen — vind ik leuk",
+      "left": "Links vegen — overslaan",
+      "up": "Omhoog vegen — acties",
+      "down": "Omlaag vegen — minder van dit",
+      "tap": "Tikken — advertentie openen",
+      "cta": "Begrepen"
+    },
+    "settings": {
+      "title": "Discover instellingen",
+      "mode": "Bedieningsmodus",
+      "standard": "Standaard (4 richtingen)",
+      "simple": "Eenvoudig (links/rechts)",
+      "buttons": "Alleen knoppen",
+      "haptics": "Trillingsreactie",
+      "ask_reason": "Vraag waarom bij ‘Minder van dit’",
+      "confirm_actions": "Acties bevestigen"
+    },
+    "trust_anchor": "Chat en betaal alleen op LyVoX — dat is veiliger."
   },
   "saved": {
     "save_button": "Zoekopdracht opslaan",
