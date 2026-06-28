@@ -74,12 +74,11 @@ async function loadPublicProfileData(userId: string): Promise<PublicProfileData 
   }
 
   // Load trust score (public read access via RLS)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- last_computed_at not yet in generated types (B5)
-  const { data: trustScoreData } = await (supabase as any)
+  const { data: trustScoreData } = await supabase
     .from("trust_score")
     .select("score, last_computed_at")
     .eq("user_id", userId)
-    .maybeSingle() as { data: { score: number; last_computed_at: string | null } | null };
+    .maybeSingle();
 
   const trustScore = trustScoreData?.score ?? 0;
   const lastComputedAt = trustScoreData?.last_computed_at ?? null;

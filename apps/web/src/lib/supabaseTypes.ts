@@ -1,6 +1,6 @@
-import type { Database } from "supabase/types/database.types";
+import type { Database, Json } from "supabase/types/database.types";
 
-export type { Database };
+export type { Database, Json };
 
 export type PublicSchema = Database["public"];
 

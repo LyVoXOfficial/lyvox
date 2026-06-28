@@ -7,6 +7,36 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       ad_item_specifics: {
@@ -32,55 +62,20 @@ export type Database = {
           },
         ]
       }
-      advert_views: {
-        Row: {
-          advert_id: string
-          id: string
-          ip_address: unknown
-          user_agent: string | null
-          user_id: string | null
-          viewed_at: string | null
-        }
-        Insert: {
-          advert_id: string
-          id?: string
-          ip_address?: unknown
-          user_agent?: string | null
-          user_id?: string | null
-          viewed_at?: string | null
-        }
-        Update: {
-          advert_id?: string
-          id?: string
-          ip_address?: unknown
-          user_agent?: string | null
-          user_id?: string | null
-          viewed_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "advert_views_advert_id_fkey"
-            columns: ["advert_id"]
-            isOneToOne: false
-            referencedRelation: "adverts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       advert_likes: {
         Row: {
           advert_id: string
-          created_at: string | null
+          created_at: string
           user_id: string
         }
         Insert: {
           advert_id: string
-          created_at?: string | null
+          created_at?: string
           user_id: string
         }
         Update: {
           advert_id?: string
-          created_at?: string | null
+          created_at?: string
           user_id?: string
         }
         Relationships: [
@@ -93,41 +88,46 @@ export type Database = {
           },
         ]
       }
-      saved_searches: {
+      advert_views: {
         Row: {
-          alert_enabled: boolean
-          created_at: string
-          filters: Json
+          advert_id: string
           id: string
-          last_alerted_at: string
-          last_seen_at: string
-          name: string
-          query: string | null
-          user_id: string
+          ip_address: unknown
+          user_agent: string | null
+          user_id: string | null
+          view_hour: number | null
+          viewed_at: string | null
+          viewer_key: string | null
         }
         Insert: {
-          alert_enabled?: boolean
-          created_at?: string
-          filters?: Json
+          advert_id: string
           id?: string
-          last_alerted_at?: string
-          last_seen_at?: string
-          name: string
-          query?: string | null
-          user_id: string
+          ip_address?: unknown
+          user_agent?: string | null
+          user_id?: string | null
+          view_hour?: number | null
+          viewed_at?: string | null
+          viewer_key?: string | null
         }
         Update: {
-          alert_enabled?: boolean
-          created_at?: string
-          filters?: Json
+          advert_id?: string
           id?: string
-          last_alerted_at?: string
-          last_seen_at?: string
-          name?: string
-          query?: string | null
-          user_id?: string
+          ip_address?: unknown
+          user_agent?: string | null
+          user_id?: string | null
+          view_hour?: number | null
+          viewed_at?: string | null
+          viewer_key?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "advert_views_advert_id_fkey"
+            columns: ["advert_id"]
+            isOneToOne: false
+            referencedRelation: "adverts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       adverts: {
         Row: {
@@ -139,6 +139,7 @@ export type Database = {
           created_at: string | null
           currency: string | null
           description: string | null
+          generation_id: string | null
           id: string
           location: string | null
           location_id: string | null
@@ -158,6 +159,7 @@ export type Database = {
           created_at?: string | null
           currency?: string | null
           description?: string | null
+          generation_id?: string | null
           id?: string
           location?: string | null
           location_id?: string | null
@@ -177,6 +179,7 @@ export type Database = {
           created_at?: string | null
           currency?: string | null
           description?: string | null
+          generation_id?: string | null
           id?: string
           location?: string | null
           location_id?: string | null
@@ -188,6 +191,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "adverts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "adverts_category_id_fkey"
             columns: ["category_id"]
@@ -203,6 +213,13 @@ export type Database = {
             referencedColumns: ["category_id"]
           },
           {
+            foreignKeyName: "adverts_generation_id_fkey"
+            columns: ["generation_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_generations"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "adverts_location_id_fkey"
             columns: ["location_id"]
             isOneToOne: false
@@ -211,27 +228,57 @@ export type Database = {
           },
         ]
       }
-      badges_awarded: {
+      analytics_events: {
         Row: {
-          subject_type: string
-          subject_id: string
-          badge: string
-          awarded_by: string | null
-          awarded_at: string
+          dedup_key: string | null
+          event_name: string
+          id: string
+          props: Json
+          session_id: string | null
+          ts: string
+          user_id: string | null
         }
         Insert: {
-          subject_type: string
-          subject_id: string
-          badge: string
-          awarded_by?: string | null
-          awarded_at?: string
+          dedup_key?: string | null
+          event_name: string
+          id?: string
+          props?: Json
+          session_id?: string | null
+          ts?: string
+          user_id?: string | null
         }
         Update: {
-          subject_type?: string
-          subject_id?: string
-          badge?: string
-          awarded_by?: string | null
+          dedup_key?: string | null
+          event_name?: string
+          id?: string
+          props?: Json
+          session_id?: string | null
+          ts?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      badges_awarded: {
+        Row: {
+          awarded_at: string
+          awarded_by: string | null
+          badge: string
+          subject_id: string
+          subject_type: string
+        }
+        Insert: {
           awarded_at?: string
+          awarded_by?: string | null
+          badge: string
+          subject_id: string
+          subject_type: string
+        }
+        Update: {
+          awarded_at?: string
+          awarded_by?: string | null
+          badge?: string
+          subject_id?: string
+          subject_type?: string
         }
         Relationships: []
       }
@@ -316,20 +363,6 @@ export type Database = {
             referencedRelation: "businesses"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "business_members_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "business_members_invited_by_fkey"
-            columns: ["invited_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
         ]
       }
       businesses: {
@@ -405,15 +438,7 @@ export type Database = {
           vat_number?: string | null
           withdrawal_terms?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "businesses_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       catalog_field_options: {
         Row: {
@@ -510,6 +535,42 @@ export type Database = {
           sort?: number | null
           unit?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      catalog_groups: {
+        Row: {
+          collapsed: boolean
+          created_at: string
+          display: string
+          domain: string
+          group_key: string
+          icon: string | null
+          id: string
+          tab_key: string | null
+          tab_order: number
+        }
+        Insert: {
+          collapsed?: boolean
+          created_at?: string
+          display?: string
+          domain: string
+          group_key: string
+          icon?: string | null
+          id?: string
+          tab_key?: string | null
+          tab_order?: number
+        }
+        Update: {
+          collapsed?: boolean
+          created_at?: string
+          display?: string
+          domain?: string
+          group_key?: string
+          icon?: string | null
+          id?: string
+          tab_key?: string | null
+          tab_order?: number
         }
         Relationships: []
       }
@@ -752,7 +813,7 @@ export type Database = {
         Insert: {
           advert_id?: string | null
           created_at?: string | null
-          created_by: string
+          created_by?: string | null
           id?: string
           last_message_at?: string | null
           updated_at?: string | null
@@ -1572,7 +1633,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          author_id: string
+          author_id?: string | null
           body: string
           conversation_id: string
           created_at?: string | null
@@ -1833,6 +1894,7 @@ export type Database = {
           flags: Json | null
           id: string
           itsme_kyc_level: string | null
+          itsme_sub: string | null
           itsme_verified: boolean | null
           notification_preferences: Json | null
           phone: string | null
@@ -1852,6 +1914,7 @@ export type Database = {
           flags?: Json | null
           id: string
           itsme_kyc_level?: string | null
+          itsme_sub?: string | null
           itsme_verified?: boolean | null
           notification_preferences?: Json | null
           phone?: string | null
@@ -1871,6 +1934,7 @@ export type Database = {
           flags?: Json | null
           id?: string
           itsme_kyc_level?: string | null
+          itsme_sub?: string | null
           itsme_verified?: boolean | null
           notification_preferences?: Json | null
           phone?: string | null
@@ -2114,7 +2178,7 @@ export type Database = {
           provider_session_id?: string | null
           status: string
           updated_at?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           amount_cents?: number
@@ -2183,6 +2247,44 @@ export type Database = {
           },
         ]
       }
+      reviews: {
+        Row: {
+          advert_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          reviewer_id: string
+          subject_id: string
+        }
+        Insert: {
+          advert_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          reviewer_id: string
+          subject_id: string
+        }
+        Update: {
+          advert_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          reviewer_id?: string
+          subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_advert_id_fkey"
+            columns: ["advert_id"]
+            isOneToOne: false
+            referencedRelation: "adverts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       safety_standards: {
         Row: {
           applies_to: string[] | null
@@ -2219,6 +2321,42 @@ export type Database = {
           name?: string
           required_for?: string[] | null
           url?: string | null
+        }
+        Relationships: []
+      }
+      saved_searches: {
+        Row: {
+          alert_enabled: boolean
+          created_at: string
+          filters: Json
+          id: string
+          last_alerted_at: string
+          last_seen_at: string
+          name: string
+          query: string | null
+          user_id: string
+        }
+        Insert: {
+          alert_enabled?: boolean
+          created_at?: string
+          filters?: Json
+          id?: string
+          last_alerted_at?: string
+          last_seen_at?: string
+          name: string
+          query?: string | null
+          user_id: string
+        }
+        Update: {
+          alert_enabled?: boolean
+          created_at?: string
+          filters?: Json
+          id?: string
+          last_alerted_at?: string
+          last_seen_at?: string
+          name?: string
+          query?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -2305,55 +2443,28 @@ export type Database = {
       }
       trust_score: {
         Row: {
+          bayesian_rating: number
+          components: Json | null
+          last_computed_at: string | null
           score: number
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          bayesian_rating?: number
+          components?: Json | null
+          last_computed_at?: string | null
           score?: number
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          bayesian_rating?: number
+          components?: Json | null
+          last_computed_at?: string | null
           score?: number
           updated_at?: string | null
           user_id?: string
-        }
-        Relationships: []
-      }
-      verifications: {
-        Row: {
-          created_at: string
-          evidence: Json | null
-          expires_at: string | null
-          id: string
-          method: string
-          status: string
-          subject_id: string
-          subject_type: string
-          verified_at: string | null
-        }
-        Insert: {
-          created_at?: string
-          evidence?: Json | null
-          expires_at?: string | null
-          id?: string
-          method: string
-          status?: string
-          subject_id: string
-          subject_type: string
-          verified_at?: string | null
-        }
-        Update: {
-          created_at?: string
-          evidence?: Json | null
-          expires_at?: string | null
-          id?: string
-          method?: string
-          status?: string
-          subject_id?: string
-          subject_type?: string
-          verified_at?: string | null
         }
         Relationships: []
       }
@@ -2921,6 +3032,69 @@ export type Database = {
         }
         Relationships: []
       }
+      verifications: {
+        Row: {
+          created_at: string
+          evidence: Json | null
+          expires_at: string | null
+          id: string
+          method: string
+          status: string
+          subject_id: string
+          subject_type: string
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          evidence?: Json | null
+          expires_at?: string | null
+          id?: string
+          method: string
+          status?: string
+          subject_id: string
+          subject_type: string
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          evidence?: Json | null
+          expires_at?: string | null
+          id?: string
+          method?: string
+          status?: string
+          subject_id?: string
+          subject_type?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
+      webhook_events: {
+        Row: {
+          event_id: string
+          payload: Json
+          processed_at: string | null
+          provider: string
+          received_at: string
+          type: string
+        }
+        Insert: {
+          event_id: string
+          payload?: Json
+          processed_at?: string | null
+          provider: string
+          received_at?: string
+          type: string
+        }
+        Update: {
+          event_id?: string
+          payload?: Json
+          processed_at?: string | null
+          provider?: string
+          received_at?: string
+          type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       category_advert_counts: {
@@ -3362,6 +3536,14 @@ export type Database = {
         Args: { category_slug: string; price: number; threshold_sigma?: number }
         Returns: boolean
       }
+      create_business: {
+        Args: { p_kbo: string; p_legal_name: string; p_vat: string }
+        Returns: string
+      }
+      create_review: {
+        Args: { p_advert_id: string; p_comment: string; p_rating: number }
+        Returns: string
+      }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {
@@ -3395,6 +3577,8 @@ export type Database = {
         | { Args: { table_name: string }; Returns: string }
       enablelongtransactions: { Args: never; Returns: string }
       equals: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
+      erase_user_data: { Args: { p_user_id: string }; Returns: undefined }
+      find_user_by_email: { Args: { p_email: string }; Returns: string }
       geometry: { Args: { "": string }; Returns: unknown }
       geometry_above: {
         Args: { geom1: unknown; geom2: unknown }
@@ -3509,12 +3693,21 @@ export type Database = {
       get_region_from_postcode: { Args: { postcode: string }; Returns: string }
       gettransactionid: { Args: never; Returns: unknown }
       is_admin: { Args: never; Returns: boolean }
+      is_business_member: {
+        Args: { b_id: string; min_role?: string }
+        Returns: boolean
+      }
+      is_conversation_participant: {
+        Args: { p_conversation_id: string }
+        Returns: boolean
+      }
       is_favorited: {
         Args: { advert_id_param: string; user_id_param: string }
         Returns: boolean
       }
       is_user_blocked: { Args: { user_id_param: string }; Returns: boolean }
       longtransactionsenabled: { Args: never; Returns: boolean }
+      normalize_kbo: { Args: { p: string }; Returns: string }
       populate_geometry_columns:
         | { Args: { tbl_oid: unknown; use_typmod?: boolean }; Returns: number }
         | { Args: { use_typmod?: boolean }; Returns: string }
@@ -3560,6 +3753,7 @@ export type Database = {
       search_adverts: {
         Args: {
           category_id_filter?: string
+          condition_filter?: string
           location_filter?: string
           location_lat?: number
           location_lng?: number
@@ -3570,6 +3764,7 @@ export type Database = {
           radius_km?: number
           search_query?: string
           sort_by?: string
+          verified_only?: boolean
         }
         Returns: {
           category_id: string
@@ -3582,6 +3777,7 @@ export type Database = {
           location_id: string
           price: number
           relevance_rank: number
+          seller_verified: boolean
           status: string
           title: string
           total_count: number
@@ -4187,6 +4383,10 @@ export type Database = {
         Args: { geom: unknown; move: number; wrap: number }
         Returns: unknown
       }
+      start_conversation: {
+        Args: { p_advert_id: string; p_peer_id: string }
+        Returns: string
+      }
       trust_inc: { Args: { pts: number; uid: string }; Returns: undefined }
       unlockrows: { Args: { "": string }; Returns: number }
       updategeometrysrid: {
@@ -4292,13 +4492,6 @@ export type Database = {
           slug: string
           years_available: number[]
         }[]
-      }
-      // Hand-added: GDPR erasure function (migration 20260627240000_erasure.sql).
-      // SECURITY DEFINER, granted to service_role only. Raises P0001/ACTIVE_BUSINESS
-      // if the user owns an active business.
-      erase_user_data: {
-        Args: { p_user_id: string }
-        Returns: undefined
       }
     }
     Enums: {
@@ -4436,8 +4629,10 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },
 } as const
-

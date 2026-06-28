@@ -1,5 +1,6 @@
 import "server-only";
 import { supabaseService } from "@/lib/supabaseService";
+import type { Json } from "@/lib/supabaseTypes";
 import type { AnalyticsEventName } from "./events";
 
 interface TrackOptions {
@@ -23,13 +24,12 @@ export async function trackServerEvent(
 ): Promise<void> {
   try {
     const service = await supabaseService();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- analytics_events not yet in generated types; remove after pnpm gen:types
-    const { error } = await (service as any).from("analytics_events").upsert(
+    const { error } = await service.from("analytics_events").upsert(
       {
         event_name: eventName,
         user_id: opts.userId ?? null,
         session_id: opts.sessionId ?? null,
-        props,
+        props: props as Json,
         // B3: server keys are namespaced 's:' so they can never be pre-empted by
         // client-supplied 'c:' keys from POST /api/analytics/track.
         dedup_key: opts.dedupKey ? `s:${opts.dedupKey}` : null,

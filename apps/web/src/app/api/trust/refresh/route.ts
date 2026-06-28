@@ -5,6 +5,7 @@ import {
   createErrorResponse,
   ApiErrorCode,
 } from "@/lib/apiErrors";
+import type { Json } from "@/lib/supabaseTypes";
 import { computeTrustScore } from "@/lib/trust/trustScore";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 
@@ -67,12 +68,11 @@ async function handleRefresh(_req: Request): Promise<Response> {
     activeRiskFlags,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- components/last_computed_at added by F14 migration, not yet in generated types
-  const { error: upsertError } = await (supabase as any).from("trust_score").upsert(
+  const { error: upsertError } = await supabase.from("trust_score").upsert(
     {
       user_id: user.id,
       score: components.total,
-      components,
+      components: components as unknown as Json,
       last_computed_at: new Date().toISOString(),
     },
     { onConflict: "user_id" },

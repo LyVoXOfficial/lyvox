@@ -66,8 +66,7 @@ async function handleTrack(req: Request) {
   // authenticated client from pre-empting server funnel events.
   const storedDedupKey = dedup_key ? `c:${dedup_key}` : null;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- analytics_events not yet in generated types; remove after pnpm gen:types
-  const { error } = await (supabase as any).from("analytics_events").upsert(
+  const { error } = await supabase.from("analytics_events").upsert(
     {
       event_name,
       user_id: user?.id ?? null,

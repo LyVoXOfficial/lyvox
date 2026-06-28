@@ -86,10 +86,7 @@ async function trackView(
   // ON CONFLICT (advert_id, viewer_key, view_hour) DO NOTHING → dedup enforced at DB level.
   const service = await supabaseService();
 
-  // viewer_key and view_hour are new columns not yet in generated types.
-  // Remove the `as any` cast after running `pnpm gen:types`.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- new columns; remove after pnpm gen:types
-  const { error: insertError } = await (service.from("advert_views") as any).upsert(
+  const { error: insertError } = await service.from("advert_views").upsert(
     {
       advert_id: advertId,
       user_id: user?.id ?? null,
