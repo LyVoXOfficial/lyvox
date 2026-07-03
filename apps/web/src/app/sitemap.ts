@@ -17,18 +17,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const categoryRoutes: MetadataRoute.Sitemap = [];
   try {
     const supabase = await supabaseService();
-    const { data: categories } = await supabase
-      .from("categories")
-      .select("path")
-      .eq("is_active", true)
-      .eq("level", 1);
+    // All category levels, but only branches that actually carry inventory —
+    // listing every empty leaf would ship thin/soft-404 pages to Google
+    // (level-1 hubs stay regardless: they are the permanent IA skeleton).
+    const [{ data: categories }, { data: stocked }] = await Promise.all([
+      supabase.from("categories").select("id, path, level").eq("is_active", true),
+      supabase.from("adverts").select("category_id").eq("status", "active").limit(5000),
+    ]);
+
+    const stockedIds = new Set((stocked ?? []).map((a) => a.category_id).filter(Boolean));
+    const pathById = new Map((categories ?? []).map((c) => [c.id, c.path as string | null]));
+    const stockedPaths = [...stockedIds]
+      .map((id) => pathById.get(id))
+      .filter((p): p is string => Boolean(p));
+
+    const hasInventory = (path: string) =>
+      stockedPaths.some((p) => p === path || p.startsWith(`${path}/`));
 
     for (const category of categories ?? []) {
       if (!category.path) continue;
+      if (category.level !== 1 && !hasInventory(category.path)) continue;
       categoryRoutes.push({
         url: absoluteUrl(`/c/${category.path}`),
         changeFrequency: "weekly",
-        priority: 0.6,
+        priority: category.level === 1 ? 0.6 : 0.5,
       });
     }
   } catch {
