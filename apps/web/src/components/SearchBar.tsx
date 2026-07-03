@@ -369,7 +369,7 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
   if (isHeader) {
     return (
       <form onSubmit={handleSubmit} className={cn("relative flex min-w-0 flex-1", className)}>
-        <div className="flex flex-1 items-center gap-[10px] rounded-full border border-border bg-card px-4 py-0 shadow-[var(--shS)]" style={{ height: 45 }}>
+        <div className="flex min-w-0 flex-1 items-center gap-[10px] rounded-full border border-border bg-card px-4 py-0 shadow-[var(--shS)]" style={{ height: 45 }}>
           <Search className="h-[18px] w-[18px] shrink-0 text-muted-foreground pointer-events-none" aria-hidden="true" />
           <input
             ref={inputRef}
@@ -390,7 +390,7 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
             aria-label={t("common.search") || "Search listings"}
             aria-autocomplete="list"
             aria-expanded={isAutocompleteOpen}
-            className="min-w-0 flex-1 border-0 bg-transparent text-[14.5px] text-foreground outline-none placeholder:text-muted-foreground"
+            className="w-full min-w-0 flex-1 border-0 bg-transparent text-[14.5px] text-foreground outline-none placeholder:text-muted-foreground"
           />
           {/* Round gradient submit button — inside the pill */}
           <button

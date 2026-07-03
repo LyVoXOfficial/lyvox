@@ -207,11 +207,11 @@ export default function AdCard({
           }}
         >
           {/* Left: Verified or Private chip — exact mockup styles (lines 161 / 207) */}
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             {sellerVerified ? (
               /* Verified chip: shield icon (--pri) + text (--priD), no background */
               <span
-                className="inline-flex items-center gap-[6px] font-bold"
+                className="inline-flex min-w-0 max-w-full items-center gap-[6px] font-bold"
                 style={{ fontSize: "12.5px", color: "var(--priD)" }}
                 title={verifiedTooltip}
               >
@@ -220,12 +220,12 @@ export default function AdCard({
                   aria-hidden="true"
                   style={{ color: "var(--primary)" }}
                 />
-                {verifiedLabel}
+                <span className="truncate">{verifiedLabel}</span>
               </span>
             ) : (
               /* Private chip: grey dot + text */
               <span
-                className="inline-flex items-center gap-[6px] font-bold"
+                className="inline-flex min-w-0 max-w-full items-center gap-[6px] font-bold"
                 style={{ fontSize: "12.5px", color: "var(--mintI)" }}
               >
                 <span
@@ -237,13 +237,13 @@ export default function AdCard({
                     flexShrink: 0,
                   }}
                 />
-                {translate("advert.private_seller", "Private")}
+                <span className="truncate">{translate("advert.private_seller", "Private")}</span>
               </span>
             )}
           </div>
 
           {/* Right: like count + report (hover-only on desktop) */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex shrink-0 items-center gap-2">
             <LikeToggle advertId={id} initialCount={likeCount ?? 0} variant="inline" />
             <div className="sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
               <ReportButton advertId={id} />
