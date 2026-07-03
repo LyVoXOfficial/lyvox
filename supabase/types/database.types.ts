@@ -3584,6 +3584,16 @@ export type Database = {
       enablelongtransactions: { Args: never; Returns: string }
       equals: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
       erase_user_data: { Args: { p_user_id: string }; Returns: undefined }
+      estimate_price: {
+        Args: { p_category_id: string; p_condition?: string }
+        Returns: {
+          backoff_level: string
+          median: number
+          p25: number
+          p75: number
+          sample_size: number
+        }[]
+      }
       find_user_by_email: { Args: { p_email: string }; Returns: string }
       geometry: { Args: { "": string }; Returns: unknown }
       geometry_above: {
