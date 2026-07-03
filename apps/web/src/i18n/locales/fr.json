@@ -203,6 +203,11 @@
     "private_seller": "Vendeur particulier"
   },
   "post": {
+    "share_banner_title": "Votre annonce est en ligne",
+    "share_banner_body": "Partagez le lien — les acheteurs la trouveront plus vite.",
+    "share_native": "Partager",
+    "share_copy": "Copier le lien",
+    "share_copied": "Lien copié",
     "not_found": "Annonce introuvable",
     "not_owner": "Vous ne pouvez pas modifier cette annonce",
     "login_to_post": "Connectez-vous pour publier une annonce",

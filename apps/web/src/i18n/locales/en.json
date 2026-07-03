@@ -203,6 +203,11 @@
     "private_seller": "Private seller"
   },
   "post": {
+    "share_banner_title": "Your listing is live",
+    "share_banner_body": "Share the link — buyers will find it sooner.",
+    "share_native": "Share",
+    "share_copy": "Copy link",
+    "share_copied": "Link copied",
     "not_found": "Advert not found",
     "not_owner": "You cannot edit this advert",
     "login_to_post": "Please sign in to post an advert",

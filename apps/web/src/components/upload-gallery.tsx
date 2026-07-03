@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { readImageSize } from "@/lib/image";
 import { apiFetch } from "@/lib/fetcher";
+import { compressImage } from "@/lib/media/compressImage";
 import { useI18n } from "@/i18n";
 import { Eye, GripVertical, Loader2, Star, Trash2 } from "lucide-react";
 
@@ -72,7 +73,10 @@ export default function UploadGallery({ advertId, locale }: { advertId: string; 
     setBusy(true);
     setStatusKey("uploading");
     try {
-      for (const file of candidates) {
+      for (const rawFile of candidates) {
+        // Downscale/re-encode camera originals BEFORE the size gate — a 8 MB
+        // phone photo becomes ~300 KB WebP instead of a hard rejection.
+        const file = await compressImage(rawFile);
         if (file.size > MAX_FILE_SIZE_BYTES) {
           setError(t("upload.error.file_too_large") || "File size must not exceed 5MB");
           continue;

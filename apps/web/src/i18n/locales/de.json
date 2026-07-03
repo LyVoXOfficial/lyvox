@@ -203,6 +203,11 @@
     "private_seller": "Privater Verkäufer"
   },
   "post": {
+    "share_banner_title": "Ihre Anzeige ist online",
+    "share_banner_body": "Teilen Sie den Link — so finden Käufer sie schneller.",
+    "share_native": "Teilen",
+    "share_copy": "Link kopieren",
+    "share_copied": "Link kopiert",
     "not_found": "Anzeige nicht gefunden",
     "not_owner": "Sie können diese Anzeige nicht bearbeiten",
     "login_to_post": "Bitte melden Sie sich an, um eine Anzeige aufzugeben",

@@ -1189,7 +1189,8 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
       }
 
       toast.success(t("post.published"));
-      router.push(`/ad/${id}`);
+      // ?published=1 arms the one-time share banner on the ad page (share loop)
+      router.push(`/ad/${id}?published=1`);
     } catch (error: any) {
       console.error("Publish error:", error);
       const errorMessage = error.message || error.toString() || t("post.update_error");

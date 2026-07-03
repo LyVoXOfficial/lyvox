@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 
 import { CheckCircle2, CircleAlert, Clock, MapPin, MessageSquare, ShieldCheck } from "lucide-react";
+import { Suspense } from "react";
 import AdvertGallery from "@/components/AdvertGallery";
+import PublishedShareBanner from "@/components/ad/PublishedShareBanner";
 import AdvertDetails from "@/components/AdvertDetails";
 import AdvertContactPanel from "@/components/AdvertContactPanel";
 import SellerCard from "@/components/SellerCard";
@@ -675,6 +677,11 @@ export default async function AdvertPage({ params }: PageProps) {
               image: primaryImageUrl,
             }}
           />
+          {/* One-time share banner right after publishing (?published=1) */}
+          <Suspense fallback={null}>
+            <PublishedShareBanner title={data.advert.title} />
+          </Suspense>
+
           <AdvertGallery images={galleryImages} />
 
           {/* Condition pill + location + date meta */}
