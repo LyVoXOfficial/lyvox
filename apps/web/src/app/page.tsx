@@ -8,13 +8,9 @@ import RecentlyViewed from "@/components/discovery/RecentlyViewed";
 import SearchBar from "@/components/SearchBar";
 import TopSellersCarousel from "@/components/home/TopSellersCarousel";
 import TopAdvertCard from "@/components/home/TopAdvertCard";
-import { ArrowRight, Car, Home as HomeIcon, Laptop, ShieldCheck } from "lucide-react";
+import { ArrowRight, BadgeEuro, Car, Home as HomeIcon, Laptop, MessageCircleWarning, ShieldCheck } from "lucide-react";
 
 // PERF-003: Lazy load carousels below the fold
-const InfoCarousel = dynamic(() => import("@/components/info-carousel"), {
-  ssr: true, // Keep SSR for SEO
-});
-
 const CategoriesCarousel = dynamic(() => import("@/components/categories-carousel"), {
   ssr: true, // Keep SSR for SEO
 });
@@ -312,8 +308,13 @@ export default async function Home() {
     },
   };
 
-  // Stats computed from real data — keep all existing computations
-  const verifiedCount = latestAds.filter((ad) => ad.sellerVerified).length;
+  // Product-first showcase: 6 freshest listings, photo-carrying first.
+  // The feed below excludes them (its page-1 fetch starts past the SSR batch,
+  // so no duplicates re-enter via pagination either).
+  const withImage = latestAds.filter((ad) => ad.image);
+  const showcaseAds = [...withImage, ...latestAds.filter((ad) => !ad.image)].slice(0, 6);
+  const showcaseIds = new Set(showcaseAds.map((ad) => ad.id));
+  const feedInitial = latestAds.filter((ad) => !showcaseIds.has(ad.id));
 
   // Quick action pills — keep existing hrefs/labels/icons exactly
   const quickActions = [
@@ -362,9 +363,11 @@ export default async function Home() {
             }}
           />
 
-          {/* Hero content grid — 1.55fr / .92fr on desktop, stacked on mobile */}
+          {/* Compact single-column hero — the stats card is gone (council verdict:
+              low real numbers displayed prominently read as "dead marketplace";
+              inflating them would be a misleading practice — so neither). */}
           <div
-            className="relative grid gap-7 py-12 md:grid-cols-[1.55fr_.92fr] md:items-stretch md:gap-7 md:py-12"
+            className="relative py-9 md:py-11"
             style={{ zIndex: 1 }}
           >
             {/* ── Left column ── */}
@@ -410,8 +413,9 @@ export default async function Home() {
                 <SearchBar variant="hero" />
               </div>
 
-              {/* Category pills */}
-              <div className="mt-[18px] flex flex-wrap gap-[9px]">
+              {/* Category pills + post CTA (the CTA moved here from the removed
+                  stats card — and is now visible on mobile too) */}
+              <div className="mt-[18px] flex flex-wrap items-center gap-[9px]">
                 {quickActions.map(({ href, label, icon: Icon, highlighted }) =>
                   highlighted ? (
                     /* "Verified sellers" — teal gradient pill */
@@ -440,121 +444,75 @@ export default async function Home() {
                     </Link>
                   ),
                 )}
+                <Link
+                  href="/post"
+                  className="lyvox-cta-gradient inline-flex h-[38px] shrink-0 items-center gap-[7px] whitespace-nowrap rounded-full px-[16px] font-bold text-primary-foreground transition hover:brightness-105"
+                  style={{ fontSize: "13.5px" }}
+                >
+                  {t("home.post_listing")}
+                  <ArrowRight className="h-[15px] w-[15px] shrink-0" aria-hidden="true" />
+                </Link>
               </div>
             </div>
 
-            {/* ── Right column — stats card (hidden on mobile) ── */}
-            <div
-              className="hidden flex-col gap-[15px] rounded-[var(--r)] border border-border bg-card p-[22px] md:flex"
-              style={{ boxShadow: "var(--shC)" }}
-            >
-              {/* Active listings */}
-              <div className="flex items-center gap-[14px]">
-                <span
-                  className="grid shrink-0 place-items-center"
-                  style={{
-                    width: 46,
-                    height: 46,
-                    borderRadius: "13px",
-                    background: "oklch(0.90 0.10 168 / 0.6)",
-                    color: "var(--mintI)",
-                  }}
-                >
-                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
-                    <path d="M3 7h18v13H3zM3 7l3-4h12l3 4M9 12h6" />
-                  </svg>
-                </span>
-                <div>
-                  <div className="font-extrabold leading-none tracking-tight text-foreground" style={{ fontSize: "28px", letterSpacing: "-0.02em" }}>
-                    {latestAds.length.toLocaleString()}
-                  </div>
-                  <div className="mt-1 text-muted-foreground" style={{ fontSize: "13px" }}>
-                    {t("home.stat_active_label")}
-                  </div>
-                </div>
-              </div>
-
-              {/* Verified sellers */}
-              <div className="flex items-center gap-[14px]">
-                <span
-                  className="grid shrink-0 place-items-center"
-                  style={{
-                    width: 46,
-                    height: 46,
-                    borderRadius: "13px",
-                    background: "oklch(0.56 0.13 178 / 0.14)",
-                    color: "var(--priD)",
-                  }}
-                >
-                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
-                    <path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z" />
-                    <path d="M9 12l2 2 4-4" />
-                  </svg>
-                </span>
-                <div>
-                  <div className="font-extrabold leading-none tracking-tight text-foreground" style={{ fontSize: "28px", letterSpacing: "-0.02em" }}>
-                    {verifiedCount.toLocaleString()}
-                  </div>
-                  <div className="mt-1 text-muted-foreground" style={{ fontSize: "13px" }}>
-                    {t("home.stat_verified_label")}
-                  </div>
-                </div>
-              </div>
-
-              {/* Free listings */}
-              <div className="flex items-center gap-[14px]">
-                <span
-                  className="grid shrink-0 place-items-center"
-                  style={{
-                    width: 46,
-                    height: 46,
-                    borderRadius: "13px",
-                    background: "oklch(0.86 0.13 72 / 0.45)",
-                    color: "var(--amberI)",
-                  }}
-                >
-                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
-                    <circle cx="12" cy="12" r="9" />
-                    <path d="M12 7v5l3 3" />
-                  </svg>
-                </span>
-                <div>
-                  <div className="font-extrabold leading-none tracking-tight text-foreground" style={{ fontSize: "28px", letterSpacing: "-0.02em" }}>
-                    {freeAds.length.toLocaleString()}
-                  </div>
-                  <div className="mt-1 text-muted-foreground" style={{ fontSize: "13px" }}>
-                    {t("home.stat_free_label")}
-                  </div>
-                </div>
-              </div>
-
-              {/* Post a listing CTA */}
-              <Link
-                href="/post"
-                className="lyvox-cta-gradient mt-[2px] inline-flex items-center justify-between rounded-[var(--rm)] px-[18px] font-bold text-primary-foreground transition hover:brightness-105"
-                style={{ height: 50, fontSize: "14.5px" }}
-              >
-                {t("home.post_listing")}
-                <ArrowRight className="h-[18px] w-[18px]" aria-hidden="true" />
-              </Link>
-            </div>
           </div>
         </section>
 
-        {/* ── DISCOVER LINK (kept from original) ──────────────────────── */}
-        <Link
-          href="/discover"
-          className="flex items-center justify-between gap-3 rounded-2xl border border-border/70 bg-card px-5 py-4 shadow-[var(--shadow-card)] transition hover:border-primary/40"
-        >
-          <span>
-            <span className="block font-semibold text-foreground">{t("discover.title")}</span>
-            <span className="block text-sm text-muted-foreground">{t("discover.subtitle")}</span>
-          </span>
-          <ArrowRight className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
-        </Link>
+        {/* ── FRESH LISTINGS — product-first proof grid (SSR, council verdict:
+               a marketplace sells with goods, not with a pitch) ── */}
+        <section className="space-y-3">
+          <AdsGrid items={showcaseAds} />
+          <div className="flex justify-end">
+            <Link
+              href="/search"
+              className="inline-flex items-center gap-[5px] font-semibold transition hover:opacity-80"
+              style={{ fontSize: "14px", color: "var(--priD)" }}
+            >
+              {t("home.see_all")}
+              <ArrowRight className="h-[14px] w-[14px]" aria-hidden="true" />
+            </Link>
+          </div>
+        </section>
 
-        {/* ── INFO CAROUSEL (kept from original) ──────────────────────── */}
-        <InfoCarousel />
+        {/* ── HOW LYVOX PROTECTS — static mechanisms row (replaces the
+               InfoCarousel: same i18n content, zero JS, crawlable links,
+               no horizontal scroll) ── */}
+        <section className="grid gap-3 sm:grid-cols-3">
+          {[
+            {
+              title: t("infocards.verified_title"),
+              body: t("infocards.verified_body"),
+              href: "/search?verified_only=true",
+              icon: ShieldCheck,
+            },
+            {
+              title: t("infocards.report_title"),
+              body: t("infocards.report_body"),
+              href: "/contact",
+              icon: MessageCircleWarning,
+            },
+            {
+              title: t("infocards.payment_title"),
+              body: t("infocards.payment_body"),
+              href: "/profile/billing",
+              icon: BadgeEuro,
+            },
+          ].map(({ title, body, href, icon: Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              className="group flex items-start gap-3.5 rounded-xl border border-border/70 bg-card p-4 shadow-[var(--shadow-soft)] transition duration-200 hover:border-primary/30 hover:shadow-[var(--shadow-card)]"
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/40 text-accent-foreground transition-colors duration-200 group-hover:bg-primary group-hover:text-primary-foreground">
+                <Icon className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[14.5px] font-bold tracking-tight">{title}</span>
+                <span className="mt-0.5 line-clamp-2 block text-[13px] leading-5 text-muted-foreground">{body}</span>
+              </span>
+            </Link>
+          ))}
+        </section>
 
         {/* ── CATEGORIES (kept from original) ─────────────────────────── */}
         <section className="space-y-4">
@@ -576,6 +534,19 @@ export default async function Home() {
 
         {/* ── RECENTLY VIEWED ─────────────────────────────────────────── */}
         <RecentlyViewed />
+
+        {/* ── DISCOVER — retention loop, demoted below the shopping sections
+               (council verdict: not top-of-funnel while the catalog is small) */}
+        <Link
+          href="/discover"
+          className="flex items-center justify-between gap-3 rounded-2xl border border-border/70 bg-card px-5 py-4 shadow-[var(--shadow-card)] transition hover:border-primary/40"
+        >
+          <span>
+            <span className="block font-semibold text-foreground">{t("discover.title")}</span>
+            <span className="block text-sm text-muted-foreground">{t("discover.subtitle")}</span>
+          </span>
+          <ArrowRight className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+        </Link>
 
         {/* ── RECOMMENDED NOW — the growing feed goes LAST so it never
                buries the sections above; auto-load is capped inside
@@ -600,7 +571,7 @@ export default async function Home() {
           </div>
 
           {/* 4-column responsive grid — AdsGrid already handles 2→3→4 col breakpoints */}
-          <DiscoveryFeed initialItems={latestAds} />
+          <DiscoveryFeed initialItems={feedInitial} hasMoreInitial={latestAds.length >= 24} />
         </section>
 
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown, Plus } from "lucide-react";
 import CategoryTree from "@/components/CategoryTree";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -34,6 +34,10 @@ const MenuLinesIcon = () => (
 export default function MainHeader() {
   const { t } = useI18n();
   const router = useRouter();
+  const pathname = usePathname();
+  // One canonical search on the home page (council verdict): the hero owns it
+  // there; the header field appears everywhere else.
+  const showHeaderSearch = pathname !== "/";
   const [hasSession, setHasSession] = useState<boolean | null>(null);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const categoriesDropdownRef = useRef<HTMLDivElement>(null);
@@ -150,8 +154,12 @@ export default function MainHeader() {
           )}
         </div>
 
-        {/* Search pill — flex-1 */}
-        <SearchBar variant="header" className="min-w-0 flex-1" />
+        {/* Search pill — flex-1 (hidden on home, where the hero search is canonical) */}
+        {showHeaderSearch ? (
+          <SearchBar variant="header" className="min-w-0 flex-1" />
+        ) : (
+          <div className="min-w-0 flex-1" aria-hidden="true" />
+        )}
 
         {/* Language chip */}
         <div className="shrink-0 [&_button]:h-[43px] [&_button]:rounded-[var(--rm)] [&_button]:border-border [&_button]:bg-card [&_button]:px-[12px] [&_button]:text-[13px] [&_button]:font-semibold [&_button]:text-muted-foreground">
@@ -183,8 +191,12 @@ export default function MainHeader() {
           <SiteLogo size="sm" />
         </div>
 
-        {/* Search pill — flex-1 */}
-        <SearchBar variant="header" className="min-w-0 flex-1" />
+        {/* Search pill — flex-1 (hidden on home, where the hero search is canonical) */}
+        {showHeaderSearch ? (
+          <SearchBar variant="header" className="min-w-0 flex-1" />
+        ) : (
+          <div className="min-w-0 flex-1" aria-hidden="true" />
+        )}
 
         {/* Language + Bell + Avatar */}
         <div className="flex shrink-0 items-center gap-2">

@@ -15,7 +15,15 @@ const PAGE_SIZE = 24;
 // reachable instead of an endless scroll burying them.
 const AUTO_PAGES = 2;
 
-export default function DiscoveryFeed({ initialItems }: { initialItems: AdvertCard[] }) {
+export default function DiscoveryFeed({
+  initialItems,
+  hasMoreInitial,
+}: {
+  initialItems: AdvertCard[];
+  /** Set when the caller withholds some SSR items (e.g. a showcase section) —
+      initialItems.length alone can no longer tell whether more pages exist. */
+  hasMoreInitial?: boolean;
+}) {
   const { t } = useI18n();
   const tr = (k: string, fb: string) => {
     const v = t(k);
@@ -26,7 +34,9 @@ export default function DiscoveryFeed({ initialItems }: { initialItems: AdvertCa
   const [page, setPage] = useState(1); // page 0 == initialItems (SSR)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [done, setDone] = useState(initialItems.length < PAGE_SIZE);
+  const [done, setDone] = useState(
+    hasMoreInitial === undefined ? initialItems.length < PAGE_SIZE : !hasMoreInitial,
+  );
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const loadMore = useCallback(async () => {
