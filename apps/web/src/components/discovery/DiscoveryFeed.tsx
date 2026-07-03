@@ -10,6 +10,10 @@ import { mapSearchItemToCard, type AdvertCard, type SearchApiItem } from "@/lib/
 import { appendUnique } from "@/lib/discoveryFeed";
 
 const PAGE_SIZE = 24;
+// Auto-load stops after this many fetched pages; further pages load via the
+// explicit "more" button. Keeps the sections and footer below the feed
+// reachable instead of an endless scroll burying them.
+const AUTO_PAGES = 2;
 
 export default function DiscoveryFeed({ initialItems }: { initialItems: AdvertCard[] }) {
   const { t } = useI18n();
@@ -47,9 +51,11 @@ export default function DiscoveryFeed({ initialItems }: { initialItems: AdvertCa
     }
   }, [loading, done, page]);
 
+  const autoLoad = page <= AUTO_PAGES;
+
   useEffect(() => {
     const node = sentinelRef.current;
-    if (!node || done) return;
+    if (!node || done || !autoLoad) return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) loadMore();
@@ -58,7 +64,7 @@ export default function DiscoveryFeed({ initialItems }: { initialItems: AdvertCa
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, [loadMore, done]);
+  }, [loadMore, done, autoLoad]);
 
   return (
     <div className="space-y-6">
@@ -83,7 +89,15 @@ export default function DiscoveryFeed({ initialItems }: { initialItems: AdvertCa
         </p>
       )}
 
-      {!done && <div ref={sentinelRef} aria-hidden="true" className="h-px w-full" />}
+      {!done && !error && !loading && !autoLoad && (
+        <div className="flex justify-center py-2">
+          <Button variant="outline" onClick={loadMore}>
+            {t("common.more")}
+          </Button>
+        </div>
+      )}
+
+      {!done && autoLoad && <div ref={sentinelRef} aria-hidden="true" className="h-px w-full" />}
     </div>
   );
 }

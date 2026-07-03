@@ -562,7 +562,24 @@ export default async function Home() {
           <CategoriesCarousel />
         </section>
 
-        {/* ── RECOMMENDED NOW (maps to DiscoveryFeed / latestAds) ─────── */}
+        {/* ── TOP SELLERS ─────────────────────────────────────────────── */}
+        <TopSellersCarousel />
+
+        {/* ── TOP ADVERT — section title + card owned by TopAdvertCard ── */}
+        <TopAdvertCard />
+
+        {/* ── FREE ADS ────────────────────────────────────────────────── */}
+        <section className="space-y-4">
+          <SectionTitle>{t("home.free_ads")}</SectionTitle>
+          <AdsGrid items={freeAds} />
+        </section>
+
+        {/* ── RECENTLY VIEWED ─────────────────────────────────────────── */}
+        <RecentlyViewed />
+
+        {/* ── RECOMMENDED NOW — the growing feed goes LAST so it never
+               buries the sections above; auto-load is capped inside
+               DiscoveryFeed, footer stays reachable via the "more" button. */}
         <section className="space-y-4">
           {/* Section header row with "See all" link */}
           <div className="flex items-end justify-between">
@@ -585,21 +602,6 @@ export default async function Home() {
           {/* 4-column responsive grid — AdsGrid already handles 2→3→4 col breakpoints */}
           <DiscoveryFeed initialItems={latestAds} />
         </section>
-
-        {/* ── TOP SELLERS ─────────────────────────────────────────────── */}
-        <TopSellersCarousel />
-
-        {/* ── TOP ADVERT — section title + card owned by TopAdvertCard ── */}
-        <TopAdvertCard />
-
-        {/* ── FREE ADS (kept from original) ───────────────────────────── */}
-        <section className="space-y-4">
-          <SectionTitle>{t("home.free_ads")}</SectionTitle>
-          <AdsGrid items={freeAds} />
-        </section>
-
-        {/* ── RECENTLY VIEWED (kept from original) ────────────────────── */}
-        <RecentlyViewed />
 
       </div>
     </>
