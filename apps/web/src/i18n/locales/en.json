@@ -202,6 +202,27 @@
     "business_seller": "Business seller",
     "private_seller": "Private seller"
   },
+  "sell": {
+    "meta_title": "Post a free classified ad in Belgium | LyVoX",
+    "meta_description": "Sell locally in Belgium: post a free listing in minutes, add photos, and chat with buyers inside LyVoX.",
+    "title": "Sell your stuff locally — free",
+    "subtitle": "Post a listing in minutes. Buyers nearby see it right away, and every conversation stays inside LyVoX.",
+    "step1_title": "Add photos",
+    "step1_body": "Snap a few clear pictures — listings with photos get contacted far more often.",
+    "step2_title": "Describe it",
+    "step2_body": "Title, price, category and a couple of honest sentences about the condition.",
+    "step3_title": "Reply in chat",
+    "step3_body": "Buyers message you inside LyVoX — agree on the handover together.",
+    "cta": "Post a listing",
+    "popular": "Popular categories",
+    "faq_title": "Frequently asked questions",
+    "faq_q1": "How much does posting cost?",
+    "faq_a1": "Posting a regular listing is free. Optional paid boosts raise visibility and are always labelled as promoted.",
+    "faq_q2": "Do I need a business account?",
+    "faq_a2": "No — private sellers just confirm email and phone. Businesses are verified with KBO/VAT and get a public trader profile.",
+    "faq_q3": "How do buyers contact me?",
+    "faq_a3": "Through LyVoX chat. Your phone number and email stay private."
+  },
   "post": {
     "share_banner_title": "Your listing is live",
     "share_banner_body": "Share the link — buyers will find it sooner.",

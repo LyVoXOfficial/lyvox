@@ -202,6 +202,27 @@
     "business_seller": "Gewerblicher Verkäufer",
     "private_seller": "Privater Verkäufer"
   },
+  "sell": {
+    "meta_title": "Kostenlose Kleinanzeige aufgeben in Belgien | LyVoX",
+    "meta_description": "Lokal verkaufen in Belgien: Anzeige in wenigen Minuten kostenlos aufgeben, Fotos hinzufügen und mit Käufern im LyVoX-Chat schreiben.",
+    "title": "Lokal verkaufen — kostenlos",
+    "subtitle": "Geben Sie in wenigen Minuten eine Anzeige auf. Käufer in der Nähe sehen sie sofort, und jedes Gespräch bleibt in LyVoX.",
+    "step1_title": "Fotos hinzufügen",
+    "step1_body": "Machen Sie einige klare Fotos — Anzeigen mit Fotos werden deutlich öfter kontaktiert.",
+    "step2_title": "Beschreiben",
+    "step2_body": "Titel, Preis, Kategorie und ein paar ehrliche Sätze zum Zustand.",
+    "step3_title": "Im Chat antworten",
+    "step3_body": "Käufer schreiben Ihnen in LyVoX — vereinbaren Sie die Übergabe gemeinsam.",
+    "cta": "Anzeige aufgeben",
+    "popular": "Beliebte Kategorien",
+    "faq_title": "Häufige Fragen",
+    "faq_q1": "Was kostet das Inserieren?",
+    "faq_a1": "Eine normale Anzeige ist kostenlos. Optionale bezahlte Boosts erhöhen die Sichtbarkeit und sind immer als beworben gekennzeichnet.",
+    "faq_q2": "Brauche ich ein Geschäftskonto?",
+    "faq_a2": "Nein — Privatverkäufer bestätigen nur E-Mail und Telefon. Unternehmen werden über KBO/USt geprüft und erhalten ein öffentliches Händlerprofil.",
+    "faq_q3": "Wie erreichen mich Käufer?",
+    "faq_a3": "Über den LyVoX-Chat. Ihre Telefonnummer und E-Mail bleiben privat."
+  },
   "post": {
     "share_banner_title": "Ihre Anzeige ist online",
     "share_banner_body": "Teilen Sie den Link — so finden Käufer sie schneller.",
