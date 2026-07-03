@@ -182,20 +182,24 @@ export default function UserMenu() {
 
   if (!email) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-0 items-center gap-2">
         <Link
           href="/login"
-          className="inline-flex h-10 items-center gap-2 rounded-md border border-border/80 bg-card px-3 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent"
+          aria-label={t("nav.sign_in")}
+          title={t("nav.sign_in")}
+          className="inline-flex h-10 shrink-0 items-center gap-2 rounded-md border border-border/80 bg-card px-3 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent"
         >
-          <LogIn className="h-4 w-4" aria-hidden="true" />
-          {t("nav.sign_in")}
+          <LogIn className="h-4 w-4 shrink-0" aria-hidden="true" />
+          <span className="hidden sm:inline">{t("nav.sign_in")}</span>
         </Link>
         <Link
           href="/register"
-          className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+          aria-label={t("nav.join")}
+          title={t("nav.join")}
+          className="inline-flex h-10 shrink-0 items-center gap-2 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
         >
-          <UserPlus className="h-4 w-4" aria-hidden="true" />
-          {t("nav.join")}
+          <UserPlus className="h-4 w-4 shrink-0" aria-hidden="true" />
+          <span className="hidden sm:inline">{t("nav.join")}</span>
         </Link>
       </div>
     );

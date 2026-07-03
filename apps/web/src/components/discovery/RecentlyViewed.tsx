@@ -34,7 +34,7 @@ export default function RecentlyViewed() {
               price={item.price}
               currency={item.currency}
               location={item.location}
-              image={item.image}
+              image={`/og/advert/${item.id}`}
             />
           </div>
         ))}

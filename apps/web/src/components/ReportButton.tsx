@@ -86,10 +86,12 @@ export default function ReportButton({ advertId }: Props) {
       <button
         type="button"
         onClick={handleOpen}
-        className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+        aria-label={tr("report.button", "Report")}
+        title={tr("report.button", "Report")}
+        className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
       >
-        <Flag className="h-3.5 w-3.5" aria-hidden="true" />
-        {tr("report.button", "Report")}
+        <Flag className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+        <span className="hidden sm:inline">{tr("report.button", "Report")}</span>
       </button>
       {open && (
         <div
