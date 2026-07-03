@@ -84,20 +84,14 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: "LyVoX",
       locale,
       alternateLocale: localizedOgCodes,
-      images: [
-        {
-          url: "/lyvox.svg",
-          width: 1024,
-          height: 1024,
-          alt: "LyVoX",
-        },
-      ],
+      // No `images` here — apps/web/src/app/opengraph-image.tsx supplies the
+      // default 1200x630 PNG automatically for this route and all children
+      // that don't define their own.
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: ["/lyvox.svg"],
     },
     alternates: {
       languages: languageAlternates,

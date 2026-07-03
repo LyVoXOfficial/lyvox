@@ -13,7 +13,7 @@ import { formatCurrency, formatDate } from "@/i18n/format";
 import { getI18nProps, getInitialLocale } from "@/i18n/server";
 import { type Locale } from "@/lib/i18n";
 import { getJsonLdScriptProps } from "@/lib/seo";
-import { getBaseUrl } from "@/lib/seo/baseUrl";
+import { getBaseUrl, absoluteUrl } from "@/lib/seo/baseUrl";
 import { generateSlug, truncateDescription } from "@/lib/seo/catalog/common";
 import { buildListingJsonLd } from "@/lib/seo/catalog/listingJsonLd";
 import { detectCategoryType } from "@/lib/utils/categoryDetector";
@@ -258,6 +258,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       : "";
     const primaryImage = advertData.media[0];
     const localeTag = resolveLocaleTag(locale);
+    // Stable route (not the expiring signed URL) so cached OG metadata never
+    // goes stale — see apps/web/src/app/api/og/advert/[id]/route.ts.
+    const ogImageUrl = absoluteUrl(`/api/og/advert/${advertData.advert.id}`);
 
     return {
       title: advertData.advert.title,
@@ -274,7 +277,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         images: primaryImage
           ? [
               {
-                url: primaryImage.url,
+                url: ogImageUrl,
                 width: primaryImage.w ?? undefined,
                 height: primaryImage.h ?? undefined,
                 alt: advertData.advert.title,
@@ -286,7 +289,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         card: primaryImage ? "summary_large_image" : "summary",
         title: advertData.advert.title,
         description,
-        images: primaryImage ? [primaryImage.url] : undefined,
+        images: primaryImage ? [ogImageUrl] : undefined,
       },
     };
   } catch (error) {
