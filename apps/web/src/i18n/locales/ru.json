@@ -142,7 +142,13 @@
     "allResults": "Все результаты",
     "removeFilter": "Убрать фильтр",
     "zeroResultSaveTitle": "Получить уведомление о новых совпадениях",
-    "loadMore": "Загрузить ещё"
+    "loadMore": "Загрузить ещё",
+    "radius_label": "Радиус",
+    "radius_10": "10 км",
+    "radius_20": "20 км",
+    "radius_50": "50 км",
+    "radius_100": "100 км",
+    "outside_radius": "Дальше от вас"
   },
   "contact": {
     "price": "Цена",

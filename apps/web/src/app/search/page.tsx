@@ -8,6 +8,7 @@ import SearchFilters, { type SearchFiltersState } from "@/components/SearchFilte
 import SaveSearchButton from "@/components/saved/SaveSearchButton";
 import { logger } from "@/lib/errorLogger";
 import { mapSearchItemToCard } from "@/lib/advertCards";
+import { buildOutsideRadiusParams, buildSearchRequestParams } from "@/lib/search/buildSearchParams";
 import AdsGrid from "@/components/ads-grid";
 import { AdsGridSkeleton } from "@/components/marketplace-grid-states";
 import { ANALYTICS_EVENTS } from "@/lib/analytics/events";
@@ -32,6 +33,8 @@ import { Loader2, SlidersHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const ANTI_SOCIAL_THRESHOLD = 10;
+const OUTSIDE_RADIUS_THRESHOLD = 6;
+const OUTSIDE_RADIUS_LIMIT = 12;
 
 type SearchResult = {
   id: string;
@@ -89,6 +92,9 @@ export default function SearchPage() {
   const priceMin = searchParams.get("price_min");
   const priceMax = searchParams.get("price_max");
   const location = searchParams.get("location") || null;
+  const lat = searchParams.get("lat");
+  const lng = searchParams.get("lng");
+  const radiusKm = searchParams.get("radius_km") || "50";
   const sortBy = searchParams.get("sort_by") || "created_at_desc";
   const condition = searchParams.get("condition");
   const page = Number.parseInt(searchParams.get("page") || "0", 10);
@@ -105,6 +111,7 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
+  const [outsideRadiusResults, setOutsideRadiusResults] = useState<SearchResult[]>([]);
   const [hasMore, setHasMore] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -125,59 +132,82 @@ export default function SearchPage() {
     setError(null);
 
     try {
-      const params = new URLSearchParams();
+      const baseRequest = {
+        query,
+        categoryId,
+        priceMin,
+        priceMax,
+        location,
+        lat,
+        lng,
+        radiusKm,
+        sortBy,
+        page,
+        limit,
+        verifiedOnly: verifiedOnlyFilter,
+        condition,
+        sourceParams: searchParams,
+      };
+      const params = buildSearchRequestParams(baseRequest);
 
-      if (query) params.set("q", query);
-      if (categoryId) params.set("category_id", categoryId);
-      if (priceMin) params.set("price_min", priceMin);
-      if (priceMax) params.set("price_max", priceMax);
-      if (location) params.set("location", location);
-      params.set("sort_by", sortBy);
-      params.set("page", page.toString());
-      params.set("limit", limit.toString());
-      if (verifiedOnlyFilter) params.set("verified_only", "true");
-      if (condition) params.set("condition", condition);
-
-      searchParams.forEach((value, key) => {
-        if (key.startsWith("catalog_field_")) {
-          params.set(key, value);
+      const loadSearchResponse = async (requestParams: URLSearchParams) => {
+        let response: Response;
+        try {
+          response = await fetch(`/api/search?${requestParams.toString()}`);
+        } catch (fetchError) {
+          const translated = translate("search.fetchFailed", "Could not load search results.");
+          throw new Error(translated);
         }
-      });
 
-      let response: Response;
-      try {
-        response = await fetch(`/api/search?${params.toString()}`);
-      } catch (fetchError) {
-        // Network error or fetch failed
-        const translated = translate("search.fetchFailed", "Could not load search results.");
-        throw new Error(translated);
+        if (!response.ok) {
+          const translated = translate("search.fetchFailed", "Could not load search results.");
+          throw new Error(translated);
+        }
+
+        let data: SearchResponse;
+        try {
+          data = await response.json();
+        } catch (parseError) {
+          const translated = translate("search.fetchFailed", "Could not load search results.");
+          throw new Error(translated);
+        }
+
+        if (!data.ok || !data.data) {
+          const errorKey = data.error === "FETCH_FAILED" ? "search.fetchFailed" : "search.error";
+          const translated = translate(errorKey, "Could not load search results.");
+          throw new Error(translated);
+        }
+
+        return data.data;
+      };
+
+      const data = await loadSearchResponse(params);
+      const formattedResults: SearchResult[] = data.items.map(mapSearchItemToCard);
+      let outsideResults: SearchResult[] = [];
+
+      const shouldLoadOutsideRadius =
+        page === 0 &&
+        formattedResults.length < OUTSIDE_RADIUS_THRESHOLD &&
+        Boolean(lat && lng);
+      if (shouldLoadOutsideRadius) {
+        const outsideParams = buildOutsideRadiusParams({
+          ...baseRequest,
+          limit: OUTSIDE_RADIUS_LIMIT,
+        });
+        if (outsideParams) {
+          const expanded = await loadSearchResponse(outsideParams);
+          const inRadiusIds = new Set(formattedResults.map((item) => item.id));
+          outsideResults = expanded.items
+            .map(mapSearchItemToCard)
+            .filter((item) => !inRadiusIds.has(item.id))
+            .slice(0, OUTSIDE_RADIUS_THRESHOLD);
+        }
       }
-
-      if (!response.ok) {
-        const translated = translate("search.fetchFailed", "Could not load search results.");
-        throw new Error(translated);
-      }
-
-      let data: SearchResponse;
-      try {
-        data = await response.json();
-      } catch (parseError) {
-        const translated = translate("search.fetchFailed", "Could not load search results.");
-        throw new Error(translated);
-      }
-
-      if (!data.ok || !data.data) {
-        // Translate error codes to user-friendly messages
-        const errorKey = data.error === "FETCH_FAILED" ? "search.fetchFailed" : "search.error";
-        const translated = translate(errorKey, "Could not load search results.");
-        throw new Error(translated);
-      }
-
-      const formattedResults: SearchResult[] = data.data.items.map(mapSearchItemToCard);
 
       setResults(formattedResults);
-      setTotal(data.data.total);
-      setHasMore(data.data.hasMore);
+      setOutsideRadiusResults(outsideResults);
+      setTotal(data.total);
+      setHasMore(data.hasMore);
 
       // Fire analytics only on new searches (not pagination fetches)
       if (page === 0) {
@@ -188,8 +218,8 @@ export default function SearchPage() {
           body: JSON.stringify({
             event_name: ANALYTICS_EVENTS.SEARCH_PERFORMED,
             props: {
-              result_count: data.data.total,
-              zero_result: data.data.total === 0,
+              result_count: data.total,
+              zero_result: data.total === 0,
               sort: sortBy,
               has_filters: hasFilters,
             },
@@ -209,12 +239,13 @@ export default function SearchPage() {
         : translate("search.error", "Could not load search results.");
       setError(errorMessage);
       setResults([]);
+      setOutsideRadiusResults([]);
       setTotal(0);
       setHasMore(false);
     } finally {
       setLoading(false);
     }
-  }, [query, categoryId, priceMin, priceMax, location, sortBy, page, limit, translate, searchParams, verifiedOnlyFilter, condition]);
+  }, [query, categoryId, priceMin, priceMax, location, lat, lng, radiusKm, sortBy, page, limit, translate, searchParams, verifiedOnlyFilter, condition]);
 
   // Fetch results when params change
   useEffect(() => {
@@ -249,6 +280,16 @@ export default function SearchPage() {
       params.set("location", filters.location);
     } else {
       params.delete("location");
+    }
+
+    if (filters.location && filters.lat !== null && filters.lng !== null) {
+      params.set("lat", String(filters.lat));
+      params.set("lng", String(filters.lng));
+      params.set("radius_km", String(filters.radius_km ?? 50));
+    } else {
+      params.delete("lat");
+      params.delete("lng");
+      params.delete("radius_km");
     }
 
     if (filters.verified_only) {
@@ -321,7 +362,7 @@ export default function SearchPage() {
   // Reset accumulated results when search params change (except page)
   useEffect(() => {
     setAllResults([]);
-  }, [query, categoryId, priceMin, priceMax, location, sortBy, verifiedOnlyFilter, condition]);
+  }, [query, categoryId, priceMin, priceMax, location, lat, lng, radiusKm, sortBy, verifiedOnlyFilter, condition]);
 
   // Accumulate results for infinite scroll
   useEffect(() => {
@@ -391,7 +432,7 @@ export default function SearchPage() {
           params: ["price_min", "price_max"],
         }
       : null,
-    location ? { key: "location", label: location, params: ["location"] } : null,
+    location ? { key: "location", label: location, params: ["location", "lat", "lng", "radius_km"] } : null,
     verifiedOnlyFilter
       ? { key: "verified_only", label: t("search.verifiedOnly") || "Verified sellers", params: ["verified_only"] }
       : null,
@@ -667,7 +708,7 @@ export default function SearchPage() {
           )}
 
           {/* Zero-result state — retention CTA with SaveSearch */}
-          {!loading && !error && total === 0 && (
+          {!loading && !error && total === 0 && outsideRadiusResults.length === 0 && (
             <div
               className="space-y-5 p-8 text-center"
               style={{
@@ -718,12 +759,23 @@ export default function SearchPage() {
           )}
 
           {/* Results grid — 2-col mobile, 3-col desktop (rail already takes 262px) */}
-          {!loading && !error && total > 0 && (
+          {!loading && !error && (total > 0 || outsideRadiusResults.length > 0) && (
             <>
-              <AdsGrid
-                items={isMobile ? allResults : results}
-                gridColsClass="grid-cols-2 lg:grid-cols-3"
-              />
+              {total > 0 && (
+                <AdsGrid
+                  items={isMobile ? allResults : results}
+                  gridColsClass="grid-cols-2 lg:grid-cols-3"
+                />
+              )}
+
+              {outsideRadiusResults.length > 0 && (
+                <section className={cn(total > 0 && "mt-10")} aria-labelledby="outside-radius-title">
+                  <h2 id="outside-radius-title" className="mb-4 text-base font-semibold">
+                    {translate("search.outside_radius", "Farther from you")}
+                  </h2>
+                  <AdsGrid items={outsideRadiusResults} gridColsClass="grid-cols-2 lg:grid-cols-3" />
+                </section>
+              )}
 
               {/* Pagination (desktop only) */}
               {!isMobile && totalPages > 1 && (

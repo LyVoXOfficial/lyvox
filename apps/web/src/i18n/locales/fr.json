@@ -142,7 +142,13 @@
     "allResults": "Tous les résultats",
     "removeFilter": "Supprimer le filtre",
     "zeroResultSaveTitle": "Recevez une notification pour les nouvelles correspondances",
-    "loadMore": "Charger plus"
+    "loadMore": "Charger plus",
+    "radius_label": "Rayon",
+    "radius_10": "10 km",
+    "radius_20": "20 km",
+    "radius_50": "50 km",
+    "radius_100": "100 km",
+    "outside_radius": "Plus loin de vous"
   },
   "contact": {
     "price": "Prix",

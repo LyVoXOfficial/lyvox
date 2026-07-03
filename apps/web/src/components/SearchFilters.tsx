@@ -42,6 +42,9 @@ export type SearchFiltersState = {
   price_min: number | null;
   price_max: number | null;
   location: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  radius_km?: number | null;
   catalog_fields: Record<string, unknown>;
   verified_only: boolean;
   condition: string | null;
@@ -79,6 +82,31 @@ const COMMON_LOCATIONS = [
   "Tournai",
   "Wavre",
   "Arlon",
+];
+const RADIUS_OPTIONS = [10, 20, 50, 100] as const;
+const GEO_LOCATIONS = [
+  { city: "Brussel", region: "Brussels", lat: 50.8503, lng: 4.3517 },
+  { city: "Antwerpen", region: "Flanders", lat: 51.2194, lng: 4.4025 },
+  { city: "Gent", region: "Flanders", lat: 51.0543, lng: 3.7174 },
+  { city: "Charleroi", region: "Wallonia", lat: 50.4114, lng: 4.4446 },
+  { city: "Liège", region: "Wallonia", lat: 50.6326, lng: 5.5797 },
+  { city: "Brugge", region: "Flanders", lat: 51.2093, lng: 3.2247 },
+  { city: "Namur", region: "Wallonia", lat: 50.4674, lng: 4.872 },
+  { city: "Leuven", region: "Flanders", lat: 50.8798, lng: 4.7005 },
+  { city: "Mechelen", region: "Flanders", lat: 51.0257, lng: 4.4776 },
+  { city: "Aalst", region: "Flanders", lat: 50.9378, lng: 4.0409 },
+  { city: "Kortrijk", region: "Flanders", lat: 50.8285, lng: 3.2649 },
+  { city: "Hasselt", region: "Flanders", lat: 50.9307, lng: 5.3378 },
+  { city: "Oostende", region: "Flanders", lat: 51.2154, lng: 2.9286 },
+  { city: "Genk", region: "Flanders", lat: 50.965, lng: 5.5 },
+  { city: "Sint-Niklaas", region: "Flanders", lat: 51.1656, lng: 4.1437 },
+  { city: "Turnhout", region: "Flanders", lat: 51.3227, lng: 4.9447 },
+  { city: "Roeselare", region: "Flanders", lat: 50.9443, lng: 3.1264 },
+  { city: "Mons", region: "Wallonia", lat: 50.4542, lng: 3.9563 },
+  { city: "Tournai", region: "Wallonia", lat: 50.6071, lng: 3.3893 },
+  { city: "Geel", region: "Flanders", lat: 51.165, lng: 4.99 },
+  { city: "Wavre", region: "Wallonia", lat: 50.7167, lng: 4.6 },
+  { city: "Nivelles", region: "Wallonia", lat: 50.5983, lng: 4.3286 },
 ];
 
 function getLocalizedCategoryName(cat: Category, locale: string): string {
@@ -189,6 +217,9 @@ export default function SearchFilters({
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [location, setLocation] = useState("");
+  const [locationLat, setLocationLat] = useState<number | null>(null);
+  const [locationLng, setLocationLng] = useState<number | null>(null);
+  const [radiusKm, setRadiusKm] = useState<number>(50);
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
   const locationInputRef = useRef<HTMLInputElement>(null);
   const locationSuggestionsRef = useRef<HTMLDivElement>(null);
@@ -211,6 +242,9 @@ export default function SearchFilters({
       const priceMin = searchParams.get("price_min");
       const priceMax = searchParams.get("price_max");
       const locationParam = searchParams.get("location");
+      const latParam = searchParams.get("lat");
+      const lngParam = searchParams.get("lng");
+      const radiusParam = searchParams.get("radius_km");
       const verifiedOnlyParam = searchParams.get("verified_only");
 
       if (categoryId) {
@@ -225,9 +259,14 @@ export default function SearchFilters({
         ]);
       }
 
-      if (locationParam) {
-        setLocation(locationParam);
-      }
+      setLocation(locationParam ?? "");
+      const parsedLat = latParam ? Number.parseFloat(latParam) : null;
+      const parsedLng = lngParam ? Number.parseFloat(lngParam) : null;
+      setLocationLat(parsedLat !== null && Number.isFinite(parsedLat) ? parsedLat : null);
+      setLocationLng(parsedLng !== null && Number.isFinite(parsedLng) ? parsedLng : null);
+
+      const parsedRadius = radiusParam ? Number.parseInt(radiusParam, 10) : 50;
+      setRadiusKm(RADIUS_OPTIONS.includes(parsedRadius as (typeof RADIUS_OPTIONS)[number]) ? parsedRadius : 50);
 
       if (verifiedOnlyParam) {
         const normalized = verifiedOnlyParam.trim().toLowerCase();
@@ -297,8 +336,12 @@ export default function SearchFilters({
     }
 
     const query = location.toLowerCase().trim();
-    return COMMON_LOCATIONS
-      .filter((loc) => loc.toLowerCase().includes(query))
+    return GEO_LOCATIONS
+      .filter((loc) => {
+        const city = loc.city.toLowerCase();
+        const region = loc.region.toLowerCase();
+        return city.includes(query) || region.includes(query);
+      })
       .slice(0, 5);
   }, [location]);
 
@@ -501,14 +544,19 @@ export default function SearchFilters({
     setPriceRange(range);
   };
 
-  const handleLocationSelect = (selectedLocation: string) => {
-    setLocation(selectedLocation);
+  const handleLocationSelect = (selectedLocation: (typeof GEO_LOCATIONS)[number]) => {
+    setLocation(selectedLocation.city);
+    setLocationLat(selectedLocation.lat);
+    setLocationLng(selectedLocation.lng);
     setShowLocationSuggestions(false);
     applyFilters({
       category_id: selectedCategory?.id || null,
       price_min: priceRange[0] > 0 ? priceRange[0] : null,
       price_max: priceRange[1] < 10000 ? priceRange[1] : null,
-      location: selectedLocation || null,
+      location: selectedLocation.city,
+      lat: selectedLocation.lat,
+      lng: selectedLocation.lng,
+      radius_km: radiusKm,
       catalog_fields: dynamicFilters,
       verified_only: verifiedOnly,
       condition,
@@ -518,6 +566,8 @@ export default function SearchFilters({
 
   const handleLocationChange = (value: string) => {
     setLocation(value);
+    setLocationLat(null);
+    setLocationLng(null);
     setShowLocationSuggestions(true);
   };
 
@@ -530,6 +580,9 @@ export default function SearchFilters({
       price_min: filters.price_min,
       price_max: filters.price_max,
       location: filters.location,
+      lat: filters.location ? (filters.lat === undefined ? locationLat : filters.lat) : null,
+      lng: filters.location ? (filters.lng === undefined ? locationLng : filters.lng) : null,
+      radius_km: filters.radius_km === undefined ? radiusKm : filters.radius_km,
       catalog_fields: filters.catalog_fields ?? dynamicFilters,
       verified_only: filters.verified_only ?? verifiedOnly,
       condition: filters.condition ?? condition,
@@ -563,6 +616,16 @@ export default function SearchFilters({
       params.set("location", mergedFilters.location);
     } else {
       params.delete("location");
+    }
+
+    if (mergedFilters.location && mergedFilters.lat !== null && mergedFilters.lng !== null) {
+      params.set("lat", String(mergedFilters.lat));
+      params.set("lng", String(mergedFilters.lng));
+      params.set("radius_km", String(mergedFilters.radius_km ?? 50));
+    } else {
+      params.delete("lat");
+      params.delete("lng");
+      params.delete("radius_km");
     }
 
     if (mergedFilters.verified_only) {
@@ -652,6 +715,9 @@ export default function SearchFilters({
     setSelectedCategory(null);
     setPriceRange([0, 10000]);
     setLocation("");
+    setLocationLat(null);
+    setLocationLng(null);
+    setRadiusKm(50);
     setDynamicFilters({});
     setVerifiedOnly(false);
     setCondition(null);
@@ -661,6 +727,9 @@ export default function SearchFilters({
       price_min: null,
       price_max: null,
       location: null,
+      lat: null,
+      lng: null,
+      radius_km: null,
       catalog_fields: {},
       verified_only: false,
       condition: null,
@@ -722,11 +791,15 @@ export default function SearchFilters({
       label: location,
       onRemove: () => {
         setLocation("");
+        setLocationLat(null);
+        setLocationLng(null);
         applyFilters({
           category_id: selectedCategory?.id || null,
           price_min: priceRange[0] > 0 ? priceRange[0] : null,
           price_max: priceRange[1] < 10000 ? priceRange[1] : null,
           location: null,
+          lat: null,
+          lng: null,
           catalog_fields: dynamicFilters,
           verified_only: verifiedOnly,
           condition,
@@ -1129,18 +1202,55 @@ export default function SearchFilters({
               ref={locationSuggestionsRef}
               className="absolute left-0 right-0 top-full z-50 mt-2 max-h-52 overflow-y-auto rounded-xl border border-border/70 bg-card shadow-[var(--shadow-card)]"
             >
-              {locationSuggestions.map((suggestion, index) => (
+              {locationSuggestions.map((suggestion) => (
                 <button
-                  key={index}
+                  key={suggestion.city}
                   type="button"
                   onClick={() => handleLocationSelect(suggestion)}
-                  className="flex min-h-[44px] w-full cursor-pointer items-center border-b border-border/60 px-4 py-2.5 text-left text-sm transition hover:bg-secondary/70 last:border-b-0"
+                  className="flex min-h-[44px] w-full cursor-pointer flex-col items-start justify-center border-b border-border/60 px-4 py-2.5 text-left text-sm transition hover:bg-secondary/70 last:border-b-0"
                 >
-                  {suggestion}
+                  <span>{suggestion.city}</span>
+                  <span className="text-xs text-muted-foreground">{suggestion.region}</span>
                 </button>
               ))}
             </div>
           )}
+        </div>
+        <div className="mt-3 space-y-2">
+          <Label className="text-sm font-semibold">
+            {tr("search.radius_label", "Radius")}
+          </Label>
+          <Select
+            value={String(radiusKm)}
+            onValueChange={(value) => {
+              const nextRadius = Number.parseInt(value, 10);
+              setRadiusKm(nextRadius);
+              applyFilters({
+                category_id: selectedCategory?.id || null,
+                price_min: priceRange[0] > 0 ? priceRange[0] : null,
+                price_max: priceRange[1] < 10000 ? priceRange[1] : null,
+                location: location || null,
+                lat: locationLat,
+                lng: locationLng,
+                radius_km: nextRadius,
+                catalog_fields: dynamicFilters,
+                verified_only: verifiedOnly,
+                condition,
+                sort_by: sortBy,
+              });
+            }}
+          >
+            <SelectTrigger className="h-11">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {RADIUS_OPTIONS.map((option) => (
+                <SelectItem key={option} value={String(option)}>
+                  {tr(`search.radius_${option}`, `${option} km`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
