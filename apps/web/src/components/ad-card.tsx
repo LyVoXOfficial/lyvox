@@ -150,7 +150,7 @@ export default function AdCard({
       {/* ── Card body ── */}
       <div style={{ padding: "14px" }}>
         {/* Price */}
-        <div className="font-extrabold tracking-tight" style={{ fontSize: "19px", letterSpacing: "-0.01em" }}>
+        <div className="font-extrabold tracking-tight tabular-nums" style={{ fontSize: "19px", letterSpacing: "-0.01em" }}>
           {isFree ? (
             <span
               className="lyvox-trust-gradient"
@@ -174,7 +174,9 @@ export default function AdCard({
           href={`/ad/${id}`}
           className="block hover:text-primary"
           style={{
-            font: "600 14px/1.35 Inter, system-ui, sans-serif",
+            fontWeight: 600,
+            fontSize: "14px",
+            lineHeight: 1.35,
             margin: "6px 0 9px",
             display: "-webkit-box",
             WebkitLineClamp: 2,
@@ -189,7 +191,7 @@ export default function AdCard({
         {/* Location with pin icon */}
         <div
           className="flex items-center gap-[5px] text-muted-foreground"
-          style={{ font: "500 12.5px Inter, system-ui, sans-serif" }}
+          style={{ fontWeight: 500, fontSize: "12.5px" }}
         >
           <MapPin className="h-[14px] w-[14px] shrink-0" aria-hidden="true" />
           <span className="truncate">{locationText}</span>

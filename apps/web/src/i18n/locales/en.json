@@ -38,6 +38,10 @@
     "post_listing": "Post a listing"
   },
   "common": {
+    "page_not_found_title": "Page not found",
+    "page_not_found_body": "The page you're looking for doesn't exist or was moved.",
+    "page_not_found_home": "Back to home",
+    "page_not_found_browse": "Browse listings",
     "more": "More",
     "language": "Language",
     "search": "Search adverts",

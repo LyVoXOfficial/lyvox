@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
+import { Onest, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 import { FavoritesProvider } from "@/components/favorites/FavoritesProvider";
 import { LikesProvider } from "@/components/likes/LikesProvider";
@@ -15,6 +16,21 @@ import { CookieConsentProvider } from "@/components/cookie/CookieConsentProvider
 import { CookieBanner } from "@/components/cookie/CookieBanner";
 import { CookiePreferenceCenter } from "@/components/cookie/CookiePreferenceCenter";
 import { Toaster } from "sonner";
+
+// Brand typography — Onest (grotesque with Cyrillic coverage for the ru locale)
+// for UI + display, Geist Mono for tabular/numeric data. Exposed as CSS vars and
+// wired into --font-sans / --font-mono in globals.css.
+const onest = Onest({
+  subsets: ["latin", "latin-ext", "cyrillic"],
+  variable: "--font-onest",
+  display: "swap",
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
+  display: "swap",
+});
 
 // `viewport-fit: cover` is required for the `env(safe-area-inset-*)` paddings
 // used by the bottom nav to be non-zero on notched devices (iOS). themeColor
@@ -87,8 +103,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const { locale, messages } = await getI18nProps();
   return (
-    <html lang={locale}>
-      <body className="min-h-screen flex flex-col">
+    <html lang={locale} className={`${onest.variable} ${geistMono.variable}`}>
+      <body className="min-h-screen flex flex-col font-sans">
         <I18nProvider locale={locale} messages={messages}>
           <CookieConsentProvider>
             <FavoritesProvider>

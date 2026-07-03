@@ -38,6 +38,10 @@
     "post_listing": "Plaats een advertentie"
   },
   "common": {
+    "page_not_found_title": "Pagina niet gevonden",
+    "page_not_found_body": "De pagina die u zoekt bestaat niet of is verplaatst.",
+    "page_not_found_home": "Terug naar home",
+    "page_not_found_browse": "Zoekertjes bekijken",
     "more": "Meer",
     "language": "Taal",
     "search": "Zoek advertenties",

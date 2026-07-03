@@ -121,7 +121,7 @@ export function TrustScoreCard({
 
       {/* Score number */}
       <div style={{ display: "flex", alignItems: "baseline", gap: "4px", marginBottom: "4px" }}>
-        <span style={{ font: "800 28px/1 Inter, system-ui, sans-serif", letterSpacing: "-0.02em" }}>
+        <span className="tabular-nums" style={{ fontWeight: 800, fontSize: "28px", lineHeight: 1, letterSpacing: "-0.02em" }}>
           {score}
         </span>
         <span style={{ fontSize: "14px", color: "var(--muted-foreground)", fontWeight: 500 }}>/100</span>

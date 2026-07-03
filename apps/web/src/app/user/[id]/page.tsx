@@ -555,7 +555,9 @@ export default async function PublicProfilePage({
             <div className="mb-1 flex flex-wrap items-center gap-2">
               <h1
                 style={{
-                  font: "800 22px/1.2 Inter, system-ui, sans-serif",
+                  fontWeight: 800,
+                  fontSize: "22px",
+                  lineHeight: 1.2,
                   letterSpacing: "-0.02em",
                   margin: 0,
                 }}
@@ -665,7 +667,8 @@ export default async function PublicProfilePage({
           <span
             style={{
               padding: "13px 22px",
-              font: "700 13.5px Inter, system-ui, sans-serif",
+              fontWeight: 700,
+              fontSize: "13.5px",
               color: "var(--priD)",
               borderBottom: "2px solid var(--primary)",
             }}
@@ -677,7 +680,8 @@ export default async function PublicProfilePage({
             <span
               style={{
                 padding: "13px 22px",
-                font: "600 13.5px Inter, system-ui, sans-serif",
+                fontWeight: 600,
+                fontSize: "13.5px",
                 color: "var(--muted-foreground)",
               }}
             >
@@ -708,7 +712,7 @@ export default async function PublicProfilePage({
                 borderRadius: "var(--r)",
               }}
             >
-              <p style={{ font: "500 14px Inter, system-ui, sans-serif" }}>
+              <p style={{ fontWeight: 500, fontSize: "14px" }}>
                 {t("profile.no_adverts_found")}
               </p>
             </div>
@@ -751,7 +755,8 @@ export default async function PublicProfilePage({
               {/* Aggregate score — bayesian_rating primary, raw avg secondary */}
               <div className="mb-1 flex items-baseline gap-2">
                 <span
-                  style={{ font: "800 30px/1 Inter, system-ui, sans-serif", letterSpacing: "-0.02em" }}
+                  className="tabular-nums"
+                  style={{ fontWeight: 800, fontSize: "30px", lineHeight: 1, letterSpacing: "-0.02em" }}
                 >
                   {bayesian_rating ?? rating ?? 0}
                 </span>

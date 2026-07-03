@@ -107,7 +107,7 @@ function GridAdvertCard({ ad, priceNotSet }: { ad: ProfileAdvert; priceNotSet: s
       {/* Card body */}
       <div style={{ padding: "12px" }}>
         {/* Price */}
-        <div style={{ font: "800 17px Inter, system-ui, sans-serif" }}>
+        <div className="tabular-nums" style={{ fontWeight: 800, fontSize: "17px" }}>
           {ad.price != null ? `€${ad.price.toLocaleString()}` : priceNotSet}
         </div>
         {/* Title — 2-line clamp */}
@@ -115,7 +115,9 @@ function GridAdvertCard({ ad, priceNotSet }: { ad: ProfileAdvert; priceNotSet: s
           href={`/ad/${ad.id}`}
           className="block hover:text-primary"
           style={{
-            font: "600 13px/1.3 Inter, system-ui, sans-serif",
+            fontWeight: 600,
+            fontSize: "13px",
+            lineHeight: 1.3,
             margin: "4px 0 6px",
             display: "-webkit-box",
             WebkitLineClamp: 2,
@@ -128,7 +130,7 @@ function GridAdvertCard({ ad, priceNotSet }: { ad: ProfileAdvert; priceNotSet: s
         </Link>
         {/* Location */}
         {ad.location && (
-          <span style={{ font: "500 12px Inter, system-ui, sans-serif", color: "var(--muted-foreground)" }}>
+          <span style={{ fontWeight: 500, fontSize: "12px", color: "var(--muted-foreground)" }}>
             {ad.location}
           </span>
         )}

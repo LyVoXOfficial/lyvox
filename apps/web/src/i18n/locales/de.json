@@ -38,6 +38,10 @@
     "post_listing": "Anzeige aufgeben"
   },
   "common": {
+    "page_not_found_title": "Seite nicht gefunden",
+    "page_not_found_body": "Die gesuchte Seite existiert nicht oder wurde verschoben.",
+    "page_not_found_home": "Zurück zur Startseite",
+    "page_not_found_browse": "Anzeigen durchsuchen",
     "more": "Mehr",
     "language": "Sprache",
     "search": "Anzeigen suchen",
