@@ -67,8 +67,10 @@
 ## 6. Бонусы (P2)
 50 AI-листинг по фото · 51 «Ищу»/обратные объявления · 52 AI-цена/bait · 53 AI scam-check · 54 безопасные точки встречи · 55 рефералы · 56 price-drop алерты · 57 шаринг · 58 аналитика продавца · 59 circular-бейдж · 60 геймификация trust. → файлы `features/50…60-*.md`.
 
-## 7. Pre-launch hardening (E) — ОТЛОЖЕНО на потом (решение пользователя)
-SEO + Security задокументированы и ждут последним этапом: [audit/02 SEO](features/audit/02-seo-technical-audit.md), [audit/03 Security](features/audit/03-security-mobile-audit.md), сводка [audit/README](features/audit/README.md) (P0-пункты 1–5, P1 11–17).
+## 7. Pre-launch hardening (E)
+SEO + Security задокументированы: [audit/02 SEO](features/audit/02-seo-technical-audit.md), [audit/03 Security](features/audit/03-security-mobile-audit.md), сводка [audit/README](features/audit/README.md).
+
+> **SEO-статус (2026-07-03): P0 полностью закрыт + прод-верифицирован** (ветки feat/seo-p0, feat/seo-p1-quick): metadataBase + нормализация base-URL (вылечен живой `//ad/` canonical), canonical объявлений переведён на реальный роут `/ad/<id>` (старый `/ad/<id>/<slug>` отдавал 404 — canonical-на-404 класс), hreflang через getBaseUrl, robots.ts + динамический sitemap.xml (976 URL: 962 объявления + категории; supabaseService — cookie-клиент в ISR молча деградирует), OG: брендовый PNG (opengraph-image.tsx) + неистекающий `/og/advert/<id>` (302 на свежий signed URL, только active; вынесен из-под robots-блока `/api/`), noindex search/discover, per-page titles/canonicals, WebSite+SearchAction JSON-LD, manifest.ts. Остаток P1/P2: seller в Product JSON-LD (12), next/image в карточках (13), локализованные title-суффиксы, maskable PNG-иконки. Security-аудит — по-прежнему отложен.
 
 ---
 
