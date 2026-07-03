@@ -201,3 +201,4 @@ security/shannon/reports/
 security/shannon/workspaces/
 security/shannon/*.local.yaml
 security/shannon/*.local.yml
+*.local.json
