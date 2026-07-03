@@ -44,6 +44,7 @@ import { FashionFields } from "@/components/catalog/FashionFields";
 import { JobsFields } from "@/components/catalog/JobsFields";
 import { FormRenderer, type CatalogFieldDefinition, type CatalogSchema, type CatalogSchemaField } from "@/catalog/renderer";
 import TrustGatePhone from "@/components/trust/TrustGatePhone";
+import { getAdvertApiErrorMessage } from "@/lib/adverts/apiErrorMessage";
 
 type PostFormProps = {
   categories: Category[];
@@ -540,7 +541,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
 
     if (!result.ok) {
       console.error("[PostForm] Draft creation failed:", result.error);
-      throw new Error(result.error || t("post.create_failed"));
+      throw new Error(getAdvertApiErrorMessage(result, t, t("post.create_failed")));
     }
     
     const newId = result.data?.advert?.id;
@@ -931,7 +932,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
 
         const result = await response.json();
         if (!result.ok) {
-          throw new Error(result.message || result.error || t("post.update_error"));
+          throw new Error(getAdvertApiErrorMessage(result, t, t("post.update_error")));
         }
 
         const snapshotAfterSave = snapshotBeforeSave ?? createDraftSnapshot();
@@ -1100,21 +1101,21 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
       }
 
       // Check if at least one photo is uploaded
+      let hasUploadedMedia = true;
       try {
         const mediaResponse = await apiFetch(`/api/media/list?advertId=${id}`);
         if (mediaResponse.ok) {
           const mediaData = await mediaResponse.json();
-          if (mediaData.ok && (!mediaData.data?.items || mediaData.data.items.length === 0)) {
-            throw new Error(t("post.form.media_required"));
+          if (mediaData.ok) {
+            hasUploadedMedia = Boolean(mediaData.data?.items?.length);
           }
         }
       } catch (mediaError: any) {
-        // If it's our validation error, throw it
-        if (mediaError.message && mediaError.message.includes("required")) {
-          throw mediaError;
-        }
         // If media check fails for other reasons, let API handle it, but log for debugging
         console.warn("Media check failed:", mediaError);
+      }
+      if (!hasUploadedMedia) {
+        throw new Error(t("post.form.media_required"));
       }
 
       // Use user-provided title, or auto-generate from category/vehicle fields
@@ -1184,10 +1185,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
 
       // Check response status and result
       if (!response.ok || !result.ok) {
-        const errorMessage = result.message || result.error || result.detail || t("post.update_error");
-        const details = result.details ? ` (${JSON.stringify(result.details)})` : "";
-        const statusInfo = !response.ok ? ` [${response.status}]` : "";
-        throw new Error(`${errorMessage}${details}${statusInfo}`);
+        throw new Error(getAdvertApiErrorMessage(result, t, t("post.update_error")));
       }
 
       toast.success(t("post.published"));
