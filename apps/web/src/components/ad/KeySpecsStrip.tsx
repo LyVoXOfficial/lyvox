@@ -19,7 +19,7 @@ function translateFallback(t: TFunction, key: string, fallback: string): string 
 
 function formatMileage(value: unknown, locale: Locale): string | null {
   const num = Number(value);
-  if (!Number.isFinite(num)) return null;
+  if (!Number.isFinite(num) || num < 0) return null;
   return `${num.toLocaleString(locale === "ru" ? "ru-RU" : locale === "nl" ? "nl-NL" : locale === "fr" ? "fr-FR" : locale === "de" ? "de-DE" : "en-US")} km`;
 }
 
