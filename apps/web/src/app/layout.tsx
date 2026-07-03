@@ -111,7 +111,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                 <TrustGateProvider>
                   <TopBar />
                   <MainHeader />
-                  <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-4 md:py-6 pb-[calc(64px+env(safe-area-inset-bottom))]">{children}</main>
+                  {/* Bottom clearance for the fixed mobile BottomNav is handled solely by
+                      ViewportBottomSpacer below (audit B-1/B-3) — do not add a duplicate
+                      pb here or content gets double-spaced on generic pages. */}
+                  <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-4 md:py-6">{children}</main>
                   <LegalFooter />
                   <ViewportBottomSpacer />
                   <BottomNav />

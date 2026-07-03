@@ -411,7 +411,7 @@ export default function ChatWindow({
           </div>
 
           {/* Composer — preserve mobile clearance exactly */}
-          <div className="sticky bottom-[calc(56px+env(safe-area-inset-bottom))] z-10 border-t border-border/70 bg-card/95 px-4 py-3 backdrop-blur md:bottom-0">
+          <div className="sticky bottom-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom))] z-10 border-t border-border/70 bg-card/95 px-4 py-3 backdrop-blur md:bottom-0">
             {sendError ? (
               <div className="mb-2 flex items-start gap-2 rounded-[var(--rs)] border border-destructive/30 bg-destructive/5 p-2 text-xs text-destructive">
                 <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
