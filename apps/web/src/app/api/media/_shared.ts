@@ -31,7 +31,7 @@ type LogDetails = TablesInsert<"logs">["details"];
 type RequestAuthContext = {
   supabase: ServerClient;
   user: User | null;
-  error: { message: string } | null;
+  error: { name?: string; message: string } | null;
 };
 
 const contextCache = new WeakMap<Request, Promise<RequestAuthContext>>();
@@ -66,6 +66,12 @@ export async function requireAuthenticatedUser(
   const { supabase, user, error } = await getRequestContext(request);
 
   if (error) {
+    // supabase-js reports an anonymous request as AuthSessionMissingError —
+    // that is an auth failure (401), not a server fault. Other errors
+    // (transport, config) stay 500 so they surface in monitoring.
+    if (error.name === "AuthSessionMissingError") {
+      return { response: unauthenticated() };
+    }
     return { response: handleSupabaseError(error, ApiErrorCode.INTERNAL_ERROR) };
   }
 
