@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { CheckCircle2, CircleAlert, Clock, MapPin, MessageSquare, ShieldCheck } from "lucide-react";
+import { CheckCircle2, ChevronDown, CircleAlert, Clock, MapPin, MessageSquare, ShieldCheck } from "lucide-react";
 import { Suspense } from "react";
 import AdvertGallery from "@/components/AdvertGallery";
 import PublishedShareBanner from "@/components/ad/PublishedShareBanner";
@@ -749,6 +749,14 @@ export default async function AdvertPage({ params }: PageProps) {
             t={translate}
           />
 
+          {/* Seller trust panel ABOVE the description (council verdict: on
+              mobile this is the shortest path to a confident contact) */}
+          {canSeeSeller ? (
+            <SellerCard seller={data.seller} locale={locale} {...sellerCardLabels} />
+          ) : (
+            <SellerIdentityGate />
+          )}
+
           {/* Description */}
           <section className="rounded-md border border-border/80 bg-card p-4 shadow-sm">
             <h2 className="mb-2 text-lg font-medium">
@@ -759,12 +767,6 @@ export default async function AdvertPage({ params }: PageProps) {
                 translate("advert.no_description", "No description has been added yet.")}
             </p>
           </section>
-
-          {canSeeSeller ? (
-            <SellerCard seller={data.seller} locale={locale} {...sellerCardLabels} />
-          ) : (
-            <SellerIdentityGate />
-          )}
 
           <section className="rounded-md border border-border/80 bg-card p-4 shadow-sm">
             <div className="mb-4 flex items-start gap-3">
@@ -833,10 +835,20 @@ export default async function AdvertPage({ params }: PageProps) {
 
       {/* KB block: generation + insights with disclaimer, or ambiguous generation CTA */}
       {(showGeneration && data.selectedGeneration) || showInsights ? (
-        <section className="rounded-md border border-border/80 bg-card p-4 shadow-sm">
-          <h2 className="mb-4 text-lg font-medium">
-            {translate("advert.insights.title", "Model information")}
-          </h2>
+        <section className="rounded-md border border-border/80 bg-card shadow-sm">
+          {/* Native accordion: the KB text stays in server HTML (indexed in
+              full weight) but stops dominating the mobile scroll. */}
+          <details className="group p-4">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 [&::-webkit-details-marker]:hidden">
+              <h2 className="text-lg font-medium">
+                {translate("advert.insights.title", "Model information")}
+              </h2>
+              <ChevronDown
+                className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+                aria-hidden="true"
+              />
+            </summary>
+            <div className="mt-4">
 
           {showGeneration && data.selectedGeneration ? (
             <div className="mb-4 space-y-4">
@@ -1054,6 +1066,8 @@ export default async function AdvertPage({ params }: PageProps) {
               "Reference info. LyVoX knowledge base — general model information, not a guarantee for this specific item.",
             )}
           </p>
+            </div>
+          </details>
         </section>
       ) : listingDomain === "vehicle" && data.generations && data.generations.length > 0 ? (
         /* Ambiguous generation CTA — bug #1996 fix: no silent guess on the detail page */
