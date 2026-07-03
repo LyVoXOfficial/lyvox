@@ -292,7 +292,24 @@ export default async function Home() {
     name: messages?.app?.title ?? "LyVoX",
     description: messages?.app?.description ?? undefined,
     url: BASE_URL,
-    logo: `${BASE_URL}/favicon.ico`,
+    logo: `${BASE_URL}/lyvox.svg`,
+  };
+
+  // WebSite + SearchAction — enables the Google sitelinks searchbox and ties
+  // the site entity to the internal /search?q= endpoint (SEO audit §5.2).
+  const webSiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: messages?.app?.title ?? "LyVoX",
+    url: BASE_URL,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${BASE_URL}/search?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
   };
 
   // Stats computed from real data — keep all existing computations
@@ -326,6 +343,7 @@ export default async function Home() {
   return (
     <>
       <script {...getJsonLdScriptProps(organizationJsonLd)} />
+      <script {...getJsonLdScriptProps(webSiteJsonLd)} />
       <div className="space-y-8 md:space-y-10">
 
         {/* ── HERO ─────────────────────────────────────────────────────── */}
