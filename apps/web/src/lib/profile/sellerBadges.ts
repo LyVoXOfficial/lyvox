@@ -1,25 +1,26 @@
+import {
+  SELLER_BADGE_CAP,
+  SELLER_BADGE_PRECEDENCE,
+  type SellerBadgeSignalKey,
+} from "@/lib/trust/signalPolicy";
+
 export type SellerBadge =
-  | "verified_business"
-  | "vat_registered"
-  | "id_verified"
-  | "phone_verified"
+  | Exclude<SellerBadgeSignalKey, "verified_email" | "verified_phone">
   | "email_verified"
-  | "established_seller";
+  | "phone_verified";
 
-/**
- * Precedence order (§8.4): tier1 first, then tier2, then tier3.
- * This fixed array determines the output order — we filter by earned membership.
- */
-const PRECEDENCE: SellerBadge[] = [
-  "id_verified",        // tier1
-  "verified_business",  // tier1
-  "vat_registered",     // tier2 (business)
-  "phone_verified",     // tier2 (individual)
-  "established_seller", // tier3
-  "email_verified",     // tier3
-];
+const POLICY_TO_LEGACY_BADGE = {
+  verified_email: "email_verified",
+  verified_phone: "phone_verified",
+  verified_business: "verified_business",
+  vat_registered: "vat_registered",
+  id_verified: "id_verified",
+  established_seller: "established_seller",
+} satisfies Record<SellerBadgeSignalKey, SellerBadge>;
 
-const CAP = 3;
+const PRECEDENCE: SellerBadge[] = SELLER_BADGE_PRECEDENCE.map(
+  (badge) => POLICY_TO_LEGACY_BADGE[badge],
+);
 
 export function deriveSellerBadges(input: {
   sellerType: "individual" | "business";
@@ -61,7 +62,7 @@ export function deriveSellerBadges(input: {
   }
 
   // Apply precedence order and cap
-  return PRECEDENCE.filter((badge) => earned.has(badge)).slice(0, CAP);
+  return PRECEDENCE.filter((badge) => earned.has(badge)).slice(0, SELLER_BADGE_CAP);
 }
 
 function isEstablished(
