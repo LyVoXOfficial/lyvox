@@ -21,7 +21,7 @@ export const ANALYTICS_EVENTS = {
   // ── Discover (swipe deck) events — PRD 01 ────────────────────────────────
   /** User opened the Discover swipe deck. props: { drop } */
   DISCOVER_OPEN: "discover_open",
-  /** User swiped in the deck. props: { direction, advert_id, category_id, seller_verified, position_in_session, via, dwell_ms } */
+  /** User swiped in the deck. props: { direction, advert_id, category_id, seller_verified, position_in_session, via, dwell_bucket } */
   DISCOVER_SWIPE: "discover_swipe",
   /** User undid a swipe. props: { undone_direction, advert_id } */
   DISCOVER_UNDO: "discover_undo",
