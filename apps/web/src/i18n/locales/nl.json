@@ -142,7 +142,13 @@
     "allResults": "Alle resultaten",
     "removeFilter": "Filter verwijderen",
     "zeroResultSaveTitle": "Ontvang een melding bij nieuwe overeenkomsten",
-    "loadMore": "Meer laden"
+    "loadMore": "Meer laden",
+    "radius_label": "Straal",
+    "radius_10": "10 km",
+    "radius_20": "20 km",
+    "radius_50": "50 km",
+    "radius_100": "100 km",
+    "outside_radius": "Verder van u"
   },
   "contact": {
     "price": "Prijs",

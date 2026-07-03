@@ -124,4 +124,20 @@ describe("GET /api/search", () => {
       seller_verified: true,
     });
   });
+
+  it("passes existing geospatial params through to search_adverts", async () => {
+    rpcMock.mockResolvedValue({
+      data: [{ id: "adv-1", title: "Bike", status: "active", total_count: 1 }],
+      error: null,
+    });
+
+    await GET(new Request("https://x.test/api/search?lat=51.165&lng=4.99&radius_km=20&limit=24"));
+
+    expect(rpcMock).toHaveBeenCalledWith("search_adverts", expect.objectContaining({
+      location_filter: undefined,
+      location_lat: 51.165,
+      location_lng: 4.99,
+      radius_km: 20,
+    }));
+  });
 });
