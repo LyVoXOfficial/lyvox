@@ -3,6 +3,7 @@
  */
 
 import type { CatalogSpecifics } from '@/lib/types/catalog';
+import { absoluteUrl } from '@/lib/seo/baseUrl';
 
 export interface BaseAdvertData {
   id: string;
@@ -44,13 +45,13 @@ export interface SEOMetadata {
 
 /**
  * Generate canonical URL
+ *
+ * The ad detail route is `/ad/[id]` — a single dynamic segment with no slug
+ * child route. A canonical that appends a slug 404s, so this intentionally
+ * ignores any slug and always resolves to the real route.
  */
-export function generateCanonicalUrl(advertId: string, slug: string): string {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    'https://lyvox.be';
-  return `${baseUrl}/ad/${advertId}/${slug}`;
+export function generateCanonicalUrl(advertId: string, _slug?: string): string {
+  return absoluteUrl(`/ad/${advertId}`);
 }
 
 /**

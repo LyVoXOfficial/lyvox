@@ -13,7 +13,8 @@ import { formatCurrency, formatDate } from "@/i18n/format";
 import { getI18nProps, getInitialLocale } from "@/i18n/server";
 import { type Locale } from "@/lib/i18n";
 import { getJsonLdScriptProps } from "@/lib/seo";
-import { generateSlug, truncateDescription } from "@/lib/seo/catalog/common";
+import { getBaseUrl, absoluteUrl } from "@/lib/seo/baseUrl";
+import { truncateDescription } from "@/lib/seo/catalog/common";
 import { buildListingJsonLd } from "@/lib/seo/catalog/listingJsonLd";
 import { detectCategoryType } from "@/lib/utils/categoryDetector";
 import { supabaseServer } from "@/lib/supabaseServer";
@@ -35,10 +36,7 @@ import { loadCatalogGroups } from "@/lib/catalog/loadCatalogGroups";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  process.env.NEXT_PUBLIC_BASE_URL ||
-  "https://lyvox.be";
+const BASE_URL = getBaseUrl();
 const isDevEnvironment = process.env.NODE_ENV !== "production";
 
 function advertDebug(message: string, context?: Record<string, unknown>) {
@@ -253,13 +251,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       return {};
     }
 
-    const slug = generateSlug(advertData.advert.title);
-    const canonical = `${BASE_URL}/ad/${advertData.advert.id}/${slug}`;
+    // Real route is /ad/[id] — a single dynamic segment, no slug child route.
+    // A canonical/og:url with an appended slug 404s; keep this id-only.
+    const canonical = `${BASE_URL}/ad/${advertData.advert.id}`;
     const description = advertData.advert.description
       ? truncateDescription(advertData.advert.description, 160)
       : "";
     const primaryImage = advertData.media[0];
     const localeTag = resolveLocaleTag(locale);
+    // Stable route (not the expiring signed URL) so cached OG metadata never
+    // goes stale — see apps/web/src/app/og/advert/[id]/route.ts. Lives outside
+    // /api/ because robots.ts disallows /api/ and scrapers honor robots.txt.
+    const ogImageUrl = absoluteUrl(`/og/advert/${advertData.advert.id}`);
 
     return {
       title: advertData.advert.title,
@@ -276,7 +279,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         images: primaryImage
           ? [
               {
-                url: primaryImage.url,
+                url: ogImageUrl,
                 width: primaryImage.w ?? undefined,
                 height: primaryImage.h ?? undefined,
                 alt: advertData.advert.title,
@@ -288,7 +291,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         card: primaryImage ? "summary_large_image" : "summary",
         title: advertData.advert.title,
         description,
-        images: primaryImage ? [primaryImage.url] : undefined,
+        images: primaryImage ? [ogImageUrl] : undefined,
       },
     };
   } catch (error) {
@@ -443,11 +446,12 @@ export default async function AdvertPage({ params }: PageProps) {
   const { data: likeCountData } = await (await supabaseServer()).rpc("get_advert_like_count", { advert_id_param: data.advert.id });
   const likeCount = Number(likeCountData ?? 0);
 
-  const slug = generateSlug(data.advert.title);
-  const canonicalUrl = `${BASE_URL}/ad/${data.advert.id}/${slug}`;
+  // Real route is /ad/[id] — a single dynamic segment, no slug child route.
+  // A canonical/JSON-LD url with an appended slug 404s; keep this id-only.
+  const canonicalUrl = `${BASE_URL}/ad/${data.advert.id}`;
   const imageUrls = galleryImages.map((image) => image.url).filter(Boolean);
   const primaryImageUrl = galleryImages[0]?.url ?? null;
-  const listingPath = `/ad/${data.advert.id}/${slug}`;
+  const listingPath = `/ad/${data.advert.id}`;
   const loginHref = `/login?next=${encodeURIComponent(listingPath)}`;
   const editHref = `/post?edit=${data.advert.id}`;
   const sellerVerified = data.seller.verifiedEmail && data.seller.verifiedPhone;

@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { Onest, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
+import { getBaseUrl } from "@/lib/seo/baseUrl";
 import { FavoritesProvider } from "@/components/favorites/FavoritesProvider";
 import { LikesProvider } from "@/components/likes/LikesProvider";
 import TopBar from "@/components/topbar";
@@ -49,12 +50,13 @@ export async function generateMetadata(): Promise<Metadata> {
   const locales = ["en", "fr", "nl", "ru", "de"] as const;
   const alternateLocale = locales.filter((l) => l !== locale);
 
+  const base = getBaseUrl();
   const languageAlternates = {
-    en: "https://lyvox.be/?lang=en",
-    nl: "https://lyvox.be/?lang=nl",
-    fr: "https://lyvox.be/?lang=fr",
-    ru: "https://lyvox.be/?lang=ru",
-    de: "https://lyvox.be/?lang=de",
+    en: `${base}/?lang=en`,
+    nl: `${base}/?lang=nl`,
+    fr: `${base}/?lang=fr`,
+    ru: `${base}/?lang=ru`,
+    de: `${base}/?lang=de`,
   } satisfies Record<(typeof locales)[number], string>;
 
   const localizedOgCodes = alternateLocale.map((l) =>
@@ -62,6 +64,7 @@ export async function generateMetadata(): Promise<Metadata> {
   );
 
   return {
+    metadataBase: new URL(getBaseUrl()),
     title,
     description,
     icons: {
@@ -77,22 +80,18 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title,
       description,
+      url: getBaseUrl(),
+      siteName: "LyVoX",
       locale,
       alternateLocale: localizedOgCodes,
-      images: [
-        {
-          url: "/lyvox.svg",
-          width: 1024,
-          height: 1024,
-          alt: "LyVoX",
-        },
-      ],
+      // No `images` here — apps/web/src/app/opengraph-image.tsx supplies the
+      // default 1200x630 PNG automatically for this route and all children
+      // that don't define their own.
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: ["/lyvox.svg"],
     },
     alternates: {
       languages: languageAlternates,

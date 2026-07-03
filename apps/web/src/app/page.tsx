@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import SectionTitle from "@/components/section-title";
@@ -21,6 +22,7 @@ const CategoriesCarousel = dynamic(() => import("@/components/categories-carouse
 import { getI18nProps } from "@/i18n/server";
 import { logger } from "@/lib/errorLogger";
 import { getJsonLdScriptProps } from "@/lib/seo";
+import { getBaseUrl, absoluteUrl } from "@/lib/seo/baseUrl";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { signMediaUrls } from "@/lib/media/signMediaUrls";
 import { getFirstImage } from "@/lib/media/getFirstImage";
@@ -29,10 +31,29 @@ import type { AdvertCard } from "@/lib/advertCards";
 
 export const revalidate = 60;
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  process.env.NEXT_PUBLIC_BASE_URL ||
-  "https://lyvox.be";
+const BASE_URL = getBaseUrl();
+
+// SEO P0 (audit §1.2): home gets its own composed title + canonical instead
+// of inheriting the bare root `LyVoX` title. Composed from existing i18n
+// `app.title` (no new locale keys) — English-only suffix per brief.
+export async function generateMetadata(): Promise<Metadata> {
+  const { messages } = await getI18nProps();
+  const siteName = messages?.app?.title ?? "LyVoX";
+  const base = getBaseUrl();
+  return {
+    title: `${siteName} — Buy & sell locally in Belgium`,
+    alternates: {
+      canonical: absoluteUrl("/"),
+      languages: {
+        en: `${base}/?lang=en`,
+        nl: `${base}/?lang=nl`,
+        fr: `${base}/?lang=fr`,
+        ru: `${base}/?lang=ru`,
+        de: `${base}/?lang=de`,
+      },
+    },
+  };
+}
 
 type AdListItem = {
   id: string;
