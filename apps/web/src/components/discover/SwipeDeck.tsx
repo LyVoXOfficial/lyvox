@@ -73,6 +73,10 @@ type Reason = (typeof REASONS)[number];
 // localStorage prefs key (guest fallback for discover_prefs)
 const PREFS_KEY = "lyvox:discover:prefs";
 
+// Privacy: raw dwell time never leaves the client - only coarse buckets do.
+const dwellBucket = (ms: number): "glance" | "short" | "long" | "study" =>
+  ms < 1500 ? "glance" : ms < 5000 ? "short" : ms < 15000 ? "long" : "study";
+
 function readLocalPrefs(): DiscoverPrefs {
   if (typeof window === "undefined") return DEFAULT_PREFS;
   try {
@@ -260,7 +264,7 @@ export default function SwipeDeck({ initial, drops }: { initial: DeckCard[]; dro
       const dwell = Date.now() - dwellStart.current;
       trackEvent({
         event_name: "discover_swipe",
-        props: { direction: "like", advert_id: card.id, category_id: card.categoryId, seller_verified: card.sellerVerified, position_in_session: positionInSession, via, dwell_ms: dwell },
+        props: { direction: "like", advert_id: card.id, category_id: card.categoryId, seller_verified: card.sellerVerified, position_in_session: positionInSession, via, dwell_bucket: dwellBucket(dwell) },
       });
       requireTrust("auth", () => {
         void addLike(card.id);
@@ -280,7 +284,7 @@ export default function SwipeDeck({ initial, drops }: { initial: DeckCard[]; dro
       const dwell = Date.now() - dwellStart.current;
       trackEvent({
         event_name: "discover_swipe",
-        props: { direction: "pass", advert_id: card.id, category_id: card.categoryId, seller_verified: card.sellerVerified, position_in_session: positionInSession, via, dwell_ms: dwell },
+        props: { direction: "pass", advert_id: card.id, category_id: card.categoryId, seller_verified: card.sellerVerified, position_in_session: positionInSession, via, dwell_bucket: dwellBucket(dwell) },
       });
       pushUndo({ card, signal: "pass", likeWasAdded: false });
     },
@@ -301,7 +305,7 @@ export default function SwipeDeck({ initial, drops }: { initial: DeckCard[]; dro
       const dwell = Date.now() - dwellStart.current;
       trackEvent({
         event_name: "discover_swipe",
-        props: { direction: "down", advert_id: card.id, category_id: card.categoryId, seller_verified: card.sellerVerified, position_in_session: positionInSession, via, dwell_ms: dwell },
+        props: { direction: "down", advert_id: card.id, category_id: card.categoryId, seller_verified: card.sellerVerified, position_in_session: positionInSession, via, dwell_bucket: dwellBucket(dwell) },
       });
       pushUndo({ card, signal: "down", likeWasAdded: false });
       const lessCount = getLessCount();
