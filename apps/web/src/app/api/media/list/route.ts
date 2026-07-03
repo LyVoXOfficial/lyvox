@@ -1,6 +1,7 @@
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { ensureAdvertOwnership, requireAuthenticatedUser } from "../_shared";
+import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -12,7 +13,29 @@ export const runtime = "nodejs";
 
 const SIGNED_DOWNLOAD_TTL_SECONDS = 10 * 60;
 
-export async function GET(request: Request) {
+// A-4: listing owner media issues N signed URLs per call — looser read limit,
+// consistent with other read endpoints (likes:get) at 60/min.
+const mediaListLimiter = createRateLimiter({ limit: 60, windowSec: 60, prefix: "media:list" });
+
+const contextCache = new WeakMap<Request, Promise<{ userId: string | null }>>();
+const resolveUserId = async (req: Request): Promise<string | null> => {
+  let cached = contextCache.get(req);
+  if (!cached) {
+    cached = (async () => {
+      const supabase = await supabaseServer();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      return { userId: user?.id ?? null };
+    })();
+    contextCache.set(req, cached);
+  }
+  return (await cached).userId;
+};
+const buildRateLimitKey = (_req: Request, userId: string | null, ip: string | null) =>
+  userId ?? ip ?? "anonymous";
+
+async function handleGet(request: Request) {
   const url = new URL(request.url);
   const advertId = url.searchParams.get("advertId");
 
@@ -88,3 +111,9 @@ export async function GET(request: Request) {
     expiresIn: SIGNED_DOWNLOAD_TTL_SECONDS,
   });
 }
+
+export const GET = withRateLimit(handleGet, {
+  limiter: mediaListLimiter,
+  getUserId: resolveUserId,
+  makeKey: buildRateLimitKey,
+});

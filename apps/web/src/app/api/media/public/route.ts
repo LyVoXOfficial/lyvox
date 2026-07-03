@@ -1,5 +1,6 @@
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
+import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -11,7 +12,12 @@ export const runtime = "nodejs";
 
 const SIGNED_DOWNLOAD_TTL_SECONDS = 10 * 60;
 
-export async function GET(request: Request) {
+// A-4: unauthenticated endpoint — enumeration/signed-URL-farming surface. IP-keyed only
+// (no session), matching the public "search:ip" precedent of 60/min.
+const mediaPublicLimiter = createRateLimiter({ limit: 60, windowSec: 60, prefix: "media:public" });
+const buildRateLimitKey = (_req: Request, _userId: string | null, ip: string | null) => ip ?? "anonymous";
+
+async function handleGet(request: Request) {
   const url = new URL(request.url);
   const advertId = url.searchParams.get("advertId");
 
@@ -111,3 +117,8 @@ export async function GET(request: Request) {
     expiresIn: SIGNED_DOWNLOAD_TTL_SECONDS,
   });
 }
+
+export const GET = withRateLimit(handleGet, {
+  limiter: mediaPublicLimiter,
+  makeKey: buildRateLimitKey,
+});

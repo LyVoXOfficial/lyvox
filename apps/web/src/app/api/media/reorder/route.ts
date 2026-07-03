@@ -1,5 +1,6 @@
 import { supabaseServer } from "@/lib/supabaseServer";
 import { ensureAdvertOwnership, requireAuthenticatedUser } from "../_shared";
+import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -12,7 +13,29 @@ import { reorderMediaSchema } from "@/lib/validations/media";
 
 export const runtime = "nodejs";
 
-export async function POST(request: Request) {
+// A-4: reordering issues N updates per call — tight per-user limit, consistent with
+// other write endpoints (likes:post, report:user) at 30/min.
+const mediaReorderLimiter = createRateLimiter({ limit: 30, windowSec: 60, prefix: "media:reorder" });
+
+const contextCache = new WeakMap<Request, Promise<{ userId: string | null }>>();
+const resolveUserId = async (req: Request): Promise<string | null> => {
+  let cached = contextCache.get(req);
+  if (!cached) {
+    cached = (async () => {
+      const supabase = await supabaseServer();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      return { userId: user?.id ?? null };
+    })();
+    contextCache.set(req, cached);
+  }
+  return (await cached).userId;
+};
+const buildRateLimitKey = (_req: Request, userId: string | null, ip: string | null) =>
+  userId ?? ip ?? "anonymous";
+
+async function handlePost(request: Request) {
   const parseResult = await safeJsonParse<{
     advertId?: string;
     orderedIds?: string[];
@@ -67,3 +90,9 @@ export async function POST(request: Request) {
 
   return createSuccessResponse({});
 }
+
+export const POST = withRateLimit(handlePost, {
+  limiter: mediaReorderLimiter,
+  getUserId: resolveUserId,
+  makeKey: buildRateLimitKey,
+});
