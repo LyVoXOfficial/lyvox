@@ -37,6 +37,24 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 
   if (!current) return {};
 
+  // Thin-guard: a category whose subtree carries <3 active listings is a
+  // soft-404 for Google — keep it reachable (follow) but out of the index
+  // until inventory arrives.
+  const { data: subtreeRows } = await supabase
+    .from("categories")
+    .select("id")
+    .eq("is_active", true)
+    .or(`path.eq.${slugPath},path.like.${slugPath}/*`);
+  const subtreeIds = (subtreeRows ?? []).map((r) => r.id);
+  const { count: subtreeCount } = subtreeIds.length
+    ? await supabase
+        .from("adverts")
+        .select("id", { count: "exact", head: true })
+        .in("category_id", subtreeIds)
+        .eq("status", "active")
+    : { count: 0 };
+  const thin = (subtreeCount ?? 0) < 3;
+
   const [locale, { messages }] = await Promise.all([getInitialLocale(), getI18nProps()]);
   const name = getLocalizedCategoryName(current as Category, locale);
 
@@ -57,6 +75,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   return {
     title,
     description,
+    ...(thin ? { robots: { index: false, follow: true } } : {}),
     alternates: { canonical },
     openGraph: {
       title,
@@ -164,12 +183,23 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       orderBy = { column: "created_at", ascending: false };
   }
 
+  // Subtree ids: ads attach to LEAF categories, so hub/mid-level pages must
+  // aggregate their whole branch — an exact category_id match renders every
+  // hub empty (live bug: /c/transport showed 0 listings).
+  const { data: subtreeRows } = await supabase
+    .from("categories")
+    .select("id")
+    .eq("is_active", true)
+    .or(`path.eq.${slugPath},path.like.${slugPath}/*`);
+  const subtreeIds = (subtreeRows ?? []).map((r) => r.id);
+  if (!subtreeIds.includes(typedCurrent.id)) subtreeIds.push(typedCurrent.id);
+
   const adverts: AdvertItem[] = [];
   const [{ data: advertsRaw }, { count: totalAdverts }] = await Promise.all([
     supabase
       .from("adverts")
       .select("id,title,price,currency,location,created_at,user_id")
-      .eq("category_id", typedCurrent.id)
+      .in("category_id", subtreeIds)
       .eq("status", "active")
       .order(orderBy.column, { ascending: orderBy.ascending })
       .order("id", { ascending: false })
@@ -177,7 +207,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     supabase
       .from("adverts")
       .select("id", { count: "exact", head: true })
-      .eq("category_id", typedCurrent.id)
+      .in("category_id", subtreeIds)
       .eq("status", "active"),
   ]);
 
