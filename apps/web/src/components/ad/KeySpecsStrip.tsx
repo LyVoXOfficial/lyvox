@@ -23,14 +23,21 @@ function formatMileage(value: unknown, locale: Locale): string | null {
   return `${num.toLocaleString(locale === "ru" ? "ru-RU" : locale === "nl" ? "nl-NL" : locale === "fr" ? "fr-FR" : locale === "de" ? "de-DE" : "en-US")} km`;
 }
 
-function specValue(specifics: Record<string, any>, ...keys: string[]): unknown {
+function looksLikeUuid(value: unknown): boolean {
+  return typeof value === "string" && /^[0-9a-f]{8}-/i.test(value);
+}
+
+export function resolveSpecValue(specifics: Record<string, any>, ...keys: string[]): unknown {
   for (const k of keys) {
     if (specifics[k] !== undefined && specifics[k] !== null && specifics[k] !== "") {
+      if (looksLikeUuid(specifics[k])) continue;
       return specifics[k];
     }
   }
   return null;
 }
+
+const specValue = resolveSpecValue;
 
 function translateSpec(t: TFunction, value: string): string {
   const MAP: Record<string, [string, string]> = {
@@ -79,7 +86,7 @@ function buildRealEstateChips(
   const chips: string[] = [];
   const listingType = specValue(specifics, "listing_type");
   if (listingType) chips.push(translateSpec(t, String(listingType)));
-  const propType = specValue(specifics, "property_type");
+  const propType = specValue(specifics, "property_type", "property_type_id");
   if (propType) chips.push(String(propType));
   const area = specValue(specifics, "area_m2", "area");
   if (area) chips.push(`${area} m²`);
@@ -128,9 +135,9 @@ function buildJobsChips(
   t: TFunction,
 ): string[] {
   const chips: string[] = [];
-  const jobCat = specValue(specifics, "job_category");
+  const jobCat = specValue(specifics, "job_category", "job_category_id");
   if (jobCat) chips.push(String(jobCat));
-  const contractType = specValue(specifics, "contract_type");
+  const contractType = specValue(specifics, "contract_type", "contract_type_id");
   if (contractType) chips.push(String(contractType));
   if (location) chips.push(location);
   return chips;
