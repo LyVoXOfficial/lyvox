@@ -1,6 +1,7 @@
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { ensureAdvertOwnership, requireAuthenticatedUser } from "../_shared";
+import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -10,8 +11,30 @@ import {
 
 export const runtime = "nodejs";
 
-export async function DELETE(
-  _req: Request,
+// A-4: media delete — tight per-user limit, consistent with other write endpoints
+// (likes:delete, likes:post) at 30/min.
+const mediaDeleteLimiter = createRateLimiter({ limit: 30, windowSec: 60, prefix: "media:delete" });
+
+const contextCache = new WeakMap<Request, Promise<{ userId: string | null }>>();
+const resolveUserId = async (req: Request): Promise<string | null> => {
+  let cached = contextCache.get(req);
+  if (!cached) {
+    cached = (async () => {
+      const supabase = await supabaseServer();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      return { userId: user?.id ?? null };
+    })();
+    contextCache.set(req, cached);
+  }
+  return (await cached).userId;
+};
+const buildRateLimitKey = (_req: Request, userId: string | null, ip: string | null) =>
+  userId ?? ip ?? "anonymous";
+
+async function handleDelete(
+  _request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params;
@@ -76,3 +99,9 @@ export async function DELETE(
 
   return createSuccessResponse({});
 }
+
+export const DELETE = withRateLimit(handleDelete, {
+  limiter: mediaDeleteLimiter,
+  getUserId: resolveUserId,
+  makeKey: buildRateLimitKey,
+});

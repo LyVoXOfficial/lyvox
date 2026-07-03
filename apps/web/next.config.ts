@@ -18,6 +18,9 @@ const contentSecurityPolicy = [
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'none'",
+  // Collect violation reports — without a collector the Report-Only phase
+  // observes nothing (audit A-1 step 1). Route logs + returns 204.
+  "report-uri /api/csp-report",
 ].join('; ');
 
 /** @type {import('next').NextConfig} */
@@ -54,10 +57,12 @@ const nextConfig = {
         headers: [
           {
             key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains',
+            value: 'max-age=31536000; includeSubDomains; preload',
           },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          // DENY aligns with CSP frame-ancestors 'none' (audit A-6) — the app
+          // never frames itself, so the stricter legacy header is safe.
+          { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'X-DNS-Prefetch-Control', value: 'on' },
           // Confirmed via code audit that the app uses none of camera/

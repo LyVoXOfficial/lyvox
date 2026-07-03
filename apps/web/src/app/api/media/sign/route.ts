@@ -5,6 +5,7 @@ import {
   requireAuthenticatedUser,
   MEDIA_LIMIT_PER_ADVERT,
 } from "../_shared";
+import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -18,6 +19,28 @@ import { signMediaSchema } from "@/lib/validations/media";
 export const runtime = "nodejs";
 
 const SIGNED_UPLOAD_TTL_SECONDS = 5 * 60;
+
+// A-4: signed-upload issuance is abuse surface (URL farming / upload spam); tight per-user
+// limit, matching the write-ish "likes:post" / "report:user" precedent of 30/min.
+const mediaSignLimiter = createRateLimiter({ limit: 30, windowSec: 60, prefix: "media:sign" });
+
+const contextCache = new WeakMap<Request, Promise<{ userId: string | null }>>();
+const resolveUserId = async (req: Request): Promise<string | null> => {
+  let cached = contextCache.get(req);
+  if (!cached) {
+    cached = (async () => {
+      const supabase = await supabaseServer();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      return { userId: user?.id ?? null };
+    })();
+    contextCache.set(req, cached);
+  }
+  return (await cached).userId;
+};
+const buildRateLimitKey = (_req: Request, userId: string | null, ip: string | null) =>
+  userId ?? ip ?? "anonymous";
 
 const sanitizeFileName = (name: string) =>
   name
@@ -35,7 +58,7 @@ const buildPath = (userId: string, advertId: string, originalName: string) => {
   return `${userId}/${advertId}/${slug}.${ext}`;
 };
 
-export async function POST(request: Request) {
+async function handlePost(request: Request) {
   const parseResult = await safeJsonParse<{
     advertId?: string;
     fileName?: string;
@@ -121,3 +144,9 @@ export async function POST(request: Request) {
     max: MEDIA_LIMIT_PER_ADVERT,
   });
 }
+
+export const POST = withRateLimit(handlePost, {
+  limiter: mediaSignLimiter,
+  getUserId: resolveUserId,
+  makeKey: buildRateLimitKey,
+});

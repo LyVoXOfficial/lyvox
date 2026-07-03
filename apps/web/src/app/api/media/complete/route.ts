@@ -5,6 +5,7 @@ import {
   requireAuthenticatedUser,
   MEDIA_LIMIT_PER_ADVERT,
 } from "../_shared";
+import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -19,7 +20,29 @@ export const runtime = "nodejs";
 
 const SIGNED_DOWNLOAD_TTL_SECONDS = 15 * 60;
 
-export async function POST(request: Request) {
+// A-4: finalizing an upload writes a media row + issues a signed download URL — tight
+// per-user limit consistent with other write endpoints (likes:post, report:user) at 30/min.
+const mediaCompleteLimiter = createRateLimiter({ limit: 30, windowSec: 60, prefix: "media:complete" });
+
+const contextCache = new WeakMap<Request, Promise<{ userId: string | null }>>();
+const resolveUserId = async (req: Request): Promise<string | null> => {
+  let cached = contextCache.get(req);
+  if (!cached) {
+    cached = (async () => {
+      const supabase = await supabaseServer();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      return { userId: user?.id ?? null };
+    })();
+    contextCache.set(req, cached);
+  }
+  return (await cached).userId;
+};
+const buildRateLimitKey = (_req: Request, userId: string | null, ip: string | null) =>
+  userId ?? ip ?? "anonymous";
+
+async function handlePost(request: Request) {
   const parseResult = await safeJsonParse<{
     advertId?: string;
     storagePath?: string;
@@ -149,3 +172,9 @@ export async function POST(request: Request) {
     },
   });
 }
+
+export const POST = withRateLimit(handlePost, {
+  limiter: mediaCompleteLimiter,
+  getUserId: resolveUserId,
+  makeKey: buildRateLimitKey,
+});
