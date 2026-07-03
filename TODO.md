@@ -16,10 +16,9 @@
 
 ## Очередь
 
-- [x] **T04** 🟡 — TrustSignalPolicy: единый конфиг trust-сигналов (P1, ~2 часа) → [docs/todo/T04-trust-signal-policy.md](docs/todo/T04-trust-signal-policy.md) — db186bb
 - [x] **T19** 🟡 — Дрейф ключей specifics: чипы/бейджи молча не показываются (находка №5 аудита T03) → [docs/todo/T19-specifics-key-drift.md](docs/todo/T19-specifics-key-drift.md) — 3fbc091
-- [ ] **T20** 🟡 — Гео-бэкфилл: справочник городов + locations.point + привязка объявлений (разблокирует T05; координаты ДАНЫ в инструкции — не выдумывать) → [docs/todo/T20-geo-backfill.md](docs/todo/T20-geo-backfill.md)
-- [ ] **T05** 🟡 — Строгий радиус в /search + секция «вне радиуса» (P1, ~3 часа; выполнять строго ПОСЛЕ T20) → [docs/todo/T05-strict-radius.md](docs/todo/T05-strict-radius.md)
+- [x] **T20** 🟡 — Гео-бэкфилл: справочник городов + locations.point + привязка объявлений (разблокирует T05; координаты ДАНЫ в инструкции — не выдумывать) → [docs/todo/T20-geo-backfill.md](docs/todo/T20-geo-backfill.md) — e25e1c9
+- [ ] **T05** 🟡 — Строгий радиус в /search + секция «вне радиуса» (P1, ~3 часа) → [docs/todo/T05-strict-radius.md](docs/todo/T05-strict-radius.md)
 - [ ] **T06** 🔴 — Внутренний прайс-оценщик median/IQR (P1, ~4 часа, БЕЗ публичного UI; миграция+REVOKE) → [docs/todo/T06-price-estimator-internal.md](docs/todo/T06-price-estimator-internal.md)
 - [ ] **T07** 🔴 — ChatOffer: структурированные предложения цены + пороги продавца (P1, ~1 день; RLS+чат) → [docs/todo/T07-chat-offers.md](docs/todo/T07-chat-offers.md)
 - [ ] **T08** 🔴 — fast_goods: /post за ≤4 шага для простых товаров (P1-конверсия, ~1-2 дня; PostForm 1400 строк, по-коммитно) → [docs/todo/T08-post-fast-goods.md](docs/todo/T08-post-fast-goods.md)
