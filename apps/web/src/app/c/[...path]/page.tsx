@@ -20,10 +20,12 @@ import { getBaseUrl, absoluteUrl } from "@/lib/seo/baseUrl";
 const BASE_URL = getBaseUrl();
 
 // F12: per-category SEO metadata (was absent — /c/* had no canonical/title/desc).
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { path } = await params;
+  const { page: pageParam } = await searchParams;
   const slugPath = Array.isArray(path) ? path.join("/") : "";
   if (!slugPath) return {};
+  const currentPage = Math.max(0, Number(pageParam || "0") || 0);
 
   const supabase = await supabaseService();
   const { data: current } = await supabase
@@ -42,14 +44,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     (messages as Record<string, Record<string, string>>)?.category?.seoDescription ??
     "Browse {category} listings on LyVoX.";
   const description = descTemplate.replace("{category}", name);
-  const canonical = absoluteUrl(`/c/${slugPath}`);
+  // Paginated pages self-canonicalize (?page=N kept, ?sort dropped) — a
+  // base-path canonical on every page collapses pages 2+ out of the index
+  // and their listings with them. Human page number is 1-based in the title.
+  const canonical =
+    currentPage > 0
+      ? absoluteUrl(`/c/${slugPath}?page=${currentPage}`)
+      : absoluteUrl(`/c/${slugPath}`);
+  const pageSuffix = currentPage > 0 ? ` — ${currentPage + 1}` : "";
+  const title = `${name}${pageSuffix} | LyVoX`;
 
   return {
-    title: `${name} | LyVoX`,
+    title,
     description,
     alternates: { canonical },
     openGraph: {
-      title: `${name} | LyVoX`,
+      title,
       description,
       url: canonical,
       type: "website",
