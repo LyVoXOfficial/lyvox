@@ -4,6 +4,7 @@ import { CheckCircle2, ChevronDown, CircleAlert, Clock, MapPin, MessageSquare, S
 import { Suspense } from "react";
 import AdvertGallery from "@/components/AdvertGallery";
 import PublishedShareBanner from "@/components/ad/PublishedShareBanner";
+import ListingCompletionBanner from "@/components/ad/ListingCompletionBanner";
 import AdvertDetails from "@/components/AdvertDetails";
 import AdvertContactPanel from "@/components/AdvertContactPanel";
 import SellerCard from "@/components/SellerCard";
@@ -18,7 +19,7 @@ import { getJsonLdScriptProps } from "@/lib/seo";
 import { getBaseUrl, absoluteUrl } from "@/lib/seo/baseUrl";
 import { truncateDescription } from "@/lib/seo/catalog/common";
 import { buildListingJsonLd } from "@/lib/seo/catalog/listingJsonLd";
-import { detectCategoryType } from "@/lib/utils/categoryDetector";
+import { detectCategoryType, resolvePostFlowMode } from "@/lib/utils/categoryDetector";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { isViewerVerified } from "@/lib/auth/requireVerified";
@@ -533,6 +534,7 @@ export default async function AdvertPage({ params }: PageProps) {
   const listingDomain = data.make
     ? "vehicle"
     : detectCategoryType(data.category?.path ?? data.category?.slug ?? "");
+  const listingFlowMode = resolvePostFlowMode(data.category?.path ?? data.category?.slug ?? "");
 
   // F13: load catalog group/field schema for readonly detail display.
   let catalogGroups: Awaited<ReturnType<typeof loadCatalogGroups>>["groups"] = [];
@@ -543,6 +545,15 @@ export default async function AdvertPage({ params }: PageProps) {
   } catch {
     // Non-fatal: falls back to AdvertDetails legacy renderer below
   }
+
+  const catalogSpecificValues = normalizeCatalogSpecificValues(data.specifics ?? {});
+  const completion = getCatalogCompletion(catalogGroups, catalogSpecificValues);
+  const showCompletionBanner =
+    isOwnListing &&
+    listingFlowMode === "fast_goods" &&
+    completion !== null &&
+    completion.filledCount < completion.targetCount;
+  const completionEditHref = `${editHref}&complete=1`;
 
   const productJsonLd = buildListingJsonLd({
     domain: listingDomain,
@@ -681,6 +692,26 @@ export default async function AdvertPage({ params }: PageProps) {
           <Suspense fallback={null}>
             <PublishedShareBanner title={data.advert.title} />
           </Suspense>
+          {showCompletionBanner && completion ? (
+            <ListingCompletionBanner
+              title={translate("post.fast_completion_title", "Complete the listing")}
+              body={translate(
+                "post.fast_completion_body",
+                "Add a few category details so buyers can compare it faster.",
+              )}
+              progressLabel={translateFallback(
+                t,
+                "post.fast_completion_progress",
+                "{filled}/{target} details added",
+                {
+                  filled: completion.filledCount,
+                  target: completion.targetCount,
+                },
+              )}
+              ctaLabel={translate("post.fast_completion_cta", "Add details")}
+              editHref={completionEditHref}
+            />
+          ) : null}
 
           <AdvertGallery images={galleryImages} />
 
@@ -821,7 +852,7 @@ export default async function AdvertPage({ params }: PageProps) {
         <CatalogDetailsSection
           groups={catalogGroups}
           fields={catalogFields}
-          values={data.specifics ?? {}}
+          values={catalogSpecificValues}
           locale={locale}
         />
       ) : showDetails ? (
@@ -1216,6 +1247,80 @@ function translateFallback(
 ): string {
   const value = t(key, params);
   return value === key ? fallback : value;
+}
+
+const COMPLETION_SCHEMA_FIELD_TARGET = 3;
+
+function normalizeCatalogSpecificValues(
+  specifics: Record<string, unknown>,
+): Record<string, unknown> {
+  const values: Record<string, unknown> = { ...specifics };
+
+  for (const [key, value] of Object.entries(specifics)) {
+    if (!key.startsWith("catalog_field_")) {
+      continue;
+    }
+
+    const fieldKey = key.replace("catalog_field_", "");
+    if (fieldKey && values[fieldKey] === undefined) {
+      values[fieldKey] = value;
+    }
+  }
+
+  return values;
+}
+
+function getCatalogCompletion(
+  groups: Awaited<ReturnType<typeof loadCatalogGroups>>["groups"],
+  specifics: Record<string, unknown>,
+): { filledCount: number; targetCount: number; totalCount: number } | null {
+  const fieldKeys = new Set<string>();
+
+  for (const group of groups) {
+    for (const field of group.fields ?? []) {
+      if (typeof field.field_key === "string" && field.field_key.trim().length > 0) {
+        fieldKeys.add(field.field_key);
+      }
+    }
+  }
+
+  if (fieldKeys.size === 0) {
+    return null;
+  }
+
+  let filledCount = 0;
+  for (const fieldKey of fieldKeys) {
+    const value = specifics[fieldKey] ?? specifics[`catalog_field_${fieldKey}`];
+    if (isFilledSpecificValue(value)) {
+      filledCount += 1;
+    }
+  }
+
+  return {
+    filledCount,
+    targetCount: Math.min(COMPLETION_SCHEMA_FIELD_TARGET, fieldKeys.size),
+    totalCount: fieldKeys.size,
+  };
+}
+
+function isFilledSpecificValue(value: unknown): boolean {
+  if (value === null || value === undefined) {
+    return false;
+  }
+
+  if (typeof value === "string") {
+    return value.trim().length > 0;
+  }
+
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+
+  if (typeof value === "object") {
+    return Object.keys(value).length > 0;
+  }
+
+  return true;
 }
 
 async function loadCurrentUserId(): Promise<string | null> {

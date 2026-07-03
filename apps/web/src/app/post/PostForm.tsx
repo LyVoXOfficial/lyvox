@@ -53,6 +53,7 @@ type PostFormProps = {
   locale: string;
   userPhone?: string | null;
   isVerified?: boolean;
+  completeListing?: boolean;
 };
 
 const AUTO_SAVE_INTERVAL_MS = 30_000;
@@ -113,10 +114,34 @@ const POST_FLOW_STEPS: Record<PostFlowMode, PostStepConfig[]> = {
   ],
 };
 
-export function PostForm({ categories, userId, advertToEdit, locale, userPhone, isVerified = false }: PostFormProps) {
+const FAST_GOODS_COMPLETION_STEPS: PostStepConfig[] = [
+  { id: "photos" },
+  { id: "category_title" },
+  { id: "specifics" },
+  { id: "price_condition" },
+  { id: "location_preview" },
+];
+
+function resolveInitialCategory(categories: Category[], categoryId?: string | null) {
+  return categoryId ? categories.find((category) => category.id === categoryId) ?? null : null;
+}
+
+export function PostForm({
+  categories,
+  userId,
+  advertToEdit,
+  locale,
+  userPhone,
+  isVerified = false,
+  completeListing = false,
+}: PostFormProps) {
   const { t } = useI18n();
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
+  const initialCategory = resolveInitialCategory(categories, advertToEdit?.category_id);
+  const initialCategoryPath = initialCategory?.path || initialCategory?.slug || "";
+  const initialCategoryType = initialCategory ? detectCategoryType(initialCategoryPath) : "generic";
+  const initialPostFlowMode = initialCategory ? resolvePostFlowMode(initialCategoryPath) : "generic";
+  const [currentStep, setCurrentStep] = useState(() => (completeListing ? 3 : 1));
   const [isLoading, setIsLoading] = useState(false);
   const [advertId, setAdvertId] = useState<string | null>(advertToEdit?.id ?? null);
   const [selectedMainCategory, setSelectedMainCategory] = useState<string | null>(null);
@@ -184,9 +209,12 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
   const [formData, setFormData] = useState(initializeFormData());
   
   // Category type detection state
-  const [categoryType, setCategoryType] = useState<string>('generic');
-  const [postFlowMode, setPostFlowMode] = useState<PostFlowMode>("generic");
-  const activeSteps = POST_FLOW_STEPS[postFlowMode] ?? POST_FLOW_STEPS.generic;
+  const [categoryType, setCategoryType] = useState<string>(initialCategoryType);
+  const [postFlowMode, setPostFlowMode] = useState<PostFlowMode>(initialPostFlowMode);
+  const useCompletionSteps = completeListing && Boolean(advertToEdit) && postFlowMode === "fast_goods";
+  const activeSteps = useCompletionSteps
+    ? FAST_GOODS_COMPLETION_STEPS
+    : POST_FLOW_STEPS[postFlowMode] ?? POST_FLOW_STEPS.generic;
   const totalSteps = activeSteps.length;
   const activeStep = activeSteps[Math.min(currentStep, totalSteps) - 1] ?? activeSteps[0];
   const schemaExcludedTypes = useRef(new Set(["vehicle", "real_estate", "electronics", "fashion", "jobs"]));
@@ -704,6 +732,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
     const fieldMap = catalogSchemaState.fields;
     const values = formData.catalog_fields ?? {};
     const errors: string[] = [];
+    const requireSchemaValues = postFlowMode !== "fast_goods";
 
     const steps = Array.isArray(schema.steps) ? schema.steps : [];
 
@@ -717,7 +746,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
 
           const label = resolveCatalogFieldLabel(fieldDef, schemaField);
           const value = values[schemaField.field_key];
-          const required = schemaField.optional === true ? false : fieldDef.is_required;
+          const required = requireSchemaValues && schemaField.optional !== true && fieldDef.is_required;
           const hasValue =
             value !== undefined &&
             value !== null &&
@@ -761,7 +790,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
     }
 
     return errors;
-  }, [categoryType, catalogSchemaState, formData.catalog_fields, resolveCatalogFieldLabel, t]);
+  }, [categoryType, catalogSchemaState, formData.catalog_fields, postFlowMode, resolveCatalogFieldLabel, t]);
 
   // Prepare vehicle specifics from form data
   const prepareSpecifics = useCallback(() => {
