@@ -203,6 +203,11 @@
     "private_seller": "Particuliere verkoper"
   },
   "post": {
+    "share_banner_title": "Je zoekertje staat online",
+    "share_banner_body": "Deel de link — zo vinden kopers het sneller.",
+    "share_native": "Delen",
+    "share_copy": "Link kopiëren",
+    "share_copied": "Link gekopieerd",
     "not_found": "Advertentie niet gevonden",
     "not_owner": "Je kunt deze advertentie niet bewerken",
     "login_to_post": "Log in om een advertentie te plaatsen",
