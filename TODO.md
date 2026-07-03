@@ -15,8 +15,9 @@
 
 - [x] **T03** — Аудит категорий и вертикальный контракт — ДОКУМЕНТ, не код (P0-фундамент, ~3 часа) → [docs/todo/T03-category-audit.md](docs/todo/T03-category-audit.md) — 6e3b7d6
 - [x] **T04** — TrustSignalPolicy: единый конфиг trust-сигналов (P1, ~2 часа) → [docs/todo/T04-trust-signal-policy.md](docs/todo/T04-trust-signal-policy.md) — db186bb
-- [ ] **T05** — Строгий радиус в /search + секция «вне радиуса» (P1, ~3 часа) → [docs/todo/T05-strict-radius.md](docs/todo/T05-strict-radius.md)
-- [ ] **T19** — Дрейф ключей specifics: чипы/бейджи молча не показываются (находка №5 аудита T03; внеочередное — позиция в списке = приоритет) → [docs/todo/T19-specifics-key-drift.md](docs/todo/T19-specifics-key-drift.md)
+- [ ] **T19** — Дрейф ключей specifics: чипы/бейджи молча не показываются (находка №5 аудита T03) → [docs/todo/T19-specifics-key-drift.md](docs/todo/T19-specifics-key-drift.md)
+- [ ] **T20** — Гео-бэкфилл: справочник городов + locations.point + привязка объявлений (разблокирует T05; координаты ДАНЫ в инструкции — не выдумывать) → [docs/todo/T20-geo-backfill.md](docs/todo/T20-geo-backfill.md)
+- [ ] **T05** — Строгий радиус в /search + секция «вне радиуса» (P1, ~3 часа; БЫЛ ЗАБЛОКИРОВАН пустой locations — выполнять строго ПОСЛЕ T20) → [docs/todo/T05-strict-radius.md](docs/todo/T05-strict-radius.md)
 - [ ] **T06** — Внутренний прайс-оценщик median/IQR (P1, ~4 часа, БЕЗ публичного UI) → [docs/todo/T06-price-estimator-internal.md](docs/todo/T06-price-estimator-internal.md)
 - [ ] **T07** — ChatOffer: структурированные предложения цены + пороги продавца (P1, ~1 день) → [docs/todo/T07-chat-offers.md](docs/todo/T07-chat-offers.md)
 - [ ] **T08** — fast_goods: /post за ≤4 шага для простых товаров (P1-конверсия, ~1-2 дня, СЛОЖНОЕ) → [docs/todo/T08-post-fast-goods.md](docs/todo/T08-post-fast-goods.md)
