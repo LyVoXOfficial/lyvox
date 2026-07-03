@@ -50,12 +50,13 @@ export async function generateMetadata(): Promise<Metadata> {
   const locales = ["en", "fr", "nl", "ru", "de"] as const;
   const alternateLocale = locales.filter((l) => l !== locale);
 
+  const base = getBaseUrl();
   const languageAlternates = {
-    en: "https://lyvox.be/?lang=en",
-    nl: "https://lyvox.be/?lang=nl",
-    fr: "https://lyvox.be/?lang=fr",
-    ru: "https://lyvox.be/?lang=ru",
-    de: "https://lyvox.be/?lang=de",
+    en: `${base}/?lang=en`,
+    nl: `${base}/?lang=nl`,
+    fr: `${base}/?lang=fr`,
+    ru: `${base}/?lang=ru`,
+    de: `${base}/?lang=de`,
   } satisfies Record<(typeof locales)[number], string>;
 
   const localizedOgCodes = alternateLocale.map((l) =>
