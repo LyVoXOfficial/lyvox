@@ -6,7 +6,6 @@ export const revalidate = 3600; // rebuild at most once per hour
 
 const STATIC_ROUTES: MetadataRoute.Sitemap = [
   { url: absoluteUrl("/"), changeFrequency: "daily", priority: 1.0 },
-  { url: absoluteUrl("/discover"), changeFrequency: "daily", priority: 0.7 },
   { url: absoluteUrl("/legal/privacy"), changeFrequency: "yearly", priority: 0.2 },
   { url: absoluteUrl("/legal/terms"), changeFrequency: "yearly", priority: 0.2 },
   { url: absoluteUrl("/legal/cookies"), changeFrequency: "yearly", priority: 0.2 },
@@ -43,7 +42,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .select("id, updated_at")
       .eq("status", "active")
       .order("updated_at", { ascending: false })
-      .limit(500);
+      .limit(5000);
 
     for (const advert of adverts ?? []) {
       advertRoutes.push({

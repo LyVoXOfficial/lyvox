@@ -260,8 +260,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const primaryImage = advertData.media[0];
     const localeTag = resolveLocaleTag(locale);
     // Stable route (not the expiring signed URL) so cached OG metadata never
-    // goes stale — see apps/web/src/app/api/og/advert/[id]/route.ts.
-    const ogImageUrl = absoluteUrl(`/api/og/advert/${advertData.advert.id}`);
+    // goes stale — see apps/web/src/app/og/advert/[id]/route.ts. Lives outside
+    // /api/ because robots.ts disallows /api/ and scrapers honor robots.txt.
+    const ogImageUrl = absoluteUrl(`/og/advert/${advertData.advert.id}`);
 
     return {
       title: advertData.advert.title,
