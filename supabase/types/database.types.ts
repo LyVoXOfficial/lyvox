@@ -3756,6 +3756,7 @@ export type Database = {
       postgis_wagyu_version: { Args: never; Returns: string }
       refresh_category_advert_counts: { Args: never; Returns: undefined }
       refresh_top_sellers: { Args: never; Returns: undefined }
+      resolve_location_id: { Args: { p_location: string }; Returns: string }
       search_adverts: {
         Args: {
           category_id_filter?: string

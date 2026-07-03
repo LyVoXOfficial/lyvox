@@ -20,6 +20,13 @@ type AdvertStatus = NonNullable<AdvertRow["status"]>;
 
 const ALLOWED_STATUSES: ReadonlySet<AdvertStatus> = new Set(["draft", "active", "archived"]);
 
+type ServiceClientWithRpc = {
+  rpc: (
+    fn: "resolve_location_id",
+    args: { p_location: string },
+  ) => Promise<{ data: string | null; error: { message?: string } | null }>;
+};
+
 const enforceStatusTransition = (current: AdvertStatus, next: AdvertStatus) => {
   if (!ALLOWED_STATUSES.has(next)) {
     return createErrorResponse(ApiErrorCode.INVALID_PAYLOAD, {
@@ -63,6 +70,26 @@ const fetchMediaCount = async (
   return null;
 };
 
+const resolveLocationId = async (
+  service: Awaited<ReturnType<typeof supabaseService>>,
+  location: string | null | undefined,
+) => {
+  const trimmed = location?.trim();
+  if (!trimmed) return null;
+
+  const { data, error } = await (service as unknown as ServiceClientWithRpc)
+    .rpc("resolve_location_id", { p_location: trimmed });
+
+  if (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[PATCH /api/adverts/:id] resolve_location_id failed", error.message ?? error);
+    }
+    return undefined;
+  }
+
+  return data ?? null;
+};
+
 export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
@@ -97,7 +124,7 @@ export async function PATCH(
   const { data: advert, error: fetchError } = await supabase
     .from("adverts")
     .select(
-      "id,user_id,status,category_id,title,description,price,currency,condition,location",
+      "id,user_id,status,category_id,title,description,price,currency,condition,location,location_id",
     )
     .eq("id", advertId)
     .maybeSingle();
@@ -163,6 +190,14 @@ export async function PATCH(
 
   if (body.location !== undefined) {
     updates.location = body.location;
+  }
+
+  if (body.location !== undefined || isPublishing) {
+    const locationToResolve = body.location !== undefined ? body.location : advert.location;
+    const resolvedLocationId = await resolveLocationId(service, locationToResolve);
+    if (resolvedLocationId !== undefined) {
+      updates.location_id = resolvedLocationId;
+    }
   }
 
   if (body.condition !== undefined) {
