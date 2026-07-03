@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
 import { formatCurrency } from "@/i18n/format";
+import { getChatOfferIdFromMessage } from "@/lib/chat/offers";
 import { formatDate } from "@/lib/i18n/formatDate";
 
 interface Conversation {
@@ -48,6 +49,9 @@ export default function ChatListClient({ conversations }: ChatListClientProps) {
   };
 
   const formatMessagePreview = (body: string, maxLength = 50) => {
+    if (getChatOfferIdFromMessage(body)) {
+      return translate("chat.offer_preview", "Price offer");
+    }
     if (body.length <= maxLength) return body;
     return body.slice(0, maxLength) + "...";
   };

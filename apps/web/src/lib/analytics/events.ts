@@ -43,6 +43,10 @@ export const ANALYTICS_EVENTS = {
   // ── Contact funnel ────────────────────────────────────────────────────────
   /** User tapped "Contact seller" — conversation created. props: { advert_id, conversation_id } */
   CONTACT_START: "contact_start",
+  /** Buyer sent a structured price offer in chat. props: { advert_id, conversation_id, offer_id, amount_cents } */
+  OFFER_SENT: "offer_sent",
+  /** Structured price offer was auto-declined below the seller threshold. props: { advert_id, conversation_id, offer_id, amount_cents } */
+  OFFER_DECLINED_AUTO: "offer_declined_auto",
 
   // ── Listing lifecycle ─────────────────────────────────────────────────────
   /** Advert saved as draft. props: { advert_id, category_id } */

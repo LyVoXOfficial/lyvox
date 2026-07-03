@@ -44,6 +44,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
       advert_id,
       adverts (
         id,
+        user_id,
         title,
         price,
         currency
@@ -102,14 +103,25 @@ export default async function ChatPage({ params }: ChatPageProps) {
       updated_at: message.updated_at ?? undefined,
     }));
 
+  const { data: offers, error: offersError } = await supabase
+    .from("chat_offers")
+    .select("id, advert_id, conversation_id, sender_id, amount_cents, currency, message, status, created_at, responded_at")
+    .eq("conversation_id", conversationId)
+    .order("created_at", { ascending: true });
+
+  if (offersError) {
+    console.error("Error loading chat offers:", offersError);
+  }
+
   const { messages: i18nMessages } = await getI18nProps();
 
   return (
     <ChatWindow
       conversationId={conversationId}
       peer={peer}
-      advert={conversation.adverts as { id: string; title: string; price: number; currency: string } | null}
+      advert={conversation.adverts as { id: string; user_id: string; title: string; price: number; currency: string } | null}
       initialMessages={sortedMessages}
+      initialOffers={offers ?? []}
       currentUserId={user.id}
       messages={i18nMessages}
     />

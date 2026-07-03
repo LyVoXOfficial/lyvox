@@ -97,6 +97,16 @@ export async function GET(request: NextRequest) {
     return handleSupabaseError(messagesError, ApiErrorCode.FETCH_FAILED);
   }
 
+  const { data: offers, error: offersError } = await supabase
+    .from("chat_offers")
+    .select("id, advert_id, conversation_id, sender_id, amount_cents, currency, message, status, created_at, responded_at")
+    .eq("conversation_id", conversationId)
+    .order("created_at", { ascending: true });
+
+  if (offersError) {
+    return handleSupabaseError(offersError, ApiErrorCode.FETCH_FAILED);
+  }
+
   // Check if there are more messages
   const hasMore = messages && messages.length > limit;
   const resultMessages = hasMore ? messages.slice(0, limit) : messages ?? [];
@@ -109,8 +119,8 @@ export async function GET(request: NextRequest) {
 
   return createSuccessResponse({
     messages: resultMessages,
+    offers: offers ?? [],
     has_more: hasMore,
     next_cursor: nextCursor,
   });
 }
-
