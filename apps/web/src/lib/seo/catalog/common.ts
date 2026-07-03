@@ -45,9 +45,13 @@ export interface SEOMetadata {
 
 /**
  * Generate canonical URL
+ *
+ * The ad detail route is `/ad/[id]` — a single dynamic segment with no slug
+ * child route. A canonical that appends a slug 404s, so this intentionally
+ * ignores any slug and always resolves to the real route.
  */
-export function generateCanonicalUrl(advertId: string, slug: string): string {
-  return absoluteUrl(`/ad/${advertId}/${slug}`);
+export function generateCanonicalUrl(advertId: string, _slug?: string): string {
+  return absoluteUrl(`/ad/${advertId}`);
 }
 
 /**

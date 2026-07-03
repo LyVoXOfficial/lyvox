@@ -7,7 +7,7 @@ function base(overrides: Partial<ListingJsonLdInput> = {}): ListingJsonLdInput {
     id: "ad-1",
     title: "Test listing",
     description: "A description",
-    url: "https://lyvox.be/ad/ad-1/test-listing",
+    url: "https://www.lyvox.be/ad/ad-1",
     images: ["https://img/1.jpg"],
     price: 1000,
     currency: "EUR",

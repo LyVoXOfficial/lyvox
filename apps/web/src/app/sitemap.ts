@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { absoluteUrl } from "@/lib/seo/baseUrl";
-import { supabaseServer } from "@/lib/supabaseServer";
+import { supabaseService } from "@/lib/supabaseService";
 
 export const revalidate = 3600; // rebuild at most once per hour
 
@@ -16,10 +16,10 @@ const STATIC_ROUTES: MetadataRoute.Sitemap = [
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const categoryRoutes: MetadataRoute.Sitemap = [];
   try {
-    const supabase = await supabaseServer();
+    const supabase = await supabaseService();
     const { data: categories } = await supabase
       .from("categories")
-      .select("slug, path")
+      .select("path")
       .eq("is_active", true)
       .eq("level", 1);
 
@@ -37,7 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const advertRoutes: MetadataRoute.Sitemap = [];
   try {
-    const supabase = await supabaseServer();
+    const supabase = await supabaseService();
     const { data: adverts } = await supabase
       .from("adverts")
       .select("id, updated_at")
