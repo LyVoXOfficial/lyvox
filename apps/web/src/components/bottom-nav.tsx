@@ -68,7 +68,7 @@ export default function BottomNav() {
         WebkitBackdropFilter: "blur(10px)",
       }}
     >
-      <div className="grid grid-cols-5 items-start pt-[9px]" style={{ height: 76 }}>
+      <div className="grid grid-cols-5 items-start pt-[9px]" style={{ height: "var(--bottom-nav-h)" }}>
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = item.matchPattern
@@ -104,7 +104,7 @@ export default function BottomNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center gap-[4px] text-[10.5px] font-semibold transition-colors",
+                "flex min-h-[48px] flex-col items-center justify-center gap-[4px] text-[10.5px] font-semibold transition-colors",
                 isActive ? "text-primary" : "text-muted-foreground",
               )}
               aria-label={item.label}

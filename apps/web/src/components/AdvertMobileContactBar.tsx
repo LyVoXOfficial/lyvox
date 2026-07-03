@@ -82,8 +82,8 @@ export default function AdvertMobileContactBar({
     <div
       className="fixed left-0 right-0 z-30 flex items-center gap-[11px] px-4 lg:hidden"
       style={{
-        bottom: "76px",
-        height: "66px",
+        bottom: "var(--bottom-nav-h)",
+        height: "var(--contact-bar-h)",
         background: "color-mix(in oklch, var(--background) 97%, transparent)",
         backdropFilter: "blur(10px)",
         borderTop: "1px solid var(--border)",
@@ -92,8 +92,7 @@ export default function AdvertMobileContactBar({
       {/* Price */}
       <div className="shrink-0">
         <div
-          className="text-foreground"
-          style={{ font: "800 18px Inter", lineHeight: 1 }}
+          className="text-foreground text-[1.125rem] font-extrabold leading-none"
         >
           {priceText}
         </div>
@@ -103,12 +102,11 @@ export default function AdvertMobileContactBar({
       {isOwnListing ? (
         <Link
           href={editHref}
-          className="flex flex-1 items-center justify-center gap-2 text-white"
+          className="flex flex-1 items-center justify-center gap-2 text-[0.906rem] font-bold text-white"
           style={{
             height: "46px",
             borderRadius: "var(--rm)",
             background: "var(--gC)",
-            font: "700 14.5px Inter",
             boxShadow: "0 4px 14px oklch(0.55 0.13 178 / 0.38)",
           }}
         >
@@ -120,13 +118,12 @@ export default function AdvertMobileContactBar({
           type="button"
           onClick={() => requireTrust("verified", () => void startChat())}
           disabled={startingChat}
-          className="flex flex-1 items-center justify-center gap-2 text-white"
+          className="flex flex-1 items-center justify-center gap-2 text-[0.906rem] font-bold text-white"
           style={{
             height: "46px",
             borderRadius: "var(--rm)",
             background: "var(--gC)",
             border: 0,
-            font: "700 14.5px Inter",
             cursor: "pointer",
             boxShadow: "0 4px 14px oklch(0.55 0.13 178 / 0.38)",
             opacity: startingChat ? 0.7 : 1,

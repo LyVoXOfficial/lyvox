@@ -647,7 +647,9 @@ export default async function AdvertPage({ params }: PageProps) {
     <>
       <script {...getJsonLdScriptProps(productJsonLd)} />
       <script {...getJsonLdScriptProps(breadcrumbJsonLd)} />
-      <div className="space-y-8 pb-[160px] lg:pb-0">
+      {/* Bottom clearance = BottomNav + AdvertMobileContactBar (audit B-2), scoped to
+          mobile/tablet where the contact bar renders (lg:hidden there → lg:pb-0 here). */}
+      <div className="space-y-8 pb-[calc(var(--bottom-nav-h)+var(--contact-bar-h)+env(safe-area-inset-bottom))] lg:pb-0">
         {/* Breadcrumb nav */}
         <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground">
           {data.category ? (

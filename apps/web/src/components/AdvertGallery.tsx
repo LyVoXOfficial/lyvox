@@ -70,7 +70,7 @@ export default function AdvertGallery({ images }: AdvertGalleryProps) {
 
       {/* Thumbnail strip — 6-column, --rm border-radius */}
       {normalized.length > 1 ? (
-        <div className="grid grid-cols-6 gap-2.5">
+        <div className="grid grid-cols-4 gap-2.5 md:grid-cols-6">
           {normalized.map((image, index) => (
             <button
               key={image.id ?? `${image.url}-${index}`}

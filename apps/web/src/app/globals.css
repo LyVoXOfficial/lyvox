@@ -75,6 +75,14 @@
   --shHi: 0 18px 44px oklch(0.42 0.08 210 / 0.16);
   /* CTA gradient var (the .lyvox-cta-gradient class already has a formula; --gC is the token) */
   --gC: linear-gradient(180deg, oklch(0.60 0.13 177), var(--priD));
+  /* Mobile bottom-nav height — single source of truth (audit B-1). Consumed by
+     BottomNav itself, ViewportBottomSpacer, and any page (e.g. /ad/*) that needs
+     to compensate for the fixed nav. Combine with env(safe-area-inset-bottom),
+     never replace it. */
+  --bottom-nav-h: 76px;
+  /* AdvertMobileContactBar height on /ad/* (mobile/tablet only, lg:hidden).
+     Used to compute total bottom clearance on the ad page (audit B-2). */
+  --contact-bar-h: 66px;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.22 0.03 200);
   --popover: oklch(1 0 0);
