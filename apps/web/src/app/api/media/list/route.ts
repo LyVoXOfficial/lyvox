@@ -1,6 +1,5 @@
-import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
-import { ensureAdvertOwnership, requireAuthenticatedUser } from "../_shared";
+import { ensureAdvertOwnership, requireAuthenticatedUser, resolveUserId } from "../_shared";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import {
   createErrorResponse,
@@ -17,21 +16,6 @@ const SIGNED_DOWNLOAD_TTL_SECONDS = 10 * 60;
 // consistent with other read endpoints (likes:get) at 60/min.
 const mediaListLimiter = createRateLimiter({ limit: 60, windowSec: 60, prefix: "media:list" });
 
-const contextCache = new WeakMap<Request, Promise<{ userId: string | null }>>();
-const resolveUserId = async (req: Request): Promise<string | null> => {
-  let cached = contextCache.get(req);
-  if (!cached) {
-    cached = (async () => {
-      const supabase = await supabaseServer();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      return { userId: user?.id ?? null };
-    })();
-    contextCache.set(req, cached);
-  }
-  return (await cached).userId;
-};
 const buildRateLimitKey = (_req: Request, userId: string | null, ip: string | null) =>
   userId ?? ip ?? "anonymous";
 
@@ -43,12 +27,11 @@ async function handleGet(request: Request) {
     return createErrorResponse(ApiErrorCode.MISSING_ADVERT_ID, { status: 400 });
   }
 
-  const supabase = await supabaseServer();
-  const authResult = await requireAuthenticatedUser(supabase);
+  const authResult = await requireAuthenticatedUser(request);
   if ("response" in authResult) {
     return authResult.response;
   }
-  const { user } = authResult;
+  const { user, supabase } = authResult;
 
   const ownership = await ensureAdvertOwnership({
     supabase,

@@ -1,8 +1,8 @@
-import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import {
   ensureAdvertOwnership,
   requireAuthenticatedUser,
+  resolveUserId,
   MEDIA_LIMIT_PER_ADVERT,
 } from "../_shared";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
@@ -24,21 +24,6 @@ const SIGNED_UPLOAD_TTL_SECONDS = 5 * 60;
 // limit, matching the write-ish "likes:post" / "report:user" precedent of 30/min.
 const mediaSignLimiter = createRateLimiter({ limit: 30, windowSec: 60, prefix: "media:sign" });
 
-const contextCache = new WeakMap<Request, Promise<{ userId: string | null }>>();
-const resolveUserId = async (req: Request): Promise<string | null> => {
-  let cached = contextCache.get(req);
-  if (!cached) {
-    cached = (async () => {
-      const supabase = await supabaseServer();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      return { userId: user?.id ?? null };
-    })();
-    contextCache.set(req, cached);
-  }
-  return (await cached).userId;
-};
 const buildRateLimitKey = (_req: Request, userId: string | null, ip: string | null) =>
   userId ?? ip ?? "anonymous";
 
@@ -76,12 +61,11 @@ async function handlePost(request: Request) {
 
   const { advertId, fileName, contentType, fileSize } = validationResult.data;
 
-  const supabase = await supabaseServer();
-  const authResult = await requireAuthenticatedUser(supabase);
+  const authResult = await requireAuthenticatedUser(request);
   if ("response" in authResult) {
     return authResult.response;
   }
-  const { user } = authResult;
+  const { user, supabase } = authResult;
 
   const ownership = await ensureAdvertOwnership({
     supabase,
