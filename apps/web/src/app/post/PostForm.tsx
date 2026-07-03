@@ -122,6 +122,14 @@ const FAST_GOODS_COMPLETION_STEPS: PostStepConfig[] = [
   { id: "location_preview" },
 ];
 
+const FAST_STEP_TITLES: Partial<Record<PostStepId, { key: string; fallback: string }>> = {
+  photos: { key: "post.fast_photos_title", fallback: "Add photos" },
+  category_title: { key: "post.fast_category_title", fallback: "Category and title" },
+  specifics: { key: "post.fast_specifics_title", fallback: "Add category details" },
+  price_condition: { key: "post.fast_price_condition_title", fallback: "Price and condition" },
+  location_preview: { key: "post.fast_location_preview_title", fallback: "Location and preview" },
+};
+
 function resolveInitialCategory(categories: Category[], categoryId?: string | null) {
   return categoryId ? categories.find((category) => category.id === categoryId) ?? null : null;
 }
@@ -1554,6 +1562,21 @@ export function PostForm({
     return false;
   };
 
+  const translateCopy = (key: string, fallback: string) => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
+
+  const getStepTitle = (stepId: PostStepId, legacyKey: string, legacyFallback: string) => {
+    const legacyTitle = translateCopy(legacyKey, legacyFallback);
+    if (postFlowMode !== "fast_goods") {
+      return legacyTitle;
+    }
+
+    const fastTitle = FAST_STEP_TITLES[stepId];
+    return fastTitle ? translateCopy(fastTitle.key, fastTitle.fallback) : legacyTitle;
+  };
+
   const renderPhotoUpload = () => (
     <div>
       <Label>{t("post.form.final_photos")}</Label>
@@ -1580,7 +1603,7 @@ export function PostForm({
       <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
         <CardHeader>
           <CardTitle className="text-2xl font-extrabold tracking-tight">
-            {t("post.form.final_photos")}
+            {getStepTitle("photos", "post.form.final_photos", "Photos")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -1601,7 +1624,9 @@ export function PostForm({
   return (
     <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
       <CardHeader>
-          <CardTitle className="text-2xl font-extrabold tracking-tight">{t("post.form.step_1_title")}</CardTitle>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">
+            {getStepTitle("category_title", "post.form.step_1_title", "Category")}
+          </CardTitle>
       </CardHeader>
         <CardContent>
           <ProgressIndicator />
@@ -2014,7 +2039,9 @@ export function PostForm({
     return (
       <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
         <CardHeader>
-          <CardTitle className="text-2xl font-extrabold tracking-tight">{t("post.form.step_4_title")}</CardTitle>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">
+            {getStepTitle("specifics", "post.form.step_4_title", "Specifications")}
+          </CardTitle>
           <CardDescription>
             {getCategoryTypeName(categoryType as any)}
           </CardDescription>
@@ -2270,7 +2297,9 @@ export function PostForm({
     return (
       <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
         <CardHeader>
-          <CardTitle className="text-2xl font-extrabold tracking-tight">{t("post.form.step_5_title")}</CardTitle>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">
+            {getStepTitle(activeStep.id, "post.form.step_5_title", "Price")}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <ProgressIndicator />
@@ -2671,7 +2700,9 @@ export function PostForm({
       </Dialog>
       <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
         <CardHeader>
-          <CardTitle className="text-2xl font-extrabold tracking-tight">{t("post.form.step_7_title")}</CardTitle>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">
+            {getStepTitle(activeStep.id, "post.form.step_7_title", "Details")}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <ProgressIndicator />
