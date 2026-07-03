@@ -15,7 +15,7 @@ import { getI18nProps, getInitialLocale } from "@/i18n/server";
 import { signMediaUrls } from "@/lib/media/signMediaUrls";
 import { getFirstImage } from "@/lib/media/getFirstImage";
 import { getJsonLdScriptProps } from "@/lib/seo";
-import { getBaseUrl } from "@/lib/seo/baseUrl";
+import { getBaseUrl, absoluteUrl } from "@/lib/seo/baseUrl";
 
 const BASE_URL = getBaseUrl();
 
@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     (messages as Record<string, Record<string, string>>)?.category?.seoDescription ??
     "Browse {category} listings on LyVoX.";
   const description = descTemplate.replace("{category}", name);
-  const canonical = `${BASE_URL}/c/${slugPath}`;
+  const canonical = absoluteUrl(`/c/${slugPath}`);
 
   return {
     title: `${name} | LyVoX`,

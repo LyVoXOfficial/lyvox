@@ -1,8 +1,12 @@
+import type { Metadata } from "next";
 import { getI18nProps } from "@/i18n/server";
 import SwipeDeck from "@/components/discover/SwipeDeck";
 import { DROPS } from "@/lib/discover/deck";
 
 export const dynamic = "force-dynamic";
+
+// SEO P0: personalized/empty-for-crawler feed — keep out of the index.
+export const metadata: Metadata = { robots: { index: false, follow: true } };
 
 export default async function DiscoverPage() {
   const { messages } = await getI18nProps();
