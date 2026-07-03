@@ -13,9 +13,8 @@
 
 ## Очередь
 
-- [x] **T01** — Dwell-бакетирование в свайп-аналитике (P0-приватность, ~30 мин) → [docs/todo/T01-dwell-buckets.md](docs/todo/T01-dwell-buckets.md) — ed26854
 - [x] **T02** — URL-allowlist в чат-скраббере (P1, ~1 час) → [docs/todo/T02-scrub-url-allowlist.md](docs/todo/T02-scrub-url-allowlist.md) — fefd3d4
-- [ ] **T03** — Аудит категорий и вертикальный контракт — ДОКУМЕНТ, не код (P0-фундамент, ~3 часа) → [docs/todo/T03-category-audit.md](docs/todo/T03-category-audit.md)
+- [x] **T03** — Аудит категорий и вертикальный контракт — ДОКУМЕНТ, не код (P0-фундамент, ~3 часа) → [docs/todo/T03-category-audit.md](docs/todo/T03-category-audit.md) — 6e3b7d6
 - [ ] **T04** — TrustSignalPolicy: единый конфиг trust-сигналов (P1, ~2 часа) → [docs/todo/T04-trust-signal-policy.md](docs/todo/T04-trust-signal-policy.md)
 - [ ] **T05** — Строгий радиус в /search + секция «вне радиуса» (P1, ~3 часа) → [docs/todo/T05-strict-radius.md](docs/todo/T05-strict-radius.md)
 - [ ] **T06** — Внутренний прайс-оценщик median/IQR (P1, ~4 часа, БЕЗ публичного UI) → [docs/todo/T06-price-estimator-internal.md](docs/todo/T06-price-estimator-internal.md)
