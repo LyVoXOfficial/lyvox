@@ -24,6 +24,17 @@
 - [ ] **T09** — Переводы объявлений: миграция + async-джоб + лейблы (P1, ~2 дня, СЛОЖНОЕ) → [docs/todo/T09-advert-translations.md](docs/todo/T09-advert-translations.md)
 - [ ] **T10** — Store-of-One: сессионная персонализация фида, client-only MVP (P2, потом) → [docs/todo/T10-session-personalization.md](docs/todo/T10-session-personalization.md)
 
+## Крупные волны после T01-T10 (инструкция-файл создаётся сильной моделью при взятии в работу)
+
+- [ ] **T11** — Конвейер изображений: превью 400px WebP при аплоаде + стабильные кэшируемые URL вместо пере-подписи на каждый рендер (крупнейший perf-выигрыш всего продукта; см. SITE_BLUEPRINT «конвейер изображений ДО редизайнов» + память media-image-pipeline)
+- [ ] **T12** — Saved-search алерты end-to-end + push/PWA (PRD 34/36/18): retention-контур; cron `saved-search-alerts` уже существует и ждёт CRON_SECRET — довести UI подписок и email-канал
+- [ ] **T13** — UX1: редизайн-фиксы страниц по мокапам (`docs/features/audit/01` + `mockups/redesign-mockups.html`)
+- [ ] **T14** — Системный проход empty-states + /search полировка (skeleton, verified-чип с предпросмотром счётчика, zero-result авторасширение) — SITE_BLUEPRINT волна 4
+- [ ] **T15** — URL-локали `/nl /fr /de /en /ru` + hreflang (МИГРАЦИЯ, сильная модель + план: сейчас Google индексирует один язык из пяти; чем позже — тем дороже)
+- [ ] **T16** — Контент-хаб `/guides`: 10-15 анти-скам гайдов nl/fr (SEO-канал GTM Фазы 1; БЕЗ имён конкурентов — CEL VI.17)
+- [ ] **T17** — Волна 3 остаток: sticky one-primary contact-bar на /ad + safety bottom-sheet + чат-хинт (SITE_BLUEPRINT волна 3)
+- [ ] **T18 (LAUNCH-GATE)** — Seed-выключатель: флаг seed-аккаунтов + исключение из агрегатов/JSON-LD/медиан на уровне запросов; сам purge — ТОЛЬКО по команде основателя перед рекламой
+
 ## Задачи основателя (не для агентов)
 - Ключи: Turnstile (free) + `CRON_SECRET` в Vercel env (иначе кроны и алерты — no-op), Stripe recurring Price для Pro.
 - Через ~неделю после 2026-07-03: посмотреть собранные отчёты `/api/csp-report` → включить CSP enforcement.
