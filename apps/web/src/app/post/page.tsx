@@ -111,6 +111,7 @@ export default async function PostPage({
 
   const categories = await getCategories();
   const editId = typeof searchParams.edit === 'string' ? searchParams.edit : null;
+  const completeListing = Boolean(editId && searchParams.complete === "1");
   const advertToEdit = editId ? await getAdvertForEdit(editId, user.id) : null;
   const userPhone = await getUserPhone(user.id);
 
@@ -133,6 +134,7 @@ export default async function PostPage({
         locale={locale}
         userPhone={userPhone}
         isVerified={isVerified}
+        completeListing={completeListing}
       />
     </main>
   );

@@ -15,6 +15,13 @@ export type CategoryType =
   | 'services'
   | 'generic';
 
+export type PostFlowMode =
+  | "fast_goods"
+  | "vehicle_deep"
+  | "real_estate_deep"
+  | "job_deep"
+  | "generic";
+
 /**
  * Detects category type based on category slug or parent hierarchy
  */
@@ -158,6 +165,31 @@ export function detectCategoryType(categorySlug: string): CategoryType {
 }
 
 /**
+ * Resolves the posting flow from a selected category path or slug.
+ */
+export function resolvePostFlowMode(categoryPath: string | null | undefined): PostFlowMode {
+  if (!categoryPath) {
+    return "generic";
+  }
+
+  const categoryType = detectCategoryType(categoryPath);
+
+  if (categoryType === "vehicle") {
+    return "vehicle_deep";
+  }
+
+  if (categoryType === "real_estate") {
+    return "real_estate_deep";
+  }
+
+  if (categoryType === "jobs") {
+    return "job_deep";
+  }
+
+  return "fast_goods";
+}
+
+/**
  * Determines if category requires specialized component or generic form
  */
 export function requiresSpecializedComponent(categoryType: CategoryType): boolean {
@@ -183,7 +215,6 @@ export function getCategoryTypeName(categoryType: CategoryType): string {
   };
   return names[categoryType];
 }
-
 
 
 

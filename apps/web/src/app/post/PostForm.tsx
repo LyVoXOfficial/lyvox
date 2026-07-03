@@ -36,7 +36,7 @@ import { supabase } from "@/lib/supabaseClient";
 import UploadGallery from "@/components/upload-gallery";
 import { getCategoryIcon } from "@/lib/categoryIcons";
 import { ChevronDown, Check, Loader2, ShieldCheck, Trash2, Zap } from "lucide-react";
-import { detectCategoryType, getCategoryTypeName } from "@/lib/utils/categoryDetector";
+import { detectCategoryType, getCategoryTypeName, resolvePostFlowMode, type PostFlowMode } from "@/lib/utils/categoryDetector";
 import BoostDialog from "@/components/BoostDialog";
 import { ElectronicsFields } from "@/components/catalog/ElectronicsFields";
 import { RealEstateFields } from "@/components/catalog/RealEstateFields";
@@ -53,15 +53,103 @@ type PostFormProps = {
   locale: string;
   userPhone?: string | null;
   isVerified?: boolean;
+  completeListing?: boolean;
 };
 
-const TOTAL_STEPS = 8;
 const AUTO_SAVE_INTERVAL_MS = 30_000;
 
-export function PostForm({ categories, userId, advertToEdit, locale, userPhone, isVerified = false }: PostFormProps) {
+type PostStepId =
+  | "photos"
+  | "category_title"
+  | "condition"
+  | "vehicle_basics"
+  | "specifics"
+  | "price"
+  | "price_condition"
+  | "vehicle_options"
+  | "details"
+  | "preview"
+  | "location_preview";
+
+type PostStepConfig = {
+  id: PostStepId;
+};
+
+const POST_FLOW_STEPS: Record<PostFlowMode, PostStepConfig[]> = {
+  generic: [
+    { id: "photos" },
+    { id: "category_title" },
+    { id: "price_condition" },
+    { id: "location_preview" },
+  ],
+  fast_goods: [
+    { id: "photos" },
+    { id: "category_title" },
+    { id: "price_condition" },
+    { id: "location_preview" },
+  ],
+  vehicle_deep: [
+    { id: "photos" },
+    { id: "category_title" },
+    { id: "condition" },
+    { id: "vehicle_basics" },
+    { id: "specifics" },
+    { id: "price" },
+    { id: "vehicle_options" },
+    { id: "location_preview" },
+  ],
+  real_estate_deep: [
+    { id: "photos" },
+    { id: "category_title" },
+    { id: "condition" },
+    { id: "specifics" },
+    { id: "price" },
+    { id: "location_preview" },
+  ],
+  job_deep: [
+    { id: "photos" },
+    { id: "category_title" },
+    { id: "specifics" },
+    { id: "location_preview" },
+  ],
+};
+
+const FAST_GOODS_COMPLETION_STEPS: PostStepConfig[] = [
+  { id: "photos" },
+  { id: "category_title" },
+  { id: "specifics" },
+  { id: "price_condition" },
+  { id: "location_preview" },
+];
+
+const FAST_STEP_TITLES: Partial<Record<PostStepId, { key: string; fallback: string }>> = {
+  photos: { key: "post.fast_photos_title", fallback: "Add photos" },
+  category_title: { key: "post.fast_category_title", fallback: "Category and title" },
+  specifics: { key: "post.fast_specifics_title", fallback: "Add category details" },
+  price_condition: { key: "post.fast_price_condition_title", fallback: "Price and condition" },
+  location_preview: { key: "post.fast_location_preview_title", fallback: "Location and preview" },
+};
+
+function resolveInitialCategory(categories: Category[], categoryId?: string | null) {
+  return categoryId ? categories.find((category) => category.id === categoryId) ?? null : null;
+}
+
+export function PostForm({
+  categories,
+  userId,
+  advertToEdit,
+  locale,
+  userPhone,
+  isVerified = false,
+  completeListing = false,
+}: PostFormProps) {
   const { t } = useI18n();
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
+  const initialCategory = resolveInitialCategory(categories, advertToEdit?.category_id);
+  const initialCategoryPath = initialCategory?.path || initialCategory?.slug || "";
+  const initialCategoryType = initialCategory ? detectCategoryType(initialCategoryPath) : "generic";
+  const initialPostFlowMode = initialCategory ? resolvePostFlowMode(initialCategoryPath) : "generic";
+  const [currentStep, setCurrentStep] = useState(() => (completeListing ? 3 : 1));
   const [isLoading, setIsLoading] = useState(false);
   const [advertId, setAdvertId] = useState<string | null>(advertToEdit?.id ?? null);
   const [selectedMainCategory, setSelectedMainCategory] = useState<string | null>(null);
@@ -129,7 +217,14 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
   const [formData, setFormData] = useState(initializeFormData());
   
   // Category type detection state
-  const [categoryType, setCategoryType] = useState<string>('generic');
+  const [categoryType, setCategoryType] = useState<string>(initialCategoryType);
+  const [postFlowMode, setPostFlowMode] = useState<PostFlowMode>(initialPostFlowMode);
+  const useCompletionSteps = completeListing && Boolean(advertToEdit) && postFlowMode === "fast_goods";
+  const activeSteps = useCompletionSteps
+    ? FAST_GOODS_COMPLETION_STEPS
+    : POST_FLOW_STEPS[postFlowMode] ?? POST_FLOW_STEPS.generic;
+  const totalSteps = activeSteps.length;
+  const activeStep = activeSteps[Math.min(currentStep, totalSteps) - 1] ?? activeSteps[0];
   const schemaExcludedTypes = useRef(new Set(["vehicle", "real_estate", "electronics", "fashion", "jobs"]));
 
   type CatalogSchemaState = {
@@ -189,22 +284,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
 
   // Calculate form completion percentage
   const calculateProgress = (): number => {
-    if (currentStep === 1) return formData.category_id ? 12.5 : 0;
-    if (currentStep === 2) return formData.condition ? 25 : 12.5;
-    if (currentStep === 3) {
-      let filled = 0;
-      if (formData.category_id) filled += 1;
-      if (formData.condition) filled += 1;
-      if (formData.make_id) filled += 1;
-      if (formData.model_id) filled += 1;
-      return Math.min(37.5 + (filled * 2), 37.5);
-    }
-    if (currentStep === 4) return 50;
-    if (currentStep === 5) return 62.5;
-    if (currentStep === 6) return 75;
-    if (currentStep === 7) return 87.5;
-    if (currentStep === 8) return 100;
-    return (currentStep / TOTAL_STEPS) * 100;
+    return Math.min(100, (currentStep / totalSteps) * 100);
   };
 
   // Helper functions
@@ -292,15 +372,38 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
         if (slugOrPath) {
           const detectedType = detectCategoryType(slugOrPath);
           setCategoryType(detectedType);
+          setPostFlowMode(resolvePostFlowMode(slugOrPath));
         } else {
           setCategoryType('generic');
+          setPostFlowMode("generic");
         }
       } else {
         // Fallback to generic if category not found
         setCategoryType('generic');
+        setPostFlowMode("generic");
       }
+    } else {
+      setCategoryType('generic');
+      setPostFlowMode("generic");
     }
   }, [formData.category_id, categories]);
+
+  useEffect(() => {
+    if (currentStep > totalSteps) {
+      setCurrentStep(totalSteps);
+    }
+  }, [currentStep, totalSteps]);
+
+  useEffect(() => {
+    if (postFlowMode !== "job_deep" || formData.condition) {
+      return;
+    }
+
+    setFormData((previous) => ({
+      ...previous,
+      condition: "used",
+    }));
+  }, [postFlowMode, formData.condition]);
 
   // Load catalog schema for non-bespoke categories
   useEffect(() => {
@@ -555,10 +658,10 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
     return newId;
   }, [advertId, t]);
 
-  // Auto-create draft when reaching step 7 (for photo upload)
+  // Auto-create draft when reaching the photo upload step.
   useEffect(() => {
-    if (currentStep === 7 && !advertId && !isLoading && !draftCreationInProgress.current) {
-      console.log("[PostForm] Auto-creating draft for step 7...");
+    if (activeStep.id === "photos" && !advertId && !isLoading && !draftCreationInProgress.current) {
+      console.log("[PostForm] Auto-creating draft for photo upload...");
       draftCreationInProgress.current = true;
       const createDraft = async () => {
         try {
@@ -576,53 +679,17 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
       };
       createDraft();
     }
-  }, [currentStep, advertId, isLoading, t, ensureAdvertId]);
+  }, [activeStep.id, advertId, isLoading, t, ensureAdvertId]);
 
   const handleNext = () => {
-    if (currentStep < TOTAL_STEPS) {
-      let targetStep = currentStep + 1;
-      
-      // For jobs: special navigation
-      if (categoryType === 'jobs') {
-        if (currentStep === 1) targetStep = 4; // Skip 2, 3
-        if (currentStep === 4) targetStep = 7; // Skip 5, 6
-      } else {
-        // Skip step 3 for non-vehicles when going forward from step 2
-        if (currentStep === 2 && categoryType !== 'vehicle' && targetStep === 3) {
-          targetStep = 4;
-        }
-        
-        // Skip step 6 for non-vehicles when going forward from step 5
-        if (currentStep === 5 && categoryType !== 'vehicle' && targetStep === 6) {
-          targetStep = 7;
-        }
-      }
-      
-      setCurrentStep(targetStep);
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
     }
   };
 
   const handleBack = () => {
     if (currentStep > 1) {
-      let targetStep = currentStep - 1;
-      
-      // For jobs: special navigation
-      if (categoryType === 'jobs') {
-        if (currentStep === 4) targetStep = 1; // Skip 3, 2
-        if (currentStep === 7) targetStep = 4; // Skip 6, 5
-      } else {
-        // Skip step 3 for non-vehicles when going back from step 4
-        if (currentStep === 4 && categoryType !== 'vehicle' && targetStep === 3) {
-          targetStep = 2;
-        }
-        
-        // Skip step 6 for non-vehicles when going back from step 7
-        if (currentStep === 7 && categoryType !== 'vehicle' && targetStep === 6) {
-          targetStep = 5;
-        }
-      }
-      
-      setCurrentStep(targetStep);
+      setCurrentStep(currentStep - 1);
     }
   };
 
@@ -673,6 +740,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
     const fieldMap = catalogSchemaState.fields;
     const values = formData.catalog_fields ?? {};
     const errors: string[] = [];
+    const requireSchemaValues = postFlowMode !== "fast_goods";
 
     const steps = Array.isArray(schema.steps) ? schema.steps : [];
 
@@ -686,7 +754,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
 
           const label = resolveCatalogFieldLabel(fieldDef, schemaField);
           const value = values[schemaField.field_key];
-          const required = schemaField.optional === true ? false : fieldDef.is_required;
+          const required = requireSchemaValues && schemaField.optional !== true && fieldDef.is_required;
           const hasValue =
             value !== undefined &&
             value !== null &&
@@ -730,7 +798,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
     }
 
     return errors;
-  }, [categoryType, catalogSchemaState, formData.catalog_fields, resolveCatalogFieldLabel, t]);
+  }, [categoryType, catalogSchemaState, formData.catalog_fields, postFlowMode, resolveCatalogFieldLabel, t]);
 
   // Prepare vehicle specifics from form data
   const prepareSpecifics = useCallback(() => {
@@ -1380,15 +1448,13 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
       return <p className={`mt-2 text-xs ${toneClass}`}>{message}</p>;
     };
 
-    // Calculate effective remaining steps based on category type
-    const effectiveTotal = categoryType === 'jobs' ? 5 : categoryType === 'vehicle' ? 8 : 6;
-    const stepsRemaining = Math.max(0, TOTAL_STEPS - currentStep);
+    const stepsRemaining = Math.max(0, totalSteps - currentStep);
 
     return (
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-muted-foreground" aria-label={`Step ${currentStep} of ${effectiveTotal}`}>
-            {t("post.form.step")} {currentStep} {t("post.form.of")} {effectiveTotal}
+          <span className="text-sm font-medium text-muted-foreground" aria-label={`Step ${currentStep} of ${totalSteps}`}>
+            {t("post.form.step")} {currentStep} {t("post.form.of")} {totalSteps}
           </span>
           {stepsRemaining > 0 ? (
             <span className="text-xs font-medium text-muted-foreground">
@@ -1484,15 +1550,114 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
     }
   };
 
-  // Step 1: Category selection
-  if (currentStep === 1) {
+  const isNextDisabled = () => {
+    if (activeStep.id === "category_title") {
+      return !formData.category_id;
+    }
+
+    if (activeStep.id === "condition" || activeStep.id === "price_condition") {
+      return !formData.condition;
+    }
+
+    return false;
+  };
+
+  const translateCopy = (key: string, fallback: string) => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
+
+  const getStepTitle = (stepId: PostStepId, legacyKey: string, legacyFallback: string) => {
+    const legacyTitle = translateCopy(legacyKey, legacyFallback);
+    if (postFlowMode !== "fast_goods") {
+      return legacyTitle;
+    }
+
+    const fastTitle = FAST_STEP_TITLES[stepId];
+    return fastTitle ? translateCopy(fastTitle.key, fastTitle.fallback) : legacyTitle;
+  };
+
+  const renderPhotoUpload = () => (
+    <div>
+      <Label>{t("post.form.final_photos")}</Label>
+      <div className="space-y-2">
+        {advertId ? (
+          <>
+            <UploadGallery advertId={advertId} locale={locale} />
+            <p className="text-xs text-muted-foreground mt-2">
+              {t("post.form.final_photos_hint")}
+            </p>
+          </>
+        ) : (
+          <div className="lyvox-image-placeholder rounded-xl p-8 flex flex-col items-center justify-center gap-2 text-center">
+            <ShieldCheck className="h-8 w-8 text-white/85" aria-hidden="true" />
+            <p className="text-sm font-medium text-white/85">{t("common.loading") || "Loading..."}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  if (activeStep.id === "photos") {
+    return (
+      <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
+        <CardHeader>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">
+            {getStepTitle("photos", "post.form.final_photos", "Photos")}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <ProgressIndicator />
+          {renderPhotoUpload()}
+        </CardContent>
+        <CardFooter className="flex justify-end sticky bottom-0 z-10 bg-card/95 backdrop-blur border-t border-border/70 rounded-b-2xl">
+          <Button size="lg" onClick={handleNext} disabled={currentStep >= totalSteps}>
+            {t("post.form.next")}
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  }
+
+  // Category and title
+  if (activeStep.id === "category_title") {
   return (
     <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
       <CardHeader>
-          <CardTitle className="text-2xl font-extrabold tracking-tight">{t("post.form.step_1_title")}</CardTitle>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">
+            {getStepTitle("category_title", "post.form.step_1_title", "Category")}
+          </CardTitle>
       </CardHeader>
         <CardContent>
           <ProgressIndicator />
+          <div className="mb-6">
+            <Label htmlFor="listing-title">
+              {t("post.form.listing_title") !== "post.form.listing_title"
+                ? t("post.form.listing_title")
+                : "Listing title"}
+              {" "}
+              <span className="text-muted-foreground text-xs font-normal">
+                ({(formData.title ?? "").length}/70)
+              </span>
+            </Label>
+            <Input
+              id="listing-title"
+              placeholder={
+                t("post.form.title_placeholder") !== "post.form.title_placeholder"
+                  ? t("post.form.title_placeholder")
+                  : "e.g. Toyota Corolla 2019 petrol automatic"
+              }
+              value={formData.title ?? ""}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              maxLength={100}
+              aria-describedby="listing-title-hint"
+            />
+            <p id="listing-title-hint" className="text-xs text-muted-foreground mt-1">
+              {t("post.form.title_hint") !== "post.form.title_hint"
+                ? t("post.form.title_hint")
+                : "10-70 characters: brand + model + key feature"}
+            </p>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
             {groupedCategories.map((group, index) => {
               const Icon = getCategoryIcon(group.main.icon, group.main.level);
@@ -1575,7 +1740,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
           </div>
         </CardContent>
         <CardFooter className="flex justify-end sticky bottom-0 z-10 bg-card/95 backdrop-blur border-t border-border/70 rounded-b-2xl">
-          <Button size="lg" onClick={handleNext} disabled={!formData.category_id}>
+          <Button size="lg" onClick={handleNext} disabled={isNextDisabled()}>
             {t("post.form.next")}
           </Button>
         </CardFooter>
@@ -1583,19 +1748,8 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
     );
   }
 
-  // Step 2: Condition selection
-  if (currentStep === 2) {
-    // For jobs, this step is skipped via handleNext/handleBack
-    if (categoryType === 'jobs') {
-      // Auto-advance to step 4 (step 3 will also be skipped)
-      // Set default condition for jobs
-      if (formData.condition !== 'used') {
-        setFormData({ ...formData, condition: 'used' });
-      }
-      setCurrentStep(4);
-      return null;
-    }
-    
+  // Condition selection
+  if (activeStep.id === "condition") {
     // Determine which conditions are available based on category type
     const showForParts = ['vehicle', 'electronics'].includes(categoryType);
     
@@ -1626,7 +1780,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
           <Button variant="outline" size="lg" onClick={handleBack}>
             {t("post.form.back")}
           </Button>
-          <Button size="lg" onClick={handleNext} disabled={!formData.condition}>
+          <Button size="lg" onClick={handleNext} disabled={isNextDisabled()}>
             {t("post.form.next")}
           </Button>
         </CardFooter>
@@ -1634,15 +1788,8 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
     );
   }
 
-  // Step 3: Basic parameters (make, model, year, steering wheel, body, doors, color)
-  // Only for vehicles - other categories auto-skip to step 4
-  if (currentStep === 3) {
-    // For non-vehicle categories, automatically skip to step 4
-    if (categoryType !== 'vehicle') {
-      setCurrentStep(4);
-      return null;
-    }
-    
+  // Vehicle basics
+  if (activeStep.id === "vehicle_basics") {
     // Vehicle-specific fields
     return (
       <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
@@ -1884,7 +2031,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
     );
   }
 
-  if (currentStep === 4) {
+  if (activeStep.id === "specifics") {
     const isSchemaCategory = !schemaExcludedTypes.current.has(categoryType);
     const { loading: schemaLoading, error: schemaError, schema, fields } = catalogSchemaState;
     const hasSchema = Boolean(schema?.steps?.length);
@@ -1892,7 +2039,9 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
     return (
       <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
         <CardHeader>
-          <CardTitle className="text-2xl font-extrabold tracking-tight">{t("post.form.step_4_title")}</CardTitle>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">
+            {getStepTitle("specifics", "post.form.step_4_title", "Specifications")}
+          </CardTitle>
           <CardDescription>
             {getCategoryTypeName(categoryType as any)}
           </CardDescription>
@@ -2143,22 +2292,38 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
     );
   }
 
-  // Step 5: Condition and price
-  if (currentStep === 5) {
-    // For jobs, skip this step (no price, salary is in step 4)
-    if (categoryType === 'jobs') {
-      // Skip to step 7 since step 6 is also skipped for jobs
-      setCurrentStep(7);
-      return null;
-    }
-    
+  // Price and optional condition grouping
+  if (activeStep.id === "price" || activeStep.id === "price_condition") {
     return (
       <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
         <CardHeader>
-          <CardTitle className="text-2xl font-extrabold tracking-tight">{t("post.form.step_5_title")}</CardTitle>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">
+            {getStepTitle(activeStep.id, "post.form.step_5_title", "Price")}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <ProgressIndicator />
+
+          {activeStep.id === "price_condition" && (
+            <div>
+              <Label>{t("post.condition")}</Label>
+              <Select
+                value={formData.condition || ""}
+                onValueChange={(value) => setFormData({ ...formData, condition: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("post.select_condition")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="new">{t("post.new")}</SelectItem>
+                  <SelectItem value="used">{t("post.used")}</SelectItem>
+                  {["vehicle", "electronics"].includes(categoryType) && (
+                    <SelectItem value="for_parts">{t("post.for_parts")}</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Vehicle-specific fields */}
           {categoryType === 'vehicle' && (
@@ -2311,7 +2476,7 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
           <Button variant="outline" size="lg" onClick={handleBack}>
             {t("post.form.back")}
           </Button>
-          <Button size="lg" onClick={handleNext}>
+          <Button size="lg" onClick={handleNext} disabled={isNextDisabled()}>
             {t("post.form.next")}
           </Button>
         </CardFooter>
@@ -2319,14 +2484,8 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
     );
   }
 
-  // Step 6: Options (only for vehicles)
-  if (currentStep === 6) {
-    // For non-vehicle categories, automatically skip to step 7
-    if (categoryType !== 'vehicle') {
-      setCurrentStep(7);
-      return null;
-    }
-    
+  // Vehicle options
+  if (activeStep.id === "vehicle_options") {
     // Vehicle options
     const optionCategories = [
       { key: "comfort", label: t("post.form.options_comfort") },
@@ -2466,8 +2625,10 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
     );
   }
 
-  // Step 7: Final details (description, photos, location, contacts)
-  if (currentStep === 7) {
+  // Details, location, contacts, and optionally preview/publish
+  if (activeStep.id === "details" || activeStep.id === "location_preview") {
+    const canPublish = isVerified || justVerified;
+
     return (
       <>
       <Dialog
@@ -2539,10 +2700,14 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
       </Dialog>
       <Card className="rounded-2xl border-border/70 shadow-[var(--shadow-card)]">
         <CardHeader>
-          <CardTitle className="text-2xl font-extrabold tracking-tight">{t("post.form.step_7_title")}</CardTitle>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">
+            {getStepTitle(activeStep.id, "post.form.step_7_title", "Details")}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <ProgressIndicator />
+          {activeStep.id === "details" && (
+          <>
           {/* Title */}
           <div>
             <Label htmlFor="listing-title">
@@ -2613,6 +2778,28 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
           </div>
 
           {/* Location — required to publish */}
+          </>
+          )}
+          {activeStep.id === "location_preview" && (
+            <div>
+              <Label htmlFor="listing-description">{t("post.form.final_description")}</Label>
+              <Textarea
+                id="listing-description"
+                placeholder={t("post.enter_description")}
+                rows={6}
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                aria-describedby="listing-description-hint"
+              />
+              {formData.description.length > 0 && formData.description.length < 120 && (
+                <p id="listing-description-hint" className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                  {t("post.form.description_short_hint") !== "post.form.description_short_hint"
+                    ? t("post.form.description_short_hint").replace("{n}", String(120 - formData.description.length))
+                    : `Aim for 120+ characters for better search visibility (${120 - formData.description.length} more)`}
+                </p>
+              )}
+            </div>
+          )}
           <div>
             <Label htmlFor="listing-location">
               {t("post.form.final_location")}
@@ -2695,22 +2882,126 @@ export function PostForm({ categories, userId, advertToEdit, locale, userPhone, 
               </p>
             )}
           </div>
+          {activeStep.id === "location_preview" && (
+            <>
+              <div className="border border-border/70 bg-muted/30 rounded-xl p-4 space-y-2 shadow-[var(--shadow-soft)]">
+                <h3 className="font-extrabold tracking-tight text-xl">
+                  {(formData.title ?? "").trim() ||
+                    (categories.find((c) => c.id === formData.category_id)
+                      ? getCategoryName(categories.find((c) => c.id === formData.category_id)!)
+                      : t("post.category"))}
+                </h3>
+                <p className="text-muted-foreground">{t("post.condition")}: {t(`post.${formData.condition}`)}</p>
+                {formData.price && <p className="text-lg font-semibold">{formData.price} EUR</p>}
+                {formData.description && <p className="text-sm">{formData.description}</p>}
+                {categoryType === "vehicle" && (
+                  <p className="text-sm text-muted-foreground">
+                    {t("post.form.make")}: {makes.find((m) => m.id === formData.make_id)?.name_en || "-"}
+                    {formData.model_id &&
+                      `, ${t("post.form.model")}: ${models.find((m) => m.id === formData.model_id)?.name_en || "-"}`}
+                    {formData.year && `, ${t("post.form.year")}: ${formData.year}`}
+                  </p>
+                )}
+              </div>
+
+              {!canPublish && (
+                <div
+                  className="rounded-xl border border-amber-200 bg-amber-50/80 dark:border-amber-900 dark:bg-amber-950/30 p-4 space-y-3"
+                  role="region"
+                  aria-label={
+                    t("post.form.verify_to_publish_title") !== "post.form.verify_to_publish_title"
+                      ? t("post.form.verify_to_publish_title")
+                      : "Phone verification required"
+                  }
+                >
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-5 w-5 text-amber-700 dark:text-amber-300 flex-shrink-0" aria-hidden="true" />
+                    <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                      {t("post.form.verify_to_publish_title") !== "post.form.verify_to_publish_title"
+                        ? t("post.form.verify_to_publish_title")
+                        : "Verify your phone to publish"}
+                    </p>
+                  </div>
+                  <p className="text-xs text-amber-800 dark:text-amber-200">
+                    {t("post.form.verify_to_publish_body") !== "post.form.verify_to_publish_body"
+                      ? t("post.form.verify_to_publish_body")
+                      : "Your draft is saved. Verify your phone number once and you're ready to publish."}
+                  </p>
+                  <TrustGatePhone onVerified={() => setJustVerified(true)} />
+                </div>
+              )}
+            </>
+          )}
           </CardContent>
-          <CardFooter className="flex justify-between gap-3 sticky bottom-0 z-10 bg-card/95 backdrop-blur border-t border-border/70 rounded-b-2xl">
-          <Button variant="outline" size="lg" onClick={handleBack}>
+          <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 sticky bottom-0 z-10 bg-card/95 backdrop-blur border-t border-border/70 rounded-b-2xl">
+          <Button variant="outline" size="lg" onClick={handleBack} className="w-full sm:w-auto">
             {t("post.form.back")}
           </Button>
-          <Button size="lg" onClick={handleNext}>
-            {t("post.form.next")}
-          </Button>
+          {activeStep.id === "location_preview" ? (
+            <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
+              {advertToEdit?.status === "active" && advertId && (
+                <BoostDialog
+                  advertId={advertId}
+                  trigger={
+                    <Button variant="outline" size="lg" disabled={isLoading} title={t("billing.boost.title")} className="text-amber-600 hover:text-amber-700">
+                      <Zap className="mr-1 h-4 w-4" />
+                      {t("billing.boost.title")}
+                    </Button>
+                  }
+                />
+              )}
+              <Button variant="outline" size="lg" onClick={handleSaveDraft} disabled={isLoading}>
+                {t("post.form.save_draft")}
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="lg" disabled={isLoading}>
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
+                    {t("post.form.delete")}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="rounded-xl">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete listing?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This removes the listing draft and cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteAdvert}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      disabled={isLoading}
+                    >
+                      Delete listing
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+              <Button
+                size="lg"
+                onClick={handlePublish}
+                disabled={isLoading || !canPublish}
+                aria-disabled={!canPublish}
+                className="lyvox-cta-gradient text-white border-0 hover:opacity-95 disabled:opacity-50"
+              >
+                {t("post.publish")}
+              </Button>
+            </div>
+          ) : (
+            <Button size="lg" onClick={handleNext}>
+              {t("post.form.next")}
+            </Button>
+          )}
           </CardFooter>
       </Card>
       </>
   );
 }
 
-  // Step 8: Preview + publish
-  if (currentStep === 8) {
+  // Preview + publish
+  if (activeStep.id === "preview") {
     const canPublish = isVerified || justVerified;
 
     return (
