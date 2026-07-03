@@ -8,11 +8,12 @@ type Props = {
   t: TFunction;
 };
 
-function isTruthy(value: unknown): boolean {
+export function isTruthy(value: unknown): boolean {
   if (value === null || value === undefined || value === "" || value === false) return false;
   if (typeof value === "boolean") return value;
   if (typeof value === "number") return value !== 0;
   const s = String(value).toLowerCase();
+  if (/^[0-9a-f]{8}-/i.test(s)) return false;
   return s !== "false" && s !== "0" && s !== "no";
 }
 
@@ -41,7 +42,9 @@ export function DocumentBadges({ categoryType, specifics, t }: Props) {
   }
 
   if (categoryType === "baby_kids") {
-    if (isTruthy(specifics.safety_certified)) {
+    const safetyCertified =
+      specifics.safety_certified ?? specifics.catalog_field_baby_safety_certified;
+    if (isTruthy(safetyCertified)) {
       badges.push({
         label: t("advert.document_badge.safety_certified", "Safety certified"),
         color: "text-violet-700 bg-violet-50 border-violet-200",
