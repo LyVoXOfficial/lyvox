@@ -1,6 +1,5 @@
-import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
-import { ensureAdvertOwnership, requireAuthenticatedUser } from "../_shared";
+import { ensureAdvertOwnership, requireAuthenticatedUser, resolveUserId } from "../_shared";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import {
   createErrorResponse,
@@ -15,26 +14,11 @@ export const runtime = "nodejs";
 // (likes:delete, likes:post) at 30/min.
 const mediaDeleteLimiter = createRateLimiter({ limit: 30, windowSec: 60, prefix: "media:delete" });
 
-const contextCache = new WeakMap<Request, Promise<{ userId: string | null }>>();
-const resolveUserId = async (req: Request): Promise<string | null> => {
-  let cached = contextCache.get(req);
-  if (!cached) {
-    cached = (async () => {
-      const supabase = await supabaseServer();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      return { userId: user?.id ?? null };
-    })();
-    contextCache.set(req, cached);
-  }
-  return (await cached).userId;
-};
 const buildRateLimitKey = (_req: Request, userId: string | null, ip: string | null) =>
   userId ?? ip ?? "anonymous";
 
 async function handleDelete(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params;
@@ -43,12 +27,11 @@ async function handleDelete(
     return createErrorResponse(ApiErrorCode.MISSING_ID, { status: 400 });
   }
 
-  const supabase = await supabaseServer();
-  const authResult = await requireAuthenticatedUser(supabase);
+  const authResult = await requireAuthenticatedUser(request);
   if ("response" in authResult) {
     return authResult.response;
   }
-  const { user } = authResult;
+  const { user, supabase } = authResult;
 
   const { data: media, error: mediaError } = await supabase
     .from("media")

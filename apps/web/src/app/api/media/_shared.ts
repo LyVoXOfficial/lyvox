@@ -1,5 +1,6 @@
 import type { NextResponse } from "next/server";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
+import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import {
   createErrorResponse,
@@ -21,13 +22,48 @@ const forbidden = () =>
 
 type LogDetails = TablesInsert<"logs">["details"];
 
+// Single per-request auth context: memoizes ONE supabaseServer() client + ONE
+// getUser() call per incoming Request, shared between rate-limit keying
+// (resolveUserId) and the handler's auth check (requireAuthenticatedUser).
+// Mirrors the pattern in app/api/likes/route.ts. Prevents a double getUser()
+// round-trip and the narrow refresh-token-rotation race that comes from two
+// independent supabaseServer() clients reading the same request cookies.
+type RequestAuthContext = {
+  supabase: ServerClient;
+  user: User | null;
+  error: { message: string } | null;
+};
+
+const contextCache = new WeakMap<Request, Promise<RequestAuthContext>>();
+
+function getRequestContext(request: Request): Promise<RequestAuthContext> {
+  let cached = contextCache.get(request);
+  if (!cached) {
+    cached = (async () => {
+      const supabase = (await supabaseServer()) as ServerClient;
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+      return { supabase, user: user ?? null, error: error ?? null };
+    })();
+    contextCache.set(request, cached);
+  }
+  return cached;
+}
+
+// For withRateLimit's getUserId — resolves from the shared context so it
+// doesn't trigger a second getUser() call. Errored auth keys by IP, same as
+// before (an error means user stays null).
+export async function resolveUserId(request: Request): Promise<string | null> {
+  const { user } = await getRequestContext(request);
+  return user?.id ?? null;
+}
+
 export async function requireAuthenticatedUser(
-  supabase: ServerClient,
-): Promise<{ user: User } | ResponseResult> {
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  request: Request,
+): Promise<{ user: User; supabase: ServerClient } | ResponseResult> {
+  const { supabase, user, error } = await getRequestContext(request);
 
   if (error) {
     return { response: handleSupabaseError(error, ApiErrorCode.INTERNAL_ERROR) };
@@ -37,7 +73,7 @@ export async function requireAuthenticatedUser(
     return { response: unauthenticated() };
   }
 
-  return { user };
+  return { user, supabase };
 }
 
 type EnsureAdvertOwnershipParams = {

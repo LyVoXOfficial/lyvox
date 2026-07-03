@@ -1,5 +1,4 @@
-import { supabaseServer } from "@/lib/supabaseServer";
-import { ensureAdvertOwnership, requireAuthenticatedUser } from "../_shared";
+import { ensureAdvertOwnership, requireAuthenticatedUser, resolveUserId } from "../_shared";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import {
   createErrorResponse,
@@ -17,21 +16,6 @@ export const runtime = "nodejs";
 // other write endpoints (likes:post, report:user) at 30/min.
 const mediaReorderLimiter = createRateLimiter({ limit: 30, windowSec: 60, prefix: "media:reorder" });
 
-const contextCache = new WeakMap<Request, Promise<{ userId: string | null }>>();
-const resolveUserId = async (req: Request): Promise<string | null> => {
-  let cached = contextCache.get(req);
-  if (!cached) {
-    cached = (async () => {
-      const supabase = await supabaseServer();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      return { userId: user?.id ?? null };
-    })();
-    contextCache.set(req, cached);
-  }
-  return (await cached).userId;
-};
 const buildRateLimitKey = (_req: Request, userId: string | null, ip: string | null) =>
   userId ?? ip ?? "anonymous";
 
@@ -51,12 +35,11 @@ async function handlePost(request: Request) {
 
   const { advertId, orderedIds } = validationResult.data;
 
-  const supabase = await supabaseServer();
-  const authResult = await requireAuthenticatedUser(supabase);
+  const authResult = await requireAuthenticatedUser(request);
   if ("response" in authResult) {
     return authResult.response;
   }
-  const { user } = authResult;
+  const { user, supabase } = authResult;
 
   const ownership = await ensureAdvertOwnership({
     supabase,
