@@ -16,7 +16,7 @@ export async function loadCatalogGroups(
 
   if (groupErr || !groupRows?.length) return empty;
 
-  const groupKeys: string[] = (groupRows as any[]).map((g: any) => g.group_key);
+  const groupKeys: string[] = groupRows.map((g: any) => g.group_key);
 
   const { data: fieldRows, error: fieldErr } = await supabase
     .from("catalog_fields")
@@ -28,7 +28,7 @@ export async function loadCatalogGroups(
 
   if (fieldErr || !fieldRows?.length) return empty;
 
-  const fieldIds: string[] = (fieldRows as any[]).map((f: any) => f.id);
+  const fieldIds: string[] = fieldRows.map((f: any) => f.id);
 
   const { data: optionRows } = await supabase
     .from("catalog_field_options")
@@ -59,18 +59,16 @@ export async function loadCatalogGroups(
       pattern: f.pattern,
       group_key: f.group_key,
       sort: f.sort,
-      metadata:
-        f.metadata && typeof f.metadata === "object" && !Array.isArray(f.metadata)
-          ? (f.metadata as Record<string, unknown>)
-          : {},
+      metadata: (f.metadata && typeof f.metadata === "object" && !Array.isArray(f.metadata))
+        ? (f.metadata as Record<string, unknown>)
+        : {},
       options: (optsByFieldId[f.id] ?? []).map((opt: any) => ({
         code: opt.code,
         name_i18n_key: opt.name_i18n_key,
         sort: opt.sort ?? null,
-        metadata:
-          opt.metadata && typeof opt.metadata === "object" && !Array.isArray(opt.metadata)
-            ? (opt.metadata as Record<string, unknown>)
-            : {},
+        metadata: (opt.metadata && typeof opt.metadata === "object" && !Array.isArray(opt.metadata))
+          ? (opt.metadata as Record<string, unknown>)
+          : {},
       })),
     };
   }
@@ -78,7 +76,7 @@ export async function loadCatalogGroups(
   const groups: CatalogSchemaGroup[] = (groupRows as any[]).map((g) => ({
     key: g.group_key,
     title_i18n_key: g.label_i18n_key ?? undefined,
-    display: g.display === "tab" || g.display === "section" ? g.display : "section",
+    display: (g.display === "tab" || g.display === "section") ? g.display : "section",
     tab_key: g.tab_key ?? g.group_key,
     tab_order: g.tab_order ?? 0,
     fields: (fieldRows as any[])

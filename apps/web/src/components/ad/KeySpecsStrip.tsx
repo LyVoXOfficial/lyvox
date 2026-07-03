@@ -1,6 +1,6 @@
 import type { Locale } from "@/lib/i18n";
 
-type TFunction = (key: string, fallback: string) => string;
+type TFunction = (key: string, params?: Record<string, string | number>) => string;
 
 type Props = {
   categoryType: string;
@@ -12,22 +12,22 @@ type Props = {
   t: TFunction;
 };
 
+function translateFallback(t: TFunction, key: string, fallback: string): string {
+  const result = t(key);
+  return result === key ? fallback : result;
+}
+
 function formatMileage(value: unknown, locale: Locale): string | null {
   const num = Number(value);
-  if (!Number.isFinite(num) || num <= 0) return null;
-  const tag =
-    locale === "ru" ? "ru-RU"
-    : locale === "nl" ? "nl-NL"
-    : locale === "fr" ? "fr-FR"
-    : locale === "de" ? "de-DE"
-    : "en-US";
-  return `${num.toLocaleString(tag)} km`;
+  if (!Number.isFinite(num) || num < 0) return null;
+  return `${num.toLocaleString(locale === "ru" ? "ru-RU" : locale === "nl" ? "nl-NL" : locale === "fr" ? "fr-FR" : locale === "de" ? "de-DE" : "en-US")} km`;
 }
 
 function specValue(specifics: Record<string, any>, ...keys: string[]): unknown {
   for (const k of keys) {
-    const v = specifics[k];
-    if (v !== undefined && v !== null && v !== "") return v;
+    if (specifics[k] !== undefined && specifics[k] !== null && specifics[k] !== "") {
+      return specifics[k];
+    }
   }
   return null;
 }
@@ -46,7 +46,7 @@ function translateSpec(t: TFunction, value: string): string {
     awd:       ["advert.value_awd", "AWD"],
   };
   const entry = MAP[String(value).toLowerCase()];
-  return entry ? t(entry[0], entry[1]) : String(value);
+  return entry ? translateFallback(t, entry[0], entry[1]) : String(value);
 }
 
 function buildVehicleChips(
@@ -56,13 +56,11 @@ function buildVehicleChips(
   t: TFunction,
 ): string[] {
   const chips: string[] = [];
+  // Fixed priority: year → mileage → fuel → transmission → body_type → city
   const year = specValue(specifics, "year");
   if (year) chips.push(String(year));
   const mileage = specValue(specifics, "mileage");
-  if (mileage) {
-    const m = formatMileage(mileage, locale);
-    if (m) chips.push(m);
-  }
+  if (mileage) { const m = formatMileage(mileage, locale); if (m) chips.push(m); }
   const fuel = specValue(specifics, "engine_type", "fuel_type", "fuel");
   if (fuel) chips.push(translateSpec(t, String(fuel)));
   const trans = specValue(specifics, "transmission");
@@ -86,7 +84,7 @@ function buildRealEstateChips(
   const area = specValue(specifics, "area_m2", "area");
   if (area) chips.push(`${area} m²`);
   const rooms = specValue(specifics, "rooms");
-  if (rooms) chips.push(`${rooms} ${t("advert.rooms", "rooms")}`);
+  if (rooms) chips.push(`${rooms} ${translateFallback(t, "advert.rooms", "rooms")}`);
   if (location && chips.length < 5) chips.push(location);
   return chips;
 }
@@ -110,6 +108,7 @@ function buildElectronicsChips(
 
 function buildFashionChips(
   specifics: Record<string, any>,
+  t: TFunction,
 ): string[] {
   const chips: string[] = [];
   const brand = specValue(specifics, "brand");
@@ -126,6 +125,7 @@ function buildFashionChips(
 function buildJobsChips(
   specifics: Record<string, any>,
   location: string | null,
+  t: TFunction,
 ): string[] {
   const chips: string[] = [];
   const jobCat = specValue(specifics, "job_category");
@@ -144,10 +144,10 @@ function buildPetsChips(
   const breed = specValue(specifics, "pet_breed", "breed");
   if (breed) chips.push(String(breed));
   const age = specValue(specifics, "age_months");
-  if (age) chips.push(`${age} ${t("advert.months", "mo")}`);
+  if (age) chips.push(`${age} ${translateFallback(t, "advert.months", "mo")}`);
   const vaccinated = specValue(specifics, "vaccinated");
   if (vaccinated === true || vaccinated === "true" || vaccinated === "yes") {
-    chips.push(t("advert.vaccinated", "Vaccinated"));
+    chips.push(translateFallback(t, "advert.vaccinated", "Vaccinated"));
   }
   return chips;
 }
@@ -157,6 +157,7 @@ export function KeySpecsStrip({
   specifics,
   locale,
   makeName,
+  modelName,
   location,
   t,
 }: Props) {
@@ -173,16 +174,17 @@ export function KeySpecsStrip({
       chips = buildElectronicsChips(specifics, makeName, t);
       break;
     case "fashion":
-      chips = buildFashionChips(specifics);
+      chips = buildFashionChips(specifics, t);
       break;
     case "jobs":
-      chips = buildJobsChips(specifics, location);
+      chips = buildJobsChips(specifics, location, t);
       break;
     case "pets":
       chips = buildPetsChips(specifics, t);
       break;
     default:
-      chips = location ? [location] : [];
+      chips = [];
+      if (location) chips.push(location);
       break;
   }
 
@@ -192,7 +194,7 @@ export function KeySpecsStrip({
   return (
     <div
       role="list"
-      aria-label={t("advert.key_specs_label", "Key specifications")}
+      aria-label={translateFallback(t, "advert.key_specs_label", "Key specifications")}
       className="flex flex-wrap items-center gap-2"
     >
       {visible.map((chip, i) => (

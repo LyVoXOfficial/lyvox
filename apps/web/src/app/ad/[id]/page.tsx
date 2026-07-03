@@ -726,7 +726,7 @@ export default async function AdvertPage({ params }: PageProps) {
             makeName={getMakeName(data.make)}
             modelName={getModelName(data.model)}
             location={data.advert.location ?? null}
-            t={translate}
+            t={t}
           />
 
           {/* Document badges: Car-Pass / EPC / Safety / Microchip */}
