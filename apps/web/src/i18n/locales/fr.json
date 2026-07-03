@@ -202,6 +202,27 @@
     "business_seller": "Vendeur professionnel",
     "private_seller": "Vendeur particulier"
   },
+  "sell": {
+    "meta_title": "Publier une annonce gratuite en Belgique | LyVoX",
+    "meta_description": "Vendez localement en Belgique : publiez une annonce gratuite en quelques minutes, ajoutez des photos et discutez avec les acheteurs dans LyVoX.",
+    "title": "Vendez localement — gratuitement",
+    "subtitle": "Publiez une annonce en quelques minutes. Les acheteurs proches la voient tout de suite, et chaque conversation reste dans LyVoX.",
+    "step1_title": "Ajoutez des photos",
+    "step1_body": "Prenez quelques photos nettes — les annonces avec photos reçoivent beaucoup plus de contacts.",
+    "step2_title": "Décrivez l'objet",
+    "step2_body": "Titre, prix, catégorie et quelques phrases honnêtes sur l'état.",
+    "step3_title": "Répondez dans le chat",
+    "step3_body": "Les acheteurs vous écrivent dans LyVoX — convenez de la remise ensemble.",
+    "cta": "Publier une annonce",
+    "popular": "Catégories populaires",
+    "faq_title": "Questions fréquentes",
+    "faq_q1": "Combien coûte la publication ?",
+    "faq_a1": "Publier une annonce classique est gratuit. Les boosts payants optionnels augmentent la visibilité et sont toujours signalés comme sponsorisés.",
+    "faq_q2": "Faut-il un compte professionnel ?",
+    "faq_a2": "Non — les particuliers confirment simplement e-mail et téléphone. Les entreprises sont vérifiées via BCE/TVA et reçoivent un profil vendeur public.",
+    "faq_q3": "Comment les acheteurs me contactent-ils ?",
+    "faq_a3": "Via le chat LyVoX. Votre numéro de téléphone et votre e-mail restent privés."
+  },
   "post": {
     "share_banner_title": "Votre annonce est en ligne",
     "share_banner_body": "Partagez le lien — les acheteurs la trouveront plus vite.",

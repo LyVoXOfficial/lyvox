@@ -114,8 +114,9 @@ export default function MainHeader() {
     if (session) {
       router.push("/post");
     } else {
-      const next = encodeURIComponent("/post");
-      router.push(`/register?next=${next}`);
+      // Guests get the indexable pitch page first (supply wave) instead of
+      // hitting the registration wall cold.
+      router.push("/sell");
     }
   };
 

@@ -6,6 +6,7 @@ export const revalidate = 3600; // rebuild at most once per hour
 
 const STATIC_ROUTES: MetadataRoute.Sitemap = [
   { url: absoluteUrl("/"), changeFrequency: "daily", priority: 1.0 },
+  { url: absoluteUrl("/sell"), changeFrequency: "monthly", priority: 0.8 },
   { url: absoluteUrl("/legal/privacy"), changeFrequency: "yearly", priority: 0.2 },
   { url: absoluteUrl("/legal/terms"), changeFrequency: "yearly", priority: 0.2 },
   { url: absoluteUrl("/legal/cookies"), changeFrequency: "yearly", priority: 0.2 },

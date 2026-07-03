@@ -202,6 +202,27 @@
     "business_seller": "Zakelijke verkoper",
     "private_seller": "Particuliere verkoper"
   },
+  "sell": {
+    "meta_title": "Gratis zoekertje plaatsen in België | LyVoX",
+    "meta_description": "Verkoop lokaal in België: plaats in enkele minuten een gratis zoekertje, voeg foto's toe en chat met kopers binnen LyVoX.",
+    "title": "Verkoop lokaal — gratis",
+    "subtitle": "Plaats een zoekertje in enkele minuten. Kopers in de buurt zien het meteen, en elk gesprek blijft binnen LyVoX.",
+    "step1_title": "Voeg foto's toe",
+    "step1_body": "Maak enkele duidelijke foto's — zoekertjes met foto's krijgen veel vaker reacties.",
+    "step2_title": "Beschrijf het",
+    "step2_body": "Titel, prijs, categorie en een paar eerlijke zinnen over de staat.",
+    "step3_title": "Antwoord in de chat",
+    "step3_body": "Kopers sturen je een bericht binnen LyVoX — spreek samen de overdracht af.",
+    "cta": "Zoekertje plaatsen",
+    "popular": "Populaire categorieën",
+    "faq_title": "Veelgestelde vragen",
+    "faq_q1": "Wat kost het plaatsen?",
+    "faq_a1": "Een gewoon zoekertje plaatsen is gratis. Optionele betaalde boosts vergroten de zichtbaarheid en zijn altijd gemarkeerd als gepromoot.",
+    "faq_q2": "Heb ik een zakelijk account nodig?",
+    "faq_a2": "Nee — particulieren bevestigen enkel e-mail en telefoon. Bedrijven worden geverifieerd via KBO/btw en krijgen een publiek handelaarsprofiel.",
+    "faq_q3": "Hoe nemen kopers contact op?",
+    "faq_a3": "Via de LyVoX-chat. Je telefoonnummer en e-mail blijven privé."
+  },
   "post": {
     "share_banner_title": "Je zoekertje staat online",
     "share_banner_body": "Deel de link — zo vinden kopers het sneller.",
