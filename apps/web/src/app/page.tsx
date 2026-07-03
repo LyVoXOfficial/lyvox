@@ -39,9 +39,19 @@ const BASE_URL = getBaseUrl();
 export async function generateMetadata(): Promise<Metadata> {
   const { messages } = await getI18nProps();
   const siteName = messages?.app?.title ?? "LyVoX";
+  const base = getBaseUrl();
   return {
     title: `${siteName} — Buy & sell locally in Belgium`,
-    alternates: { canonical: absoluteUrl("/") },
+    alternates: {
+      canonical: absoluteUrl("/"),
+      languages: {
+        en: `${base}/?lang=en`,
+        nl: `${base}/?lang=nl`,
+        fr: `${base}/?lang=fr`,
+        ru: `${base}/?lang=ru`,
+        de: `${base}/?lang=de`,
+      },
+    },
   };
 }
 
