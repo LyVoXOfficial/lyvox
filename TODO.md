@@ -16,9 +16,8 @@
 
 ## Очередь
 
-- [x] **T05** 🟡 — Строгий радиус в /search + секция «вне радиуса» (P1, ~3 часа) → [docs/todo/T05-strict-radius.md](docs/todo/T05-strict-radius.md) — 832b143
 - [x] **T06** 🔴 — Внутренний прайс-оценщик median/IQR (P1, ~4 часа, БЕЗ публичного UI; миграция+REVOKE) → [docs/todo/T06-price-estimator-internal.md](docs/todo/T06-price-estimator-internal.md) — 989f7c7
-- [ ] **T07** 🔴 — ChatOffer: структурированные предложения цены + пороги продавца (P1, ~1 день; RLS+чат) → [docs/todo/T07-chat-offers.md](docs/todo/T07-chat-offers.md)
+- [x] **T07** 🔴 — ChatOffer: структурированные предложения цены + пороги продавца (P1, ~1 день; RLS+чат) → [docs/todo/T07-chat-offers.md](docs/todo/T07-chat-offers.md) — bd9de7e
 - [ ] **T08** 🔴 — fast_goods: /post за ≤4 шага для простых товаров (P1-конверсия, ~1-2 дня; PostForm 1400 строк, по-коммитно) → [docs/todo/T08-post-fast-goods.md](docs/todo/T08-post-fast-goods.md)
 - [ ] **T09** 🔴 — Переводы объявлений: миграция + async-джоб + лейблы (P1, ~2 дня; послойно) → [docs/todo/T09-advert-translations.md](docs/todo/T09-advert-translations.md)
 - [ ] **T10** 🟡 — Store-of-One: сессионная персонализация фида, client-only MVP (P2, потом) → [docs/todo/T10-session-personalization.md](docs/todo/T10-session-personalization.md)

@@ -124,7 +124,7 @@ export async function PATCH(
   const { data: advert, error: fetchError } = await supabase
     .from("adverts")
     .select(
-      "id,user_id,status,category_id,title,description,price,currency,condition,location,location_id",
+      "id,user_id,status,category_id,title,description,price,currency,condition,location,location_id,min_offer_cents",
     )
     .eq("id", advertId)
     .maybeSingle();
@@ -186,6 +186,10 @@ export async function PATCH(
 
   if (body.price !== undefined) {
     updates.price = body.price;
+  }
+
+  if (body.min_offer_cents !== undefined) {
+    updates.min_offer_cents = body.min_offer_cents;
   }
 
   if (body.location !== undefined) {

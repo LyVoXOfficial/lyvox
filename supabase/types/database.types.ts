@@ -144,6 +144,7 @@ export type Database = {
           id: string
           location: string | null
           location_id: string | null
+          min_offer_cents: number | null
           moderation_status: string | null
           price: number | null
           status: string
@@ -165,6 +166,7 @@ export type Database = {
           id?: string
           location?: string | null
           location_id?: string | null
+          min_offer_cents?: number | null
           moderation_status?: string | null
           price?: number | null
           status?: string
@@ -186,6 +188,7 @@ export type Database = {
           id?: string
           location?: string | null
           location_id?: string | null
+          min_offer_cents?: number | null
           moderation_status?: string | null
           price?: number | null
           status?: string
@@ -682,6 +685,60 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "category_advert_counts"
             referencedColumns: ["category_id"]
+          },
+        ]
+      }
+      chat_offers: {
+        Row: {
+          advert_id: string
+          amount_cents: number
+          conversation_id: string
+          created_at: string
+          currency: string
+          id: string
+          message: string | null
+          responded_at: string | null
+          sender_id: string
+          status: string
+        }
+        Insert: {
+          advert_id: string
+          amount_cents: number
+          conversation_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          message?: string | null
+          responded_at?: string | null
+          sender_id: string
+          status?: string
+        }
+        Update: {
+          advert_id?: string
+          amount_cents?: number
+          conversation_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          message?: string | null
+          responded_at?: string | null
+          sender_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_offers_advert_id_fkey"
+            columns: ["advert_id"]
+            isOneToOne: false
+            referencedRelation: "adverts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_offers_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
           },
         ]
       }

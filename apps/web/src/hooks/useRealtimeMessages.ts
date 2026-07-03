@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import type { RealtimeChannel } from "@supabase/supabase-js";
+import type { Tables } from "@/lib/supabaseTypes";
 
 export interface Message {
   id: number;
@@ -14,9 +15,12 @@ export interface Message {
   updated_at?: string;
 }
 
+export type ChatOffer = Tables<"chat_offers">;
+
 interface UseRealtimeMessagesOptions {
   conversationId: string | null;
   onMessage?: (message: Message) => void;
+  onOffer?: (offer: ChatOffer) => void;
   onError?: (error: Error) => void;
   enabled?: boolean;
 }
@@ -55,6 +59,7 @@ const MAX_RECONNECT_DELAY = 30000; // 30 seconds
 export function useRealtimeMessages({
   conversationId,
   onMessage,
+  onOffer,
   onError,
   enabled = true,
 }: UseRealtimeMessagesOptions): UseRealtimeMessagesReturn {
@@ -140,6 +145,50 @@ export function useRealtimeMessages({
           }
         },
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "chat_offers",
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          if (!isMountedRef.current) return;
+
+          try {
+            onOffer?.(payload.new as ChatOffer);
+            setError(null);
+            reconnectAttemptsRef.current = 0;
+          } catch (err) {
+            const error = err instanceof Error ? err : new Error(String(err));
+            setError(error);
+            onError?.(error);
+          }
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "chat_offers",
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          if (!isMountedRef.current) return;
+
+          try {
+            onOffer?.(payload.new as ChatOffer);
+            setError(null);
+            reconnectAttemptsRef.current = 0;
+          } catch (err) {
+            const error = err instanceof Error ? err : new Error(String(err));
+            setError(error);
+            onError?.(error);
+          }
+        },
+      )
       .on("system", {}, (payload) => {
         if (!isMountedRef.current) return;
 
@@ -183,7 +232,7 @@ export function useRealtimeMessages({
       });
 
     channelRef.current = channel;
-  }, [conversationId, enabled, onMessage, onError, cleanup, scheduleReconnect]);
+  }, [conversationId, enabled, onMessage, onOffer, onError, cleanup, scheduleReconnect]);
 
   const reconnect = useCallback(() => {
     reconnectAttemptsRef.current = 0;

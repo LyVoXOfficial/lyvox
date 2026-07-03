@@ -24,6 +24,14 @@ export const updateAdvertSchema = z
       .finite("Price must be a valid number")
       .nullable()
       .optional(),
+
+    min_offer_cents: z
+      .number()
+      .int("Minimum offer must be whole cents")
+      .positive("Minimum offer must be positive")
+      .lt(100000000, "Minimum offer is too high")
+      .nullable()
+      .optional(),
     
     currency: z.enum(["EUR", "USD", "GBP", "RUB"]).optional(),
     
@@ -68,4 +76,3 @@ export const updateAdvertSchema = z
   );
 
 export type UpdateAdvertInput = z.infer<typeof updateAdvertSchema>;
-
