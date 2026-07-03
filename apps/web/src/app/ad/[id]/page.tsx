@@ -13,6 +13,7 @@ import { formatCurrency, formatDate } from "@/i18n/format";
 import { getI18nProps, getInitialLocale } from "@/i18n/server";
 import { type Locale } from "@/lib/i18n";
 import { getJsonLdScriptProps } from "@/lib/seo";
+import { getBaseUrl } from "@/lib/seo/baseUrl";
 import { generateSlug, truncateDescription } from "@/lib/seo/catalog/common";
 import { buildListingJsonLd } from "@/lib/seo/catalog/listingJsonLd";
 import { detectCategoryType } from "@/lib/utils/categoryDetector";
@@ -35,10 +36,7 @@ import { loadCatalogGroups } from "@/lib/catalog/loadCatalogGroups";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  process.env.NEXT_PUBLIC_BASE_URL ||
-  "https://lyvox.be";
+const BASE_URL = getBaseUrl();
 const isDevEnvironment = process.env.NODE_ENV !== "production";
 
 function advertDebug(message: string, context?: Record<string, unknown>) {

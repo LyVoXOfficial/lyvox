@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { Onest, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
+import { getBaseUrl } from "@/lib/seo/baseUrl";
 import { FavoritesProvider } from "@/components/favorites/FavoritesProvider";
 import { LikesProvider } from "@/components/likes/LikesProvider";
 import TopBar from "@/components/topbar";
@@ -62,6 +63,7 @@ export async function generateMetadata(): Promise<Metadata> {
   );
 
   return {
+    metadataBase: new URL(getBaseUrl()),
     title,
     description,
     icons: {
@@ -77,6 +79,8 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title,
       description,
+      url: getBaseUrl(),
+      siteName: "LyVoX",
       locale,
       alternateLocale: localizedOgCodes,
       images: [

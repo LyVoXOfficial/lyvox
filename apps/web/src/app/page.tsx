@@ -21,6 +21,7 @@ const CategoriesCarousel = dynamic(() => import("@/components/categories-carouse
 import { getI18nProps } from "@/i18n/server";
 import { logger } from "@/lib/errorLogger";
 import { getJsonLdScriptProps } from "@/lib/seo";
+import { getBaseUrl } from "@/lib/seo/baseUrl";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { signMediaUrls } from "@/lib/media/signMediaUrls";
 import { getFirstImage } from "@/lib/media/getFirstImage";
@@ -29,10 +30,7 @@ import type { AdvertCard } from "@/lib/advertCards";
 
 export const revalidate = 60;
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  process.env.NEXT_PUBLIC_BASE_URL ||
-  "https://lyvox.be";
+const BASE_URL = getBaseUrl();
 
 type AdListItem = {
   id: string;

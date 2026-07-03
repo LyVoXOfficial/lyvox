@@ -3,6 +3,7 @@
  */
 
 import type { CatalogSpecifics } from '@/lib/types/catalog';
+import { absoluteUrl } from '@/lib/seo/baseUrl';
 
 export interface BaseAdvertData {
   id: string;
@@ -46,11 +47,7 @@ export interface SEOMetadata {
  * Generate canonical URL
  */
 export function generateCanonicalUrl(advertId: string, slug: string): string {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    'https://lyvox.be';
-  return `${baseUrl}/ad/${advertId}/${slug}`;
+  return absoluteUrl(`/ad/${advertId}/${slug}`);
 }
 
 /**
