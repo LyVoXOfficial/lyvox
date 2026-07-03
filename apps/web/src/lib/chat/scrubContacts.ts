@@ -31,6 +31,20 @@ export type ContactScrubResult = {
 const IBAN_RE = /\b[A-Z]{2}\d{2}(?:[ ]?[A-Za-z0-9]){10,30}\b/g;
 const EMAIL_RE = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g;
 const URL_RE = /\b(?:https?:\/\/|www\.)[^\s]+/gi;
+// Technical reference hosts buyers legitimately share; NEVER contact channels.
+const ALLOWED_URL_HOSTS = new Set([
+  "www.realoem.com",
+  "realoem.com",
+  "www.gsmarena.com",
+  "gsmarena.com",
+  "www.car-pass.be",
+  "car-pass.be",
+  "autoscout24.be",
+  "www.autoscout24.be",
+  "immoweb.be",
+  "www.immoweb.be",
+  "wikipedia.org",
+]);
 // A run of digits with common separators; validated to 8–15 actual digits so we
 // don't flag prices ("1500"), years ("2024") or sizes ("42"). A match is only
 // treated as a PHONE NUMBER if it is phone-formatted (international prefix or
@@ -53,7 +67,20 @@ export function scrubContacts(input: string): ContactScrubResult {
   let out = input;
   out = out.replace(IBAN_RE, () => (mark("iban"), MASK));
   out = out.replace(EMAIL_RE, () => (mark("email"), MASK));
-  out = out.replace(URL_RE, () => (mark("url"), MASK));
+  out = out.replace(URL_RE, (match) => {
+    try {
+      const url = new URL(/^https?:\/\//i.test(match) ? match : `https://${match}`);
+      const hostname = url.hostname.toLowerCase();
+      if (ALLOWED_URL_HOSTS.has(hostname) || hostname.endsWith(".wikipedia.org")) {
+        return match;
+      }
+    } catch {
+      mark("url");
+      return MASK;
+    }
+    mark("url");
+    return MASK;
+  });
   out = out.replace(PHONE_RE, (match) => {
     const digits = match.replace(/\D/g, "");
     if (digits.length < 8 || digits.length > 15) return match;

@@ -47,6 +47,28 @@ describe("scrubContacts", () => {
     expect(r.cleaned).not.toContain("www.scam-courier.example");
   });
 
+  it("does NOT mask allowlisted technical reference URLs", () => {
+    const url = "https://www.realoem.com/bmw/enUS/part?id=123";
+    const r = scrubContacts(`part specs are here ${url}`);
+    expect(r.flagged).toBe(false);
+    expect(r.types).toEqual([]);
+    expect(r.cleaned).toContain(url);
+  });
+
+  it("masks contact-channel URLs even when they look short and legitimate", () => {
+    const r = scrubContacts("message me at https://wa.me/32470123456");
+    expect(r.types).toContain("url");
+    expect(r.cleaned).not.toContain("wa.me");
+    expect(r.cleaned).toContain(MASK);
+  });
+
+  it("masks malformed URLs without throwing", () => {
+    expect(() => scrubContacts("broken link https://[bad]")).not.toThrow();
+    const r = scrubContacts("broken link https://[bad]");
+    expect(r.types).toContain("url");
+    expect(r.cleaned).toContain(MASK);
+  });
+
   it("masks an IBAN (with or without spaces)", () => {
     const r = scrubContacts("transfer to BE68 5390 0754 7034 thanks");
     expect(r.types).toContain("iban");
