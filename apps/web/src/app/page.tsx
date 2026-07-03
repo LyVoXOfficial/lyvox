@@ -324,7 +324,9 @@ export default async function Home() {
       icon: Car,
     },
     {
-      href: "/c/electronics",
+      // Real transliterated category paths — /c/electronics and /c/home-garden
+      // were dead mockup slugs (live 404s from the hero chips).
+      href: "/c/elektronika-i-tehnika",
       label: t("home.qa_electronics"),
       icon: Laptop,
     },
@@ -335,7 +337,7 @@ export default async function Home() {
       highlighted: true, // "Verified sellers" pill uses the --gT gradient
     },
     {
-      href: "/c/home-garden",
+      href: "/c/dlya-doma-hobbi-i-detey",
       label: t("home.category_home"),
       icon: HomeIcon,
     },

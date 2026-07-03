@@ -54,8 +54,8 @@ export default async function SellPage() {
 
   const popular = [
     { href: "/c/transport", label: home.qa_transport ?? "Transport" },
-    { href: "/c/electronics", label: home.qa_electronics ?? "Electronics" },
-    { href: "/c/home-garden", label: home.category_home ?? "Home & garden" },
+    { href: "/c/elektronika-i-tehnika", label: home.qa_electronics ?? "Electronics" },
+    { href: "/c/dlya-doma-hobbi-i-detey", label: home.category_home ?? "Home & garden" },
   ];
 
   return (
