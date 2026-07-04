@@ -816,6 +816,12 @@
     "posted": "Veröffentlicht",
     "price_not_specified": "Preis nicht angegeben",
     "location_not_specified": "Ort nicht angegeben",
+    "safety_microcopy": "Chat in LyVoX - Kontaktdaten bleiben privat",
+    "safety_sheet_title": "Bevor ihr euch trefft",
+    "safety_meet_public": "Trefft euch an einem belebten öffentlichen Ort.",
+    "safety_inspect_first": "Prüfe den Artikel vor der Zahlung.",
+    "safety_keep_chat": "Halte das Gespräch in LyVoX.",
+    "safety_close": "Sicherheitstipps schließen",
     "seller_information": "Verkäuferinfos",
     "seller_active_listings": "Aktive Anzeigen",
     "seller_view_profile": "Profil ansehen",
@@ -1502,6 +1508,7 @@
   },
   "chat": {
     "title": "Nachrichten",
+    "safety_hint": "Trefft euch an einem belebten öffentlichen Ort, prüfe den Artikel vor der Zahlung und halte das Gespräch in LyVoX.",
     "empty": {
       "title": "Noch keine Unterhaltungen",
       "description": "Starten Sie eine Unterhaltung, indem Sie einen Verkäufer von einer Anzeigenseite aus kontaktieren.",
