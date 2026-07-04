@@ -18,9 +18,8 @@
 
 ## Крупные волны после T01-T10 (инструкция-файл создаётся 🔴-моделью при взятии в работу)
 
-- [x] **T14** 🟡 — Системный проход empty-states + /search полировка (skeleton, verified-чип с предпросмотром счётчика, zero-result авторасширение) — SITE_BLUEPRINT волна 4 → [T14-empty-states-search.md](docs/todo/T14-empty-states-search.md) — 0f65e2a (все 5 пунктов; EmptyState=алиас MarketplaceEmptyState +children-слот; relaxation чинит только при exact=0 без гео-расширения; verified-чип N/M — реальные счётчики limit=1; desktop debounce 300мс без Apply, mobile «Показать N»; /c-index-error и discover/favorites оставлены compliant-as-is; scope-note docs/todo/notes/T14-scope.md)
 - [x] **T15** 🔴 — URL-локали `/nl /fr /de /en /ru` + hreflang (МИГРАЦИЯ архитектуры: сейчас Google индексирует один язык из пяти; чем позже — тем дороже) → [T15-url-locales.md](docs/todo/T15-url-locales.md) — a802850 (path-prefix locales через активный `apps/web/src/middleware.ts`, SSR locale header, canonical+hreflang, locale sitemap, переключатель языка сохраняет текущую страницу)
-- [ ] **T16** 🟢 — Контент-хаб `/guides`: 10-15 анти-скам гайдов nl/fr (SEO-канал GTM Фазы 1; БЕЗ имён конкурентов — CEL VI.17; тексты — 🟡, каркас — 🟢) → [T16-guides-hub.md](docs/todo/T16-guides-hub.md)
+- [x] **T16** 🟢 — Контент-хаб `/guides`: 10-15 анти-скам гайдов nl/fr (SEO-канал GTM Фазы 1; БЕЗ имён конкурентов — CEL VI.17; тексты — 🟡, каркас — 🟢) → [T16-guides-hub.md](docs/todo/T16-guides-hub.md) — 6fcc843 (data-driven 10 гайдов, SSR `/guides` + `/guides/[slug]`, Article/ItemList JSON-LD, canonical+hreflang, sitemap, footer link, i18n en/fr/nl/de/ru)
 - [ ] **T17** 🟡 — Волна 3 остаток: sticky one-primary contact-bar на /ad + safety bottom-sheet + чат-хинт (SITE_BLUEPRINT волна 3) → [T17-ad-contact-bar.md](docs/todo/T17-ad-contact-bar.md)
 - [ ] **T18 (LAUNCH-GATE)** 🔴 — Seed-выключатель: флаг seed-аккаунтов + исключение из агрегатов/JSON-LD/медиан на уровне запросов; сам purge — ТОЛЬКО по команде основателя перед рекламой → [T18-seed-switch.md](docs/todo/T18-seed-switch.md)
 
