@@ -1660,7 +1660,10 @@
   "discovery": {
     "recently_viewed": "Vus récemment",
     "load_error": "Impossible de charger plus d'annonces.",
-    "end_of_feed": "Vous êtes arrivé à la fin."
+    "end_of_feed": "Vous êtes arrivé à la fin.",
+    "personalized_note": "Ordre ajusté pour cette session",
+    "personalized_reset": "Réinitialiser",
+    "personalized_why": "Pourquoi cet ordre ?"
   },
   "trust": {
     "tab_login": "Se connecter",
@@ -1944,7 +1947,9 @@
     "policy_title": "Politique en matière de cookies",
     "policy_intro": "Cette page répertorie tous les cookies et éléments de stockage du navigateur utilisés par LyVoX, regroupés par catégorie. Les éléments nécessaires sont toujours actifs ; les autres nécessitent votre consentement.",
     "policy_draft_note": "Cette politique est une ébauche de travail. Le texte juridique complet sera ajouté avant le lancement public.",
-    "manage": "Gérer les paramètres des cookies"
+    "manage": "Gérer les paramètres des cookies",
+    "session_personalization_title": "Ordre du fil limité à la session",
+    "session_personalization_body": "Lorsque les cookies fonctionnels sont acceptés, LyVoX peut utiliser les clics sur les catégories et les annonces ouvertes pendant cette session du navigateur pour réordonner les pages suivantes du fil. La première page garde son ordre initial, les signaux restent dans sessionStorage et ils ne sont pas envoyés à LyVoX."
   },
   "legal": {
     "draft_notice": "⚠ Brouillon — ce contenu est en attente d'une révision juridique finale et n'est pas encore juridiquement contraignant.",

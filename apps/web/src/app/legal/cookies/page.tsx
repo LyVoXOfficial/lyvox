@@ -26,6 +26,8 @@ export default async function CookiesPage() {
       necessaryLabel={t("cookie.necessary_label")}
       functionalLabel={t("cookie.functional_label")}
       analyticsLabel={t("cookie.analytics_label")}
+      sessionTitle={t("cookie.session_personalization_title")}
+      sessionBody={t("cookie.session_personalization_body")}
     />
   );
 }

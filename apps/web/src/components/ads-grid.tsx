@@ -5,6 +5,7 @@ import { MarketplaceEmptyState } from "@/components/marketplace-grid-states";
 
 type Item = {
   id: string;
+  categoryId?: string | null;
   title: string;
   price?: number | null;
   currency?: string | null;

@@ -73,6 +73,12 @@ export const STORAGE_INVENTORY: {
     lib: "lib/seenAdverts.ts",
   },
   {
+    key: "lyvox:sessionIntent",
+    category: "functional",
+    purpose: "Session-only feed ordering signals kept in sessionStorage and never sent to LyVoX",
+    lib: "lib/discovery/sessionIntent.ts",
+  },
+  {
     key: "lyvox:discover:prefs",
     category: "functional",
     purpose: "Discover swipe settings (mode, haptics, etc.) for anonymous visitors",

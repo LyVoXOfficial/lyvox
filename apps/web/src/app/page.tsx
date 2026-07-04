@@ -53,6 +53,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 type AdListItem = {
   id: string;
+  categoryId?: string | null;
   title: string;
   price?: number | null;
   currency?: string | null;
@@ -127,7 +128,7 @@ async function getFreeAds(supabase: SupabaseClient): Promise<AdListItem[]> {
   // Get free ads (price = 0 or null)
   const { data: free, error: freeError } = await supabase
     .from("adverts")
-    .select("id,title,price,currency,location,created_at,user_id")
+    .select("id,category_id,title,price,currency,location,created_at,user_id")
     .eq("status", "active")
     .or("price.eq.0,price.is.null")
     .order("created_at", { ascending: false })
@@ -182,6 +183,7 @@ async function getFreeAds(supabase: SupabaseClient): Promise<AdListItem[]> {
 
   return (free ?? []).map((ad) => ({
     id: ad.id,
+    categoryId: ad.category_id ?? null,
     title: ad.title,
     price: ad.price,
     currency: ad.currency ?? null,
@@ -197,7 +199,7 @@ async function getLatestAds(supabase: SupabaseClient): Promise<AdvertCard[]> {
   // Get latest ads
   const { data: ads, error: adsError } = await supabase
     .from("adverts")
-    .select("id,title,price,currency,location,created_at,user_id")
+    .select("id,category_id,title,price,currency,location,created_at,user_id")
     .eq("status", "active")
     .order("created_at", { ascending: false })
     .limit(24);
@@ -251,6 +253,7 @@ async function getLatestAds(supabase: SupabaseClient): Promise<AdvertCard[]> {
 
   return (ads ?? []).map((ad) => ({
     id: ad.id,
+    categoryId: ad.category_id ?? null,
     title: ad.title,
     price: ad.price ?? null,
     currency: ad.currency ?? null,

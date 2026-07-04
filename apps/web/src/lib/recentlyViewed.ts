@@ -2,6 +2,7 @@ import { hasConsent } from "@/lib/cookieConsent/store";
 
 export type RecentAdvert = {
   id: string;
+  categoryId?: string | null;
   title: string;
   price: number | null;
   currency: string | null;

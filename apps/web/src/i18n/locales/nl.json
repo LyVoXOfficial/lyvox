@@ -1660,7 +1660,10 @@
   "discovery": {
     "recently_viewed": "Recent bekeken",
     "load_error": "Kon meer advertenties niet laden.",
-    "end_of_feed": "Je hebt het einde bereikt."
+    "end_of_feed": "Je hebt het einde bereikt.",
+    "personalized_note": "Volgorde aangepast voor deze sessie",
+    "personalized_reset": "Resetten",
+    "personalized_why": "Waarom deze volgorde?"
   },
   "trust": {
     "tab_login": "Inloggen",
@@ -1944,7 +1947,9 @@
     "policy_title": "Cookiebeleid",
     "policy_intro": "Deze pagina geeft een overzicht van alle cookies en browseropslagitems die LyVoX gebruikt, gegroepeerd per categorie. Noodzakelijke items zijn altijd actief; andere vereisen uw toestemming.",
     "policy_draft_note": "Dit beleid is een werkversie. De volledige juridische tekst wordt toegevoegd vóór de publieke lancering.",
-    "manage": "Cookie-instellingen beheren"
+    "manage": "Cookie-instellingen beheren",
+    "session_personalization_title": "Feedvolgorde alleen voor deze sessie",
+    "session_personalization_body": "Wanneer functionele cookies zijn aanvaard, kan LyVoX categorieklikken en geopende advertenties uit deze browsersessie gebruiken om latere feedpagina's anders te ordenen. De eerste pagina behoudt de oorspronkelijke volgorde, de signalen blijven in sessionStorage en ze worden niet naar LyVoX verzonden."
   },
   "legal": {
     "draft_notice": "⚠ Concept — deze inhoud is in afwachting van definitieve juridische beoordeling en is nog niet juridisch bindend.",

@@ -2,12 +2,21 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import AdsGrid from "@/components/ads-grid";
 import { AdsGridSkeleton } from "@/components/marketplace-grid-states";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
 import { mapSearchItemToCard, type AdvertCard, type SearchApiItem } from "@/lib/advertCards";
 import { appendUnique } from "@/lib/discoveryFeed";
+import {
+  getSessionIntent,
+  hasSessionSignals,
+  rankSessionItems,
+  reset,
+  SESSION_INTENT_CHANGED,
+  type SessionIntentState,
+} from "@/lib/discovery/sessionIntent";
 
 const PAGE_SIZE = 24;
 // Auto-load stops after this many fetched pages; further pages load via the
@@ -29,8 +38,17 @@ export default function DiscoveryFeed({
     const v = t(k);
     return v === k ? fb : v;
   };
+  const initialIntent: SessionIntentState = {
+    mode: "off",
+    source: "memory",
+    updatedAt: 0,
+    categories: {},
+    priceBands: {},
+    localRadiusKm: null,
+  };
 
   const [items, setItems] = useState<AdvertCard[]>(initialItems);
+  const [intent, setIntent] = useState<SessionIntentState>(initialIntent);
   const [page, setPage] = useState(1); // page 0 == initialItems (SSR)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -38,6 +56,18 @@ export default function DiscoveryFeed({
     hasMoreInitial === undefined ? initialItems.length < PAGE_SIZE : !hasMoreInitial,
   );
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const initialCountRef = useRef(initialItems.length);
+
+  useEffect(() => {
+    const refreshIntent = () => setIntent(getSessionIntent());
+    refreshIntent();
+    window.addEventListener(SESSION_INTENT_CHANGED, refreshIntent);
+    window.addEventListener("lyvox:cookie-consent-changed", refreshIntent);
+    return () => {
+      window.removeEventListener(SESSION_INTENT_CHANGED, refreshIntent);
+      window.removeEventListener("lyvox:cookie-consent-changed", refreshIntent);
+    };
+  }, []);
 
   const loadMore = useCallback(async () => {
     if (loading || done) return;
@@ -62,6 +92,13 @@ export default function DiscoveryFeed({
   }, [loading, done, page]);
 
   const autoLoad = page <= AUTO_PAGES;
+  const personalized = hasSessionSignals(intent);
+  const visibleItems = personalized
+    ? [
+        ...items.slice(0, initialCountRef.current),
+        ...rankSessionItems(items.slice(initialCountRef.current), intent),
+      ]
+    : items;
 
   useEffect(() => {
     const node = sentinelRef.current;
@@ -78,7 +115,24 @@ export default function DiscoveryFeed({
 
   return (
     <div className="space-y-6">
-      <AdsGrid items={items} />
+      {personalized && (
+        <div className="flex flex-col gap-3 rounded-md border border-border bg-card px-4 py-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>{tr("discovery.personalized_note", "Order adjusted for this session")}</span>
+            <Link
+              href="/legal/cookies#session-personalization"
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
+              {tr("discovery.personalized_why", "Why this order?")}
+            </Link>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => setIntent(reset())}>
+            {tr("discovery.personalized_reset", "Reset")}
+          </Button>
+        </div>
+      )}
+
+      <AdsGrid items={visibleItems} />
 
       {loading && <AdsGridSkeleton count={8} />}
 

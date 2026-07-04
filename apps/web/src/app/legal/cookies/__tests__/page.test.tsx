@@ -28,6 +28,8 @@ const i18nProps = {
   necessaryLabel: "cookie.necessary_label",
   functionalLabel: "cookie.functional_label",
   analyticsLabel: "cookie.analytics_label",
+  sessionTitle: "cookie.session_personalization_title",
+  sessionBody: "cookie.session_personalization_body",
 };
 
 describe("CookieInventory — /legal/cookies page", () => {
