@@ -25,7 +25,9 @@ const { POST } = await import("../route");
 
 // Helper to create a JSON Request with optional body
 function jsonReq(body?: unknown) {
-  if (body === undefined) return undefined;
+  if (body === undefined) {
+    return new Request("https://x.test/api/adverts", { method: "POST" });
+  }
   return new Request("https://x.test/api/adverts", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -62,7 +64,7 @@ describe("POST /api/adverts verification gate", () => {
     checkBlockedMock.mockResolvedValue({ isBlocked: false });
     // Route proceeds past verification; categories lookup returns null → CATEGORY_LOOKUP_FAILED (not 403)
     fromMock.mockReturnValue(makeChainable());
-    const res = await POST();
+    const res = await POST(jsonReq());
     // Unverified user must NOT get 403 VERIFICATION_REQUIRED for draft creation
     expect(res.status).not.toBe(403);
     const body = await res.json();
@@ -71,7 +73,7 @@ describe("POST /api/adverts verification gate", () => {
 
   it("401 when not signed in", async () => {
     getUserMock.mockResolvedValue({ data: { user: null } });
-    const res = await POST();
+    const res = await POST(jsonReq());
     expect(res.status).toBe(401);
   });
 });
@@ -132,7 +134,7 @@ describe("POST /api/adverts — business gate (T17)", () => {
   it("no canSellAsBusiness call when req is undefined (legacy no-body call)", async () => {
     getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
     fromMock.mockReturnValue(makeChainable());
-    await POST(undefined);
+    await POST(jsonReq(undefined));
     expect(canSellMock).not.toHaveBeenCalled();
   });
 
@@ -216,7 +218,7 @@ describe("POST /api/adverts — F9 fraud gate", () => {
       blockedUntil: "2999-01-01T00:00:00Z",
       reason: "Account flagged for fraud",
     });
-    const res = await POST();
+    const res = await POST(jsonReq());
     expect(res.status).toBe(403);
     const body = await res.json();
     expect(body.error).toBe("FORBIDDEN");
@@ -229,7 +231,7 @@ describe("POST /api/adverts — F9 fraud gate", () => {
     checkBlockedMock.mockResolvedValue({ isBlocked: false });
     // categories lookup → null → route returns CATEGORY_LOOKUP_FAILED, but checkBlocked was already called
     fromMock.mockReturnValue(makeChainable());
-    await POST(undefined);
+    await POST(jsonReq(undefined));
     expect(checkBlockedMock).toHaveBeenCalledWith("u-fc", { failClosed: true });
   });
 });

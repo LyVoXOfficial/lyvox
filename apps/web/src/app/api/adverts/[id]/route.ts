@@ -13,8 +13,40 @@ import { updateAdvertSchema } from "@/lib/validations/adverts";
 import type { Tables, TablesInsert, TablesUpdate } from "@/lib/supabaseTypes";
 import { isViewerVerified } from "@/lib/auth/requireVerified";
 import { markAdvertTranslationsStale } from "@/lib/translations/advertTranslations";
+import { createRateLimiter, getClientIp, build429 } from "@/lib/rateLimiter";
 
 export const runtime = "nodejs";
+
+const parsePositiveInt = (value: string | undefined, fallback: number) => {
+  const parsed = Number.parseInt(value ?? "", 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+// SEC-RL1: publish is the spam surface, not draft edits — scope the limiter
+// to the publish transition only so plain field edits stay unthrottled.
+const ADVERT_PUBLISH_USER_ATTEMPTS = parsePositiveInt(
+  process.env.RATE_LIMIT_ADVERT_PUBLISH_USER_PER_10M,
+  10,
+);
+const ADVERT_PUBLISH_USER_WINDOW_SEC = 10 * 60;
+const ADVERT_PUBLISH_IP_ATTEMPTS = parsePositiveInt(
+  process.env.RATE_LIMIT_ADVERT_PUBLISH_IP_PER_24H,
+  100,
+);
+const ADVERT_PUBLISH_IP_WINDOW_SEC = 24 * 60 * 60;
+
+const advertPublishUserLimiter = createRateLimiter({
+  limit: ADVERT_PUBLISH_USER_ATTEMPTS,
+  windowSec: ADVERT_PUBLISH_USER_WINDOW_SEC,
+  prefix: "advert:publish:user",
+});
+
+const advertPublishIpLimiter = createRateLimiter({
+  limit: ADVERT_PUBLISH_IP_ATTEMPTS,
+  windowSec: ADVERT_PUBLISH_IP_WINDOW_SEC,
+  prefix: "advert:publish:ip",
+  bucketId: "global",
+});
 
 type AdvertRow = Tables<"adverts">;
 type AdvertStatus = NonNullable<AdvertRow["status"]>;
@@ -161,8 +193,21 @@ export async function PATCH(
   const requestedStatus = body.status;
   const isPublishing = requestedStatus === "active";
 
-  // Publish gate: phone verification + fraud block check
+  // Publish gate: rate limit + phone verification + fraud block check
   if (isPublishing) {
+    const publishUserResult = await advertPublishUserLimiter(user.id);
+    if (!publishUserResult.success) {
+      return build429(publishUserResult);
+    }
+
+    const ip = getClientIp(request);
+    if (ip) {
+      const publishIpResult = await advertPublishIpLimiter(ip);
+      if (!publishIpResult.success) {
+        return build429(publishIpResult);
+      }
+    }
+
     if (!(await isViewerVerified(supabase, user.id))) {
       return createErrorResponse(ApiErrorCode.VERIFICATION_REQUIRED, {
         status: 403,

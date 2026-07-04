@@ -10,14 +10,67 @@ import type { TablesInsert } from "@/lib/supabaseTypes";
 import { checkUserBlocked } from "@/lib/fraud/checkUserBlocked";
 import { invokeFraudCheck } from "@/lib/fraud/invokeFraudCheck";
 import { canSellAsBusiness } from "@/lib/auth/canSellAsBusiness";
+import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 
 export const runtime = "nodejs";
 
-export async function POST(req?: Request) {
-  const supabase = await supabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+const parsePositiveInt = (value: string | undefined, fallback: number) => {
+  const parsed = Number.parseInt(value ?? "", 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+// SEC-RL1: spam surface — a compromised/scripted account can otherwise create
+// unbounded draft adverts. Stacked per-user + per-IP limiters, same pattern as
+// reports/create/route.ts.
+const ADVERT_CREATE_USER_ATTEMPTS = parsePositiveInt(
+  process.env.RATE_LIMIT_ADVERT_CREATE_USER_PER_10M,
+  5,
+);
+const ADVERT_CREATE_USER_WINDOW_SEC = 10 * 60;
+const ADVERT_CREATE_IP_ATTEMPTS = parsePositiveInt(
+  process.env.RATE_LIMIT_ADVERT_CREATE_IP_PER_24H,
+  50,
+);
+const ADVERT_CREATE_IP_WINDOW_SEC = 24 * 60 * 60;
+
+const advertCreateUserLimiter = createRateLimiter({
+  limit: ADVERT_CREATE_USER_ATTEMPTS,
+  windowSec: ADVERT_CREATE_USER_WINDOW_SEC,
+  prefix: "advert:create:user",
+});
+
+const advertCreateIpLimiter = createRateLimiter({
+  limit: ADVERT_CREATE_IP_ATTEMPTS,
+  windowSec: ADVERT_CREATE_IP_WINDOW_SEC,
+  prefix: "advert:create:ip",
+  bucketId: "global",
+});
+
+type SupabaseServerClient = Awaited<ReturnType<typeof supabaseServer>>;
+type SupabaseUser = Awaited<ReturnType<SupabaseServerClient["auth"]["getUser"]>>["data"]["user"];
+type RequestContext = { supabase: SupabaseServerClient; user: SupabaseUser };
+
+const contextCache = new WeakMap<Request, Promise<RequestContext>>();
+
+const getRequestContext = async (req: Request): Promise<RequestContext> => {
+  let cached = contextCache.get(req);
+  if (!cached) {
+    cached = (async () => {
+      const supabase = await supabaseServer();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      return { supabase, user: user ?? null };
+    })();
+    contextCache.set(req, cached);
+  }
+  return cached;
+};
+
+const resolveUserId = (req: Request) => getRequestContext(req).then(({ user }) => user?.id ?? null);
+
+const baseHandler = async (req: Request) => {
+  const { supabase, user } = await getRequestContext(req);
 
   if (!user) {
     return createErrorResponse(ApiErrorCode.UNAUTHENTICATED, { status: 401 });
@@ -113,4 +166,15 @@ export async function POST(req?: Request) {
       category_id: data.category_id,
     },
   });
-}
+};
+
+const withUserLimit = withRateLimit(baseHandler, {
+  limiter: advertCreateUserLimiter,
+  getUserId: resolveUserId,
+  makeKey: (_req, userId) => (userId ? userId : null),
+});
+
+export const POST = withRateLimit(withUserLimit, {
+  limiter: advertCreateIpLimiter,
+  makeKey: (_req, _userId, ip) => (ip ? ip : null),
+});

@@ -177,7 +177,7 @@ const pickStricterResult = (
   return current;
 };
 
-const build429 = ({ limit, reset, retryAfterSec }: RateLimitResult): Response => {
+export const build429 = ({ limit, reset, retryAfterSec }: RateLimitResult): Response => {
   // Используем стандартизированный формат, но сохраняем дополнительные поля для обратной совместимости
   const resetAt = new Date(reset * 1000).toISOString();
   const detail = `Rate limit exceeded. Retry after ${retryAfterSec} seconds. Reset at ${resetAt}. Limit: ${limit}`;
