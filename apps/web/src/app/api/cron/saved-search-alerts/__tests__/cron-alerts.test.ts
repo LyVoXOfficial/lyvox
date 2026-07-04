@@ -24,6 +24,10 @@ const savedSearchesMock = (rows: unknown[], onUpdate?: () => void) => ({
 beforeEach(() => {
   fromMock.mockReset();
   rpcMock.mockReset();
+  delete process.env.RESEND_API_KEY;
+  delete process.env.SENDGRID_API_KEY;
+  delete process.env.MAILGUN_API_KEY;
+  delete process.env.SMTP_URL;
 });
 
 describe("GET /api/cron/saved-search-alerts", () => {
@@ -81,6 +85,26 @@ describe("GET /api/cron/saved-search-alerts", () => {
     const body = await res.json();
     expect(body.data.notified).toBe(0);
     expect(updated).toBe(1); // still advances the watermark
+  });
+
+  it("skips searches with alert_frequency=off", async () => {
+    let updated = 0;
+    fromMock.mockImplementation((table: string) => {
+      if (table === "saved_searches")
+        return savedSearchesMock(
+          [{ id: "s1", user_id: "u1", name: "x", query: null, filters: {}, alert_frequency: "off", last_alerted_at: "2020-01-01T00:00:00.000Z" }],
+          () => { updated++; },
+        );
+      if (table === "notifications") return { insert: async () => ({ error: null }) };
+      throw new Error("unexpected table " + table);
+    });
+    rpcMock.mockResolvedValue({ data: [{ created_at: "2026-06-25T00:00:00.000Z" }], error: null });
+
+    const res = await GET(req("Bearer testsecret"));
+    const body = await res.json();
+    expect(body.data.notified).toBe(0);
+    expect(updated).toBe(0);
+    expect(rpcMock).not.toHaveBeenCalled();
   });
 
   it("does NOT advance the watermark on an RPC error (no silent skip)", async () => {

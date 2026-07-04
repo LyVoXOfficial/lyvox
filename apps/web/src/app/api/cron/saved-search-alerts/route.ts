@@ -1,5 +1,8 @@
 import { supabaseService } from "@/lib/supabaseService";
 import { createErrorResponse, createSuccessResponse, ApiErrorCode } from "@/lib/apiErrors";
+import { absoluteUrl } from "@/lib/seo/baseUrl";
+import { emailProviderConfigured, sendEmail } from "@/lib/email/sender";
+import { resolveLocale } from "@/lib/i18n";
 import enMessages from "@/i18n/locales/en.json";
 
 export const runtime = "nodejs";
@@ -22,6 +25,13 @@ type Filters = {
   sort_by?: string | null;
 };
 
+type FreshAdvert = {
+  id?: string | null;
+  title?: string | null;
+  created_at?: string | null;
+  content_locale?: string | null;
+};
+
 function interpolate(tpl: string, params: Record<string, string | number>): string {
   return tpl.replace(/\{(\w+)\}/g, (m, k) => (params[k] != null ? String(params[k]) : m));
 }
@@ -37,6 +47,14 @@ function searchHref(query: string | null, f: Filters): string {
   if (f.condition) p.set("condition", f.condition);
   if (f.sort_by) p.set("sort_by", f.sort_by);
   return `/search?${p.toString()}`;
+}
+
+function isEmailEnabled(value: unknown): boolean {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return true;
+  const email = (value as { email?: unknown }).email;
+  if (typeof email !== "object" || email === null || Array.isArray(email)) return true;
+  const preference = (email as Record<string, unknown>).saved_search;
+  return preference !== false;
 }
 
 async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
@@ -72,8 +90,11 @@ export async function GET(request: Request) {
 
   const rows = searches ?? [];
   let notified = 0;
+  let emailed = 0;
+  const canSendEmail = emailProviderConfigured();
 
   await mapWithConcurrency(rows, CONCURRENCY, async (s) => {
+    if (s.alert_frequency === "off") return;
     const f = (s.filters ?? {}) as Filters;
     // Capture the boundary BEFORE the scan; we alert on adverts in (last_alerted_at, runStartedAt]
     // and advance the watermark to runStartedAt. This window bound avoids both missing adverts
@@ -96,7 +117,7 @@ export async function GET(request: Request) {
 
     const sinceMs = new Date(s.last_alerted_at).getTime();
     const untilMs = runStartedAt.getTime();
-    const fresh = (Array.isArray(ads) ? (ads as Array<{ created_at?: string | null }>) : []).filter((a) => {
+    const fresh = (Array.isArray(ads) ? (ads as FreshAdvert[]) : []).filter((a) => {
       if (a.created_at == null) return false;
       const t = new Date(a.created_at).getTime();
       return t > sinceMs && t <= untilMs;
@@ -117,6 +138,42 @@ export async function GET(request: Request) {
         return;
       }
       notified++;
+
+      if (canSendEmail) {
+        const firstFresh = fresh.find((ad) => ad.id);
+        let emailAdvert = firstFresh;
+        if (firstFresh?.id) {
+          const { data: advert } = await supabase
+            .from("adverts")
+            .select("id,title,content_locale")
+            .eq("id", firstFresh.id)
+            .maybeSingle();
+          emailAdvert = { ...firstFresh, ...advert };
+        }
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("notification_preferences")
+          .eq("id", s.user_id)
+          .maybeSingle();
+
+        if (isEmailEnabled(profile?.notification_preferences)) {
+          const advertId = emailAdvert?.id;
+          const sent = await sendEmail({
+            userId: s.user_id,
+            type: "saved_search",
+            locale: resolveLocale(emailAdvert?.content_locale),
+            data: {
+              search_name: s.name,
+              advert_title: emailAdvert?.title ?? s.name,
+              advert_url: advertId ? absoluteUrl(`/ad/${advertId}`) : absoluteUrl(searchHref(s.query ?? null, f)),
+              saved_url: absoluteUrl("/saved"),
+              saved_search_id: s.id,
+            },
+          });
+          if (sent) emailed++;
+        }
+      }
     }
 
     const { error: updErr } = await supabase
@@ -128,5 +185,5 @@ export async function GET(request: Request) {
     }
   });
 
-  return createSuccessResponse({ processed: rows.length, notified });
+  return createSuccessResponse({ processed: rows.length, notified, emailed });
 }

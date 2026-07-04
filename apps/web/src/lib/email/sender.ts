@@ -3,9 +3,61 @@ import type { Locale } from "@/lib/i18n";
 
 interface SendEmailOptions {
   userId: string;
-  type: "new_message" | "advert_approved" | "advert_rejected" | "payment_completed";
+  type: "new_message" | "advert_approved" | "advert_rejected" | "payment_completed" | "saved_search";
   data: Record<string, any>;
   locale: Locale;
+}
+
+export function emailProviderConfigured(env: Record<string, string | undefined> = process.env): boolean {
+  return Boolean(env.RESEND_API_KEY || env.SENDGRID_API_KEY);
+}
+
+async function deliverEmail({
+  to,
+  subject,
+  html,
+  text,
+}: {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+}): Promise<boolean> {
+  const from = process.env.EMAIL_FROM || "LyVoX <notifications@lyvox.be>";
+
+  if (process.env.RESEND_API_KEY) {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ from, to, subject, html, text }),
+    });
+    return response.ok;
+  }
+
+  if (process.env.SENDGRID_API_KEY) {
+    const response = await fetch("https://api.sendgrid.com/v3/mail/send", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        personalizations: [{ to: [{ email: to }] }],
+        from: { email: process.env.EMAIL_FROM_ADDRESS || "notifications@lyvox.be", name: "LyVoX" },
+        subject,
+        content: [
+          { type: "text/plain", value: text },
+          { type: "text/html", value: html },
+        ],
+      }),
+    });
+    return response.ok;
+  }
+
+  return false;
 }
 
 /**
@@ -71,10 +123,17 @@ export async function sendEmail({
     const { getEmailTemplate } = await import("./templates");
     const template = getEmailTemplate(type, locale, data);
 
-    // For now, we'll use Supabase Auth to send emails
-    // In production, you might want to use SendGrid or Mailgun
-    // This is a placeholder - actual email sending should be implemented
-    // based on your email provider choice
+    const delivered = await deliverEmail({
+      to: authUser.user.email,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+    });
+
+    if (!delivered) {
+      console.error(`Email delivery failed for user ${userId}, type ${type}`);
+      return false;
+    }
 
     // Create notification record
     const { error: notifError } = await supabase.from("notifications").insert({
@@ -92,9 +151,7 @@ export async function sendEmail({
       return false;
     }
 
-    // TODO: Implement actual email sending via SendGrid/Mailgun/Supabase SMTP
-    // For now, we just create the notification record
-    console.log(`Email notification created for user ${userId}, type ${type}`);
+    console.log(`Email notification sent for user ${userId}, type ${type}`);
 
     return true;
   } catch (error) {
@@ -102,4 +159,3 @@ export async function sendEmail({
     return false;
   }
 }
-
