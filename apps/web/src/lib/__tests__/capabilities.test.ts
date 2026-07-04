@@ -15,5 +15,6 @@ describe("capability flags", () => {
   });
   it("maps each capability to its CAPABILITY_* env name", () => {
     expect(CAPABILITY_ENV.payments_escrow).toBe("CAPABILITY_PAYMENTS_ESCROW");
+    expect(CAPABILITY_ENV.advert_translations).toBe("CAPABILITY_ADVERT_TRANSLATIONS");
   });
 });

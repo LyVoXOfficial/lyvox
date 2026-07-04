@@ -10,7 +10,8 @@ export type Capability =
   | "whatsapp_otp"
   | "payments_escrow"
   | "discover_v2"
-  | "boost_ranking";
+  | "boost_ranking"
+  | "advert_translations";
 
 export const CAPABILITY_ENV: Record<Capability, string> = {
   pro_subscriptions: "CAPABILITY_PRO_SUBSCRIPTIONS",
@@ -20,6 +21,7 @@ export const CAPABILITY_ENV: Record<Capability, string> = {
   payments_escrow: "CAPABILITY_PAYMENTS_ESCROW",
   discover_v2: "CAPABILITY_DISCOVER_V2",
   boost_ranking: "CAPABILITY_BOOST_RANKING",
+  advert_translations: "CAPABILITY_ADVERT_TRANSLATIONS",
 };
 
 export function isCapabilityEnabled(
