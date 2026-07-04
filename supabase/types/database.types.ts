@@ -88,6 +88,59 @@ export type Database = {
           },
         ]
       }
+      advert_translations: {
+        Row: {
+          advert_id: string
+          created_at: string
+          description: string | null
+          generated_by: string
+          id: string
+          model_or_provider: string
+          source_hash: string
+          source_locale: string
+          status: string
+          target_locale: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          advert_id: string
+          created_at?: string
+          description?: string | null
+          generated_by: string
+          id?: string
+          model_or_provider: string
+          source_hash: string
+          source_locale: string
+          status?: string
+          target_locale: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          advert_id?: string
+          created_at?: string
+          description?: string | null
+          generated_by?: string
+          id?: string
+          model_or_provider?: string
+          source_hash?: string
+          source_locale?: string
+          status?: string
+          target_locale?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advert_translations_advert_id_fkey"
+            columns: ["advert_id"]
+            isOneToOne: false
+            referencedRelation: "adverts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       advert_views: {
         Row: {
           advert_id: string
