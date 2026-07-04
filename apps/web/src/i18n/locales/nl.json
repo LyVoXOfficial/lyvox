@@ -35,7 +35,8 @@
   "footer": {
     "tagline": "Op België gerichte marktplaats voor lokale advertenties, geverifieerde verkopers en veiligere gesprekken.",
     "browse_listings": "Advertenties bekijken",
-    "post_listing": "Plaats een advertentie"
+    "post_listing": "Plaats een advertentie",
+    "guides": "Anti-oplichting gidsen"
   },
   "common": {
     "page_not_found_title": "Pagina niet gevonden",
@@ -234,6 +235,212 @@
     "faq_a2": "Nee — particulieren bevestigen enkel e-mail en telefoon. Bedrijven worden geverifieerd via KBO/btw en krijgen een publiek handelaarsprofiel.",
     "faq_q3": "Hoe nemen kopers contact op?",
     "faq_a3": "Via de LyVoX-chat. Je telefoonnummer en e-mail blijven privé."
+  },
+  "guides": {
+    "meta_title": "Anti-oplichting gidsen voor tweedehands kopen in België | LyVoX",
+    "meta_description": "Praktische controles voor tweedehands auto's, elektronica, huurwoningen, jobs en lokale afspraken in België.",
+    "title": "Anti-oplichting gidsen voor tweedehands kopen",
+    "subtitle": "Korte, concrete checks voordat u een advertentie vertrouwt, een afspraak maakt of een item inspecteert.",
+    "read_guide": "Lees gids",
+    "back_to_guides": "Alle gidsen",
+    "category_cta": "Bekijk gerelateerde advertenties",
+    "trust_title": "Gebruik LyVoX-vertrouwenssignalen",
+    "trust_body": "Combineer geverifieerde verkoperssignalen, chat binnen het platform en meldknoppen met uw eigen controle van item, documenten en afspraak.",
+    "trust_verified": "Controleer geverifieerde verkoperssignalen",
+    "trust_chat": "Houd het gesprek in LyVoX-chat",
+    "trust_report": "Meld verdachte advertenties of berichten",
+    "items": {
+      "herken-oplichting-tweedehands-kopen": {
+        "title": "Hoe herken je oplichting bij tweedehands kopen?",
+        "intro": "Let op deze signalen voordat u naar een verkoper gaat of een item reserveert.",
+        "category_label": "Bekijk advertenties",
+        "sections": [
+          {
+            "heading": "Lees de advertentie kritisch",
+            "body": "Vage foto's, gekopieerde tekst, een prijs die veel lager ligt dan vergelijkbare zoekertjes of haast om meteen te beslissen zijn waarschuwingssignalen."
+          },
+          {
+            "heading": "Vergelijk de verkoperssignalen",
+            "body": "Kijk naar profielleeftijd, verificaties, eerdere advertenties en of de verkoper gewone vragen helder en consequent beantwoordt."
+          },
+          {
+            "heading": "Controleer vóór de afspraak",
+            "body": "Vraag om recente foto's, serienummers of documenten waar dat logisch is. Maak pas een afspraak wanneer de details bij elkaar passen."
+          }
+        ]
+      },
+      "car-pass-controleren-tweedehands-auto": {
+        "title": "Car-Pass controleren bij een tweedehands auto",
+        "intro": "In België is kilometerhistoriek essentieel. Gebruik de Car-Pass samen met een brede controle van de wagen.",
+        "category_label": "Bekijk transportadvertenties",
+        "sections": [
+          {
+            "heading": "Vraag het document vroeg",
+            "body": "Een serieuze verkoper kan kilometerstand, onderhoud, keuring en boorddocumenten uitleggen voordat u de wagen gaat bekijken."
+          },
+          {
+            "heading": "Vergelijk alle gegevens",
+            "body": "Leg kilometerstand, chassisnummer, keuringsbewijs en advertentietekst naast elkaar. Kleine verschillen vragen een duidelijke uitleg."
+          },
+          {
+            "heading": "Bekijk de wagen bij daglicht",
+            "body": "Controleer slijtage, dashboardmeldingen, banden, sleutels en papieren samen. Verandert het verhaal ter plaatse, pauzeer dan de deal."
+          }
+        ]
+      },
+      "imei-serienummer-elektronica-checken": {
+        "title": "IMEI en serienummer controleren bij elektronica",
+        "intro": "Telefoons, laptops en tablets zijn beter te beoordelen wanneer de verkoper identifiers en eigendomsbewijs kan tonen.",
+        "category_label": "Bekijk elektronica-advertenties",
+        "sections": [
+          {
+            "heading": "Match toestel, doos en bewijs",
+            "body": "Vraag IMEI of serienummer en vergelijk dit met instellingen, doos, factuur of garantiepagina. Alles moet hetzelfde verhaal vertellen."
+          },
+          {
+            "heading": "Test de basisfuncties",
+            "body": "Controleer laden, camera's, speakers, scherm, accountvergrendeling, batterijstatus en netwerkverbinding voordat u vertrekt."
+          },
+          {
+            "heading": "Bewaar bewijs in de chat",
+            "body": "Laat foto's, afspraken en toestelgegevens in de platformchat staan zodat advertentie, verkoper en item aan elkaar gekoppeld blijven."
+          }
+        ]
+      },
+      "veilige-afspraak-tweedehands-deal": {
+        "title": "Een veilige afspraak maken voor een tweedehands deal",
+        "intro": "Een goede overdracht is openbaar, rustig en eenvoudig af te breken als het item niet klopt.",
+        "category_label": "Bekijk lokale advertenties",
+        "sections": [
+          {
+            "heading": "Kies een publieke plek",
+            "body": "Spreek overdag af op een drukke locatie waar u het item rustig kunt bekijken zonder tijdsdruk."
+          },
+          {
+            "heading": "Neem de advertentie mee",
+            "body": "Houd zoekertje, chat en afgesproken prijs bij de hand zodat u die ter plaatse met het item kunt vergelijken."
+          },
+          {
+            "heading": "Negeer geen druk",
+            "body": "Een plots andere locatie, weigering van inspectie of aandringen op snelheid is genoeg reden om de afspraak te stoppen."
+          }
+        ]
+      },
+      "epc-attest-huren-kopen": {
+        "title": "EPC-attest controleren bij huren of kopen",
+        "intro": "De EPC-score helpt energieprestaties vergelijken, maar het attest moet bij de juiste woning en documenten horen.",
+        "category_label": "Bekijk vastgoedadvertenties",
+        "sections": [
+          {
+            "heading": "Vraag het attest op",
+            "body": "Controleer of adres, wooneenheid, datum en certificaatnummer overeenkomen met de advertentie en de bezichtiging."
+          },
+          {
+            "heading": "Vergelijk met de woning",
+            "body": "Let op ramen, verwarming, isolatie, renovatieclaims en opmerkingen in het attest tijdens het bezoek."
+          },
+          {
+            "heading": "Zet vragen op schrift",
+            "body": "Stel vervolgvragen in de chat zodat beloftes over werken, kosten of timing later terug te vinden zijn."
+          }
+        ]
+      },
+      "huurwaarborg-en-contract-controleren": {
+        "title": "Huurwaarborg en contract controleren",
+        "intro": "Vergelijk contract, identiteit en bezichtiging voordat u zich aan een huurwoning verbindt.",
+        "category_label": "Bekijk huuradvertenties",
+        "sections": [
+          {
+            "heading": "Controleer de verhuurcontext",
+            "body": "Vraag of de persoon die de woning toont eigenaar, makelaar of gevolmachtigde is en of dat schriftelijk kan worden onderbouwd."
+          },
+          {
+            "heading": "Lees het contract rustig",
+            "body": "Controleer adres, duur, huurprijs, waarborgregeling, plaatsbeschrijving, kosten en opzegvoorwaarden voordat u tekent."
+          },
+          {
+            "heading": "Wees voorzichtig met haast",
+            "body": "Beslissen vóór een echte bezichtiging, ontbrekende documenten of verschillende namen zijn redenen om niet door te gaan."
+          }
+        ]
+      },
+      "fiets-kopen-framenummer-check": {
+        "title": "Framenummer controleren bij een tweedehands fiets",
+        "intro": "Een duidelijk framenummer en een logisch verhaal van de verkoper verkleinen het risico op een problematische fiets.",
+        "category_label": "Bekijk transportadvertenties",
+        "sections": [
+          {
+            "heading": "Zoek het framenummer",
+            "body": "Vraag waar het nummer staat en vergelijk het met foto's, factuur, registratie of onderhoudsbewijs als die er zijn."
+          },
+          {
+            "heading": "Inspecteer slijtage en onderdelen",
+            "body": "Controleer remmen, verlichting, batterij bij e-bikes, sleutels, lader en of de staat past bij de prijs."
+          },
+          {
+            "heading": "Stel vragen bij ontbrekende basics",
+            "body": "Geen sleutel, geen lader, weggewerkte nummers of vage antwoorden over eigendom zijn duidelijke stoptekens."
+          }
+        ]
+      },
+      "jobaanbieding-scam-herkennen": {
+        "title": "Verdachte jobaanbiedingen herkennen",
+        "intro": "Echte werkgevers kunnen functie, bedrijf en proces uitleggen zonder normale controles te ontwijken.",
+        "category_label": "Bekijk jobadvertenties",
+        "sections": [
+          {
+            "heading": "Controleer de werkgever",
+            "body": "Vergelijk bedrijfsnaam, website, locatie, e-maildomein en functiebeschrijving voordat u gevoelige documenten deelt."
+          },
+          {
+            "heading": "Let op vage taken",
+            "body": "Wees voorzichtig met onduidelijk werk, onrealistische vergoeding, goederen ontvangen voor iemand anders of druk om buiten het platform te praten."
+          },
+          {
+            "heading": "Houd het proces traceerbaar",
+            "body": "Gebruik geschreven berichten voor interviewmomenten, taakdetails en volgende stappen zodat tegenstrijdigheden zichtbaar blijven."
+          }
+        ]
+      },
+      "huisdier-adoptie-advertentie-check": {
+        "title": "Huisdieradvertenties en adoptie veilig controleren",
+        "intro": "Bij dierenadvertenties tellen welzijn, documenten en een echte ontmoeting zwaarder dan snelheid.",
+        "category_label": "Bekijk dierenadvertenties",
+        "sections": [
+          {
+            "heading": "Vraag naar het dier",
+            "body": "Vraag leeftijd, gezondheid, vaccinaties, herkomst, chipinformatie en waarom het dier wordt herplaatst."
+          },
+          {
+            "heading": "Bekijk de omgeving",
+            "body": "Een bezoek helpt welzijn, gedrag en de link tussen foto's en werkelijkheid te beoordelen."
+          },
+          {
+            "heading": "Stop bij druk of inconsistenties",
+            "body": "Dringende verhalen, weigeren van ontmoeting of documenten die niet kloppen zijn redenen om de advertentie te melden."
+          }
+        ]
+      },
+      "chat-signalen-verdachte-verkoper": {
+        "title": "Chat-signalen van een verdachte verkoper",
+        "intro": "De manier waarop een verkoper communiceert laat vaak zien of een advertentie extra controle nodig heeft.",
+        "category_label": "Bekijk advertenties",
+        "sections": [
+          {
+            "heading": "Let op wisselende verhalen",
+            "body": "Andere locaties, namen, itemdetails of redenen voor verkoop maken een zoekertje minder betrouwbaar."
+          },
+          {
+            "heading": "Stel specifieke vragen",
+            "body": "Vraag naar details die de echte eigenaar kent: staat, accessoires, documenten, serienummer en inspectiemogelijkheid."
+          },
+          {
+            "heading": "Gebruik melden wanneer nodig",
+            "body": "Voelt het gesprek manipulerend of spreekt het de advertentie tegen, meld het dan zodat moderatie de signalen kan bekijken."
+          }
+        ]
+      }
+    }
   },
   "post": {
     "share_banner_title": "Je zoekertje staat online",

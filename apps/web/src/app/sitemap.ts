@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { guides } from "@/lib/guides";
 import { localizedSitemapEntries } from "@/lib/seo/localizedUrls";
 import { supabaseService } from "@/lib/supabaseService";
 
@@ -7,6 +8,13 @@ export const revalidate = 3600; // rebuild at most once per hour
 const STATIC_ROUTES: MetadataRoute.Sitemap = [
   ...localizedSitemapEntries("/", { changeFrequency: "daily", priority: 1.0 }),
   ...localizedSitemapEntries("/sell", { changeFrequency: "monthly", priority: 0.8 }),
+  ...localizedSitemapEntries("/guides", { changeFrequency: "monthly", priority: 0.7 }),
+  ...guides.flatMap((guide) =>
+    localizedSitemapEntries(`/guides/${guide.slug}`, {
+      changeFrequency: "monthly",
+      priority: 0.65,
+    }),
+  ),
   ...localizedSitemapEntries("/legal/privacy", { changeFrequency: "yearly", priority: 0.2 }),
   ...localizedSitemapEntries("/legal/terms", { changeFrequency: "yearly", priority: 0.2 }),
   ...localizedSitemapEntries("/legal/cookies", { changeFrequency: "yearly", priority: 0.2 }),

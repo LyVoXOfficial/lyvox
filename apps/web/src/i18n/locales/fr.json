@@ -35,7 +35,8 @@
   "footer": {
     "tagline": "Place de marché axée sur la Belgique pour les annonces locales, des vendeurs vérifiés et des conversations plus sûres.",
     "browse_listings": "Parcourir les annonces",
-    "post_listing": "Publier une annonce"
+    "post_listing": "Publier une annonce",
+    "guides": "Guides anti-arnaque"
   },
   "common": {
     "page_not_found_title": "Page introuvable",
@@ -234,6 +235,212 @@
     "faq_a2": "Non — les particuliers confirment simplement e-mail et téléphone. Les entreprises sont vérifiées via BCE/TVA et reçoivent un profil vendeur public.",
     "faq_q3": "Comment les acheteurs me contactent-ils ?",
     "faq_a3": "Via le chat LyVoX. Votre numéro de téléphone et votre e-mail restent privés."
+  },
+  "guides": {
+    "meta_title": "Guides anti-arnaque pour les petites annonces en Belgique | LyVoX",
+    "meta_description": "Contrôles pratiques pour voitures d'occasion, électronique, logement, emploi et rendez-vous locaux en Belgique.",
+    "title": "Guides anti-arnaque pour les petites annonces",
+    "subtitle": "Des vérifications courtes et concrètes avant de faire confiance à une annonce, visiter un bien ou inspecter un objet.",
+    "read_guide": "Lire le guide",
+    "back_to_guides": "Tous les guides",
+    "category_cta": "Voir les annonces liées",
+    "trust_title": "Utilisez les signaux de confiance LyVoX",
+    "trust_body": "Combinez les signaux de vendeur vérifié, le chat de la plateforme et les outils de signalement avec votre propre contrôle de l'objet, des documents et du rendez-vous.",
+    "trust_verified": "Vérifier les signaux du vendeur",
+    "trust_chat": "Garder la conversation dans le chat LyVoX",
+    "trust_report": "Signaler les annonces ou messages suspects",
+    "items": {
+      "herken-oplichting-tweedehands-kopen": {
+        "title": "Reconnaître une arnaque lors d'un achat d'occasion",
+        "intro": "Vérifiez ces signaux avant de vous déplacer chez un vendeur ou de réserver un objet.",
+        "category_label": "Parcourir les annonces",
+        "sections": [
+          {
+            "heading": "Lire l'annonce avec recul",
+            "body": "Photos floues, texte copié, prix très inférieur aux annonces comparables ou pression pour décider vite sont des signaux d'alerte."
+          },
+          {
+            "heading": "Comparer les signaux du vendeur",
+            "body": "Regardez l'ancienneté du profil, les vérifications, les annonces précédentes et la cohérence des réponses aux questions normales."
+          },
+          {
+            "heading": "Contrôler avant le rendez-vous",
+            "body": "Demandez des photos récentes, numéros de série ou documents lorsque c'est pertinent. Ne vous déplacez que si les détails concordent."
+          }
+        ]
+      },
+      "car-pass-controleren-tweedehands-auto": {
+        "title": "Contrôler le Car-Pass avant d'acheter une voiture d'occasion",
+        "intro": "En Belgique, l'historique kilométrique compte. Le Car-Pass doit être lu avec les autres contrôles du véhicule.",
+        "category_label": "Voir les annonces transport",
+        "sections": [
+          {
+            "heading": "Demander le document tôt",
+            "body": "Un vendeur sérieux peut expliquer kilométrage, entretien, contrôle technique et documents avant votre visite."
+          },
+          {
+            "heading": "Comparer toutes les données",
+            "body": "Comparez kilométrage, numéro de châssis, papiers de contrôle et annonce. Les écarts doivent avoir une explication claire."
+          },
+          {
+            "heading": "Inspecter la voiture de jour",
+            "body": "Vérifiez usure, témoins au tableau de bord, pneus, clés et papiers ensemble. Si le récit change sur place, arrêtez-vous."
+          }
+        ]
+      },
+      "imei-serienummer-elektronica-checken": {
+        "title": "Contrôler IMEI et numéro de série pour l'électronique",
+        "intro": "Téléphones, ordinateurs et tablettes sont plus faciles à vérifier si le vendeur montre identifiants et preuve d'achat.",
+        "category_label": "Voir les annonces électronique",
+        "sections": [
+          {
+            "heading": "Faire correspondre appareil et preuves",
+            "body": "Demandez l'IMEI ou le numéro de série et comparez-le aux réglages, à la boîte, à la facture ou à la page de garantie."
+          },
+          {
+            "heading": "Tester les fonctions de base",
+            "body": "Contrôlez charge, caméras, haut-parleurs, écran, verrouillage de compte, batterie et connexion réseau avant de partir."
+          },
+          {
+            "heading": "Garder les preuves dans le chat",
+            "body": "Photos, accords et détails de l'appareil restent ainsi reliés à l'annonce et au vendeur."
+          }
+        ]
+      },
+      "veilige-afspraak-tweedehands-deal": {
+        "title": "Organiser un rendez-vous plus sûr pour une transaction locale",
+        "intro": "Une bonne remise se fait dans un lieu public, calmement, avec la possibilité de partir si l'objet ne correspond pas.",
+        "category_label": "Voir les annonces locales",
+        "sections": [
+          {
+            "heading": "Choisir un lieu public",
+            "body": "Privilégiez un endroit fréquenté, en journée, où vous pouvez inspecter l'objet sans pression."
+          },
+          {
+            "heading": "Garder l'annonce sous la main",
+            "body": "Annonce, chat et prix convenu doivent pouvoir être comparés à l'objet au moment du rendez-vous."
+          },
+          {
+            "heading": "Refuser la pression",
+            "body": "Changement soudain de lieu, refus d'inspection ou insistance pour aller vite sont des raisons suffisantes pour arrêter."
+          }
+        ]
+      },
+      "epc-attest-huren-kopen": {
+        "title": "Contrôler le certificat PEB/EPC pour louer ou acheter",
+        "intro": "Le score énergétique aide à comparer, mais le certificat doit correspondre au bon logement et aux bons documents.",
+        "category_label": "Voir les annonces immobilières",
+        "sections": [
+          {
+            "heading": "Demander le certificat",
+            "body": "Vérifiez que l'adresse, l'unité, la date et le numéro du certificat correspondent à l'annonce visitée."
+          },
+          {
+            "heading": "Comparer avec le logement",
+            "body": "Pendant la visite, regardez fenêtres, chauffage, isolation, remarques et promesses de rénovation."
+          },
+          {
+            "heading": "Écrire les questions",
+            "body": "Posez les questions de suivi dans le chat pour retrouver ensuite les réponses sur travaux, coûts ou délais."
+          }
+        ]
+      },
+      "huurwaarborg-en-contract-controleren": {
+        "title": "Contrôler garantie locative et contrat",
+        "intro": "Avant de vous engager, comparez contrat, identité et visite réelle du logement.",
+        "category_label": "Voir les locations",
+        "sections": [
+          {
+            "heading": "Vérifier le rôle de l'interlocuteur",
+            "body": "Demandez si la personne est propriétaire, agent ou mandatée, et si ce rôle peut être documenté."
+          },
+          {
+            "heading": "Lire le contrat calmement",
+            "body": "Contrôlez adresse, durée, loyer, garantie, état des lieux, charges et préavis avant toute signature."
+          },
+          {
+            "heading": "Se méfier de l'urgence",
+            "body": "Décision avant visite, documents manquants ou noms incohérents sont des signaux pour ne pas continuer."
+          }
+        ]
+      },
+      "fiets-kopen-framenummer-check": {
+        "title": "Contrôler le numéro de cadre avant d'acheter un vélo",
+        "intro": "Un numéro lisible et un récit cohérent du vendeur réduisent le risque d'un vélo problématique.",
+        "category_label": "Voir les annonces transport",
+        "sections": [
+          {
+            "heading": "Trouver le numéro de cadre",
+            "body": "Demandez où il se trouve et comparez-le aux photos, facture, enregistrement ou preuve d'entretien si disponibles."
+          },
+          {
+            "heading": "Inspecter l'usure et les pièces",
+            "body": "Vérifiez freins, éclairage, batterie pour e-bike, clés, chargeur et cohérence entre état et prix."
+          },
+          {
+            "heading": "Questionner les éléments manquants",
+            "body": "Pas de clé, pas de chargeur, identifiants grattés ou réponses vagues sur l'origine doivent bloquer la transaction."
+          }
+        ]
+      },
+      "jobaanbieding-scam-herkennen": {
+        "title": "Reconnaître une offre d'emploi suspecte",
+        "intro": "Un vrai employeur peut expliquer le rôle, l'entreprise et le processus sans contourner les contrôles normaux.",
+        "category_label": "Voir les offres d'emploi",
+        "sections": [
+          {
+            "heading": "Contrôler l'employeur",
+            "body": "Comparez nom d'entreprise, site, localisation, domaine e-mail et description du poste avant de partager des documents sensibles."
+          },
+          {
+            "heading": "Repérer les tâches vagues",
+            "body": "Méfiez-vous du travail flou, d'une rémunération irréaliste, de marchandises à recevoir pour autrui ou d'une pression hors plateforme."
+          },
+          {
+            "heading": "Garder une trace écrite",
+            "body": "Conservez par écrit horaires d'entretien, détails du rôle et prochaines étapes pour rendre visibles les contradictions."
+          }
+        ]
+      },
+      "huisdier-adoptie-advertentie-check": {
+        "title": "Contrôler une annonce d'animal ou d'adoption",
+        "intro": "Pour les animaux, bien-être, documents et rencontre réelle comptent plus que la rapidité.",
+        "category_label": "Voir les annonces animaux",
+        "sections": [
+          {
+            "heading": "Poser des questions sur l'animal",
+            "body": "Demandez âge, santé, vaccins, origine, puce et raison du placement."
+          },
+          {
+            "heading": "Voir l'environnement",
+            "body": "Une visite aide à juger le bien-être, le comportement et la correspondance entre photos et réalité."
+          },
+          {
+            "heading": "Arrêter en cas de pression",
+            "body": "Histoires urgentes, refus de rencontre ou documents incohérents justifient un signalement."
+          }
+        ]
+      },
+      "chat-signalen-verdachte-verkoper": {
+        "title": "Signes dans le chat d'un vendeur suspect",
+        "intro": "La manière de communiquer révèle souvent si une annonce mérite plus de vérifications.",
+        "category_label": "Parcourir les annonces",
+        "sections": [
+          {
+            "heading": "Observer les récits changeants",
+            "body": "Lieux, noms, détails de l'objet ou raisons de vente qui changent rendent l'annonce moins fiable."
+          },
+          {
+            "heading": "Poser des questions précises",
+            "body": "Demandez état, accessoires, documents, numéro de série et possibilités d'inspection."
+          },
+          {
+            "heading": "Utiliser le signalement",
+            "body": "Si le dialogue devient manipulateur ou contredit l'annonce, signalez-le pour examen par la modération."
+          }
+        ]
+      }
+    }
   },
   "post": {
     "share_banner_title": "Votre annonce est en ligne",

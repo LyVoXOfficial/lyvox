@@ -35,7 +35,8 @@
   "footer": {
     "tagline": "Belgium-focused marketplace for local listings, verified seller signals and safer conversations.",
     "browse_listings": "Browse listings",
-    "post_listing": "Post a listing"
+    "post_listing": "Post a listing",
+    "guides": "Anti-scam guides"
   },
   "common": {
     "page_not_found_title": "Page not found",
@@ -234,6 +235,212 @@
     "faq_a2": "No — private sellers just confirm email and phone. Businesses are verified with KBO/VAT and get a public trader profile.",
     "faq_q3": "How do buyers contact me?",
     "faq_a3": "Through LyVoX chat. Your phone number and email stay private."
+  },
+  "guides": {
+    "meta_title": "Anti-scam guides for Belgian classifieds | LyVoX",
+    "meta_description": "Practical checks for second-hand cars, electronics, housing, jobs and local handovers in Belgium.",
+    "title": "Anti-scam guides for Belgian classifieds",
+    "subtitle": "Short, practical checks before you visit, inspect or agree on a local deal.",
+    "read_guide": "Read guide",
+    "back_to_guides": "All guides",
+    "category_cta": "Browse related listings",
+    "trust_title": "Use LyVoX trust signals",
+    "trust_body": "Combine verified seller signals, platform chat and reporting tools with your own inspection before arranging a local handover.",
+    "trust_verified": "Check verified seller signals",
+    "trust_chat": "Keep the conversation in LyVoX chat",
+    "trust_report": "Report suspicious listings or messages",
+    "items": {
+      "herken-oplichting-tweedehands-kopen": {
+        "title": "How to spot scam signs when buying second-hand",
+        "intro": "Use these checks before you visit a seller or reserve an item.",
+        "category_label": "Browse listings",
+        "sections": [
+          {
+            "heading": "Check the advert itself",
+            "body": "Be careful with vague photos, copied descriptions, a price far below similar listings or pressure to decide immediately."
+          },
+          {
+            "heading": "Compare seller signals",
+            "body": "Look at profile age, verified contact signals, listing history and whether the seller answers normal questions clearly."
+          },
+          {
+            "heading": "Inspect before agreeing",
+            "body": "Ask for fresh photos, serial numbers or documents where relevant, and arrange the handover only after the details make sense."
+          }
+        ]
+      },
+      "car-pass-controleren-tweedehands-auto": {
+        "title": "How to check Car-Pass before buying a used car",
+        "intro": "In Belgium, mileage history matters. Treat the Car-Pass as one part of a wider vehicle check.",
+        "category_label": "Browse transport listings",
+        "sections": [
+          {
+            "heading": "Ask for the document early",
+            "body": "A serious seller can explain the mileage, service history and documents before you travel to see the car."
+          },
+          {
+            "heading": "Compare every number",
+            "body": "Compare mileage, chassis number, inspection papers and advert details. Small mismatches need a clear explanation."
+          },
+          {
+            "heading": "Inspect the car in daylight",
+            "body": "Check wear, dashboard warnings, tyres and paperwork together, and walk away if the story changes during the visit."
+          }
+        ]
+      },
+      "imei-serienummer-elektronica-checken": {
+        "title": "IMEI and serial-number checks for used electronics",
+        "intro": "Phones, laptops and tablets are easier to verify when the seller can show identifiers and proof of ownership.",
+        "category_label": "Browse electronics listings",
+        "sections": [
+          {
+            "heading": "Match device and box",
+            "body": "Ask for the IMEI or serial number and compare it with the device settings, box, receipt or warranty page."
+          },
+          {
+            "heading": "Test the basics",
+            "body": "Check charging, cameras, speakers, screen, account lock status and network connection before leaving with the item."
+          },
+          {
+            "heading": "Keep proof in chat",
+            "body": "Use platform chat for photos and agreements so the listing, seller and device details stay connected."
+          }
+        ]
+      },
+      "veilige-afspraak-tweedehands-deal": {
+        "title": "How to arrange a safer second-hand meeting",
+        "intro": "A good handover is public, calm and easy to leave if the item is not as described.",
+        "category_label": "Browse local listings",
+        "sections": [
+          {
+            "heading": "Choose a public place",
+            "body": "Meet during daylight in a busy location where you can inspect the item without being rushed."
+          },
+          {
+            "heading": "Bring the advert details",
+            "body": "Keep the listing, chat and agreed price available so you can compare them with the item on the spot."
+          },
+          {
+            "heading": "Do not ignore pressure",
+            "body": "Changing locations, refusing inspection or pushing for a quick decision are reasons to pause the deal."
+          }
+        ]
+      },
+      "epc-attest-huren-kopen": {
+        "title": "EPC checks when renting or buying property",
+        "intro": "The EPC score helps you compare energy performance, but it should match the property and documents.",
+        "category_label": "Browse property listings",
+        "sections": [
+          {
+            "heading": "Ask for the certificate",
+            "body": "Check that the EPC refers to the same address, unit and date range as the listing you are viewing."
+          },
+          {
+            "heading": "Compare with reality",
+            "body": "Look at windows, heating, insulation notes and renovation claims during the visit."
+          },
+          {
+            "heading": "Keep questions written",
+            "body": "Ask follow-up questions in chat so promises about works, costs or timing are easy to review later."
+          }
+        ]
+      },
+      "huurwaarborg-en-contract-controleren": {
+        "title": "Rental deposit and contract checks",
+        "intro": "Before you commit to a rental, compare the contract, identity details and viewing history.",
+        "category_label": "Browse rentals",
+        "sections": [
+          {
+            "heading": "Verify the landlord context",
+            "body": "Check whether the person showing the property can explain ownership, agency role or written mandate."
+          },
+          {
+            "heading": "Read the contract calmly",
+            "body": "Look for address, duration, rent, deposit handling, inventory and notice terms before signing anything."
+          },
+          {
+            "heading": "Avoid rushed decisions",
+            "body": "Pressure to decide before a real visit, missing documents or inconsistent names are warning signs."
+          }
+        ]
+      },
+      "fiets-kopen-framenummer-check": {
+        "title": "Frame-number checks before buying a used bike",
+        "intro": "A clear frame number and a consistent seller story reduce the risk of buying a problematic bike.",
+        "category_label": "Browse transport listings",
+        "sections": [
+          {
+            "heading": "Find the frame number",
+            "body": "Ask where the number is located and compare it with photos, invoice details or registration documents if available."
+          },
+          {
+            "heading": "Inspect wear and parts",
+            "body": "Check brakes, lights, battery for e-bikes, lock keys and whether the condition matches the price."
+          },
+          {
+            "heading": "Question missing basics",
+            "body": "No key, no charger, scraped identifiers or vague ownership answers should stop the deal."
+          }
+        ]
+      },
+      "jobaanbieding-scam-herkennen": {
+        "title": "How to spot suspicious job offers",
+        "intro": "Real employers can explain the role, company identity and process without asking you to bypass normal checks.",
+        "category_label": "Browse job listings",
+        "sections": [
+          {
+            "heading": "Check the employer details",
+            "body": "Compare company name, website, location, email domain and role description before sharing sensitive documents."
+          },
+          {
+            "heading": "Watch for vague tasks",
+            "body": "Be careful with unclear work, unrealistic pay, requests to receive goods or pressure to move off platform."
+          },
+          {
+            "heading": "Keep the process traceable",
+            "body": "Use written messages for interview times, role details and next steps so inconsistencies are visible."
+          }
+        ]
+      },
+      "huisdier-adoptie-advertentie-check": {
+        "title": "Checks for pet adoption and animal listings",
+        "intro": "Animal listings need extra care: welfare, documents and a real visit matter more than speed.",
+        "category_label": "Browse animal listings",
+        "sections": [
+          {
+            "heading": "Ask about the animal",
+            "body": "Request age, health information, vaccination details, origin and why the animal is being rehomed."
+          },
+          {
+            "heading": "See the environment",
+            "body": "A real visit helps you judge welfare, behaviour and whether the photos match the current situation."
+          },
+          {
+            "heading": "Pause on pressure",
+            "body": "Urgent stories, refusal to meet or inconsistent documents are reasons to report the listing."
+          }
+        ]
+      },
+      "chat-signalen-verdachte-verkoper": {
+        "title": "Chat signs that a seller may be suspicious",
+        "intro": "The way a seller communicates often reveals whether a listing deserves more checks.",
+        "category_label": "Browse listings",
+        "sections": [
+          {
+            "heading": "Look for changing stories",
+            "body": "Different locations, names, item details or reasons for selling make the advert harder to trust."
+          },
+          {
+            "heading": "Keep questions specific",
+            "body": "Ask for details only the real owner would know: condition, accessories, documents and inspection options."
+          },
+          {
+            "heading": "Use the report option",
+            "body": "If the conversation feels manipulative or contradicts the listing, report it so moderation can review the signals."
+          }
+        ]
+      }
+    }
   },
   "post": {
     "share_banner_title": "Your listing is live",

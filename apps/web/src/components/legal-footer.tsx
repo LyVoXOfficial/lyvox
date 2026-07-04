@@ -31,6 +31,7 @@ export default function LegalFooter() {
           <ul className="mt-2 space-y-2">
             <li><Link className="hover:text-foreground" href={href("/search")}>{translate("footer.browse_listings", "Browse listings")}</Link></li>
             <li><Link className="hover:text-foreground" href={href("/post")}>{translate("footer.post_listing", "Post a listing")}</Link></li>
+            <li><Link className="hover:text-foreground" href={href("/guides")}>{translate("footer.guides", "Anti-scam guides")}</Link></li>
             <li><Link className="hover:text-foreground" href={href("/contact")}>{translate("common.contacts", "Contact")}</Link></li>
           </ul>
         </div>
