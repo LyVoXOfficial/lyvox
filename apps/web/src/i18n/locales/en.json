@@ -689,6 +689,15 @@
     },
     "description": "Description",
     "no_description": "No description",
+    "translation_generated": "Machine translated from {language}",
+    "translation_show_original": "Show original",
+    "translation_language": {
+      "en": "English",
+      "fr": "French",
+      "nl": "Dutch",
+      "de": "German",
+      "ru": "Russian"
+    },
     "no_photos": "No photos available",
     "posted": "Posted",
     "price_not_specified": "Price not specified",

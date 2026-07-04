@@ -35,6 +35,17 @@ import { KeySpecsStrip } from "@/components/ad/KeySpecsStrip";
 import { DocumentBadges } from "@/components/ad/DocumentBadges";
 import { CatalogDetailsSection } from "@/components/ad/CatalogDetailsSection";
 import { loadCatalogGroups } from "@/lib/catalog/loadCatalogGroups";
+import {
+  AdvertTranslatedDescription,
+  AdvertTranslatedTitle,
+  AdvertTranslationControls,
+  AdvertTranslationProvider,
+} from "@/components/ad/AdvertTranslationView";
+import { isCapabilityEnabled } from "@/lib/capabilities";
+import {
+  buildAdvertSourceHash,
+  resolveAdvertSourceLocale,
+} from "@/lib/translations/advertTranslations";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -66,8 +77,19 @@ type AdvertRecord = Pick<
   | "created_at"
   | "status"
   | "business_id"
+  | "content_locale"
 >;
 
+type AdvertTranslationRecord = Pick<
+  Tables<"advert_translations">,
+  | "source_locale"
+  | "target_locale"
+  | "title"
+  | "description"
+  | "generated_by"
+  | "model_or_provider"
+  | "source_hash"
+>;
 
 type Messages = Record<string, any>;
 type TFunction = (key: string, params?: Record<string, string | number>) => string;
@@ -174,6 +196,7 @@ type MediaItem = {
 
 type AdvertData = {
   advert: AdvertRecord;
+  translation: AdvertTranslationRecord | null;
   specifics: Record<string, any>;
   media: MediaItem[];
   make: VehicleMake | null;
@@ -335,7 +358,7 @@ export default async function AdvertPage({ params }: PageProps) {
       currentUserId = resolvedUserId;
       locale = i18n.locale;
       messages = i18n.messages;
-      data = await loadAdvertData(id, currentUserId);
+      data = await loadAdvertData(id, currentUserId, locale);
       advertDebug("Data load completed", {
         advertId: id,
         hasData: Boolean(data),
@@ -613,6 +636,21 @@ export default async function AdvertPage({ params }: PageProps) {
   };
 
   const sellerName = data.seller.displayName ?? sellerCardLabels.unknownSellerLabel;
+  const sourceLocale = resolveAdvertSourceLocale(data.advert.content_locale);
+  const displayedTranslation =
+    data.translation && data.translation.target_locale === locale && locale !== sourceLocale
+      ? data.translation
+      : null;
+  const translationSourceLanguage = translate(
+    `advert.translation_language.${sourceLocale}`,
+    sourceLocale.toUpperCase(),
+  );
+  const translationBadgeLabel = translateFallback(
+    t,
+    "advert.translation_generated",
+    "Machine translated from {language}",
+    { language: translationSourceLanguage },
+  );
   const favoriteAdvert = {
     id: data.advert.id,
     title: data.advert.title,
@@ -743,61 +781,135 @@ export default async function AdvertPage({ params }: PageProps) {
             ) : null}
           </div>
 
-          {/* Title + price + LikeToggle */}
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <h1
-                className="tracking-tight text-foreground"
-                style={{ font: "800 28px/1.2 Inter", letterSpacing: "-0.02em" }}
-              >
-                {data.advert.title}
-              </h1>
-              <LikeToggle advertId={data.advert.id} initialCount={likeCount} variant="inline" />
-            </div>
-            <div
-              className="tracking-tight text-foreground"
-              style={{ font: "800 32px Inter", letterSpacing: "-0.02em" }}
-            >
-              {priceText}
-            </div>
-          </div>
+          {displayedTranslation ? (
+            <AdvertTranslationProvider enabled>
+              {/* Title + price + LikeToggle */}
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <h1
+                      className="tracking-tight text-foreground"
+                      style={{ font: "800 28px/1.2 Inter", letterSpacing: "-0.02em" }}
+                    >
+                      <AdvertTranslatedTitle
+                        original={data.advert.title}
+                        translated={displayedTranslation.title}
+                      />
+                    </h1>
+                    <AdvertTranslationControls
+                      badgeLabel={translationBadgeLabel}
+                      showOriginalLabel={translate("advert.translation_show_original", "Show original")}
+                    />
+                  </div>
+                  <LikeToggle advertId={data.advert.id} initialCount={likeCount} variant="inline" />
+                </div>
+                <div
+                  className="tracking-tight text-foreground"
+                  style={{ font: "800 32px Inter", letterSpacing: "-0.02em" }}
+                >
+                  {priceText}
+                </div>
+              </div>
 
-          {/* Key-specs strip: per-category priority chips */}
-          <KeySpecsStrip
-            categoryType={listingDomain}
-            specifics={data.specifics ?? {}}
-            locale={locale}
-            makeName={getMakeName(data.make)}
-            modelName={getModelName(data.model)}
-            location={data.advert.location ?? null}
-            t={t}
-          />
+              {/* Key-specs strip: per-category priority chips */}
+              <KeySpecsStrip
+                categoryType={listingDomain}
+                specifics={data.specifics ?? {}}
+                locale={locale}
+                makeName={getMakeName(data.make)}
+                modelName={getModelName(data.model)}
+                location={data.advert.location ?? null}
+                t={t}
+              />
 
-          {/* Document badges: Car-Pass / EPC / Safety / Microchip */}
-          <DocumentBadges
-            categoryType={listingDomain}
-            specifics={data.specifics ?? {}}
-            t={translate}
-          />
+              {/* Document badges: Car-Pass / EPC / Safety / Microchip */}
+              <DocumentBadges
+                categoryType={listingDomain}
+                specifics={data.specifics ?? {}}
+                t={translate}
+              />
 
-          {/* Seller trust panel ABOVE the description (council verdict: on
-              mobile this is the shortest path to a confident contact) */}
-          {canSeeSeller ? (
-            <SellerCard seller={data.seller} locale={locale} {...sellerCardLabels} />
+              {/* Seller trust panel ABOVE the description (council verdict: on
+                  mobile this is the shortest path to a confident contact) */}
+              {canSeeSeller ? (
+                <SellerCard seller={data.seller} locale={locale} {...sellerCardLabels} />
+              ) : (
+                <SellerIdentityGate />
+              )}
+
+              {/* Description */}
+              <section className="rounded-md border border-border/80 bg-card p-4 shadow-sm">
+                <h2 className="mb-2 text-lg font-medium">
+                  {translate("advert.description", "Description")}
+                </h2>
+                <p className="whitespace-pre-wrap text-sm leading-6 text-foreground/90">
+                  <AdvertTranslatedDescription
+                    original={data.advert.description ?? null}
+                    translated={displayedTranslation.description}
+                    emptyLabel={translate("advert.no_description", "No description has been added yet.")}
+                  />
+                </p>
+              </section>
+            </AdvertTranslationProvider>
           ) : (
-            <SellerIdentityGate />
-          )}
+            <>
+              {/* Title + price + LikeToggle */}
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <h1
+                    className="tracking-tight text-foreground"
+                    style={{ font: "800 28px/1.2 Inter", letterSpacing: "-0.02em" }}
+                  >
+                    {data.advert.title}
+                  </h1>
+                  <LikeToggle advertId={data.advert.id} initialCount={likeCount} variant="inline" />
+                </div>
+                <div
+                  className="tracking-tight text-foreground"
+                  style={{ font: "800 32px Inter", letterSpacing: "-0.02em" }}
+                >
+                  {priceText}
+                </div>
+              </div>
 
-          {/* Description */}
-          <section className="rounded-md border border-border/80 bg-card p-4 shadow-sm">
-            <h2 className="mb-2 text-lg font-medium">
-              {translate("advert.description", "Description")}
-            </h2>
-            <p className="whitespace-pre-wrap text-sm leading-6 text-foreground/90">
-              {data.advert.description ??
-                translate("advert.no_description", "No description has been added yet.")}
-            </p>
-          </section>
+              {/* Key-specs strip: per-category priority chips */}
+              <KeySpecsStrip
+                categoryType={listingDomain}
+                specifics={data.specifics ?? {}}
+                locale={locale}
+                makeName={getMakeName(data.make)}
+                modelName={getModelName(data.model)}
+                location={data.advert.location ?? null}
+                t={t}
+              />
+
+              {/* Document badges: Car-Pass / EPC / Safety / Microchip */}
+              <DocumentBadges
+                categoryType={listingDomain}
+                specifics={data.specifics ?? {}}
+                t={translate}
+              />
+
+              {/* Seller trust panel ABOVE the description (council verdict: on
+                  mobile this is the shortest path to a confident contact) */}
+              {canSeeSeller ? (
+                <SellerCard seller={data.seller} locale={locale} {...sellerCardLabels} />
+              ) : (
+                <SellerIdentityGate />
+              )}
+
+              {/* Description */}
+              <section className="rounded-md border border-border/80 bg-card p-4 shadow-sm">
+                <h2 className="mb-2 text-lg font-medium">
+                  {translate("advert.description", "Description")}
+                </h2>
+                <p className="whitespace-pre-wrap text-sm leading-6 text-foreground/90">
+                  {data.advert.description ??
+                    translate("advert.no_description", "No description has been added yet.")}
+                </p>
+              </section>
+            </>
+          )}
 
           <section className="rounded-md border border-border/80 bg-card p-4 shadow-sm">
             <div className="mb-4 flex items-start gap-3">
@@ -1459,6 +1571,7 @@ function parseAdvertYear(value: unknown): number | null {
 async function loadAdvertData(
   advertId: string,
   currentUserId: string | null,
+  targetLocale?: Locale,
 ): Promise<AdvertData | null> {
   // Prefer anon-scoped server client for reading (RLS-safe),
   // while still attempting to use service client for storage signing.
@@ -1483,7 +1596,7 @@ async function loadAdvertData(
     const { data: advertRows, error: advertError } = await svc
       .from("adverts")
       .select(
-        "id,user_id,category_id,title,description,price,currency,location,created_at,status,business_id",
+        "id,user_id,category_id,title,description,price,currency,location,created_at,status,business_id,content_locale",
       )
       .eq("id", advertId)
       .limit(1);
@@ -1515,6 +1628,36 @@ async function loadAdvertData(
       advertId,
       status: advert.status,
     });
+
+    let translation: AdvertTranslationRecord | null = null;
+    if (targetLocale && isCapabilityEnabled("advert_translations")) {
+      const sourceLocale = resolveAdvertSourceLocale(advert.content_locale);
+      if (targetLocale !== sourceLocale) {
+        const sourceHash = buildAdvertSourceHash(advert);
+        const { data: translationRows, error: translationError } = await svc
+          .from("advert_translations")
+          .select("source_locale,target_locale,title,description,generated_by,model_or_provider,source_hash")
+          .eq("advert_id", advertId)
+          .eq("target_locale", targetLocale)
+          .eq("source_hash", sourceHash)
+          .eq("status", "published")
+          .order("updated_at", { ascending: false })
+          .limit(1);
+
+        if (translationError) {
+          advertDebug("loadAdvertData:translation query error", {
+            advertId,
+            targetLocale,
+            error: translationError.message,
+          });
+        } else {
+          const row = Array.isArray(translationRows)
+            ? (translationRows[0] as AdvertTranslationRecord | undefined)
+            : undefined;
+          translation = row ?? null;
+        }
+      }
+    }
 
   let category: CategorySummary | null = null;
   let categoryBreadcrumbs: CategorySummary[] = [];
@@ -1814,6 +1957,7 @@ async function loadAdvertData(
 
   return {
     advert,
+    translation,
     specifics,
     media,
     make,

@@ -72,13 +72,26 @@ const makeUpdateChain = (capture: (payload: Record<string, unknown>) => void) =>
   return chain;
 };
 
+const makeStaleTranslationsChain = (capture: (payload: Record<string, unknown>) => void) => {
+  const chain: Record<string, unknown> = {};
+  chain.update = (payload: Record<string, unknown>) => {
+    capture(payload);
+    return chain;
+  };
+  chain.eq = () => chain;
+  chain.neq = async () => ({ error: null });
+  return chain;
+};
+
 const makeInsertChain = () => ({ insert: async () => ({ error: null }) });
 
 describe("PATCH /api/adverts/[id] geo resolve", () => {
   let capturedUpdate: Record<string, unknown> | null;
+  let capturedStaleUpdate: Record<string, unknown> | null;
 
   beforeEach(() => {
     capturedUpdate = null;
+    capturedStaleUpdate = null;
     getUserMock.mockReset().mockResolvedValue({ data: { user: { id: USER_ID } } });
     serverFromMock.mockReset();
     serviceFromMock.mockReset();
@@ -102,6 +115,7 @@ describe("PATCH /api/adverts/[id] geo resolve", () => {
             condition: "used",
             location: null,
             location_id: null,
+            content_locale: "en",
           },
           error: null,
         });
@@ -112,6 +126,9 @@ describe("PATCH /api/adverts/[id] geo resolve", () => {
 
     serviceFromMock.mockImplementation((table: string) => {
       if (table === "adverts") return makeUpdateChain((payload) => { capturedUpdate = payload; });
+      if (table === "advert_translations") {
+        return makeStaleTranslationsChain((payload) => { capturedStaleUpdate = payload; });
+      }
       if (table === "logs") return makeInsertChain();
       throw new Error(`Unexpected service table: ${table}`);
     });
@@ -137,6 +154,7 @@ describe("PATCH /api/adverts/[id] geo resolve", () => {
       location_id: BRUSSEL_LOCATION_ID,
       status: "active",
     });
+    expect(capturedStaleUpdate).toEqual({ status: "stale" });
   });
 
   it("keeps publishing successful and stores null location_id for an unknown city", async () => {
@@ -156,5 +174,6 @@ describe("PATCH /api/adverts/[id] geo resolve", () => {
       location_id: null,
       status: "active",
     });
+    expect(capturedStaleUpdate).toEqual({ status: "stale" });
   });
 });

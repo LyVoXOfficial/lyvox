@@ -12,6 +12,7 @@ import { validateRequest } from "@/lib/validations";
 import { updateAdvertSchema } from "@/lib/validations/adverts";
 import type { Tables, TablesInsert, TablesUpdate } from "@/lib/supabaseTypes";
 import { isViewerVerified } from "@/lib/auth/requireVerified";
+import { markAdvertTranslationsStale } from "@/lib/translations/advertTranslations";
 
 export const runtime = "nodejs";
 
@@ -124,7 +125,7 @@ export async function PATCH(
   const { data: advert, error: fetchError } = await supabase
     .from("adverts")
     .select(
-      "id,user_id,status,category_id,title,description,price,currency,condition,location,location_id,min_offer_cents",
+      "id,user_id,status,category_id,title,description,price,currency,condition,location,location_id,min_offer_cents,content_locale",
     )
     .eq("id", advertId)
     .maybeSingle();
@@ -151,6 +152,10 @@ export async function PATCH(
 
   const updates: TablesUpdate<"adverts"> = {};
   const specifics = body.specifics ?? null;
+  const sourceChanged =
+    (body.title !== undefined && body.title !== advert.title) ||
+    (body.description !== undefined && (body.description ?? null) !== (advert.description ?? null)) ||
+    (body.content_locale !== undefined && body.content_locale !== advert.content_locale);
 
   // Get requested status early to check if we're publishing
   const requestedStatus = body.status;
@@ -272,6 +277,13 @@ export async function PATCH(
 
     if (updateError) {
       return handleSupabaseError(updateError, ApiErrorCode.UPDATE_FAILED);
+    }
+  }
+
+  if (sourceChanged) {
+    const staleError = await markAdvertTranslationsStale(service, advertId);
+    if (staleError) {
+      return handleSupabaseError(staleError, ApiErrorCode.UPDATE_FAILED);
     }
   }
 
