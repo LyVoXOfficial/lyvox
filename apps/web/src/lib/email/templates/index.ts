@@ -198,6 +198,58 @@ const templates: Record<
       text: `Zahlung für "${data.product_name || ""}" abgeschlossen. Betrag: ${data.amount || ""}`,
     }),
   },
+  saved_search: {
+    en: (data) => ({
+      subject: "New saved-search match on LyVoX",
+      html: `
+        <h2>New saved-search match</h2>
+        <p>${data.advert_title || "A listing"} matches your saved search "${data.search_name || ""}".</p>
+        <p><a href="${data.advert_url || "#"}">View listing</a></p>
+        <p><a href="${data.saved_url || "/saved"}">Manage saved searches</a></p>
+      `,
+      text: `${data.advert_title || "A listing"} matches your saved search "${data.search_name || ""}". View: ${data.advert_url || "#"} Manage: ${data.saved_url || "/saved"}`,
+    }),
+    ru: (data) => ({
+      subject: "Новое совпадение сохранённого поиска на LyVoX",
+      html: `
+        <h2>Новое совпадение сохранённого поиска</h2>
+        <p>${data.advert_title || "Объявление"} подходит под ваш сохранённый поиск "${data.search_name || ""}".</p>
+        <p><a href="${data.advert_url || "#"}">Открыть объявление</a></p>
+        <p><a href="${data.saved_url || "/saved"}">Управлять сохранёнными поисками</a></p>
+      `,
+      text: `${data.advert_title || "Объявление"} подходит под ваш сохранённый поиск "${data.search_name || ""}". Открыть: ${data.advert_url || "#"} Управлять: ${data.saved_url || "/saved"}`,
+    }),
+    nl: (data) => ({
+      subject: "Nieuwe match voor opgeslagen zoekopdracht op LyVoX",
+      html: `
+        <h2>Nieuwe match voor opgeslagen zoekopdracht</h2>
+        <p>${data.advert_title || "Een zoekertje"} past bij uw opgeslagen zoekopdracht "${data.search_name || ""}".</p>
+        <p><a href="${data.advert_url || "#"}">Bekijk zoekertje</a></p>
+        <p><a href="${data.saved_url || "/saved"}">Opgeslagen zoekopdrachten beheren</a></p>
+      `,
+      text: `${data.advert_title || "Een zoekertje"} past bij uw opgeslagen zoekopdracht "${data.search_name || ""}". Bekijk: ${data.advert_url || "#"} Beheer: ${data.saved_url || "/saved"}`,
+    }),
+    fr: (data) => ({
+      subject: "Nouveau résultat pour une recherche enregistrée sur LyVoX",
+      html: `
+        <h2>Nouveau résultat pour une recherche enregistrée</h2>
+        <p>${data.advert_title || "Une annonce"} correspond à votre recherche enregistrée "${data.search_name || ""}".</p>
+        <p><a href="${data.advert_url || "#"}">Voir l'annonce</a></p>
+        <p><a href="${data.saved_url || "/saved"}">Gérer les recherches enregistrées</a></p>
+      `,
+      text: `${data.advert_title || "Une annonce"} correspond à votre recherche enregistrée "${data.search_name || ""}". Voir: ${data.advert_url || "#"} Gérer: ${data.saved_url || "/saved"}`,
+    }),
+    de: (data) => ({
+      subject: "Neuer Treffer für gespeicherte Suche auf LyVoX",
+      html: `
+        <h2>Neuer Treffer für gespeicherte Suche</h2>
+        <p>${data.advert_title || "Eine Anzeige"} passt zu Ihrer gespeicherten Suche "${data.search_name || ""}".</p>
+        <p><a href="${data.advert_url || "#"}">Anzeige ansehen</a></p>
+        <p><a href="${data.saved_url || "/saved"}">Gespeicherte Suchen verwalten</a></p>
+      `,
+      text: `${data.advert_title || "Eine Anzeige"} passt zu Ihrer gespeicherten Suche "${data.search_name || ""}". Ansehen: ${data.advert_url || "#"} Verwalten: ${data.saved_url || "/saved"}`,
+    }),
+  },
 };
 
 export function getEmailTemplate(
@@ -213,4 +265,3 @@ export function getEmailTemplate(
   const template = localeTemplates[locale] || localeTemplates.en;
   return template(data);
 }
-

@@ -2455,6 +2455,7 @@ export type Database = {
       saved_searches: {
         Row: {
           alert_enabled: boolean
+          alert_frequency: string
           created_at: string
           filters: Json
           id: string
@@ -2466,6 +2467,7 @@ export type Database = {
         }
         Insert: {
           alert_enabled?: boolean
+          alert_frequency?: string
           created_at?: string
           filters?: Json
           id?: string
@@ -2477,6 +2479,7 @@ export type Database = {
         }
         Update: {
           alert_enabled?: boolean
+          alert_frequency?: string
           created_at?: string
           filters?: Json
           id?: string

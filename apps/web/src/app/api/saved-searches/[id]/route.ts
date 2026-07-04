@@ -26,9 +26,17 @@ const buildRateLimitKey = (_req: Request, userId: string | null, ip: string | nu
 
 const mutateLimiter = createRateLimiter({ limit: 30, windowSec: 60, prefix: "saved:mutate" });
 const uuidSchema = z.string().uuid();
+const alertFrequencySchema = z.enum(["instant", "daily", "off"]);
 const patchSchema = z
-  .object({ alert_enabled: z.boolean().optional(), seen: z.boolean().optional() })
-  .refine((d) => d.alert_enabled !== undefined || d.seen !== undefined, "Nothing to update");
+  .object({
+    alert_enabled: z.boolean().optional(),
+    alert_frequency: alertFrequencySchema.optional(),
+    seen: z.boolean().optional(),
+  })
+  .refine(
+    (d) => d.alert_enabled !== undefined || d.alert_frequency !== undefined || d.seen !== undefined,
+    "Nothing to update",
+  );
 
 async function deleteSaved(request: Request, context: { params: Promise<{ id: string }> }) {
   const { supabase, user } = await getRequestContext(request);
@@ -68,7 +76,13 @@ async function patchSaved(request: Request, context: { params: Promise<{ id: str
   }
 
   const update: Record<string, unknown> = {};
-  if (parsed.data.alert_enabled !== undefined) update.alert_enabled = parsed.data.alert_enabled;
+  if (parsed.data.alert_frequency !== undefined) {
+    update.alert_frequency = parsed.data.alert_frequency;
+    update.alert_enabled = parsed.data.alert_frequency !== "off";
+  } else if (parsed.data.alert_enabled !== undefined) {
+    update.alert_enabled = parsed.data.alert_enabled;
+    update.alert_frequency = parsed.data.alert_enabled ? "daily" : "off";
+  }
   if (parsed.data.seen === true) update.last_seen_at = new Date().toISOString();
 
   const { data, error } = await supabase

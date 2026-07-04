@@ -56,11 +56,13 @@ const filtersSchema = z.object({
   sort_by: z.string().max(40).nullish(),
 });
 type SavedFilters = z.infer<typeof filtersSchema>;
+const alertFrequencySchema = z.enum(["instant", "daily", "off"]);
 
 const createSchema = z.object({
   name: z.string().min(1).max(120),
   query: z.string().max(200).nullish(),
   filters: filtersSchema.default({}),
+  alert_frequency: alertFrequencySchema.default("daily"),
 });
 
 // new_count = active adverts matching the saved filters with created_at > last_seen_at.
@@ -134,7 +136,14 @@ async function createSaved(request: Request) {
 
   const { data, error } = await supabase
     .from("saved_searches")
-    .insert({ user_id: user.id, name: parsed.data.name, query: parsed.data.query ?? null, filters: parsed.data.filters })
+    .insert({
+      user_id: user.id,
+      name: parsed.data.name,
+      query: parsed.data.query ?? null,
+      filters: parsed.data.filters,
+      alert_enabled: parsed.data.alert_frequency !== "off",
+      alert_frequency: parsed.data.alert_frequency,
+    })
     .select("*")
     .single();
   if (error) return handleSupabaseError(error, ApiErrorCode.INTERNAL_ERROR);

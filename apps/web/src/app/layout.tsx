@@ -17,6 +17,8 @@ import { CookieConsentProvider } from "@/components/cookie/CookieConsentProvider
 import { CookieBanner } from "@/components/cookie/CookieBanner";
 import { CookiePreferenceCenter } from "@/components/cookie/CookiePreferenceCenter";
 import { Toaster } from "sonner";
+import { isCapabilityEnabled } from "@/lib/capabilities";
+import { WebPushRegistrar } from "@/components/WebPushRegistrar";
 
 // Brand typography — Onest (grotesque with Cyrillic coverage for the ru locale)
 // for UI + display, Geist Mono for tabular/numeric data. Exposed as CSS vars and
@@ -101,6 +103,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const { locale, messages } = await getI18nProps();
+  const webPushEnabled = isCapabilityEnabled("web_push");
   return (
     <html lang={locale} className={`${onest.variable} ${geistMono.variable}`}>
       <body className="min-h-screen flex flex-col font-sans">
@@ -126,6 +129,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             <CookiePreferenceCenter />
           </CookieConsentProvider>
         </I18nProvider>
+        <WebPushRegistrar enabled={webPushEnabled} />
         {/* Global toast container — without this, every toast.* call across the app is silently dropped. */}
         <Toaster position="top-center" richColors closeButton />
       </body>

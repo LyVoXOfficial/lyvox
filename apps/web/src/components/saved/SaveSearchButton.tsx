@@ -28,7 +28,7 @@ export default function SaveSearchButton({
       const res = await fetch("/api/saved-searches", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, query: query || null, filters }),
+        body: JSON.stringify({ name, query: query || null, filters, alert_frequency: "daily" }),
       });
       if (res.status === 401) {
         addLocalSavedSearch({ name, query: query || null, filters });

@@ -116,6 +116,20 @@ describe("/api/saved-searches/[id] delete+patch", () => {
     expect(captured!.last_seen_at).toBeTruthy();
   });
 
+  it("PATCH alert_frequency=off disables alerts", async () => {
+    getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
+    let captured: Record<string, unknown> | null = null;
+    fromMock.mockImplementation(() => ({
+      update: (u: Record<string, unknown>) => {
+        captured = u;
+        return { eq: () => ({ eq: () => ({ select: () => ({ maybeSingle: async () => ({ data: { id: UUID }, error: null }) }) }) }) };
+      },
+    }));
+    const res = await PATCH(jsonReq({ alert_frequency: "off" }, "PATCH"), ctx(UUID));
+    expect(res.status).toBe(200);
+    expect(captured).toEqual({ alert_frequency: "off", alert_enabled: false });
+  });
+
   it("PATCH 400 with an empty body", async () => {
     getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
     expect((await PATCH(jsonReq({}, "PATCH"), ctx(UUID))).status).toBe(400);

@@ -8,12 +8,15 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
 import { getLocalSavedSearches, removeLocalSavedSearch, type SavedSearchFilters } from "@/lib/savedSearches";
 
+type AlertFrequency = "instant" | "daily" | "off";
+
 type Row = {
   id: string;
   name: string;
   query: string | null;
   filters: SavedSearchFilters;
   alert_enabled?: boolean;
+  alert_frequency?: AlertFrequency;
   new_count?: number;
   new_count_capped?: boolean;
   local?: boolean;
@@ -69,14 +72,17 @@ export default function SavedSearchesClient() {
     setRows((rs) => rs.map((x) => (x.id === r.id ? { ...x, new_count: 0 } : x)));
   };
 
-  const toggleAlert = (r: Row) => {
+  const updateAlertFrequency = (r: Row, alert_frequency: AlertFrequency) => {
     if (r.local) return;
-    const next = !(r.alert_enabled ?? true);
-    setRows((rs) => rs.map((x) => (x.id === r.id ? { ...x, alert_enabled: next } : x)));
+    setRows((rs) =>
+      rs.map((x) =>
+        x.id === r.id ? { ...x, alert_frequency, alert_enabled: alert_frequency !== "off" } : x,
+      ),
+    );
     void fetch(`/api/saved-searches/${r.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ alert_enabled: next }),
+      body: JSON.stringify({ alert_frequency }),
     }).catch(() => null);
   };
 
@@ -125,21 +131,32 @@ export default function SavedSearchesClient() {
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
-                  {!r.local ? (
-                    <Button variant="ghost" size="icon" aria-label={t("saved.alerts")} onClick={() => toggleAlert(r)}>
-                      {(r.alert_enabled ?? true) ? (
-                        <Bell className="h-4 w-4 text-primary" aria-hidden="true" />
-                      ) : (
-                        <BellOff className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                      )}
-                    </Button>
-                  ) : null}
                   <Button variant="ghost" size="icon" aria-label={t("saved.delete")} onClick={() => remove(r)}>
                     <Trash2 className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                   </Button>
                 </div>
               </div>
-              <div className="mt-3">
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {!r.local ? (
+                  <label className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                    {(r.alert_frequency ?? ((r.alert_enabled ?? true) ? "daily" : "off")) === "off" ? (
+                      <BellOff className="h-4 w-4" aria-hidden="true" />
+                    ) : (
+                      <Bell className="h-4 w-4 text-primary" aria-hidden="true" />
+                    )}
+                    <span>{t("saved.alert_frequency")}</span>
+                    <select
+                      className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground"
+                      value={r.alert_frequency ?? ((r.alert_enabled ?? true) ? "daily" : "off")}
+                      onChange={(event) => updateAlertFrequency(r, event.target.value as AlertFrequency)}
+                      aria-label={t("saved.alert_frequency")}
+                    >
+                      <option value="instant">{t("saved.alert_instant")}</option>
+                      <option value="daily">{t("saved.alert_daily")}</option>
+                      <option value="off">{t("saved.alert_off")}</option>
+                    </select>
+                  </label>
+                ) : null}
                 <Button asChild variant="outline" size="sm" onClick={() => markSeen(r)}>
                   <Link href={buildHref(r.query, r.filters)}>
                     <SearchIcon className="h-4 w-4" aria-hidden="true" />

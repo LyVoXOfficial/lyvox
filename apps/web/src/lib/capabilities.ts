@@ -11,7 +11,8 @@ export type Capability =
   | "payments_escrow"
   | "discover_v2"
   | "boost_ranking"
-  | "advert_translations";
+  | "advert_translations"
+  | "web_push";
 
 export const CAPABILITY_ENV: Record<Capability, string> = {
   pro_subscriptions: "CAPABILITY_PRO_SUBSCRIPTIONS",
@@ -22,6 +23,7 @@ export const CAPABILITY_ENV: Record<Capability, string> = {
   discover_v2: "CAPABILITY_DISCOVER_V2",
   boost_ranking: "CAPABILITY_BOOST_RANKING",
   advert_translations: "CAPABILITY_ADVERT_TRANSLATIONS",
+  web_push: "CAPABILITY_WEB_PUSH",
 };
 
 export function isCapabilityEnabled(
