@@ -1,18 +1,8 @@
-import { headers } from "next/headers";
 import RegisterForm from "./RegisterForm";
-import { resolveFromAcceptLanguage, resolveLocale, type Locale } from "@/lib/i18n";
+import { getInitialLocale } from "@/i18n/server";
 
-type PageProps = {
-  searchParams?: {
-    lang?: string;
-  };
-};
-
-export default async function RegisterPage({ searchParams }: PageProps) {
-  const headerList = await headers();
-  const acceptLanguage = headerList.get("accept-language");
-  const fromQuery = searchParams?.lang ? resolveLocale(searchParams.lang) : null;
-  const initialLocale: Locale = fromQuery ?? resolveFromAcceptLanguage(acceptLanguage);
+export default async function RegisterPage() {
+  const initialLocale = await getInitialLocale();
 
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-background">

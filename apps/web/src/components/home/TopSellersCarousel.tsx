@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useI18n } from "@/i18n";
+import { localizeHref, type Locale } from "@/lib/i18n";
 
 type TopSeller = {
   id: string;
@@ -31,10 +32,18 @@ function isFullyVerified(s: TopSeller) {
   return s.verified_email && s.verified_phone;
 }
 
-function SellerCard({ seller, tr }: { seller: TopSeller; tr: (k: string, fb: string) => string }) {
+function SellerCard({
+  seller,
+  tr,
+  locale,
+}: {
+  seller: TopSeller;
+  tr: (k: string, fb: string) => string;
+  locale: Locale;
+}) {
   return (
     <Link
-      href={`/user/${seller.id}`}
+      href={localizeHref(`/user/${seller.id}`, locale)}
       className="flex items-center gap-[13px] rounded-[var(--r)] border border-border bg-card p-[18px] transition hover:border-primary/40 hover:shadow-[var(--shC)]"
       style={{ boxShadow: "var(--shS)" }}
     >
@@ -109,7 +118,7 @@ function SellerCard({ seller, tr }: { seller: TopSeller; tr: (k: string, fb: str
 }
 
 export default function TopSellersCarousel() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const tr = (k: string, fb: string) => {
     const v = t(k);
     return v === k ? fb : v;
@@ -211,7 +220,7 @@ export default function TopSellersCarousel() {
       {/* Grid — 4-up desktop, 2-up mobile */}
       <div className="grid grid-cols-2 gap-4 pb-1 md:grid-cols-4">
         {visible.map((seller) => (
-          <SellerCard key={seller.id} seller={seller} tr={tr} />
+          <SellerCard key={seller.id} seller={seller} tr={tr} locale={locale} />
         ))}
       </div>
     </section>

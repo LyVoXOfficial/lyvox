@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { localeLabels, registerMessages } from "./messages";
-import { supportedLocales, type Locale } from "@/lib/i18n";
+import { localizeHref, supportedLocales, type Locale } from "@/lib/i18n";
 import { useDebounce } from "@/hooks/useDebounce";
 import { supabase } from "@/lib/supabaseClient";
 import { logger } from "@/lib/errorLogger";
@@ -269,7 +269,7 @@ export default function RegisterForm({ initialLocale }: Props) {
       toast.success(messages.successTitle, {
         description: messages.successBody,
       });
-      router.push(`/onboarding?lang=${locale}`);
+      router.push(localizeHref("/onboarding", locale));
     } catch {
       toast.error(messages.errorService);
     } finally {
@@ -278,8 +278,8 @@ export default function RegisterForm({ initialLocale }: Props) {
   });
 
   const loginHref = searchParams.get("next")
-    ? `/login?next=${encodeURIComponent(searchParams.get("next") ?? "")}`
-    : "/login";
+    ? localizeHref(`/login?next=${encodeURIComponent(searchParams.get("next") ?? "")}`, locale)
+    : localizeHref("/login", locale);
 
   return (
     <div className="overflow-hidden rounded-[var(--r)] border border-border/70 shadow-[var(--shadow-card)] md:grid md:grid-cols-[1fr_1.05fr]">

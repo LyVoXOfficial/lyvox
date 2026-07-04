@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Category } from "@/lib/types";
 import { getCategoryIcon } from "@/lib/categoryIcons";
 import { useI18n } from "@/i18n";
+import { localizeHref } from "@/lib/i18n";
 
 function getLocalizedCategoryName(cat: Category, locale: string): string {
   if (locale === "nl") return cat.name_nl || cat.name_en || cat.name_ru || cat.slug;
@@ -27,7 +28,7 @@ export default function CategoryList({ items, base = "/c" }: { items: Category[]
     <ul className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {uniqueItems.map((cat) => {
         const Icon = getCategoryIcon(cat.icon, cat.level);
-        const href = `${base}/${cat.path}`;
+        const href = localizeHref(`${base}/${cat.path}`, locale);
         const label = getLocalizedCategoryName(cat, locale);
         return (
           <li key={cat.id}>

@@ -14,9 +14,14 @@ import LikeToggle from "@/components/likes/LikeToggle";
 import RecentlyViewedRecorder from "@/components/discovery/RecentlyViewedRecorder";
 import { formatCurrency, formatDate } from "@/i18n/format";
 import { getI18nProps, getInitialLocale } from "@/i18n/server";
-import { type Locale } from "@/lib/i18n";
+import { localizeHref, type Locale } from "@/lib/i18n";
 import { getJsonLdScriptProps } from "@/lib/seo";
-import { getBaseUrl, absoluteUrl } from "@/lib/seo/baseUrl";
+import { absoluteUrl } from "@/lib/seo/baseUrl";
+import {
+  languageAlternates,
+  localizedAbsoluteUrl,
+  localizedCanonical,
+} from "@/lib/seo/localizedUrls";
 import { truncateDescription } from "@/lib/seo/catalog/common";
 import { buildListingJsonLd } from "@/lib/seo/catalog/listingJsonLd";
 import { detectCategoryType, resolvePostFlowMode } from "@/lib/utils/categoryDetector";
@@ -50,7 +55,6 @@ import {
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const BASE_URL = getBaseUrl();
 const isDevEnvironment = process.env.NODE_ENV !== "production";
 
 function advertDebug(message: string, context?: Record<string, unknown>) {
@@ -279,7 +283,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     // Real route is /ad/[id] — a single dynamic segment, no slug child route.
     // A canonical/og:url with an appended slug 404s; keep this id-only.
-    const canonical = `${BASE_URL}/ad/${advertData.advert.id}`;
+    const canonicalPath = `/ad/${advertData.advert.id}`;
+    const canonical = localizedCanonical(canonicalPath, locale);
     const description = advertData.advert.description
       ? truncateDescription(advertData.advert.description, 160)
       : "";
@@ -295,6 +300,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description,
       alternates: {
         canonical,
+        languages: languageAlternates(canonicalPath),
       },
       openGraph: {
         title: advertData.advert.title,
@@ -474,12 +480,14 @@ export default async function AdvertPage({ params }: PageProps) {
 
   // Real route is /ad/[id] — a single dynamic segment, no slug child route.
   // A canonical/JSON-LD url with an appended slug 404s; keep this id-only.
-  const canonicalUrl = `${BASE_URL}/ad/${data.advert.id}`;
+  const canonicalPath = `/ad/${data.advert.id}`;
+  const canonicalUrl = localizedCanonical(canonicalPath, locale);
   const imageUrls = galleryImages.map((image) => image.url).filter(Boolean);
   const primaryImageUrl = galleryImages[0]?.url ?? null;
   const listingPath = `/ad/${data.advert.id}`;
-  const loginHref = `/login?next=${encodeURIComponent(listingPath)}`;
-  const editHref = `/post?edit=${data.advert.id}`;
+  const href = (path: string) => localizeHref(path, locale);
+  const loginHref = href(`/login?next=${encodeURIComponent(href(listingPath))}`);
+  const editHref = href(`/post?edit=${data.advert.id}`);
   const sellerVerified = data.seller.verifiedEmail && data.seller.verifiedPhone;
 
   const brandName =
@@ -512,7 +520,7 @@ export default async function AdvertPage({ params }: PageProps) {
       "@type": "ListItem",
       position: 1,
       name: translate("common.home", "Home"),
-      item: BASE_URL,
+      item: localizedAbsoluteUrl("/", locale),
     },
   ];
 
@@ -521,7 +529,7 @@ export default async function AdvertPage({ params }: PageProps) {
       "@type": "ListItem",
       position: breadcrumbElements.length + 1,
       name: translate("common.categories", "Categories"),
-      item: `${BASE_URL}/c`,
+      item: localizedAbsoluteUrl("/c", locale),
     });
 
     const sortedBreadcrumbs = [...data.categoryBreadcrumbs].sort(
@@ -533,7 +541,7 @@ export default async function AdvertPage({ params }: PageProps) {
         "@type": "ListItem",
         position: breadcrumbElements.length + 1,
         name: resolveCategoryName(category),
-        item: `${BASE_URL}/c/${category.path}`,
+        item: localizedAbsoluteUrl(`/c/${category.path}`, locale),
       });
     });
   }

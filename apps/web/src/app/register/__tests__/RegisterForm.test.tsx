@@ -84,7 +84,7 @@ describe("<RegisterForm />", () => {
       }),
     );
     await waitFor(() => {
-      expect(routerMock.push).toHaveBeenCalledWith("/onboarding?lang=en");
+      expect(routerMock.push).toHaveBeenCalledWith("/en/onboarding");
     });
     expect(toast.success).toHaveBeenCalledWith("Check your inbox", {
       description: expect.any(String),

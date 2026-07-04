@@ -10,6 +10,7 @@ import { supabase } from "@/lib/supabaseClient";
 import type { Category } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { getRecentSearches, addRecentSearch, removeRecentSearch } from "@/lib/recentSearches";
+import { localizeHref } from "@/lib/i18n";
 
 type SearchBarProps = {
   /**
@@ -185,7 +186,7 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
     // If a category is selected, navigate to it
     if (selectedIndex >= 0 && filteredCategories[selectedIndex]) {
       const selectedCategory = filteredCategories[selectedIndex];
-      router.push(`/c/${selectedCategory.path}`);
+      router.push(localizeHref(`/c/${selectedCategory.path}`, locale));
       setShowAutocomplete(false);
       return;
     }
@@ -195,13 +196,13 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
       onSubmit(query);
     } else {
       addRecentSearch(query);
-      router.push(`/search?q=${encodeURIComponent(query)}`);
+      router.push(localizeHref(`/search?q=${encodeURIComponent(query)}`, locale));
     }
     setShowAutocomplete(false);
   };
 
   const handleCategorySelect = (category: Category) => {
-    router.push(`/c/${category.path}`);
+    router.push(localizeHref(`/c/${category.path}`, locale));
     setSearch("");
     setShowAutocomplete(false);
   };
@@ -288,7 +289,7 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => router.push(`/ad/${item.id}`)}
+                    onClick={() => router.push(localizeHref(`/ad/${item.id}`, locale))}
                     className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-secondary/60"
                   >
                     <span className="lyvox-image-placeholder flex h-10 w-10 shrink-0 overflow-hidden rounded-md">
@@ -316,7 +317,7 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
                   <div key={q} className="flex items-center justify-between px-3 py-1.5 hover:bg-secondary/60">
                     <button
                       type="button"
-                      onClick={() => router.push(`/search?q=${encodeURIComponent(q)}`)}
+                      onClick={() => router.push(localizeHref(`/search?q=${encodeURIComponent(q)}`, locale))}
                       className="min-w-0 flex-1 truncate text-left text-sm"
                     >
                       {q}
@@ -336,7 +337,7 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
             {showAutocomplete && filteredCategories.map((category, index) => (
               <Link
                 key={category.id}
-                href={`/c/${category.path}`}
+                href={localizeHref(`/c/${category.path}`, locale)}
                 onClick={(e) => {
                   e.preventDefault();
                   handleCategorySelect(category);
@@ -419,7 +420,7 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => router.push(`/ad/${item.id}`)}
+                    onClick={() => router.push(localizeHref(`/ad/${item.id}`, locale))}
                     className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-secondary/60"
                   >
                     <span className="lyvox-image-placeholder flex h-10 w-10 shrink-0 overflow-hidden rounded-md">
@@ -448,7 +449,7 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
                   <div key={q} className="flex items-center justify-between px-3 py-1.5 hover:bg-secondary/60">
                     <button
                       type="button"
-                      onClick={() => router.push(`/search?q=${encodeURIComponent(q)}`)}
+                      onClick={() => router.push(localizeHref(`/search?q=${encodeURIComponent(q)}`, locale))}
                       className="min-w-0 flex-1 truncate text-left text-sm"
                     >
                       {q}
@@ -469,7 +470,7 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
             {showAutocomplete && filteredCategories.map((category, index) => (
               <Link
                 key={category.id}
-                href={`/c/${category.path}`}
+                href={localizeHref(`/c/${category.path}`, locale)}
                 onClick={(e) => {
                   e.preventDefault();
                   handleCategorySelect(category);
@@ -543,7 +544,7 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
                     <button
                       key={item.id}
                       type="button"
-                      onClick={() => router.push(`/ad/${item.id}`)}
+                      onClick={() => router.push(localizeHref(`/ad/${item.id}`, locale))}
                       className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-secondary/60"
                     >
                       <span className="lyvox-image-placeholder flex h-10 w-10 shrink-0 overflow-hidden rounded-md">
@@ -572,7 +573,7 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
                     <div key={q} className="flex items-center justify-between px-3 py-1.5 hover:bg-secondary/60">
                       <button
                         type="button"
-                        onClick={() => router.push(`/search?q=${encodeURIComponent(q)}`)}
+                        onClick={() => router.push(localizeHref(`/search?q=${encodeURIComponent(q)}`, locale))}
                         className="min-w-0 flex-1 truncate text-left text-sm"
                       >
                         {q}
@@ -593,7 +594,7 @@ export default function SearchBar({ variant = "default", className, onSubmit }: 
               {showAutocomplete && filteredCategories.map((category, index) => (
                 <Link
                   key={category.id}
-                  href={`/c/${category.path}`}
+                  href={localizeHref(`/c/${category.path}`, locale)}
                   onClick={(e) => {
                     e.preventDefault();
                     handleCategorySelect(category);

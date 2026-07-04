@@ -9,6 +9,7 @@ import LikeToggle from "@/components/likes/LikeToggle";
 import BenefitsBadge from "@/components/BenefitsBadge";
 import { useI18n } from "@/i18n";
 import { recordCategoryClick } from "@/lib/discovery/sessionIntent";
+import { localizeHref } from "@/lib/i18n";
 
 type Props = {
   id: string;
@@ -82,6 +83,7 @@ export default function AdCard({
   const recordOpenIntent = () => {
     recordCategoryClick(categoryId);
   };
+  const adHref = localizeHref(`/ad/${id}`, locale);
 
   return (
     <article
@@ -94,7 +96,7 @@ export default function AdCard({
       {/* ── Image area (4:3) ── */}
       <div className="relative" style={{ aspectRatio: "4/3" }}>
         <Link
-          href={`/ad/${id}`}
+          href={adHref}
           className="block h-full w-full overflow-hidden"
           style={{ borderRadius: "var(--r) var(--r) 0 0" }}
           onClick={recordOpenIntent}
@@ -185,7 +187,7 @@ export default function AdCard({
 
         {/* Title — 2-line clamp, min-height matches mockup's 38px */}
         <Link
-          href={`/ad/${id}`}
+          href={adHref}
           className="block hover:text-primary"
           onClick={recordOpenIntent}
           style={{

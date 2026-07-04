@@ -1,13 +1,29 @@
 export const runtime = "nodejs";
 export const revalidate = 300;
 
+import type { Metadata } from "next";
 import { supabaseService } from "@/lib/supabaseService";
 import type { Category } from "@/lib/types";
 import CategoryList from "@/components/category-list";
 import { getI18nProps } from "@/i18n/server";
+import { localizeHref } from "@/lib/i18n";
+import { languageAlternates, localizedCanonical } from "@/lib/seo/localizedUrls";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { locale, messages } = await getI18nProps();
+  const title = `${messages?.common?.categories ?? "Categories"} | LyVoX`;
+
+  return {
+    title,
+    alternates: {
+      canonical: localizedCanonical("/c", locale),
+      languages: languageAlternates("/c"),
+    },
+  };
+}
 
 export default async function CategoriesIndex() {
-  const { messages } = await getI18nProps();
+  const { locale, messages } = await getI18nProps();
   const t = (key: string, fallback: string): string => {
     const value = key.split(".").reduce<any>((acc, part) => (acc ? acc[part] : undefined), messages);
     return typeof value === "string" ? value : fallback;
@@ -33,7 +49,7 @@ export default async function CategoriesIndex() {
         </p>
       </header>
       {items.length ? (
-        <CategoryList items={items} base="/c" />
+        <CategoryList items={items} base={localizeHref("/c", locale)} />
       ) : (
         <div className="rounded-2xl border border-border/70 bg-card p-6 text-center shadow-[var(--shadow-soft)]">
           <p className="text-sm text-muted-foreground">

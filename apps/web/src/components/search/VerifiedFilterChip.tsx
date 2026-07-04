@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { ANALYTICS_EVENTS } from "@/lib/analytics/events";
+import { localizeHref } from "@/lib/i18n";
 import {
   Tooltip,
   TooltipContent,
@@ -23,7 +24,7 @@ type CountState = { verified: number | null; total: number | null };
  * in sync) and logs to analytics_events (F6).
  */
 export default function VerifiedFilterChip() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const tr = useCallback(
     (key: string, fallback: string) => {
       const value = t(key);
@@ -109,7 +110,7 @@ export default function VerifiedFilterChip() {
       }),
     }).catch(() => {});
 
-    router.push(`/search?${params.toString()}`);
+    router.push(localizeHref(`/search?${params.toString()}`, locale));
   };
 
   const label = tr("search.verifiedOnlyChip", "Verified only");

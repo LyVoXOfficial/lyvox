@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { headers } from "next/headers";
 import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { resolveFromAcceptLanguage, resolveLocale, type Locale } from "@/lib/i18n";
+import { getInitialLocale } from "@/i18n/server";
+import { localizeHref, type Locale } from "@/lib/i18n";
 
 type Messages = {
   title: string;
@@ -78,18 +78,10 @@ const messages: Record<Locale, Messages> = {
   },
 };
 
-type PageProps = {
-  searchParams?: {
-    lang?: string;
-  };
-};
-
-export default async function OnboardingPage({ searchParams }: PageProps) {
-  const headerList = await headers();
-  const acceptLanguage = headerList.get("accept-language");
-  const fromQuery = searchParams?.lang ? resolveLocale(searchParams.lang) : null;
-  const locale: Locale = fromQuery ?? resolveFromAcceptLanguage(acceptLanguage);
+export default async function OnboardingPage() {
+  const locale = await getInitialLocale();
   const t = messages[locale];
+  const href = (path: string) => localizeHref(path, locale);
 
   return (
     <main className="bg-background">
@@ -120,13 +112,13 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
 
           <div className="flex flex-wrap gap-3">
             <Button asChild>
-              <Link href="/profile/edit">
+              <Link href={href("/profile/edit")}>
                 {t.profileCta}
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/profile/phone">{t.phoneCta}</Link>
+              <Link href={href("/profile/phone")}>{t.phoneCta}</Link>
             </Button>
           </div>
         </section>
@@ -136,7 +128,7 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
           <h2 className="mt-4 text-lg font-extrabold tracking-tight text-foreground">Why this matters</h2>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">{t.secondaryLead}</p>
           <Button asChild variant="ghost" className="mt-4 px-0">
-            <Link href="/search">
+            <Link href={href("/search")}>
               Browse marketplace
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>

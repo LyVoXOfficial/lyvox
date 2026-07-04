@@ -16,9 +16,12 @@ import { getI18nProps, getInitialLocale } from "@/i18n/server";
 import { signMediaUrls } from "@/lib/media/signMediaUrls";
 import { getFirstImage } from "@/lib/media/getFirstImage";
 import { getJsonLdScriptProps } from "@/lib/seo";
-import { getBaseUrl, absoluteUrl } from "@/lib/seo/baseUrl";
-
-const BASE_URL = getBaseUrl();
+import { localizeHref } from "@/lib/i18n";
+import {
+  languageAlternates,
+  localizedAbsoluteUrl,
+  localizedCanonical,
+} from "@/lib/seo/localizedUrls";
 
 // F12: per-category SEO metadata (was absent — /c/* had no canonical/title/desc).
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
@@ -66,10 +69,11 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   // Paginated pages self-canonicalize (?page=N kept, ?sort dropped) — a
   // base-path canonical on every page collapses pages 2+ out of the index
   // and their listings with them. Human page number is 1-based in the title.
-  const canonical =
+  const canonicalPath =
     currentPage > 0
-      ? absoluteUrl(`/c/${slugPath}?page=${currentPage}`)
-      : absoluteUrl(`/c/${slugPath}`);
+      ? `/c/${slugPath}?page=${currentPage}`
+      : `/c/${slugPath}`;
+  const canonical = localizedCanonical(canonicalPath, locale);
   const pageSuffix = currentPage > 0 ? ` — ${currentPage + 1}` : "";
   const title = `${name}${pageSuffix} | LyVoX`;
 
@@ -77,7 +81,10 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     title,
     description,
     ...(thin ? { robots: { index: false, follow: true } } : {}),
-    alternates: { canonical },
+    alternates: {
+      canonical,
+      languages: languageAlternates(canonicalPath),
+    },
     openGraph: {
       title,
       description,
@@ -287,6 +294,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   }
 
   const currentName = getLocalizedCategoryName(typedCurrent, locale);
+  const href = (path: string) => localizeHref(path, locale);
 
   // F12: BreadcrumbList JSON-LD (Home → … → current category).
   const breadcrumbJsonLd = {
@@ -297,13 +305,13 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         "@type": "ListItem",
         position: 1,
         name: t("category.allCategories", "All categories"),
-        item: `${BASE_URL}/c`,
+        item: localizedAbsoluteUrl("/c", locale),
       },
       ...breadcrumbItems.map((crumb, index) => ({
         "@type": "ListItem",
         position: index + 2,
         name: crumb.label,
-        item: `${BASE_URL}${crumb.href}`,
+        item: localizedAbsoluteUrl(crumb.href, locale),
       })),
     ],
   };
@@ -318,7 +326,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         itemListElement: adverts.map((advert, index) => ({
           "@type": "ListItem",
           position: index + 1,
-          url: `${BASE_URL}/ad/${advert.id}`,
+          url: localizedAbsoluteUrl(`/ad/${advert.id}`, locale),
           name: advert.title,
         })),
       }
@@ -329,9 +337,9 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       <script {...getJsonLdScriptProps(breadcrumbJsonLd)} />
       {itemListJsonLd ? <script {...getJsonLdScriptProps(itemListJsonLd)} /> : null}
       <Breadcrumbs
-        items={breadcrumbItems}
+        items={breadcrumbItems.map((item) => ({ ...item, href: href(item.href) }))}
         homeLabel={t("category.allCategories", "All categories")}
-        homeHref="/c"
+        homeHref={href("/c")}
       />
 
       <header className="space-y-1.5">
@@ -349,7 +357,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           <h2 className="text-lg font-extrabold tracking-tight text-foreground">
             {t("category.subcategories", "Subcategories")}
           </h2>
-          <CategoryList items={children} base="/c" />
+          <CategoryList items={children} base={href("/c")} />
         </section>
       )}
 
@@ -359,7 +367,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             {t("category.listings", "Listings")}
           </h2>
           <Link
-            href={`/search?category_id=${typedCurrent.id}`}
+            href={href(`/search?category_id=${typedCurrent.id}`)}
             className="text-sm font-medium text-primary hover:underline"
           >
             {t("category.searchWithFilters", "Search with filters")} →
@@ -395,7 +403,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           >
             {currentPage > 0 && (
               <Link
-                href={`/c/${slugPath}?${new URLSearchParams({ sort: sortParam || "date-desc", page: String(currentPage - 1) })}`}
+                href={href(`/c/${slugPath}?${new URLSearchParams({ sort: sortParam || "date-desc", page: String(currentPage - 1) })}`)}
                 className="rounded-lg border border-border/70 bg-card px-4 py-2 text-sm font-medium hover:bg-secondary"
               >
                 ← {t("category.prevPage", "Previous page")}
@@ -406,7 +414,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             </span>
             {(currentPage + 1) * PAGE_SIZE < (totalAdverts ?? 0) && (
               <Link
-                href={`/c/${slugPath}?${new URLSearchParams({ sort: sortParam || "date-desc", page: String(currentPage + 1) })}`}
+                href={href(`/c/${slugPath}?${new URLSearchParams({ sort: sortParam || "date-desc", page: String(currentPage + 1) })}`)}
                 className="rounded-lg border border-border/70 bg-card px-4 py-2 text-sm font-medium hover:bg-secondary"
               >
                 {t("category.nextPage", "Next page")} →

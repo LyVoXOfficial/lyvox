@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Grid3x3, Home, MoreHorizontal, Plus, User } from "lucide-react";
 import { useI18n } from "@/i18n";
+import { localizeHref, stripLocalePrefix } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
@@ -16,7 +17,8 @@ type NavItem = {
 
 export default function BottomNav() {
   const path = usePathname();
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
+  const currentPath = stripLocalePrefix(path || "/").pathname;
   const moreLabel = t("common.more");
 
   const defaultMatch = (currentPath: string, href: string): boolean => {
@@ -72,14 +74,15 @@ export default function BottomNav() {
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = item.matchPattern
-            ? item.matchPattern(path, item.href)
-            : defaultMatch(path, item.href);
+            ? item.matchPattern(currentPath, item.href)
+            : defaultMatch(currentPath, item.href);
+          const itemHref = localizeHref(item.href, locale);
 
           if (item.href === "/post") {
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={itemHref}
                 className="flex flex-col items-center gap-[5px]"
                 aria-label={item.label}
               >
@@ -102,7 +105,7 @@ export default function BottomNav() {
           return (
             <Link
               key={item.href}
-              href={item.href}
+              href={itemHref}
               className={cn(
                 "flex min-h-[48px] flex-col items-center justify-center gap-[4px] text-[10.5px] font-semibold transition-colors",
                 isActive ? "text-primary" : "text-muted-foreground",

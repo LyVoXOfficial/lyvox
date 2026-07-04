@@ -3,14 +3,16 @@
 import Link from "next/link";
 import { useI18n } from "@/i18n";
 import { useCookieConsent } from "@/components/cookie/CookieConsentProvider";
+import { localizeHref } from "@/lib/i18n";
 
 export default function LegalFooter() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const { openPreferences } = useCookieConsent();
   const translate = (key: string, fallback: string) => {
     const value = t(key);
     return value === key ? fallback : value;
   };
+  const href = (path: string) => localizeHref(path, locale);
 
   return (
     <footer className="mb-16 border-t border-border/75 bg-card md:mb-0">
@@ -27,18 +29,18 @@ export default function LegalFooter() {
         <div>
           <div className="font-semibold text-foreground">{translate("common.about", "Marketplace")}</div>
           <ul className="mt-2 space-y-2">
-            <li><Link className="hover:text-foreground" href="/search">{translate("footer.browse_listings", "Browse listings")}</Link></li>
-            <li><Link className="hover:text-foreground" href="/post">{translate("footer.post_listing", "Post a listing")}</Link></li>
-            <li><Link className="hover:text-foreground" href="/contact">{translate("common.contacts", "Contact")}</Link></li>
+            <li><Link className="hover:text-foreground" href={href("/search")}>{translate("footer.browse_listings", "Browse listings")}</Link></li>
+            <li><Link className="hover:text-foreground" href={href("/post")}>{translate("footer.post_listing", "Post a listing")}</Link></li>
+            <li><Link className="hover:text-foreground" href={href("/contact")}>{translate("common.contacts", "Contact")}</Link></li>
           </ul>
         </div>
         <div>
           <div className="font-semibold text-foreground">{translate("common.legal", "Legal")}</div>
           <ul className="mt-2 space-y-2">
-            <li><Link className="hover:text-foreground" href="/legal/terms">{translate("common.terms", "Terms")}</Link></li>
-            <li><Link className="hover:text-foreground" href="/legal/privacy">{translate("common.privacy", "Privacy")}</Link></li>
-            <li><Link className="hover:text-foreground" href="/legal/cookies">{translate("common.cookies", "Cookies")}</Link></li>
-            <li><Link className="hover:text-foreground" href="/legal/imprint">{translate("common.imprint", "Imprint")}</Link></li>
+            <li><Link className="hover:text-foreground" href={href("/legal/terms")}>{translate("common.terms", "Terms")}</Link></li>
+            <li><Link className="hover:text-foreground" href={href("/legal/privacy")}>{translate("common.privacy", "Privacy")}</Link></li>
+            <li><Link className="hover:text-foreground" href={href("/legal/cookies")}>{translate("common.cookies", "Cookies")}</Link></li>
+            <li><Link className="hover:text-foreground" href={href("/legal/imprint")}>{translate("common.imprint", "Imprint")}</Link></li>
             <li>
               <button
                 type="button"

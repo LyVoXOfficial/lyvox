@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/pagination";
 import { Loader2, SlidersHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { localizeHref } from "@/lib/i18n";
 
 const ANTI_SOCIAL_THRESHOLD = 10;
 const OUTSIDE_RADIUS_THRESHOLD = 6;
@@ -80,6 +81,10 @@ export default function SearchPage() {
   const { t, locale } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const searchHref = useCallback(
+    (queryString?: string) => localizeHref(queryString ? `/search?${queryString}` : "/search", locale),
+    [locale],
+  );
   const translate = useCallback(
     (key: string, fallback: string, params?: Record<string, string | number>) => {
       const value = t(key, params);
@@ -359,7 +364,7 @@ export default function SearchPage() {
     // Reset to page 0 when filters change
     params.set("page", "0");
     
-    router.push(`/search?${params.toString()}`);
+    router.push(searchHref(params.toString()));
   };
 
   // Handle sort change
@@ -367,14 +372,14 @@ export default function SearchPage() {
     const params = new URLSearchParams(searchParams.toString());
     params.set("sort_by", newSortBy);
     params.set("page", "0"); // Reset to first page
-    router.push(`/search?${params.toString()}`);
+    router.push(searchHref(params.toString()));
   };
 
   // Handle page change
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", newPage.toString());
-    router.push(`/search?${params.toString()}`);
+    router.push(searchHref(params.toString()));
   };
 
   // Sentinel ref for IntersectionObserver-based infinite scroll
@@ -432,7 +437,7 @@ export default function SearchPage() {
           const nextPage = page + 1;
           const params = new URLSearchParams(searchParams.toString());
           params.set("page", nextPage.toString());
-          router.push(`/search?${params.toString()}`, { scroll: false });
+          router.push(searchHref(params.toString()), { scroll: false });
         }
       },
       { rootMargin: "300px" },
@@ -440,7 +445,7 @@ export default function SearchPage() {
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [isMobile, hasMore, loading, isLoadingMore, page, searchParams, router]);
+  }, [isMobile, hasMore, loading, isLoadingMore, page, searchHref, searchParams, router]);
 
   // Calculate pagination info
   const totalPages = Math.ceil(total / limit);
@@ -475,7 +480,7 @@ export default function SearchPage() {
     keys.forEach((key) => params.delete(key));
     params.set("page", "0");
     const next = params.toString();
-    router.push(next ? `/search?${next}` : "/search");
+    router.push(searchHref(next || undefined));
   };
 
   // Render pagination numbers
@@ -690,7 +695,7 @@ export default function SearchPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push("/search")}
+            onClick={() => router.push(searchHref())}
             className="h-7 px-2 text-xs"
             style={{ color: "var(--priD)" }}
           >
@@ -826,7 +831,7 @@ export default function SearchPage() {
               </div>
               <div className="flex flex-wrap justify-center gap-2">
                 {activeFilterChips.length > 0 && (
-                  <Button variant="outline" size="sm" onClick={() => router.push("/search")}>
+                  <Button variant="outline" size="sm" onClick={() => router.push(searchHref())}>
                     {translate("search.clearFilters", "Clear filters")}
                   </Button>
                 )}

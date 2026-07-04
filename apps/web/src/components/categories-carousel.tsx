@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { getCategoryIcon } from "@/lib/categoryIcons";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useI18n } from "@/i18n";
+import { localizeHref } from "@/lib/i18n";
 
 type Item = Category;
 
@@ -75,7 +76,7 @@ export default function CategoriesCarousel() {
           return (
             <Link
               key={cat.slug}
-              href={`/c/${cat.path}`}
+              href={localizeHref(`/c/${cat.path}`, locale)}
               className="group flex w-32 snap-start flex-col items-center gap-2.5 rounded-xl border border-border/70 bg-card p-4 shadow-[var(--shadow-soft)] transition duration-200 hover:-translate-y-1 hover:border-primary/30 hover:shadow-[var(--shadow-card)]"
             >
               <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary text-primary transition-colors duration-200 group-hover:bg-primary group-hover:text-primary-foreground">
