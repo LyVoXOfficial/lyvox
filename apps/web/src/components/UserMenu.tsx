@@ -34,6 +34,11 @@ type MenuLink = {
 export default function UserMenu() {
   const { t } = useI18n();
   const [email, setEmail] = useState<string | null>(null);
+  // Session is resolved client-side after hydration; until the first check
+  // settles we render a neutral avatar skeleton instead of the guest buttons.
+  // This masks the "guest → account" flash for logged-in users without
+  // pulling server session state into the header (out of presentation scope).
+  const [resolved, setResolved] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [phoneVerified, setPhoneVerified] = useState<boolean | null>(null);
   const [open, setOpen] = useState(false);
@@ -100,6 +105,7 @@ export default function UserMenu() {
             lastEmail = null;
             phoneVerificationFetched = false;
           }
+          setResolved(true);
         }
       } catch {
         if (!cancelled) {
@@ -107,6 +113,7 @@ export default function UserMenu() {
           setIsAdmin(false);
           setPhoneVerified(null);
           lastEmail = null;
+          setResolved(true);
         }
       }
     };
@@ -126,6 +133,7 @@ export default function UserMenu() {
           setPhoneVerified(null);
           lastEmail = null;
         }
+        setResolved(true);
       }
     });
 
@@ -179,6 +187,17 @@ export default function UserMenu() {
       window.location.replace("/");
     }
   };
+
+  if (!resolved) {
+    // Neutral placeholder while the session is being resolved — avatar-sized on
+    // mobile, widening to the account-button footprint on sm+ to avoid a layout
+    // shift once the real menu (or guest buttons) renders.
+    return (
+      <div className="flex h-10 items-center" aria-hidden="true">
+        <div className="h-10 w-10 animate-pulse rounded-md bg-muted sm:w-28" />
+      </div>
+    );
+  }
 
   if (!email) {
     return (
