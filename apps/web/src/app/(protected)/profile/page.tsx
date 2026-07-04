@@ -6,12 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowRight, CheckCircle, Star, Calendar, Mail, Phone, Edit, BarChart3, Package, MessageSquare, Settings, Heart, Shield, ShieldCheck, User, Bell } from "lucide-react";
+import { ArrowRight, CheckCircle, Star, Calendar, Mail, Phone, Edit, BarChart3, Package, MessageSquare, Settings, Heart, Shield, ShieldCheck, User } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/i18n/format";
 import { ProfileAdvertsList } from "@/components/profile/ProfileAdvertsList";
 import { ProfileReviewsList } from "@/components/profile/ProfileReviewsList";
-import { type ProfileData, type ProfileFavorite } from "@/lib/profileTypes";
+import { NotificationPreferencesCard } from "@/components/profile/NotificationPreferencesCard";
+import { type ProfileData, type ProfileFavorite, type ProfileReview } from "@/lib/profileTypes";
 import { logger } from "@/lib/errorLogger";
 import { signMediaUrls } from "@/lib/media/signMediaUrls";
 import { getFirstImage } from "@/lib/media/getFirstImage";
@@ -295,10 +296,79 @@ async function loadProfileData(userId: string): Promise<(ProfileData & {
     };
   });
  
+  // Reviews received by this user. The reviews table isn't in the generated
+  // Supabase types yet, so use a narrow untyped cast (same defensive pattern as
+  // app/user/[id]/page.tsx). Failures degrade to an empty list, never throw.
+  let reviews: ProfileReview[] = [];
+  try {
+    const untyped = supabase as unknown as {
+      from: (table: string) => {
+        select: (cols: string) => {
+          eq: (col: string, val: string) => {
+            order: (col: string, opts: { ascending: boolean }) => {
+              limit: (n: number) => Promise<{
+                data:
+                  | Array<{
+                      id: string;
+                      rating: number;
+                      comment: string | null;
+                      created_at: string | null;
+                      reviewer_id: string | null;
+                    }>
+                  | null;
+                error: unknown;
+              }>;
+            };
+          };
+        };
+      };
+    };
+    const { data: rawReviews, error: reviewsError } = await untyped
+      .from("reviews")
+      .select("id, rating, comment, created_at, reviewer_id")
+      .eq("subject_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (reviewsError) {
+      logger.warn("Could not load profile reviews", {
+        component: "ProfilePage",
+        action: "loadReviews",
+        metadata: { userId },
+        error: reviewsError,
+      });
+    } else if (rawReviews && rawReviews.length > 0) {
+      const reviewerIds = [
+        ...new Set(rawReviews.map((r) => r.reviewer_id).filter((id): id is string => !!id)),
+      ];
+      const { data: reviewerProfiles } = await supabase
+        .from("profiles")
+        .select("id, display_name")
+        .in("id", reviewerIds);
+      const nameMap = new Map<string, string | null>(
+        (reviewerProfiles ?? []).map((p) => [p.id, p.display_name]),
+      );
+      reviews = rawReviews.map((r) => ({
+        id: r.id,
+        rating: r.rating,
+        comment: r.comment ?? null,
+        created_at: r.created_at ?? "",
+        author: r.reviewer_id ? { display_name: nameMap.get(r.reviewer_id) ?? null } : null,
+      }));
+    }
+  } catch (error) {
+    logger.warn("Could not load profile reviews (table may not exist yet)", {
+      component: "ProfilePage",
+      action: "loadReviews",
+      metadata: { userId },
+      error,
+    });
+  }
+
   const profile: ProfileData & { advertsStats: typeof advertsStats } = {
     ...profileData,
     trust_score: trustScore,
-    reviews: [], // Reviews table doesn't exist yet, return empty array
+    reviews,
     adverts: hydratedAdverts,
     favorites,
     advertsStats,
@@ -651,43 +721,10 @@ export default async function ProfilePage() {
               </CardContent>
             </Card>
 
-            {/* Notification Settings */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="rounded-xl bg-primary/10 p-2">
-                    <Bell className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <CardTitle>{tr("profile.notifications", "Notifications")}</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      {tr("profile.notifications_description", "Configure email and push notifications.")}
-                    </p>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between rounded-xl border border-border/70 p-3">
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span>{tr("profile.email_notifications", "Email notifications")}</span>
-                    </div>
-                    <Badge variant="secondary">{tr("profile.enabled", "Enabled")}</Badge>
-                  </div>
-                  <div className="flex items-center justify-between rounded-xl border border-border/70 p-3">
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                      <span>{tr("profile.messages_notifications", "Messages")}</span>
-                    </div>
-                    <Badge variant="secondary">{tr("profile.enabled", "Enabled")}</Badge>
-                  </div>
-                  <p className="pt-2 text-xs text-muted-foreground">
-                    {tr("profile.notifications_coming_soon", "Full notification preferences will be available soon.")}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Notification Settings — real email opt-out toggles wired to
+                /api/notifications/preferences (replaces the old decorative
+                "Enabled" badges). */}
+            <NotificationPreferencesCard />
           </div>
         </TabsContent>
       </Tabs>
