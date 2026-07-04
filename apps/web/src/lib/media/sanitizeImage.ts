@@ -57,7 +57,14 @@ export type SanitizeOptions = {
 
 export const DEFAULT_SANITIZE_OPTIONS: SanitizeOptions = {
   maxBytes: 5 * 1024 * 1024, // mirrors signMediaSchema fileSize cap + ad-media bucket limit
-  maxInputPixels: 40_000_000, // 40 MP — comfortably above any real phone photo
+  // 24 MP ceiling. This is the decompression-bomb axis: a low-entropy PNG can be
+  // <5 MB on disk yet W*H pixels once decoded, and libvips has no shrink-on-load
+  // for PNG, so it must allocate ~W*H*4 bytes of RGBA BEFORE the downscale. At
+  // 24 MP that is ~96 MB per concurrent /complete; 40 MP would be ~160 MB. 24 MP
+  // still comfortably covers real phone photos (they are downscaled to 1600px
+  // anyway). Kept in sync with sharp's limitInputPixels below so oversize inputs
+  // are rejected at/near decode, not merely flagged.
+  maxInputPixels: 24_000_000,
   maxDimension: 1600, // mirrors client compressImage MAX_DIMENSION
   quality: 82,
   timeoutSeconds: 15,

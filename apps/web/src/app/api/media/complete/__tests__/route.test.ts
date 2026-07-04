@@ -65,10 +65,12 @@ const PREVIEW_PATH = `${USER_ID}/${ADVERT_ID}/previews/photo-400.webp`;
 const VALID_BODY = {
   advertId: ADVERT_ID,
   storagePath: STORAGE_PATH,
-  // client dims are deliberately WRONG to prove the server recomputes them
+  // Old-client / hostile extra fields: all must be IGNORED. The server recomputes
+  // dimensions from the sanitised bytes and DERIVES the preview path itself — a
+  // client-supplied previewStoragePath must never be honoured.
   width: 9999,
   height: 9999,
-  previewStoragePath: PREVIEW_PATH,
+  previewStoragePath: "attacker-controlled/evil/path.webp",
   previewWidth: 9999,
   previewHeight: 9999,
 };
@@ -84,7 +86,7 @@ function completeReq(body: unknown = VALID_BODY) {
 let insertPayloadCapture: Record<string, unknown> | null = null;
 
 /** Owner ok; under limit; optional existing row; standard lastSort + insert. */
-function makeServerFrom(existingRow: unknown = null) {
+function makeServerFrom(existingRow: unknown = null, insertError: unknown = null) {
   return (table: string) => {
     if (table === "adverts") {
       return {
@@ -115,19 +117,22 @@ function makeServerFrom(existingRow: unknown = null) {
           insertPayloadCapture = payload;
           return {
             select: () => ({
-              single: async () => ({
-                data: {
-                  id: "media-1",
-                  url: STORAGE_PATH,
-                  sort: payload.sort,
-                  w: payload.w,
-                  h: payload.h,
-                  preview_url: payload.preview_url,
-                  preview_w: payload.preview_w,
-                  preview_h: payload.preview_h,
-                },
-                error: null,
-              }),
+              single: async () =>
+                insertError
+                  ? { data: null, error: insertError }
+                  : {
+                      data: {
+                        id: "media-1",
+                        url: STORAGE_PATH,
+                        sort: payload.sort,
+                        w: payload.w,
+                        h: payload.h,
+                        preview_url: payload.preview_url,
+                        preview_w: payload.preview_w,
+                        preview_h: payload.preview_h,
+                      },
+                      error: null,
+                    },
             }),
           };
         },
@@ -177,11 +182,13 @@ describe("POST /api/media/complete — SEC-UPLOAD sanitisation", () => {
     const fullUpload = uploadMock.mock.calls.find((c) => c[0] === STORAGE_PATH);
     expect(fullUpload?.[2]).toEqual({ contentType: "image/webp", upsert: true });
 
-    // public preview regenerated from the sanitised buffer, not trusted from client
+    // public preview regenerated from the sanitised buffer, uploaded to the
+    // SERVER-DERIVED path — never the attacker-supplied previewStoragePath
     expect(derivePreviewMock).toHaveBeenCalledTimes(1);
     expect(storageFromMock).toHaveBeenCalledWith("ad-media-preview");
     const previewUpload = uploadMock.mock.calls.find((c) => c[0] === PREVIEW_PATH);
     expect(previewUpload?.[2]).toEqual({ contentType: "image/webp", upsert: true });
+    expect(uploadMock.mock.calls.some((c) => c[0] === "attacker-controlled/evil/path.webp")).toBe(false);
 
     // server-computed dims win over the (wrong) client-claimed 9999
     expect(insertPayloadCapture?.w).toBe(800);
@@ -255,16 +262,27 @@ describe("POST /api/media/complete — SEC-UPLOAD sanitisation", () => {
     expect(sanitizeMock).not.toHaveBeenCalled();
   });
 
-  it("drops the client preview (preview_url null) when preview regeneration fails, but still succeeds", async () => {
+  it("drops the preview (preview_url null) when server regeneration fails, but still succeeds", async () => {
     derivePreviewMock.mockRejectedValue(new Error("sharp preview boom"));
 
     const res = await POST(completeReq());
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
-    // un-sanitised client preview removed from the public bucket
+    // anything at the derived public preview path is removed
     expect(removeMock).toHaveBeenCalledWith([PREVIEW_PATH]);
     expect(insertPayloadCapture?.preview_url).toBeNull();
     expect(insertPayloadCapture?.preview_mime).toBeNull();
+  });
+
+  it("cleans up the sanitised full + preview orphans when the media INSERT fails", async () => {
+    serverFromMock.mockImplementation(makeServerFrom(null, { message: "insert boom" }));
+
+    const res = await POST(completeReq());
+    expect(res.status).toBeGreaterThanOrEqual(400);
+    expect((await res.json()).error).toBe("CREATE_FAILED");
+    // symmetry: a failed insert must not leave sanitised-but-unreferenced objects
+    expect(removeMock).toHaveBeenCalledWith([STORAGE_PATH]);
+    expect(removeMock).toHaveBeenCalledWith([PREVIEW_PATH]);
   });
 });

@@ -23,18 +23,9 @@ export const signMediaSchema = z.object({
     .int("File size must be an integer")
     .positive("File size must be positive")
     .max(5 * 1024 * 1024, "File size must not exceed 5MB"),
-
-  previewContentType: z
-    .string()
-    .startsWith("image/", "Preview content type must be an image")
-    .optional(),
-
-  previewFileSize: z
-    .number()
-    .int("Preview file size must be an integer")
-    .positive("Preview file size must be positive")
-    .max(1024 * 1024, "Preview file size must not exceed 1MB")
-    .optional(),
+  // SEC-UPLOAD: the preview is derived server-side from the sanitised full image
+  // in /api/media/complete — the client no longer uploads a preview, so no
+  // preview upload token is issued here.
 });
 
 export type SignMediaInput = z.infer<typeof signMediaSchema>;
@@ -59,40 +50,8 @@ export const completeMediaSchema = z.object({
       (path) => path.includes("/"),
       "Storage path must contain at least one slash (for userId/advertId structure)",
     ),
-  
-  width: z
-    .number()
-    .int()
-    .positive()
-    .optional(),
-  
-  height: z
-    .number()
-    .int()
-    .positive()
-    .optional(),
-
-  previewStoragePath: z
-    .string()
-    .trim()
-    .min(1, "Preview storage path is required")
-    .regex(
-      /^[a-z0-9_/-]+\.[a-z0-9_]+$/i,
-      "Preview storage path format is invalid",
-    )
-    .optional(),
-
-  previewWidth: z
-    .number()
-    .int()
-    .positive()
-    .optional(),
-
-  previewHeight: z
-    .number()
-    .int()
-    .positive()
-    .optional(),
+  // SEC-UPLOAD: width/height and all preview fields are computed server-side from
+  // the sanitised bytes — any client-supplied values are ignored (stripped).
 });
 
 export type CompleteMediaInput = z.infer<typeof completeMediaSchema>;

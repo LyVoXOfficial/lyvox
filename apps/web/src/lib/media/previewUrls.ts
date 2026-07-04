@@ -17,3 +17,18 @@ export function getMediaPreviewPublicUrl(path: string | null | undefined): strin
 export function isStoragePath(path: string | null | undefined): path is string {
   return Boolean(path && !HTTP_URL_REGEX.test(path));
 }
+
+/**
+ * Deterministically derive the preview object path (in the PUBLIC ad-media-preview
+ * bucket) from a full-image storage path. SEC-UPLOAD: the preview is written
+ * ONLY by the server (in /api/media/complete, from the sanitised full buffer) —
+ * the client never uploads to the public preview bucket — so the path is computed
+ * here rather than accepted from the request.
+ */
+export function buildPreviewStoragePath(fullStoragePath: string): string {
+  const slashIndex = fullStoragePath.lastIndexOf("/");
+  const dir = slashIndex >= 0 ? fullStoragePath.slice(0, slashIndex) : "";
+  const file = slashIndex >= 0 ? fullStoragePath.slice(slashIndex + 1) : fullStoragePath;
+  const base = file.replace(/\.[^.]+$/, "") || "photo";
+  return `${dir}/previews/${base}-400.webp`;
+}

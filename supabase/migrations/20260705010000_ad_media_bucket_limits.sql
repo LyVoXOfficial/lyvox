@@ -18,7 +18,11 @@ values (
   'ad-media',
   false,
   5242880, -- 5 MB, matches signMediaSchema fileSize cap and sanitizeImage maxBytes
-  array['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif']::text[]
+  -- Mirror the sanitizer's accept surface so a legit upload is never pre-blocked
+  -- at the storage PUT for a format /api/media/complete would transcode to WebP
+  -- (notably HEIC/HEIF from desktop). This list is a weak client-declared filter;
+  -- file_size_limit above is the real gate.
+  array['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif', 'image/heic', 'image/heif']::text[]
 )
 on conflict (id) do update
 set

@@ -16,7 +16,7 @@ import {
 } from "@/lib/apiErrors";
 import { validateRequest } from "@/lib/validations";
 import { completeMediaSchema } from "@/lib/validations/media";
-import { getMediaPreviewPublicUrl } from "@/lib/media/previewUrls";
+import { getMediaPreviewPublicUrl, buildPreviewStoragePath } from "@/lib/media/previewUrls";
 import { sanitizeImageBuffer, derivePreviewBuffer } from "@/lib/media/sanitizeImage";
 
 export const runtime = "nodejs";
@@ -52,11 +52,6 @@ async function handlePost(request: Request) {
   const parseResult = await safeJsonParse<{
     advertId?: string;
     storagePath?: string;
-    width?: number;
-    height?: number;
-    previewStoragePath?: string;
-    previewWidth?: number;
-    previewHeight?: number;
   }>(request);
   if (!parseResult.success) {
     return parseResult.response;
@@ -67,9 +62,9 @@ async function handlePost(request: Request) {
     return validationResult.response;
   }
 
-  // NOTE: client-supplied width/height/previewWidth/previewHeight are ignored —
-  // SEC-UPLOAD recomputes them from the sanitised bytes below (authoritative).
-  const { advertId, storagePath, previewStoragePath } = validationResult.data;
+  // NOTE: client-supplied dimensions/preview fields are ignored — SEC-UPLOAD
+  // recomputes them server-side from the sanitised bytes below (authoritative).
+  const { advertId, storagePath } = validationResult.data;
 
   const authResult = await requireAuthenticatedUser(request);
   if ("response" in authResult) {
@@ -91,16 +86,10 @@ async function handlePost(request: Request) {
     return createErrorResponse(ApiErrorCode.FORBIDDEN, { status: 403 });
   }
 
-  if (previewStoragePath && !previewStoragePath.startsWith(`${user.id}/${advertId}/previews/`)) {
-    await service
-      .from("logs")
-      .insert({
-        user_id: user.id,
-        action: "media_complete_preview_denied",
-        details: { advertId, previewStoragePath },
-      });
-    return createErrorResponse(ApiErrorCode.FORBIDDEN, { status: 403 });
-  }
+  // The preview path is DERIVED from the (ownership-checked) full path — never
+  // taken from the client — so it is always within the user's namespace and is
+  // written only here, from the sanitised buffer.
+  const previewStoragePath = buildPreviewStoragePath(storagePath);
 
   const ownership = await ensureAdvertOwnership({
     supabase,
@@ -186,34 +175,33 @@ async function handlePost(request: Request) {
     return handleSupabaseError(reupload.error, ApiErrorCode.CREATE_FAILED);
   }
 
-  // Regenerate the PUBLIC preview from the already-sanitised full buffer so the
-  // unsigned, publicly-served thumbnail can never carry attacker-controlled
-  // bytes. On failure, drop the client-uploaded preview entirely rather than
-  // leave un-sanitised bytes live in a public bucket.
-  let effectivePreviewPath: string | null = previewStoragePath ?? null;
+  // Derive the PUBLIC preview server-side from the already-sanitised full buffer
+  // and write it (the client never uploads to the public bucket), so the
+  // unsigned, publicly-served thumbnail can only ever be sanitised bytes. On
+  // failure, remove anything at the derived path and fall back to signing the
+  // full image for thumbnails (preview_url null).
+  let effectivePreviewPath: string | null = previewStoragePath;
   let effectivePreviewW: number | null = null;
   let effectivePreviewH: number | null = null;
-  if (previewStoragePath) {
-    try {
-      const preview = await derivePreviewBuffer(sanitized.buffer);
-      const previewUpload = await service.storage
-        .from("ad-media-preview")
-        .upload(previewStoragePath, preview.buffer, {
-          contentType: "image/webp",
-          upsert: true,
-        });
-      if (previewUpload.error) throw previewUpload.error;
-      effectivePreviewW = preview.width;
-      effectivePreviewH = preview.height;
-    } catch (previewError) {
-      await service.storage.from("ad-media-preview").remove([previewStoragePath]);
-      effectivePreviewPath = null;
-      await logMediaEvent("media_complete_preview_failed", user.id, {
-        advertId,
-        previewStoragePath,
-        error: String(previewError),
+  try {
+    const preview = await derivePreviewBuffer(sanitized.buffer);
+    const previewUpload = await service.storage
+      .from("ad-media-preview")
+      .upload(previewStoragePath, preview.buffer, {
+        contentType: "image/webp",
+        upsert: true,
       });
-    }
+    if (previewUpload.error) throw previewUpload.error;
+    effectivePreviewW = preview.width;
+    effectivePreviewH = preview.height;
+  } catch (previewError) {
+    await service.storage.from("ad-media-preview").remove([previewStoragePath]);
+    effectivePreviewPath = null;
+    await logMediaEvent("media_complete_preview_failed", user.id, {
+      advertId,
+      previewStoragePath,
+      error: String(previewError),
+    });
   }
 
   const { data: lastSort } = await supabase
@@ -245,6 +233,9 @@ async function handlePost(request: Request) {
     .single();
 
   if (insertError || !inserted) {
+    // Symmetry with the other failure branches: never leave sanitised-but-
+    // unreferenced objects (esp. the public preview) behind on a failed insert.
+    await cleanupUploads(service, storagePath, effectivePreviewPath);
     return handleSupabaseError(
       insertError ?? { message: "INSERT_FAILED" },
       ApiErrorCode.CREATE_FAILED,
