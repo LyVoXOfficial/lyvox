@@ -148,7 +148,12 @@
     "radius_20": "20 km",
     "radius_50": "50 km",
     "radius_100": "100 km",
-    "outside_radius": "Plus loin de vous"
+    "outside_radius": "Plus loin de vous",
+    "relaxedTitle": "Aucune correspondance exacte — voici des annonces similaires",
+    "relaxedCount": "Nous avons élargi vos filtres et trouvé {count} de plus.",
+    "relaxedHint": "Nous avons élargi vos filtres pour afficher des annonces proches.",
+    "verifiedOnlyChip": "Vérifiés uniquement",
+    "verifiedPreview": "{verified} sur {total}"
   },
   "contact": {
     "price": "Prix",
@@ -1558,7 +1563,9 @@
     "searchWithFilters": "Rechercher avec des filtres",
     "prevPage": "Page précédente",
     "nextPage": "Page suivante",
-    "page": "Page {page} sur {total}"
+    "page": "Page {page} sur {total}",
+    "emptyTitle": "Aucune annonce active ici pour l'instant",
+    "postFirst": "Publier une annonce"
   },
   "report": {
     "button": "Signaler",
@@ -1784,7 +1791,9 @@
     "all_listings": "Toutes les annonces",
     "signin_prompt": "Connectez-vous pour enregistrer vos recherches sur tous vos appareils et recevoir des alertes.",
     "alert_title": "Nouveaux résultats : {name}",
-    "alert_body": "{count} nouvelle(s) annonce(s) correspondent à votre recherche enregistrée."
+    "alert_body": "{count} nouvelle(s) annonce(s) correspondent à votre recherche enregistrée.",
+    "emptyDesc": "Enregistrez une recherche pour être alerté dès qu'une annonce correspond.",
+    "startSearch": "Lancer une recherche"
   },
   "pro": {
     "title": "Devenir vendeur professionnel",

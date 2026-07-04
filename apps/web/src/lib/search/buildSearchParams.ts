@@ -48,6 +48,30 @@ export function buildSearchRequestParams(input: SearchRequestParamsInput) {
   return params;
 }
 
+/**
+ * Zero-result relaxation (T14 item 2): when an exact search returns nothing,
+ * loosen the *restrictive* filters (price range, condition, verified-only) while
+ * keeping the intent-defining ones (query, category, location). Returns null when
+ * there is nothing to relax — so the caller only broadens when it can honestly
+ * offer "similar nearby" instead of a dead end. Results are still real rows from
+ * the loosened query; nothing is fabricated.
+ */
+export function buildRelaxedParams(input: SearchRequestParamsInput) {
+  const hasRelaxableFilter = Boolean(
+    input.priceMin || input.priceMax || input.condition || input.verifiedOnly,
+  );
+  if (!hasRelaxableFilter) return null;
+
+  return buildSearchRequestParams({
+    ...input,
+    priceMin: null,
+    priceMax: null,
+    condition: null,
+    verifiedOnly: false,
+    page: 0,
+  });
+}
+
 export function buildOutsideRadiusParams(
   input: SearchRequestParamsInput,
   multiplier = 3,

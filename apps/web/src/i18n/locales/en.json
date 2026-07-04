@@ -148,7 +148,12 @@
     "radius_20": "20 km",
     "radius_50": "50 km",
     "radius_100": "100 km",
-    "outside_radius": "Farther from you"
+    "outside_radius": "Farther from you",
+    "relaxedTitle": "No exact matches — here's what's similar",
+    "relaxedCount": "We broadened your filters and found {count} more.",
+    "relaxedHint": "We broadened your filters to show related listings.",
+    "verifiedOnlyChip": "Verified only",
+    "verifiedPreview": "{verified} of {total}"
   },
   "contact": {
     "price": "Price",
@@ -1558,7 +1563,9 @@
     "searchWithFilters": "Search with filters",
     "prevPage": "Previous page",
     "nextPage": "Next page",
-    "page": "Page {page} of {total}"
+    "page": "Page {page} of {total}",
+    "emptyTitle": "No active listings here yet",
+    "postFirst": "Post a listing"
   },
   "report": {
     "button": "Report",
@@ -1784,7 +1791,9 @@
     "all_listings": "All listings",
     "signin_prompt": "Sign in to save searches across devices and get alerts.",
     "alert_title": "New matches: {name}",
-    "alert_body": "{count} new listing(s) match your saved search."
+    "alert_body": "{count} new listing(s) match your saved search.",
+    "emptyDesc": "Save a search to get notified the moment a matching listing appears.",
+    "startSearch": "Start a search"
   },
   "pro": {
     "title": "Become a professional seller",

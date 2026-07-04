@@ -13,6 +13,8 @@ export const ANALYTICS_EVENTS = {
   SWIPE_LEFT: "swipe_left",
   /** User saved a search alert. props: { query, category_id? } */
   SAVE_SEARCH: "save_search",
+  /** User toggled the "verified sellers only" search filter. props: { enabled, verified_count?, total_count? } */
+  VERIFIED_FILTER_TOGGLED: "verified_filter_toggled",
   /** User clicked a search result. props: { query_hash?, advert_id, position, category_id? } */
   SEARCH_RESULT_CLICK: "search_result_click",
   /** User liked / bookmarked an advert. props: { advert_id } */

@@ -8,9 +8,10 @@ import SearchFilters, { type SearchFiltersState } from "@/components/SearchFilte
 import SaveSearchButton from "@/components/saved/SaveSearchButton";
 import { logger } from "@/lib/errorLogger";
 import { mapSearchItemToCard } from "@/lib/advertCards";
-import { buildOutsideRadiusParams, buildSearchRequestParams } from "@/lib/search/buildSearchParams";
+import { buildOutsideRadiusParams, buildRelaxedParams, buildSearchRequestParams } from "@/lib/search/buildSearchParams";
 import AdsGrid from "@/components/ads-grid";
 import { AdsGridSkeleton } from "@/components/marketplace-grid-states";
+import VerifiedFilterChip from "@/components/search/VerifiedFilterChip";
 import { ANALYTICS_EVENTS } from "@/lib/analytics/events";
 import { Button } from "@/components/ui/button";
 import {
@@ -113,6 +114,8 @@ export default function SearchPage() {
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
   const [outsideRadiusResults, setOutsideRadiusResults] = useState<SearchResult[]>([]);
+  const [relaxedResults, setRelaxedResults] = useState<SearchResult[]>([]);
+  const [relaxedTotal, setRelaxedTotal] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -205,8 +208,27 @@ export default function SearchPage() {
         }
       }
 
+      // T14 item 2 — Zero-result relaxation. Precedence: exact →
+      // exact+outside-radius (geo) → relaxed (drop price/condition/verified) →
+      // true-empty. Only broaden when the exact query is truly empty and the geo
+      // expansion found nothing, and only using real rows from the loosened query.
+      let relaxed: SearchResult[] = [];
+      let relaxedCount = 0;
+      const shouldRelax =
+        page === 0 && data.total === 0 && outsideResults.length === 0;
+      if (shouldRelax) {
+        const relaxedParams = buildRelaxedParams({ ...baseRequest, limit: OUTSIDE_RADIUS_LIMIT });
+        if (relaxedParams) {
+          const relaxedData = await loadSearchResponse(relaxedParams);
+          relaxed = relaxedData.items.map(mapSearchItemToCard).slice(0, OUTSIDE_RADIUS_THRESHOLD);
+          relaxedCount = relaxedData.total;
+        }
+      }
+
       setResults(formattedResults);
       setOutsideRadiusResults(outsideResults);
+      setRelaxedResults(relaxed);
+      setRelaxedTotal(relaxedCount);
       setTotal(data.total);
       setHasMore(data.hasMore);
 
@@ -241,6 +263,8 @@ export default function SearchPage() {
       setError(errorMessage);
       setResults([]);
       setOutsideRadiusResults([]);
+      setRelaxedResults([]);
+      setRelaxedTotal(0);
       setTotal(0);
       setHasMore(false);
     } finally {
@@ -632,6 +656,11 @@ export default function SearchPage() {
         </div>
       </div>
 
+      {/* Quick-filter chips (above results) — verified toggle with live count preview */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <VerifiedFilterChip />
+      </div>
+
       {/* Applied-filter chips (below header, full-width) */}
       {activeFilterChips.length > 0 && (
         <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -682,7 +711,7 @@ export default function SearchPage() {
           {/* Loading state — skeleton grid matches real layout */}
           {loading && (
             <div aria-busy="true" aria-label={translate("common.loading", "Loading...")}>
-              <AdsGridSkeleton count={8} />
+              <AdsGridSkeleton count={12} gridColsClass="grid-cols-2 lg:grid-cols-3" />
             </div>
           )}
 
@@ -708,8 +737,57 @@ export default function SearchPage() {
             </div>
           )}
 
+          {/* Relaxed-results state — honest "no exact matches, similar nearby" with
+              real rows from a loosened query + SaveSearch as the primary CTA */}
+          {!loading && !error && total === 0 && outsideRadiusResults.length === 0 && relaxedResults.length > 0 && (
+            <section className="space-y-5" aria-labelledby="relaxed-title">
+              <div
+                className="space-y-3 p-5"
+                style={{
+                  background: "var(--card)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--r)",
+                  boxShadow: "var(--shS)",
+                }}
+              >
+                <div className="space-y-1">
+                  <h2 id="relaxed-title" className="text-base font-semibold">
+                    {translate("search.relaxedTitle", "No exact matches — here's what's similar")}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {relaxedTotal > 0
+                      ? translate(
+                          "search.relaxedCount",
+                          "We broadened your filters and found {count} more.",
+                          { count: relaxedTotal },
+                        )
+                      : translate("search.relaxedHint", "We broadened your filters to show related listings.")}
+                  </p>
+                </div>
+                <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {translate("search.zeroResultSaveTitle", "Get notified when new matches appear")}
+                  </p>
+                  <SaveSearchButton
+                    query={query}
+                    filters={{
+                      category_id: categoryId,
+                      price_min: priceMin ? Number(priceMin) : null,
+                      price_max: priceMax ? Number(priceMax) : null,
+                      location,
+                      verified_only: verifiedOnlyFilter || null,
+                      condition: condition || null,
+                      sort_by: sortBy,
+                    }}
+                  />
+                </div>
+              </div>
+              <AdsGrid items={relaxedResults} gridColsClass="grid-cols-2 lg:grid-cols-3" />
+            </section>
+          )}
+
           {/* Zero-result state — retention CTA with SaveSearch */}
-          {!loading && !error && total === 0 && outsideRadiusResults.length === 0 && (
+          {!loading && !error && total === 0 && outsideRadiusResults.length === 0 && relaxedResults.length === 0 && (
             <div
               className="space-y-5 p-8 text-center"
               style={{
