@@ -9,9 +9,12 @@
 -- real gate here; allowed_mime_types is only a weak (client-declared) secondary
 -- filter.
 --
--- IMPORTANT: `ad-media` is PRIVATE (served via short-lived signed URLs). This
--- migration must never flip it public — the on-conflict branch deliberately does
--- NOT touch `public`.
+-- IMPORTANT: the code serves ad-media via short-lived SIGNED URLs (treated as
+-- private), but the live bucket is currently public=true (pre-existing config —
+-- tracked as a follow-up to lock it down). This migration deliberately does NOT
+-- touch `public`: it must neither newly-expose a private bucket nor silently
+-- "confirm" the current public state as intended. Only file_size_limit +
+-- allowed_mime_types are set here.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (
   'ad-media',
