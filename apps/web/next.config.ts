@@ -1,28 +1,8 @@
-// Content-Security-Policy shipped in Report-Only mode first: it does NOT block
-// anything, it only reports violations, so it is safe to enable while the
-// allowlist is validated against real traffic. Allowlist covers Next.js
-// (inline/eval needed without nonces), Supabase (REST + realtime websockets),
-// Stripe (checkout/elements), and Upstash. Once the browser console shows no
-// legitimate violations, promote the header key to `Content-Security-Policy`.
-// See docs/SECURITY_AUDIT.md (M3).
-const contentSecurityPolicy = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://*.supabase.co https://*.stripe.com",
-  "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.upstash.io",
-  "frame-src https://js.stripe.com https://hooks.stripe.com",
-  "worker-src 'self' blob:",
-  "object-src 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "frame-ancestors 'none'",
-  // Collect violation reports — without a collector the Report-Only phase
-  // observes nothing (audit A-1 step 1). Route logs + returns 204.
-  "report-uri /api/csp-report",
-].join('; ');
-
+// SEC-CSP: the Content-Security-Policy is generated per-request in
+// `src/middleware.ts` (nonce + 'strict-dynamic', no 'unsafe-inline'/'unsafe-eval')
+// via `src/lib/security/csp.ts`. It MUST NOT also be emitted here — two
+// `Content-Security-Policy` sources make the browser intersect them and break
+// the app. The static (non-nonce) security headers stay below.
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // eslint config moved to eslint.config.mjs (Next.js 16)
@@ -72,12 +52,9 @@ const nextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
-          // Report-Only: observe before enforcing. Promote to
-          // `Content-Security-Policy` once violations are clean.
-          {
-            key: 'Content-Security-Policy-Report-Only',
-            value: contentSecurityPolicy,
-          },
+          // NOTE: Content-Security-Policy is intentionally NOT set here — it is
+          // emitted per-request (with a nonce) from src/middleware.ts. See the
+          // comment at the top of this file (SEC-CSP).
         ],
       },
       // NOTE: The previous blanket `Cache-Control: public, max-age=3600` on

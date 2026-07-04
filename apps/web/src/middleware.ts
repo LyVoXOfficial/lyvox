@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { buildCsp, cspHeaderName, generateNonce, resolveCspMode } from "@/lib/security/csp";
 import {
   defaultLocale,
   isSupportedLocale,
@@ -73,6 +74,20 @@ function getLocaleRouting(request: NextRequest) {
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+
+  // SEC-CSP: mint a per-request nonce and derive the policy once. `cspMode`
+  // decides only the RESPONSE header name (enforce vs report-only); the value is
+  // identical either way. The request-side `Content-Security-Policy` header is
+  // set below so Next.js can extract the nonce and stamp it onto its bootstrap
+  // scripts — that lets us drop 'unsafe-inline'/'unsafe-eval' from script-src.
+  const nonce = generateNonce();
+  const cspValue = buildCsp(nonce);
+  const cspHeader = cspHeaderName(resolveCspMode());
+  const applyCsp = <T extends NextResponse>(response: T): T => {
+    response.headers.set(cspHeader, cspValue);
+    return response;
+  };
+
   if (pathname === "/") {
     const locale = getPreferredLocale(request);
     const url = request.nextUrl.clone();
@@ -81,10 +96,15 @@ export async function middleware(request: NextRequest) {
     response.headers.set("Vary", "Accept-Language, Cookie");
     response.headers.set("Cache-Control", "private, max-age=300");
     setLocaleCookie(response, locale);
-    return response;
+    return applyCsp(response);
   }
 
   const routing = getLocaleRouting(request);
+  // Expose the nonce to Server Components (`headers().get('x-nonce')`) and give
+  // Next.js the nonce via a request-side CSP header (always the enforcing name —
+  // Next reads it regardless of the response-side report-only/enforce choice).
+  routing.requestHeaders.set("x-nonce", nonce);
+  routing.requestHeaders.set("Content-Security-Policy", cspValue);
   const makeResponse = () => {
     if (!routing.shouldRewrite) {
       return NextResponse.next({
@@ -153,14 +173,16 @@ export async function middleware(request: NextRequest) {
         : "/login";
       url.search = "";
       url.searchParams.set("redirect", `${pathname}${request.nextUrl.search}`);
-      return NextResponse.redirect(url);
+      return applyCsp(NextResponse.redirect(url));
     }
 
     if (user && isAuthRoute) {
-      return NextResponse.redirect(
-        new URL(
-          routing.hasLocalePrefix ? localizePath("/profile", routing.locale) : "/profile",
-          request.url,
+      return applyCsp(
+        NextResponse.redirect(
+          new URL(
+            routing.hasLocalePrefix ? localizePath("/profile", routing.locale) : "/profile",
+            request.url,
+          ),
         ),
       );
     }
@@ -170,7 +192,7 @@ export async function middleware(request: NextRequest) {
     setLocaleCookie(supabaseResponse, routing.locale);
   }
 
-  return supabaseResponse;
+  return applyCsp(supabaseResponse);
 }
 
 export const config = {
