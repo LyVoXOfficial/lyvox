@@ -127,11 +127,14 @@ async function upsertProfiles() {
     const p = PERSONAS[i];
     const [, postcode] = pick(LOCATIONS, i);
     await pg.query(
-      `insert into public.profiles (id, display_name, seller_type, verified_email, verified_phone, phone, rating, created_at)
-       values ($1,$2,$3,$4,$5,$6,$7, now() - interval '40 days')
+      // is_seed=true (T18): mark seeded profiles so the launch-gate switch can
+      // exclude them from aggregates. Direct pg connection bypasses column-locks.
+      `insert into public.profiles (id, display_name, seller_type, verified_email, verified_phone, phone, rating, is_seed, created_at)
+       values ($1,$2,$3,$4,$5,$6,$7, true, now() - interval '40 days')
        on conflict (id) do update set
          display_name=excluded.display_name, seller_type=excluded.seller_type,
-         verified_email=excluded.verified_email, verified_phone=excluded.verified_phone, phone=excluded.phone`,
+         verified_email=excluded.verified_email, verified_phone=excluded.verified_phone, phone=excluded.phone,
+         is_seed=true`,
       [p.id, p.name, p.type, p.vEmail, p.vPhone, p.phone, (4 + Math.random()).toFixed(2)],
     );
   }

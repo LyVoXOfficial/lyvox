@@ -2019,6 +2019,7 @@ export type Database = {
           display_name: string | null
           flags: Json | null
           id: string
+          is_seed: boolean
           itsme_kyc_level: string | null
           itsme_sub: string | null
           itsme_verified: boolean | null
@@ -2040,6 +2041,7 @@ export type Database = {
           display_name?: string | null
           flags?: Json | null
           id: string
+          is_seed?: boolean
           itsme_kyc_level?: string | null
           itsme_sub?: string | null
           itsme_verified?: boolean | null
@@ -2061,6 +2063,7 @@ export type Database = {
           display_name?: string | null
           flags?: Json | null
           id?: string
+          is_seed?: boolean
           itsme_kyc_level?: string | null
           itsme_sub?: string | null
           itsme_verified?: boolean | null
@@ -3525,6 +3528,7 @@ export type Database = {
           created_at: string | null
           display_name: string | null
           id: string | null
+          is_seed: boolean | null
           rating: number | null
           total_deals: number | null
           trust_score: number | null
@@ -3710,7 +3714,11 @@ export type Database = {
       equals: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
       erase_user_data: { Args: { p_user_id: string }; Returns: undefined }
       estimate_price: {
-        Args: { p_category_id: string; p_condition?: string }
+        Args: {
+          p_category_id: string
+          p_condition?: string
+          p_exclude_seed?: boolean
+        }
         Returns: {
           backoff_level: string
           median: number

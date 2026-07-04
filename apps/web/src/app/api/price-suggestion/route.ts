@@ -8,6 +8,7 @@ import {
   handleSupabaseError,
 } from "@/lib/apiErrors";
 import { requireAuthenticatedUser, resolveUserId } from "../media/_shared";
+import { excludeSeedFromAggregates } from "@/lib/seed/excludeSeedFromAggregates";
 
 export const runtime = "nodejs";
 
@@ -63,7 +64,7 @@ type EstimatePriceRow = {
 type EstimatePriceRpcClient = {
   rpc(
     name: "estimate_price",
-    args: { p_category_id: string; p_condition: string | null },
+    args: { p_category_id: string; p_condition: string | null; p_exclude_seed: boolean },
   ): Promise<{
     data: EstimatePriceRow[] | null;
     error: { message?: string; code?: string } | null;
@@ -93,6 +94,9 @@ async function handleGet(request: Request) {
   const { data, error } = await service.rpc("estimate_price", {
     p_category_id: validation.data.categoryId,
     p_condition: validation.data.condition ?? null,
+    // T18: at launch the founder can exclude seeded/demo ads from the median
+    // sample. OFF (default) → seed ads still count, byte-for-byte as today.
+    p_exclude_seed: excludeSeedFromAggregates(),
   });
 
   if (error) {
