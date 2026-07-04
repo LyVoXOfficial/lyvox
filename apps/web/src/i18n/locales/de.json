@@ -677,6 +677,15 @@
     "option_comfort_heated_seats": "Sitzheizung",
     "description": "Beschreibung",
     "no_description": "Keine Beschreibung",
+    "translation_generated": "Automatisch aus dem {language} übersetzt",
+    "translation_show_original": "Original anzeigen",
+    "translation_language": {
+      "en": "Englischen",
+      "fr": "Französischen",
+      "nl": "Niederländischen",
+      "de": "Deutschen",
+      "ru": "Russischen"
+    },
     "no_photos": "Keine Fotos verfügbar",
     "posted": "Veröffentlicht",
     "price_not_specified": "Preis nicht angegeben",

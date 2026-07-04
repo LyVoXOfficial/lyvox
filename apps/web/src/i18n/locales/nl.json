@@ -677,6 +677,15 @@
     "option_comfort_heated_seats": "Verwarmde stoelen",
     "description": "Beschrijving",
     "no_description": "Geen beschrijving",
+    "translation_generated": "Automatisch vertaald uit het {language}",
+    "translation_show_original": "Origineel tonen",
+    "translation_language": {
+      "en": "Engels",
+      "fr": "Frans",
+      "nl": "Nederlands",
+      "de": "Duits",
+      "ru": "Russisch"
+    },
     "no_photos": "Geen foto's beschikbaar",
     "posted": "Geplaatst",
     "price_not_specified": "Prijs niet opgegeven",

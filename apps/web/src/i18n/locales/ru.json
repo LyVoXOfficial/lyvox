@@ -689,6 +689,15 @@
     },
     "description": "Описание",
     "no_description": "Описания нет",
+    "translation_generated": "Переведено автоматически с {language}",
+    "translation_show_original": "Показать оригинал",
+    "translation_language": {
+      "en": "английского",
+      "fr": "французского",
+      "nl": "нидерландского",
+      "de": "немецкого",
+      "ru": "русского"
+    },
     "no_photos": "Фотографии отсутствуют",
     "posted": "Размещено",
     "price_not_specified": "Цена не указана",
