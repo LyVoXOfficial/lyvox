@@ -247,6 +247,54 @@
   position: relative;
   z-index: 1;
 }
+
+/* ── One-shot entrance micro-animations (share banner & friends) ──
+   Rare, celebratory surfaces only — never on high-frequency UI.
+   Strong ease-out curve; scale never starts below 0.5. */
+@keyframes lyvox-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes lyvox-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes lyvox-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.lyvox-rise-in {
+  animation: lyvox-rise-in 300ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.lyvox-pop-in {
+  animation: lyvox-pop-in 350ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lyvox-rise-in,
+  .lyvox-pop-in {
+    animation: lyvox-fade-in 200ms ease both;
+  }
+}
 /* Fine grain over the hero mesh — breaks digital flatness without reading as dirt.
    Kept on its own layer (::after) so the blur on ::before doesn't soften it. */
 .lyvox-hero-mesh::after {
