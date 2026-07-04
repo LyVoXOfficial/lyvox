@@ -80,6 +80,22 @@ describe("validateEnv", () => {
     expect(r.warnings.some((w) => w.includes("STRIPE_SECRET_KEY"))).toBe(true);
   });
 
+  it("warns on a present-but-invalid value without hard-failing (shape is advisory)", () => {
+    const r = validateEnv({ ...FULL_PROD_ENV, NEXT_PUBLIC_SUPABASE_URL: "not-a-url" });
+    // Presence is the boot gate; a malformed value is a warning, not a block.
+    expect(r.missingCritical).toEqual([]);
+    expect(r.ok).toBe(true);
+    expect(r.warnings.some((w) => w.includes("NEXT_PUBLIC_SUPABASE_URL") && w.includes("invalid"))).toBe(
+      true,
+    );
+  });
+
+  it("treats a whitespace-only critical value as missing (isBlank trims)", () => {
+    const r = validateEnv({ ...FULL_PROD_ENV, SUPABASE_SERVICE_ROLE_KEY: "   " });
+    expect(r.missingCritical).toContain("SUPABASE_SERVICE_ROLE_KEY");
+    expect(r.ok).toBe(false);
+  });
+
   it("carries the hardFail decision derived from the env", () => {
     expect(validateEnv({ ...FULL_PROD_ENV }).hardFail).toBe(true);
     expect(validateEnv({ ...FULL_PROD_ENV, VERCEL_ENV: "preview" }).hardFail).toBe(false);

@@ -1,10 +1,20 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-// SEC-RL2: when Upstash keys are absent (no redisClient — the case in the test
-// env, which sets no UPSTASH_* vars), the limiter must fail *closed* in a
-// hard-fail (production) environment and stay a no-op elsewhere. We drive that
-// decision by mocking isHardFailEnv rather than mutating NODE_ENV/VERCEL_ENV.
-const hardFail = vi.hoisted(() => ({ value: false }));
+// SEC-RL2: when Upstash keys are absent (no redisClient), the limiter must fail
+// *closed* in a hard-fail (production) environment and stay a no-op elsewhere.
+//
+// The `!redisClient` branch is only reachable when UPSTASH_* are unset. That
+// precondition is captured at rateLimiter *module load* (from raw process.env),
+// so mocking @/lib/env is not enough — we must guarantee the vars are unset
+// BEFORE the import runs. `vi.hoisted` runs before the (hoisted) import below,
+// so deleting them here makes the precondition explicit and enforced rather than
+// relying on the ambient shell (a dev who exported real Upstash creds would
+// otherwise flip redisClient non-null and silently invalidate this test).
+const hardFail = vi.hoisted(() => {
+  delete process.env.UPSTASH_REDIS_REST_URL;
+  delete process.env.UPSTASH_REDIS_REST_TOKEN;
+  return { value: false };
+});
 
 vi.mock("@/lib/env", () => ({
   isHardFailEnv: () => hardFail.value,
@@ -17,6 +27,11 @@ afterEach(() => {
 });
 
 describe("createRateLimiter without Upstash (SEC-RL2)", () => {
+  it("precondition: UPSTASH_* are unset so the !redisClient branch is under test", () => {
+    expect(process.env.UPSTASH_REDIS_REST_URL).toBeFalsy();
+    expect(process.env.UPSTASH_REDIS_REST_TOKEN).toBeFalsy();
+  });
+
   it("is a no-op (fail-open) outside production", async () => {
     hardFail.value = false;
     const limiter = createRateLimiter({ limit: 5, windowSec: 60, prefix: "test" });
