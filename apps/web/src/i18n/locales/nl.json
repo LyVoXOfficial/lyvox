@@ -148,7 +148,13 @@
     "radius_20": "20 km",
     "radius_50": "50 km",
     "radius_100": "100 km",
-    "outside_radius": "Verder van u"
+    "outside_radius": "Verder van u",
+    "relaxedTitle": "Geen exacte overeenkomsten — dit lijkt erop",
+    "relaxedCount": "We hebben je filters verruimd en {count} extra gevonden.",
+    "relaxedHint": "We hebben je filters verruimd om verwante zoekertjes te tonen.",
+    "verifiedOnlyChip": "Alleen geverifieerd",
+    "verifiedPreview": "{verified} van {total}",
+    "showN": "Toon {count}"
   },
   "contact": {
     "price": "Prijs",
@@ -1558,7 +1564,9 @@
     "searchWithFilters": "Zoeken met filters",
     "prevPage": "Vorige pagina",
     "nextPage": "Volgende pagina",
-    "page": "Pagina {page} van {total}"
+    "page": "Pagina {page} van {total}",
+    "emptyTitle": "Nog geen actieve zoekertjes hier",
+    "postFirst": "Plaats een zoekertje"
   },
   "report": {
     "button": "Melden",
@@ -1784,7 +1792,9 @@
     "all_listings": "Alle zoekertjes",
     "signin_prompt": "Meld u aan om zoekopdrachten op alle apparaten op te slaan en meldingen te krijgen.",
     "alert_title": "Nieuwe resultaten: {name}",
-    "alert_body": "{count} nieuw(e) zoekertje(s) komen overeen met uw opgeslagen zoekopdracht."
+    "alert_body": "{count} nieuw(e) zoekertje(s) komen overeen met uw opgeslagen zoekopdracht.",
+    "emptyDesc": "Bewaar een zoekopdracht en ontvang een melding zodra er een match is.",
+    "startSearch": "Start een zoekopdracht"
   },
   "pro": {
     "title": "Professionele verkoper worden",

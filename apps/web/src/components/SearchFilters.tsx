@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useI18n } from "@/i18n";
 import { supabase } from "@/lib/supabaseClient";
 import type { Category } from "@/lib/types";
@@ -15,6 +15,7 @@ import { Slider } from "@/components/ui/slider";
 import { logger } from "@/lib/errorLogger";
 import { FormRenderer, type CatalogSchema, type CatalogFieldDefinition, type CatalogSchemaField } from "@/catalog/renderer";
 import { detectCategoryType } from "@/lib/utils/categoryDetector";
+import { buildSearchRequestParams } from "@/lib/search/buildSearchParams";
 import {
   Sheet,
   SheetContent,
@@ -188,7 +189,6 @@ export default function SearchFilters({
     const value = t(key);
     return value === key ? fallback : value;
   };
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   // Auto-detect variant based on screen size if not provided
@@ -234,6 +234,30 @@ export default function SearchFilters({
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [condition, setCondition] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<string>("created_at_desc");
+
+  // T14 item 5 — unified filter model.
+  // Desktop: no "instant + Apply" duality — changes commit via a 300ms debounce.
+  // Mobile drawer: changes buffer until Apply, which shows a live "Show N" count.
+  // Debouncer keeps its timer in a closure (not a React ref) so it stays outside
+  // the render path — the filter-chip onRemove closures call applyFilters.
+  const debouncedCommit = useMemo(() => {
+    const state: { timer: number | null } = { timer: null };
+    return {
+      run(fn: () => void) {
+        if (state.timer) window.clearTimeout(state.timer);
+        state.timer = window.setTimeout(fn, 300);
+      },
+      cancel() {
+        if (state.timer) window.clearTimeout(state.timer);
+        state.timer = null;
+      },
+    };
+  }, []);
+  const [previewCount, setPreviewCount] = useState<number | null>(null);
+  const previewReqRef = useRef(0);
+
+  // Cancel any pending debounced commit on unmount.
+  useEffect(() => () => debouncedCommit.cancel(), [debouncedCommit]);
 
   // Initialize from URL params
   useEffect(() => {
@@ -542,6 +566,16 @@ export default function SearchFilters({
 
   const handlePriceRangeChange = (range: [number, number]) => {
     setPriceRange(range);
+    applyFilters({
+      category_id: selectedCategory?.id || null,
+      price_min: range[0] > 0 ? range[0] : null,
+      price_max: range[1] < 10000 ? range[1] : null,
+      location: location || null,
+      catalog_fields: dynamicFilters,
+      verified_only: verifiedOnly,
+      condition,
+      sort_by: sortBy,
+    });
   };
 
   const handleLocationSelect = (selectedLocation: (typeof GEO_LOCATIONS)[number]) => {
@@ -571,102 +605,113 @@ export default function SearchFilters({
     setShowLocationSuggestions(true);
   };
 
+  const buildMergedFilters = (filters: SearchFiltersState): SearchFiltersState => ({
+    category_id: filters.category_id,
+    price_min: filters.price_min,
+    price_max: filters.price_max,
+    location: filters.location,
+    lat: filters.location ? (filters.lat === undefined ? locationLat : filters.lat) : null,
+    lng: filters.location ? (filters.lng === undefined ? locationLng : filters.lng) : null,
+    radius_km: filters.radius_km === undefined ? radiusKm : filters.radius_km,
+    catalog_fields: filters.catalog_fields ?? dynamicFilters,
+    verified_only: filters.verified_only ?? verifiedOnly,
+    condition: filters.condition ?? condition,
+    sort_by: filters.sort_by ?? sortBy,
+  });
+
+  // Navigation is owned by the page (via onFiltersChange → router.push). This
+  // component no longer pushes to the router itself, removing the previous
+  // double-navigation. Desktop debounces (300ms); the mobile drawer commits only
+  // when Apply / Clear is pressed (force).
   const applyFilters = (filters: SearchFiltersState, force = false) => {
-    // In drawer mode buffer all changes until Apply / Clear-all button is pressed
-    if (actualVariant === "drawer" && !force) return;
+    const mergedFilters = buildMergedFilters(filters);
 
-    const mergedFilters: SearchFiltersState = {
-      category_id: filters.category_id,
-      price_min: filters.price_min,
-      price_max: filters.price_max,
-      location: filters.location,
-      lat: filters.location ? (filters.lat === undefined ? locationLat : filters.lat) : null,
-      lng: filters.location ? (filters.lng === undefined ? locationLng : filters.lng) : null,
-      radius_km: filters.radius_km === undefined ? radiusKm : filters.radius_km,
-      catalog_fields: filters.catalog_fields ?? dynamicFilters,
-      verified_only: filters.verified_only ?? verifiedOnly,
-      condition: filters.condition ?? condition,
-      sort_by: filters.sort_by ?? sortBy,
-    };
-
-    onFiltersChange?.(mergedFilters);
-
-    // Update URL params
-    const params = new URLSearchParams(searchParams.toString());
-
-    if (mergedFilters.category_id) {
-      params.set("category_id", mergedFilters.category_id);
-    } else {
-      params.delete("category_id");
-    }
-
-    if (mergedFilters.price_min !== null && mergedFilters.price_min > 0) {
-      params.set("price_min", mergedFilters.price_min.toString());
-    } else {
-      params.delete("price_min");
-    }
-
-    if (mergedFilters.price_max !== null && mergedFilters.price_max < 10000) {
-      params.set("price_max", mergedFilters.price_max.toString());
-    } else {
-      params.delete("price_max");
-    }
-
-    if (mergedFilters.location) {
-      params.set("location", mergedFilters.location);
-    } else {
-      params.delete("location");
-    }
-
-    if (mergedFilters.location && mergedFilters.lat !== null && mergedFilters.lng !== null) {
-      params.set("lat", String(mergedFilters.lat));
-      params.set("lng", String(mergedFilters.lng));
-      params.set("radius_km", String(mergedFilters.radius_km ?? 50));
-    } else {
-      params.delete("lat");
-      params.delete("lng");
-      params.delete("radius_km");
-    }
-
-    if (mergedFilters.verified_only) {
-      params.set("verified_only", "true");
-    } else {
-      params.delete("verified_only");
-    }
-
-    if (mergedFilters.condition) {
-      params.set("condition", mergedFilters.condition);
-    } else {
-      params.delete("condition");
-    }
-
-    if (mergedFilters.sort_by) {
-      params.set("sort_by", mergedFilters.sort_by);
-    }
-
-    Array.from(params.keys())
-      .filter((key) => key.startsWith("catalog_field_"))
-      .forEach((key) => params.delete(key));
-
-    Object.entries(mergedFilters.catalog_fields).forEach(([key, value]) => {
-      if (
-        value === null ||
-        value === undefined ||
-        (typeof value === "string" && value.trim() === "") ||
-        (typeof value === "number" && Number.isNaN(value))
-      ) {
-        return;
+    if (actualVariant === "drawer") {
+      // Buffer: local state already updated the UI; count preview reacts to state.
+      // Only Apply / Clear (force) commits the navigation.
+      if (force) {
+        debouncedCommit.cancel();
+        onFiltersChange?.(mergedFilters);
       }
-      const paramKey = `catalog_field_${key}`;
-      if (typeof value === "boolean") {
-        params.set(paramKey, value ? "true" : "false");
-      } else {
-        params.set(paramKey, String(value));
-      }
-    });
+      return;
+    }
 
-    router.push(`/search?${params.toString()}`);
+    // Sidebar (desktop): debounce the commit so slider drags / rapid toggles
+    // coalesce into a single navigation.
+    if (force) {
+      debouncedCommit.cancel();
+      onFiltersChange?.(mergedFilters);
+      return;
+    }
+    debouncedCommit.run(() => onFiltersChange?.(mergedFilters));
   };
+
+  // Mobile drawer: live "Show N" preview of how many results the currently
+  // buffered filters would return, so Apply is not a leap in the dark. Debounced
+  // 300ms and request-id guarded; only runs while the drawer is open, and uses a
+  // real count (limit=1, ?instant=1 bucket) — never an estimate.
+  useEffect(() => {
+    if (actualVariant !== "drawer" || !open) return;
+    const id = ++previewReqRef.current;
+    const timer = window.setTimeout(() => {
+      const cf = new URLSearchParams();
+      Object.entries(dynamicFilters).forEach(([key, value]) => {
+        if (
+          value === null ||
+          value === undefined ||
+          (typeof value === "string" && value.trim() === "") ||
+          (typeof value === "number" && Number.isNaN(value))
+        ) {
+          return;
+        }
+        cf.set(`catalog_field_${key}`, typeof value === "boolean" ? (value ? "true" : "false") : String(value));
+      });
+
+      const params = buildSearchRequestParams({
+        query: searchParams.get("q") || undefined,
+        categoryId: selectedCategory?.id || null,
+        priceMin: priceRange[0] > 0 ? String(priceRange[0]) : null,
+        priceMax: priceRange[1] < 10000 ? String(priceRange[1]) : null,
+        location: location || null,
+        lat: locationLat != null ? String(locationLat) : null,
+        lng: locationLng != null ? String(locationLng) : null,
+        radiusKm: String(radiusKm),
+        sortBy,
+        page: 0,
+        limit: 1,
+        verifiedOnly,
+        condition,
+        sourceParams: cf,
+      });
+      params.set("instant", "1");
+
+      void fetch(`/api/search?${params.toString()}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((body) => {
+          if (id !== previewReqRef.current) return;
+          if (body?.ok && body?.data && typeof body.data.total === "number") {
+            setPreviewCount(body.data.total);
+          }
+        })
+        .catch(() => {});
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    actualVariant,
+    open,
+    selectedCategory,
+    priceRange,
+    location,
+    locationLat,
+    locationLng,
+    radiusKm,
+    verifiedOnly,
+    condition,
+    sortBy,
+    dynamicFilters,
+    searchParams,
+  ]);
 
   const handleDynamicFieldChange = (fieldKey: string, value: unknown) => {
     setDynamicFilters((prev) => {
@@ -1020,7 +1065,7 @@ export default function SearchFilters({
               value={priceRange[0]}
               onChange={(e) => {
                 const val = Number.parseFloat(e.target.value) || 0;
-                setPriceRange([Math.min(val, priceRange[1]), priceRange[1]]);
+                handlePriceRangeChange([Math.min(val, priceRange[1]), priceRange[1]]);
               }}
               className="h-11 flex-1"
               placeholder={tr("filters.min", "Min")}
@@ -1033,7 +1078,7 @@ export default function SearchFilters({
               value={priceRange[1]}
               onChange={(e) => {
                 const val = Number.parseFloat(e.target.value) || 10000;
-                setPriceRange([priceRange[0], Math.max(val, priceRange[0])]);
+                handlePriceRangeChange([priceRange[0], Math.max(val, priceRange[0])]);
               }}
               className="h-11 flex-1"
               placeholder={tr("filters.max", "Max")}
@@ -1284,10 +1329,13 @@ export default function SearchFilters({
     </div>
   );
 
+  // Drawer footer only (desktop commits via debounce — no Apply button there).
   const filtersFooter = (
     <div className="flex gap-2">
       <Button onClick={handleApplyFilters} className="h-11 flex-1">
-        {tr("search.apply", "Apply")}
+        {previewCount !== null
+          ? tr("search.showN", "Show {count}").replace("{count}", String(previewCount))
+          : tr("search.apply", "Apply")}
       </Button>
       <Button variant="outline" onClick={handleClearAll} className="h-11 px-5">
         {tr("search.clear", "Clear")}
@@ -1323,7 +1371,6 @@ export default function SearchFilters({
           </button>
         </div>
         {filtersContent}
-        <div className="mt-5 border-t border-border/70 pt-4">{filtersFooter}</div>
       </aside>
     );
   }

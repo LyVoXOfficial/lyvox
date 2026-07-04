@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
 import { getLocalSavedSearches, removeLocalSavedSearch, type SavedSearchFilters } from "@/lib/savedSearches";
+import { MarketplaceEmptyState } from "@/components/marketplace-grid-states";
 
 type AlertFrequency = "instant" | "daily" | "off";
 
@@ -37,6 +38,10 @@ function buildHref(query: string | null, f: SavedSearchFilters = {}): string {
 
 export default function SavedSearchesClient() {
   const { t } = useI18n();
+  const tr = (key: string, fallback: string): string => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [authed, setAuthed] = useState(true);
@@ -104,9 +109,12 @@ export default function SavedSearchesClient() {
       ) : null}
 
       {rows.length === 0 ? (
-        <p className="rounded-md border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          {t("saved.empty")}
-        </p>
+        <MarketplaceEmptyState
+          icon={SearchIcon}
+          title={tr("saved.empty", "You haven't saved any searches yet.")}
+          description={tr("saved.emptyDesc", "Save a search to get notified the moment a matching listing appears.")}
+          primaryAction={{ href: "/search", label: tr("saved.startSearch", "Start a search") }}
+        />
       ) : (
         <ul className="space-y-3">
           {rows.map((r) => (

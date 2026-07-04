@@ -8,6 +8,7 @@ import { supabaseService } from "@/lib/supabaseService";
 import type { Category } from "@/lib/types";
 import CategoryList from "@/components/category-list";
 import AdsGrid from "@/components/ads-grid";
+import { MarketplaceEmptyState } from "@/components/marketplace-grid-states";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import CategoryFilters from "@/components/category/CategoryFilters";
 import { buildCategoryBreadcrumbs, getLocalizedCategoryName } from "@/lib/breadcrumbs";
@@ -368,14 +369,22 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         {adverts.length > 0 ? (
           <AdsGrid items={adverts} />
         ) : (
-          <div className="rounded-2xl border border-border/70 bg-card p-8 text-center shadow-[var(--shadow-soft)]">
-            <p className="text-sm text-muted-foreground">
-              {t(
-                "category.noListings",
-                "There are no active listings in this category yet. Be the first to post one.",
-              )}
-            </p>
-          </div>
+          <MarketplaceEmptyState
+            title={t("category.emptyTitle", "No active listings here yet")}
+            description={t(
+              "category.noListings",
+              "There are no active listings in this category yet. Be the first to post one.",
+            )}
+            primaryAction={{
+              href: `/search?category_id=${typedCurrent.id}`,
+              label: t("category.searchWithFilters", "Search with filters"),
+            }}
+            secondaryAction={{
+              href: "/post",
+              label: t("category.postFirst", "Post a listing"),
+              variant: "outline",
+            }}
+          />
         )}
 
         {/* Pagination */}

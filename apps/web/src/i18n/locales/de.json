@@ -148,7 +148,13 @@
     "radius_20": "20 km",
     "radius_50": "50 km",
     "radius_100": "100 km",
-    "outside_radius": "Weiter entfernt"
+    "outside_radius": "Weiter entfernt",
+    "relaxedTitle": "Keine exakten Treffer — das ist ähnlich",
+    "relaxedCount": "Wir haben deine Filter erweitert und {count} weitere gefunden.",
+    "relaxedHint": "Wir haben deine Filter erweitert, um verwandte Anzeigen zu zeigen.",
+    "verifiedOnlyChip": "Nur verifiziert",
+    "verifiedPreview": "{verified} von {total}",
+    "showN": "{count} anzeigen"
   },
   "contact": {
     "price": "Preis",
@@ -1558,7 +1564,9 @@
     "searchWithFilters": "Mit Filtern suchen",
     "prevPage": "Vorherige Seite",
     "nextPage": "Nächste Seite",
-    "page": "Seite {page} von {total}"
+    "page": "Seite {page} von {total}",
+    "emptyTitle": "Noch keine aktiven Anzeigen hier",
+    "postFirst": "Anzeige aufgeben"
   },
   "report": {
     "button": "Melden",
@@ -1784,7 +1792,9 @@
     "all_listings": "Alle Anzeigen",
     "signin_prompt": "Melden Sie sich an, um Suchen geräteübergreifend zu speichern und Benachrichtigungen zu erhalten.",
     "alert_title": "Neue Treffer: {name}",
-    "alert_body": "{count} neue Anzeige(n) passen zu Ihrer gespeicherten Suche."
+    "alert_body": "{count} neue Anzeige(n) passen zu Ihrer gespeicherten Suche.",
+    "emptyDesc": "Speichere eine Suche und werde benachrichtigt, sobald ein Treffer erscheint.",
+    "startSearch": "Suche starten"
   },
   "pro": {
     "title": "Professioneller Verkäufer werden",
