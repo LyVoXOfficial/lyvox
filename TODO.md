@@ -18,9 +18,8 @@
 
 ## Крупные волны после T01-T10 (инструкция-файл создаётся 🔴-моделью при взятии в работу)
 
-- [x] **T16** 🟢 — Контент-хаб `/guides`: 10-15 анти-скам гайдов nl/fr (SEO-канал GTM Фазы 1; БЕЗ имён конкурентов — CEL VI.17; тексты — 🟡, каркас — 🟢) → [T16-guides-hub.md](docs/todo/T16-guides-hub.md) — 6fcc843 (data-driven 10 гайдов, SSR `/guides` + `/guides/[slug]`, Article/ItemList JSON-LD, canonical+hreflang, sitemap, footer link, i18n en/fr/nl/de/ru)
 - [x] **T17** 🟡 — Волна 3 остаток: sticky one-primary contact-bar на /ad + safety bottom-sheet + чат-хинт (SITE_BLUEPRINT волна 3) → [T17-ad-contact-bar.md](docs/todo/T17-ad-contact-bar.md) — 139e0f3 (one-primary mobile contact bar, secondary offer opens chat composer, optional safety bottom-sheet, chat safety hint, i18n en/fr/nl/de/ru)
-- [ ] **T18 (LAUNCH-GATE)** 🔴 — Seed-выключатель: флаг seed-аккаунтов + исключение из агрегатов/JSON-LD/медиан на уровне запросов; сам purge — ТОЛЬКО по команде основателя перед рекламой → [T18-seed-switch.md](docs/todo/T18-seed-switch.md)
+- [x] **T18 (LAUNCH-GATE)** 🔴 — Seed-выключатель: флаг seed-аккаунтов + исключение из агрегатов/JSON-LD/медиан на уровне запросов; сам purge — ТОЛЬКО по команде основателя перед рекламой → [T18-seed-switch.md](docs/todo/T18-seed-switch.md) — 79334ef (profiles.is_seed NOT NULL + backfill из @lyvox-seed.be; флаг EXCLUDE_SEED_FROM_AGGREGATES default OFF = витрина байт-в-байт; estimate_price +p_exclude_seed; top_sellers MV +is_seed и фильтр в /api/top-sellers; JSON-LD/счётчики — сид-агрегатов нет, no-op; миграция применена к проду при OFF = ноль изменений; заодно долит pending T12 130000)
 
 ## Задачи основателя (не для агентов)
 - Ключи: Turnstile (free) + `CRON_SECRET` в Vercel env (иначе кроны и алерты — no-op), Stripe recurring Price для Pro.
