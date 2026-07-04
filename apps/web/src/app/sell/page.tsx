@@ -3,7 +3,8 @@ import Link from "next/link";
 import { ArrowRight, Camera, ClipboardList, MessageSquare } from "lucide-react";
 import { getI18nProps } from "@/i18n/server";
 import { getJsonLdScriptProps } from "@/lib/seo";
-import { absoluteUrl } from "@/lib/seo/baseUrl";
+import { localizeHref } from "@/lib/i18n";
+import { languageAlternates, localizedCanonical } from "@/lib/seo/localizedUrls";
 
 // Indexable seller landing (supply wave): the guest-facing pitch for the
 // high-intent "post a free ad" queries. The actual /post flow stays behind
@@ -16,19 +17,23 @@ const sellCopy = (messages: Record<string, unknown> | undefined) =>
   ((messages?.sell ?? {}) as SellMessages);
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { messages } = await getI18nProps();
+  const { locale, messages } = await getI18nProps();
   const s = sellCopy(messages);
   return {
     title: s.meta_title ?? "Post a free classified ad in Belgium | LyVoX",
     description: s.meta_description ?? "Post a free listing in minutes and chat with buyers inside LyVoX.",
-    alternates: { canonical: absoluteUrl("/sell") },
+    alternates: {
+      canonical: localizedCanonical("/sell", locale),
+      languages: languageAlternates("/sell"),
+    },
   };
 }
 
 export default async function SellPage() {
-  const { messages } = await getI18nProps();
+  const { locale, messages } = await getI18nProps();
   const s = sellCopy(messages);
   const home = (messages?.home ?? {}) as SellMessages;
+  const href = (path: string) => localizeHref(path, locale);
 
   const steps = [
     { icon: Camera, title: s.step1_title ?? "Add photos", body: s.step1_body ?? "" },
@@ -53,9 +58,9 @@ export default async function SellPage() {
   };
 
   const popular = [
-    { href: "/c/transport", label: home.qa_transport ?? "Transport" },
-    { href: "/c/elektronika-i-tehnika", label: home.qa_electronics ?? "Electronics" },
-    { href: "/c/dlya-doma-hobbi-i-detey", label: home.category_home ?? "Home & garden" },
+    { href: href("/c/transport"), label: home.qa_transport ?? "Transport" },
+    { href: href("/c/elektronika-i-tehnika"), label: home.qa_electronics ?? "Electronics" },
+    { href: href("/c/dlya-doma-hobbi-i-detey"), label: home.category_home ?? "Home & garden" },
   ];
 
   return (
@@ -71,7 +76,7 @@ export default async function SellPage() {
             {s.subtitle ?? ""}
           </p>
           <Link
-            href="/post"
+            href={href("/post")}
             className="lyvox-cta-gradient inline-flex h-12 items-center gap-2 rounded-[var(--rm)] px-7 text-[15px] font-bold text-primary-foreground transition hover:brightness-105 active:scale-[0.98]"
           >
             {s.cta ?? "Post a listing"}

@@ -7,6 +7,7 @@ import AdsGrid from "@/components/ads-grid";
 import { AdsGridSkeleton } from "@/components/marketplace-grid-states";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
+import { localizeHref } from "@/lib/i18n";
 import { mapSearchItemToCard, type AdvertCard, type SearchApiItem } from "@/lib/advertCards";
 import { appendUnique } from "@/lib/discoveryFeed";
 import {
@@ -33,7 +34,7 @@ export default function DiscoveryFeed({
       initialItems.length alone can no longer tell whether more pages exist. */
   hasMoreInitial?: boolean;
 }) {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const tr = (k: string, fb: string) => {
     const v = t(k);
     return v === k ? fb : v;
@@ -120,7 +121,7 @@ export default function DiscoveryFeed({
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span>{tr("discovery.personalized_note", "Order adjusted for this session")}</span>
             <Link
-              href="/legal/cookies#session-personalization"
+              href={localizeHref("/legal/cookies#session-personalization", locale)}
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
               {tr("discovery.personalized_why", "Why this order?")}

@@ -10,6 +10,7 @@ import SearchBar from "@/components/SearchBar";
 import { SiteLogo } from "@/components/site-logo";
 import UserMenu from "@/components/UserMenu";
 import { useI18n } from "@/i18n";
+import { localizeHref, stripLocalePrefix } from "@/lib/i18n";
 import { supabase } from "@/lib/supabaseClient";
 import { cn } from "@/lib/utils";
 
@@ -32,12 +33,12 @@ const MenuLinesIcon = () => (
 );
 
 export default function MainHeader() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
   // One canonical search on the home page (council verdict): the hero owns it
   // there; the header field appears everywhere else.
-  const showHeaderSearch = pathname !== "/";
+  const showHeaderSearch = stripLocalePrefix(pathname || "/").pathname !== "/";
   const [hasSession, setHasSession] = useState<boolean | null>(null);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const categoriesDropdownRef = useRef<HTMLDivElement>(null);
@@ -112,11 +113,11 @@ export default function MainHeader() {
     }
 
     if (session) {
-      router.push("/post");
+      router.push(localizeHref("/post", locale));
     } else {
       // Guests get the indexable pitch page first (supply wave) instead of
       // hitting the registration wall cold.
-      router.push("/sell");
+      router.push(localizeHref("/sell", locale));
     }
   };
 

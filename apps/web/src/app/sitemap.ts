@@ -1,16 +1,16 @@
 import type { MetadataRoute } from "next";
-import { absoluteUrl } from "@/lib/seo/baseUrl";
+import { localizedSitemapEntries } from "@/lib/seo/localizedUrls";
 import { supabaseService } from "@/lib/supabaseService";
 
 export const revalidate = 3600; // rebuild at most once per hour
 
 const STATIC_ROUTES: MetadataRoute.Sitemap = [
-  { url: absoluteUrl("/"), changeFrequency: "daily", priority: 1.0 },
-  { url: absoluteUrl("/sell"), changeFrequency: "monthly", priority: 0.8 },
-  { url: absoluteUrl("/legal/privacy"), changeFrequency: "yearly", priority: 0.2 },
-  { url: absoluteUrl("/legal/terms"), changeFrequency: "yearly", priority: 0.2 },
-  { url: absoluteUrl("/legal/cookies"), changeFrequency: "yearly", priority: 0.2 },
-  { url: absoluteUrl("/legal/imprint"), changeFrequency: "yearly", priority: 0.2 },
+  ...localizedSitemapEntries("/", { changeFrequency: "daily", priority: 1.0 }),
+  ...localizedSitemapEntries("/sell", { changeFrequency: "monthly", priority: 0.8 }),
+  ...localizedSitemapEntries("/legal/privacy", { changeFrequency: "yearly", priority: 0.2 }),
+  ...localizedSitemapEntries("/legal/terms", { changeFrequency: "yearly", priority: 0.2 }),
+  ...localizedSitemapEntries("/legal/cookies", { changeFrequency: "yearly", priority: 0.2 }),
+  ...localizedSitemapEntries("/legal/imprint", { changeFrequency: "yearly", priority: 0.2 }),
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -37,11 +37,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const category of categories ?? []) {
       if (!category.path) continue;
       if (category.level !== 1 && !hasInventory(category.path)) continue;
-      categoryRoutes.push({
-        url: absoluteUrl(`/c/${category.path}`),
-        changeFrequency: "weekly",
-        priority: category.level === 1 ? 0.6 : 0.5,
-      });
+      categoryRoutes.push(
+        ...localizedSitemapEntries(`/c/${category.path}`, {
+          changeFrequency: "weekly",
+          priority: category.level === 1 ? 0.6 : 0.5,
+        }),
+      );
     }
   } catch {
     // Categories are optional — fall back to static routes only on error.
@@ -58,12 +59,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .limit(5000);
 
     for (const advert of adverts ?? []) {
-      advertRoutes.push({
-        url: absoluteUrl(`/ad/${advert.id}`),
-        lastModified: advert.updated_at ?? undefined,
-        changeFrequency: "daily",
-        priority: 0.8,
-      });
+      advertRoutes.push(
+        ...localizedSitemapEntries(`/ad/${advert.id}`, {
+          lastModified: advert.updated_at ?? undefined,
+          changeFrequency: "daily",
+          priority: 0.8,
+        }),
+      );
     }
   } catch {
     // Adverts are optional — fall back to static routes only on error.

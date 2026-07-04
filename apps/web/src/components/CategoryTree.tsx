@@ -6,6 +6,7 @@ import { useI18n } from "@/i18n";
 import { getCategoryIcon } from "@/lib/categoryIcons";
 import { ChevronRight, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { localizeHref } from "@/lib/i18n";
 
 type CategoryTreeProps = {
   variant?: "dropdown" | "drawer";
@@ -108,7 +109,7 @@ export default function CategoryTree({ variant = "dropdown", onCategorySelect }:
     const isExpanded = expanded.has(cat.id);
     const Icon = getCategoryIcon(cat.icon, cat.level);
     const name = cat.name; // Already localized from API
-    const href = `/c/${cat.path}`;
+    const href = localizeHref(`/c/${cat.path}`, locale);
 
     if (variant === "dropdown") {
       return (

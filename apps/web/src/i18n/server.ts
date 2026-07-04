@@ -1,5 +1,10 @@
 import { cookies, headers } from "next/headers";
-import { resolveFromAcceptLanguage, resolveLocale, type Locale } from "@/lib/i18n";
+import {
+  localeHeaderName,
+  resolveFromAcceptLanguage,
+  resolveLocale,
+  type Locale,
+} from "@/lib/i18n";
 
 type Messages = Record<string, any>;
 
@@ -21,10 +26,14 @@ async function loadMessages(locale: Locale): Promise<Messages> {
 }
 
 export async function getInitialLocale(): Promise<Locale> {
+  const h = await headers();
+  const fromPath = h.get(localeHeaderName);
+  if (fromPath) return resolveLocale(fromPath);
+
   const c = await cookies();
   const fromCookie = c.get("locale")?.value;
   if (fromCookie) return resolveLocale(fromCookie);
-  const h = await headers();
+
   const accepted = h.get("accept-language");
   return resolveFromAcceptLanguage(accepted);
 }

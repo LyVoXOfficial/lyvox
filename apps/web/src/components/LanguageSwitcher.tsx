@@ -1,8 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Globe } from "lucide-react";
 import { useI18n, supportedLocales, type Locale } from "@/i18n";
+import { localeCookieName, localizeHref } from "@/lib/i18n";
 import {
   Select,
   SelectContent,
@@ -22,23 +23,14 @@ const localeNames: Record<Locale, string> = {
 export default function LanguageSwitcher() {
   const { locale } = useI18n();
   const router = useRouter();
+  const pathname = usePathname() || "/";
 
-  const handleLocaleChange = async (newLocale: Locale) => {
-    try {
-      const response = await fetch("/api/locale", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ locale: newLocale }),
-      });
+  const handleLocaleChange = (newLocale: Locale) => {
+    if (newLocale === locale) return;
 
-      if (response.ok) {
-        router.refresh();
-      }
-    } catch (error) {
-      console.error("Failed to change locale:", error);
-    }
+    document.cookie = `${localeCookieName}=${newLocale}; path=/; max-age=${365 * 24 * 60 * 60}; samesite=lax`;
+    const suffix = `${window.location.search}${window.location.hash}`;
+    router.push(localizeHref(`${pathname}${suffix}`, newLocale), { scroll: false });
   };
 
   return (

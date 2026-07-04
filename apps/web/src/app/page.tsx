@@ -18,7 +18,13 @@ const CategoriesCarousel = dynamic(() => import("@/components/categories-carouse
 import { getI18nProps } from "@/i18n/server";
 import { logger } from "@/lib/errorLogger";
 import { getJsonLdScriptProps } from "@/lib/seo";
-import { getBaseUrl, absoluteUrl } from "@/lib/seo/baseUrl";
+import { getBaseUrl } from "@/lib/seo/baseUrl";
+import {
+  languageAlternates,
+  localizedAbsoluteUrl,
+  localizedCanonical,
+} from "@/lib/seo/localizedUrls";
+import { localizeHref } from "@/lib/i18n";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { signMediaUrls } from "@/lib/media/signMediaUrls";
 import { getFirstImage } from "@/lib/media/getFirstImage";
@@ -33,20 +39,13 @@ const BASE_URL = getBaseUrl();
 // of inheriting the bare root `LyVoX` title. Composed from existing i18n
 // `app.title` (no new locale keys) — English-only suffix per brief.
 export async function generateMetadata(): Promise<Metadata> {
-  const { messages } = await getI18nProps();
+  const { locale, messages } = await getI18nProps();
   const siteName = messages?.app?.title ?? "LyVoX";
-  const base = getBaseUrl();
   return {
     title: `${siteName} — Buy & sell locally in Belgium`,
     alternates: {
-      canonical: absoluteUrl("/"),
-      languages: {
-        en: `${base}/?lang=en`,
-        nl: `${base}/?lang=nl`,
-        fr: `${base}/?lang=fr`,
-        ru: `${base}/?lang=ru`,
-        de: `${base}/?lang=de`,
-      },
+      canonical: localizedCanonical("/", locale),
+      languages: languageAlternates("/"),
     },
   };
 }
@@ -301,16 +300,17 @@ export default async function Home() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: messages?.app?.title ?? "LyVoX",
-    url: BASE_URL,
+    url: localizedAbsoluteUrl("/", locale),
     potentialAction: {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: `${BASE_URL}/search?q={search_term_string}`,
+        urlTemplate: `${localizedAbsoluteUrl("/search", locale)}?q={search_term_string}`,
       },
       "query-input": "required name=search_term_string",
     },
   };
+  const href = (path: string) => localizeHref(path, locale);
 
   // Product-first showcase: 6 freshest listings, photo-carrying first.
   // The feed below excludes them (its page-1 fetch starts past the SSR batch,
@@ -427,7 +427,7 @@ export default async function Home() {
                     /* "Verified sellers" — teal gradient pill */
                     <Link
                       key={href}
-                      href={href}
+                      href={localizeHref(href, locale)}
                       className="lyvox-trust-gradient inline-flex h-[38px] shrink-0 items-center gap-[7px] whitespace-nowrap rounded-full px-[15px] font-bold text-white transition hover:brightness-105"
                       style={{
                         fontSize: "13.5px",
@@ -441,7 +441,7 @@ export default async function Home() {
                     /* Plain category pills */
                     <Link
                       key={href}
-                      href={href}
+                      href={localizeHref(href, locale)}
                       className="inline-flex h-[38px] shrink-0 items-center gap-[7px] whitespace-nowrap rounded-full border border-border bg-card px-[15px] font-semibold text-foreground transition hover:border-primary/40 hover:text-primary"
                       style={{ fontSize: "13.5px", boxShadow: "var(--shS)" }}
                     >
@@ -451,7 +451,7 @@ export default async function Home() {
                   ),
                 )}
                 <Link
-                  href="/post"
+                  href={href("/post")}
                   className="lyvox-cta-gradient inline-flex h-[38px] shrink-0 items-center gap-[7px] whitespace-nowrap rounded-full px-[16px] font-bold text-primary-foreground transition hover:brightness-105"
                   style={{ fontSize: "13.5px" }}
                 >
@@ -470,7 +470,7 @@ export default async function Home() {
           <AdsGrid items={showcaseAds} />
           <div className="flex justify-end">
             <Link
-              href="/search"
+              href={href("/search")}
               className="inline-flex items-center gap-[5px] font-semibold transition hover:opacity-80"
               style={{ fontSize: "14px", color: "var(--priD)" }}
             >
@@ -506,7 +506,7 @@ export default async function Home() {
           ].map(({ title, body, href, icon: Icon }) => (
             <Link
               key={href}
-              href={href}
+              href={localizeHref(href, locale)}
               className="group flex items-start gap-3.5 rounded-xl border border-border/70 bg-card p-4 shadow-[var(--shadow-soft)] transition duration-200 hover:border-primary/30 hover:shadow-[var(--shadow-card)]"
             >
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/40 text-accent-foreground transition-colors duration-200 group-hover:bg-primary group-hover:text-primary-foreground">
@@ -544,7 +544,7 @@ export default async function Home() {
         {/* ── DISCOVER — retention loop, demoted below the shopping sections
                (council verdict: not top-of-funnel while the catalog is small) */}
         <Link
-          href="/discover"
+          href={href("/discover")}
           className="flex items-center justify-between gap-3 rounded-2xl border border-border/70 bg-card px-5 py-4 shadow-[var(--shadow-card)] transition hover:border-primary/40"
         >
           <span>
@@ -567,7 +567,7 @@ export default async function Home() {
               {t("home.recommended_now")}
             </h2>
             <Link
-              href="/search"
+              href={href("/search")}
               className="inline-flex items-center gap-[5px] font-semibold transition hover:opacity-80"
               style={{ fontSize: "14px", color: "var(--priD)" }}
             >

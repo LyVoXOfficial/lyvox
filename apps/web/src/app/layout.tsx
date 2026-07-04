@@ -52,15 +52,6 @@ export async function generateMetadata(): Promise<Metadata> {
   const locales = ["en", "fr", "nl", "ru", "de"] as const;
   const alternateLocale = locales.filter((l) => l !== locale);
 
-  const base = getBaseUrl();
-  const languageAlternates = {
-    en: `${base}/?lang=en`,
-    nl: `${base}/?lang=nl`,
-    fr: `${base}/?lang=fr`,
-    ru: `${base}/?lang=ru`,
-    de: `${base}/?lang=de`,
-  } satisfies Record<(typeof locales)[number], string>;
-
   const localizedOgCodes = alternateLocale.map((l) =>
     l === "en" ? "en_US" : l === "nl" ? "nl_BE" : l === "fr" ? "fr_BE" : l === "ru" ? "ru_RU" : l === "de" ? "de_DE" : l,
   );
@@ -94,9 +85,6 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-    },
-    alternates: {
-      languages: languageAlternates,
     },
   };
 }
