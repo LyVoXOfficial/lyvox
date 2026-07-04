@@ -16,9 +16,8 @@
 
 ## Очередь
 
-- [x] **T08** 🔴 — fast_goods: /post за ≤4 шага для простых товаров (P1-конверсия, ~1-2 дня; PostForm 1400 строк, по-коммитно) → [docs/todo/T08-post-fast-goods.md](docs/todo/T08-post-fast-goods.md) — 9a05848
 - [x] **T09** 🔴 — Переводы объявлений: миграция + async-джоб + лейблы (P1, ~2 дня; послойно) → [docs/todo/T09-advert-translations.md](docs/todo/T09-advert-translations.md) — e8f6525
-- [ ] **T10** 🟡 — Store-of-One: сессионная персонализация фида, client-only MVP (P2, потом) → [docs/todo/T10-session-personalization.md](docs/todo/T10-session-personalization.md)
+- [x] **T10** 🟡 — Store-of-One: сессионная персонализация фида, client-only MVP (P2, потом) → [docs/todo/T10-session-personalization.md](docs/todo/T10-session-personalization.md) — b34c97a
 
 ## Крупные волны после T01-T10 (инструкция-файл создаётся 🔴-моделью при взятии в работу)
 
