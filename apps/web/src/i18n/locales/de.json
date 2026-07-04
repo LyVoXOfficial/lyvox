@@ -35,7 +35,8 @@
   "footer": {
     "tagline": "Auf Belgien ausgerichteter Marktplatz für lokale Anzeigen, verifizierte Verkäufer und sicherere Gespräche.",
     "browse_listings": "Anzeigen durchsuchen",
-    "post_listing": "Anzeige aufgeben"
+    "post_listing": "Anzeige aufgeben",
+    "guides": "Anti-Betrug-Ratgeber"
   },
   "common": {
     "page_not_found_title": "Seite nicht gefunden",
@@ -234,6 +235,122 @@
     "faq_a2": "Nein — Privatverkäufer bestätigen nur E-Mail und Telefon. Unternehmen werden über KBO/USt geprüft und erhalten ein öffentliches Händlerprofil.",
     "faq_q3": "Wie erreichen mich Käufer?",
     "faq_a3": "Über den LyVoX-Chat. Ihre Telefonnummer und E-Mail bleiben privat."
+  },
+  "guides": {
+    "meta_title": "Anti-Betrug-Ratgeber für Kleinanzeigen in Belgien | LyVoX",
+    "meta_description": "Praktische Checks für Gebrauchtwagen, Elektronik, Immobilien, Jobs und lokale Übergaben in Belgien.",
+    "title": "Anti-Betrug-Ratgeber für Kleinanzeigen",
+    "subtitle": "Kurze Checks, bevor Sie eine Anzeige einschätzen, einen Termin vereinbaren oder ein Objekt prüfen.",
+    "read_guide": "Ratgeber lesen",
+    "back_to_guides": "Alle Ratgeber",
+    "category_cta": "Passende Anzeigen ansehen",
+    "trust_title": "LyVoX-Vertrauenssignale nutzen",
+    "trust_body": "Kombinieren Sie verifizierte Verkäuferhinweise, Plattform-Chat und Meldefunktionen mit Ihrer eigenen Prüfung.",
+    "trust_verified": "Verkäuferhinweise prüfen",
+    "trust_chat": "Gespräch im LyVoX-Chat halten",
+    "trust_report": "Verdächtige Anzeigen oder Nachrichten melden",
+    "items": {
+      "herken-oplichting-tweedehands-kopen": {
+        "title": "Betrugszeichen beim Second-Hand-Kauf erkennen",
+        "intro": "Diese Checks helfen, bevor Sie zu einem Verkäufer fahren oder einen Artikel reservieren.",
+        "category_label": "Anzeigen durchsuchen",
+        "sections": [
+          { "heading": "Anzeige kritisch lesen", "body": "Unscharfe Fotos, kopierte Texte, sehr niedrige Preise oder Druck zur schnellen Entscheidung sind Warnzeichen." },
+          { "heading": "Verkäufersignale vergleichen", "body": "Achten Sie auf Profilalter, Verifizierung, frühere Anzeigen und klare Antworten auf normale Fragen." },
+          { "heading": "Vor dem Termin prüfen", "body": "Fragen Sie nach aktuellen Fotos, Seriennummern oder Dokumenten, wenn sie für den Artikel relevant sind." }
+        ]
+      },
+      "car-pass-controleren-tweedehands-auto": {
+        "title": "Car-Pass beim Gebrauchtwagen prüfen",
+        "intro": "In Belgien ist die Kilometerhistorie wichtig. Der Car-Pass gehört zu einer breiteren Fahrzeugprüfung.",
+        "category_label": "Transportanzeigen ansehen",
+        "sections": [
+          { "heading": "Dokument früh anfragen", "body": "Ein seriöser Verkäufer kann Kilometerstand, Wartung, Prüfung und Fahrzeugpapiere vor dem Besuch erklären." },
+          { "heading": "Daten abgleichen", "body": "Vergleichen Sie Kilometer, Fahrgestellnummer, Prüfunterlagen und Anzeige. Abweichungen brauchen eine klare Erklärung." },
+          { "heading": "Bei Tageslicht prüfen", "body": "Kontrollieren Sie Abnutzung, Warnleuchten, Reifen, Schlüssel und Papiere gemeinsam vor Ort." }
+        ]
+      },
+      "imei-serienummer-elektronica-checken": {
+        "title": "IMEI und Seriennummer bei Elektronik prüfen",
+        "intro": "Telefone, Laptops und Tablets lassen sich besser prüfen, wenn Kennungen und Eigentumsnachweis vorliegen.",
+        "category_label": "Elektronikanzeigen ansehen",
+        "sections": [
+          { "heading": "Gerät und Nachweis abgleichen", "body": "Vergleichen Sie IMEI oder Seriennummer mit Einstellungen, Karton, Rechnung oder Garantieseite." },
+          { "heading": "Grundfunktionen testen", "body": "Prüfen Sie Laden, Kamera, Lautsprecher, Display, Kontosperre, Akku und Netzverbindung." },
+          { "heading": "Nachweise im Chat behalten", "body": "Fotos, Zusagen und Gerätedaten bleiben so mit Anzeige und Verkäufer verbunden." }
+        ]
+      },
+      "veilige-afspraak-tweedehands-deal": {
+        "title": "Einen sicheren Termin für lokale Übergaben planen",
+        "intro": "Eine gute Übergabe ist öffentlich, ruhig und leicht abzubrechen, wenn der Artikel nicht passt.",
+        "category_label": "Lokale Anzeigen ansehen",
+        "sections": [
+          { "heading": "Öffentlichen Ort wählen", "body": "Treffen Sie sich tagsüber an einem belebten Ort mit Zeit für eine ruhige Prüfung." },
+          { "heading": "Anzeige bereithalten", "body": "Vergleichen Sie Anzeige, Chat und vereinbarten Preis direkt mit dem Artikel." },
+          { "heading": "Druck ernst nehmen", "body": "Plötzlicher Ortswechsel, verweigerte Prüfung oder Eile sind Gründe, den Termin zu beenden." }
+        ]
+      },
+      "epc-attest-huren-kopen": {
+        "title": "EPC-Ausweis beim Mieten oder Kaufen prüfen",
+        "intro": "Der Energieausweis hilft beim Vergleich, muss aber zur richtigen Immobilie passen.",
+        "category_label": "Immobilienanzeigen ansehen",
+        "sections": [
+          { "heading": "Ausweis anfragen", "body": "Adresse, Einheit, Datum und Nummer sollten mit Anzeige und Besichtigung übereinstimmen." },
+          { "heading": "Mit der Realität vergleichen", "body": "Prüfen Sie Fenster, Heizung, Dämmung und Renovierungsangaben während des Besuchs." },
+          { "heading": "Fragen schriftlich stellen", "body": "Chat-Antworten zu Arbeiten, Kosten oder Terminen lassen sich später leichter prüfen." }
+        ]
+      },
+      "huurwaarborg-en-contract-controleren": {
+        "title": "Mietkaution und Vertrag prüfen",
+        "intro": "Vergleichen Sie Vertrag, Identität und Besichtigung, bevor Sie sich für eine Mietwohnung entscheiden.",
+        "category_label": "Mietanzeigen ansehen",
+        "sections": [
+          { "heading": "Rolle der Kontaktperson prüfen", "body": "Klären Sie, ob die Person Eigentümer, Makler oder bevollmächtigt ist." },
+          { "heading": "Vertrag ruhig lesen", "body": "Adresse, Laufzeit, Miete, Kaution, Übergabeprotokoll, Kosten und Kündigung müssen klar sein." },
+          { "heading": "Eile vermeiden", "body": "Druck vor einer echten Besichtigung, fehlende Dokumente oder verschiedene Namen sind Warnzeichen." }
+        ]
+      },
+      "fiets-kopen-framenummer-check": {
+        "title": "Rahmennummer beim gebrauchten Fahrrad prüfen",
+        "intro": "Eine lesbare Rahmennummer und eine schlüssige Verkäufergeschichte senken das Risiko.",
+        "category_label": "Transportanzeigen ansehen",
+        "sections": [
+          { "heading": "Rahmennummer finden", "body": "Fragen Sie nach der Stelle und vergleichen Sie sie mit Rechnung, Registrierung oder Fotos." },
+          { "heading": "Zustand prüfen", "body": "Bremsen, Licht, Akku bei E-Bikes, Schlüssel, Ladegerät und Preis sollten zusammenpassen." },
+          { "heading": "Fehlende Basics hinterfragen", "body": "Kein Schlüssel, kein Ladegerät oder entfernte Kennzeichen sind klare Stoppsignale." }
+        ]
+      },
+      "jobaanbieding-scam-herkennen": {
+        "title": "Verdächtige Jobangebote erkennen",
+        "intro": "Echte Arbeitgeber können Rolle, Unternehmen und Ablauf ohne Umgehung normaler Checks erklären.",
+        "category_label": "Jobanzeigen ansehen",
+        "sections": [
+          { "heading": "Arbeitgeber prüfen", "body": "Vergleichen Sie Firmenname, Website, Standort, E-Mail-Domain und Aufgabenbeschreibung." },
+          { "heading": "Vage Aufgaben erkennen", "body": "Unklare Arbeit, unrealistische Vergütung oder Druck zum Plattformwechsel sind riskant." },
+          { "heading": "Ablauf nachvollziehbar halten", "body": "Interviewzeiten, Rolle und nächste Schritte sollten schriftlich festgehalten werden." }
+        ]
+      },
+      "huisdier-adoptie-advertentie-check": {
+        "title": "Tier- und Adoptionsanzeigen prüfen",
+        "intro": "Bei Tieren zählen Wohlergehen, Dokumente und ein echter Besuch mehr als Geschwindigkeit.",
+        "category_label": "Tieranzeigen ansehen",
+        "sections": [
+          { "heading": "Nach dem Tier fragen", "body": "Alter, Gesundheit, Impfungen, Herkunft, Chip und Abgabegrund sollten klar sein." },
+          { "heading": "Umgebung ansehen", "body": "Ein Besuch zeigt Wohlergehen, Verhalten und ob Fotos zur Situation passen." },
+          { "heading": "Bei Druck stoppen", "body": "Dringende Geschichten, verweigerte Treffen oder unklare Dokumente rechtfertigen eine Meldung." }
+        ]
+      },
+      "chat-signalen-verdachte-verkoper": {
+        "title": "Chat-Signale eines verdächtigen Verkäufers",
+        "intro": "Die Kommunikation zeigt oft, ob eine Anzeige zusätzliche Prüfung braucht.",
+        "category_label": "Anzeigen durchsuchen",
+        "sections": [
+          { "heading": "Wechselnde Geschichten beachten", "body": "Andere Orte, Namen, Artikeldetails oder Verkaufsgründe machen eine Anzeige weniger vertrauenswürdig." },
+          { "heading": "Konkrete Fragen stellen", "body": "Fragen Sie nach Zustand, Zubehör, Dokumenten, Seriennummer und Prüfmöglichkeit." },
+          { "heading": "Melden nutzen", "body": "Wenn der Chat manipulativ wirkt oder der Anzeige widerspricht, melden Sie ihn zur Prüfung." }
+        ]
+      }
+    }
   },
   "post": {
     "share_banner_title": "Ihre Anzeige ist online",
