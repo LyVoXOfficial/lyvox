@@ -67,7 +67,7 @@ capabilityOn(x) === adminToggle(x) === true  &&  requiredSecretsPresent(x) === t
 
 ### Фаза A — старт: внешний трек + видимость
 - [ ] **01.** Запустить внешние гейты (часы пошли): `PROD-F3` (PSD2/AML юрист+Stripe+NBB), `PROD-F4` (GDPR RoPA/DPIA), `PROD-F5` (DSA-роль/PoC), `VAT-LEGAL` (бухгалтер: ставки/схемы) — переписка/договоры параллельно всему коду — 🎚️ **[— · n/a внешнее]**
-- [ ] **02.** `OPS-ERR` — Sentry + Vercel Speed Insights (снять baseline скорости/ошибок ДО оптимизаций — иначе чиним вслепую) — 🎚️ **[Haiku 4.5 · low]**
+- [x] ~~**02.** `OPS-ERR` — Sentry + Vercel Speed Insights (снять baseline скорости/ошибок ДО оптимизаций — иначе чиним вслепую) — 🎚️ **[Haiku 4.5 · low]**~~ ✅ 2026-07-04
 - [ ] **03.** `FLAG-05` + `SEC-RL2` — единая zod-схема env + hard-fail в prod при отсутствии критичных ключей (закрывает «rate-limiter молча выключен») — 🎚️ **[Opus 4.8 · high]**
 
 ### Фаза B — безопасность P0 (дёшево, критично, до запуска)
@@ -437,8 +437,10 @@ Hover-lift и tap-scale карточек, состояния кнопок (loadi
 
 # Блок OPS — Наблюдаемость, QA, релиз-инжиниринг
 
-### OPS-ERR · Error tracking + performance monitoring — [P0][⛔]
+### OPS-ERR · Error tracking + performance monitoring — [P0][✅]
 Sentry (или аналог) на клиент+сервер; Vercel Speed Insights/Analytics (CWV с прода). Без этого «медленно/сломалось» — вслепую. Behind FLAG + ключ.
+
+**Реализовано 2026-07-04:** server-side Sentry инициализация в `instrumentation.ts` (автозагружается в Next.js 16); client-side Sentry + Vercel Analytics в `ErrorTrackingProvider`; capability флаги `error_tracking` и `analytics_insights` (AND-gated на env-ключи); трейсинг 100% в dev, 10% в prod. Активация: установить `NEXT_PUBLIC_SENTRY_DSN` / `SENTRY_DSN` и флаги в админке (когда FLAG-01 готов).
 
 ### OPS-HEALTH · Health-checks + uptime + алёрты — [P1][⛔]
 `/api/health` (БД/Redis/Stripe-reachability), внешний uptime-мониторинг, алёрты в канал; связать с SEC-AUDIT.
