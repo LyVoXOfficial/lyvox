@@ -21,13 +21,13 @@
 ## Крупные волны после T01-T10 (инструкция-файл создаётся 🔴-моделью при взятии в работу)
 
 - [x] **T11** 🔴 — Конвейер изображений: превью 400px WebP при аплоаде + стабильные кэшируемые URL вместо пере-подписи на каждый рендер (крупнейший perf-выигрыш всего продукта; см. SITE_BLUEPRINT «конвейер изображений ДО редизайнов» + память media-image-pipeline) → [docs/todo/T11-image-pipeline.md](docs/todo/T11-image-pipeline.md) — 245b647
-- [ ] **T12** 🟡 — Saved-search алерты end-to-end + push/PWA (PRD 34/36/18): retention-контур; cron `saved-search-alerts` уже существует и ждёт CRON_SECRET — довести UI подписок и email-канал
-- [ ] **T13** 🟡 — UX1: редизайн-фиксы страниц по мокапам (`docs/features/audit/01` + `mockups/redesign-mockups.html`)
-- [ ] **T14** 🟡 — Системный проход empty-states + /search полировка (skeleton, verified-чип с предпросмотром счётчика, zero-result авторасширение) — SITE_BLUEPRINT волна 4
-- [ ] **T15** 🔴 — URL-локали `/nl /fr /de /en /ru` + hreflang (МИГРАЦИЯ архитектуры: сейчас Google индексирует один язык из пяти; чем позже — тем дороже)
-- [ ] **T16** 🟢 — Контент-хаб `/guides`: 10-15 анти-скам гайдов nl/fr (SEO-канал GTM Фазы 1; БЕЗ имён конкурентов — CEL VI.17; тексты — 🟡, каркас — 🟢)
-- [ ] **T17** 🟡 — Волна 3 остаток: sticky one-primary contact-bar на /ad + safety bottom-sheet + чат-хинт (SITE_BLUEPRINT волна 3)
-- [ ] **T18 (LAUNCH-GATE)** 🔴 — Seed-выключатель: флаг seed-аккаунтов + исключение из агрегатов/JSON-LD/медиан на уровне запросов; сам purge — ТОЛЬКО по команде основателя перед рекламой
+- [ ] **T12** 🟡 — Saved-search алерты end-to-end + push/PWA (PRD 34/36/18): retention-контур; cron `saved-search-alerts` уже существует и ждёт CRON_SECRET — довести UI подписок и email-канал → [T12-saved-search-alerts.md](docs/todo/T12-saved-search-alerts.md)
+- [ ] **T13** 🟡 — UX1: редизайн-фиксы страниц по мокапам (`docs/features/audit/01` + `mockups/redesign-mockups.html`) → [T13-ux1-redesign-fixes.md](docs/todo/T13-ux1-redesign-fixes.md)
+- [ ] **T14** 🟡 — Системный проход empty-states + /search полировка (skeleton, verified-чип с предпросмотром счётчика, zero-result авторасширение) — SITE_BLUEPRINT волна 4 → [T14-empty-states-search.md](docs/todo/T14-empty-states-search.md)
+- [ ] **T15** 🔴 — URL-локали `/nl /fr /de /en /ru` + hreflang (МИГРАЦИЯ архитектуры: сейчас Google индексирует один язык из пяти; чем позже — тем дороже) → [T15-url-locales.md](docs/todo/T15-url-locales.md)
+- [ ] **T16** 🟢 — Контент-хаб `/guides`: 10-15 анти-скам гайдов nl/fr (SEO-канал GTM Фазы 1; БЕЗ имён конкурентов — CEL VI.17; тексты — 🟡, каркас — 🟢) → [T16-guides-hub.md](docs/todo/T16-guides-hub.md)
+- [ ] **T17** 🟡 — Волна 3 остаток: sticky one-primary contact-bar на /ad + safety bottom-sheet + чат-хинт (SITE_BLUEPRINT волна 3) → [T17-ad-contact-bar.md](docs/todo/T17-ad-contact-bar.md)
+- [ ] **T18 (LAUNCH-GATE)** 🔴 — Seed-выключатель: флаг seed-аккаунтов + исключение из агрегатов/JSON-LD/медиан на уровне запросов; сам purge — ТОЛЬКО по команде основателя перед рекламой → [T18-seed-switch.md](docs/todo/T18-seed-switch.md)
 
 ## Задачи основателя (не для агентов)
 - Ключи: Turnstile (free) + `CRON_SECRET` в Vercel env (иначе кроны и алерты — no-op), Stripe recurring Price для Pro.
