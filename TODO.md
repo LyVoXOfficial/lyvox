@@ -16,9 +16,8 @@
 
 ## Очередь
 
-- [x] **T07** 🔴 — ChatOffer: структурированные предложения цены + пороги продавца (P1, ~1 день; RLS+чат) → [docs/todo/T07-chat-offers.md](docs/todo/T07-chat-offers.md) — bd9de7e
 - [x] **T08** 🔴 — fast_goods: /post за ≤4 шага для простых товаров (P1-конверсия, ~1-2 дня; PostForm 1400 строк, по-коммитно) → [docs/todo/T08-post-fast-goods.md](docs/todo/T08-post-fast-goods.md) — 9a05848
-- [ ] **T09** 🔴 — Переводы объявлений: миграция + async-джоб + лейблы (P1, ~2 дня; послойно) → [docs/todo/T09-advert-translations.md](docs/todo/T09-advert-translations.md)
+- [x] **T09** 🔴 — Переводы объявлений: миграция + async-джоб + лейблы (P1, ~2 дня; послойно) → [docs/todo/T09-advert-translations.md](docs/todo/T09-advert-translations.md) — e8f6525
 - [ ] **T10** 🟡 — Store-of-One: сессионная персонализация фида, client-only MVP (P2, потом) → [docs/todo/T10-session-personalization.md](docs/todo/T10-session-personalization.md)
 
 ## Крупные волны после T01-T10 (инструкция-файл создаётся 🔴-моделью при взятии в работу)
