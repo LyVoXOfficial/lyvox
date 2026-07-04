@@ -99,6 +99,7 @@ describe("GET /api/price-suggestion", () => {
     expect(rpcMock).toHaveBeenCalledWith("estimate_price", {
       p_category_id: CATEGORY_ID,
       p_condition: "used",
+      p_exclude_seed: false,
     });
   });
 
@@ -127,6 +128,38 @@ describe("GET /api/price-suggestion", () => {
     expect(rpcMock).toHaveBeenCalledWith("estimate_price", {
       p_category_id: CATEGORY_ID,
       p_condition: null,
+      p_exclude_seed: false,
     });
+  });
+
+  it("passes p_exclude_seed:true when EXCLUDE_SEED_FROM_AGGREGATES is on (T18)", async () => {
+    getUserMock.mockResolvedValue({ data: { user: { id: USER_ID } }, error: null });
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          sample_size: 24,
+          p25: "100",
+          median: "150",
+          p75: "225",
+          backoff_level: "category_condition",
+        },
+      ],
+      error: null,
+    });
+
+    const prev = process.env.EXCLUDE_SEED_FROM_AGGREGATES;
+    process.env.EXCLUDE_SEED_FROM_AGGREGATES = "true";
+    try {
+      const res = await GET(priceSuggestionReq());
+      expect(res.status).toBe(200);
+      expect(rpcMock).toHaveBeenCalledWith("estimate_price", {
+        p_category_id: CATEGORY_ID,
+        p_condition: "used",
+        p_exclude_seed: true,
+      });
+    } finally {
+      if (prev === undefined) delete process.env.EXCLUDE_SEED_FROM_AGGREGATES;
+      else process.env.EXCLUDE_SEED_FROM_AGGREGATES = prev;
+    }
   });
 });
