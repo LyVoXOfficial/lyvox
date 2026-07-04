@@ -728,7 +728,7 @@ export default async function AdvertPage({ params }: PageProps) {
           />
           {/* One-time share banner right after publishing (?published=1) */}
           <Suspense fallback={null}>
-            <PublishedShareBanner title={data.advert.title} />
+            <PublishedShareBanner title={data.advert.title} adId={data.advert.id} />
           </Suspense>
           {showCompletionBanner && completion ? (
             <ListingCompletionBanner

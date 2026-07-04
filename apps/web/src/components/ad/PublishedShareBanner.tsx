@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Check, Copy, MessageCircle, Share2, X } from "lucide-react";
 import { useI18n } from "@/i18n";
@@ -8,7 +8,7 @@ import { useI18n } from "@/i18n";
 // Post-publish share loop (supply wave): shown once right after the seller
 // publishes (?published=1). The prefilled text is deliberately neutral —
 // title + link only, no platform trust claims (DSA Art.30 discipline).
-export default function PublishedShareBanner({ title }: { title: string }) {
+export default function PublishedShareBanner({ title, adId }: { title: string; adId: string }) {
   const { t } = useI18n();
   const tr = (k: string, fb: string) => {
     const v = t(k);
@@ -18,10 +18,15 @@ export default function PublishedShareBanner({ title }: { title: string }) {
   const [dismissed, setDismissed] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const url = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    return `${window.location.origin}${window.location.pathname}`;
-  }, []);
+  // The link is built from the server-provided ad id and the canonical
+  // site origin, NEVER from window.location: during the client-side
+  // transition from /post the component mounts before the URL commits,
+  // so a pathname captured at mount still said /post — that exact bug
+  // shipped a WhatsApp link pointing at the post form instead of the
+  // listing. NEXT_PUBLIC_SITE_URL is identical on server and client
+  // (no hydration drift) and keeps shared links canonical even from dev.
+  const origin = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.lyvox.be").replace(/\/+$/, "");
+  const url = `${origin}/ad/${adId}`;
 
   if (searchParams.get("published") !== "1" || dismissed) return null;
 
