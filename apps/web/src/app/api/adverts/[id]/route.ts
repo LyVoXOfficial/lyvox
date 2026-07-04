@@ -466,7 +466,7 @@ export async function DELETE(
 
   const { data: mediaRows, error: mediaError } = await supabase
     .from("media")
-    .select("id,url")
+    .select("id,url,preview_url")
     .eq("advert_id", advertId);
 
   if (mediaError) {
@@ -493,6 +493,12 @@ export async function DELETE(
       .filter((path): path is string => Boolean(path && !path.startsWith("http")));
     if (storagePaths.length) {
       await service.storage.from("ad-media").remove(storagePaths);
+    }
+    const previewStoragePaths = mediaRows
+      .map((row) => row.preview_url)
+      .filter((path): path is string => Boolean(path && !path.startsWith("http")));
+    if (previewStoragePaths.length) {
+      await service.storage.from("ad-media-preview").remove(previewStoragePaths);
     }
   }
 

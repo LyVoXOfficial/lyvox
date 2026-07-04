@@ -1,10 +1,15 @@
 import { supabaseService } from "@/lib/supabaseService";
 import { logger } from "@/lib/errorLogger";
+import { getMediaPreviewPublicUrl } from "@/lib/media/previewUrls";
 
-export type MediaItemWithUrl<T> = T & { url: string | null | undefined };
+export type MediaItemWithUrl<T> = T & {
+  url: string | null | undefined;
+  preview_url?: string | null | undefined;
+};
 
 export type SignedMediaItem<T> = MediaItemWithUrl<T> & {
   signedUrl: string | null;
+  previewUrl: string | null;
 };
 
 const HTTP_URL_REGEX = /^https?:\/\//i;
@@ -24,7 +29,7 @@ const signedUrlMemoryCache = new Map<string, CacheEntry>();
  * Generate signed URLs for media objects stored in the `ad-media` bucket.
  * Absolute URLs are returned as-is.
  */
-export async function signMediaUrls<T extends { url: string | null | undefined }>(
+export async function signMediaUrls<T extends { url: string | null | undefined; preview_url?: string | null | undefined }>(
   mediaItems: T[],
   ttlSeconds: number = DEFAULT_TTL_SECONDS,
 ): Promise<Array<SignedMediaItem<T>>> {
@@ -140,17 +145,19 @@ export async function signMediaUrls<T extends { url: string | null | undefined }
     const originalUrl = item?.url ?? null;
 
     if (!originalUrl) {
-      results.push({ ...item, signedUrl: null });
+      results.push({ ...item, signedUrl: null, previewUrl: null });
       continue;
     }
 
     if (HTTP_URL_REGEX.test(originalUrl)) {
-      results.push({ ...item, signedUrl: originalUrl });
+      results.push({ ...item, signedUrl: originalUrl, previewUrl: getMediaPreviewPublicUrl(item.preview_url) ?? originalUrl });
       continue;
     }
 
+    const previewUrl = getMediaPreviewPublicUrl(item.preview_url);
+
     if (!bucket) {
-      results.push({ ...item, signedUrl: null });
+      results.push({ ...item, signedUrl: null, previewUrl });
       continue;
     }
 
@@ -165,7 +172,7 @@ export async function signMediaUrls<T extends { url: string | null | undefined }
       }
     }
 
-    results.push({ ...item, signedUrl });
+    results.push({ ...item, signedUrl, previewUrl });
   }
 
   return results;

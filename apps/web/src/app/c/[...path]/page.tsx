@@ -235,7 +235,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     }
     const { data: mediaRows, error: mediaError } = await supabase
       .from("media")
-      .select("advert_id,url,sort")
+      .select("advert_id,url,preview_url,sort")
       .in("advert_id", ids)
       .order("sort", { ascending: true });
 
@@ -254,12 +254,13 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           acc.get(media.advert_id)!.push({
             url: media.url ?? null,
             signedUrl: media.signedUrl,
+            previewUrl: media.previewUrl,
             sort: media.sort ?? null,
           });
 
           return acc;
         },
-        new Map<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>>(),
+        new Map<string, Array<{ url: string | null; signedUrl: string | null; previewUrl?: string | null; sort: number | null }>>(),
       );
 
       for (const [advertId, items] of grouped.entries()) {

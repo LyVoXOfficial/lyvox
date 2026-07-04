@@ -63,6 +63,11 @@ async function main() {
     await supa.storage.from(BUCKET).remove(files.map((f) => `seed/${f.name}`));
     console.log(`Removed ${files.length} images from ${BUCKET}/seed.`);
   }
+  const { data: previewFiles } = await supa.storage.from('ad-media-preview').list('seed', { limit: 1000 });
+  if (previewFiles?.length) {
+    await supa.storage.from('ad-media-preview').remove(previewFiles.map((f) => `seed/${f.name}`));
+    console.log(`Removed ${previewFiles.length} preview images from ad-media-preview/seed.`);
+  }
 
   // auth users
   for (const id of ids) await supa.auth.admin.deleteUser(id);

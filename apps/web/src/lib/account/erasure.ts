@@ -73,7 +73,7 @@ export async function eraseAccount(
     if (advertIds.length > 0) {
       const { data: mediaRows, error: mediaError } = await service
         .from("media")
-        .select("url")
+        .select("url,preview_url")
         .in("advert_id", advertIds);
 
       if (mediaError) {
@@ -89,6 +89,14 @@ export async function eraseAccount(
 
       if (storagePaths.length > 0) {
         await service.storage.from("ad-media").remove(storagePaths);
+      }
+
+      const previewStoragePaths = (mediaRows ?? [])
+        .map((r) => r.preview_url as string | null)
+        .filter((path): path is string => Boolean(path && !path.startsWith("http")));
+
+      if (previewStoragePaths.length > 0) {
+        await service.storage.from("ad-media-preview").remove(previewStoragePaths);
       }
     }
   } catch (storageErr) {

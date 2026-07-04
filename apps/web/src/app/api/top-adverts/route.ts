@@ -2,6 +2,8 @@ import { supabaseServer } from "@/lib/supabaseServer";
 import { createSuccessResponse, createErrorResponse, ApiErrorCode } from "@/lib/apiErrors";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import { popularityScore } from "@/lib/popularity";
+import { signMediaUrls } from "@/lib/media/signMediaUrls";
+import { getFirstImage } from "@/lib/media/getFirstImage";
 
 const limiter = createRateLimiter({
   limit: 60,
@@ -116,16 +118,36 @@ async function baseHandler(request: Request) {
   const topAdvertIds = topAdverts.map((a) => a.id);
   const { data: mediaData } = await supabase
     .from("media")
-    .select("advert_id, url")
+    .select("advert_id, url, preview_url, sort")
     .in("advert_id", topAdvertIds)
     .order("sort", { ascending: true });
 
   const mediaMap: Record<string, string> = {};
-  mediaData?.forEach((m) => {
-    if (!mediaMap[m.advert_id]) {
-      mediaMap[m.advert_id] = m.url;
+  if (mediaData?.length) {
+    const signedMedia = await signMediaUrls(mediaData);
+    const grouped = signedMedia.reduce(
+      (acc, media) => {
+        if (!acc.has(media.advert_id)) {
+          acc.set(media.advert_id, []);
+        }
+        acc.get(media.advert_id)!.push({
+          url: media.url ?? null,
+          signedUrl: media.signedUrl,
+          previewUrl: media.previewUrl,
+          sort: media.sort ?? null,
+        });
+        return acc;
+      },
+      new Map<string, Array<{ url: string | null; signedUrl: string | null; previewUrl?: string | null; sort: number | null }>>(),
+    );
+
+    for (const [advertId, items] of grouped.entries()) {
+      const first = getFirstImage(items);
+      if (first) {
+        mediaMap[advertId] = first;
+      }
     }
-  });
+  }
 
   // Add images to adverts
   const result = topAdverts.map((advert) => ({
@@ -144,4 +166,3 @@ export const GET = withRateLimit(baseHandler, {
   limiter,
   makeKey: (_req, _userId, ip) => ip ?? "anonymous",
 });
-

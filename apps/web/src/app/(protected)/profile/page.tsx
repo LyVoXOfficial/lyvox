@@ -118,11 +118,11 @@ async function loadProfileData(userId: string): Promise<(ProfileData & {
     status: advert.status ?? null,
     created_at: advert.created_at ?? "",
     location: advert.location ?? null,
-    media: [] as Array<{ url: string | null; sort: number | null }>,
+    media: [] as Array<{ url: string | null; signedUrl: string | null; previewUrl?: string | null; sort: number | null }>,
   }));
 
   // Fetch media for adverts and favorites plus seller verification in parallel
-  let mediaByAdvert: Record<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>> = {};
+  let mediaByAdvert: Record<string, Array<{ url: string | null; signedUrl: string | null; previewUrl?: string | null; sort: number | null }>> = {};
 
   if (favoritesError) {
     logger.warn("Failed to load profile favorites", {
@@ -144,14 +144,14 @@ async function loadProfileData(userId: string): Promise<(ProfileData & {
 
   const advertMediaPromise =
     adverts.length > 0
-      ? supabase.from("media").select("advert_id, url, sort").in("advert_id", adverts.map((ad) => ad.id))
+      ? supabase.from("media").select("advert_id, url, preview_url, sort").in("advert_id", adverts.map((ad) => ad.id))
       : Promise.resolve({ data: null, error: null });
 
   const favoriteMediaPromise =
     favoriteAdvertIds.length > 0
       ? supabase
           .from("media")
-          .select("advert_id, url, sort")
+          .select("advert_id, url, preview_url, sort")
           .in("advert_id", favoriteAdvertIds)
           .order("sort", { ascending: true })
       : Promise.resolve({ data: null, error: null });
@@ -197,16 +197,17 @@ async function loadProfileData(userId: string): Promise<(ProfileData & {
           acc[advertId] = [];
         }
 
-        const resolvedUrl = media.signedUrl ?? null;
+        const resolvedUrl = media.previewUrl ?? media.signedUrl ?? null;
         acc[advertId].push({
           url: resolvedUrl,
-          signedUrl: resolvedUrl,
+          signedUrl: media.signedUrl ?? null,
+          previewUrl: media.previewUrl,
           sort: media.sort ?? null,
         });
 
         return acc;
       },
-      {} as Record<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>>,
+      {} as Record<string, Array<{ url: string | null; signedUrl: string | null; previewUrl?: string | null; sort: number | null }>>,
     );
   }
 
@@ -222,12 +223,13 @@ async function loadProfileData(userId: string): Promise<(ProfileData & {
           advert_id: media.advert_id,
           url: media.url ?? null,
           signedUrl: media.signedUrl,
+          previewUrl: media.previewUrl,
           sort: media.sort ?? null,
         });
 
         return acc;
       },
-      new Map<string, Array<{ advert_id: string; url: string | null; signedUrl: string | null; sort: number | null }>>(),
+      new Map<string, Array<{ advert_id: string; url: string | null; signedUrl: string | null; previewUrl?: string | null; sort: number | null }>>(),
     );
 
     for (const [advertId, items] of groupedFavorites.entries()) {

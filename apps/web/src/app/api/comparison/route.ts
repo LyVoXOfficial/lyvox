@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
   const advertIdList = filteredAdverts.map((advert) => advert.id);
   const { data: mediaRows, error: mediaError } = await supabase
     .from("media")
-    .select("advert_id, url, sort")
+    .select("advert_id, url, preview_url, sort")
     .in("advert_id", advertIdList)
     .order("sort", { ascending: true });
 
@@ -195,11 +195,12 @@ export async function POST(request: NextRequest) {
           advert_id: media.advert_id,
           url: media.url ?? null,
           signedUrl: media.signedUrl,
+          previewUrl: media.previewUrl,
           sort: media.sort ?? null,
         });
         return acc;
       },
-      new Map<string, Array<{ advert_id: string; url: string | null; signedUrl: string | null; sort: number | null }>>(),
+      new Map<string, Array<{ advert_id: string; url: string | null; signedUrl: string | null; previewUrl?: string | null; sort: number | null }>>(),
     );
 
     for (const [advertId, items] of grouped.entries()) {

@@ -7,14 +7,16 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { readImageSize } from "@/lib/image";
 import { apiFetch } from "@/lib/fetcher";
-import { compressImage } from "@/lib/media/compressImage";
+import { compressImageVariants } from "@/lib/media/compressImage";
 import { useI18n } from "@/i18n";
 import { Eye, GripVertical, Loader2, Star, Trash2 } from "lucide-react";
 
 type MediaItem = {
   id: string;
   url: string;
+  previewUrl?: string | null;
   storagePath: string;
+  previewStoragePath?: string | null;
   w: number | null;
   h: number | null;
   sort: number;
@@ -76,13 +78,16 @@ export default function UploadGallery({ advertId, locale }: { advertId: string; 
       for (const rawFile of candidates) {
         // Downscale/re-encode camera originals BEFORE the size gate — a 8 MB
         // phone photo becomes ~300 KB WebP instead of a hard rejection.
-        const file = await compressImage(rawFile);
+        const { full: file, preview } = await compressImageVariants(rawFile);
         if (file.size > MAX_FILE_SIZE_BYTES) {
           setError(t("upload.error.file_too_large") || "File size must not exceed 5MB");
           continue;
         }
 
         const dims = await readImageSize(file).catch(() => ({ w: null, h: null }));
+        const previewDims = preview
+          ? await readImageSize(preview).catch(() => ({ w: null, h: null }))
+          : { w: null, h: null };
 
         const signResponse = await apiFetch("/api/media/sign", {
           method: "POST",
@@ -92,6 +97,8 @@ export default function UploadGallery({ advertId, locale }: { advertId: string; 
             fileName: file.name,
             contentType: file.type,
             fileSize: file.size,
+            previewContentType: preview?.type,
+            previewFileSize: preview?.size,
           }),
         });
 
@@ -124,7 +131,7 @@ export default function UploadGallery({ advertId, locale }: { advertId: string; 
           throw new Error(signPayload.detail || signPayload.message || errorMsg);
         }
 
-        const { path, token } = signPayload.data;
+        const { path, token, previewPath, previewToken } = signPayload.data;
         if (!path || !token) {
           const errorMsg = "Missing path or token from sign response";
           console.error("MEDIA_SIGN_MISSING_DATA", { path: !!path, token: !!token, fileName: file.name });
@@ -145,6 +152,22 @@ export default function UploadGallery({ advertId, locale }: { advertId: string; 
           );
         }
 
+        if (preview && previewPath && previewToken) {
+          const previewUploadResult = await supabase.storage
+            .from("ad-media-preview")
+            .uploadToSignedUrl(previewPath, previewToken, preview);
+          if (previewUploadResult.error) {
+            console.error("MEDIA_PREVIEW_UPLOAD_ERROR", {
+              error: previewUploadResult.error,
+              path: previewPath,
+              fileName: preview.name,
+            });
+            throw new Error(
+              previewUploadResult.error.message || `Preview upload failed: ${previewUploadResult.error}`,
+            );
+          }
+        }
+
         // Verify upload succeeded before completing
         if (!path) {
           throw new Error("Upload succeeded but path is missing");
@@ -158,6 +181,9 @@ export default function UploadGallery({ advertId, locale }: { advertId: string; 
             storagePath: path,
             width: dims.w,
             height: dims.h,
+            previewStoragePath: preview && previewPath ? previewPath : undefined,
+            previewWidth: previewDims.w ?? undefined,
+            previewHeight: previewDims.h ?? undefined,
           }),
         });
 
@@ -517,7 +543,7 @@ export default function UploadGallery({ advertId, locale }: { advertId: string; 
                 </div>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={item.url}
+                  src={item.previewUrl ?? item.url}
                   alt=""
                   className="aspect-square w-full rounded object-cover"
                 />

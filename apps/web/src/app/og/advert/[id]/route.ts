@@ -42,7 +42,7 @@ export async function GET(_req: Request, context: { params: Promise<{ id: string
 
     const { data: media, error: mediaError } = await service
       .from("media")
-      .select("url,sort")
+      .select("url,preview_url,sort")
       .eq("advert_id", id)
       .order("sort", { ascending: true })
       .limit(1);
@@ -53,11 +53,12 @@ export async function GET(_req: Request, context: { params: Promise<{ id: string
 
     const [signed] = await signMediaUrls(media, SIGNED_TTL_SECONDS);
 
-    if (!signed?.signedUrl) {
+    const redirectUrl = signed.previewUrl ?? signed.signedUrl;
+    if (!redirectUrl) {
       return fallbackRedirect();
     }
 
-    const response = NextResponse.redirect(signed.signedUrl, 302);
+    const response = NextResponse.redirect(redirectUrl, 302);
     response.headers.set("Cache-Control", "public, max-age=300");
     return response;
   } catch {

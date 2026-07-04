@@ -1,5 +1,6 @@
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
+import { getMediaPreviewPublicUrl } from "@/lib/media/previewUrls";
 
 const SIGNED_DOWNLOAD_TTL_SECONDS = 10 * 60;
 const DEFAULT_CAP = 24;
@@ -32,14 +33,14 @@ export async function resolveFirstImages(
 
   const { data: media } = await supabase
     .from("media")
-    .select("advert_id,url,sort")
+    .select("advert_id,url,preview_url,sort")
     .in("advert_id", activeIds)
     .order("sort", { ascending: true });
 
   // First (lowest sort) media row per advert. Rows arrive sorted ascending.
-  const firstPath = new Map<string, string>();
-  for (const row of (media ?? []) as Array<{ advert_id: string; url: string }>) {
-    if (!firstPath.has(row.advert_id)) firstPath.set(row.advert_id, row.url);
+  const firstPath = new Map<string, { url: string; preview_url: string | null }>();
+  for (const row of (media ?? []) as Array<{ advert_id: string; url: string; preview_url: string | null }>) {
+    if (!firstPath.has(row.advert_id)) firstPath.set(row.advert_id, { url: row.url, preview_url: row.preview_url });
   }
   if (firstPath.size === 0) return out;
 
@@ -47,7 +48,13 @@ export async function resolveFirstImages(
   const storage = service.storage.from("ad-media");
 
   await Promise.all(
-    Array.from(firstPath.entries()).map(async ([advertId, path]) => {
+    Array.from(firstPath.entries()).map(async ([advertId, item]) => {
+      const previewUrl = getMediaPreviewPublicUrl(item.preview_url);
+      if (previewUrl) {
+        out.set(advertId, previewUrl);
+        return;
+      }
+      const path = item.url;
       if (path.startsWith("http://") || path.startsWith("https://")) {
         out.set(advertId, path); // legacy absolute URL — use as-is
         return;

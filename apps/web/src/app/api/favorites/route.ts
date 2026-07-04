@@ -128,7 +128,7 @@ async function getFavorites(request: Request) {
   if (advertIds.length > 0) {
     const { data: mediaData, error: mediaError } = await supabase
       .from("media")
-      .select("advert_id, url, sort")
+      .select("advert_id, url, preview_url, sort")
       .in("advert_id", advertIds)
       .order("sort", { ascending: true });
 
@@ -139,8 +139,9 @@ async function getFavorites(request: Request) {
     const signedMedia = await signMediaUrls(mediaData ?? []);
 
     for (const media of signedMedia) {
-      if (media.signedUrl && !mediaMap.has(media.advert_id)) {
-        mediaMap.set(media.advert_id, media.signedUrl);
+      const imageUrl = media.previewUrl ?? media.signedUrl;
+      if (imageUrl && !mediaMap.has(media.advert_id)) {
+        mediaMap.set(media.advert_id, imageUrl);
       }
     }
   }

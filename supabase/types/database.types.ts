@@ -1683,6 +1683,10 @@ export type Database = {
           created_at: string | null
           h: number | null
           id: string
+          preview_h: number | null
+          preview_mime: string | null
+          preview_url: string | null
+          preview_w: number | null
           sort: number | null
           url: string
           w: number | null
@@ -1692,6 +1696,10 @@ export type Database = {
           created_at?: string | null
           h?: number | null
           id?: string
+          preview_h?: number | null
+          preview_mime?: string | null
+          preview_url?: string | null
+          preview_w?: number | null
           sort?: number | null
           url: string
           w?: number | null
@@ -1701,6 +1709,10 @@ export type Database = {
           created_at?: string | null
           h?: number | null
           id?: string
+          preview_h?: number | null
+          preview_mime?: string | null
+          preview_url?: string | null
+          preview_w?: number | null
           sort?: number | null
           url?: string
           w?: number | null

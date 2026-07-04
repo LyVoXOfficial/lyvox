@@ -78,7 +78,7 @@ async function resolveFirstImages(
 
   const { data: mediaData, error: mediaError } = await supabase
     .from("media")
-    .select("advert_id,url,sort")
+    .select("advert_id,url,preview_url,sort")
     .in("advert_id", advertIds)
     .order("sort", { ascending: true });
 
@@ -106,12 +106,13 @@ async function resolveFirstImages(
       acc.get(advertId)!.push({
         url: media.url ?? null,
         signedUrl: media.signedUrl,
+        previewUrl: media.previewUrl,
         sort: media.sort ?? null,
       });
 
       return acc;
     },
-    new Map<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>>(),
+    new Map<string, Array<{ url: string | null; signedUrl: string | null; previewUrl?: string | null; sort: number | null }>>(),
   );
 
   for (const [advertId, items] of grouped.entries()) {

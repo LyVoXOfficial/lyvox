@@ -43,6 +43,8 @@ export default function AdvertGallery({ images }: AdvertGalleryProps) {
             alt={activeImage?.alt || "Advert image"}
             width={activeImage?.width ?? undefined}
             height={activeImage?.height ?? undefined}
+            loading="eager"
+            fetchPriority="high"
             className="h-full w-full object-cover"
           />
         ) : (
@@ -90,6 +92,7 @@ export default function AdvertGallery({ images }: AdvertGalleryProps) {
                 <img
                   src={image.url}
                   alt={image.alt || `Preview ${index + 1}`}
+                  loading="lazy"
                   className="h-full w-full object-cover"
                 />
               ) : (

@@ -1726,7 +1726,7 @@ async function loadAdvertData(
 
   const { data: mediaRows, error: mediaError } = await svc
     .from("media")
-    .select("id,url,sort,w,h")
+    .select("id,url,preview_url,sort,w,h,preview_w,preview_h")
     .eq("advert_id", advertId)
     .order("sort", { ascending: true });
 
@@ -1750,6 +1750,9 @@ async function loadAdvertData(
       sort: number | null;
       w: number | null;
       h: number | null;
+      preview_url?: string | null;
+      preview_w?: number | null;
+      preview_h?: number | null;
     }>;
 
     const signedMediaRows = await signMediaUrls(typedRows);
@@ -2007,7 +2010,7 @@ async function loadSimilarAdverts(
         location,
         created_at,
         user_id,
-        media(url, sort)
+        media(url, preview_url, sort)
       `,
       )
       .eq("category_id", categoryId)
@@ -2054,6 +2057,7 @@ async function loadSimilarAdverts(
         ? row.media.map((item) => ({
             advert_id: row.id,
             url: item?.url ?? null,
+            preview_url: item?.preview_url ?? null,
             sort: item?.sort ?? null,
           }))
         : [],
@@ -2069,12 +2073,13 @@ async function loadSimilarAdverts(
         acc.get(media.advert_id)!.push({
           url: media.url ?? null,
           signedUrl: media.signedUrl,
+          previewUrl: media.previewUrl,
           sort: media.sort ?? null,
         });
 
         return acc;
       },
-      new Map<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>>(),
+      new Map<string, Array<{ url: string | null; signedUrl: string | null; previewUrl?: string | null; sort: number | null }>>(),
     );
 
     const mapped = data.map((row) => {

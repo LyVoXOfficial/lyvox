@@ -123,7 +123,7 @@ export default async function ProPage() {
     if (rawAdverts.length > 0) {
       const { data: mediaRows } = await supabase
         .from("media")
-        .select("advert_id, url, sort")
+        .select("advert_id, url, preview_url, sort")
         .in(
           "advert_id",
           rawAdverts.map((a) => a.id),
@@ -132,12 +132,13 @@ export default async function ProPage() {
       const signedMedia = mediaRows?.length ? await signMediaUrls(mediaRows) : [];
 
       const mediaByAdvert = signedMedia.reduce<
-        Record<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>>
+        Record<string, Array<{ url: string | null; signedUrl: string | null; previewUrl?: string | null; sort: number | null }>>
       >((acc, m) => {
         if (!acc[m.advert_id]) acc[m.advert_id] = [];
         acc[m.advert_id].push({
           url: m.signedUrl ?? null,
           signedUrl: m.signedUrl ?? null,
+          previewUrl: m.previewUrl,
           sort: m.sort ?? null,
         });
         return acc;

@@ -23,6 +23,18 @@ export const signMediaSchema = z.object({
     .int("File size must be an integer")
     .positive("File size must be positive")
     .max(5 * 1024 * 1024, "File size must not exceed 5MB"),
+
+  previewContentType: z
+    .string()
+    .startsWith("image/", "Preview content type must be an image")
+    .optional(),
+
+  previewFileSize: z
+    .number()
+    .int("Preview file size must be an integer")
+    .positive("Preview file size must be positive")
+    .max(1024 * 1024, "Preview file size must not exceed 1MB")
+    .optional(),
 });
 
 export type SignMediaInput = z.infer<typeof signMediaSchema>;
@@ -59,6 +71,28 @@ export const completeMediaSchema = z.object({
     .int()
     .positive()
     .optional(),
+
+  previewStoragePath: z
+    .string()
+    .trim()
+    .min(1, "Preview storage path is required")
+    .regex(
+      /^[a-z0-9_/-]+\.[a-z0-9_]+$/i,
+      "Preview storage path format is invalid",
+    )
+    .optional(),
+
+  previewWidth: z
+    .number()
+    .int()
+    .positive()
+    .optional(),
+
+  previewHeight: z
+    .number()
+    .int()
+    .positive()
+    .optional(),
 });
 
 export type CompleteMediaInput = z.infer<typeof completeMediaSchema>;
@@ -77,4 +111,3 @@ export const reorderMediaSchema = z.object({
 });
 
 export type ReorderMediaInput = z.infer<typeof reorderMediaSchema>;
-
