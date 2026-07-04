@@ -153,7 +153,8 @@
     "relaxedCount": "Wir haben deine Filter erweitert und {count} weitere gefunden.",
     "relaxedHint": "Wir haben deine Filter erweitert, um verwandte Anzeigen zu zeigen.",
     "verifiedOnlyChip": "Nur verifiziert",
-    "verifiedPreview": "{verified} von {total}"
+    "verifiedPreview": "{verified} von {total}",
+    "showN": "{count} anzeigen"
   },
   "contact": {
     "price": "Preis",

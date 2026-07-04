@@ -153,7 +153,8 @@
     "relaxedCount": "We broadened your filters and found {count} more.",
     "relaxedHint": "We broadened your filters to show related listings.",
     "verifiedOnlyChip": "Verified only",
-    "verifiedPreview": "{verified} of {total}"
+    "verifiedPreview": "{verified} of {total}",
+    "showN": "Show {count}"
   },
   "contact": {
     "price": "Price",

@@ -153,7 +153,8 @@
     "relaxedCount": "We hebben je filters verruimd en {count} extra gevonden.",
     "relaxedHint": "We hebben je filters verruimd om verwante zoekertjes te tonen.",
     "verifiedOnlyChip": "Alleen geverifieerd",
-    "verifiedPreview": "{verified} van {total}"
+    "verifiedPreview": "{verified} van {total}",
+    "showN": "Toon {count}"
   },
   "contact": {
     "price": "Prijs",
