@@ -59,8 +59,8 @@ export default function AdsGrid({
 
   return (
     <div className={`grid gap-3 lg:gap-4 ${gridColsClass}`}>
-      {items.map((item) => (
-        <AdCard key={item.id} {...item} />
+      {items.map((item, index) => (
+        <AdCard key={item.id} {...item} priority={index < 4} />
       ))}
     </div>
   );

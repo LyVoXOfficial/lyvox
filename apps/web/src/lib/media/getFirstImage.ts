@@ -4,9 +4,9 @@ export type SortableMedia<T> = (MediaItemWithUrl<T> & { sort?: number | null }) 
 
 /**
  * Return the first available media URL based on the `sort` value.
- * Prefers `signedUrl`, falling back to absolute `url` values.
+ * Prefers stable preview URLs, then signed full URLs, falling back to absolute URLs.
  */
-export function getFirstImage<T extends { url: string | null | undefined; sort?: number | null; signedUrl?: string | null }>(
+export function getFirstImage<T extends { url: string | null | undefined; sort?: number | null; signedUrl?: string | null; previewUrl?: string | null }>(
   mediaItems: Array<T>,
 ): string | null {
   if (!mediaItems?.length) {
@@ -20,6 +20,10 @@ export function getFirstImage<T extends { url: string | null | undefined; sort?:
   });
 
   for (const item of sorted) {
+    if (item.previewUrl && item.previewUrl.length > 0) {
+      return item.previewUrl;
+    }
+
     if (item.signedUrl && item.signedUrl.length > 0) {
       return item.signedUrl;
     }

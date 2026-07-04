@@ -4,7 +4,9 @@
 // for listing photos).
 
 const MAX_DIMENSION = 1600;
+const PREVIEW_MAX_DIMENSION = 400;
 const WEBP_QUALITY = 0.82;
+const PREVIEW_WEBP_QUALITY = 0.75;
 const JPEG_QUALITY = 0.85;
 // Below this size the roundtrip isn't worth it (icons, screenshots, already-tiny files).
 const SKIP_BELOW_BYTES = 400 * 1024;
@@ -35,12 +37,15 @@ const decode = async (file: File): Promise<ImageBitmap | HTMLImageElement> => {
 const toBlob = (canvas: HTMLCanvasElement, type: string, quality: number) =>
   new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, quality));
 
-/**
- * Downscale to MAX_DIMENSION and re-encode as WebP (JPEG fallback).
- * Never throws: any failure returns the original file untouched.
- * GIFs are passed through (canvas would drop animation).
- */
-export async function compressImage(file: File): Promise<File> {
+type EncodeOptions = {
+  maxDimension: number;
+  webpQuality: number;
+  jpegQuality: number;
+  skipBelowBytes?: number;
+  suffix?: string;
+};
+
+async function resizeImage(file: File, options: EncodeOptions): Promise<File> {
   try {
     if (!file.type.startsWith("image/") || file.type === "image/gif") return file;
 
@@ -49,8 +54,8 @@ export async function compressImage(file: File): Promise<File> {
     const srcH = "height" in source ? source.height : 0;
     if (!srcW || !srcH) return file;
 
-    const scale = Math.min(1, MAX_DIMENSION / Math.max(srcW, srcH));
-    if (scale === 1 && file.size <= SKIP_BELOW_BYTES) return file;
+    const scale = Math.min(1, options.maxDimension / Math.max(srcW, srcH));
+    if (scale === 1 && options.skipBelowBytes && file.size <= options.skipBelowBytes) return file;
 
     const canvas = document.createElement("canvas");
     canvas.width = Math.round(srcW * scale);
@@ -60,17 +65,47 @@ export async function compressImage(file: File): Promise<File> {
     ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
     if ("close" in source) source.close();
 
-    let blob = await toBlob(canvas, "image/webp", WEBP_QUALITY);
+    let blob = await toBlob(canvas, "image/webp", options.webpQuality);
     let ext = "webp";
     if (!blob || blob.type !== "image/webp") {
-      blob = await toBlob(canvas, "image/jpeg", JPEG_QUALITY);
+      blob = await toBlob(canvas, "image/jpeg", options.jpegQuality);
       ext = "jpg";
     }
     if (!blob || blob.size >= file.size) return file;
 
     const base = file.name.replace(/\.[^.]+$/, "") || "photo";
-    return new File([blob], `${base}.${ext}`, { type: blob.type });
+    return new File([blob], `${base}${options.suffix ?? ""}.${ext}`, { type: blob.type });
   } catch {
     return file;
   }
+}
+
+/**
+ * Downscale to MAX_DIMENSION and re-encode as WebP (JPEG fallback).
+ * Never throws: any failure returns the original file untouched.
+ * GIFs are passed through (canvas would drop animation).
+ */
+export async function compressImage(file: File): Promise<File> {
+  return resizeImage(file, {
+    maxDimension: MAX_DIMENSION,
+    webpQuality: WEBP_QUALITY,
+    jpegQuality: JPEG_QUALITY,
+    skipBelowBytes: SKIP_BELOW_BYTES,
+  });
+}
+
+export async function compressImageVariants(file: File): Promise<{ full: File; preview: File | null }> {
+  const full = await compressImage(file);
+  if (!full.type.startsWith("image/") || full.type === "image/gif") {
+    return { full, preview: null };
+  }
+
+  const preview = await resizeImage(full, {
+    maxDimension: PREVIEW_MAX_DIMENSION,
+    webpQuality: PREVIEW_WEBP_QUALITY,
+    jpegQuality: JPEG_QUALITY,
+    suffix: "-400",
+  });
+
+  return { full, preview: preview === full ? null : preview };
 }

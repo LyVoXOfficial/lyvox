@@ -15,6 +15,7 @@ import {
 } from "@/lib/apiErrors";
 import { validateRequest } from "@/lib/validations";
 import { completeMediaSchema } from "@/lib/validations/media";
+import { getMediaPreviewPublicUrl } from "@/lib/media/previewUrls";
 
 export const runtime = "nodejs";
 
@@ -33,6 +34,9 @@ async function handlePost(request: Request) {
     storagePath?: string;
     width?: number;
     height?: number;
+    previewStoragePath?: string;
+    previewWidth?: number;
+    previewHeight?: number;
   }>(request);
   if (!parseResult.success) {
     return parseResult.response;
@@ -43,7 +47,7 @@ async function handlePost(request: Request) {
     return validationResult.response;
   }
 
-  const { advertId, storagePath, width, height } = validationResult.data;
+  const { advertId, storagePath, width, height, previewStoragePath, previewWidth, previewHeight } = validationResult.data;
 
   const authResult = await requireAuthenticatedUser(request);
   if ("response" in authResult) {
@@ -61,6 +65,17 @@ async function handlePost(request: Request) {
         user_id: user.id,
         action: "media_complete_denied",
         details: { advertId, storagePath },
+      });
+    return createErrorResponse(ApiErrorCode.FORBIDDEN, { status: 403 });
+  }
+
+  if (previewStoragePath && !previewStoragePath.startsWith(`${user.id}/${advertId}/previews/`)) {
+    await service
+      .from("logs")
+      .insert({
+        user_id: user.id,
+        action: "media_complete_preview_denied",
+        details: { advertId, previewStoragePath },
       });
     return createErrorResponse(ApiErrorCode.FORBIDDEN, { status: 403 });
   }
@@ -119,12 +134,16 @@ async function handlePost(request: Request) {
     sort: nextSort,
     w: width ?? null,
     h: height ?? null,
+    preview_url: previewStoragePath ?? null,
+    preview_w: previewWidth ?? null,
+    preview_h: previewHeight ?? null,
+    preview_mime: previewStoragePath ? "image/webp" : null,
   };
 
   const { data: inserted, error: insertError } = await supabase
     .from("media")
     .insert(insertPayload)
-    .select("id, url, sort, w, h")
+    .select("id, url, sort, w, h, preview_url, preview_w, preview_h")
     .single();
 
   if (insertError || !inserted) {
@@ -149,10 +168,14 @@ async function handlePost(request: Request) {
     media: {
       id: inserted.id,
       url: signedDownload.signedUrl,
+      previewUrl: getMediaPreviewPublicUrl(inserted.preview_url),
       sort: inserted.sort,
       w: inserted.w,
       h: inserted.h,
+      preview_w: inserted.preview_w,
+      preview_h: inserted.preview_h,
       storagePath,
+      previewStoragePath: inserted.preview_url,
     },
   });
 }

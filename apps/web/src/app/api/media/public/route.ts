@@ -7,6 +7,7 @@ import {
   handleSupabaseError,
   ApiErrorCode,
 } from "@/lib/apiErrors";
+import { getMediaPreviewPublicUrl } from "@/lib/media/previewUrls";
 
 export const runtime = "nodejs";
 
@@ -53,7 +54,7 @@ async function handleGet(request: Request) {
   // Load media - RLS allows public read for active adverts
   const { data: records, error: mediaError } = await supabase
     .from("media")
-    .select("id,url,sort,w,h,created_at")
+    .select("id,url,sort,w,h,preview_url,preview_w,preview_h,created_at")
     .eq("advert_id", advertId)
     .order("sort", { ascending: true });
 
@@ -79,10 +80,14 @@ async function handleGet(request: Request) {
         return {
           id: record.id,
           url: path,
+          previewUrl: getMediaPreviewPublicUrl(record.preview_url),
           storagePath: null,
+          previewStoragePath: record.preview_url,
           sort: record.sort,
           w: record.w,
           h: record.h,
+          preview_w: record.preview_w,
+          preview_h: record.preview_h,
           created_at: record.created_at,
         };
       }
@@ -102,10 +107,14 @@ async function handleGet(request: Request) {
       return {
         id: record.id,
         url: error ? null : data?.signedUrl ?? null,
+        previewUrl: getMediaPreviewPublicUrl(record.preview_url),
         storagePath: path,
+        previewStoragePath: record.preview_url,
         sort: record.sort,
         w: record.w,
         h: record.h,
+        preview_w: record.preview_w,
+        preview_h: record.preview_h,
         created_at: record.created_at,
       };
     }) ?? [];

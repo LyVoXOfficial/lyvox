@@ -70,12 +70,12 @@ export async function GET(request: NextRequest) {
   }
 
   // Fetch media for all adverts in a separate query
-  let mediaByAdvert: Record<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>> = {};
+  let mediaByAdvert: Record<string, Array<{ url: string | null; signedUrl: string | null; previewUrl?: string | null; sort: number | null }>> = {};
   if (adverts && adverts.length > 0) {
     const advertIds = adverts.map((ad) => ad.id);
     const { data: mediaData, error: mediaError } = await supabase
       .from("media")
-      .select("advert_id, url, sort")
+      .select("advert_id, url, preview_url, sort")
       .in("advert_id", advertIds);
 
     if (mediaError) {
@@ -90,14 +90,15 @@ export async function GET(request: NextRequest) {
           }
 
           acc[media.advert_id].push({
-            url: media.signedUrl ?? null,
+            url: media.previewUrl ?? media.signedUrl ?? null,
             signedUrl: media.signedUrl ?? null,
+            previewUrl: media.previewUrl,
             sort: media.sort ?? null,
           });
 
           return acc;
         },
-        {} as Record<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>>,
+        {} as Record<string, Array<{ url: string | null; signedUrl: string | null; previewUrl?: string | null; sort: number | null }>>,
       );
     }
   }
@@ -120,4 +121,3 @@ export async function GET(request: NextRequest) {
     pageSize,
   });
 }
-

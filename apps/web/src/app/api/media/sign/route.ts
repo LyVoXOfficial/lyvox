@@ -43,6 +43,14 @@ const buildPath = (userId: string, advertId: string, originalName: string) => {
   return `${userId}/${advertId}/${slug}.${ext}`;
 };
 
+const buildPreviewPath = (storagePath: string) => {
+  const slashIndex = storagePath.lastIndexOf("/");
+  const dir = slashIndex >= 0 ? storagePath.slice(0, slashIndex) : "";
+  const file = slashIndex >= 0 ? storagePath.slice(slashIndex + 1) : storagePath;
+  const base = file.replace(/\.[^.]+$/, "") || "photo";
+  return `${dir}/previews/${base}-400.webp`;
+};
+
 async function handlePost(request: Request) {
   const parseResult = await safeJsonParse<{
     advertId?: string;
@@ -59,7 +67,7 @@ async function handlePost(request: Request) {
     return validationResult.response;
   }
 
-  const { advertId, fileName, contentType, fileSize } = validationResult.data;
+  const { advertId, fileName, contentType, fileSize, previewContentType, previewFileSize } = validationResult.data;
 
   const authResult = await requireAuthenticatedUser(request);
   if ("response" in authResult) {
@@ -108,6 +116,7 @@ async function handlePost(request: Request) {
 
   const service = await supabaseService();
   const storage = service.storage.from("ad-media");
+  const previewStorage = service.storage.from("ad-media-preview");
   const { data: signedUpload, error: signedError } = await storage.createSignedUploadUrl(
     storagePath,
     { upsert: false },
@@ -120,9 +129,30 @@ async function handlePost(request: Request) {
     );
   }
 
+  let preview: { path: string; token: string } | null = null;
+  if (previewContentType && previewFileSize) {
+    const previewPath = buildPreviewPath(storagePath);
+    const { data: signedPreviewUpload, error: previewSignedError } =
+      await previewStorage.createSignedUploadUrl(previewPath, { upsert: false });
+
+    if (previewSignedError || !signedPreviewUpload) {
+      return handleSupabaseError(
+        previewSignedError ?? { message: "PREVIEW_SIGNED_URL_FAILED" },
+        ApiErrorCode.SIGNED_URL_FAILED,
+      );
+    }
+
+    preview = {
+      path: previewPath,
+      token: signedPreviewUpload.token,
+    };
+  }
+
   return createSuccessResponse({
     path: storagePath,
     token: signedUpload.token,
+    previewPath: preview?.path ?? null,
+    previewToken: preview?.token ?? null,
     expiresIn: SIGNED_UPLOAD_TTL_SECONDS,
     orderIndex: nextSort,
     max: MEDIA_LIMIT_PER_ADVERT,

@@ -31,7 +31,7 @@ async function getAdvertForEdit(id: string, userId: string) {
   const supabase = await supabaseServer();
   const { data: ad, error } = await supabase
     .from("adverts")
-    .select("*, media(id, url, sort), ad_item_specifics(specifics)")
+    .select("*, media(id, url, preview_url, sort), ad_item_specifics(specifics)")
     .eq("id", id)
     .eq("user_id", userId)
     .maybeSingle();

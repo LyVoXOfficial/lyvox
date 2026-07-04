@@ -10,7 +10,7 @@ import { eraseAccount, ActiveBusinessError } from "@/lib/account/erasure";
 function makeService({
   rpcError = null as null | { message?: string; code?: string },
   advertRows = [] as { id: string }[],
-  mediaRows = [] as { url: string }[],
+  mediaRows = [] as { url: string; preview_url?: string | null }[],
   storageError = null as null | Error,
   deleteUserError = null as null | { message: string },
 } = {}) {
@@ -29,17 +29,22 @@ function makeService({
     return {};
   });
 
-  const storageRemove = vi.fn().mockResolvedValue(
-    storageError ? Promise.reject(storageError) : { data: null, error: null },
+  const storageRemove = vi.fn(() =>
+    storageError ? Promise.reject(storageError) : Promise.resolve({ data: null, error: null }),
+  );
+  const previewStorageRemove = vi.fn(() =>
+    storageError ? Promise.reject(storageError) : Promise.resolve({ data: null, error: null }),
   );
   const storage = {
-    from: vi.fn().mockReturnValue({ remove: storageRemove }),
+    from: vi.fn((bucket: string) => ({
+      remove: bucket === "ad-media-preview" ? previewStorageRemove : storageRemove,
+    })),
   };
 
   const deleteUser = vi.fn().mockResolvedValue({ error: deleteUserError, data: null });
   const auth = { admin: { deleteUser } };
 
-  return { rpc, from, storage, auth, _mocks: { storageRemove, deleteUser } };
+  return { rpc, from, storage, auth, _mocks: { storageRemove, previewStorageRemove, deleteUser } };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -55,6 +60,8 @@ describe("eraseAccount", () => {
     const svc = makeService({
       advertRows: [{ id: "adv-1" }, { id: "adv-2" }],
       mediaRows: [
+        { url: "https://cdn.example.com/preview-only-1.jpg", preview_url: "user/adv-1/previews/photo-400.webp" },
+        { url: "https://cdn.example.com/preview-only-2.jpg", preview_url: "user/adv-2/previews/photo-400.webp" },
         { url: "ad-media/user/adv-1/photo.jpg" },   // storage path — included
         { url: "https://cdn.example.com/img.jpg" },  // full URL — excluded
         { url: "ad-media/user/adv-2/photo.jpg" },   // storage path — included
@@ -72,12 +79,18 @@ describe("eraseAccount", () => {
     expect(svc.from).toHaveBeenCalledWith("media");
 
     // storage.remove called with only non-http paths
-    const { storageRemove, deleteUser } = svc._mocks;
+    const { storageRemove, previewStorageRemove, deleteUser } = svc._mocks;
     expect(svc.storage.from).toHaveBeenCalledWith("ad-media");
+    expect(svc.storage.from).toHaveBeenCalledWith("ad-media-preview");
     expect(storageRemove).toHaveBeenCalledOnce();
     expect(storageRemove).toHaveBeenCalledWith([
       "ad-media/user/adv-1/photo.jpg",
       "ad-media/user/adv-2/photo.jpg",
+    ]);
+    expect(previewStorageRemove).toHaveBeenCalledOnce();
+    expect(previewStorageRemove).toHaveBeenCalledWith([
+      "user/adv-1/previews/photo-400.webp",
+      "user/adv-2/previews/photo-400.webp",
     ]);
 
     // deleteUser called once with userId
@@ -87,9 +100,11 @@ describe("eraseAccount", () => {
     // ORDER: rpc < storage.remove < deleteUser
     const rpcOrder = svc.rpc.mock.invocationCallOrder[0];
     const removeOrder = storageRemove.mock.invocationCallOrder[0];
+    const previewRemoveOrder = previewStorageRemove.mock.invocationCallOrder[0];
     const deleteOrder = deleteUser.mock.invocationCallOrder[0];
     expect(rpcOrder).toBeLessThan(removeOrder);
     expect(removeOrder).toBeLessThan(deleteOrder);
+    expect(previewRemoveOrder).toBeLessThan(deleteOrder);
   });
 
   it("throws ActiveBusinessError on ACTIVE_BUSINESS rpc error (by message)", async () => {

@@ -35,7 +35,7 @@ async function handleDelete(
 
   const { data: media, error: mediaError } = await supabase
     .from("media")
-    .select("id,advert_id,url,sort")
+    .select("id,advert_id,url,preview_url,sort")
     .eq("id", id)
     .maybeSingle();
 
@@ -59,7 +59,12 @@ async function handleDelete(
   }
 
   const service = await supabaseService();
-  await service.storage.from("ad-media").remove([media.url]);
+  if (media.url && !media.url.startsWith("http")) {
+    await service.storage.from("ad-media").remove([media.url]);
+  }
+  if (media.preview_url && !media.preview_url.startsWith("http")) {
+    await service.storage.from("ad-media-preview").remove([media.preview_url]);
+  }
 
   const { error: deleteError } = await supabase.from("media").delete().eq("id", id);
 

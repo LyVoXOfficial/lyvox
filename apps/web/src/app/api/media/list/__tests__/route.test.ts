@@ -92,6 +92,9 @@ function makeOwnedAdvertWithMedia() {
                 {
                   id: "media-1",
                   url: "user-1/adv-1/photo-1.jpg",
+                  preview_url: null,
+                  preview_w: null,
+                  preview_h: null,
                   sort: 0,
                   w: 800,
                   h: 600,
@@ -184,10 +187,14 @@ describe("GET /api/media/list", () => {
       {
         id: "media-1",
         url: "https://signed.example/user-1/adv-1/photo-1.jpg",
+        previewUrl: null,
         storagePath: "user-1/adv-1/photo-1.jpg",
+        previewStoragePath: null,
         sort: 0,
         w: 800,
         h: 600,
+        preview_w: null,
+        preview_h: null,
         created_at: "2026-01-01T00:00:00.000Z",
       },
     ]);

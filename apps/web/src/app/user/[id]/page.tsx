@@ -40,7 +40,7 @@ type PublicProfileData = {
     status: string | null;
     created_at: string;
     location: string | null;
-    media: { url: string | null; signedUrl: string | null; sort: number | null }[] | null;
+    media: { url: string | null; signedUrl: string | null; previewUrl?: string | null; sort: number | null }[] | null;
   }>;
   reviews: Array<{
     id: string;
@@ -96,7 +96,7 @@ async function loadPublicProfileData(userId: string): Promise<PublicProfileData 
       status,
       created_at,
       location,
-      media(url, sort)
+      media(url, preview_url, sort)
     `
     )
     .eq("user_id", userId)
@@ -191,6 +191,7 @@ async function loadPublicProfileData(userId: string): Promise<PublicProfileData 
       ? ad.media.map((media) => ({
           advert_id: ad.id,
           url: media.url ?? null,
+          preview_url: media.preview_url ?? null,
           sort: media.sort ?? null,
         }))
       : []
@@ -205,12 +206,13 @@ async function loadPublicProfileData(userId: string): Promise<PublicProfileData 
       acc.get(media.advert_id)!.push({
         url: media.url ?? null,
         signedUrl: media.signedUrl,
+        previewUrl: media.previewUrl,
         sort: media.sort ?? null,
       });
 
       return acc;
     },
-    new Map<string, Array<{ url: string | null; signedUrl: string | null; sort: number | null }>>()
+    new Map<string, Array<{ url: string | null; signedUrl: string | null; previewUrl?: string | null; sort: number | null }>>()
   );
 
   return {

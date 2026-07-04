@@ -25,6 +25,7 @@ type Props = {
     benefit_type: string;
     valid_until: string;
   }>;
+  priority?: boolean;
   /** Optional condition label shown as a pill top-left (e.g. "Like new", "Used"). Additive — no existing callers pass this yet. */
   condition?: string;
 };
@@ -41,6 +42,7 @@ export default function AdCard({
   sellerVerified,
   likeCount,
   benefits,
+  priority = false,
   condition,
 }: Props) {
   const { t, locale } = useI18n();
@@ -102,7 +104,8 @@ export default function AdCard({
             <img
               src={image}
               alt={title}
-              loading="lazy"
+              loading={priority ? "eager" : "lazy"}
+              fetchPriority={priority ? "high" : "auto"}
               className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
             />
           ) : (
