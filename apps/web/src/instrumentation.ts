@@ -2,8 +2,14 @@
 // Loaded via next.config.ts: experimental.instrumentationHook
 
 import * as Sentry from '@sentry/nextjs';
+import { assertEnvOnBoot } from '@/lib/env';
 
 export function register() {
+  // FLAG-05 / SEC-RL2: fail loudly at boot in production if a critical key
+  // (Supabase, Upstash) is missing, instead of degrading silently. Runs in both
+  // nodejs and edge runtimes so no server variant boots misconfigured.
+  assertEnvOnBoot();
+
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     if (process.env.SENTRY_DSN) {
       Sentry.init({

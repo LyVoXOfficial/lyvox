@@ -68,7 +68,7 @@ capabilityOn(x) === adminToggle(x) === true  &&  requiredSecretsPresent(x) === t
 ### Фаза A — старт: внешний трек + видимость
 - [ ] **01.** Запустить внешние гейты (часы пошли): `PROD-F3` (PSD2/AML юрист+Stripe+NBB), `PROD-F4` (GDPR RoPA/DPIA), `PROD-F5` (DSA-роль/PoC), `VAT-LEGAL` (бухгалтер: ставки/схемы) — переписка/договоры параллельно всему коду — 🎚️ **[— · n/a внешнее]**
 - [x] ~~**02.** `OPS-ERR` — Sentry + Vercel Speed Insights (снять baseline скорости/ошибок ДО оптимизаций — иначе чиним вслепую) — 🎚️ **[Haiku 4.5 · low]**~~ ✅ 2026-07-04
-- [ ] **03.** `FLAG-05` + `SEC-RL2` — единая zod-схема env + hard-fail в prod при отсутствии критичных ключей (закрывает «rate-limiter молча выключен») — 🎚️ **[Opus 4.8 · high]**
+- [x] **03.** ~~`FLAG-05` + `SEC-RL2` — единая zod-схема env + hard-fail в prod при отсутствии критичных ключей (закрывает «rate-limiter молча выключен»)~~ ✅ `lib/env.ts` (boot-assert в `instrumentation.register()`) + rate-limiter fail-closed в prod — 🎚️ **[Opus 4.8 · high]**
 
 ### Фаза B — безопасность P0 (дёшево, критично, до запуска)
 - [ ] **04.** `SEC-CSP` — CSP report-only → enforced (nonce + strict-dynamic, убрать `unsafe-inline`/`unsafe-eval`) — топ-1 дыра — 🎚️ **[Workflow · ultracode]**
@@ -147,6 +147,7 @@ capabilityOn(x) === adminToggle(x) === true  &&  requiredSecretsPresent(x) === t
 | `search_adverts` RPC: 13-арг сигнатура фиксирована | 1× | Не добавлять параметры без координированного DROP+CREATE |
 | react-compiler ESLint hard-errors (не только tsc) | 1× | refs-during-render + reassign-after-render; debounce через useMemo object-mutation |
 | Supabase migration drift (out-of-band applied) | 1× | schema_migrations рассинхронился; сверять 77=77 через psql |
+| env-валидация: throw на import ломает `next build`; `NODE_ENV==='production'` ловит и Vercel **preview** | 1× | Валидировать только в runtime-boot (`instrumentation.register()`), не на import; hard-fail гейтить на `VERCEL_ENV==='production'` (или self-host `NODE_ENV`), иначе падают preview-деплои без Upstash |
 
 *(при повторе любой строки до счётчика 3 — переносим в «Правила» с новым RULE-ID и, если применимо, добавляем CI-гард)*
 
@@ -225,10 +226,11 @@ capabilityOn(x) === adminToggle(x) === true  &&  requiredSecretsPresent(x) === t
 **Решение:** таблица `settings_audit` (кто, когда, ключ, старое→новое, IP); запись при каждом флипе; просмотр в админке. Связать с `SEC-AUDIT`.
 **Критерии приёмки:** любой флип оставляет строку аудита; строки только на чтение (append-only, no update/delete grant).
 
-### FLAG-05 · Валидация env на старте (zod-схема окружения) — [P1][🟡]
+### FLAG-05 · Валидация env на старте (zod-схема окружения) — [P1][✅]
 **Проблема:** ключи разбросаны по `process.env.*`; часть гардов degrade-silently (Upstash no-op, Turnstile skip) — удобно в dev, опасно в prod (см. `SEC-RL2`).
 **Решение:** единая zod-схема env (`lib/env.ts`), парсится на boot; в `production` — **hard-fail** на отсутствии критичных (Supabase/Stripe-если-billing-on/Upstash-если-rate-limit-on); в dev — предупреждение. Совместить с `getIntegrationStatus`.
 **Критерии приёмки:** прод не стартует без критичных ключей; список некритичных деградаций явный.
+**✅ Сделано (2026-07-04):** `apps/web/src/lib/env.ts` — чистая `validateEnv(env)` (не бросает, не исполняется на import) + `assertEnvOnBoot()` вызывается из `instrumentation.register()`. Критичные всегда: Supabase url/anon/service-role. Критичные в prod: `UPSTASH_*` (ядро SEC-RL2). Явный список деградаций (Stripe/Turnstile/Sentry/email/Twilio/CRON_SECRET) → warnings, не блокируют boot. Hard-fail только в РЕАЛЬНОМ prod (`VERCEL_ENV==='production'` или self-host `NODE_ENV==='production'`) — **preview-деплои Vercel НЕ падают** (`isHardFailEnv`). Тесты: `lib/__tests__/env.test.ts`. `getIntegrationStatus` не существовал — не создавал (scope: FLAG-06/FLAG-03).
 
 ### FLAG-06 · Миграция ~13 гардов на async-резолвер — [P1][⛔]
 **Проблема:** гарды читают env синхронно; после FLAG-01 нужно перевести их на резолвер (иначе тумблер не работает для них).
@@ -294,10 +296,11 @@ capabilityOn(x) === adminToggle(x) === true  &&  requiredSecretsPresent(x) === t
 **Решение:** добавить per-user + per-IP лимиты на create/publish; тюнинг через `RATE_LIMIT_*`.
 **Критерии приёмки:** N листингов/интервал сверх лимита → 429; лимит конфигурируем.
 
-### SEC-RL2 · Rate-limiter: hard-fail при отсутствии Upstash в prod — [P0][🟡]
+### SEC-RL2 · Rate-limiter: hard-fail при отсутствии Upstash в prod — [P0][✅]
 **Проблема:** если `UPSTASH_*` не заданы, `createRateLimiter` возвращает no-op `success:true` (только `console.warn`) — в проде это **молча отключает ВСЕ лимиты**.
 **Решение:** в `NODE_ENV==='production'` — hard-fail на старте (через `FLAG-05` env-схему), либо fail-closed на запросах, если rate-limit-capability включён без ключей.
 **Критерии приёмки:** прод не работает с «тихо выключенными» лимитами.
+**✅ Сделано (2026-07-04):** ДВА независимых рубежа. (1) Boot: `assertEnvOnBoot()` бросает в prod → сервер не стартует без `UPSTASH_*` (FLAG-05). (2) Request-level (нагрузочный гарант, юнит-тестируем и не зависит от Next-семантики `register()`): no-Redis ветка `createRateLimiter` теперь **fail-closed** в prod — `success:false` + валидный 429-shape (`remaining:0`, `retryAfterSec:windowSec`, конечный `reset` — не NaN), вместо `success:true`. Тронута ТОЛЬКО ветка `!redisClient`; ветка пустого ключа осталась `success:true` («нечего лимитировать» ≠ «лимитер выключен»). Dev/test — прежний no-op. Тесты: `lib/__tests__/rateLimiter.failClosed.test.ts`.
 
 ### SEC-BOT · Расширить бот-защиту (Turnstile на login/OTP/reset) + оценить BotID — [P0][🟡]
 **Проблема:** Turnstile подключён к **единственному** роуту `auth/register`. Login, phone/OTP-request, password-reset, chat, reports — **без CAPTCHA**. BotID отсутствует. На запуске ждём credential-stuffing и OTP-абуз (toll-fraud на SMS).

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { createErrorResponse, ApiErrorCode } from "@/lib/apiErrors";
+import { isHardFailEnv } from "@/lib/env";
 
 type RateLimiterOptions = {
   limit: number;
@@ -48,12 +49,18 @@ export function createRateLimiter({
 }: RateLimiterOptions): RateLimiterFn {
   if (!redisClient) {
     disabledLogger();
+    // SEC-RL2: in a real production deployment, missing Upstash keys must NOT
+    // silently disable limits. The boot guard (FLAG-05, assertEnvOnBoot) should
+    // already have prevented startup; this is defense-in-depth in case the app
+    // is running in prod without that guard — fail *closed* (429) rather than
+    // waving every request through. Dev/test keep the no-op for convenience.
+    const failClosed = isHardFailEnv();
     return async () => ({
-      success: true,
+      success: !failClosed,
       limit,
-      remaining: limit,
+      remaining: failClosed ? 0 : limit,
       reset: Math.floor(Date.now() / 1000) + windowSec,
-      retryAfterSec: 0,
+      retryAfterSec: failClosed ? windowSec : 0,
     });
   }
 
