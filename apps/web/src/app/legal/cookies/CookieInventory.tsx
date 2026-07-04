@@ -24,6 +24,8 @@ interface Props {
   necessaryLabel: string;
   functionalLabel: string;
   analyticsLabel: string;
+  sessionTitle: string;
+  sessionBody: string;
 }
 
 const CATEGORY_ORDER: ConsentCategory[] = ["necessary", "functional", "analytics"];
@@ -40,6 +42,8 @@ export function CookieInventory({
   necessaryLabel,
   functionalLabel,
   analyticsLabel,
+  sessionTitle,
+  sessionBody,
 }: Props) {
   const labels: Record<ConsentCategory, string> = {
     necessary: necessaryLabel,
@@ -61,6 +65,11 @@ export function CookieInventory({
       </p>
 
       <p className="mb-8 text-muted-foreground">{policyIntro}</p>
+
+      <section id="session-personalization" className="mb-8 rounded-md border border-border bg-card p-4">
+        <h2 className="mb-2 text-lg font-semibold">{sessionTitle}</h2>
+        <p className="text-muted-foreground">{sessionBody}</p>
+      </section>
 
       {grouped.map(({ cat, entries }) => (
         <section key={cat} className="mb-8">

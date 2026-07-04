@@ -1660,7 +1660,10 @@
   "discovery": {
     "recently_viewed": "Zuletzt angesehen",
     "load_error": "Weitere Anzeigen konnten nicht geladen werden.",
-    "end_of_feed": "Sie haben das Ende erreicht."
+    "end_of_feed": "Sie haben das Ende erreicht.",
+    "personalized_note": "Reihenfolge für diese Sitzung angepasst",
+    "personalized_reset": "Zurücksetzen",
+    "personalized_why": "Warum diese Reihenfolge?"
   },
   "trust": {
     "tab_login": "Anmelden",
@@ -1944,7 +1947,9 @@
     "policy_title": "Cookie-Richtlinie",
     "policy_intro": "Diese Seite listet alle Cookies und Browser-Speicherelemente auf, die LyVoX verwendet, gruppiert nach Kategorie. Notwendige Elemente sind immer aktiv; andere erfordern Ihre Zustimmung.",
     "policy_draft_note": "Diese Richtlinie ist ein Arbeitsentwurf. Der vollständige rechtliche Text wird vor dem öffentlichen Start hinzugefügt.",
-    "manage": "Cookie-Einstellungen verwalten"
+    "manage": "Cookie-Einstellungen verwalten",
+    "session_personalization_title": "Feed-Reihenfolge nur für diese Sitzung",
+    "session_personalization_body": "Wenn funktionale Cookies akzeptiert sind, kann LyVoX Kategorie-Klicks und geöffnete Anzeigen aus dieser Browsersitzung verwenden, um spätere Feed-Seiten neu zu ordnen. Die erste Seite behält ihre ursprüngliche Reihenfolge, die Signale bleiben in sessionStorage und werden nicht an LyVoX gesendet."
   },
   "legal": {
     "draft_notice": "⚠ Entwurf — dieser Inhalt steht unter dem Vorbehalt der abschließenden rechtlichen Prüfung und ist noch nicht rechtsverbindlich.",

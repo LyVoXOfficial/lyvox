@@ -1,5 +1,6 @@
 export type SearchApiItem = {
   id: string;
+  category_id?: string | null;
   title: string;
   price?: number | null;
   currency?: string | null;
@@ -12,6 +13,7 @@ export type SearchApiItem = {
 
 export type AdvertCard = {
   id: string;
+  categoryId: string | null;
   title: string;
   price: number | null;
   currency: string | null;
@@ -25,6 +27,7 @@ export type AdvertCard = {
 export function mapSearchItemToCard(item: SearchApiItem): AdvertCard {
   return {
     id: item.id,
+    categoryId: item.category_id ?? null,
     title: item.title,
     price: item.price ?? null,
     currency: item.currency ?? null,

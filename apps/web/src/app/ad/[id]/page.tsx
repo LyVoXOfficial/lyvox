@@ -719,6 +719,7 @@ export default async function AdvertPage({ params }: PageProps) {
           <RecentlyViewedRecorder
             advert={{
               id: data.advert.id,
+              categoryId: data.advert.category_id ?? null,
               title: data.advert.title,
               price: data.advert.price ?? null,
               currency: data.advert.currency ?? null,

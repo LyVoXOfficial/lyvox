@@ -3,7 +3,7 @@ import { appendUnique } from "@/lib/discoveryFeed";
 import type { AdvertCard } from "@/lib/advertCards";
 
 const card = (id: string): AdvertCard => ({
-  id, title: id, price: null, currency: null, location: null, image: null,
+  id, categoryId: null, title: id, price: null, currency: null, location: null, image: null,
   createdAt: null, sellerVerified: false, likeCount: 0,
 });
 

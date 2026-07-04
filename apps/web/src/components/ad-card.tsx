@@ -8,9 +8,11 @@ import FavoriteToggle from "@/components/favorites/FavoriteToggle";
 import LikeToggle from "@/components/likes/LikeToggle";
 import BenefitsBadge from "@/components/BenefitsBadge";
 import { useI18n } from "@/i18n";
+import { recordCategoryClick } from "@/lib/discovery/sessionIntent";
 
 type Props = {
   id: string;
+  categoryId?: string | null;
   title: string;
   price?: number | null;
   currency?: string | null;
@@ -29,6 +31,7 @@ type Props = {
 
 export default function AdCard({
   id,
+  categoryId,
   title,
   price,
   currency,
@@ -74,6 +77,9 @@ export default function AdCard({
   const verifiedLabel = translate("advert.verified_seller", "Verified");
   const verifiedTooltip =
     translate("advert.verified_seller_tooltip", "Seller confirmed email and phone");
+  const recordOpenIntent = () => {
+    recordCategoryClick(categoryId);
+  };
 
   return (
     <article
@@ -85,7 +91,12 @@ export default function AdCard({
     >
       {/* ── Image area (4:3) ── */}
       <div className="relative" style={{ aspectRatio: "4/3" }}>
-        <Link href={`/ad/${id}`} className="block h-full w-full overflow-hidden" style={{ borderRadius: "var(--r) var(--r) 0 0" }}>
+        <Link
+          href={`/ad/${id}`}
+          className="block h-full w-full overflow-hidden"
+          style={{ borderRadius: "var(--r) var(--r) 0 0" }}
+          onClick={recordOpenIntent}
+        >
           {image ? (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
@@ -173,6 +184,7 @@ export default function AdCard({
         <Link
           href={`/ad/${id}`}
           className="block hover:text-primary"
+          onClick={recordOpenIntent}
           style={{
             fontWeight: 600,
             fontSize: "14px",

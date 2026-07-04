@@ -52,6 +52,7 @@ type SearchResponse = {
   data?: {
     items: Array<{
       id: string;
+      category_id?: string | null;
       title: string;
       price?: number | null;
       currency?: string | null;

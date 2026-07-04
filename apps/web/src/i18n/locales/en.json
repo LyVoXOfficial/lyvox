@@ -1660,7 +1660,10 @@
   "discovery": {
     "recently_viewed": "Recently viewed",
     "load_error": "Couldn't load more listings.",
-    "end_of_feed": "You've reached the end."
+    "end_of_feed": "You've reached the end.",
+    "personalized_note": "Order adjusted for this session",
+    "personalized_reset": "Reset",
+    "personalized_why": "Why this order?"
   },
   "trust": {
     "tab_login": "Sign in",
@@ -1944,7 +1947,9 @@
     "policy_title": "Cookie Policy",
     "policy_intro": "This page lists all cookies and browser storage items used by LyVoX, grouped by category. Necessary items are always active; others require your consent.",
     "policy_draft_note": "This policy is a working draft. Full legal text will be added before public launch.",
-    "manage": "Manage cookie settings"
+    "manage": "Manage cookie settings",
+    "session_personalization_title": "Session-only feed order",
+    "session_personalization_body": "When functional cookies are accepted, LyVoX can use category clicks and opened listings from this browser session to reorder later feed pages. The first page stays in its original order, the signals stay in sessionStorage, and they are not sent to LyVoX."
   },
   "legal": {
     "draft_notice": "⚠ Draft — this content is pending final legal review and is not yet legally binding.",
