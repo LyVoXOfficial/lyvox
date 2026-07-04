@@ -12,7 +12,9 @@ export type Capability =
   | "discover_v2"
   | "boost_ranking"
   | "advert_translations"
-  | "web_push";
+  | "web_push"
+  | "error_tracking"
+  | "analytics_insights";
 
 export const CAPABILITY_ENV: Record<Capability, string> = {
   pro_subscriptions: "CAPABILITY_PRO_SUBSCRIPTIONS",
@@ -24,6 +26,8 @@ export const CAPABILITY_ENV: Record<Capability, string> = {
   boost_ranking: "CAPABILITY_BOOST_RANKING",
   advert_translations: "CAPABILITY_ADVERT_TRANSLATIONS",
   web_push: "CAPABILITY_WEB_PUSH",
+  error_tracking: "CAPABILITY_ERROR_TRACKING",
+  analytics_insights: "CAPABILITY_ANALYTICS_INSIGHTS",
 };
 
 export function isCapabilityEnabled(

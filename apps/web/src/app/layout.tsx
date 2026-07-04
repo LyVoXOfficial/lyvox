@@ -19,6 +19,7 @@ import { CookiePreferenceCenter } from "@/components/cookie/CookiePreferenceCent
 import { Toaster } from "sonner";
 import { isCapabilityEnabled } from "@/lib/capabilities";
 import { WebPushRegistrar } from "@/components/WebPushRegistrar";
+import { ErrorTrackingProvider } from "@/components/ErrorTrackingProvider";
 
 // Brand typography — Onest (grotesque with Cyrillic coverage for the ru locale)
 // for UI + display, Geist Mono for tabular/numeric data. Exposed as CSS vars and
@@ -118,6 +119,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           </CookieConsentProvider>
         </I18nProvider>
         <WebPushRegistrar enabled={webPushEnabled} />
+        <ErrorTrackingProvider />
         {/* Global toast container — without this, every toast.* call across the app is silently dropped. */}
         <Toaster position="top-center" richColors closeButton />
       </body>
