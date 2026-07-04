@@ -906,6 +906,12 @@
     "posted": "Geplaatst",
     "price_not_specified": "Prijs niet opgegeven",
     "location_not_specified": "Locatie niet opgegeven",
+    "safety_microcopy": "Chat in LyVoX - contactgegevens blijven privé",
+    "safety_sheet_title": "Voor je afspreekt",
+    "safety_meet_public": "Spreek af op een drukke openbare plek.",
+    "safety_inspect_first": "Controleer het item voordat je betaalt.",
+    "safety_keep_chat": "Houd het gesprek binnen LyVoX.",
+    "safety_close": "Veiligheidstips sluiten",
     "seller_information": "Verkoperinformatie",
     "seller_active_listings": "Actieve advertenties",
     "seller_view_profile": "Bekijk profiel",
@@ -1592,6 +1598,7 @@
   },
   "chat": {
     "title": "Berichten",
+    "safety_hint": "Spreek af op een drukke openbare plek, controleer het item voordat je betaalt en houd het gesprek binnen LyVoX.",
     "empty": {
       "title": "Nog geen gesprekken",
       "description": "Start een gesprek door contact op te nemen met een verkoper vanaf een advertentiepagina.",

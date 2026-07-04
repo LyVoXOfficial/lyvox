@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   BadgeEuro,
@@ -78,6 +79,7 @@ export default function ChatWindow({
   currentUserId,
 }: ChatWindowProps) {
   const { t, locale } = useI18n();
+  const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [offersById, setOffersById] = useState<Map<string, ChatOffer>>(
     () => new Map(initialOffers.map((offer) => [offer.id, offer])),
@@ -86,7 +88,7 @@ export default function ChatWindow({
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [offerAmount, setOfferAmount] = useState("");
-  const [isOfferOpen, setIsOfferOpen] = useState(false);
+  const [isOfferOpen, setIsOfferOpen] = useState(() => searchParams.get("offer") === "1");
   const [isSendingOffer, setIsSendingOffer] = useState(false);
   const [offerActionId, setOfferActionId] = useState<string | null>(null);
   const [offerError, setOfferError] = useState<string | null>(null);
@@ -507,7 +509,10 @@ export default function ChatWindow({
             <div className="flex justify-center py-1">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1 text-xs text-muted-foreground shadow-[var(--shS)]">
                 <ShieldCheck className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-                {translate("chat.safety_check_pill", "Safety check passed · chat opened securely")}
+                {translate(
+                  "chat.safety_hint",
+                  "Meet in a busy public place, inspect the item before payment, and keep the conversation inside LyVoX.",
+                )}
               </span>
             </div>
 
