@@ -46,6 +46,7 @@
     "react-hook-form": "^7.65.0",
     "react-i18next": "^16.2.1",
     "react-icons": "^5.5.0",
+    "sharp": "^0.34.4",
     "sonner": "^2.0.7",
     "stripe": "^19.3.0",
     "tailwind-merge": "^3.3.1",

@@ -14,6 +14,10 @@ const nextConfig = {
     // fixing them; only flip this back as a temporary, tracked exception.
     ignoreBuildErrors: false,
   },
+  // SEC-UPLOAD: `sharp` (native libvips binary) is used server-side in
+  // /api/media/complete to sanitise uploads. Keep it external so the bundler
+  // never tries to inline the platform-specific .node addon.
+  serverExternalPackages: ["sharp"],
   images: {
     // PERF-002: Image optimization configuration
     formats: ['image/avif', 'image/webp'],

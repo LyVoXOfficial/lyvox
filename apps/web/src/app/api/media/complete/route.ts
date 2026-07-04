@@ -3,6 +3,7 @@ import {
   ensureAdvertOwnership,
   requireAuthenticatedUser,
   resolveUserId,
+  logMediaEvent,
   MEDIA_LIMIT_PER_ADVERT,
 } from "../_shared";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
@@ -16,10 +17,29 @@ import {
 import { validateRequest } from "@/lib/validations";
 import { completeMediaSchema } from "@/lib/validations/media";
 import { getMediaPreviewPublicUrl } from "@/lib/media/previewUrls";
+import { sanitizeImageBuffer, derivePreviewBuffer } from "@/lib/media/sanitizeImage";
 
 export const runtime = "nodejs";
 
 const SIGNED_DOWNLOAD_TTL_SECONDS = 15 * 60;
+
+type ServiceClient = Awaited<ReturnType<typeof supabaseService>>;
+
+/** Best-effort removal of orphaned upload objects after a rejected completion. */
+async function cleanupUploads(
+  service: ServiceClient,
+  storagePath: string,
+  previewStoragePath: string | null | undefined,
+): Promise<void> {
+  try {
+    await service.storage.from("ad-media").remove([storagePath]);
+    if (previewStoragePath) {
+      await service.storage.from("ad-media-preview").remove([previewStoragePath]);
+    }
+  } catch {
+    // The request has already failed; cleanup is opportunistic.
+  }
+}
 
 // A-4: finalizing an upload writes a media row + issues a signed download URL — tight
 // per-user limit consistent with other write endpoints (likes:post, report:user) at 30/min.
@@ -47,7 +67,9 @@ async function handlePost(request: Request) {
     return validationResult.response;
   }
 
-  const { advertId, storagePath, width, height, previewStoragePath, previewWidth, previewHeight } = validationResult.data;
+  // NOTE: client-supplied width/height/previewWidth/previewHeight are ignored —
+  // SEC-UPLOAD recomputes them from the sanitised bytes below (authoritative).
+  const { advertId, storagePath, previewStoragePath } = validationResult.data;
 
   const authResult = await requireAuthenticatedUser(request);
   if ("response" in authResult) {
@@ -115,7 +137,83 @@ async function handlePost(request: Request) {
     .maybeSingle();
 
   if (existingPath) {
+    // Already completed (and therefore already sanitised) on a prior call.
     return createSuccessResponse({ reused: true });
+  }
+
+  // SEC-UPLOAD: bytes were uploaded straight to Storage via a signed URL,
+  // bypassing every server route — so this is the only point at which we can
+  // inspect and neutralise them. Download → magic-byte sniff → sharp re-encode
+  // to a clean WebP (EXIF/GPS stripped, decompression bombs bounded) BEFORE the
+  // media row is created. Any rejection deletes the orphaned upload(s).
+  const download = await service.storage.from("ad-media").download(storagePath);
+  if (download.error || !download.data) {
+    await cleanupUploads(service, storagePath, previewStoragePath);
+    return createErrorResponse(ApiErrorCode.NOT_FOUND, {
+      status: 404,
+      detail: "uploaded object not found",
+    });
+  }
+
+  const originalBuffer = Buffer.from(await download.data.arrayBuffer());
+  const sanitized = await sanitizeImageBuffer(originalBuffer);
+  if (!sanitized.ok) {
+    await cleanupUploads(service, storagePath, previewStoragePath);
+    await logMediaEvent("media_complete_rejected", user.id, {
+      advertId,
+      storagePath,
+      reason: sanitized.reason,
+    });
+    if (sanitized.reason === "TOO_LARGE") {
+      return createErrorResponse(ApiErrorCode.FILE_TOO_LARGE, {
+        status: 413,
+        detail: sanitized.reason,
+      });
+    }
+    return createErrorResponse(ApiErrorCode.UNSUPPORTED_CONTENT_TYPE, {
+      status: 422,
+      detail: sanitized.reason,
+    });
+  }
+
+  // Overwrite the stored object with the normalised WebP. The stored
+  // Content-Type (not the path extension) is what the signed URL serves.
+  const reupload = await service.storage
+    .from("ad-media")
+    .upload(storagePath, sanitized.buffer, { contentType: "image/webp", upsert: true });
+  if (reupload.error) {
+    await cleanupUploads(service, storagePath, previewStoragePath);
+    return handleSupabaseError(reupload.error, ApiErrorCode.CREATE_FAILED);
+  }
+
+  // Regenerate the PUBLIC preview from the already-sanitised full buffer so the
+  // unsigned, publicly-served thumbnail can never carry attacker-controlled
+  // bytes. On failure, drop the client-uploaded preview entirely rather than
+  // leave un-sanitised bytes live in a public bucket.
+  let effectivePreviewPath: string | null = previewStoragePath ?? null;
+  let effectivePreviewW: number | null = null;
+  let effectivePreviewH: number | null = null;
+  if (previewStoragePath) {
+    try {
+      const preview = await derivePreviewBuffer(sanitized.buffer);
+      const previewUpload = await service.storage
+        .from("ad-media-preview")
+        .upload(previewStoragePath, preview.buffer, {
+          contentType: "image/webp",
+          upsert: true,
+        });
+      if (previewUpload.error) throw previewUpload.error;
+      effectivePreviewW = preview.width;
+      effectivePreviewH = preview.height;
+    } catch (previewError) {
+      await service.storage.from("ad-media-preview").remove([previewStoragePath]);
+      effectivePreviewPath = null;
+      await logMediaEvent("media_complete_preview_failed", user.id, {
+        advertId,
+        previewStoragePath,
+        error: String(previewError),
+      });
+    }
   }
 
   const { data: lastSort } = await supabase
@@ -132,12 +230,12 @@ async function handlePost(request: Request) {
     advert_id: advertId,
     url: storagePath,
     sort: nextSort,
-    w: width ?? null,
-    h: height ?? null,
-    preview_url: previewStoragePath ?? null,
-    preview_w: previewWidth ?? null,
-    preview_h: previewHeight ?? null,
-    preview_mime: previewStoragePath ? "image/webp" : null,
+    w: sanitized.width,
+    h: sanitized.height,
+    preview_url: effectivePreviewPath,
+    preview_w: effectivePreviewW,
+    preview_h: effectivePreviewH,
+    preview_mime: effectivePreviewPath ? "image/webp" : null,
   };
 
   const { data: inserted, error: insertError } = await supabase
