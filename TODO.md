@@ -21,7 +21,7 @@
 
 ## Крупные волны после T01-T10 (инструкция-файл создаётся 🔴-моделью при взятии в работу)
 
-- [ ] **T11** 🔴 — Конвейер изображений: превью 400px WebP при аплоаде + стабильные кэшируемые URL вместо пере-подписи на каждый рендер (крупнейший perf-выигрыш всего продукта; см. SITE_BLUEPRINT «конвейер изображений ДО редизайнов» + память media-image-pipeline)
+- [ ] **T11** 🔴 — Конвейер изображений: превью 400px WebP при аплоаде + стабильные кэшируемые URL вместо пере-подписи на каждый рендер (крупнейший perf-выигрыш всего продукта; см. SITE_BLUEPRINT «конвейер изображений ДО редизайнов» + память media-image-pipeline) → [docs/todo/T11-image-pipeline.md](docs/todo/T11-image-pipeline.md)
 - [ ] **T12** 🟡 — Saved-search алерты end-to-end + push/PWA (PRD 34/36/18): retention-контур; cron `saved-search-alerts` уже существует и ждёт CRON_SECRET — довести UI подписок и email-канал
 - [ ] **T13** 🟡 — UX1: редизайн-фиксы страниц по мокапам (`docs/features/audit/01` + `mockups/redesign-mockups.html`)
 - [ ] **T14** 🟡 — Системный проход empty-states + /search полировка (skeleton, verified-чип с предпросмотром счётчика, zero-result авторасширение) — SITE_BLUEPRINT волна 4
