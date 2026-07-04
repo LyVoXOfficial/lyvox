@@ -12,6 +12,7 @@ import {
 import { validateRequest } from "@/lib/validations";
 import { verifyOtpSchema } from "@/lib/validations/phone";
 import { parseBelgianMobile } from "@/lib/validations/belgianPhone";
+import { verifyTurnstile } from "@/lib/antifraud/turnstile";
 import type { Tables, TablesInsert, TablesUpdate } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
@@ -64,7 +65,16 @@ const baseHandler = async (req: Request) => {
     return validationResult.response;
   }
 
-  const { code, phone } = validationResult.data;
+  const { code, phone, turnstileToken } = validationResult.data;
+
+  // Turnstile CAPTCHA verification (no-op when TURNSTILE_SECRET_KEY is unset).
+  const turnstileResult = await verifyTurnstile(turnstileToken, getClientIp(req));
+  if (!turnstileResult.ok) {
+    return createErrorResponse(ApiErrorCode.CAPTCHA_FAILED, {
+      status: 403,
+      detail: turnstileResult.codes.join(","),
+    });
+  }
 
   const supabase = await supabaseServer();
   const {

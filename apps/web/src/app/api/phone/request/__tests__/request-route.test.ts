@@ -38,6 +38,13 @@ vi.mock("@/lib/rateLimiter", () => ({
 // server-only guard is a no-op in test
 vi.mock("server-only", () => ({}));
 
+// Mock verifyTurnstile — default to ok (simulates no TURNSTILE_SECRET_KEY configured)
+// so existing tests are unaffected. Tests that need it to fail override this mock.
+const verifyTurnstileMock = vi.fn();
+vi.mock("@/lib/antifraud/turnstile", () => ({
+  verifyTurnstile: verifyTurnstileMock,
+}));
+
 // Intercept global fetch so no real Twilio call is made.
 const fetchMock = vi.fn();
 vi.stubGlobal("fetch", fetchMock);
@@ -89,6 +96,7 @@ describe("POST /api/phone/request — service-role enforcement", () => {
     cookieFromMock.mockReset();
     serviceFromMock.mockReset();
     fetchMock.mockReset();
+    verifyTurnstileMock.mockReset();
 
     // Default: user is logged in
     getUserMock.mockResolvedValue({ data: { user: { id: USER_ID } } });
@@ -96,6 +104,16 @@ describe("POST /api/phone/request — service-role enforcement", () => {
     cookieFromMock.mockReturnValue(makeChain({ data: null, error: null }));
     // Default: Twilio succeeds
     fetchMock.mockResolvedValue(twilioOk());
+    // Default: Turnstile returns ok (simulates no-secret / skipped path)
+    verifyTurnstileMock.mockResolvedValue({ ok: true, skipped: true });
+  });
+
+  it("403 CAPTCHA_FAILED when Turnstile verification fails", async () => {
+    verifyTurnstileMock.mockResolvedValue({ ok: false, codes: ["invalid-input-response"] });
+    const res = await POST(jsonReq({ phone: VALID_PHONE, turnstileToken: "bad-token" }));
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.error).toBe("CAPTCHA_FAILED");
   });
 
   it("401 when no user session", async () => {

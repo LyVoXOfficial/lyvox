@@ -1673,7 +1673,8 @@
     "errorConnectionShort": "Der Server ist nicht erreichbar.",
     "signedInSuccess": "Erfolgreich angemeldet.",
     "magicLinkSent": "Anmeldelink gesendet. Überprüfen Sie Ihre E-Mails.",
-    "errorSocialProvider": "Fortfahren mit {provider} nicht möglich."
+    "errorSocialProvider": "Fortfahren mit {provider} nicht möglich.",
+    "captchaError": "Captcha-Überprüfung fehlgeschlagen. Bitte erneut versuchen."
   },
   "category": {
     "indexSubtitle": "Wählen Sie einen Bereich, um Anzeigen und Unterkategorien zu durchsuchen.",
@@ -1826,7 +1827,8 @@
     "gate_title_auth": "Zum Fortfahren anmelden",
     "gate_body_auth": "Erstellen Sie ein kostenloses Konto oder melden Sie sich an.",
     "gate_title_phone": "Telefon bestätigen",
-    "gate_body_phone": "Bestätigen Sie Ihre Nummer, um Verkäufer zu kontaktieren und zu veröffentlichen."
+    "gate_body_phone": "Bestätigen Sie Ihre Nummer, um Verkäufer zu kontaktieren und zu veröffentlichen.",
+    "captcha_error": "Captcha-Überprüfung fehlgeschlagen. Bitte erneut versuchen."
   },
   "seller_gate": {
     "title": "Bestätigen, um den Verkäufer zu sehen",

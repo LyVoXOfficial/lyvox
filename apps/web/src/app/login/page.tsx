@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
 import { ArrowLeft, CheckCircle2, Loader2, Lock, Mail, ShieldCheck } from "lucide-react";
@@ -16,6 +16,8 @@ import { logger } from "@/lib/errorLogger";
 import { supabase } from "@/lib/supabaseClient";
 import { loginSchema } from "@/lib/validations/auth";
 import { useI18n } from "@/i18n";
+import TurnstileWidget, { type TurnstileWidgetHandle } from "@/components/antifraud/TurnstileWidget";
+import { verifyCaptcha } from "@/lib/antifraud/verifyCaptchaClient";
 
 function LoginPageInner() {
   const { t } = useI18n();
@@ -32,6 +34,8 @@ function LoginPageInner() {
   const [touched, setTouched] = useState(false);
   const [rememberDevice, setRememberDevice] = useState(false);
   const [activeTab, setActiveTab] = useState<"password" | "magic-link">("password");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null);
 
   const callbackError = searchParams.get("error");
   const callbackMessage = searchParams.get("message");
@@ -76,6 +80,15 @@ function LoginPageInner() {
         const message = tr("auth.errorPasswordMinLength", "Password must contain at least 8 characters.");
         setValidationError(message);
         toast.error(message);
+        return;
+      }
+
+      const captchaOk = await verifyCaptcha(turnstileToken);
+      // Turnstile tokens are single-use — reset now so the next attempt (success
+      // or failure) always gets a fresh token instead of a spent one.
+      turnstileRef.current?.reset();
+      if (!captchaOk) {
+        toast.error(tr("auth.captchaError", "Captcha verification failed. Try again."));
         return;
       }
 
@@ -132,6 +145,13 @@ function LoginPageInner() {
         const firstError = validationResult.error.issues[0];
         setValidationError(firstError.message);
         toast.error(firstError.message);
+        return;
+      }
+
+      const captchaOk = await verifyCaptcha(turnstileToken);
+      turnstileRef.current?.reset();
+      if (!captchaOk) {
+        toast.error(tr("auth.captchaError", "Captcha verification failed. Try again."));
         return;
       }
 
@@ -305,6 +325,8 @@ function LoginPageInner() {
                 <span className="bg-card px-2 text-muted-foreground">{tr("auth.orContinueWith", "or continue with")}</span>
               </div>
             </div>
+
+            <TurnstileWidget ref={turnstileRef} onToken={setTurnstileToken} />
 
             <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "password" | "magic-link")}>
               <TabsList className="grid h-10 w-full grid-cols-2 rounded-xl">

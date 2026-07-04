@@ -1763,7 +1763,8 @@
     "errorConnectionShort": "Kan de server niet bereiken.",
     "signedInSuccess": "Succesvol aangemeld.",
     "magicLinkSent": "Aanmeldlink verzonden. Controleer uw e-mail.",
-    "errorSocialProvider": "Kon niet doorgaan met {provider}."
+    "errorSocialProvider": "Kon niet doorgaan met {provider}.",
+    "captchaError": "Captchacontrole mislukt. Probeer opnieuw."
   },
   "category": {
     "indexSubtitle": "Kies een categorie om advertenties en subcategorieën te bekijken.",
@@ -1916,7 +1917,8 @@
     "gate_title_auth": "Log in om door te gaan",
     "gate_body_auth": "Maak een gratis account of log in om door te gaan.",
     "gate_title_phone": "Verifieer je telefoon",
-    "gate_body_phone": "Bevestig je telefoonnummer om verkopers te contacteren en te plaatsen."
+    "gate_body_phone": "Bevestig je telefoonnummer om verkopers te contacteren en te plaatsen.",
+    "captcha_error": "Captchacontrole mislukt. Probeer opnieuw."
   },
   "seller_gate": {
     "title": "Verifieer om de verkoper te zien",

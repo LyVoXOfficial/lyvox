@@ -1763,7 +1763,8 @@
     "errorConnectionShort": "Could not reach the server.",
     "signedInSuccess": "Signed in successfully.",
     "magicLinkSent": "Sign-in link sent. Check your email.",
-    "errorSocialProvider": "Could not continue with {provider}."
+    "errorSocialProvider": "Could not continue with {provider}.",
+    "captchaError": "Captcha verification failed. Try again."
   },
   "category": {
     "indexSubtitle": "Choose a section to browse listings and subcategories.",
@@ -1916,7 +1917,8 @@
     "gate_title_auth": "Sign in to continue",
     "gate_body_auth": "Create a free account or sign in to continue.",
     "gate_title_phone": "Verify your phone",
-    "gate_body_phone": "Confirm your phone number to contact sellers and publish listings."
+    "gate_body_phone": "Confirm your phone number to contact sellers and publish listings.",
+    "captcha_error": "Captcha verification failed. Try again."
   },
   "seller_gate": {
     "title": "Verify to see the seller",

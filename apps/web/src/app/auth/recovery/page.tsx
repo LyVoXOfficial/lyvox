@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { ArrowLeft, CheckCircle2, Loader2, Mail, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -9,17 +9,34 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabaseClient";
+import { useI18n } from "@/i18n";
+import TurnstileWidget, { type TurnstileWidgetHandle } from "@/components/antifraud/TurnstileWidget";
+import { verifyCaptcha } from "@/lib/antifraud/verifyCaptchaClient";
 
 function RecoveryPageInner() {
+  const { t } = useI18n();
+  const tr = (k: string, fb: string) => {
+    const v = t(k);
+    return v === k ? fb : v;
+  };
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null);
 
   const handleRecovery = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
 
     try {
+      const captchaOk = await verifyCaptcha(turnstileToken);
+      turnstileRef.current?.reset();
+      if (!captchaOk) {
+        toast.error(tr("auth.captchaError", "Captcha verification failed. Try again."));
+        return;
+      }
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       });
@@ -126,6 +143,8 @@ function RecoveryPageInner() {
                       disabled={loading}
                     />
                   </div>
+
+                  <TurnstileWidget ref={turnstileRef} onToken={setTurnstileToken} />
 
                   <Button type="submit" disabled={loading} className="h-11 w-full">
                     {loading ? (

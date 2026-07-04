@@ -6,6 +6,7 @@
  */
 
 export * from "./adverts";
+export * from "./antifraud";
 export * from "./auth";
 export * from "./billing";
 export * from "./categories";

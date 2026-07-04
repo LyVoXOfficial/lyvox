@@ -14,6 +14,8 @@ export const requestOtpSchema = z.object({
     .trim()
     .min(6, "Phone number too short")
     .max(20, "Phone number too long"),
+
+  turnstileToken: z.string().optional(),
 });
 
 export type RequestOtpInput = z.infer<typeof requestOtpSchema>;
@@ -33,6 +35,8 @@ export const verifyOtpSchema = z.object({
     .trim()
     .min(1, "OTP code is required")
     .max(10, "OTP code must not exceed 10 characters"),
+
+  turnstileToken: z.string().optional(),
 });
 
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;

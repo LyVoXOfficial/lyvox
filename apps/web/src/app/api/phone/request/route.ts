@@ -12,6 +12,7 @@ import {
 import { validateRequest } from "@/lib/validations";
 import { requestOtpSchema } from "@/lib/validations/phone";
 import { parseBelgianMobile } from "@/lib/validations/belgianPhone";
+import { verifyTurnstile } from "@/lib/antifraud/turnstile";
 import type { TablesInsert } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
@@ -62,7 +63,17 @@ const baseHandler = async (req: Request) => {
     return validationResult.response;
   }
 
-  const { phone } = validationResult.data;
+  const { phone, turnstileToken } = validationResult.data;
+
+  // Turnstile CAPTCHA verification (no-op when TURNSTILE_SECRET_KEY is unset).
+  // Guards SMS toll-fraud abuse from a scripted/compromised authenticated session.
+  const turnstileResult = await verifyTurnstile(turnstileToken, getClientIp(req));
+  if (!turnstileResult.ok) {
+    return createErrorResponse(ApiErrorCode.CAPTCHA_FAILED, {
+      status: 403,
+      detail: turnstileResult.codes.join(","),
+    });
+  }
 
   const supabase = await supabaseServer();
   const {

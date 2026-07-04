@@ -1763,7 +1763,8 @@
     "errorConnectionShort": "Impossible de joindre le serveur.",
     "signedInSuccess": "Connexion réussie.",
     "magicLinkSent": "Lien de connexion envoyé. Vérifiez votre e-mail.",
-    "errorSocialProvider": "Impossible de continuer avec {provider}."
+    "errorSocialProvider": "Impossible de continuer avec {provider}.",
+    "captchaError": "Échec de la vérification du captcha. Réessayez."
   },
   "category": {
     "indexSubtitle": "Choisissez une rubrique pour parcourir les annonces et les sous-catégories.",
@@ -1916,7 +1917,8 @@
     "gate_title_auth": "Connectez-vous pour continuer",
     "gate_body_auth": "Créez un compte gratuit ou connectez-vous pour continuer.",
     "gate_title_phone": "Vérifiez votre téléphone",
-    "gate_body_phone": "Confirmez votre numéro pour contacter les vendeurs et publier des annonces."
+    "gate_body_phone": "Confirmez votre numéro pour contacter les vendeurs et publier des annonces.",
+    "captcha_error": "Échec de la vérification du captcha. Réessayez."
   },
   "seller_gate": {
     "title": "Vérifiez pour voir le vendeur",

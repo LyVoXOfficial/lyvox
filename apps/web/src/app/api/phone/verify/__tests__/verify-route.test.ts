@@ -38,6 +38,13 @@ vi.mock("@/lib/rateLimiter", () => ({
 // server-only guard is a no-op in test
 vi.mock("server-only", () => ({}));
 
+// Mock verifyTurnstile — default to ok (simulates no TURNSTILE_SECRET_KEY configured)
+// so existing tests are unaffected. Tests that need it to fail override this mock.
+const verifyTurnstileMock = vi.fn();
+vi.mock("@/lib/antifraud/turnstile", () => ({
+  verifyTurnstile: verifyTurnstileMock,
+}));
+
 const { POST } = await import("../route");
 
 // ---------------------------------------------------------------------------
@@ -101,10 +108,21 @@ describe("POST /api/phone/verify — service-role enforcement", () => {
     getUserMock.mockReset();
     cookieFromMock.mockReset();
     serviceFromMock.mockReset();
+    verifyTurnstileMock.mockReset();
 
     // Cookie client: getUser succeeds + logs insert succeeds
     getUserMock.mockResolvedValue({ data: { user: { id: USER_ID } } });
     cookieFromMock.mockReturnValue(makeChain({ data: null, error: null }));
+    // Default: Turnstile returns ok (simulates no-secret / skipped path)
+    verifyTurnstileMock.mockResolvedValue({ ok: true, skipped: true });
+  });
+
+  it("403 CAPTCHA_FAILED when Turnstile verification fails", async () => {
+    verifyTurnstileMock.mockResolvedValue({ ok: false, codes: ["invalid-input-response"] });
+    const res = await POST(jsonReq({ phone: VALID_PHONE, code: OTP_CODE, turnstileToken: "bad-token" }));
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.error).toBe("CAPTCHA_FAILED");
   });
 
   it("401 when no user session", async () => {
