@@ -1,0 +1,49 @@
+version: 2
+updates:
+  # npm/pnpm dependencies
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - power4ik
+    assignees:
+      - power4ik
+    # RULE-05: next.js vuln blocks deployment, review immediately
+    labels:
+      - "dependencies"
+      - "security"
+    # Commit message prefix for clarity
+    commit-message:
+      prefix: "deps:"
+      include: scope
+    # Group minor/patch updates per package
+    allow:
+      - dependency-type: "all"
+    # Always attempt auto-merge for patch+minor (not major)
+    auto-merge: true
+    rebase-strategy: auto
+
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "10:00"
+    reviewers:
+      - power4ik
+    assignees:
+      - power4ik
+    labels:
+      - "ci/cd"
+      - "actions"
+    commit-message:
+      prefix: "ci:"
+    allow:
+      - dependency-type: "all"
+    # Actions pinned to SHA (see workflow file)
+    # Dependabot will update them

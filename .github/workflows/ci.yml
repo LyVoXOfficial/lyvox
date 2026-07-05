@@ -23,15 +23,15 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@a5ac7e51b41094c153fac1f8c89f752d5fcbc5da
         
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
         with:
           version: 10.17.0
           
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1a4442caab129ea3c800f0cb4468e8766355f421
         with:
           node-version: '20'
           cache: 'pnpm'
@@ -52,15 +52,15 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@a5ac7e51b41094c153fac1f8c89f752d5fcbc5da
         
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
         with:
           version: 10.17.0
           
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1a4442caab129ea3c800f0cb4468e8766355f421
         with:
           node-version: '20'
           cache: 'pnpm'
@@ -82,15 +82,15 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@a5ac7e51b41094c153fac1f8c89f752d5fcbc5da
         
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
         with:
           version: 10.17.0
           
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1a4442caab129ea3c800f0cb4468e8766355f421
         with:
           node-version: '20'
           cache: 'pnpm'
@@ -105,42 +105,92 @@ jobs:
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-        
+        uses: actions/checkout@a5ac7e51b41094c153fac1f8c89f752d5fcbc5da
+
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
         with:
           version: 10.17.0
-          
+
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1a4442caab129ea3c800f0cb4468e8766355f421
         with:
           node-version: '20'
           cache: 'pnpm'
-          
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        
+
       - name: Run tests
         run: pnpm run test
+
+  # Job 5: Audit Dependencies (RULE-05: next must not appear in audit)
+  audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@a5ac7e51b41094c153fac1f8c89f752d5fcbc5da
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
+        with:
+          version: 10.17.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@1a4442caab129ea3c800f0cb4468e8766355f421
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run audit (RULE-05)
+        run: |
+          set -e
+          AUDIT_OUTPUT=$(pnpm audit --prod 2>&1)
+          echo "$AUDIT_OUTPUT"
+          if echo "$AUDIT_OUTPUT" | grep -q "next"; then
+            echo "❌ RULE-05 violation: Vulnerable Next.js detected. Update next + eslint-config-next before pushing."
+            exit 1
+          fi
+          echo "✅ Audit passed: no vulnerable Next.js versions"
+
+  # Job 6: Secret Scanning (gitleaks)
+  secrets:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@a5ac7e51b41094c153fac1f8c89f752d5fcbc5da
+
+      - name: Run gitleaks scan
+        uses: gitleaks/gitleaks-action@v2.3.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # Summary job - requires all other jobs to pass
   ci-success:
     name: CI Success
     runs-on: ubuntu-latest
-    needs: [lint-and-typecheck, build, i18n-check, test]
+    needs: [lint-and-typecheck, build, i18n-check, test, audit, secrets]
     if: always()
-    
+
     steps:
       - name: Check all jobs
         run: |
           if [[ "${{ needs.lint-and-typecheck.result }}" != "success" ]] || \
              [[ "${{ needs.build.result }}" != "success" ]] || \
              [[ "${{ needs.i18n-check.result }}" != "success" ]] || \
-             [[ "${{ needs.test.result }}" != "success" ]]; then
+             [[ "${{ needs.test.result }}" != "success" ]] || \
+             [[ "${{ needs.audit.result }}" != "success" ]] || \
+             [[ "${{ needs.secrets.result }}" != "success" ]]; then
             echo "❌ One or more CI jobs failed"
             exit 1
           else
