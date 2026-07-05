@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, ShieldCheck } from "lucide-react";
 import { useMemo } from "react";
 import ReportButton from "@/components/ReportButton";
@@ -102,13 +103,13 @@ export default function AdCard({
           onClick={recordOpenIntent}
         >
           {image ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
+            <Image
               src={image}
               alt={title}
-              loading={priority ? "eager" : "lazy"}
-              fetchPriority={priority ? "high" : "auto"}
-              className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+              fill
+              priority={priority}
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover transition duration-300 group-hover:scale-105"
             />
           ) : (
             /* Soft teal/mint radial-gradient placeholder matching mockup */

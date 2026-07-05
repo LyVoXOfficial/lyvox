@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { ThumbsUp, MapPin, ImageOff, BadgeCheck, Sparkles } from "lucide-react";
 import FavoriteToggle from "@/components/favorites/FavoriteToggle";
 import { useI18n } from "@/i18n";
@@ -100,11 +101,13 @@ export default function SwipeCard({
         aria-label={hasGallery ? t("discover.coach.tap") : undefined}
       >
         {image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={image}
             alt={card.title}
-            className="h-full w-full object-cover"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
             draggable={false}
           />
         ) : (

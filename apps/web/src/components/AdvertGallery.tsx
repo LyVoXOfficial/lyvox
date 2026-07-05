@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -37,15 +38,13 @@ export default function AdvertGallery({ images }: AdvertGalleryProps) {
         style={{ aspectRatio: "16/11", borderRadius: "var(--r)" }}
       >
         {activeImage?.url ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
+          <Image
             src={activeImage.url}
             alt={activeImage?.alt || "Advert image"}
-            width={activeImage?.width ?? undefined}
-            height={activeImage?.height ?? undefined}
-            loading="eager"
-            fetchPriority="high"
-            className="h-full w-full object-cover"
+            fill
+            priority
+            sizes="(max-width: 640px) 90vw, (max-width: 1024px) 80vw, 800px"
+            className="object-cover"
           />
         ) : (
           <div className="lyvox-image-placeholder flex h-full w-full items-center justify-center">
@@ -88,12 +87,12 @@ export default function AdvertGallery({ images }: AdvertGalleryProps) {
               aria-label={image.alt || `Preview ${index + 1}`}
             >
               {image.url ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
+                <Image
                   src={image.url}
                   alt={image.alt || `Preview ${index + 1}`}
-                  loading="lazy"
-                  className="h-full w-full object-cover"
+                  fill
+                  sizes="100px"
+                  className="object-cover"
                 />
               ) : (
                 <div className="lyvox-image-placeholder flex h-full w-full items-center justify-center">
