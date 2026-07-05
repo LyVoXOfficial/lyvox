@@ -1,4 +1,5 @@
 import { supabaseService } from "@/lib/supabaseService";
+import { revalidateAdvert } from "@/lib/advert/advertDetail";
 import {
   ensureAdvertOwnership,
   requireAuthenticatedUser,
@@ -242,6 +243,9 @@ async function handlePost(request: Request) {
       ApiErrorCode.CREATE_FAILED,
     );
   }
+
+  // PERF-01: a newly added photo must appear on the cached detail gallery.
+  revalidateAdvert(advertId);
 
   const { data: signedDownload, error: signedError } = await service.storage
     .from("ad-media")

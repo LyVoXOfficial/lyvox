@@ -3,7 +3,6 @@ import "server-only";
 import { unstable_cache, revalidateTag } from "next/cache";
 import { supabaseService } from "@/lib/supabaseService";
 import { supabaseServer } from "@/lib/supabaseServer";
-import { getMediaPreviewPublicUrl } from "@/lib/media/previewUrls";
 import { loadCatalogGroups } from "@/lib/catalog/loadCatalogGroups";
 import { detectCategoryType, type CategoryType } from "@/lib/utils/categoryDetector";
 import { isCapabilityEnabled } from "@/lib/capabilities";
@@ -359,8 +358,11 @@ export async function loadAdvertDetailCore(
   try {
     svc = await supabaseService();
   } catch (error) {
+    // Do NOT return null: unstable_cache memoizes a resolved null for the whole
+    // revalidate window. THROW so the failure is never cached and the next
+    // request retries (matches the old uncached loader's self-healing).
     console.error("loadAdvertDetailCore: service client unavailable", { advertId, error });
-    return null;
+    throw error instanceof Error ? error : new Error("advertDetail: service client unavailable");
   }
 
   cacheLog("core:cold-load", { advertId, locale, onlyActive });
@@ -394,9 +396,13 @@ export async function loadAdvertDetailCore(
       : undefined;
 
     if (advertRes.error) {
+      // Transient DB error (pooler drop / timeout). Throw, don't return null —
+      // a cached null would 404 a LIVE listing for the full revalidate window.
       console.error("Failed to load advert record", { advertId, error: advertRes.error });
-      return null;
+      throw new Error(`advertDetail: advert query failed: ${advertRes.error.message}`);
     }
+    // Genuine absent / inactive → null IS cacheable (a real 404 for the public
+    // cache; drafts are then loaded uncached + owner-gated by getAdvertDetail).
     if (!advert) return null;
     if (onlyActive && advert.status !== "active") return null;
 
@@ -477,6 +483,11 @@ export async function loadAdvertDetailCore(
       advert.business_id
         ? // biz_public_read RLS = `status='active'`; replicate it explicitly
           // since the service client bypasses RLS (advisor trap #1).
+          // Accepted bounded staleness: this trader panel is cached with the
+          // advert (≤120s). A business-level mutation (suspend / entity_verified
+          // revoke) reflects within one revalidate window since revalidateAdvert
+          // only busts advert:<id>. Low impact — DSA trader info is public and
+          // self-heals; business_id→advert reverse-invalidation is a follow-up.
           svc
             .from("businesses")
             .select(
@@ -619,8 +630,11 @@ export async function loadAdvertDetailCore(
       catalogFields: catalog.fields,
     };
   } catch (error) {
+    // Rethrow (don't return null): an unexpected/transient failure must not be
+    // memoized as a 404 by unstable_cache. Genuine absent/inactive adverts
+    // returned null explicitly above and ARE cacheable.
     console.error("loadAdvertDetailCore unexpected error", { advertId, error });
-    return null;
+    throw error;
   }
 }
 
@@ -740,16 +754,14 @@ async function loadSimilarAdvertsRaw(
   }
 }
 
-export function getCachedSimilarAdverts(
+// Similar adverts are loaded PER-REQUEST (not cached): caching them by category
+// created a stale-tag class — a deleted/edited advert lingering as a dead link
+// in siblings' rails — with no clean invalidation. Two indexed queries plus
+// memory-cached signing are cheap enough to run live and keep the rail fresh.
+export function getSimilarAdverts(
   advertId: string,
   categoryId: string | null,
 ): Promise<SimilarAdvertRaw[]> {
   if (!categoryId) return Promise.resolve([]);
-  return unstable_cache(
-    () => loadSimilarAdvertsRaw(advertId, categoryId),
-    ["advert-similar", advertId, categoryId],
-    { revalidate: ADVERT_DETAIL_REVALIDATE_SECONDS, tags: ["advert", `advert-category:${categoryId}`] },
-  )();
+  return loadSimilarAdvertsRaw(advertId, categoryId);
 }
-
-export { getMediaPreviewPublicUrl };

@@ -49,7 +49,7 @@ import { cache } from "react";
 import {
   getAdvertDetail,
   getCachedActiveAdvertDetail,
-  getCachedSimilarAdverts,
+  getSimilarAdverts,
   type AdvertDetail,
 } from "@/lib/advert/advertDetail";
 import type { CatalogSchemaGroup } from "@/catalog/renderer/types";
@@ -450,7 +450,7 @@ export default async function AdvertPage({ params }: PageProps) {
   //  - like count: volatile, single RPC
   const [viewerVerified, similarRaw, likeCount] = await Promise.all([
     loadViewerVerified(currentUserId),
-    getCachedSimilarAdverts(data.advert.id, data.advert.category_id),
+    getSimilarAdverts(data.advert.id, data.advert.category_id),
     (async () => {
       const { data: likeCountData } = await (await supabaseServer()).rpc(
         "get_advert_like_count",

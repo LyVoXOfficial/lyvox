@@ -1,4 +1,5 @@
 import { supabaseService } from "@/lib/supabaseService";
+import { revalidateAdvert } from "@/lib/advert/advertDetail";
 import { ensureAdvertOwnership, requireAuthenticatedUser, resolveUserId } from "../_shared";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import { withCsrfProtection } from "@/lib/security/csrf";
@@ -85,6 +86,9 @@ async function handleDelete(
     );
     await Promise.all(updates);
   }
+
+  // PERF-01: drop the cached detail so the removed photo's path is not served.
+  revalidateAdvert(media.advert_id);
 
   return createSuccessResponse({});
 }

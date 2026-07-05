@@ -5,6 +5,7 @@ import { supabaseServer } from "@/lib/supabaseServer";
 type ServiceClient = Awaited<ReturnType<typeof supabaseService>>;
 import { supabaseService } from "@/lib/supabaseService";
 import { hasAdminRole } from "@/lib/adminRole";
+import { revalidateAdvert } from "@/lib/advert/advertDetail";
 import { getI18nProps } from "@/i18n/server";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -155,6 +156,8 @@ async function moderateReport(
       if (unpublishError) {
         return { success: false, error: unpublishError.message };
       }
+      // PERF-01: takedown flips visibility — bust the cached /ad/[id] detail.
+      revalidateAdvert(report.adverts.id);
     }
   }
 

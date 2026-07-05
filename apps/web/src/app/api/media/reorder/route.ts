@@ -1,4 +1,5 @@
 import { ensureAdvertOwnership, requireAuthenticatedUser, resolveUserId } from "../_shared";
+import { revalidateAdvert } from "@/lib/advert/advertDetail";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import { withCsrfProtection } from "@/lib/security/csrf";
 import {
@@ -71,6 +72,9 @@ async function handlePost(request: Request) {
     supabase.from("media").update({ sort: index }).eq("id", id),
   );
   await Promise.all(updates);
+
+  // PERF-01: new sort order changes gallery order + primary/OG image — bust cache.
+  revalidateAdvert(advertId);
 
   return createSuccessResponse({});
 }

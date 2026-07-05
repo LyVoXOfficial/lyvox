@@ -12,6 +12,7 @@ import {
 } from "@/lib/apiErrors";
 import { validateRequest } from "@/lib/validations";
 import { updateReportSchema } from "@/lib/validations/reports";
+import { revalidateAdvert } from "@/lib/advert/advertDetail";
 import type { TablesInsert, TablesUpdate } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
@@ -127,6 +128,10 @@ const baseHandler = async (req: Request) => {
         .eq("id", report.adverts.id);
       if (advertUpdateError) {
         console.warn("ADVERT_UNPUBLISH_FAILED", advertUpdateError.message);
+      } else {
+        // PERF-01: a takedown flips visibility — bust the cached /ad/[id] detail
+        // so the removed listing stops being served from the shared cache.
+        revalidateAdvert(report.adverts.id);
       }
     }
   }

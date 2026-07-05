@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getStripe } from "@/lib/stripe/client";
 import { supabaseService } from "@/lib/supabaseService";
+import { revalidateAdvert } from "@/lib/advert/advertDetail";
 import type { Database, Json } from "@/lib/supabaseTypes";
 import {
   createErrorResponse,
@@ -298,6 +299,10 @@ export async function POST(req: NextRequest) {
 
           if (benefitError) {
             console.error("Failed to create benefit:", benefitError);
+          } else if (benefitData.advert_id) {
+            // PERF-01: a boost benefit changes the advert's BenefitsBadge — bust
+            // the cached /ad/[id] detail so the badge appears without the delay.
+            revalidateAdvert(benefitData.advert_id);
           }
         }
 
