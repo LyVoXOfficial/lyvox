@@ -100,6 +100,19 @@ describe("validateEnv", () => {
     expect(validateEnv({ ...FULL_PROD_ENV }).hardFail).toBe(true);
     expect(validateEnv({ ...FULL_PROD_ENV, VERCEL_ENV: "preview" }).hardFail).toBe(false);
   });
+
+  it("SEC-ENV: warns when STRIPE_SECRET_KEY is a full-access key, not a restricted one", () => {
+    const r = validateEnv({ ...FULL_PROD_ENV, STRIPE_SECRET_KEY: "sk_live_abc123" });
+    expect(r.ok).toBe(true); // advisory only — never blocks boot
+    expect(r.warnings.some((w) => w.includes("STRIPE_SECRET_KEY") && w.includes("restricted"))).toBe(
+      true,
+    );
+  });
+
+  it("SEC-ENV: does NOT warn when STRIPE_SECRET_KEY is already a restricted key", () => {
+    const r = validateEnv({ ...FULL_PROD_ENV, STRIPE_SECRET_KEY: "rk_live_abc123" });
+    expect(r.warnings.some((w) => w.includes("restricted"))).toBe(false);
+  });
 });
 
 describe("assertEnvOnBoot", () => {

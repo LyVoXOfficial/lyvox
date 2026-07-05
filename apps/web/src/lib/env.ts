@@ -128,6 +128,19 @@ export function validateEnv(env: EnvMap = process.env): EnvReport {
     }
   }
 
+  // SEC-ENV: nudge toward least-privilege Stripe keys without ever hard-failing —
+  // rotating a live key is a Stripe-dashboard action outside this deploy's control
+  // (see docs/security/SEC-ENV-key-rotation.md), so this stays advisory in every env.
+  const stripeKey = env.STRIPE_SECRET_KEY;
+  if (!isBlank(stripeKey) && /^sk_(live|test)_/.test(stripeKey!)) {
+    warnings.push(
+      "STRIPE_SECRET_KEY is a full-access key (sk_live_.../sk_test_...) — SEC-ENV requires a " +
+        "restricted key (rk_live_.../rk_test_...) scoped to only the permissions " +
+        "billing/checkout/subscribe actually need. " +
+        "Rotate via the Stripe dashboard per docs/security/SEC-ENV-key-rotation.md."
+    );
+  }
+
   return { ok: missingCritical.length === 0, hardFail, missingCritical, warnings };
 }
 

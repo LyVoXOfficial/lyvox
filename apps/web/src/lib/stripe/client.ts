@@ -1,3 +1,7 @@
+// SEC-ENV: STRIPE_SECRET_KEY is a server-only secret (a restricted key, per rotation
+// procedure in docs/security/SEC-ENV-key-rotation.md). This throws at build time if
+// ever imported into a client bundle, mirroring the supabaseService.ts guard.
+import "server-only";
 import Stripe from "stripe";
 
 let stripeClient: Stripe | null = null;
