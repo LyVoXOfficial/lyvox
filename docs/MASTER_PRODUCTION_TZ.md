@@ -78,7 +78,7 @@ capabilityOn(x) === adminToggle(x) === true  &&  requiredSecretsPresent(x) === t
 - [x] ~~**08.** `SEC-VALID` — zod-схема на всех мутирующих роутах (+CI-гард на роут без схемы)~~ ✅ 2026-07-05 — 🎚️ **[Sonnet 5 · medium]**
 - [x] ~~**09.** `SEC-CSRF` — helper-ассерт Origin/Sec-Fetch-Site на мутациях~~ ✅ 2026-07-05 — 🎚️ **[Sonnet 5 · medium]**
 - [x] ~~**10.** `SEC-AUTHZ-GUARD` — CI-гард RLS/column-grants/function-grants (фиксирует RULE-01/02 автоматикой)~~ ✅ 2026-07-05 — статик-гард `authz-migration-guard.test.ts` (RULE-A/RULE-01/RULE-02 на новых миграциях, allowlist по образцу SEC-VALID, +positive-detection) едет на `pnpm test`; **живой аудит** `scripts/audit-authz-live.mjs` (`pnpm authz:audit`, `role_table_grants × pg_policies × pg_proc`) прогнан по проду → отчёт `docs/security/SEC-AUTHZ-GUARD-live-audit.md`. Follow-up: column-scope `profiles`-INSERT (verified_*/itsme_*/pro_until) + purchases/reports — 🎚️ **[Opus 4.8 · high]**
-- [ ] **11.** `SEC-DEP` — supply-chain: Dependabot + `pnpm audit` gate + gitleaks + pin actions — 🎚️ **[Haiku 4.5 · low]**
+- [x] ~~**11.** `SEC-DEP` — supply-chain: Dependabot + `pnpm audit` gate + gitleaks + pin actions~~ ✅ 2026-07-05 — `.github/workflows/ci.yml` (audit + gitleaks jobs, deps checked on every push), `.github/dependabot.yml` (npm + actions schedule), all actions pinned by SHA — 🎚️ **[Haiku 4.5 · low]**
 - [ ] **12.** `SEC-ENV` — restricted Stripe-ключи + процедура ротации + CI-гард на утечку секрета — 🎚️ **[Sonnet 5 · medium]**
 
 ### Фаза C — перформанс (быстрый эффект + CWV/SEO)
