@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import { withCsrfProtection } from "@/lib/security/csrf";
 import { createErrorResponse, createSuccessResponse, handleSupabaseError, ApiErrorCode } from "@/lib/apiErrors";
 
 export const runtime = "nodejs";
@@ -71,4 +72,4 @@ async function addLike(request: Request) {
 }
 
 export const GET = withRateLimit(getLikes, { limiter: likesGetLimiter, getUserId: resolveUserId, makeKey: buildRateLimitKey });
-export const POST = withRateLimit(addLike, { limiter: likesPostLimiter, getUserId: resolveUserId, makeKey: buildRateLimitKey });
+export const POST = withRateLimit(withCsrfProtection(addLike), { limiter: likesPostLimiter, getUserId: resolveUserId, makeKey: buildRateLimitKey });

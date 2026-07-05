@@ -1,5 +1,6 @@
 import { supabaseServer } from "@/lib/supabaseServer";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import { withCsrfProtection } from "@/lib/security/csrf";
 import { trackServerEvent } from "@/lib/analytics/trackServerEvent";
 import { ANALYTICS_EVENTS } from "@/lib/analytics/events";
 import {
@@ -176,7 +177,7 @@ const withUserLimit = withRateLimit(baseHandler, {
   makeKey: (_req, userId) => (userId ? userId : null),
 });
 
-export const POST = withRateLimit(withUserLimit, {
+export const POST = withRateLimit(withCsrfProtection(withUserLimit), {
   limiter: chatStartIpLimiter,
   makeKey: (_req, _userId, ip) => (ip ? ip : null),
 });

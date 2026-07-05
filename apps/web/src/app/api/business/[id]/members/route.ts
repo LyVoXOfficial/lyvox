@@ -1,6 +1,7 @@
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { createRateLimiter, withRateLimit, getClientIp } from "@/lib/rateLimiter";
+import { withCsrfProtection } from "@/lib/security/csrf";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -141,7 +142,7 @@ const baseHandler = async (
 };
 
 export const POST = withRateLimit(
-  (req: Request, context: { params: Promise<{ id: string }> }) => baseHandler(req, context),
+  withCsrfProtection((req: Request, context: { params: Promise<{ id: string }> }) => baseHandler(req, context)),
   {
     limiter: userLimiter,
     makeKey: (_req, userId, ip) => [

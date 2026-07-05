@@ -8,6 +8,7 @@ import {
 } from "@/lib/apiErrors";
 import { validateRequest } from "@/lib/validations";
 import { verifyCaptchaSchema } from "@/lib/validations/antifraud";
+import { withCsrfProtection } from "@/lib/security/csrf";
 
 export const runtime = "nodejs";
 
@@ -43,7 +44,7 @@ const baseHandler = async (req: Request) => {
   return createSuccessResponse({});
 };
 
-export const POST = withRateLimit(baseHandler, {
+export const POST = withRateLimit(withCsrfProtection(baseHandler), {
   limiter: verifyCaptchaIpLimiter,
   makeKey: (req) => getClientIp(req),
 });

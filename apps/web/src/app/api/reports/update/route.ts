@@ -2,6 +2,7 @@ import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { hasAdminRole } from "@/lib/adminRole";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import { withCsrfProtection } from "@/lib/security/csrf";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -140,7 +141,7 @@ const baseHandler = async (req: Request) => {
   return createSuccessResponse({});
 };
 
-export const POST = withRateLimit(baseHandler, {
+export const POST = withRateLimit(withCsrfProtection(baseHandler), {
   limiter: reportAdminLimiter,
   getUserId: resolveUserId,
   makeKey: (_req, userId) => (userId ? userId : null),

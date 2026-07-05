@@ -6,6 +6,7 @@ import {
   ApiErrorCode,
 } from "@/lib/apiErrors";
 import { NextRequest } from "next/server";
+import { assertSameOrigin } from "@/lib/security/csrf";
 
 export const runtime = "nodejs";
 
@@ -13,6 +14,9 @@ export async function POST(
   req: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
+  const csrfError = assertSameOrigin(req);
+  if (csrfError) return csrfError;
+
   const { id } = await context.params;
   const supabase = await supabaseServer();
   const {

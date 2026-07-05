@@ -37,6 +37,7 @@ import {
 } from "@/lib/apiErrors";
 import { eraseAccount, ActiveBusinessError } from "@/lib/account/erasure";
 import { deleteAccountSchema } from "@/lib/validations";
+import { withCsrfProtection } from "@/lib/security/csrf";
 
 export const runtime = "nodejs";
 
@@ -163,7 +164,7 @@ const withUserLimit = withRateLimit(baseHandler, {
   makeKey: (_req, userId) => userId,
 });
 
-export const POST = withRateLimit(withUserLimit, {
+export const POST = withRateLimit(withCsrfProtection(withUserLimit), {
   limiter: deletionIpLimiter,
   makeKey: (req) => getClientIp(req),
 });

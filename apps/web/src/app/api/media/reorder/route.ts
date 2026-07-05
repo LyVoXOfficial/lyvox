@@ -1,5 +1,6 @@
 import { ensureAdvertOwnership, requireAuthenticatedUser, resolveUserId } from "../_shared";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import { withCsrfProtection } from "@/lib/security/csrf";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -74,7 +75,7 @@ async function handlePost(request: Request) {
   return createSuccessResponse({});
 }
 
-export const POST = withRateLimit(handlePost, {
+export const POST = withRateLimit(withCsrfProtection(handlePost), {
   limiter: mediaReorderLimiter,
   getUserId: resolveUserId,
   makeKey: buildRateLimitKey,

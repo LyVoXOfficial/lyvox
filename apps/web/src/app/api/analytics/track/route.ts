@@ -9,6 +9,7 @@ import {
 } from "@/lib/apiErrors";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import { ANALYTICS_EVENTS, DEAL_STUB_EVENTS, type AnalyticsEventName } from "@/lib/analytics/events";
+import { withCsrfProtection } from "@/lib/security/csrf";
 
 export const runtime = "nodejs";
 
@@ -93,7 +94,7 @@ async function handleTrack(req: Request) {
   return createSuccessResponse({ tracked: true });
 }
 
-export const POST = withRateLimit(handleTrack, {
+export const POST = withRateLimit(withCsrfProtection(handleTrack), {
   limiter: analyticsLimiter,
   makeKey: (_req, _userId, ip) => ip ?? "anonymous",
 });

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { hasAdminRole } from "@/lib/adminRole";
+import { assertSameOrigin } from "@/lib/security/csrf";
 import { validateRequest, moderationReviewSchema } from "@/lib/validations";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +15,9 @@ export const revalidate = 0;
  * Requires: Admin role
  */
 export async function POST(request: NextRequest) {
+  const csrfError = assertSameOrigin(request);
+  if (csrfError) return csrfError;
+
   try {
     const supabase = await supabaseServer();
     const {

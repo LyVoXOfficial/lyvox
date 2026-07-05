@@ -13,6 +13,7 @@ import { supabaseServer } from "@/lib/supabaseServer";
 import { createErrorResponse, createSuccessResponse, ApiErrorCode } from "@/lib/apiErrors";
 import type { WebAuthnEnrollRequest, WebAuthnEnrollResponse } from "@/types/webauthn";
 import { z } from "zod";
+import { assertSameOrigin } from "@/lib/security/csrf";
 
 export const runtime = "nodejs";
 
@@ -34,6 +35,9 @@ const enrollSchema = z.object({
 // ============================================================================
 
 export async function POST(request: Request) {
+  const csrfError = assertSameOrigin(request);
+  if (csrfError) return csrfError;
+
   try {
     // 1. Парсинг request body
     let body: WebAuthnEnrollRequest;

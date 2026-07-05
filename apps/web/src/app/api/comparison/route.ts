@@ -10,6 +10,7 @@ import {
 } from "@/lib/apiErrors";
 import { signMediaUrls } from "@/lib/media/signMediaUrls";
 import { getFirstImage } from "@/lib/media/getFirstImage";
+import { assertSameOrigin } from "@/lib/security/csrf";
 
 function normalizeCondition(raw: unknown): string | null {
   if (typeof raw !== "string") {
@@ -50,6 +51,9 @@ const payloadSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const csrfError = assertSameOrigin(request);
+  if (csrfError) return csrfError;
+
   const supabase = await supabaseServer();
   const {
     data: { user },

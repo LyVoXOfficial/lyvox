@@ -6,6 +6,7 @@ import {
   safeJsonParse,
   ApiErrorCode,
 } from "@/lib/apiErrors";
+import { assertSameOrigin } from "@/lib/security/csrf";
 import { validateRequest } from "@/lib/validations";
 import { updateNotificationPreferencesSchema } from "@/lib/validations/notifications";
 
@@ -75,6 +76,9 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const csrfError = assertSameOrigin(req);
+  if (csrfError) return csrfError;
+
   const supabase = await supabaseServer();
   const {
     data: { user },

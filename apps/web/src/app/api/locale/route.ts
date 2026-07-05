@@ -1,9 +1,13 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { resolveLocale, type Locale } from "@/lib/i18n";
+import { assertSameOrigin } from "@/lib/security/csrf";
 import { validateRequest, setLocaleSchema } from "@/lib/validations";
 
 export async function POST(request: Request) {
+  const csrfError = assertSameOrigin(request);
+  if (csrfError) return csrfError;
+
   try {
     let rawBody: unknown;
     try {

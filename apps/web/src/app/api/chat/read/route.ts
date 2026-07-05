@@ -8,6 +8,7 @@ import {
 } from "@/lib/apiErrors";
 import { validateRequest } from "@/lib/validations";
 import { markReadSchema } from "@/lib/validations/chat";
+import { withCsrfProtection } from "@/lib/security/csrf";
 
 export const runtime = "nodejs";
 
@@ -73,5 +74,5 @@ const baseHandler = async (req: Request) => {
   return createSuccessResponse({});
 };
 
-export const POST = baseHandler;
+export const POST = withCsrfProtection(baseHandler);
 

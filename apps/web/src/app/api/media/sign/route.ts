@@ -6,6 +6,7 @@ import {
   MEDIA_LIMIT_PER_ADVERT,
 } from "../_shared";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import { withCsrfProtection } from "@/lib/security/csrf";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -136,7 +137,7 @@ async function handlePost(request: Request) {
   });
 }
 
-export const POST = withRateLimit(handlePost, {
+export const POST = withRateLimit(withCsrfProtection(handlePost), {
   limiter: mediaSignLimiter,
   getUserId: resolveUserId,
   makeKey: buildRateLimitKey,

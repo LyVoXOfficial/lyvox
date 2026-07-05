@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import { withCsrfProtection } from "@/lib/security/csrf";
 import { createErrorResponse, createSuccessResponse, handleSupabaseError, ApiErrorCode } from "@/lib/apiErrors";
 
 export const runtime = "nodejs";
@@ -97,5 +98,5 @@ async function patchSaved(request: Request, context: { params: Promise<{ id: str
   return createSuccessResponse(data);
 }
 
-export const DELETE = withRateLimit(deleteSaved, { limiter: mutateLimiter, getUserId: resolveUserId, makeKey: buildRateLimitKey });
-export const PATCH = withRateLimit(patchSaved, { limiter: mutateLimiter, getUserId: resolveUserId, makeKey: buildRateLimitKey });
+export const DELETE = withRateLimit(withCsrfProtection(deleteSaved), { limiter: mutateLimiter, getUserId: resolveUserId, makeKey: buildRateLimitKey });
+export const PATCH = withRateLimit(withCsrfProtection(patchSaved), { limiter: mutateLimiter, getUserId: resolveUserId, makeKey: buildRateLimitKey });

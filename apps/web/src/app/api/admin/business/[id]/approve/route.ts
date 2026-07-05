@@ -6,6 +6,7 @@ import {
   createSuccessResponse,
   ApiErrorCode,
 } from "@/lib/apiErrors";
+import { assertSameOrigin } from "@/lib/security/csrf";
 
 export const runtime = "nodejs";
 
@@ -13,6 +14,9 @@ export async function POST(
   _req: Request,
   context: { params: Promise<{ id: string }> },
 ): Promise<Response> {
+  const csrfError = assertSameOrigin(_req);
+  if (csrfError) return csrfError;
+
   const { id } = await context.params;
 
   // ── Auth: require admin ────────────────────────────────────────────────────

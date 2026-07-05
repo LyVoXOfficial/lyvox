@@ -6,11 +6,15 @@ import {
   handleSupabaseError,
   ApiErrorCode,
 } from "@/lib/apiErrors";
+import { assertSameOrigin } from "@/lib/security/csrf";
 import { parseBelgianMobile } from "@/lib/validations/belgianPhone";
 
 export const runtime = "nodejs";
 
 export async function POST(_req: Request): Promise<Response> {
+  const csrfError = assertSameOrigin(_req);
+  if (csrfError) return csrfError;
+
   // Step 1: authenticate via cookie client
   const cookie = await supabaseServer();
   const {

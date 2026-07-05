@@ -6,6 +6,7 @@ import {
   ApiErrorCode,
 } from "@/lib/apiErrors";
 import { createRateLimiter, withRateLimit, getClientIp } from "@/lib/rateLimiter";
+import { withCsrfProtection } from "@/lib/security/csrf";
 import { runViesVerification } from "@/lib/verification/runViesVerification";
 
 export const runtime = "nodejs";
@@ -72,7 +73,7 @@ const withUserLimit = withRateLimit<[{ params: Promise<{ id: string }> }]>(baseH
   makeKey: (_req, userId) => userId,
 });
 
-export const POST = withRateLimit<[{ params: Promise<{ id: string }> }]>(withUserLimit, {
+export const POST = withRateLimit<[{ params: Promise<{ id: string }> }]>(withCsrfProtection(withUserLimit), {
   limiter: ipLimiter,
   makeKey: (req) => getClientIp(req),
 });

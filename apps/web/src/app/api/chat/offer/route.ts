@@ -9,6 +9,7 @@ import {
   safeJsonParse,
 } from "@/lib/apiErrors";
 import { buildChatOfferMessageBody } from "@/lib/chat/offers";
+import { assertSameOrigin } from "@/lib/security/csrf";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import type { Tables, TablesInsert } from "@/lib/supabaseTypes";
@@ -75,6 +76,9 @@ async function assertParticipant(
 }
 
 export async function POST(req: Request) {
+  const csrfError = assertSameOrigin(req);
+  if (csrfError) return csrfError;
+
   const supabase = await supabaseServer();
   const {
     data: { user },
@@ -229,6 +233,9 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
+  const csrfError = assertSameOrigin(req);
+  if (csrfError) return csrfError;
+
   const supabase = await supabaseServer();
   const {
     data: { user },

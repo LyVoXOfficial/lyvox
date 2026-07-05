@@ -1,6 +1,7 @@
 import { supabaseService } from "@/lib/supabaseService";
 import { ensureAdvertOwnership, requireAuthenticatedUser, resolveUserId } from "../_shared";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import { withCsrfProtection } from "@/lib/security/csrf";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -88,7 +89,7 @@ async function handleDelete(
   return createSuccessResponse({});
 }
 
-export const DELETE = withRateLimit(handleDelete, {
+export const DELETE = withRateLimit(withCsrfProtection(handleDelete), {
   limiter: mediaDeleteLimiter,
   getUserId: resolveUserId,
   makeKey: buildRateLimitKey,

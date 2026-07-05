@@ -14,6 +14,7 @@ import { registerSchema } from "@/lib/validations/auth";
 import { createRateLimiter, withRateLimit, getClientIp } from "@/lib/rateLimiter";
 import { isDisposableEmail } from "@/lib/antifraud/disposableEmail";
 import { verifyTurnstile } from "@/lib/antifraud/turnstile";
+import { withCsrfProtection } from "@/lib/security/csrf";
 
 export const runtime = "nodejs";
 
@@ -142,7 +143,7 @@ const baseHandler = async (req: Request) => {
   );
 };
 
-export const POST = withRateLimit(baseHandler, {
+export const POST = withRateLimit(withCsrfProtection(baseHandler), {
   limiter: registerIpLimiter,
   makeKey: (req) => getClientIp(req),
 });

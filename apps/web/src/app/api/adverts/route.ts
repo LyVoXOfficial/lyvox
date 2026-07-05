@@ -12,6 +12,7 @@ import { invokeFraudCheck } from "@/lib/fraud/invokeFraudCheck";
 import { canSellAsBusiness } from "@/lib/auth/canSellAsBusiness";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import { validateRequest, createAdvertSchema } from "@/lib/validations";
+import { withCsrfProtection } from "@/lib/security/csrf";
 
 export const runtime = "nodejs";
 
@@ -179,7 +180,7 @@ const withUserLimit = withRateLimit(baseHandler, {
   makeKey: (_req, userId) => (userId ? userId : null),
 });
 
-export const POST = withRateLimit(withUserLimit, {
+export const POST = withRateLimit(withCsrfProtection(withUserLimit), {
   limiter: advertCreateIpLimiter,
   makeKey: (_req, _userId, ip) => (ip ? ip : null),
 });

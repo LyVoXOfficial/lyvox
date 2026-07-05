@@ -8,6 +8,7 @@ import {
   ApiErrorCode,
 } from "@/lib/apiErrors";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import { withCsrfProtection } from "@/lib/security/csrf";
 import type { Tables } from "@/lib/supabaseTypes";
 
 const addFavoriteSchema = z.object({
@@ -272,7 +273,7 @@ export const GET = withRateLimit(getFavorites, {
   makeKey: buildRateLimitKey,
 });
 
-export const POST = withRateLimit(addFavorite, {
+export const POST = withRateLimit(withCsrfProtection(addFavorite), {
   limiter: favoritesPostLimiter,
   getUserId: resolveUserId,
   makeKey: buildRateLimitKey,

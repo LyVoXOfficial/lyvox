@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import { withCsrfProtection } from "@/lib/security/csrf";
 import { createErrorResponse, createSuccessResponse, handleSupabaseError, ApiErrorCode } from "@/lib/apiErrors";
 
 export const runtime = "nodejs";
@@ -57,7 +58,7 @@ async function removeLike(
   return createSuccessResponse({ advert_id: advertId });
 }
 
-export const DELETE = withRateLimit(removeLike, {
+export const DELETE = withRateLimit(withCsrfProtection(removeLike), {
   limiter: deleteLimiter,
   getUserId: resolveUserId,
   makeKey: buildRateLimitKey,

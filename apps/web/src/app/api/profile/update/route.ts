@@ -6,6 +6,7 @@ import {
   safeJsonParse,
   ApiErrorCode,
 } from "@/lib/apiErrors";
+import { assertSameOrigin } from "@/lib/security/csrf";
 import { validateRequest } from "@/lib/validations";
 import { updateProfileSchema } from "@/lib/validations/profile";
 import type { TablesInsert } from "@/lib/supabaseTypes";
@@ -13,6 +14,9 @@ import type { TablesInsert } from "@/lib/supabaseTypes";
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
+  const csrfError = assertSameOrigin(req);
+  if (csrfError) return csrfError;
+
   const supabase = await supabaseServer();
   const {
     data: { user },

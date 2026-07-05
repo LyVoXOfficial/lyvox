@@ -13,6 +13,7 @@ import { validateRequest } from "@/lib/validations";
 import { createBusinessSchema } from "@/lib/validations/business";
 import { isViewerVerified } from "@/lib/auth/requireVerified";
 import { runViesVerification } from "@/lib/verification/runViesVerification";
+import { withCsrfProtection } from "@/lib/security/csrf";
 
 export const runtime = "nodejs";
 
@@ -192,7 +193,7 @@ const withUserLimit = withRateLimit(baseHandler, {
   makeKey: (_req, userId) => userId,
 });
 
-export const POST = withRateLimit(withUserLimit, {
+export const POST = withRateLimit(withCsrfProtection(withUserLimit), {
   limiter: ipLimiter,
   makeKey: (req) => getClientIp(req),
 });

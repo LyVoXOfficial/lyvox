@@ -7,6 +7,7 @@ import {
   ApiErrorCode,
 } from "@/lib/apiErrors";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import { withCsrfProtection } from "@/lib/security/csrf";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof supabaseServer>>;
 type SupabaseUser = Awaited<ReturnType<SupabaseServerClient["auth"]["getUser"]>>["data"]["user"];
@@ -86,7 +87,7 @@ async function removeFavorite(
   });
 }
 
-export const DELETE = withRateLimit(removeFavorite, {
+export const DELETE = withRateLimit(withCsrfProtection(removeFavorite), {
   limiter: deleteLimiter,
   getUserId: resolveUserId,
   makeKey: buildRateLimitKey,

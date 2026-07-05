@@ -5,6 +5,7 @@ import {
   createSuccessResponse,
   ApiErrorCode,
 } from "@/lib/apiErrors";
+import { assertSameOrigin } from "@/lib/security/csrf";
 
 export const runtime = "nodejs";
 
@@ -46,6 +47,9 @@ export async function DELETE(
   _req: Request,
   context: { params: Promise<{ id: string; userId: string }> },
 ): Promise<Response> {
+  const csrfError = assertSameOrigin(_req);
+  if (csrfError) return csrfError;
+
   const { id, userId } = await context.params;
 
   // 1. Auth

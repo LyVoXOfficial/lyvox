@@ -10,6 +10,7 @@ import {
 } from "@/lib/apiErrors";
 import { validateRequest } from "@/lib/validations";
 import { updateBusinessSchema } from "@/lib/validations/business";
+import { assertSameOrigin } from "@/lib/security/csrf";
 
 export const runtime = "nodejs";
 
@@ -179,6 +180,9 @@ export async function PATCH(
   req: Request,
   context: { params: Promise<{ id: string }> },
 ): Promise<Response> {
+  const csrfError = assertSameOrigin(req);
+  if (csrfError) return csrfError;
+
   const { id } = await context.params;
 
   // ── Auth: require signed-in user ───────────────────────────────────────────

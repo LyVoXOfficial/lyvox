@@ -8,6 +8,7 @@ import {
   safeJsonParse,
   ApiErrorCode,
 } from "@/lib/apiErrors";
+import { assertSameOrigin } from "@/lib/security/csrf";
 import { validateRequest } from "@/lib/validations";
 import { updateConsentsSchema } from "@/lib/validations/profile";
 import type { TablesInsert, TablesUpdate } from "@/lib/supabaseTypes";
@@ -22,6 +23,9 @@ type ConsentLog = {
 };
 
 export async function POST(request: Request) {
+  const csrfError = assertSameOrigin(request);
+  if (csrfError) return csrfError;
+
   const parseResult = await safeJsonParse<{ marketingOptIn?: unknown }>(request);
   if (!parseResult.success) {
     return parseResult.response;

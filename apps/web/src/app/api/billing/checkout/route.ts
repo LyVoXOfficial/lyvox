@@ -11,6 +11,7 @@ import {
 import { validateRequest } from "@/lib/validations";
 import { createCheckoutSchema } from "@/lib/validations/billing";
 import { getStripe } from "@/lib/stripe/client";
+import { withCsrfProtection } from "@/lib/security/csrf";
 
 export const runtime = "nodejs";
 
@@ -209,7 +210,7 @@ const withUserLimit = withRateLimit(baseHandler, {
   makeKey: (_req, userId) => (userId ? userId : null),
 });
 
-export const POST = withRateLimit(withUserLimit, {
+export const POST = withRateLimit(withCsrfProtection(withUserLimit), {
   limiter: checkoutIpLimiter,
   makeKey: (_req, _userId, ip) => (ip ? ip : null),
 });

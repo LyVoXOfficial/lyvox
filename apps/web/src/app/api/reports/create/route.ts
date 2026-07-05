@@ -1,5 +1,6 @@
 import { supabaseServer } from "@/lib/supabaseServer";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import { withCsrfProtection } from "@/lib/security/csrf";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -117,7 +118,7 @@ const baseHandler = async (req: Request) => {
   return createSuccessResponse({});
 };
 
-const withUserLimit = withRateLimit(baseHandler, {
+const withUserLimit = withRateLimit(withCsrfProtection(baseHandler), {
   limiter: reportUserLimiter,
   getUserId: resolveUserId,
   makeKey: (_req, userId) => (userId ? userId : null),

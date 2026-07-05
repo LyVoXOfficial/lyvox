@@ -14,6 +14,7 @@ import type { Tables, TablesInsert, TablesUpdate } from "@/lib/supabaseTypes";
 import { isViewerVerified } from "@/lib/auth/requireVerified";
 import { markAdvertTranslationsStale } from "@/lib/translations/advertTranslations";
 import { createRateLimiter, getClientIp, build429 } from "@/lib/rateLimiter";
+import { assertSameOrigin } from "@/lib/security/csrf";
 
 export const runtime = "nodejs";
 
@@ -127,6 +128,9 @@ export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
+  const csrfError = assertSameOrigin(request);
+  if (csrfError) return csrfError;
+
   const { id: advertId } = await context.params;
 
   if (!advertId) {
@@ -469,6 +473,9 @@ export async function DELETE(
   _request: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
+  const csrfError = assertSameOrigin(_request);
+  if (csrfError) return csrfError;
+
   const { id: advertId } = await context.params;
   if (!advertId) {
     return createErrorResponse(ApiErrorCode.MISSING_ID, { status: 400 });

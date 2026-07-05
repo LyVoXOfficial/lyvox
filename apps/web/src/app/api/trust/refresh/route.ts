@@ -8,6 +8,7 @@ import {
 import type { Json } from "@/lib/supabaseTypes";
 import { computeTrustScore } from "@/lib/trust/trustScore";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import { withCsrfProtection } from "@/lib/security/csrf";
 
 export const runtime = "nodejs";
 
@@ -85,7 +86,7 @@ async function handleRefresh(_req: Request): Promise<Response> {
   return createSuccessResponse({ components });
 }
 
-export const POST = withRateLimit(handleRefresh, {
+export const POST = withRateLimit(withCsrfProtection(handleRefresh), {
   limiter: refreshLimiter,
   getUserId: async (_req) => {
     const supabase = await supabaseServer();

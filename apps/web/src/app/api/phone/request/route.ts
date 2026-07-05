@@ -2,6 +2,7 @@ import { randomBytes, createHmac, randomInt } from "crypto";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { createRateLimiter, withRateLimit, getClientIp } from "@/lib/rateLimiter";
+import { withCsrfProtection } from "@/lib/security/csrf";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -275,7 +276,7 @@ const withFallbackLimit = withRateLimit(baseHandler, {
   makeKey: (req, userId) => (!userId ? getClientIp(req) : null),
 });
 
-const withUserLimit = withRateLimit(withFallbackLimit, {
+const withUserLimit = withRateLimit(withCsrfProtection(withFallbackLimit), {
   limiter: otpUserLimiter,
   getUserId,
   makeKey: (_req, userId) => userId,

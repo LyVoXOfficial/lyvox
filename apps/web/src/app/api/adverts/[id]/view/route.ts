@@ -11,6 +11,7 @@ import {
   ApiErrorCode,
 } from "@/lib/apiErrors";
 import { createRateLimiter, withRateLimit, getClientIp } from "@/lib/rateLimiter";
+import { withCsrfProtection } from "@/lib/security/csrf";
 
 // Runs in Node.js runtime (supabaseServer uses cookies; crypto available)
 export const runtime = "nodejs";
@@ -131,7 +132,7 @@ async function trackView(
   });
 }
 
-export const POST = withRateLimit(trackView, {
+export const POST = withRateLimit(withCsrfProtection(trackView), {
   limiter: viewLimiter,
   makeKey: (_req, _userId, ip) => ip ?? "anonymous",
 });
