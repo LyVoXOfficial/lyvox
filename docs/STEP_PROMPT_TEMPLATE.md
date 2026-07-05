@@ -80,9 +80,13 @@
    Vercel авто-деплоит www.lyvox.be. (Дерево чистое, все проверки §4 зелёные, `next` пропатчен.)
 2. Дождись готовности: `vercel ls lyvox-frontend` → `Ready` (или проверь дашборд).
 3. **Верифицируй ЖИВЬЁМ на проде** (RULE-04, env boot-validation → «Ready» ≠ «отдаёт»):
-   - `curl -sS -o /dev/null -w "%{http_code}" https://www.lyvox.be/` → **200**.
+   - `curl -sS -o /dev/null -w "%{http_code}" https://www.lyvox.be/` → **200** (сайт бутается).
+   - **Проверяй ИМЕННО ту поверхность, которую менял этот шаг, а не только `/`.** Homepage
+     не трогает auth/API/мутации — `GET /` зелёный ничего не доказывает про SEC-CSRF/BOT/VALID/RL.
+     Backend/auth-шаг → curl-ни изменённый роут: страницы (`/login`, `/sell`, `/post`) → 200/307,
+     мутирующие API на GET → 405/401/400 (**не 500** = роут бутается, гард не сломал загрузку).
    - `curl -s https://www.lyvox.be/<путь>` и grep маркер изменения (новый класс/строка/i18n
-     с `-H "Cookie: locale=ru"`). Auth-страницы редиректят на /login для анонима — это норм.
+     с `-H "Cookie: locale=ru"`; для header-изменений — `curl -D -`). Auth-страницы редиректят на /login.
 
 ## 7. Закрытие
 
