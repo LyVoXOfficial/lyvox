@@ -10,10 +10,15 @@ function builder(result: { data: unknown; error: unknown }) {
 }
 
 const tableResults: Record<string, { data: unknown; error: unknown }> = {};
-const signMock = vi.fn(async (path: string) => ({
-  data: { signedUrl: `signed:${path}` },
-  error: null,
-}));
+
+const signMediaUrlsMock = vi.fn(
+  async (items: Array<{ advert_id: string; url: string; preview_url?: string | null }>) =>
+    items.map((item) => ({
+      ...item,
+      signedUrl: /^https?:\/\//i.test(item.url) ? item.url : `signed:${item.url}`,
+      previewUrl: null,
+    })),
+);
 
 vi.mock("@/lib/supabaseServer", () => ({
   supabaseServer: async () => ({
@@ -21,17 +26,15 @@ vi.mock("@/lib/supabaseServer", () => ({
   }),
 }));
 
-vi.mock("@/lib/supabaseService", () => ({
-  supabaseService: async () => ({
-    storage: { from: () => ({ createSignedUrl: (p: string) => signMock(p) }) },
-  }),
+vi.mock("@/lib/media/signMediaUrls", () => ({
+  signMediaUrls: (...args: unknown[]) => signMediaUrlsMock(...(args as [Array<{ advert_id: string; url: string }>])),
 }));
 
 const { resolveFirstImages } = await import("@/lib/advertMedia");
 
 describe("resolveFirstImages", () => {
   beforeEach(() => {
-    signMock.mockClear();
+    signMediaUrlsMock.mockClear();
     tableResults.adverts = {
       data: [
         { id: "a1", status: "active" },
@@ -57,6 +60,14 @@ describe("resolveFirstImages", () => {
     expect(map.has("a3")).toBe(false); // inactive
   });
 
+  it("signs only the first (lowest-sort) media row per advert, via the shared batch signer", async () => {
+    await resolveFirstImages(["a1", "a2"]);
+    expect(signMediaUrlsMock).toHaveBeenCalledTimes(1);
+    const batch = signMediaUrlsMock.mock.calls[0][0] as Array<{ advert_id: string; url: string }>;
+    expect(batch).toHaveLength(2);
+    expect(batch.find((i) => i.advert_id === "a1")?.url).toBe("a1/first.jpg");
+  });
+
   it("dedupes and caps the id list before querying", async () => {
     const map = await resolveFirstImages(["a1", "a1", "a1"], { cap: 1 });
     expect(map.get("a1")).toBe("signed:a1/first.jpg");
@@ -65,6 +76,6 @@ describe("resolveFirstImages", () => {
   it("returns an empty map for empty input", async () => {
     const map = await resolveFirstImages([]);
     expect(map.size).toBe(0);
-    expect(signMock).not.toHaveBeenCalled();
+    expect(signMediaUrlsMock).not.toHaveBeenCalled();
   });
 });

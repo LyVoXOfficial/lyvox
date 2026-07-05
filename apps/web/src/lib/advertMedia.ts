@@ -1,8 +1,7 @@
 import { supabaseServer } from "@/lib/supabaseServer";
-import { supabaseService } from "@/lib/supabaseService";
-import { getMediaPreviewPublicUrl } from "@/lib/media/previewUrls";
+import { signMediaUrls } from "@/lib/media/signMediaUrls";
+import { getFirstImage } from "@/lib/media/getFirstImage";
 
-const SIGNED_DOWNLOAD_TTL_SECONDS = 10 * 60;
 const DEFAULT_CAP = 24;
 
 /**
@@ -38,37 +37,19 @@ export async function resolveFirstImages(
     .order("sort", { ascending: true });
 
   // First (lowest sort) media row per advert. Rows arrive sorted ascending.
-  const firstPath = new Map<string, { url: string; preview_url: string | null }>();
+  const firstRow = new Map<string, { advert_id: string; url: string; preview_url: string | null }>();
   for (const row of (media ?? []) as Array<{ advert_id: string; url: string; preview_url: string | null }>) {
-    if (!firstPath.has(row.advert_id)) firstPath.set(row.advert_id, { url: row.url, preview_url: row.preview_url });
+    if (!firstRow.has(row.advert_id)) firstRow.set(row.advert_id, row);
   }
-  if (firstPath.size === 0) return out;
+  if (firstRow.size === 0) return out;
 
-  const service = await supabaseService();
-  const storage = service.storage.from("ad-media");
+  // Batch + shared memory cache (PERF-03: consolidated onto the same signer as everywhere else).
+  const signed = await signMediaUrls(Array.from(firstRow.values()));
 
-  await Promise.all(
-    Array.from(firstPath.entries()).map(async ([advertId, item]) => {
-      const previewUrl = getMediaPreviewPublicUrl(item.preview_url);
-      if (previewUrl) {
-        out.set(advertId, previewUrl);
-        return;
-      }
-      const path = item.url;
-      if (path.startsWith("http://") || path.startsWith("https://")) {
-        out.set(advertId, path); // legacy absolute URL — use as-is
-        return;
-      }
-      const { data, error } = await storage.createSignedUrl(
-        path,
-        SIGNED_DOWNLOAD_TTL_SECONDS,
-      );
-      if (error) {
-        console.error(`Failed to create signed URL for path "${path}":`, error);
-      }
-      if (!error && data?.signedUrl) out.set(advertId, data.signedUrl);
-    }),
-  );
+  for (const item of signed) {
+    const image = getFirstImage([item]);
+    if (image) out.set(item.advert_id, image);
+  }
 
   return out;
 }
