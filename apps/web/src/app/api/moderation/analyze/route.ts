@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { hasAdminRole } from "@/lib/adminRole";
+import { validateRequest, moderationAnalyzeSchema } from "@/lib/validations";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -29,12 +30,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false, error: "FORBIDDEN" }, { status: 403 });
     }
 
-    const body = await request.json();
-    const { advert_id } = body;
-
-    if (!advert_id) {
+    let rawBody: unknown;
+    try {
+      rawBody = await request.json();
+    } catch {
       return NextResponse.json({ ok: false, error: "MISSING_ADVERT_ID" }, { status: 400 });
     }
+
+    const validation = validateRequest(moderationAnalyzeSchema, rawBody);
+    if (!validation.success) {
+      return validation.response;
+    }
+
+    const { advert_id } = validation.data;
 
     // Fetch advert data
     const { data: advert, error: advertError } = await supabase

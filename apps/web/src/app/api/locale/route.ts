@@ -1,20 +1,29 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { resolveLocale, type Locale } from "@/lib/i18n";
+import { validateRequest, setLocaleSchema } from "@/lib/validations";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { locale } = body;
-
-    if (!locale || typeof locale !== "string") {
+    let rawBody: unknown;
+    try {
+      rawBody = await request.json();
+    } catch {
       return NextResponse.json(
         { ok: false, error: "INVALID_LOCALE" },
         { status: 400 }
       );
     }
 
-    const resolvedLocale = resolveLocale(locale);
+    const validation = validateRequest(setLocaleSchema, rawBody);
+    if (!validation.success) {
+      return NextResponse.json(
+        { ok: false, error: "INVALID_LOCALE" },
+        { status: 400 }
+      );
+    }
+
+    const resolvedLocale = resolveLocale(validation.data.locale);
     const cookieStore = await cookies();
 
     // Set cookie with locale

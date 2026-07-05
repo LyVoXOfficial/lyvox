@@ -96,7 +96,7 @@ describe("POST /api/adverts — business gate (T17)", () => {
   it("403 VERIFICATION_REQUIRED with detail=membership when canSellAsBusiness returns membership", async () => {
     getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
     canSellMock.mockResolvedValue({ ok: false, reason: "membership" });
-    const res = await POST(jsonReq({ business_id: "biz-uuid-1" }));
+    const res = await POST(jsonReq({ business_id: "aaaaaaaa-1111-4111-8111-111111111111" }));
     expect(res.status).toBe(403);
     const body = await res.json();
     expect(body.error).toBe("VERIFICATION_REQUIRED");
@@ -106,7 +106,7 @@ describe("POST /api/adverts — business gate (T17)", () => {
   it("403 VERIFICATION_REQUIRED with detail=not_active when business is not active", async () => {
     getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
     canSellMock.mockResolvedValue({ ok: false, reason: "not_active" });
-    const res = await POST(jsonReq({ business_id: "biz-uuid-2" }));
+    const res = await POST(jsonReq({ business_id: "bbbbbbbb-2222-4222-8222-222222222222" }));
     expect(res.status).toBe(403);
     const body = await res.json();
     expect(body.error).toBe("VERIFICATION_REQUIRED");
@@ -116,7 +116,7 @@ describe("POST /api/adverts — business gate (T17)", () => {
   it("403 VERIFICATION_REQUIRED with detail=phone when canSellAsBusiness returns phone", async () => {
     getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
     canSellMock.mockResolvedValue({ ok: false, reason: "phone" });
-    const res = await POST(jsonReq({ business_id: "biz-uuid-3" }));
+    const res = await POST(jsonReq({ business_id: "cccccccc-3333-4333-8333-333333333333" }));
     expect(res.status).toBe(403);
     const body = await res.json();
     expect(body.error).toBe("VERIFICATION_REQUIRED");
@@ -140,7 +140,7 @@ describe("POST /api/adverts — business gate (T17)", () => {
 
   it("proceeds to INSERT with business_id when canSellAsBusiness returns ok:true — INSERT is on service-role client", async () => {
     const USER_ID = "u-biz-ok";
-    const BIZ_ID = "biz-uuid-ok";
+    const BIZ_ID = "dddddddd-4444-4444-8444-444444444444";
 
     getUserMock.mockResolvedValue({ data: { user: { id: USER_ID } } });
     canSellMock.mockResolvedValue({ ok: true });

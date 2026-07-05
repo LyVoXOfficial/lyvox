@@ -36,6 +36,7 @@ import {
   ApiErrorCode,
 } from "@/lib/apiErrors";
 import { eraseAccount, ActiveBusinessError } from "@/lib/account/erasure";
+import { deleteAccountSchema } from "@/lib/validations";
 
 export const runtime = "nodejs";
 
@@ -74,19 +75,24 @@ const baseHandler = async (req: Request): Promise<Response> => {
   }
 
   // ── Step 2: Parse body ────────────────────────────────────────────────────
-  const parseResult = await safeJsonParse<{ confirm?: unknown; password?: unknown }>(req);
+  const parseResult = await safeJsonParse<unknown>(req);
   if (!parseResult.success) {
     return parseResult.response;
   }
 
-  const { confirm, password } = parseResult.data;
-
-  if (confirm !== "DELETE") {
+  // Schema enforces confirm === "DELETE" and password (when present) is a
+  // non-empty string. We deliberately use safeParse (not validateRequest)
+  // here so a validation failure keeps the pre-existing, documented
+  // "CONFIRM_REQUIRED" detail contract instead of a raw zod message.
+  const validation = deleteAccountSchema.safeParse(parseResult.data);
+  if (!validation.success) {
     return createErrorResponse(ApiErrorCode.INVALID_PAYLOAD, {
       status: 400,
       detail: "CONFIRM_REQUIRED",
     });
   }
+
+  const { password } = validation.data;
 
   // ── Step 3: Re-authenticate (fresh credential confirmation) ───────────────
   // Phone-only accounts have no password (email is null/empty). For those, we

@@ -11,6 +11,7 @@ import { checkUserBlocked } from "@/lib/fraud/checkUserBlocked";
 import { invokeFraudCheck } from "@/lib/fraud/invokeFraudCheck";
 import { canSellAsBusiness } from "@/lib/auth/canSellAsBusiness";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
+import { validateRequest, createAdvertSchema } from "@/lib/validations";
 
 export const runtime = "nodejs";
 
@@ -87,19 +88,23 @@ const baseHandler = async (req: Request) => {
     });
   }
 
-  // Parse optional business_id from request body
-  let businessId: string | null = null;
+  // Parse optional business_id from request body. No body at all is fine
+  // (this route is usually called with no body); a malformed JSON body is
+  // also treated as "no body". But if a body IS present, business_id (when
+  // given) must be a valid UUID — SEC-VALID.
+  let rawBody: unknown = {};
   if (req) {
     try {
-      const body = await req.json();
-      if (body && typeof body.business_id === "string" && body.business_id.length > 0) {
-        businessId = body.business_id;
-      }
-    } catch (err) {
-      // body is optional — ignore parse errors
-      if (process.env.NODE_ENV !== "production") console.warn("[POST /api/adverts] body parse failed", err);
+      rawBody = await req.json();
+    } catch {
+      rawBody = {};
     }
   }
+  const validation = validateRequest(createAdvertSchema, rawBody ?? {});
+  if (!validation.success) {
+    return validation.response;
+  }
+  const businessId = validation.data.business_id ?? null;
 
   // If posting as a business, enforce canSellAsBusiness gate
   if (businessId) {

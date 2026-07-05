@@ -5,13 +5,16 @@
  * to validate request bodies before processing.
  */
 
+export * from "./account";
 export * from "./adverts";
 export * from "./antifraud";
 export * from "./auth";
 export * from "./billing";
 export * from "./categories";
 export * from "./chat";
+export * from "./locale";
 export * from "./media";
+export * from "./moderation";
 export * from "./notifications";
 export * from "./phone";
 export * from "./profile";

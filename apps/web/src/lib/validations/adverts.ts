@@ -76,3 +76,12 @@ export const updateAdvertSchema = z
   );
 
 export type UpdateAdvertInput = z.infer<typeof updateAdvertSchema>;
+
+/**
+ * Schema for creating a new draft advert (POST /api/adverts)
+ */
+export const createAdvertSchema = z.object({
+  business_id: z.string().uuid("business_id must be a valid UUID").optional(),
+});
+
+export type CreateAdvertInput = z.infer<typeof createAdvertSchema>;
