@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
+import { revalidateAdvert } from "@/lib/advert/advertDetail";
 import { supabaseService } from "@/lib/supabaseService";
 import {
   createErrorResponse,
@@ -391,6 +392,10 @@ export async function PATCH(
     await invokeFraudCheck({ check_type: "advert", advert_id: advertId });
   }
 
+  // PERF-01: bust the cached /ad/[id] detail so edits/publish reflect at once
+  // (otherwise stale up to the revalidate window).
+  revalidateAdvert(advertId);
+
   return createSuccessResponse({});
 }
 
@@ -565,6 +570,9 @@ export async function DELETE(
     details: { advertId },
   };
   await service.from("logs").insert(audit);
+
+  // PERF-01: drop the cached detail for the now-deleted advert.
+  revalidateAdvert(advertId);
 
   return createSuccessResponse({});
 }

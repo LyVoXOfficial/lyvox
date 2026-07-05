@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
+import { revalidateAdvert } from "@/lib/advert/advertDetail";
 import { supabaseService } from "@/lib/supabaseService";
 import { hasAdminRole } from "@/lib/adminRole";
 import { assertSameOrigin } from "@/lib/security/csrf";
@@ -67,6 +68,10 @@ export async function POST(request: NextRequest) {
       console.error("Failed to update advert:", updateError);
       return NextResponse.json({ ok: false, error: "UPDATE_FAILED" }, { status: 500 });
     }
+
+    // PERF-01: a moderation status change flips public visibility — bust the
+    // cached /ad/[id] detail so it can't linger in the shared cache.
+    revalidateAdvert(advert_id);
 
     // Log moderation action
     const { error: logError } = await service.from("moderation_logs").insert({

@@ -24,9 +24,8 @@ import {
 } from "@/lib/seo/localizedUrls";
 import { truncateDescription } from "@/lib/seo/catalog/common";
 import { buildListingJsonLd } from "@/lib/seo/catalog/listingJsonLd";
-import { detectCategoryType, resolvePostFlowMode } from "@/lib/utils/categoryDetector";
+import { resolvePostFlowMode } from "@/lib/utils/categoryDetector";
 import { supabaseServer } from "@/lib/supabaseServer";
-import { supabaseService } from "@/lib/supabaseService";
 import { isViewerVerified } from "@/lib/auth/requireVerified";
 import SellerIdentityGate from "@/components/trust/SellerIdentityGate";
 import { signMediaUrls } from "@/lib/media/signMediaUrls";
@@ -39,21 +38,48 @@ import AdvertMobileContactBar from "@/components/AdvertMobileContactBar";
 import { KeySpecsStrip } from "@/components/ad/KeySpecsStrip";
 import { DocumentBadges } from "@/components/ad/DocumentBadges";
 import { CatalogDetailsSection } from "@/components/ad/CatalogDetailsSection";
-import { loadCatalogGroups } from "@/lib/catalog/loadCatalogGroups";
 import {
   AdvertTranslatedDescription,
   AdvertTranslatedTitle,
   AdvertTranslationControls,
   AdvertTranslationProvider,
 } from "@/components/ad/AdvertTranslationView";
-import { isCapabilityEnabled } from "@/lib/capabilities";
+import { resolveAdvertSourceLocale } from "@/lib/translations/advertTranslations";
+import { cache } from "react";
 import {
-  buildAdvertSourceHash,
-  resolveAdvertSourceLocale,
-} from "@/lib/translations/advertTranslations";
+  getAdvertDetail,
+  getCachedActiveAdvertDetail,
+  getCachedSimilarAdverts,
+  type AdvertDetail,
+} from "@/lib/advert/advertDetail";
+import type { CatalogSchemaGroup } from "@/catalog/renderer/types";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// PERF-01: the page stays dynamically rendered — the root layout reads
+// headers()/cookies() for locale, and the SEC-CSP per-request nonce depends on
+// that dynamic render. The performance win comes from the DATA layer:
+// getAdvertDetail caches the viewer-independent payload via unstable_cache, so
+// warm requests skip the ~18-query per-view DB waterfall WITHOUT turning the
+// route static (which would bake a stale CSP nonce → white-screen under
+// enforce). `revalidate` here is a data-cache default, not route-level ISR.
+export const revalidate = 120;
+
+// De-dup the auth lookup across generateMetadata + the page + viewer checks.
+const getRequestUserId = cache(async (): Promise<string | null> => {
+  try {
+    const supabase = await supabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user?.id ?? null;
+  } catch (error) {
+    console.warn("Failed to resolve current user", error);
+    return null;
+  }
+});
+
+// Post-signing advert-detail shape: media carries signed URLs (raw storage
+// paths are signed per-request, outside the cache — see advertDetail.ts).
+type PageAdvertData = Omit<AdvertDetail, "media"> & { media: MediaItem[] };
 
 const isDevEnvironment = process.env.NODE_ENV !== "production";
 
@@ -274,8 +300,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   try {
-    const [currentUserId, locale] = await Promise.all([loadCurrentUserId(), getInitialLocale()]);
-    const advertData = await loadAdvertData(id, currentUserId);
+    const locale = await getInitialLocale();
+    // Metadata is public → only active adverts get rich OG tags (shared cache).
+    const advertData = await getCachedActiveAdvertDetail(id, locale);
 
     if (!advertData) {
       return {};
@@ -357,14 +384,30 @@ export default async function AdvertPage({ params }: PageProps) {
     let currentUserId: string | null = null;
     let locale: Locale = "en";
     let messages: Messages = {};
-    let data: AdvertData | null = null;
+    let data: PageAdvertData | null = null;
 
     try {
-      const [resolvedUserId, i18n] = await Promise.all([loadCurrentUserId(), getI18nProps()]);
+      const [resolvedUserId, i18n] = await Promise.all([getRequestUserId(), getI18nProps()]);
       currentUserId = resolvedUserId;
       locale = i18n.locale;
       messages = i18n.messages;
-      data = await loadAdvertData(id, currentUserId, locale);
+      const detail = await getAdvertDetail(id, locale, currentUserId);
+      if (detail) {
+        // Sign media per-request (outside the cache — signed URLs expire ~15m).
+        const signedRows = await signMediaUrls(detail.media);
+        const media: MediaItem[] = [];
+        for (const record of signedRows) {
+          if (!record.signedUrl) continue;
+          media.push({
+            id: record.id,
+            url: record.signedUrl,
+            w: record.w ?? null,
+            h: record.h ?? null,
+            sort: record.sort ?? null,
+          });
+        }
+        data = { ...detail, media };
+      }
       advertDebug("Data load completed", {
         advertId: id,
         hasData: Boolean(data),
@@ -401,9 +444,53 @@ export default async function AdvertPage({ params }: PageProps) {
       );
     }
 
-  const viewerVerified = await loadViewerVerified(currentUserId);
+  // Viewer-specific + volatile reads run in parallel (none are cached):
+  //  - viewerVerified: identity gate (per-viewer)
+  //  - similar adverts: cached list of raw media paths (signed below)
+  //  - like count: volatile, single RPC
+  const [viewerVerified, similarRaw, likeCount] = await Promise.all([
+    loadViewerVerified(currentUserId),
+    getCachedSimilarAdverts(data.advert.id, data.advert.category_id),
+    (async () => {
+      const { data: likeCountData } = await (await supabaseServer()).rpc(
+        "get_advert_like_count",
+        { advert_id_param: data.advert.id },
+      );
+      return Number(likeCountData ?? 0);
+    })(),
+  ]);
   const isOwnListing = !!currentUserId && currentUserId === data.seller.id;
   const canSeeSeller = viewerVerified || isOwnListing;
+
+  // Sign similar-advert media per-request (batched + memory-cached).
+  const similarMediaFlat = similarRaw.flatMap((row) =>
+    row.media.map((item) => ({
+      advert_id: row.id,
+      url: item.url,
+      preview_url: item.preview_url,
+      sort: item.sort,
+    })),
+  );
+  const signedSimilarMedia = await signMediaUrls(similarMediaFlat);
+  const similarMediaByAdvert = new Map<string, typeof signedSimilarMedia>();
+  for (const item of signedSimilarMedia) {
+    const list = similarMediaByAdvert.get(item.advert_id);
+    if (list) {
+      list.push(item);
+    } else {
+      similarMediaByAdvert.set(item.advert_id, [item]);
+    }
+  }
+  const similarAdverts: SimilarAdvertItem[] = similarRaw.map((row) => ({
+    id: row.id,
+    title: row.title,
+    price: row.price,
+    currency: row.currency,
+    location: row.location,
+    createdAt: row.createdAt,
+    image: getFirstImage(similarMediaByAdvert.get(row.id) ?? []),
+    sellerVerified: row.sellerVerified,
+  }));
 
   const t = createTranslator(messages);
   const translate = (key: string, fallback: string) => {
@@ -465,18 +552,6 @@ export default async function AdvertPage({ params }: PageProps) {
   const reliabilityScoreDisplay = formatScore(data.insights?.reliability_score);
   const popularityScoreDisplay = formatScore(data.insights?.popularity_score);
   const showScores = reliabilityScoreDisplay !== null || popularityScoreDisplay !== null;
-
-  const similarAdverts = await loadSimilarAdverts(
-    data.advert.id,
-    data.advert.category_id,
-  );
-  advertDebug("Similar adverts loaded", {
-    advertId: data.advert.id,
-    count: similarAdverts.length,
-  });
-
-  const { data: likeCountData } = await (await supabaseServer()).rpc("get_advert_like_count", { advert_id_param: data.advert.id });
-  const likeCount = Number(likeCountData ?? 0);
 
   // Real route is /ad/[id] — a single dynamic segment, no slug child route.
   // A canonical/JSON-LD url with an appended slug 404s; keep this id-only.
@@ -562,20 +637,11 @@ export default async function AdvertPage({ params }: PageProps) {
   // F12: per-category structured data via the listing JSON-LD dispatcher.
   // Domain is derived from the category path; a vehicle make forces the vehicle
   // branch even if the category slug is ambiguous.
-  const listingDomain = data.make
-    ? "vehicle"
-    : detectCategoryType(data.category?.path ?? data.category?.slug ?? "");
+  // F12/F13: domain + catalog schema are derived and cached in the loader.
+  const listingDomain = data.listingDomain;
   const listingFlowMode = resolvePostFlowMode(data.category?.path ?? data.category?.slug ?? "");
-
-  // F13: load catalog group/field schema for readonly detail display.
-  let catalogGroups: Awaited<ReturnType<typeof loadCatalogGroups>>["groups"] = [];
-  let catalogFields: Awaited<ReturnType<typeof loadCatalogGroups>>["fields"] = {};
-  try {
-    const svcForCatalog = await supabaseService();
-    ({ groups: catalogGroups, fields: catalogFields } = await loadCatalogGroups(listingDomain, svcForCatalog));
-  } catch {
-    // Non-fatal: falls back to AdvertDetails legacy renderer below
-  }
+  const catalogGroups = data.catalogGroups;
+  const catalogFields = data.catalogFields;
 
   const catalogSpecificValues = normalizeCatalogSpecificValues(data.specifics ?? {});
   const completion = getCatalogCompletion(catalogGroups, catalogSpecificValues);
@@ -1392,7 +1458,7 @@ function normalizeCatalogSpecificValues(
 }
 
 function getCatalogCompletion(
-  groups: Awaited<ReturnType<typeof loadCatalogGroups>>["groups"],
+  groups: CatalogSchemaGroup[],
   specifics: Record<string, unknown>,
 ): { filledCount: number; targetCount: number; totalCount: number } | null {
   const fieldKeys = new Set<string>();
@@ -1444,19 +1510,6 @@ function isFilledSpecificValue(value: unknown): boolean {
   return true;
 }
 
-async function loadCurrentUserId(): Promise<string | null> {
-  try {
-    const supabase = await supabaseServer();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    return user?.id ?? null;
-  } catch (error) {
-    console.warn("Failed to resolve current user", error);
-    return null;
-  }
-}
-
 async function loadViewerVerified(userId: string | null): Promise<boolean> {
   if (!userId) return false;
   try {
@@ -1465,660 +1518,6 @@ async function loadViewerVerified(userId: string | null): Promise<boolean> {
   } catch (error) {
     console.warn("Failed to resolve viewer verification", error);
     return false; // fail-closed: hide identity if we can't confirm
-  }
-}
-
-async function loadVehicleInsights(
-  client: Awaited<ReturnType<typeof supabaseService>>,
-  generationId: string,
-): Promise<VehicleInsights | null> {
-  advertDebug("loadVehicleInsights:start", { generationId });
-  const { data, error } = await client
-    .from("vehicle_generation_insights")
-    .select("*")
-    .eq("generation_id", generationId)
-    .limit(1);
-
-  const base = Array.isArray(data) ? data[0] : null;
-
-  if (error || !base) {
-    if (error) {
-      console.warn("Failed to load vehicle insights", { generationId, error });
-      advertDebug("loadVehicleInsights:query error", {
-        generationId,
-        error: error.message,
-      });
-    }
-    return null;
-  }
-
-  const normalizedBase: VehicleInsights = {
-    ...(base as VehicleInsights),
-    reliability_score: normalizeNullableNumber((base as VehicleInsights).reliability_score),
-    popularity_score: normalizeNullableNumber((base as VehicleInsights).popularity_score),
-  };
-
-  const { data: translations, error: translationsError } = await client
-    .from("vehicle_generation_insights_i18n")
-    .select(
-      "locale, pros, cons, inspection_tips, notable_features, engine_examples, common_issues",
-    )
-    .eq("generation_id", generationId);
-
-  if (translationsError) {
-    console.warn("Failed to load vehicle insights translations", {
-      generationId,
-      error: translationsError,
-    });
-    advertDebug("loadVehicleInsights:translations error", {
-      generationId,
-      error: translationsError.message,
-    });
-  }
-
-  const result = {
-    ...normalizedBase,
-    vehicle_generation_insights_i18n: translations ?? [],
-  };
-  advertDebug("loadVehicleInsights:completed", {
-    generationId,
-    hasTranslations: Boolean(translations?.length),
-  });
-  return result;
-}
-
-function determineGeneration(
-  generations: VehicleGeneration[],
-  specifics: Record<string, any>,
-  advertGenerationId?: string | null,
-): VehicleGeneration | null {
-  if (!generations.length) return null;
-
-  // F7 fix: prefer the normalized FK column (explicit seller choice).
-  const fkId = advertGenerationId ?? null;
-  if (fkId) {
-    const match = generations.find((g) => g.id === fkId);
-    if (match) return match;
-  }
-
-  // Backward compat: try JSONB specifics.generation_id (pre-F7 records).
-  const jsonbId = specifics.generation_id ? String(specifics.generation_id) : null;
-  if (jsonbId) {
-    const match = generations.find((g) => g.id === jsonbId);
-    if (match) return match;
-  }
-
-  // Year-range fallback — ONLY when result is unambiguous.
-  // Bug #1996: .find() silently returned the first match when multiple
-  // generations overlap the same year (e.g. 1996 BMW 5-Series: E34 ends
-  // 1996, E39 starts 1996). Now we filter all matches and return null for
-  // ambiguous cases — the seller must pick explicitly in the form.
-  const advertYear = parseAdvertYear(specifics.year);
-  if (advertYear) {
-    const matching = generations.filter((g) => {
-      const startOk = g.start_year === null || g.start_year <= advertYear;
-      const endOk = g.end_year === null || g.end_year >= advertYear;
-      return startOk && endOk;
-    });
-    if (matching.length === 1) return matching[0]; // unique → safe to show
-    // ambiguous (>1) or none (0) → fall through, don't guess
-  }
-
-  if (generations.length === 1) return generations[0];
-
-  return null;
-}
-
-function parseAdvertYear(value: unknown): number | null {
-  if (value === null || value === undefined) {
-    return null;
-  }
-  const num = Number(value);
-  return Number.isFinite(num) ? num : null;
-}
-
-async function loadAdvertData(
-  advertId: string,
-  currentUserId: string | null,
-  targetLocale?: Locale,
-): Promise<AdvertData | null> {
-  // Prefer anon-scoped server client for reading (RLS-safe),
-  // while still attempting to use service client for storage signing.
-  const db = await supabaseServer();
-  let svc = db;
-  try {
-    svc = await supabaseService();
-  } catch (error) {
-    // Fallback to anon client; signing may fail but is handled below.
-    advertDebug("Falling back to anon Supabase client", {
-      advertId,
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-  advertDebug("loadAdvertData:start", {
-    advertId,
-    currentUserId,
-    usingServiceClient: svc !== db,
-  });
-
-  try {
-    const { data: advertRows, error: advertError } = await svc
-      .from("adverts")
-      .select(
-        "id,user_id,category_id,title,description,price,currency,location,created_at,status,business_id,content_locale",
-      )
-      .eq("id", advertId)
-      .limit(1);
-    const advert = Array.isArray(advertRows) ? (advertRows[0] as AdvertRecord | undefined) : undefined;
-
-    if (advertError) {
-      console.error("Failed to load advert record", { advertId, error: advertError });
-      advertDebug("loadAdvertData:advert query error", {
-        advertId,
-        error: advertError.message,
-      });
-      return null;
-    }
-
-    if (!advert) {
-      advertDebug("loadAdvertData:advert not found", { advertId });
-      return null;
-    }
-
-    if (advert.status !== "active" && advert.user_id !== currentUserId) {
-      advertDebug("loadAdvertData:advert hidden for current user", {
-        advertId,
-        status: advert.status,
-        currentUserId,
-      });
-      return null;
-    }
-    advertDebug("loadAdvertData:advert found", {
-      advertId,
-      status: advert.status,
-    });
-
-    let translation: AdvertTranslationRecord | null = null;
-    if (targetLocale && isCapabilityEnabled("advert_translations")) {
-      const sourceLocale = resolveAdvertSourceLocale(advert.content_locale);
-      if (targetLocale !== sourceLocale) {
-        const sourceHash = buildAdvertSourceHash(advert);
-        const { data: translationRows, error: translationError } = await svc
-          .from("advert_translations")
-          .select("source_locale,target_locale,title,description,generated_by,model_or_provider,source_hash")
-          .eq("advert_id", advertId)
-          .eq("target_locale", targetLocale)
-          .eq("source_hash", sourceHash)
-          .eq("status", "published")
-          .order("updated_at", { ascending: false })
-          .limit(1);
-
-        if (translationError) {
-          advertDebug("loadAdvertData:translation query error", {
-            advertId,
-            targetLocale,
-            error: translationError.message,
-          });
-        } else {
-          const row = Array.isArray(translationRows)
-            ? (translationRows[0] as AdvertTranslationRecord | undefined)
-            : undefined;
-          translation = row ?? null;
-        }
-      }
-    }
-
-  let category: CategorySummary | null = null;
-  let categoryBreadcrumbs: CategorySummary[] = [];
-
-  if (advert?.category_id) {
-    const { data: categoryRows } = await svc
-      .from("categories")
-      .select(
-        "path, slug, level, name_en, name_nl, name_fr, name_de, name_ru",
-      )
-      .eq("id", advert.category_id)
-      .limit(1);
-
-    const categoryRecord = Array.isArray(categoryRows) ? (categoryRows[0] as CategorySummary | undefined) : undefined;
-    if (categoryRecord) {
-      category = categoryRecord;
-
-      if (categoryRecord.path) {
-        const crumbPaths = categoryRecord.path
-          .split("/")
-          .filter(Boolean)
-          .map((_, idx, arr) => arr.slice(0, idx + 1).join("/"));
-
-        if (crumbPaths.length) {
-          const { data: breadcrumbRecords } = await svc
-            .from("categories")
-            .select(
-              "path, slug, level, name_en, name_nl, name_fr, name_de, name_ru",
-            )
-            .in("path", crumbPaths);
-
-          if (breadcrumbRecords) {
-            categoryBreadcrumbs = (breadcrumbRecords as CategorySummary[]).sort(
-              (a, b) => (a.level ?? 0) - (b.level ?? 0),
-            );
-          }
-        }
-      }
-    }
-  }
-
-  const { data: specificsRows, error: specificsError } = await svc
-    .from("ad_item_specifics")
-    .select("specifics")
-    .eq("advert_id", advertId)
-    .limit(1);
-
-  if (specificsError) {
-    console.warn("Failed to load advert specifics, using empty object", {
-      advertId,
-      error: specificsError,
-    });
-    advertDebug("loadAdvertData:specifics query error", {
-      advertId,
-      error: specificsError.message,
-    });
-  }
-
-  const specificsRecord = Array.isArray(specificsRows) ? specificsRows[0] : null;
-  const specifics = ((specificsRecord as any)?.specifics ?? {}) as Record<string, any>;
-  advertDebug("loadAdvertData:specifics resolved", {
-    advertId,
-    keys: Object.keys(specifics).length,
-  });
-
-  const { data: mediaRows, error: mediaError } = await svc
-    .from("media")
-    .select("id,url,preview_url,sort,w,h,preview_w,preview_h")
-    .eq("advert_id", advertId)
-    .order("sort", { ascending: true });
-
-  if (mediaError) {
-    console.warn("Failed to load advert media, continuing with empty list", {
-      advertId,
-      error: mediaError,
-    });
-    advertDebug("loadAdvertData:media query error", {
-      advertId,
-      error: mediaError.message,
-    });
-  }
-
-  const media: MediaItem[] = [];
-
-  if (mediaRows?.length) {
-    const typedRows = mediaRows as Array<{
-      id: string;
-      url: string | null;
-      sort: number | null;
-      w: number | null;
-      h: number | null;
-      preview_url?: string | null;
-      preview_w?: number | null;
-      preview_h?: number | null;
-    }>;
-
-    const signedMediaRows = await signMediaUrls(typedRows);
-
-    for (const record of signedMediaRows) {
-      if (!record.signedUrl) {
-        advertDebug("loadAdvertData:media signed url missing", {
-          advertId,
-          mediaId: record.id,
-        });
-        continue;
-      }
-
-      media.push({
-        id: record.id,
-        url: record.signedUrl,
-        w: record.w ?? null,
-        h: record.h ?? null,
-        sort: record.sort ?? null,
-      });
-    }
-  }
-  advertDebug("loadAdvertData:media resolved", {
-    advertId,
-    mediaCount: media.length,
-  });
-
-  let make: VehicleMake | null = null;
-  const makeId = specifics.make_id ? String(specifics.make_id) : null;
-  if (makeId) {
-    const { data: makeRows } = await svc
-      .from("vehicle_makes")
-      .select("id, name_en, vehicle_make_i18n(name)")
-      .eq("id", makeId)
-      .limit(1);
-    make = (Array.isArray(makeRows) ? (makeRows[0] as VehicleMake) : null) ?? null;
-  }
-
-  let model: VehicleModel | null = null;
-  const modelId = specifics.model_id ? String(specifics.model_id) : null;
-  if (modelId) {
-    const { data: modelRows } = await svc
-      .from("vehicle_models")
-      .select("id, name_en, vehicle_model_i18n(name)")
-      .eq("id", modelId)
-      .limit(1);
-    model = (Array.isArray(modelRows) ? (modelRows[0] as VehicleModel) : null) ?? null;
-  }
-
-  let color: VehicleColor | null = null;
-  const colorId = specifics.color_id ? String(specifics.color_id) : null;
-  if (colorId) {
-    const { data: colorRows } = await svc
-      .from("vehicle_colors")
-      .select("id, name_en, name_nl, name_fr, name_de, name_ru")
-      .eq("id", colorId)
-      .limit(1);
-    color = (Array.isArray(colorRows) ? (colorRows[0] as VehicleColor) : null) ?? null;
-  }
-
-  let generations: VehicleGeneration[] = [];
-  if (modelId) {
-    const { data: generationsData, error: generationsError } = await svc
-      .from("vehicle_generations")
-      .select(
-        "id, model_id, code, start_year, end_year, facelift, summary, production_countries, vehicle_generation_i18n(locale, summary, pros, cons, inspection_tips)",
-      )
-      .eq("model_id", modelId)
-      .order("start_year", { ascending: true });
-
-    if (generationsError) {
-      console.warn("Failed to load vehicle generations", {
-        modelId,
-        error: generationsError,
-      });
-    } else if (generationsData) {
-      generations = generationsData as VehicleGeneration[];
-    }
-  }
-
-  // F7: read the generation_id FK in an ISOLATED, error-tolerant query.
-  // Deploy-safety: if migration 20260628120000 has not been applied yet, this
-  // column does not exist and PostgREST returns an error — but it cannot take
-  // down the page because it is separate from the main advert load. When the
-  // column is absent we fall back to the JSONB specifics.generation_id below.
-  let advertGenerationId: string | null = null;
-  if (modelId) {
-    const { data: genRow } = await svc
-      .from("adverts")
-      .select("generation_id")
-      .eq("id", advertId)
-      .maybeSingle();
-    advertGenerationId =
-      (genRow as { generation_id?: string | null } | null)?.generation_id ?? null;
-  }
-
-  const selectedGeneration = determineGeneration(generations, specifics, advertGenerationId);
-
-  let insights: VehicleInsights | null = null;
-  const insightsGenerationId =
-    advertGenerationId ??
-    specifics.generation_id ??
-    selectedGeneration?.id ??
-    null;
-  if (insightsGenerationId) {
-    insights = await loadVehicleInsights(svc, String(insightsGenerationId));
-  }
-
-  const { data: optionsData, error: optionsError } = await svc
-    .from("vehicle_options")
-    .select("id, category, code, name_en, name_nl, name_fr, name_de, name_ru")
-    .order("category", { ascending: true })
-    .order("name_en", { ascending: true });
-
-  if (optionsError) {
-    console.warn("Failed to load vehicle options catalog", {
-      advertId,
-      error: optionsError,
-    });
-    advertDebug("loadAdvertData:vehicle options query error", {
-      advertId,
-      error: optionsError.message,
-    });
-  }
-
-  const vehicleOptions = (optionsData ?? []) as VehicleOption[];
-  advertDebug("loadAdvertData:vehicle options loaded", {
-    advertId,
-    count: vehicleOptions.length,
-  });
-
-  const { data: profileRows } = await svc
-    .from("profiles")
-    .select("display_name, verified_email, verified_phone, created_at")
-    .eq("id", advert.user_id)
-    .limit(1);
-
-  const profile = Array.isArray(profileRows) ? profileRows[0] : null;
-
-  const { data: trustRows } = await svc
-    .from("trust_score")
-    .select("score")
-    .eq("user_id", advert.user_id)
-    .limit(1);
-  const trust = Array.isArray(trustRows) ? trustRows[0] : null;
-
-  const { count: activeAdvertsCount } = await svc
-    .from("adverts")
-    .select("id", { head: true, count: "exact" })
-    .eq("user_id", advert.user_id)
-    .eq("status", "active");
-
-  const seller: SellerInfo = {
-    id: advert.user_id,
-    displayName: profile?.display_name ?? null,
-    verifiedEmail: Boolean(profile?.verified_email),
-    verifiedPhone: Boolean(profile?.verified_phone),
-    trustScore: trust?.score ?? 0,
-    createdAt: profile?.created_at ?? null,
-    activeAdverts: activeAdvertsCount ?? 0,
-  };
-
-  // Load benefits for this advert
-  const { data: benefitsRows } = await svc
-    .from("benefits")
-    .select("benefit_type, valid_until")
-    .eq("advert_id", advertId)
-    .gt("valid_until", new Date().toISOString());
-
-  const benefits = (benefitsRows || []).map((b) => ({
-    benefit_type: b.benefit_type,
-    valid_until: b.valid_until,
-  }));
-
-  // Load DSA trader-info panel: public subset for business adverts (T16)
-  // Uses anon/cookie client so RLS biz_public_read enforces status='active' — no extra filter needed.
-  let businessData: BusinessPublicData | null = null;
-  const businessIdFromAdvert = advert.business_id ?? null;
-  if (businessIdFromAdvert) {
-    try {
-      const anonDb = await supabaseServer();
-      const { data: bizRow } = await anonDb
-        .from("businesses")
-        .select(
-          "legal_name,trade_name,legal_form,address_line,postcode,city,country,kbo_number,vat_number,email,phone_e164,withdrawal_terms,self_certified_at,entity_verified",
-        )
-        .eq("id", businessIdFromAdvert)
-        .maybeSingle();
-      if (bizRow) {
-        businessData = bizRow as BusinessPublicData;
-      }
-    } catch (err) {
-      console.warn("Failed to load business panel data", { advertId, businessId: businessIdFromAdvert, err });
-    }
-  }
-
-  advertDebug("loadAdvertData:completed", {
-    advertId,
-    mediaCount: media.length,
-    categoryResolved: Boolean(category),
-    breadcrumbs: categoryBreadcrumbs.length,
-    vehicleOptions: vehicleOptions.length,
-    benefitsCount: benefits.length,
-    hasBusinessPanel: Boolean(businessData),
-  });
-
-  return {
-    advert,
-    translation,
-    specifics,
-    media,
-    make,
-    model,
-    color,
-    generations,
-    selectedGeneration,
-    insights,
-    vehicleOptions,
-    seller,
-    category,
-    categoryBreadcrumbs,
-    benefits,
-    businessData,
-  };
-  } catch (error) {
-    console.error("loadAdvertData unexpected error", { advertId, error });
-    advertDebug("loadAdvertData:unexpected error", {
-      advertId,
-      error: error instanceof Error ? error.message : String(error),
-    });
-    return null;
-  }
-}
-
-async function loadSimilarAdverts(
-  advertId: string,
-  categoryId: string | null,
-): Promise<SimilarAdvertItem[]> {
-  if (!categoryId) {
-    return [];
-  }
-
-  const client = await supabaseService();
-  advertDebug("loadSimilarAdverts:start", { advertId, categoryId });
-
-  try {
-    const { data, error } = await client
-      .from("adverts")
-      .select(
-        `
-        id,
-        title,
-        price,
-        currency,
-        location,
-        created_at,
-        user_id,
-        media(url, preview_url, sort)
-      `,
-      )
-      .eq("category_id", categoryId)
-      .eq("status", "active")
-      .neq("id", advertId)
-      .order("created_at", { ascending: false })
-      .limit(8);
-
-    if (error || !data) {
-      if (error) {
-        console.warn("Failed to load similar adverts", { advertId, error });
-        advertDebug("loadSimilarAdverts:query error", {
-          advertId,
-          categoryId,
-          error: error.message,
-        });
-      }
-      return [];
-    }
-
-    const userIds = data
-      .map((row) => row.user_id)
-      .filter((value): value is string => typeof value === "string");
-
-    let verifiedMap = new Map<string, boolean>();
-    if (userIds.length) {
-      const { data: profilesData } = await client
-        .from("profiles")
-        .select("id,verified_email,verified_phone")
-        .in("id", userIds);
-
-      if (profilesData) {
-        verifiedMap = new Map(
-          profilesData.map((profile) => [
-            profile.id,
-            Boolean(profile.verified_email) && Boolean(profile.verified_phone),
-          ]),
-        );
-      }
-    }
-
-    const flatMedia = data.flatMap((row) =>
-      Array.isArray(row.media)
-        ? row.media.map((item) => ({
-            advert_id: row.id,
-            url: item?.url ?? null,
-            preview_url: item?.preview_url ?? null,
-            sort: item?.sort ?? null,
-          }))
-        : [],
-    );
-
-    const signedSimilarMedia = await signMediaUrls(flatMedia);
-    const mediaByAdvert = signedSimilarMedia.reduce(
-      (acc, media) => {
-        if (!acc.has(media.advert_id)) {
-          acc.set(media.advert_id, []);
-        }
-
-        acc.get(media.advert_id)!.push({
-          url: media.url ?? null,
-          signedUrl: media.signedUrl,
-          previewUrl: media.previewUrl,
-          sort: media.sort ?? null,
-        });
-
-        return acc;
-      },
-      new Map<string, Array<{ url: string | null; signedUrl: string | null; previewUrl?: string | null; sort: number | null }>>(),
-    );
-
-    const mapped = data.map((row) => {
-      const mediaItems = mediaByAdvert.get(row.id) ?? [];
-      const image = getFirstImage(mediaItems);
-
-      return {
-        id: row.id,
-        title: row.title,
-        price: normalizeNullableNumber(row.price),
-        currency: row.currency ?? "EUR",
-        location: row.location,
-        createdAt: row.created_at ?? null,
-        image,
-        sellerVerified: verifiedMap.get(row.user_id ?? "") ?? false,
-      };
-    });
-    advertDebug("loadSimilarAdverts:completed", {
-      advertId,
-      categoryId,
-      count: mapped.length,
-    });
-    return mapped;
-  } catch (error) {
-    console.warn("Failed to load similar adverts (unexpected)", { advertId, error });
-    advertDebug("loadSimilarAdverts:unexpected error", {
-      advertId,
-      categoryId,
-      error: error instanceof Error ? error.message : String(error),
-    });
-    return [];
   }
 }
 
