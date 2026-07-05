@@ -82,7 +82,7 @@ capabilityOn(x) === adminToggle(x) === true  &&  requiredSecretsPresent(x) === t
 - [x] ~~**12.** `SEC-ENV` — restricted Stripe-ключи + процедура ротации + CI-гард на утечку секрета~~ ✅ 2026-07-05 — CI-гард `envHygieneGuard.ts` (ловит `NEXT_PUBLIC_`+secret-имя и `"use client"`-импорт `supabaseService`, едет на `pnpm test`); `stripe/client.ts` получил `import "server-only"` (был единственный secret-клиент без него); `validateEnv()` предупреждает (не блокирует) когда `STRIPE_SECRET_KEY` — full-access (`sk_live_`) вместо restricted (`rk_live_`); процедура ротации + scope-таблица restricted-ключа → `docs/security/SEC-ENV-key-rotation.md`. Follow-up (вне scope): RULE-05 CI-грep `grep -q "next"` в `.github/workflows/ci.yml` слишком широкий (матчит `next-i18next`/`@next/eslint-plugin-next` в путях), фактическая проверка пакета `next` в этом проходе делалась вручную — 🎚️ **[Sonnet 5 · medium]**
 
 ### Фаза C — перформанс (быстрый эффект + CWV/SEO)
-- [ ] **13.** `PERF-02` — `next/image` во всех сетках/галереях (после `SEC-UPLOAD` — картинки уже нормализованы) — 🎚️ **[Haiku 4.5 · low]**
+- [x] ~~**13.** `PERF-02` — `next/image` во всех сетках/галереях (после `SEC-UPLOAD` — картинки уже нормализованы) — 🎚️ **[Haiku 4.5 · low]**~~ ✅ 2026-07-05
 - [ ] **14.** `PERF-01` — `/ad/[id]`: ISR + `Promise.all` + viewer-островок (+ фильтр/кэш `vehicle_options`) — 🎚️ **[Opus 4.8 · xhigh]**
 - [ ] **15.** `PERF-03` — свести двух подписантов signed-URL к одному + общий кэш — 🎚️ **[Sonnet 5 · medium]**
 - [ ] **16.** `PERF-04` — SSR первой страницы поиска — 🎚️ **[Opus 4.8 · high]**
