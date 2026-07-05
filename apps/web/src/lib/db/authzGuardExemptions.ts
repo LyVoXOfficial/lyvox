@@ -68,6 +68,60 @@ export const AUTHZ_GUARD_EXEMPTIONS: AuthzExemption[] = [
       "INSERT is gated by policy chat_offers_sender_insert whose with_check PINS the sensitive column (status='sent') plus currency='EUR', sender_id=auth.uid() and conversation participation (verified live); the remaining columns (amount/advert_id/conversation_id) are the buyer's own offer data — no unpinned trust/entitlement column is exposed.",
   },
 
+  // ── RULE-01b: pre-existing sensitive-column tables whose default table-wide write grant is not
+  //    yet revoked. The genuine ones are KNOWN and tracked for remediation (column-scope) in
+  //    docs/security/SEC-AUTHZ-GUARD-live-audit.md; allowlisted so the guard gates NEW migrations
+  //    without being red on the baseline. The staleness test will force removal of each entry once
+  //    its "revoke <op> ... from authenticated" lands. RULE-01b now BLOCKS any new such migration.
+  {
+    kind: "unlocked-column-policy",
+    identifier: "profiles:insert",
+    reason:
+      "KNOWN pre-existing hole (verified_*/itsme_*/pro_until settable on self-insert); UPDATE was column-scoped by the lockdown, INSERT was not. Tracked for remediation in SEC-AUTHZ-GUARD-live-audit.md — remove this entry when the revoke lands.",
+  },
+  {
+    kind: "unlocked-column-policy",
+    identifier: "purchases:insert",
+    reason:
+      "KNOWN pre-existing (status settable on self-insert). Money-flow is F3-gated regardless; tracked for remediation in SEC-AUTHZ-GUARD-live-audit.md — remove when column-scoped.",
+  },
+  {
+    kind: "unlocked-column-policy",
+    identifier: "reports:insert",
+    reason:
+      "KNOWN pre-existing (status settable on insert). Low impact (moderation re-derives status) but tracked for remediation in SEC-AUTHZ-GUARD-live-audit.md — remove when column-scoped.",
+  },
+  {
+    kind: "unlocked-column-policy",
+    identifier: "business_members:update",
+    reason:
+      "Mostly mitigated: the update policy with_check pins user_id=auth.uid() and role=(caller's existing role subquery), preventing self-escalation; still tracked for defense-in-depth column-scoping in SEC-AUTHZ-GUARD-live-audit.md.",
+  },
+  {
+    kind: "unlocked-column-policy",
+    identifier: "property_listings:insert",
+    reason:
+      "Heuristic match on physical-attribute columns (renovation_year/elevator), not trust/entitlement — the owner legitimately sets these on their own listing. No lock needed.",
+  },
+  {
+    kind: "unlocked-column-policy",
+    identifier: "property_listings:update",
+    reason:
+      "Heuristic match on physical-attribute columns (renovation_year/elevator), not trust/entitlement — the owner legitimately edits these on their own listing. No lock needed.",
+  },
+  {
+    kind: "unlocked-column-policy",
+    identifier: "job_listings:insert",
+    reason:
+      "Heuristic match on attribute column education_level, not a trust/entitlement field — the poster legitimately sets it on their own job listing. No lock needed.",
+  },
+  {
+    kind: "unlocked-column-policy",
+    identifier: "job_listings:update",
+    reason:
+      "Heuristic match on attribute column education_level, not a trust/entitlement field — the poster legitimately edits it on their own job listing. No lock needed.",
+  },
+
   // ── RULE-A: created tables intentionally without RLS. Verified live: authenticated/anon hold NO
   //    write grant on these, so RLS-off does not make them user-writable — they are SELECT-only
   //    catalog-schema reference tables, written only by service-role/seed.

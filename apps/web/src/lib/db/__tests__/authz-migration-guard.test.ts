@@ -176,6 +176,61 @@ describe("SEC-AUTHZ-GUARD · detects bad migrations (positive controls)", () => 
     expect(v.some((x) => x.kind === "table-wide-grant")).toBe(false);
   });
 
+  // ── RULE-01b: the DEFAULT-grant column-exposure class (the profiles-INSERT vector) ──
+  it("flags a new table with a sensitive column + authenticated INSERT policy but NO revoke (RULE-01b, advisor scenario)", () => {
+    const v = run(
+      "x.sql",
+      `create table public.foo (id uuid, verified boolean);
+       alter table public.foo enable row level security;
+       create policy p on public.foo for insert to authenticated with check (id = auth.uid());`
+    );
+    expect(
+      v.some((x) => x.kind === "unlocked-column-policy" && x.identifier === "foo:insert")
+    ).toBe(true);
+  });
+
+  it("does NOT flag RULE-01b when the default grant is explicitly revoked", () => {
+    const v = run(
+      "x.sql",
+      `create table public.foo (id uuid, verified boolean);
+       alter table public.foo enable row level security;
+       create policy p on public.foo for insert to authenticated with check (id = auth.uid());
+       revoke insert on public.foo from authenticated;
+       grant insert (id) on public.foo to authenticated;`
+    );
+    expect(v.some((x) => x.kind === "unlocked-column-policy")).toBe(false);
+  });
+
+  it("does NOT flag RULE-01b for a service-managed table (RLS on, no authenticated write policy)", () => {
+    const v = run(
+      "x.sql",
+      `create table public.svc (id uuid, status text);
+       alter table public.svc enable row level security;
+       create policy r on public.svc for select to authenticated using (true);`
+    );
+    expect(v.some((x) => x.kind === "unlocked-column-policy")).toBe(false);
+  });
+
+  it("does NOT flag RULE-01b when the write policy is admin-only (is_admin gate)", () => {
+    const v = run(
+      "x.sql",
+      `create table public.adm (id uuid, status text);
+       alter table public.adm enable row level security;
+       create policy a on public.adm for all to public using (is_admin()) with check (is_admin());`
+    );
+    expect(v.some((x) => x.kind === "unlocked-column-policy")).toBe(false);
+  });
+
+  it("does NOT flag RULE-01b for a table with only non-sensitive columns", () => {
+    const v = run(
+      "x.sql",
+      `create table public.plain (id uuid, title text, note text);
+       alter table public.plain enable row level security;
+       create policy p on public.plain for insert to authenticated with check (id = auth.uid());`
+    );
+    expect(v.some((x) => x.kind === "unlocked-column-policy")).toBe(false);
+  });
+
   it("flags a SECURITY DEFINER fn(uuid) with no revoke (RULE-02)", () => {
     const v = run(
       "x.sql",

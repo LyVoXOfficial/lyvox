@@ -5,10 +5,15 @@
 `information_schema.role_table_grants × pg_policies × pg_proc`.
 
 The **static CI guard** (`apps/web/src/lib/db/__tests__/authz-migration-guard.test.ts`) protects
-migration *authoring* — it fails CI when a new migration ships an unlocked column/function. It cannot
-prove the *live* database is compliant, because RULE-01/02 fixes on this project were historically
-applied out-of-band via psql (see memory: `supabase-migration-drift-repair`, `storage-rls-privacy-state`).
-This audit is the complement: it inspects what prod actually looks like today.
+migration *authoring* — it fails CI when a new migration ships an unlocked column/function. It covers
+both the explicit-grant case (RULE-01) and, crucially, the **default-grant case** (RULE-01b): a new
+table with a trust/entitlement column + an authenticated write policy but no explicit `revoke` is
+flagged, because Supabase's automatic table-wide grant (never in migration text) is exactly how the
+`profiles`-INSERT hole below stayed open. What the static guard still cannot see is the *current live*
+state — RULE-01/02 fixes on this project were historically applied out-of-band via psql (see memory:
+`supabase-migration-drift-repair`, `storage-rls-privacy-state`). This audit is that complement: it
+inspects what prod actually looks like today. The genuine F2 findings below are also flagged by the
+static guard's RULE-01b (grandfathered in its allowlist until remediation lands).
 
 ## How findings are scoped (why the count went 421 → 20)
 

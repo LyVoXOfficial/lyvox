@@ -10,9 +10,16 @@
  * error journal + RULE-01/RULE-02):
  *
  *   RULE-A (RLS coverage): every created public table has RLS enabled somewhere in the corpus.
- *   RULE-01 (no table-wide writes): no INSERT/UPDATE/ALL grant to authenticated/anon without a
- *           column list (RLS gates ROWS, not COLUMNS — a table-wide write lets an owner set
- *           trust/entitlement/tax columns via direct PostgREST, bypassing the API's zod strip).
+ *   RULE-01 (no explicit table-wide writes): no INSERT/UPDATE/ALL grant to authenticated/anon
+ *           without a column list (RLS gates ROWS, not COLUMNS — a table-wide write lets an owner
+ *           set trust/entitlement/tax columns via direct PostgREST, bypassing the API's zod strip).
+ *   RULE-01b (default-grant column exposure): the COMMON vector. Supabase auto-grants table-wide
+ *           INSERT/UPDATE to authenticated on every new table — a grant that never appears in
+ *           migration text. So a new table with a trust/entitlement column + an authenticated/public
+ *           write POLICY, but no explicit `revoke <op> ... from authenticated`, silently exposes that
+ *           column (this is exactly how profiles-INSERT stayed open). The only migration-level lock is
+ *           an explicit revoke, so we require one whenever a sensitive-column table gets a reachable
+ *           write policy. Discriminator against service-managed tables: a write POLICY must exist.
  *   RULE-02 (privileged functions locked): every SECURITY DEFINER function with a uuid argument
  *           revokes EXECUTE from BOTH authenticated AND anon in the same migration (Supabase grants
  *           EXECUTE to authenticated+anon by default; `revoke ... from public` alone is NOT enough).
@@ -35,15 +42,17 @@ export interface PseudoMigration {
 export type ViolationKind =
   | "table-no-rls"
   | "table-wide-grant"
+  | "unlocked-column-policy"
   | "unlocked-definer-fn";
 
 export interface AuthzExemption {
   kind: ViolationKind;
   /**
    * The normalized identifier being grandfathered:
-   *  - table-no-rls        → table name (e.g. "catalog_fields")
-   *  - table-wide-grant    → "<table>:<priv>:<role>" (e.g. "adverts:update:authenticated")
-   *  - unlocked-definer-fn → function name (e.g. "is_business_member")
+   *  - table-no-rls          → table name (e.g. "catalog_fields")
+   *  - table-wide-grant      → "<table>:<priv>:<role>" (e.g. "adverts:update:authenticated")
+   *  - unlocked-column-policy→ "<table>:<op>" (e.g. "profiles:insert")
+   *  - unlocked-definer-fn   → function name (e.g. "is_business_member")
    */
   identifier: string;
   /** > 10 chars. Why this historical exception is safe / intentional. */
@@ -253,6 +262,100 @@ export function extractDefinerFns(cleanSql: string): DefinerFn[] {
   return fns;
 }
 
+// ── RULE-01b primitives: columns, write policies, table revokes ──────────────
+
+/**
+ * Trust/entitlement/verification/tax column-name heuristic (mirrors the live audit). A table-wide
+ * write to any of these is the RULE-01 hazard; an ordinary attribute column is not.
+ */
+export const SENSITIVE_COLUMN_RE =
+  /(verif|trust|entitle|_tax|vat|kbo|status|role|is_admin|_level|score|badge|plan|pro_|boost|premium|balance|credit|kyc|itsme)/i;
+
+const ADD_COLUMN_RE =
+  /\balter\s+table\s+(?:if\s+exists\s+)?(?:only\s+)?("?[\w.]+"?)\s+add\s+column\s+(?:if\s+not\s+exists\s+)?("?\w+"?)/gi;
+
+/** Split a CREATE TABLE body on top-level commas (respecting nested parens). */
+function splitTopLevel(body: string): string[] {
+  const parts: string[] = [];
+  let depth = 0;
+  let cur = "";
+  for (const ch of body) {
+    if (ch === "(") depth++;
+    else if (ch === ")") depth--;
+    if (ch === "," && depth === 0) {
+      parts.push(cur);
+      cur = "";
+    } else {
+      cur += ch;
+    }
+  }
+  if (cur.trim()) parts.push(cur);
+  return parts;
+}
+
+const TABLE_CONSTRAINT_KW =
+  /^(constraint|primary|foreign|unique|check|exclude|like)\b/i;
+
+/** Map of table -> set of declared column names, from CREATE TABLE bodies + ALTER TABLE ADD COLUMN. */
+export function extractColumnsByTable(
+  cleanSql: string
+): Map<string, Set<string>> {
+  const cols = new Map<string, Set<string>>();
+  const add = (table: string, col: string) => {
+    const t = normIdent(table);
+    if (!cols.has(t)) cols.set(t, new Set());
+    cols.get(t)!.add(col.replace(/"/g, "").toLowerCase());
+  };
+
+  for (const m of cleanSql.matchAll(CREATE_TABLE_RE)) {
+    const table = m[1];
+    const openParen = cleanSql.indexOf("(", m.index! + m[0].length - table.length);
+    if (openParen === -1) continue;
+    const body = readBalancedArgs(cleanSql, openParen);
+    for (const raw of splitTopLevel(body)) {
+      const def = raw.trim();
+      if (!def || TABLE_CONSTRAINT_KW.test(def)) continue;
+      const colName = def.split(/\s|\(/)[0];
+      if (colName) add(table, colName);
+    }
+  }
+  for (const m of cleanSql.matchAll(ADD_COLUMN_RE)) add(m[1], m[2]);
+  return cols;
+}
+
+export interface WritePolicy {
+  table: string;
+  cmd: string; // insert | update | delete | select | all
+  roles: string;
+  gate: string;
+}
+
+/** create policy NAME on TABLE [as ...] [for CMD] [to ROLES] [using(...)] [with check(...)] ; */
+const CREATE_POLICY_RE = /\bcreate\s+policy\s+[\s\S]*?;/gi;
+
+export function extractWritePolicies(cleanSql: string): WritePolicy[] {
+  const out: WritePolicy[] = [];
+  for (const stmtMatch of cleanSql.matchAll(CREATE_POLICY_RE)) {
+    const stmt = stmtMatch[0];
+    const onM = /\bon\s+("?[\w.]+"?)/i.exec(stmt);
+    if (!onM) continue;
+    const table = normIdent(onM[1]);
+    const cmd = (/(\bfor\s+(insert|update|delete|select|all)\b)/i.exec(stmt)?.[2] ?? "all").toLowerCase();
+    const roles = (/\bto\s+([\s\S]*?)(?:\busing\b|\bwith\s+check\b|;)/i.exec(stmt)?.[1] ?? "public").trim();
+    const usingExpr = /\busing\s*\(/i.exec(stmt);
+    const checkExpr = /\bwith\s+check\s*\(/i.exec(stmt);
+    let gate = "";
+    if (usingExpr) gate += " " + readBalancedArgs(stmt, stmt.indexOf("(", usingExpr.index));
+    if (checkExpr) gate += " " + readBalancedArgs(stmt, stmt.indexOf("(", checkExpr.index));
+    out.push({ table, cmd, roles, gate: gate.trim() });
+  }
+  return out;
+}
+
+/** revoke PRIVS on TABLE from ROLES — captures which (table, op) had their default grant revoked. */
+const REVOKE_TABLE_RE =
+  /\brevoke\s+([\s\S]*?)\s+on\s+("?[\w.]+"?)\s+from\s+([^;]*)/gi;
+
 // ── Core analysis ────────────────────────────────────────────────────────────
 
 export interface AnalyzeResult {
@@ -277,6 +380,12 @@ export function analyzeMigrations(
   const rlsEnabled = new Set<string>();
   const violations: Violation[] = [];
 
+  // RULE-01b corpus-wide state (a table's columns/policies/revokes can span migrations).
+  const sensitiveColsByTable = new Map<string, Set<string>>();
+  const writePoliciesByTable = new Map<string, WritePolicy[]>();
+  const revokedOps = new Set<string>(); // "<table>:<op>" where op default-grant was revoked from authenticated
+  const policySourceMig = new Map<string, string>(); // table -> migration that first added a write policy
+
   for (const file of files) {
     const clean = preprocessSql(file.sql);
 
@@ -288,6 +397,36 @@ export function analyzeMigrations(
     for (const m of clean.matchAll(DROP_TABLE_RE)) dropped.add(normIdent(m[1]));
     for (const m of clean.matchAll(ENABLE_RLS_RE))
       rlsEnabled.add(normIdent(m[1]));
+
+    // RULE-01b inputs (corpus-wide).
+    for (const [table, cols] of extractColumnsByTable(clean)) {
+      const sens = [...cols].filter((c) => SENSITIVE_COLUMN_RE.test(c));
+      if (sens.length) {
+        if (!sensitiveColsByTable.has(table))
+          sensitiveColsByTable.set(table, new Set());
+        sens.forEach((c) => sensitiveColsByTable.get(table)!.add(c));
+      }
+    }
+    for (const wp of extractWritePolicies(clean)) {
+      if (!writePoliciesByTable.has(wp.table))
+        writePoliciesByTable.set(wp.table, []);
+      writePoliciesByTable.get(wp.table)!.push(wp);
+      if (!policySourceMig.has(wp.table)) policySourceMig.set(wp.table, file.name);
+    }
+    for (const rm of clean.matchAll(REVOKE_TABLE_RE)) {
+      const privs = rm[1].toLowerCase();
+      const table = normIdent(rm[2]);
+      const roles = rm[3];
+      // We only care about revokes that pull the default table-wide write from authenticated.
+      if (/\bon\s+function\b/i.test(rm[0]) || /\bfunction\b/.test(rm[2])) continue;
+      if (!rolesInclude(roles, "authenticated") && !rolesInclude(roles, "public"))
+        continue;
+      const ops: string[] = [];
+      if (/\ball\b/.test(privs)) ops.push("insert", "update");
+      if (/\binsert\b/.test(privs)) ops.push("insert");
+      if (/\bupdate\b/.test(privs)) ops.push("update");
+      for (const op of ops) revokedOps.add(`${table}:${op}`);
+    }
 
     // RULE-01: table-wide write grants (per-statement).
     for (const m of clean.matchAll(GRANT_RE)) {
@@ -388,6 +527,41 @@ export function analyzeMigrations(
       migration: mig,
       message: `Table public.${table} is created but never gets "alter table ... enable row level security". Every public table needs RLS (CLAUDE.md). Add the enable-RLS statement, or add a documented allowlist entry "${table}".`,
     });
+  }
+
+  // RULE-01b: a sensitive-column table with a reachable authenticated/public write policy but no
+  // explicit revoke of the default table-wide grant exposes that column (the profiles-INSERT class).
+  // Gate a NON-admin user can actually pass: open (true) or owner-scoped (auth.uid()); an is_admin()
+  // -only gate is admin-managed and not a RULE-01 hazard (mirrors the live audit).
+  const gateNonAdminReachable = (gate: string) => {
+    const g = gate.trim().toLowerCase();
+    if (g === "" || g === "true") return true;
+    return /auth\.(uid|jwt)\s*\(/i.test(g);
+  };
+  for (const [table, sensCols] of sensitiveColsByTable) {
+    if (dropped.has(table)) continue;
+    const policies = writePoliciesByTable.get(table) || [];
+    for (const op of ["insert", "update"] as const) {
+      const reachable = policies.some(
+        (p) =>
+          (p.cmd === op || p.cmd === "all") &&
+          (rolesInclude(p.roles, "authenticated") ||
+            rolesInclude(p.roles, "public")) &&
+          gateNonAdminReachable(p.gate)
+      );
+      if (!reachable) continue;
+      if (revokedOps.has(`${table}:${op}`)) continue; // default grant explicitly revoked → locked
+      const identifier = `${table}:${op}`;
+      if (isExempt("unlocked-column-policy", identifier)) continue;
+      violations.push({
+        kind: "unlocked-column-policy",
+        identifier,
+        migration: policySourceMig.get(table) ?? created.get(table) ?? "(unknown)",
+        message: `public.${table} has trust/entitlement column(s) [${[...sensCols].join(
+          ", "
+        )}] and an authenticated ${op.toUpperCase()} policy, but no "revoke ${op} on public.${table} from authenticated". RULE-01b: Supabase's DEFAULT table-wide ${op} grant (never written in a migration) lets the user set those columns on their own row via direct PostgREST, bypassing the API zod strip. Add "revoke ${op} on public.${table} from authenticated;" then "grant ${op} (editable_cols) on public.${table} to authenticated;", or add a documented allowlist entry "${identifier}".`,
+      });
+    }
   }
 
   return {
