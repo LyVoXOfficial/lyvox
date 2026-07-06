@@ -72,6 +72,42 @@ export function buildRelaxedParams(input: SearchRequestParamsInput) {
   });
 }
 
+/**
+ * Derive the canonical search-request input from a URLSearchParams (the query
+ * string of /search). Used by BOTH the SSR server component (app/search/page.tsx)
+ * and the client island (app/search/SearchClient.tsx) so the hydration key and
+ * the client re-fetch are computed identically. If these two derivations drift,
+ * the client would either double-fetch on mount (wasting the SSR win) or skip a
+ * real re-fetch (stale results). Field-for-field mirror of the client's inline
+ * URL parsing.
+ */
+export function readSearchRequestFromParams(
+  sp: URLSearchParams,
+  limit: number,
+): SearchRequestParamsInput {
+  const verifiedRaw = sp.get("verified_only");
+  const verifiedOnly = verifiedRaw
+    ? ["true", "1", "yes"].includes(verifiedRaw.trim().toLowerCase())
+    : false;
+
+  return {
+    query: sp.get("q") ?? undefined,
+    categoryId: sp.get("category_id"),
+    priceMin: sp.get("price_min"),
+    priceMax: sp.get("price_max"),
+    location: sp.get("location"),
+    lat: sp.get("lat"),
+    lng: sp.get("lng"),
+    radiusKm: sp.get("radius_km") || "50",
+    sortBy: sp.get("sort_by") || "created_at_desc",
+    page: Number.parseInt(sp.get("page") || "0", 10),
+    limit,
+    verifiedOnly,
+    condition: sp.get("condition"),
+    sourceParams: sp,
+  };
+}
+
 export function buildOutsideRadiusParams(
   input: SearchRequestParamsInput,
   multiplier = 3,
