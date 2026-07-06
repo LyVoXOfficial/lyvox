@@ -2,11 +2,19 @@
 "use client";
 
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from "react";
+import dynamic from "next/dynamic";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useI18n } from "@/i18n";
 import { fetchViewerTrust } from "@/components/trust/useViewerTrust";
-import TrustGateLogin from "@/components/trust/TrustGateLogin";
-import TrustGatePhone from "@/components/trust/TrustGatePhone";
+
+// PERF-07 item 4: the dialog body pulls the heavy client chain
+// (TrustGateLogin → RegisterForm → react-hook-form + react-icons/fa, and
+// TrustGatePhone → TurnstileWidget). It only ever renders when `open === true`
+// (Radix unmounts DialogContent while closed), so eagerly importing it forced
+// ~17kB of rhf/icons into every route's first-load JS. Load it on demand — the
+// Dialog shell below stays eager so the gate can open instantly.
+const TrustGateLogin = dynamic(() => import("@/components/trust/TrustGateLogin"));
+const TrustGatePhone = dynamic(() => import("@/components/trust/TrustGatePhone"));
 
 type Level = "auth" | "verified";
 type Stage = "login" | "phone";

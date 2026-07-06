@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { useI18n } from "@/i18n";
 import { supabase } from "@/lib/supabaseClient";
@@ -13,7 +14,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { logger } from "@/lib/errorLogger";
-import { FormRenderer, type CatalogSchema, type CatalogFieldDefinition, type CatalogSchemaField } from "@/catalog/renderer";
+import type { CatalogSchema, CatalogFieldDefinition } from "@/catalog/renderer";
+// PERF-07 item 3: the catalog FormRenderer widget tree only renders after a
+// category with a dynamic schema is selected — never on the initial /search
+// (which is robots:noindex anyway). A static import forced ~24kB into the
+// search route's first-load JS. Load it on demand; the sidebar rail (initial
+// content) stays eager. Named export → resolve it inside the dynamic import.
+const FormRenderer = dynamic(() => import("@/catalog/renderer").then((m) => m.FormRenderer));
 import { detectCategoryType } from "@/lib/utils/categoryDetector";
 import { buildSearchRequestParams } from "@/lib/search/buildSearchParams";
 import {

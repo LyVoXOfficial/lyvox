@@ -14,10 +14,35 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { logger } from "@/lib/errorLogger";
 import { supabase } from "@/lib/supabaseClient";
-import { loginSchema } from "@/lib/validations/auth";
 import { useI18n } from "@/i18n";
 import TurnstileWidget, { type TurnstileWidgetHandle } from "@/components/antifraud/TurnstileWidget";
 import { verifyCaptcha } from "@/lib/antifraud/verifyCaptchaClient";
+
+// PERF-07 item 2: /login was the sole consumer of the zod `loginSchema`, which
+// dragged the whole zod runtime into this route's first-load JS for a single
+// email check. Inline the exact same validation (trim → lowercase → non-empty →
+// email regex, identical messages) so zod no longer ships to /login — the same
+// zod-free email check RegisterForm already uses. The return shape mirrors
+// zod's `safeParse` result so every call site below is untouched.
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+type EmailParseResult =
+  | { success: true; data: { email: string } }
+  | { success: false; error: { issues: [{ message: string }] } };
+
+function parseLoginEmail(rawEmail: string): EmailParseResult {
+  const email = rawEmail.trim().toLowerCase();
+  if (email.length < 1) {
+    return { success: false, error: { issues: [{ message: "Enter your email address." }] } };
+  }
+  if (!EMAIL_PATTERN.test(email)) {
+    return {
+      success: false,
+      error: { issues: [{ message: "Enter a valid email address, for example user@example.com." }] },
+    };
+  }
+  return { success: true, data: { email } };
+}
 
 function LoginPageInner() {
   const { t } = useI18n();
@@ -52,7 +77,7 @@ function LoginPageInner() {
       return;
     }
 
-    const validationResult = loginSchema.safeParse({ email: email.trim() });
+    const validationResult = parseLoginEmail(email);
     if (!validationResult.success) {
       const firstError = validationResult.error.issues[0];
       setValidationError(firstError.message);
@@ -67,7 +92,7 @@ function LoginPageInner() {
     setValidationError(null);
 
     try {
-      const validationResult = loginSchema.safeParse({ email: email.trim() });
+      const validationResult = parseLoginEmail(email);
 
       if (!validationResult.success) {
         const firstError = validationResult.error.issues[0];
@@ -139,7 +164,7 @@ function LoginPageInner() {
     setValidationError(null);
 
     try {
-      const validationResult = loginSchema.safeParse({ email: email.trim() });
+      const validationResult = parseLoginEmail(email);
 
       if (!validationResult.success) {
         const firstError = validationResult.error.issues[0];
