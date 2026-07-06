@@ -1,12 +1,220 @@
-import * as Icons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import {
+  Armchair,
+  Baby,
+  BadgeCheck,
+  Bed,
+  Bike,
+  Bird,
+  Blocks,
+  Bone,
+  BookOpen,
+  Briefcase,
+  BriefcaseBusiness,
+  Building,
+  Building2,
+  Calendar,
+  Camera,
+  CameraOff,
+  Car,
+  CarFront,
+  Cat,
+  ClipboardList,
+  Clock,
+  CloudSun,
+  Code,
+  Cpu,
+  Crown,
+  Dice6,
+  Dog,
+  DoorOpen,
+  Dumbbell,
+  Factory,
+  Fish,
+  FlaskConical,
+  Gamepad2,
+  Gauge,
+  Gem,
+  Gift,
+  GraduationCap,
+  Guitar,
+  Hammer,
+  HandHeart,
+  Handshake,
+  Headphones,
+  Heart,
+  Home,
+  Hourglass,
+  House,
+  KeyRound,
+  KeySquare,
+  Lamp,
+  Laptop,
+  Layers,
+  LifeBuoy,
+  Monitor,
+  Package,
+  Paintbrush,
+  Palette,
+  PartyPopper,
+  PawPrint,
+  PenTool,
+  PlaySquare,
+  Plug,
+  Printer,
+  Puzzle,
+  RefreshCw,
+  Search,
+  Server,
+  Ship,
+  Shirt,
+  ShoppingBag,
+  Smartphone,
+  Sofa,
+  Sparkles,
+  Speaker,
+  Sprout,
+  Squirrel,
+  Tablet,
+  Tag,
+  Tent,
+  Ticket,
+  Trees,
+  Truck,
+  Tv,
+  UserRound,
+  Users,
+  UtensilsCrossed,
+  Video,
+  Wallet,
+  Watch,
+  Waves,
+  Wrench,
+} from "lucide-react";
 
-const ROOT_FALLBACK = Icons.Layers as LucideIcon;
-const FALLBACK = Icons.Tag as LucideIcon;
+// PERF-06: this used to be `import * as Icons from "lucide-react"` with a
+// dynamic `Icons[iconName]` lookup. A namespace import defeats tree-shaking
+// (a computed member access keeps the whole library reachable), so ALL ~1560
+// lucide icons — ~160 kB gzip — shipped to every page that transitively
+// imports this helper (home, search, category tree, filters). Next's built-in
+// `optimizePackageImports` for lucide-react only helps NAMED imports.
+//
+// The category `icon` column is free-form text, but the set of values that
+// actually appear in the DB is finite. This map is that set (enumerated from
+// `SELECT DISTINCT icon FROM categories`, 2026-07-07). Named imports let the
+// bundler ship only these icons.
+//
+// TRADEOFF: if a category is later created with an icon name NOT in this map,
+// it renders the generic fallback until the name is added here. Keep this map
+// in sync when new category icons are introduced. (The old namespace version
+// would have rendered any valid lucide name — but at the cost of the full
+// bundle on every page.)
+//
+// Behaviour is otherwise identical to the old lookup: names present here
+// resolve to their icon; anything else falls back exactly as before. Six DB
+// values were already falling back under the old code because they are not
+// valid lucide exports (`BabyBottle`, `Broom`, `Soap`) or use the wrong case
+// (`home`, `smartphone`, `hanger`); they are intentionally omitted so their
+// rendering does not change.
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  Armchair,
+  Baby,
+  BadgeCheck,
+  Bed,
+  Bike,
+  Bird,
+  Blocks,
+  Bone,
+  BookOpen,
+  Briefcase,
+  BriefcaseBusiness,
+  Building,
+  Building2,
+  Calendar,
+  Camera,
+  CameraOff,
+  Car,
+  CarFront,
+  Cat,
+  ClipboardList,
+  Clock,
+  CloudSun,
+  Code,
+  Cpu,
+  Crown,
+  Dice6,
+  Dog,
+  DoorOpen,
+  Dumbbell,
+  Factory,
+  Fish,
+  FlaskConical,
+  Gamepad2,
+  Gauge,
+  Gem,
+  Gift,
+  GraduationCap,
+  Guitar,
+  Hammer,
+  HandHeart,
+  Handshake,
+  Headphones,
+  Heart,
+  Home,
+  Hourglass,
+  House,
+  KeyRound,
+  KeySquare,
+  Lamp,
+  Laptop,
+  Layers,
+  LifeBuoy,
+  Monitor,
+  Package,
+  Paintbrush,
+  Palette,
+  PartyPopper,
+  PawPrint,
+  PenTool,
+  PlaySquare,
+  Plug,
+  Printer,
+  Puzzle,
+  RefreshCw,
+  Search,
+  Server,
+  Ship,
+  Shirt,
+  ShoppingBag,
+  Smartphone,
+  Sofa,
+  Sparkles,
+  Speaker,
+  Sprout,
+  Squirrel,
+  Tablet,
+  Tent,
+  Ticket,
+  Trees,
+  Truck,
+  Tv,
+  UserRound,
+  Users,
+  UtensilsCrossed,
+  Video,
+  Wallet,
+  Watch,
+  Waves,
+  Wrench,
+};
+
+// Fallbacks preserved from the previous implementation (Icons.Layers / Icons.Tag).
+const ROOT_FALLBACK: LucideIcon = Layers;
+const FALLBACK: LucideIcon = Tag;
 
 export function getCategoryIcon(iconName: string | null | undefined, level: number): LucideIcon {
-  if (iconName && iconName in Icons) {
-    return Icons[iconName as keyof typeof Icons] as LucideIcon;
+  if (iconName && iconName in CATEGORY_ICONS) {
+    return CATEGORY_ICONS[iconName];
   }
   return level <= 1 ? ROOT_FALLBACK : FALLBACK;
 }
