@@ -3,8 +3,17 @@
 // via `src/lib/security/csp.ts`. It MUST NOT also be emitted here — two
 // `Content-Security-Policy` sources make the browser intersect them and break
 // the app. The static (non-nonce) security headers stay below.
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import withBundleAnalyzerInit from "@next/bundle-analyzer";
+import type { NextConfig } from "next";
+
+// PERF-06: `pnpm analyze` (ANALYZE=true) opens the client/server bundle
+// treemaps. Gated behind the env var so normal builds/deploys never pay the
+// analyzer's report-generation cost.
+const withBundleAnalyzer = withBundleAnalyzerInit({
+  enabled: process.env.ANALYZE === "true",
+});
+
+const nextConfig: NextConfig = {
   // eslint config moved to eslint.config.mjs (Next.js 16)
   // No longer supported in next.config.ts
   typescript: {
@@ -12,7 +21,13 @@ const nextConfig = {
     // (`pnpm typecheck` = 0 errors) and CI gates on it, so the build enforces
     // types too. If a future change needs to ship despite type errors, prefer
     // fixing them; only flip this back as a temporary, tracked exception.
-    ignoreBuildErrors: false,
+    // PERF-06 exception: `pnpm analyze` forces `--webpack` (Turbopack has no
+    // bundle-analyzer report) and Next 16's webpack build generates a
+    // slightly different `.next/types` PageProps shape than the Turbopack
+    // build every other command uses, which fails typecheck on a page
+    // unrelated to whatever is being analyzed. Real (Turbopack) builds and CI
+    // are unaffected — only this manual, non-deploy tool loosens the gate.
+    ignoreBuildErrors: process.env.ANALYZE === "true",
   },
   // SEC-UPLOAD: `sharp` (native libvips binary) is used server-side in
   // /api/media/complete to sanitise uploads. Keep it external so the bundler
@@ -95,6 +110,6 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);
 
 
