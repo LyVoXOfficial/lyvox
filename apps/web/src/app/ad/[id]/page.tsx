@@ -25,7 +25,7 @@ import {
 import { truncateDescription } from "@/lib/seo/catalog/common";
 import { buildListingJsonLd } from "@/lib/seo/catalog/listingJsonLd";
 import { resolvePostFlowMode } from "@/lib/utils/categoryDetector";
-import { supabaseServer } from "@/lib/supabaseServer";
+import { getRequestSupabase } from "@/lib/supabaseServer";
 import { isViewerVerified } from "@/lib/auth/requireVerified";
 import SellerIdentityGate from "@/components/trust/SellerIdentityGate";
 import { signMediaUrls } from "@/lib/media/signMediaUrls";
@@ -66,7 +66,7 @@ export const revalidate = 120;
 // De-dup the auth lookup across generateMetadata + the page + viewer checks.
 const getRequestUserId = cache(async (): Promise<string | null> => {
   try {
-    const supabase = await supabaseServer();
+    const supabase = await getRequestSupabase();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -452,7 +452,7 @@ export default async function AdvertPage({ params }: PageProps) {
     loadViewerVerified(currentUserId),
     getSimilarAdverts(data.advert.id, data.advert.category_id),
     (async () => {
-      const { data: likeCountData } = await (await supabaseServer()).rpc(
+      const { data: likeCountData } = await (await getRequestSupabase()).rpc(
         "get_advert_like_count",
         { advert_id_param: data.advert.id },
       );
@@ -1513,7 +1513,7 @@ function isFilledSpecificValue(value: unknown): boolean {
 async function loadViewerVerified(userId: string | null): Promise<boolean> {
   if (!userId) return false;
   try {
-    const supabase = await supabaseServer();
+    const supabase = await getRequestSupabase();
     return await isViewerVerified(supabase, userId);
   } catch (error) {
     console.warn("Failed to resolve viewer verification", error);

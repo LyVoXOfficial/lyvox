@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { cache } from "react";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import type { Database } from "@/lib/supabaseTypes";
 
@@ -65,6 +66,18 @@ export async function supabaseServer() {
     },
   );
 }
+
+/**
+ * PERF-05: request-scoped variant of `supabaseServer()`. `React.cache()` dedupes
+ * repeat calls within a single incoming request (Server Components AND Route
+ * Handlers share the same per-request store Next.js resets on every request —
+ * no cross-request/cross-user leakage). Use this in read paths that call the
+ * client from multiple places per request (e.g. a page's `generateMetadata`
+ * plus its default export) to avoid redundant `cookies()` reads and duplicate
+ * session/token-refresh work. Prefer the plain `supabaseServer()` in mutation
+ * routes where a fresh client per call is intentional.
+ */
+export const getRequestSupabase = cache(supabaseServer);
 
 // ============================================================================
 // Server-side Session Utilities
