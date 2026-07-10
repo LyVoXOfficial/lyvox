@@ -1,11 +1,15 @@
+> [!WARNING]
+> **Историческое свидетельство аудита на 2026-06-25, а не текущий список уязвимостей.** Не повторять исправления и не считать статусы ниже актуальными без воспроизведения на текущем `HEAD`. Действующие security release-gates и открытые задачи находятся только в [`docs/MASTER_PRODUCTION_TZ.md`](./MASTER_PRODUCTION_TZ.md).
+
 # LyVoX — Security & Quality Audit
 
 _Audit date: 2026-06-25_
 
 Scope: authentication/authorization, service-role (RLS-bypass) usage, HTTP
 security headers, caching, build/type safety, and documentation accuracy for
-`apps/web` + `supabase`. This document is the single source of truth for audit
-findings (it replaces the various ad-hoc `*_STATUS.md` / `*_REPORT.md` notes).
+`apps/web` + `supabase`. At the audit date this document consolidated findings
+from ad-hoc `*_STATUS.md` / `*_REPORT.md` notes; it is no longer an authority
+for current status or remediation order.
 
 Status legend: ✅ FIXED in this pass · ⚠️ RECOMMENDED (needs a decision / larger
 change / testing) · ℹ️ NOTE.
@@ -273,8 +277,11 @@ call to a possibly-absent function is unsafe until the migration drift is fixed.
 
 ## How to fix the migration drift (R2) — run this yourself (needs `supabase link`)
 
-The CLI here is not linked (`Cannot find project ref`), so these must be run in
-your authenticated environment. Do them in order, and **back up first**:
+The CLI was not linked at the audit date (`Cannot find project ref`), so the
+following commands were proposed for an authenticated environment.
+
+> [!CAUTION]
+> **Do not run this historical migration-reconciliation sequence.** The remote state and project runbook may have changed. Reproduce drift against the current environment and follow only the database procedure approved in `docs/MASTER_PRODUCTION_TZ.md` and `AGENTS.md`.
 
 ```bash
 # 0. Link + safety
@@ -284,7 +291,7 @@ supabase db dump -f backup_$(date +%F).sql            # full backup before any c
 # 1. See the exact drift (the 13 remote-only 20251110224xxx vs the local-only set)
 supabase migration list --linked
 
-# 2. RECOMMENDED: adopt the remote as source of truth (it has the live schema).
+# 2. HISTORICAL PROPOSAL (DO NOT RUN): adopt the remote as source of truth.
 #    Pull the real remote schema into a fresh baseline migration, then reconcile
 #    history so the CLI and DB agree:
 supabase db pull                                       # writes a baseline from remote

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 LyVoX is a Belgium-focused trust-first C2C/B2C marketplace. Stack: **Next.js 16 (App Router) + React 19 + TypeScript + Supabase (Postgres/Auth/Storage/Edge Functions) + Stripe + Upstash Redis**. pnpm monorepo, deployed on Vercel. Auth is **Supabase Auth + itsme (OIDC)** — never Auth0.
 
-Backlog lives in `docs/MASTER_TODO.md`. Feature specs are in `docs/features/<id>-*.md`. Cross-cutting foundations are in `docs/features/FOUNDATIONS-F1-F14.md`.
+The only current Production backlog and status source is `docs/MASTER_PRODUCTION_TZ.md`. Feature specs in `docs/features/<id>-*.md`, `docs/PROJECT_VISION_AND_TZ.md`, `docs/MASTER_TODO.md`, foundations, audits, and old checklists are subordinate or historical and must not override the master.
 
 ## Commands
 
@@ -21,7 +21,7 @@ pnpm lint             # eslint
 pnpm gen:types        # regenerate supabase/types/database.types.ts from linked DB
 ```
 
-All four checks must stay green before merging: `pnpm typecheck && pnpm test && pnpm lint`.
+All four checks must stay green before merging: `pnpm typecheck`, `pnpm test`, `pnpm lint`, and `pnpm build`.
 
 ## Monorepo layout
 
@@ -31,7 +31,7 @@ supabase/
   migrations/      — timestamped SQL migrations (YYYYMMDDHHMMSS_*.sql)
   functions/       — Supabase Edge Functions (ai-moderation, fraud-detection, maintenance-cleanup)
   types/           — auto-generated database.types.ts (never edit by hand)
-docs/              — specs, PRDs, audit reports — single source of truth for product
+docs/              — canonical Production master plus subordinate specs, PRDs, and historical audits
 scripts/           — maintenance helpers (monitoring, seeding, checklist)
 tests/             — e2e / shared test assets
 ```
@@ -40,10 +40,10 @@ tests/             — e2e / shared test assets
 
 ### Supabase clients — three separate files, never mix
 
-| File | When to use |
-|---|---|
-| `lib/supabaseClient.ts` | **Browser only** — `createBrowserClient`, singleton, localStorage session |
-| `lib/supabaseServer.ts` | **Server Components / API routes** — `createServerClient`, reads/sets cookies |
+| File                     | When to use                                                                        |
+| ------------------------ | ---------------------------------------------------------------------------------- |
+| `lib/supabaseClient.ts`  | **Browser only** — `createBrowserClient`, singleton, localStorage session          |
+| `lib/supabaseServer.ts`  | **Server Components / API routes** — `createServerClient`, reads/sets cookies      |
 | `lib/supabaseService.ts` | **Server only, service-role** — bypasses RLS; import is guarded by `"server-only"` |
 
 Always call `supabaseServer()` (async, returns client) in API routes. Use `supabaseService()` only where RLS must be bypassed (e.g., admin, webhook handlers). Never use the browser client in server code.
@@ -65,7 +65,7 @@ All API routes return `{ok: true, data: {...}}` on success or `{ok: false, error
 
 ### Capability flags (feature flags)
 
-Capabilities live in `lib/capabilities.ts`. Flip via env var (`CAPABILITY_PRO_SUBSCRIPTIONS=true`, etc.) — no code changes needed. Current gates: `pro_subscriptions`, `stripe_identity`, `itsme`, `whatsapp_otp`, `payments_escrow`.
+Capability identifiers start in `lib/capabilities.ts`, but effective runtime status must follow `docs/production/CAPABILITY_ACTIVATION_MATRIX.md`: implementation + admin toggle + secrets + legal/company gate + provider health + allowed release mode + emergency switch. Secrets stay in the provider secret store; the admin UI never stores or returns their values. Regulated and paid capabilities default OFF.
 
 ### i18n
 
@@ -113,7 +113,7 @@ consult `graphify-out/GRAPH_REPORT.md` → "God Nodes" section for the current t
 
 ## Key blockers / golden rules
 
-- **⛔ No production money-flow code** until F3 (PSD2/AML legal gate) is closed — see `docs/features/escrow-legal-gate.md`. Schema design and provider abstraction are allowed.
+- **⛔ No live production money-flow or accidentally key-activatable money path** until F3 (PSD2/AML legal gate) is closed — see `docs/features/escrow-legal-gate.md`. Schema, state machines, deterministic simulators, provider abstractions, and contract tests are allowed.
 - Every feature behind a **capability flag** or feature branch; atomic commits; branch naming `feat/<id>-<slug>`.
 - Webhook handlers must be idempotent (F1 target: `INSERT … ON CONFLICT (event_id) DO NOTHING`).
 - Money amounts and payout recipients are authorised **server-side** only (F2).

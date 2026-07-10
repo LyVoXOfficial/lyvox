@@ -14,7 +14,6 @@
     "prune": "pnpm dlx ts-prune",
     "depcheck": "pnpm dlx depcheck",
     "test": "vitest run",
-    "checklist:update": "node scripts/update-checklist-progress.js",
     "authz:audit": "node scripts/audit-authz-live.mjs",
     "settings:smoke": "node scripts/settings-smoke.mjs",
     "analyze:queries": "node scripts/analyze-query-performance.mjs",

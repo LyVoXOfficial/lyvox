@@ -1,8 +1,9 @@
-> ⚠ УСТАРЕЛО — этот файл больше не ведётся. Единый источник правды: [docs/MASTER_TODO.md](./MASTER_TODO.md). Сведено туда; можно удалить.
+> [!WARNING]
+> **Архивный план. Не выполнять фазы, сроки и deploy-инструкции ниже.** Единственный актуальный план и backlog: [`docs/MASTER_PRODUCTION_TZ.md`](./MASTER_PRODUCTION_TZ.md). Файл сохранён как история.
 
 # План разработки проекта LyVoX
 
-> Актуальный source of truth после аудита 2026-06-05: `docs/PROJECT_VISION_AND_TZ.md`.
+> Исторический контекст этого плана основан на снимке `docs/PROJECT_VISION_AND_TZ.md` от 2026-06-05.
 > Этот файл сохраняется как исторический roadmap и может содержать устаревшие статусы.
 
 ## 1. Общее описание
@@ -192,7 +193,7 @@
 - Транспорт: каскадные списки марка/модель/год + сбор пробега и состояния; EV-подкатегория с привязкой к нормализованных таблиц `vehicle_makes`/`vehicle_models`/`vehicle_generations` ([REQ:Core], [REQ:Data], [TODO #8]).
 
 ## 6. Примечание по управлению проектом
-Файл PLAN.md формируется на основе актуальных требований и архитектуры. Его нужно обновлять после каждого значимого изменения в базе данных, архитектуре или дорожной карте, чтобы оставаться синхронизированным с `docs/requirements.md`, `docs/ARCH_RULES.md`, `docs/TODO.md` и `docs/ARCHITECTURE.md`.
+Исторически PLAN.md синхронизировали с requirements/TODO/architecture. Эта процедура отменена: файл не обновляется, текущий план и статусы находятся только в `docs/MASTER_PRODUCTION_TZ.md`.
 
 [REQ:Core]: requirements.md#project-overview
 [REQ:Security]: requirements.md#authorization--permissions
@@ -210,4 +211,3 @@
 [TODO #6]: TODO.md#lyvox-todo
 [TODO #7]: TODO.md#lyvox-todo
 [TODO #8]: TODO.md#lyvox-todo
-

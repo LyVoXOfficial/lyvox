@@ -26,9 +26,8 @@
 
 - Ограничения — здесь (ARCH_RULES.md).
 - Фактическая архитектура/изменения — в `docs/ARCHITECTURE.md`.
-- ERD, RLS-SQL, ENV, Roadmap — в `docs/requirements.md`.
+- ERD, RLS-SQL и описательная ENV-матрица — в `docs/requirements.md`; текущий roadmap, приоритеты и release-status — только в `docs/MASTER_PRODUCTION_TZ.md`.
 - API-контракты — в `docs/API_REFERENCE.md`.
-
 
 
 

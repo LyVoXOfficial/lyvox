@@ -1,3 +1,6 @@
+> [!WARNING]
+> **Историческая карта документации от 2025-11-09. Не использовать указанные ниже entrypoint, authority или checklist для выбора задач.** Единственная актуальная точка входа в production-работу: [`docs/MASTER_PRODUCTION_TZ.md`](./MASTER_PRODUCTION_TZ.md). Карта сохранена до отдельной регенерации.
+
 last_sync: 2025-11-09
 
 # LyVoX Knowledge Map
@@ -10,16 +13,16 @@ last_sync: 2025-11-09
 
 ## 📚 Documentation Hierarchy
 
-> **PROMPT_MAIN.md** is the root entrypoint. Every documentation journey starts there.
+> **Historical mapping (retired):** at the time, `PROMPT_MAIN.md` was treated as the root entrypoint. Do not use it to start current work.
 
 ```text
 📁 LyVoX Workspace (root)
 │
-├─ 📄 PROMPT_MAIN.md                     🎯 Root Knowledge Entrypoint
-│   └─ Entry point for AI assistants and contributors
-│   └─ Links to Master Checklist, deployment workflows, core references
+├─ 📄 PROMPT_MAIN.md                     Historical root entrypoint (retired)
+│   └─ Historical entry point for AI assistants and contributors (retired)
+│   └─ Historical links to retired checklist and deployment workflows
 │
-├─ 📁 docs/                              🔒 Private Documentation Root (never public)
+├─ 📁 docs/                              Historical documentation root
 │   │
 │   ├─ 📄 KNOWLEDGE_MAP.md               📚 This document — knowledge hierarchy
 │   │
@@ -32,7 +35,7 @@ last_sync: 2025-11-09
 │   │   ├─ 📄 requirements.md            (Requirements, ERD, RLS, environment matrix)
 │   │   ├─ 📄 API_REFERENCE.md           (API contracts and schemas)
 │   │   ├─ 📄 PLAN.md                    (Roadmap and milestones)
-│   │   ├─ 📄 TODO.md                    (Operational backlog)
+│   │   ├─ 📄 TODO.md                    (Historical backlog; retired)
 │   │   ├─ 📄 INSTALL.md                 (Environment setup)
 │   │   ├─ 📄 MCP_SERVICES.md            (Supabase & Vercel MCP usage)
 │   │   └─ Additional planning/compliance docs
@@ -44,7 +47,7 @@ last_sync: 2025-11-09
 │   │   └─ (Conceptual descriptions of business flows and rules)
 │   │
 │   ├─ 📁 development/                   💻 Implementation Guides & Modules
-│   │   ├─ 📄 MASTER_CHECKLIST.md        🎯 Start here — prioritized task list
+│   │   ├─ 📄 MASTER_CHECKLIST.md        Historical prioritized list (retired)
 │   │   ├─ 📄 README.md                  (Development documentation overview)
 │   │   ├─ 📄 database-schema.md         (Supabase schema details)
 │   │   ├─ 📄 api-architecture.md        (Route handler design patterns)
@@ -76,17 +79,17 @@ last_sync: 2025-11-09
 
 ---
 
-## 🎯 Authority Sources
+## Historical authority sources (retired)
 
 | Document | Authoritative For |
 |----------|-------------------|
-| `PROMPT_MAIN.md` | AI workflow, deployment checklist, task execution rules |
+| `PROMPT_MAIN.md` | Historical AI workflow and deployment rules (retired) |
 | `docs/CURSOR_KNOWLEDGE_BASE.md` | Global technical patterns and architecture principles |
 | `docs/ARCHITECTURE.md` | System topology, journeys, and stack versions |
 | `docs/ARCH_RULES.md` | Non-negotiable architectural constraints |
 | `docs/requirements.md` | Schema, RLS policies, compliance, environment setup |
 | `docs/API_REFERENCE.md` | API contracts (request/response schemas) |
-| `docs/development/MASTER_CHECKLIST.md` | Task priorities, dependencies, completion tracking |
+| `docs/development/MASTER_CHECKLIST.md` | Historical priorities and completion tracking (retired) |
 | `supabase/migrations/` | Canonical database definition |
 | `supabase/types/database.types.ts` | Generated TypeScript types matching schema |
 
@@ -94,7 +97,7 @@ last_sync: 2025-11-09
 
 ## 📖 Layered Knowledge System
 
-1. **Layer 1 — Root Entry Point:** `PROMPT_MAIN.md` (start here for workflow, references, and governance).  
+1. **Layer 1 — Historical root entry point:** `PROMPT_MAIN.md` (retired workflow).
 2. **Layer 2 — General Foundation:** `docs/CURSOR_KNOWLEDGE_BASE.md` (global technical knowledge).  
 3. **Layer 3 — Core Documentation:** Root-level docs inside `docs/` (architecture, requirements, planning).  
 4. **Layer 4 — Domain Knowledge:** `docs/domains/` (business logic, conceptual rules).  
@@ -106,9 +109,9 @@ last_sync: 2025-11-09
 ## 🔗 Cross-Reference Patterns
 
 - **Domain ↔ Development:** Domain docs explain *what/why*; development docs explain *how/where*. Example: `domains/moderation.md` ↔ `development/moderation-ai.md`.  
-- **Development ↔ Master Checklist:** Implementation guides link to IDs in `MASTER_CHECKLIST.md` (e.g., `UI-015`, `DB-003`).  
+- **Development ↔ Master Checklist:** historical links to retired IDs in `MASTER_CHECKLIST.md` (for traceability only).
 - **Catalog ↔ Implementation:** `catalog/CATALOG_MASTER.md` (strategy) ↔ `development/categories.md` (execution) ↔ `catalog/categories/*.md` (attributes).  
-- **PROMPT_MAIN.md ↔ KNOWLEDGE_MAP.md:** PROMPT references this map; this map points back to PROMPT as the root.  
+- **PROMPT_MAIN.md ↔ KNOWLEDGE_MAP.md:** historical circular navigation, now retired.
 - **CURSOR_KNOWLEDGE_BASE.md ↔ All Layers:** Acts as the shared foundation for domain and development docs.  
 
 ---
@@ -117,17 +120,17 @@ last_sync: 2025-11-09
 
 ### For New Contributors
 
-1. Read `PROMPT_MAIN.md` to understand workflow and governance.  
+1. Retired instruction: do not use `PROMPT_MAIN.md` as current workflow or governance.
 2. Skim `docs/CURSOR_KNOWLEDGE_BASE.md` for platform fundamentals.  
 3. Review `docs/ARCHITECTURE.md` and `docs/requirements.md` for high-level context.  
-4. Follow `docs/development/MASTER_CHECKLIST.md` to pick prioritized tasks.  
+4. Historical instruction, no longer valid: use `docs/development/MASTER_CHECKLIST.md` to pick tasks.
 
 ### For AI Assistants
 
-1. Always start with `PROMPT_MAIN.md`.  
+1. Historical instruction, no longer valid: start with `PROMPT_MAIN.md`.
 2. Use `CURSOR_KNOWLEDGE_BASE.md` for architectural patterns.  
 3. Dive into `docs/domains/` for business logic.  
-4. Implement using `docs/development/` guides; update `MASTER_CHECKLIST.md` as required.  
+4. Historical instruction, no longer valid: implement from `docs/development/` guides and update `MASTER_CHECKLIST.md`.
 5. Consult `docs/catalog/` for taxonomy, AI enrichment, and attribute structures.  
 
 ### Quick Lookup
@@ -140,14 +143,9 @@ last_sync: 2025-11-09
 
 ---
 
-## 🔒 Privacy & Repository Policy
+## Historical privacy statement (retired)
 
-The **entire `/docs` directory (including this file and `PROMPT_MAIN.md`) must remain private**. Do not upload, push, or sync documentation to any public repository.  
-
-- Contains internal specifications, schema, compliance notes.  
-- Must stay local until a secure private repository is configured.  
-- Ensure `.gitignore` excludes `/docs/**`.  
-- AI assistants must not publish or leak documentation content.  
+The former instruction to keep `/docs` local and exclude it from Git is no longer valid for this repository. Do not change Git visibility, ignore rules, publishing policy, or repository access based on this archive; follow the current repository governance and `docs/MASTER_PRODUCTION_TZ.md`.
 
 ---
 
@@ -156,18 +154,18 @@ The **entire `/docs` directory (including this file and `PROMPT_MAIN.md`) must r
 - Update this map when new documentation layers or directories are introduced.  
 - Revise authority table if canonical sources change.  
 - Keep cross-reference examples in sync with major document reorganizations.  
-- Refresh `last_sync` whenever edits occur.  
-- Validate this map against `PROMPT_MAIN.md` and `CURSOR_KNOWLEDGE_BASE.md` after updates.  
+- Do not maintain `last_sync` manually; regenerate or retire this map through an explicit current task.
+- Do not validate current documentation against retired `PROMPT_MAIN.md`.
 
 ---
 
 ## Cross-References
 
-- 🔗 `PROMPT_MAIN.md` — root knowledge entrypoint (this file references it explicitly).  
+- 🔗 `PROMPT_MAIN.md` — historical root entrypoint (retired).
 - 🔗 `docs/CURSOR_KNOWLEDGE_BASE.md` — foundational technical knowledge.  
-- 🔗 `docs/development/MASTER_CHECKLIST.md` — operational execution track.  
+- 🔗 `docs/development/MASTER_CHECKLIST.md` — historical execution track (retired).
 
-📚 For full navigation instructions, see the “Knowledge Context” section inside `PROMPT_MAIN.md`.
+Current navigation and execution begin in [`docs/MASTER_PRODUCTION_TZ.md`](./MASTER_PRODUCTION_TZ.md), not in `PROMPT_MAIN.md`.
 
 
 ## 🤖 AI Enrichment & Cross-Reference System
@@ -175,7 +173,3 @@ The **entire `/docs` directory (including this file and `PROMPT_MAIN.md`) must r
 This workspace maintains AI-generated links between domain, development, and catalog documents.
 
 See `docs/AI_LINKS_INDEX.md` for the full matrix of relationships.
-
-
-
-

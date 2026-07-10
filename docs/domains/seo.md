@@ -2,7 +2,7 @@ last_sync: 2025-10-28
 
 # Next-Gen SEO & AI Discovery for LyVoX
 
-related: i18n.md, adverts.md, vehicles.md, PROMPT_MAIN.md
+related: i18n.md, adverts.md, vehicles.md, ../MASTER_PRODUCTION_TZ.md
 
 ---
 

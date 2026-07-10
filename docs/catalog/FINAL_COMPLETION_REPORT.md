@@ -1,4 +1,5 @@
-> ⚠ УСТАРЕЛО — этот файл больше не ведётся. Единый источник правды: [docs/MASTER_TODO.md](../MASTER_TODO.md). Сведено туда; можно удалить.
+> [!WARNING]
+> **Архивный отчёт; слово “FINAL” не означает текущую production-готовность.** Не использовать его для go/no-go. Единственный актуальный источник статуса: [`docs/MASTER_PRODUCTION_TZ.md`](../MASTER_PRODUCTION_TZ.md). Файл сохранён как история.
 
 # 🎉 LyVoX Catalog System - Final Completion Report
 

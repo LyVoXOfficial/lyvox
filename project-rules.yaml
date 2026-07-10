@@ -1,55 +1,89 @@
- description: Основные правила и архитектура сервиса (governance)
- globs:
-   alwaysApply: true
+description: LyVoX repository governance
+globs:
+  alwaysApply: true
 
- references:
-   archRules: "@docs/ARCH_RULES.md"
-   architecture: "@docs/ARCHITECTURE.md"
-   requirements: "@docs/requirements.md"
-   apiReference: "@docs/API_REFERENCE.md"
-   plan: "@docs/PLAN.md"
-   todo: "@docs/TODO.md"
+references:
+  productionMaster: "@docs/MASTER_PRODUCTION_TZ.md"
+  releaseGates: "@docs/production/RELEASE_GATES.md"
+  capabilityMatrix: "@docs/production/CAPABILITY_ACTIVATION_MATRIX.md"
+  designSystem: "@docs/DESIGN_SYSTEM.md"
+  agentProtocol: "@docs/production/AGENT_EXECUTION_PROTOCOL.md"
+  architecture: "@docs/ARCHITECTURE.md"
+  apiReference: "@docs/API_REFERENCE.md"
+  requirements: "@docs/requirements.md"
+  claudeGuidance: "@CLAUDE.md"
 
- policies:
-   - name: "Docs must reflect code/db changes"
-     appliesTo:
--      - "apps/web/src/app/**"
-+      - "apps/web/src/app/**"
-+      - "apps/web/src/app/api/**"
-       - "apps/web/src/lib/**"
-       - "supabase/migrations/**"
-+      - "supabase/types/**"
-+      - "supabase/schema.sql"
-     requireUpdates:
-       - "@docs/API_REFERENCE.md"
-       - "@docs/ARCHITECTURE.md"
-       - "@docs/requirements.md"
-+      - "@docs/PLAN.md"
+policies:
+  - name: "One Production source of truth"
+    rule: |
+      - Scope, priority, current task status and release readiness live only in @docs/MASTER_PRODUCTION_TZ.md.
+      - Vision, PRDs, requirements, audits, roadmaps and checklists are subordinate or historical.
+      - Never update @docs/MASTER_TODO.md, @docs/TODO.md or @docs/development/MASTER_CHECKLIST.md as current trackers.
+      - A task closes only with reproducible evidence on the exact commit SHA.
 
-+  - name: "PLAN must stay in sync with requirements, rules and TODO"
-+    appliesTo:
-+      - "@docs/requirements.md"
-+      - "@docs/ARCH_RULES.md"
-+      - "@docs/TODO.md"
-+    requireUpdates:
-+      - "@docs/PLAN.md"
-+
-+  - name: "No duplication across docs"
-+    rule: |
-+      - Ограничения/версии → только @docs/ARCH_RULES.md
-+      - ERD/RLS/ENV/Roadmap → только @docs/requirements.md
-+      - Фактическая архитектура и журнал → только @docs/ARCHITECTURE.md
-+      - API-контракты → только @docs/API_REFERENCE.md
-+      - Этапы/сроки/критерии → только @docs/PLAN.md
-+    requireUpdates:
-+      - "@docs/ARCHITECTURE.md"
-+      - "@docs/requirements.md"
-+      - "@docs/API_REFERENCE.md"
-+      - "@docs/PLAN.md"
-+
-+  - name: "RLS required for new tables"
-+    appliesTo:
-+      - "supabase/migrations/**"
-+    rule: "Любая новая таблица должна иметь RLS = ON и минимум политики SELECT/INSERT. Если нет — сгенерировать SQL-правки и добавить описание в @docs/requirements.md."
-+    requireUpdates:
-+      - "@docs/requirements.md"
+  - name: "Runtime truth over documentation claims"
+    rule: |
+      - Current behavior must be verified against code, migrations and runtime evidence.
+      - Public claims must match effective capabilities.
+      - Disabled adapters, mocks and unchecked boxes are not implementation evidence.
+
+  - name: "Capability activation safety"
+    appliesTo:
+      - "apps/web/src/lib/capabilities.ts"
+      - "apps/web/src/lib/integrations/**"
+      - "apps/web/src/lib/settings/**"
+      - "apps/web/src/app/api/**"
+      - "apps/web/src/app/admin/**"
+    rule: |
+      - Effective status requires implementation, admin enablement, secrets, external approvals, provider health and an allowed release mode.
+      - Secrets stay in an approved secret store and never appear in database settings or client responses.
+      - Paid, identity and regulated capabilities default OFF and fail closed.
+    requireUpdates:
+      - "@docs/production/CAPABILITY_ACTIVATION_MATRIX.md"
+      - "@docs/MASTER_PRODUCTION_TZ.md"
+
+  - name: "Docs reflect material code and database changes"
+    appliesTo:
+      - "apps/web/src/app/**"
+      - "apps/web/src/lib/**"
+      - "supabase/migrations/**"
+      - "supabase/types/**"
+      - "supabase/functions/**"
+    rule: |
+      - Update only the authoritative document affected by the change.
+      - Do not duplicate current status into a subordinate PRD or historical checklist.
+      - Update the Production master only when priority, acceptance, evidence or release status changes.
+
+  - name: "RLS and grants required"
+    appliesTo:
+      - "supabase/migrations/**"
+    rule: |
+      - Every new table has RLS enabled and least-privilege policies/grants.
+      - Self-referential policy queries use an approved SECURITY DEFINER helper.
+      - New SECURITY DEFINER functions revoke default execute and grant only required roles.
+      - Schema changes regenerate types and include forward/recovery verification.
+
+  - name: "Production release gate"
+    appliesTo:
+      - ".github/workflows/**"
+      - "vercel.json"
+      - "apps/web/vercel.json"
+      - "apps/web/src/app/api/health/**"
+      - "docs/ops/**"
+    rule: |
+      - Follow @docs/production/RELEASE_GATES.md.
+      - Green local checks do not replace protected CI, staging, restore, security and rollback evidence.
+
+  - name: "Production design contract"
+    appliesTo:
+      - "apps/web/src/app/**"
+      - "apps/web/src/components/**"
+      - "apps/web/src/app/globals.css"
+    rule: |
+      - Follow @docs/DESIGN_SYSTEM.md.
+      - Preserve the existing component stack; do not reintroduce retired gradient, mesh, glass or generic AI-template patterns.
+
+  - name: "Legacy automation is disabled"
+    rule: |
+      - Do not run checklist:update or any script that mutates archived checklist progress.
+      - Do not use PROMPT_MAIN, MASTER_TODO, TODO, PLAN or MASTER_CHECKLIST to select current work.

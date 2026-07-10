@@ -1,5 +1,8 @@
 # AI Documentation Cross-Reference
 
+> [!WARNING]
+> Generated relationship index only. It is not a task queue or authority source. Start current work from `docs/MASTER_PRODUCTION_TZ.md`; links to archived checklists are historical until the next clean regeneration.
+
 last_sync: 2025-11-09
 
 ## Cross-Reference Index
@@ -70,4 +73,3 @@ domains/profile.md → [development/security-compliance.md, domains/trust_score.
 domains/seo.md → [catalog/CATALOG_MASTER.md, catalog/CATALOG_IMPLEMENTATION_STATUS.md, catalog/FINAL_COMPLETION_REPORT.md, catalog/IMPLEMENTATION_SUMMARY.md, development/MASTER_CHECKLIST.md]
 domains/support_disputes.md → [domains/adverts.md, domains/deals.md, domains/moderation.md, domains/trust_score.md, development/security-compliance.md]
 domains/trust_score.md → [development/security-compliance.md, domains/moderation.md, domains/adverts.md, domains/profile.md, domains/deals.md]
-

@@ -1,10 +1,13 @@
+> [!CAUTION]
+> **Исторический индекс development-документации. Не начинать работу с `MASTER_CHECKLIST.md` и не обновлять прогресс по описанному ниже workflow.** Единственная актуальная очередь задач и release-gates: [`docs/MASTER_PRODUCTION_TZ.md`](../MASTER_PRODUCTION_TZ.md).
+
 # LyVoX Development Documentation
 
 Документационный фреймворк уровня production для разработки маркетплейса LyVoX.
 
-## 🎯 Главный чек-лист
+## Исторический checklist (retired)
 
-**[📋 MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md)** - **НАЧНИТЕ ОТСЮДА!**
+**[📋 MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md)** — архив; **не начинайте работу отсюда**.
 
 Сводный файл со всеми задачами, организованными по приоритетам и зависимостям:
 
@@ -70,25 +73,16 @@
 
 Эта документация дополняет:
 
-- `../PROMPT_MAIN.md` - **главный промпт-файл** с инструкциями для AI ассистентов (включает ссылку на MASTER_CHECKLIST и автоматическое обновление прогресса)
+- `../PROMPT_MAIN.md` — исторический AI-prompt (retired; не использовать для выбора задач или обновления прогресса)
 - `../requirements.md` - общие требования
 - `../ARCHITECTURE.md` - архитектурные решения
 - `../API_REFERENCE.md` - справочник API
 - `../domains/*.md` - доменные документы
 
-### Автоматическое обновление прогресса
+### Retired progress automation
 
-Прогресс выполнения в `MASTER_CHECKLIST.md` обновляется автоматически:
-
-1. **После выполнения задачи**: Отметьте задачу как `[x]` (выполнено) или `[~]` (в процессе)
-2. **Запустите обновление**: `pnpm run checklist:update`
-3. **Скрипт автоматически**:
-   - Пересчитает количество выполненных задач
-   - Пересчитает задачи в процессе
-   - Найдет следующие 5 невыполненных задач
-   - Обновит блок прогресса в файле
-
-Эта процедура интегрирована в `PROMPT_MAIN.md` и выполняется автоматически после каждой задачи.
+> [!CAUTION]
+> Не запускать `pnpm run checklist:update`, не менять галочки в `MASTER_CHECKLIST.md` и не использовать автоматизацию из `PROMPT_MAIN.md`. Этот контур обновляет архивный tracker. Статус меняется только по правилам актуального [`docs/MASTER_PRODUCTION_TZ.md`](../MASTER_PRODUCTION_TZ.md).
 
 ## Структура файлов
 
@@ -105,5 +99,5 @@
 
 ## 🔗 Related Docs
 
-**Development:** [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [deep-audit-20251108.md](./deep-audit-20251108.md)
+**Historical development references:** [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [deep-audit-20251108.md](./deep-audit-20251108.md)
 **Catalog:** [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md) • [CATALOG_IMPLEMENTATION_STATUS.md](../catalog/CATALOG_IMPLEMENTATION_STATUS.md) • [categories/real-estate.md](../catalog/categories/real-estate.md)

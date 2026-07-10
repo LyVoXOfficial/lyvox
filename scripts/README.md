@@ -24,7 +24,6 @@ scripts/
 ├── seedCategories.ts                 # Seed для категорий
 │
 ├── check-i18n-keys.js                # Проверка i18n ключей
-├── update-checklist-progress.js      # Обновление прогресса
 │
 └── README.md                         # Этот файл
 ```
@@ -292,23 +291,6 @@ node scripts/runSeed.mjs ./path/to/seed.sql
 
 ---
 
-## 📊 Утилиты
-
-### update-checklist-progress.js
-
-Обновление прогресса в MASTER_CHECKLIST.md.
-
-```bash
-node scripts/update-checklist-progress.js
-```
-
-**Что делает:**
-- Подсчитывает выполненные задачи
-- Обновляет секцию "Прогресс выполнения"
-- Показывает следующие задачи
-
----
-
 ## 🔧 Общие переменные окружения
 
 ### Database
@@ -354,7 +336,7 @@ PG_KEEPALIVE_DELAY_MS="10000"
 
 - **Vehicle Sync Quick Start:** [VEHICLE_SYNC_QUICK_START.md](../docs/development/VEHICLE_SYNC_QUICK_START.md)
 - **Vehicle Sync Guide (полная):** [VEHICLE_SYNC_GUIDE.md](../docs/development/VEHICLE_SYNC_GUIDE.md)
-- **Master Checklist:** [MASTER_CHECKLIST.md](../docs/development/MASTER_CHECKLIST.md)
+- **Production master:** [MASTER_PRODUCTION_TZ.md](../docs/MASTER_PRODUCTION_TZ.md)
 
 ---
 
@@ -393,7 +375,7 @@ ONLY_MAKES="bmw,audi" node scripts/vehicle_i18n_expand.mjs
 2. Добавьте shebang: `#!/usr/bin/env node`
 3. Сделайте исполняемым: `chmod +x scripts/your-script.mjs`
 4. Обновите этот README
-5. Добавьте в MASTER_CHECKLIST.md если нужно
+5. Добавьте скрипт в актуальный task/evidence только если это требует `MASTER_PRODUCTION_TZ.md`
 
 ### Стиль кода
 
@@ -407,4 +389,3 @@ ONLY_MAKES="bmw,audi" node scripts/vehicle_i18n_expand.mjs
 
 **Версия:** 1.1
 **Обновлено:** 2025-11-03 (добавлен CSV Import)
-

@@ -1,4 +1,5 @@
-> ⚠ УСТАРЕЛО — этот файл больше не ведётся. Единый источник правды: [docs/MASTER_TODO.md](../MASTER_TODO.md). Сведено туда; можно удалить.
+> [!WARNING]
+> **Архивный roadmap. Сроки, фазы и статусы ниже не исполнять и не обновлять.** Единственный актуальный план выхода в production: [`docs/MASTER_PRODUCTION_TZ.md`](../MASTER_PRODUCTION_TZ.md). Файл сохранён как история.
 
 # Roadmap: MVP → M1 → M2 → Production
 
@@ -187,7 +188,6 @@
 
 **Development:** [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [deep-audit-20251108.md](./deep-audit-20251108.md)
 **Catalog:** [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md) • [FINAL_COMPLETION_REPORT.md](../catalog/FINAL_COMPLETION_REPORT.md) • [IMPLEMENTATION_SUMMARY.md](../catalog/IMPLEMENTATION_SUMMARY.md)
-
 
 
 

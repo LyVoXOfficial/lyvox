@@ -1,4 +1,5 @@
-> ⚠ УСТАРЕЛО — этот файл больше не ведётся. Единый источник правды: [docs/MASTER_TODO.md](./MASTER_TODO.md). Сведено туда; можно удалить.
+> [!WARNING]
+> **Архивный план. Не выполнять и не обновлять статусы.** Актуальные auth-задачи и release-gates находятся только в [`docs/MASTER_PRODUCTION_TZ.md`](./MASTER_PRODUCTION_TZ.md). Файл сохранён как история.
 
 # План улучшения авторизации
 
@@ -166,4 +167,3 @@ if (!verified_email || !verified_phone) {
 - Twilio для SMS (уже настроен)
 - Google OAuth credentials
 - Facebook App credentials
-

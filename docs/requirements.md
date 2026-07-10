@@ -1,6 +1,9 @@
 # LyVoX Requirements
 
-> Связанные документы: [ARCH_RULES](./ARCH_RULES.md) • [ARCHITECTURE](./ARCHITECTURE.md) • [API_REFERENCE](./API_REFERENCE.md) • [INSTALL](./INSTALL.md) • [TODO](./TODO.md) • [PLAN](./PLAN.md)
+> [!NOTE]
+> Этот файл описывает требования, schema/RLS/ENV и compliance-контекст, но не является backlog или release-status. Единственный актуальный scope, порядок и Production-статус: [MASTER_PRODUCTION_TZ](./MASTER_PRODUCTION_TZ.md).
+>
+> Связанные документы: [ARCH_RULES](./ARCH_RULES.md) • [ARCHITECTURE](./ARCHITECTURE.md) • [API_REFERENCE](./API_REFERENCE.md) • [INSTALL](./INSTALL.md)
 
 <!-- Short aliases used by PLAN.md -->
 
@@ -254,12 +257,11 @@ erDiagram
 
 ## Roadmap
 
-- Expand automated API and RLS regression tests (aligns with the open item in `docs/TODO.md`).
+- Expand automated API and RLS regression tests only when scheduled by `docs/MASTER_PRODUCTION_TZ.md`.
 - Instrument Upstash rate limiting metrics and alerting around `/api/phone/*` and `/api/reports/*`.
 - Codify Cloudflare WAF plus Zero Trust configuration as infrastructure-as-code.
 - Configure a Supabase cron (or external trigger) for the `maintenance-cleanup` Edge Function and surface retention knobs via env.
 - Ship dependent make/model/year pickers for Transport listings (EV subcategory, structured mileage/condition capture) backed by Supabase tables `vehicle_makes`, `vehicle_models`, and `vehicle_generations`.
-
 
 
 

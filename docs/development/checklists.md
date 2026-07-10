@@ -1,4 +1,5 @@
-> ⚠ УСТАРЕЛО — этот файл больше не ведётся. Единый источник правды: [docs/MASTER_TODO.md](../MASTER_TODO.md). Сведено туда; можно удалить.
+> [!CAUTION]
+> **Архивные контрольные списки. Не использовать для go/no-go, деплоя или подтверждения production-ready.** Единственный действующий checklist и источник статуса: [`docs/MASTER_PRODUCTION_TZ.md`](../MASTER_PRODUCTION_TZ.md). Файл сохранён из-за входящих ссылок.
 
 # Чек-листы и контрольные точки
 
@@ -224,7 +225,6 @@
 
 **Development:** [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [search-filters.md](./search-filters.md)
 **Catalog:** [CATALOG_IMPLEMENTATION_STATUS.md](../catalog/CATALOG_IMPLEMENTATION_STATUS.md) • [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md) • [categories/real-estate.md](../catalog/categories/real-estate.md)
-
 
 
 

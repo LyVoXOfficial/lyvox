@@ -1895,7 +1895,7 @@ When adding new categories:
 7. Add validation rules
 8. Update i18n strings
 9. Write tests
-10. Update MASTER_CHECKLIST.md
+10. Update Production evidence/status only when required by `docs/MASTER_PRODUCTION_TZ.md`
 
 ---
 
