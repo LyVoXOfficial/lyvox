@@ -1,7 +1,24 @@
 {
   "name": "lyvox",
   "private": true,
+  "engines": {
+    "node": "24.x"
+  },
   "packageManager": "pnpm@10.17.0",
+  "pnpm": {
+    "overrides": {
+      "@babel/core": "7.29.7",
+      "ajv@6": "6.15.0",
+      "brace-expansion@1": "1.1.16",
+      "diff@4": "4.0.4",
+      "flatted": "3.4.2",
+      "form-data@4": "4.0.6",
+      "minimatch@3": "3.1.5",
+      "postcss": "8.5.16",
+      "ws@8": "8.21.0",
+      "yaml@2": "2.9.0"
+    }
+  },
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
@@ -27,23 +44,23 @@
     ]
   },
   "devDependencies": {
-    "@supabase/supabase-js": "^2.76.0",
+    "@supabase/supabase-js": "^2.110.2",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.1",
     "@testing-library/user-event": "^14.5.2",
     "dotenv": "^17.2.3",
     "eslint": "^9.38.0",
     "husky": "^9.1.7",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.3.0",
     "jsdom": "^24.1.3",
     "lint-staged": "^15.2.10",
     "prettier": "^3.3.3",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
-    "turbo": "^2.0.0",
+    "turbo": "^2.10.4",
     "typescript": "^5.9.0",
-    "vite": "^5.4.10",
-    "vitest": "^2.1.4"
+    "vite": "^6.4.3",
+    "vitest": "^3.2.7"
   },
   "dependencies": {
     "csv-parse": "^6.1.0",

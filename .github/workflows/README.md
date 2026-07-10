@@ -12,7 +12,7 @@ Required job families:
 - production build and bundle budget;
 - i18n key parity;
 - unit/integration tests;
-- structured production dependency audit;
+- structured production and complete workspace dependency audits;
 - secret scanning;
 - Playwright critical journeys once the P0 E2E harness lands;
 - one summary job required by branch protection.
@@ -37,10 +37,26 @@ Do not run the retired `checklist:update` workflow and do not modify `docs/devel
 
 CI/build secrets are configured in GitHub/Vercel secret stores. Never paste values into this file, workflow logs, repository variables intended for client code, or documentation.
 
-At minimum, current build jobs may require:
+CI build jobs use non-secret placeholders and must never read Production credentials.
 
-- `NEXT_PUBLIC_SUPABASE_URL`;
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+[`deploy-production.yml`](deploy-production.yml) is the only repository-controlled Production path. It runs only after a successful canonical `CI` push run on `main`. A dependency-free Node script verifies the workflow, GitHub Actions app id and current SHA; validates the linked Vercel project; builds that exact SHA as staged Production; rechecks CI and Production-target drift; then promotes through the Vercel REST API. The Git integration for `main` is disabled in `apps/web/vercel.json`.
+
+Activation requires these GitHub `Production` environment secrets:
+
+- `VERCEL_TOKEN`;
+- `VERCEL_ORG_ID`;
+- `VERCEL_PROJECT_ID`.
+
+The Vercel project must also keep these fail-closed settings:
+
+- Git link `LyVoXOfficial/lyvox`, Production Branch `main`;
+- Root Directory `apps/web`, Framework `Next.js`, Node.js `24.x`, без custom Build/Install/Output overrides;
+- Ignored Build Step disabled;
+- Settings → Environments → Production → Branch Tracking → **Auto-assign Custom Production Domains OFF**.
+
+The last setting is required for staged→promote. Secrets alone are intentionally insufficient.
+
+There is intentionally no manual arbitrary-SHA dispatch. Re-run the original verified workflow when a safe retry is needed.
 
 Runtime/provider secrets are governed by [`docs/production/CAPABILITY_ACTIVATION_MATRIX.md`](../../docs/production/CAPABILITY_ACTIVATION_MATRIX.md).
 
@@ -51,4 +67,4 @@ Runtime/provider secrets are governed by [`docs/production/CAPABILITY_ACTIVATION
 - E2E, staging, restore, security and rollback evidence are independent gates.
 - Workflow success is not permission to enable a paid, identity or regulated capability.
 
-The baseline audit dated 2026-07-10 found invalid pinned SHAs and a mutable gitleaks tag in `ci.yml`; fixing and proving those checks is task `P0-01`, not a completed state described by this README.
+Evidence and remaining blockers for this workflow are recorded in [`P0-01.md`](../../docs/production/evidence/P0-01.md), never in this descriptive README.

@@ -142,8 +142,8 @@ effective(x) =
 Подробные atomic steps, files и verification: `docs/aegis/plans/2026-07-10-production-readiness-v2.md`.
 
 - [x] **P0-00 SSOT.** ✅ 2026-07-10: master закреплён через README/CLAUDE/project rules; конкурирующие trackers и опасные workflows архивированы, два устаревших prompts и checklist-updater удалены, documentation linker переведён на этот master.
-- [ ] **P0-01 CI/MAIN.** Исправить action SHA, pin gitleaks, required checks, branch protection и deploy gate.
-- [ ] **P0-02 DEPENDENCIES.** Устранить reachable critical/high production advisories.
+- [ ] **P0-01 CI/MAIN.** 🟡 `CODE_COMPLETE`: action SHA исправлены, Gitleaks CLI закреплён с checksum, `main` защищён active ruleset, автоматический Vercel Git deploy для `main` выключен и заменён REST staged→promote workflow после `CI Success` с exact-SHA, project/runtime и incident-race guards. До `VERIFIED` остаются удалённый CI/deploy proof на точном SHA, ротация двух найденных Google API keys, Vercel secrets/config и независимый GitHub reviewer. Evidence: [production/evidence/P0-01.md](production/evidence/P0-01.md).
+- [ ] **P0-02 DEPENDENCIES.** 🟡 `CODE_COMPLETE`, локально проверено: production audit снижен с `1 critical / 13 high / 13 moderate / 2 low` до `0 / 0 / 0 / 0`; полный workspace/toolchain audit также `0 / 0 / 0 / 0`. Exact-SHA remote CI и независимая verification ещё требуются. Evidence: [production/evidence/P0-02.md](production/evidence/P0-02.md).
 - [ ] **P0-03 LAUNCH-MODE.** Ввести `contact_only` и абсолютный money hard-stop; разделить `paid_boosts`/`boost_ranking`.
 - [ ] **P0-04 FLAGS/ADMIN.** Registry, blocker reasons, async resolver, `/admin/settings`, MFA, audit, health, kill switches.
 - [ ] **P0-05 PRODUCT-TRUTH.** Мигрировать call sites и связать публичные claims с effective capability.

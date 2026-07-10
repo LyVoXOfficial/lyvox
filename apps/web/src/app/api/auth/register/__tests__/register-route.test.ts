@@ -90,7 +90,10 @@ describe("POST /api/auth/register", () => {
 
     expect(response.status).toBe(201);
     const body = await response.json();
-    expect(body).toMatchObject({ ok: true, data: { verificationRequired: true } });
+    expect(body).toMatchObject({
+      ok: true,
+      data: { verificationRequired: true },
+    });
     expect(signUpMock).toHaveBeenCalledWith(
       expect.objectContaining({
         email: "user@example.com",
@@ -137,7 +140,9 @@ describe("POST /api/auth/register", () => {
     );
 
     expect(response.status).toBe(500);
-    await expect(response.json()).resolves.toMatchObject({ error: "SERVICE_ROLE_MISSING" });
+    await expect(response.json()).resolves.toMatchObject({
+      error: "SERVICE_ROLE_MISSING",
+    });
     expect(logInsertMock).not.toHaveBeenCalled();
   });
 
@@ -148,6 +153,15 @@ describe("POST /api/auth/register", () => {
       message: "duplicate key value violates unique constraint",
       details: "profiles_pkey",
       hint: "",
+      toJSON() {
+        return {
+          name: this.name,
+          code: this.code,
+          message: this.message,
+          details: this.details,
+          hint: this.hint,
+        };
+      },
     };
 
     signUpMock.mockResolvedValue({
@@ -165,7 +179,9 @@ describe("POST /api/auth/register", () => {
 
     // UNIQUE constraint violation (23505) теперь возвращает 409 с BAD_INPUT кодом
     expect(response.status).toBe(409);
-    await expect(response.json()).resolves.toMatchObject({ error: "BAD_INPUT" });
+    await expect(response.json()).resolves.toMatchObject({
+      error: "BAD_INPUT",
+    });
     expect(logInsertMock).not.toHaveBeenCalled();
   });
 
@@ -203,17 +219,26 @@ describe("POST /api/auth/register", () => {
 
     expect(response.status).toBe(201);
     const body = await response.json();
-    expect(body).toMatchObject({ ok: true, data: { verificationRequired: true } });
+    expect(body).toMatchObject({
+      ok: true,
+      data: { verificationRequired: true },
+    });
     expect(signUpMock).toHaveBeenCalled();
   });
 
   it("returns 403 CAPTCHA_FAILED when verifyTurnstile fails", async () => {
-    verifyTurnstileMock.mockResolvedValue({ ok: false, codes: ["invalid-input-response"] });
+    verifyTurnstileMock.mockResolvedValue({
+      ok: false,
+      codes: ["invalid-input-response"],
+    });
 
     const response = await POST(
       new Request("https://example.com/api/auth/register", {
         method: "POST",
-        body: JSON.stringify({ ...defaultPayload, turnstileToken: "bad-token" }),
+        body: JSON.stringify({
+          ...defaultPayload,
+          turnstileToken: "bad-token",
+        }),
       }),
     );
 

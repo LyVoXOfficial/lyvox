@@ -7,8 +7,8 @@
 ### Переменные окружения
 
 ```bash
-DATABASE_URL="postgresql://postgres.kjzqowcxojspjtoadzee:Mersene223!!@aws-0-eu-central-2.pooler.supabase.com:5432/postgres"
-GOOGLE_API_KEY="AIzaSyBDKpcCjVrleEqDJXhGytt1zzmka58vuWY"
+DATABASE_URL="REVOKED_REPLACE_ME"
+GOOGLE_API_KEY="REVOKED_REPLACE_ME"
 ```
 
 ### Зависимости
@@ -22,15 +22,15 @@ pnpm install pg csv-parse dotenv -w
 ### Полный процесс (все шаги)
 
 ```bash
-export DATABASE_URL="postgresql://..."
-export GOOGLE_API_KEY="AIzaSyB..."
+export DATABASE_URL="REVOKED_REPLACE_ME"
+export GOOGLE_API_KEY="REVOKED_REPLACE_ME"
 node scripts/complete-vehicle-catalog.mjs
 ```
 
 ### Dry-run режим (без изменений в БД)
 
 ```bash
-export DATABASE_URL="postgresql://..."
+export DATABASE_URL="REVOKED_REPLACE_ME"
 export DRY_RUN=true
 node scripts/complete-vehicle-catalog.mjs
 ```
@@ -48,6 +48,7 @@ node scripts/audit-full-coverage.mjs
 **Выходной файл:** `audit-report.json`
 
 **Что проверяется:**
+
 - Модели без insights
 - Пустые массивы в insights (pros, cons, inspection_tips, и т.д.)
 - Модели без reliability/popularity scores
@@ -68,6 +69,7 @@ node scripts/fill-missing-insights.mjs
 ```
 
 **Что заполняется:**
+
 - `pros` (преимущества)
 - `cons` (недостатки)
 - `inspection_tips` (советы при осмотре)
@@ -78,20 +80,24 @@ node scripts/fill-missing-insights.mjs
 - `popularity_score` (оценка популярности 0-10)
 - `generations` (поколения)
 
-**Зависимости:** 
+**Зависимости:**
+
 - Требуется `audit-report.json` (запустите Шаг 1)
 - Требуется `GOOGLE_API_KEY`
 
 **Лимиты AI:**
+
 - Используется Google Gemini API
 - Rate limit: ~60 запросов/минуту
 - Батчи обрабатываются с задержкой 2 секунды
 
-**Время выполнения:** 
+**Время выполнения:**
+
 - ~2-3 минуты на 10 моделей
 - Для 93 моделей: ~20-30 минут
 
 **DRY_RUN режим:**
+
 ```bash
 export DRY_RUN=true
 node scripts/fill-missing-insights.mjs
@@ -109,21 +115,26 @@ node scripts/fill-model-scores.mjs
 ```
 
 **Что заполняется:**
+
 - `reliability_score` (0-10)
 - `popularity_score` (0-10)
 
 **Факторы оценки:**
+
 - Reliability: качество сборки, частота проблем, стоимость ремонта, долговечность
 - Popularity: объём продаж, присутствие на рынке, узнаваемость бренда
 
-**Зависимости:** 
+**Зависимости:**
+
 - Требуется `GOOGLE_API_KEY`
 
-**Время выполнения:** 
+**Время выполнения:**
+
 - ~1-2 минуты на 20 моделей
 - Для 811 моделей: ~40-80 минут
 
 **DRY_RUN режим:**
+
 ```bash
 export DRY_RUN=true
 node scripts/fill-model-scores.mjs
@@ -140,17 +151,21 @@ node scripts/backfill-insight-arrays.mjs
 ```
 
 **Что заполняется:**
+
 - Пустые `pros`, `cons`, `inspection_tips`, и т.д.
 
-**Зависимости:** 
+**Зависимости:**
+
 - Требуется `audit-report.json` (запустите Шаг 1)
 - Требуется `GOOGLE_API_KEY`
 
-**Время выполнения:** 
+**Время выполнения:**
+
 - Зависит от количества моделей с пустыми массивами
 - ~1.5 секунды на модель
 
 **DRY_RUN режим:**
+
 ```bash
 export DRY_RUN=true
 node scripts/backfill-insight-arrays.mjs
@@ -167,13 +182,15 @@ node scripts/update-i18n.mjs
 ```
 
 **Что обновляется:**
+
 - `vehicle_make_i18n` (переводы марок)
 - `vehicle_model_i18n` (переводы моделей)
 - `vehicle_generation_i18n` (переводы поколений)
 
 **Языки:** DE, EN, FR, NL, RU
 
-**Зависимости:** 
+**Зависимости:**
+
 - Требуется `vehicle_i18n_normalize.mjs`
 - Требуется `vehicle_i18n_expand.mjs`
 
@@ -190,6 +207,7 @@ node scripts/merge-duplicate-models.mjs
 ```
 
 **Что происходит:**
+
 - Находит дубликаты по нормализованным именам
 - Выбирает канонический вариант
 - Переносит generations, insights, i18n
@@ -198,6 +216,7 @@ node scripts/merge-duplicate-models.mjs
 **Время выполнения:** ~1-3 минуты
 
 **DRY_RUN режим:**
+
 ```bash
 export DRY_RUN=true
 node scripts/merge-duplicate-models.mjs
@@ -214,6 +233,7 @@ node scripts/update-model-aggregates.mjs
 ```
 
 **Что обновляется:**
+
 - `years_available` (список всех годов)
 - `first_model_year` / `last_model_year`
 - `body_types_available`
@@ -225,6 +245,7 @@ node scripts/update-model-aggregates.mjs
 **Время выполнения:** ~2-5 минут
 
 **DRY_RUN режим:**
+
 ```bash
 node scripts/update-model-aggregates.mjs --dry-run
 # или
@@ -245,6 +266,7 @@ node scripts/audit-full-coverage.mjs
 **Проверяет:** Те же метрики, что и в Шаге 1
 
 **Ожидаемый результат:**
+
 - 0 моделей без insights
 - 0 моделей без оценок
 - 0 пустых массивов в insights
@@ -260,6 +282,7 @@ node scripts/audit-full-coverage.mjs
 **Путь:** `docs/development/VEHICLE_SYNC_FINAL_REPORT.md`
 
 Отчёт содержит:
+
 - Сводную статистику (марки, модели, поколения, инсайты)
 - Список оставшихся проблем
 - Покрытие переводов по языкам
@@ -298,6 +321,7 @@ export BATCH_SIZE=20  # Больше = быстрее, но выше риск о
 **Причина:** API ключ неверный или исчерпан лимит запросов
 
 **Решение:**
+
 - Проверьте `GOOGLE_API_KEY`
 - Подождите 1-2 минуты и повторите
 - Уменьшите `BATCH_SIZE`
@@ -307,6 +331,7 @@ export BATCH_SIZE=20  # Больше = быстрее, но выше риск о
 **Причина:** Устаревшая схема базы данных
 
 **Решение:**
+
 - Убедитесь, что применены все миграции
 - Проверьте структуру таблиц в Supabase
 
@@ -315,6 +340,7 @@ export BATCH_SIZE=20  # Больше = быстрее, но выше риск о
 **Причина:** Не установлены зависимости
 
 **Решение:**
+
 ```bash
 pnpm install csv-parse pg dotenv -w
 ```
@@ -324,6 +350,7 @@ pnpm install csv-parse pg dotenv -w
 **Причина:** Проблемы с сетью или неверный DATABASE_URL
 
 **Решение:**
+
 - Используйте Session Pooler connection string (IPv4 compatible)
 - Проверьте доступность базы данных
 
@@ -348,16 +375,19 @@ pnpm install csv-parse pg dotenv -w
 После завершения процесса проверьте:
 
 1. **Insights:**
+
    ```bash
    node scripts/check-insight-coverage.mjs
    ```
 
 2. **Переводы:**
+
    ```bash
    node scripts/check-i18n-counts.mjs
    ```
 
 3. **Дубликаты:**
+
    ```bash
    node scripts/find-duplicate-models.mjs
    ```
@@ -385,6 +415,7 @@ pnpm install csv-parse pg dotenv -w
 ## Поддержка
 
 Если возникают проблемы:
+
 1. Проверьте логи в консоли
 2. Изучите `audit-report.json`
 3. Запустите отдельные скрипты для диагностики
