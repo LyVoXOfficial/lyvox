@@ -22,7 +22,7 @@ R0 является целью технической работы до реги
 | Область            | Факт                                                                                                     | Статус  |
 | ------------------ | -------------------------------------------------------------------------------------------------------- | ------- |
 | Локальная сборка   | typecheck, 974 теста, build и lint без errors проходят; lint даёт 213 warnings                           | Жёлтый  |
-| GitHub CI          | Workflow исправлен локально; exact-SHA remote run ещё не завершён, history secret scan остаётся красным  | Жёлтый  |
+| GitHub CI          | Exact-SHA remote: все jobs кроме ожидаемого history secret scan зелёные; aggregate gate блокирует merge  | Жёлтый  |
 | Защита main        | Активен ruleset: PR + strict `CI Success` + Preview + no force/delete; второй reviewer ещё отсутствует   | Жёлтый  |
 | Supply chain       | Production и полный workspace audit: 0 известных advisory; два Google API keys требуют ротации           | Красный |
 | CSP                | Рабочий код есть, production остаётся report-only                                                        | Красный |
