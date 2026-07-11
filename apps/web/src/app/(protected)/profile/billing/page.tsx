@@ -2,6 +2,7 @@ import { supabaseServer } from "@/lib/supabaseServer";
 import { redirect } from "next/navigation";
 import { getI18nProps } from "@/i18n/server";
 import BillingPageClient from "@/components/billing/BillingPageClient";
+import { getIntegrationStatus } from "@/lib/integrations/registry";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -57,12 +58,14 @@ export default async function BillingPage() {
   }
 
   const { messages } = await getI18nProps();
+  const paidBoosts = await getIntegrationStatus("paid_boosts");
 
   return (
     <BillingPageClient
       purchases={purchases || []}
       benefits={benefits || []}
       messages={messages}
+      paidBoostsEnabled={paidBoosts.effective}
     />
   );
 }

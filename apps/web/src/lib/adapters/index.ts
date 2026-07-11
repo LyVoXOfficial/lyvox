@@ -1,5 +1,5 @@
-import { isCapabilityEnabled, type Capability } from "@/lib/capabilities";
 import type { IdentityAdapter, OtpAdapter, PaymentsAdapter } from "./types";
+import { getIntegrationStatus } from "@/lib/integrations/registry";
 
 // Disabled defaults: the seam is live, but until a real provider is wired in Phase B
 // (a contract + credentials), every call resolves "unsupported". Swapping in a provider
@@ -8,17 +8,28 @@ const disabledIdentity: IdentityAdapter = { verify: async () => ({ status: "unsu
 const disabledOtp: OtpAdapter = { send: async () => ({ status: "unsupported" }) };
 const disabledPayments: PaymentsAdapter = { createPayout: async () => ({ status: "unsupported" }) };
 
-function gated<T>(cap: Capability, adapter: T, env: Record<string, string | undefined>): T | null {
-  return isCapabilityEnabled(cap, env) ? adapter : null;
+async function gated<T>(
+  cap: "stripe_identity" | "whatsapp_otp" | "payments_escrow",
+  adapter: T,
+  env: Record<string, string | undefined>,
+): Promise<T | null> {
+  const status = await getIntegrationStatus(cap, env);
+  return status.effective ? adapter : null;
 }
 
-export function getIdentityAdapter(env: Record<string, string | undefined> = process.env): IdentityAdapter | null {
+export async function getIdentityAdapter(
+  env: Record<string, string | undefined> = process.env,
+): Promise<IdentityAdapter | null> {
   return gated("stripe_identity", disabledIdentity, env);
 }
-export function getOtpAdapter(env: Record<string, string | undefined> = process.env): OtpAdapter | null {
+export async function getOtpAdapter(
+  env: Record<string, string | undefined> = process.env,
+): Promise<OtpAdapter | null> {
   return gated("whatsapp_otp", disabledOtp, env);
 }
-export function getPaymentsAdapter(env: Record<string, string | undefined> = process.env): PaymentsAdapter | null {
+export async function getPaymentsAdapter(
+  env: Record<string, string | undefined> = process.env,
+): Promise<PaymentsAdapter | null> {
   return gated("payments_escrow", disabledPayments, env);
 }
 

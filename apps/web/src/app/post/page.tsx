@@ -6,6 +6,7 @@ import { PostForm } from "./PostForm";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getIntegrationStatus } from "@/lib/integrations/registry";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -109,7 +110,10 @@ export default async function PostPage({
   // isVerified uses the same predicate as the PATCH /api/adverts/[id] publish gate.
   const isVerified = await isViewerVerified(supabase, user.id);
 
-  const categories = await getCategories();
+  const [categories, paidBoosts] = await Promise.all([
+    getCategories(),
+    getIntegrationStatus("paid_boosts"),
+  ]);
   const editId = typeof searchParams.edit === 'string' ? searchParams.edit : null;
   const completeListing = Boolean(editId && searchParams.complete === "1");
   const advertToEdit = editId ? await getAdvertForEdit(editId, user.id) : null;
@@ -135,6 +139,7 @@ export default async function PostPage({
         userPhone={userPhone}
         isVerified={isVerified}
         completeListing={completeListing}
+        paidBoostsEnabled={paidBoosts.effective}
       />
     </main>
   );

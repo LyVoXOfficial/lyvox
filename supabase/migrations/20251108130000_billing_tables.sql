@@ -50,7 +50,10 @@ create index if not exists idx_purchases_product_code on public.purchases(produc
 
 create index if not exists idx_benefits_user_valid on public.benefits(user_id, valid_until desc);
 create index if not exists idx_benefits_advert on public.benefits(advert_id) where advert_id is not null;
-create index if not exists idx_benefits_type_valid on public.benefits(benefit_type, valid_until desc) where valid_until > now();
+-- Fresh-replay exception: PostgreSQL forbids STABLE now() in index predicates.
+-- Active-benefit filtering remains in queries; this full index supports the
+-- same leading columns without an invalid time-dependent predicate.
+create index if not exists idx_benefits_type_valid on public.benefits(benefit_type, valid_until desc);
 create index if not exists idx_benefits_purchase on public.benefits(purchase_id) where purchase_id is not null;
 
 -- 5. Triggers for updated_at
@@ -58,4 +61,3 @@ create trigger set_updated_at_purchases
   before update on public.purchases
   for each row
   execute function public.set_updated_at();
-

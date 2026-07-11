@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { supabaseServer } from "@/lib/supabaseServer";
 type ServiceClient = Awaited<ReturnType<typeof supabaseService>>;
 import { supabaseService } from "@/lib/supabaseService";
-import { hasAdminRole } from "@/lib/adminRole";
+import { getAdminAccess } from "@/lib/auth/requireAdmin";
 import { revalidateAdvert } from "@/lib/advert/advertDetail";
 import { getI18nProps } from "@/i18n/server";
 import { Badge } from "@/components/ui/badge";
@@ -172,22 +171,17 @@ async function updateReport(
   "use server";
 
   const { messages } = await getI18nProps();
-  const supabase = await supabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    await setFlash(messages?.admin?.reports?.errors?.auth_required ?? "Authentication required");
+  const access = await getAdminAccess();
+  if (!access.ok) {
+    await setFlash(
+      access.reason === "mfa_required"
+        ? "Multi-factor authentication is required"
+        : messages?.admin?.reports?.errors?.access_denied ?? "Access denied",
+    );
     revalidatePath("/admin/reports");
     return;
   }
-
-  if (!hasAdminRole(user)) {
-    await setFlash(messages?.admin?.reports?.errors?.access_denied ?? "Access denied");
-    revalidatePath("/admin/reports");
-    return;
-  }
+  const user = access.user;
 
   let service: ServiceClient;
   try {
@@ -251,22 +245,17 @@ async function bulkUpdateReports(formData: FormData) {
       return;
   }
 
-  const supabase = await supabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    await setFlash(messages?.admin?.reports?.errors?.auth_required ?? "Authentication required");
+  const access = await getAdminAccess();
+  if (!access.ok) {
+    await setFlash(
+      access.reason === "mfa_required"
+        ? "Multi-factor authentication is required"
+        : messages?.admin?.reports?.errors?.access_denied ?? "Access denied",
+    );
     revalidatePath("/admin/reports");
     return;
   }
-
-  if (!hasAdminRole(user)) {
-    await setFlash(messages?.admin?.reports?.errors?.access_denied ?? "Access denied");
-    revalidatePath("/admin/reports");
-    return;
-  }
+  const user = access.user;
 
   let service: ServiceClient;
   try {
@@ -325,17 +314,9 @@ export default async function AdminReportsPage({
     return result;
   };
 
-  const supabase = await supabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return <main className="p-4 text-sm text-red-600">{t("admin.reports.errors.auth_required")}.</main>;
-  }
-
-  if (!hasAdminRole(user)) {
-    return <main className="p-4 text-sm text-red-600">{t("admin.reports.errors.access_denied")}.</main>;
+  const access = await getAdminAccess();
+  if (!access.ok) {
+    return <main className="p-4 text-sm text-red-600">{access.reason === "mfa_required" ? "Multi-factor authentication required" : t("admin.reports.errors.access_denied")}.</main>;
   }
 
   let service: ServiceClient;
@@ -727,4 +708,3 @@ export default async function AdminReportsPage({
     </main>
   );
 }
-

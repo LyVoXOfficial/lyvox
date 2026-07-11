@@ -5,7 +5,7 @@ import { ImageResponse } from "next/og";
 // falls back to this. Pure inline JSX — no external fetch, no custom font
 // loading — keeps this deterministic under CSP and at build time.
 
-export const alt = "LyVoX — Trusted local marketplace in Belgium";
+export const alt = "LyVoX — Local marketplace for Belgium";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -43,7 +43,7 @@ export default function Image() {
             color: "#9fd9d2",
           }}
         >
-          Trusted local marketplace — Belgium
+          Local marketplace — Belgium
         </div>
       </div>
     ),

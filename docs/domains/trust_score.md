@@ -35,7 +35,7 @@ last_sync: 2025-10-28
 - Future signals (e.g., phone verification, successful trades) can reuse `trust_inc` once defined.
 
 ## Improvements & TODO Links
-- TODO: design positive trust accrual events (e.g., verified identity, successful sales) — add concrete tickets in `docs/PLAN.md` when prioritised.
+- Historical TODO: positive trust accrual events require a concrete task in `docs/MASTER_PRODUCTION_TZ.md` before implementation.
 - TODO: monitor for score floor/ceiling; consider bounding values to safeguard from overflow.
 - Ensure audit exports (DSAR) continue to include `trust_score` snapshot (already documented in [requirements.md](../requirements.md#data-retention)).
 

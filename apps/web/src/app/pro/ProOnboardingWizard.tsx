@@ -332,7 +332,7 @@ function WizardInner() {
             {tr("pro.title", "Become a professional seller")}
           </CardTitle>
           <CardDescription>
-            {tr("pro.intro.body", "Register your company on LyVoX to unlock professional seller features, a verified business badge, and full compliance with Belgian consumer law.")}
+            {tr("pro.intro.body", "Create a trader profile and record the business details buyers need. Verification and legal status are shown separately.")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

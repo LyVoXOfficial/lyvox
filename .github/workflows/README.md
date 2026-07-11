@@ -1,163 +1,70 @@
-# CI/CD Workflows
+# LyVoX CI/CD workflows
 
-This directory contains GitHub Actions workflows for automated checks and deployments.
+Current release requirements are defined only in [`docs/MASTER_PRODUCTION_TZ.md`](../../docs/MASTER_PRODUCTION_TZ.md) and [`docs/production/RELEASE_GATES.md`](../../docs/production/RELEASE_GATES.md). This README describes workflow files; it is not a status tracker.
 
-## Workflows
+## CI
 
-### 🔍 CI (Continuous Integration)
+[`ci.yml`](ci.yml) is expected to run on pushes and pull requests for protected branches.
 
-**File:** `ci.yml`  
-**Triggers:** Push to `main`/`develop`, Pull Requests
+Required job families:
 
-**Jobs:**
+- lint and TypeScript;
+- production build and bundle budget;
+- i18n key parity;
+- unit/integration tests;
+- structured production and complete workspace dependency audits;
+- secret scanning;
+- Playwright critical journeys once the P0 E2E harness lands;
+- one summary job required by branch protection.
 
-1. **Lint & Type Check**
-   - Runs ESLint to catch code quality issues
-   - Runs TypeScript compiler in check mode (`tsc --noEmit`)
-   - Fails on any linting or type errors
+Every third-party action must use a verified immutable commit SHA. A green local run does not replace green CI on the exact release commit.
 
-2. **Build Check**
-   - Builds the entire project using `pnpm run build`
-   - Ensures no build-time errors
-   - Uses Turbo for optimized builds
+## Local checks
 
-3. **i18n Keys Check**
-   - Validates consistency of translation keys across all locales
-   - Checks for missing translations (EN, NL, FR, RU, DE)
-   - Warns on inconsistencies but doesn't fail (warnings only)
-
-4. **Unit Tests**
-   - Runs all unit tests with Vitest
-   - Fails if any tests fail
-
-5. **Checklist Progress Check**
-   - Verifies `MASTER_CHECKLIST.md` progress stats are up-to-date
-   - Fails if checklist needs update (reminder to run `pnpm run checklist:update`)
-
-6. **CI Success**
-   - Summary job that depends on all other jobs
-   - Provides clear pass/fail status
-
-## Required Secrets
-
-For the CI workflow to work, configure these GitHub Secrets:
-
-- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
-
-**How to add secrets:**
-1. Go to repository Settings → Secrets and variables → Actions
-2. Click "New repository secret"
-3. Add each secret with its value
-
-## Local Testing
-
-Before pushing, run these commands locally to catch issues early:
+Run relevant focused tests while implementing. Before merge, the repository gates must be green:
 
 ```bash
-# Type check
-pnpm run typecheck
-
-# Lint
-pnpm run lint
-
-# Build
-pnpm run build
-
-# Run tests
-pnpm run test
-
-# Check i18n keys
+pnpm typecheck
+pnpm test
+pnpm lint
+pnpm build
 node scripts/check-i18n-keys.js
-
-# Update checklist progress
-pnpm run checklist:update
 ```
 
-## CI Status Badge
+Do not add a second checklist workflow or progress tracker beside `docs/MASTER_PRODUCTION_TZ.md`.
 
-Add this to your README.md to show CI status:
+## Secrets
 
-```markdown
-![CI](https://github.com/YOUR_USERNAME/lyvox/actions/workflows/ci.yml/badge.svg)
-```
+CI/build secrets are configured in GitHub/Vercel secret stores. Never paste values into this file, workflow logs, repository variables intended for client code, or documentation.
 
-## Troubleshooting
+CI build jobs use non-secret placeholders and must never read Production credentials.
 
-### Build fails with "Module not found"
+[`deploy-production.yml`](deploy-production.yml) is the only repository-controlled Production path. It runs only after a successful canonical `CI` push run on `main`. A dependency-free Node script verifies the workflow, GitHub Actions app id and current SHA; validates the linked Vercel project; builds that exact SHA as staged Production; rechecks CI and Production-target drift; then promotes through the Vercel REST API. The Git integration for `main` is disabled in `apps/web/vercel.json`.
 
-**Cause:** Missing dependencies or outdated lockfile
+Activation requires these GitHub `Production` environment secrets:
 
-**Fix:**
-```bash
-pnpm install
-pnpm run build
-```
+- `VERCEL_TOKEN`;
+- `VERCEL_ORG_ID`;
+- `VERCEL_PROJECT_ID`.
 
-### Type check fails locally but passes in CI
+The Vercel project must also keep these fail-closed settings:
 
-**Cause:** Different TypeScript versions or cached types
+- Git link `LyVoXOfficial/lyvox`, Production Branch `main`;
+- Root Directory `apps/web`, Framework `Next.js`, Node.js `24.x`, без custom Build/Install/Output overrides;
+- Ignored Build Step disabled;
+- Settings → Environments → Production → Branch Tracking → **Auto-assign Custom Production Domains OFF**.
 
-**Fix:**
-```bash
-rm -rf node_modules apps/*/node_modules
-pnpm install
-pnpm run typecheck
-```
+The last setting is required for staged→promote. Secrets alone are intentionally insufficient.
 
-### i18n check shows missing keys
+There is intentionally no manual arbitrary-SHA dispatch. Re-run the original verified workflow when a safe retry is needed.
 
-**Cause:** Translation keys added to one locale but not others
+Runtime/provider secrets are governed by [`docs/production/CAPABILITY_ACTIVATION_MATRIX.md`](../../docs/production/CAPABILITY_ACTIVATION_MATRIX.md).
 
-**Fix:**
-1. Add missing keys to other locale files
-2. Or remove unused keys from reference locale (EN)
+## Release governance
 
-### Checklist check fails
+- `main` must require all release checks and disallow force-push.
+- Production deployment must not bypass red CI.
+- E2E, staging, restore, security and rollback evidence are independent gates.
+- Workflow success is not permission to enable a paid, identity or regulated capability.
 
-**Cause:** `MASTER_CHECKLIST.md` statistics are out of date
-
-**Fix:**
-```bash
-pnpm run checklist:update
-git add docs/development/MASTER_CHECKLIST.md
-git commit -m "chore: update checklist progress"
-```
-
-## Performance
-
-The CI workflow uses several optimizations:
-
-- **Concurrency:** Cancels in-progress runs for the same branch
-- **Caching:** Node modules and pnpm store are cached
-- **Parallel jobs:** All jobs run in parallel (except summary job)
-- **Turbo:** Uses Turbo cache for builds
-
-**Average run time:** 3-5 minutes
-
-## Future Enhancements
-
-- [ ] Add E2E tests with Playwright
-- [ ] Add visual regression tests
-- [ ] Add security scanning (Dependabot, Snyk)
-- [ ] Add performance benchmarks
-- [ ] Add deployment previews for PRs
-- [ ] Add automatic changelog generation
-
-## Related Files
-
-- `scripts/check-i18n-keys.js` - i18n consistency checker
-- `scripts/update-checklist-progress.js` - Checklist updater
-- `package.json` - Script definitions
-- `turbo.json` - Turbo build configuration
-
-
-
-
-
-
-
-
-
-
-
+Evidence and remaining blockers for this workflow are recorded in [`P0-01.md`](../../docs/production/evidence/P0-01.md), never in this descriptive README.

@@ -5,6 +5,7 @@ This project has a knowledge graph at graphify-out/ with god nodes, community st
 When the user types `/graphify`, invoke the `skill` tool with `skill: "graphify"` before doing anything else.
 
 Rules:
+
 - Treat `CLAUDE.md` as the shared project guidance for this repository. Read it before non-trivial work and follow it alongside this file.
 - For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
 - Dirty graphify-out/ files are expected after hooks or incremental updates; dirty graph files are not a reason to skip graphify. Only skip graphify if the task is about stale or incorrect graph output, or the user explicitly says not to use it.
@@ -25,27 +26,33 @@ Rules:
 Этот раздел обязателен к прочтению ПЕРЕД первой командой в сессии. Каждое правило родилось из реально повторённой ошибки.
 
 ### 0. Рабочая директория
+
 - Проект — ТОЛЬКО `C:\LyvoxMarketPlace`. Перед любой работой: `git remote -v` должен показывать `github.com/LyVoXOfficial/lyvox`. Не показывает — СТОП, ты в чужом репозитории (прецедент: сессия стартовала в `C:\Larum14huis\ElectricalProject`).
 - Первая команда каждой сессии: `git pull origin main` (другие агенты пушат между твоими сессиями).
 
 ### 1. Shell: Windows + PowerShell 5.1 + Git Bash — не смешивать
+
 - В PowerShell 5.1 НЕТ `&&` и `||` — это parser error. Либо `;`, либо `if ($?) { ... }`, либо выполняй команду в Git Bash.
 - Одна команда = один синтаксис. Bash-конструкции (`$VAR`, `[ -f x ]`, heredoc) в PowerShell не работают, и наоборот (`$env:X`, backtick-переносы) — в bash.
 - `head/tail/wc/touch` в PowerShell отсутствуют. `sed -i` на Windows портит CRLF — не использовать для правок; правь файлы своим edit-инструментом.
 
 ### 2. Кодировки — источник худших багов проекта
+
 - PowerShell 5.1 читает файлы БЕЗ BOM как ANSI/cp1251; `Out-File`/`>` пишут UTF-16. Итог — можибейк класса «BELGIГ«» (реально жил на проде: 1278 битых строк в локалях).
 - ПРАВИЛО: любой не-ASCII текст (кириллица, ë é ü, тире —) записывается в файлы ТОЛЬКО edit/write-инструментом агента, НИКОГДА через echo/Set-Content/Out-File/sed.
 - После любой правки `apps/web/src/i18n/locales/*.json`: `grep -c "Г«\|вЂ\|Г¤" apps/web/src/i18n/locales/*.json` — все нули. Не нули = ты внёс можибейк, откатывай.
 
 ### 3. Git-дисциплина
+
 - Строки `[graphify hook] launching background rebuild` и `[graphify] Branch switched` в выводе git — НЕ ошибки. Игнорируй.
 - Пре-коммит хук гоняет ПОЛНЫЙ тест-сьют (~2 мин, 700+ тестов). Это норма: не прерывай, не решай что «зависло», НИКОГДА не используй `--no-verify` для обхода упавших тестов.
 - НИКОГДА `git add -A` / `git add .` — в дереве живут артефакты других агентов и хуков (graphify-out/, .superpowers/, чужие незакоммиченные файлы). Добавляй ТОЛЬКО файлы своей задачи поимённо.
 - Чужие незакоммиченные файлы в `git status` — не трогать, не коммитить, не стэшить. Возможно, параллельно работает другой агент.
 - Multiline-коммит: пиши сообщение через несколько `-m` или файл (`git commit -F msg.txt`); не вставляй в сообщение backtick'и и `$`.
 
-### 4. Проектные инварианты (дублируют TODO.md — потому что нарушались)
+### 4. Проектные инварианты
+
+- Seed-данные — управляемая основателем витрина до launch-gate. Не удалять, не очищать и не включать их массовое исключение без отдельной явной команды основателя; код переключателя допустим только в безопасном состоянии OFF.
 - i18n-ключ добавляется СРАЗУ в 5 файлов (en/fr/nl/de/ru), иначе guard-тест валит весь сьют. Локали правятся только edit-инструментом (см. §2).
 - Клиенты API читают `body.data.X` (конверт `{ok, data}`), не `body.X`.
 - RPC `search_adverts` — 13 аргументов, сигнатура ФИКСИРОВАНА (изменение = DROP+CREATE + координация с задеплоенным кодом).
@@ -55,20 +62,24 @@ Rules:
 - Миграции: `supabase db push --include-all --db-url "$SUPABASE_DB_URL"` (переменная в `.env`; значение НИКОГДА не печатать, не логировать, не коммитить).
 
 ### 5. Верификация
+
 - Дев-сервер (`pnpm dev`): CSS/JS-чанки НЕ контент-хешированы — браузер кэширует старьё, и «фикс не работает» оказывается кэшем. Истина = SSR-HTML: `curl -s "http://localhost:3000/путь?x=$RANDOM"`. В прод-сборке проблемы нет.
 - Прод после пуша в main готов через ~2 мин (Vercel). Проверяй с cache-buster'ом (`?x=случайное`). `robots.txt` кэшируется Cloudflare ~4 часа — тоже только с cache-buster.
 - `pnpm test` / `pnpm typecheck` / `pnpm lint` — из КОРНЯ репозитория, не из apps/web.
 
 ### 5b. Экономия токенов (лимиты — общий ресурс)
+
 - НЕ запускай полный `pnpm test` вручную перед коммитом — пре-коммит хук всё равно прогонит его сам. Вручную гоняй только СФОКУСИРОВАННЫЙ тест изменяемого модуля: `pnpm test -- --run apps/web/src/<путь>`.
 - Файлы локалей (`apps/web/src/i18n/locales/*.json`, ~1000 строк каждый) НЕ читай целиком — ищи конкретные ключи grep'ом; читай только нужный диапазон строк.
 - `PostForm.tsx`, `SearchFilters.tsx`, `ad/[id]/page.tsx` — файлы >1000 строк: сначала grep по символу, потом чтение только нужного диапазона.
 - Не перечитывай файл после собственной правки «для проверки» — инструмент правки сам сообщает об успехе.
 
 ### 6. Журнал граблей (самопополняющийся — это твоя обязанность)
+
 ПРАВИЛО: наступил на одну и ту же ошибку ДВАЖДЫ (в одной сессии или узнал из прошлой) — обязан дописать сюда ОДНУ строку формата `симптом → причина → правило` тем же коммитом, что и основная работа. Не раздувай: одна строка, без историй.
 
 - `fatal: 'origin' does not appear...` при pull → сессия открыта не в том репозитории → проверяй remote до любых действий (§0).
 - Тесты «висят» на коммите → это пре-коммит хук с полным сьютом → ждать ~2 мин (§3).
 - Hydration mismatch в dev, где client-значение соответствует СТАРОМУ коду → браузер/Turbopack исполняют устаревший JS-чанк (переживает даже fetch cache:reload) → перезапусти dev-сервер, не «чини» код по этому сигналу (§5).
 - Ссылка для шаринга/канонический URL в client-компоненте → НИКОГДА из window.location (при SPA-переходе компонент монтируется до фиксации URL — так WhatsApp-ссылка вела на /post) → строй из server-пропсов + NEXT_PUBLIC_SITE_URL.
+- Inline Node transform fails twice in PowerShell -> nested shell quoting stripped JavaScript quotes -> create a temporary script with `apply_patch`, run it, then delete it instead of retrying inline escaping.

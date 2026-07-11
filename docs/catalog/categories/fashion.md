@@ -348,5 +348,5 @@ Zara Floral Dress - Size M, Blue | LyVoX
 
 ## 🔗 Related Docs
 
-**Development:** [MASTER_CHECKLIST.md](../../development/MASTER_CHECKLIST.md)
+**Development:** [Production master](../../MASTER_PRODUCTION_TZ.md)
 **Catalog:** [CATALOG_MASTER.md](../CATALOG_MASTER.md) • [categories/real-estate.md](./real-estate.md) • [CATALOG_IMPLEMENTATION_STATUS.md](../CATALOG_IMPLEMENTATION_STATUS.md) • [IMPLEMENTATION_SUMMARY.md](../IMPLEMENTATION_SUMMARY.md)

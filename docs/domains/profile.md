@@ -45,9 +45,9 @@ last_sync: 2025-10-28
 - SSR client obtains cookies via `supabaseServer()` (see `apps/web/src/lib/supabaseServer.ts`).
 
 ## Open Issues & TODO
-- TODO: add DSAR export coverage in automated tests (`TODO.md`: Expand automated API tests).
+- Candidate: add DSAR export coverage in automated tests; prioritisation belongs to the [Production master](../MASTER_PRODUCTION_TZ.md).
 - TODO: tighten validation for `display_name` (currently length only).
-- Future work: unify `phone` column with `phones` table once SMS flow fully migrates (track in new TODO entry if prioritised).
+- Future work: unify `phone` column with `phones` table once SMS flow fully migrates, if prioritised in the Production master.
 
 ## Change Log
 - 2025-10-28: Initial domain summary extracted from current API + migrations.

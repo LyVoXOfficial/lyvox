@@ -12,6 +12,7 @@ import { validateRequest } from "@/lib/validations";
 import { createCheckoutSchema } from "@/lib/validations/billing";
 import { getStripe } from "@/lib/stripe/client";
 import { withCsrfProtection } from "@/lib/security/csrf";
+import { getIntegrationStatus } from "@/lib/integrations/registry";
 
 export const runtime = "nodejs";
 
@@ -34,6 +35,12 @@ const checkoutIpLimiter = createRateLimiter({
 });
 
 const baseHandler = async (req: Request) => {
+  const capability = await getIntegrationStatus("paid_boosts");
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!capability.effective || !baseUrl) {
+    return createErrorResponse(ApiErrorCode.FEATURE_DISABLED, { status: 404 });
+  }
+
   const supabase = await supabaseServer();
   const {
     data: { user },
@@ -51,16 +58,24 @@ const baseHandler = async (req: Request) => {
   if (blockCheck.isBlocked) {
     return createErrorResponse(ApiErrorCode.FORBIDDEN, {
       status: 403,
-      detail: blockCheck.reason || "Account is temporarily blocked. Cannot make purchases.",
+      detail:
+        blockCheck.reason ||
+        "Account is temporarily blocked. Cannot make purchases.",
     });
   }
 
-  const parseResult = await safeJsonParse<{ product_code?: unknown; advert_id?: unknown }>(req);
+  const parseResult = await safeJsonParse<{
+    product_code?: unknown;
+    advert_id?: unknown;
+  }>(req);
   if (!parseResult.success) {
     return parseResult.response;
   }
 
-  const validationResult = validateRequest(createCheckoutSchema, parseResult.data);
+  const validationResult = validateRequest(
+    createCheckoutSchema,
+    parseResult.data,
+  );
   if (!validationResult.success) {
     return validationResult.response;
   }
@@ -70,8 +85,11 @@ const baseHandler = async (req: Request) => {
   // Verify product exists and is active
   const { data: product, error: productError } = await supabase
     .from("products")
-    .select("id, code, name, price_cents, currency")
+    .select(
+      "id, code, name, price_cents, currency, capability, benefit_type, duration_days, requires_advert, offer_version, tax_behavior",
+    )
     .eq("code", product_code)
+    .eq("capability", "paid_boosts")
     .eq("active", true)
     .maybeSingle();
 
@@ -86,11 +104,18 @@ const baseHandler = async (req: Request) => {
     });
   }
 
+  if (product.requires_advert && !advert_id) {
+    return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+      status: 400,
+      detail: "This product requires an advert",
+    });
+  }
+
   // If advert_id is provided, verify it belongs to the user
   if (advert_id) {
     const { data: advert, error: advertError } = await supabase
       .from("adverts")
-      .select("id, user_id")
+      .select("id, user_id, status")
       .eq("id", advert_id)
       .maybeSingle();
 
@@ -111,10 +136,18 @@ const baseHandler = async (req: Request) => {
         detail: "You can only boost your own adverts",
       });
     }
+
+    if (advert.status !== "active") {
+      return createErrorResponse(ApiErrorCode.BAD_INPUT, {
+        status: 400,
+        detail: "Only active adverts can receive this benefit",
+      });
+    }
   }
 
-  // Create pending purchase record
-  const { data: purchase, error: purchaseError } = await supabase
+  // Financial rows are service-owned; authenticated PostgREST INSERT is revoked.
+  const service = await supabaseService();
+  const { data: purchase, error: purchaseError } = await service
     .from("purchases")
     .insert({
       user_id: user.id,
@@ -123,6 +156,8 @@ const baseHandler = async (req: Request) => {
       status: "pending",
       amount_cents: product.price_cents,
       currency: product.currency || "EUR",
+      advert_id: advert_id || null,
+      product_offer_version: product.offer_version,
     })
     .select("id")
     .single();
@@ -132,14 +167,8 @@ const baseHandler = async (req: Request) => {
   }
 
   // Create Stripe Checkout Session
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const successUrl = `${baseUrl}/billing/success?session_id={CHECKOUT_SESSION_ID}`;
-  const cancelUrl = `${baseUrl}/billing/cancel`;
-
-  // Service-role client for purchases UPDATEs: the cookie client's RLS only
-  // allows SELECT-own + admin on purchases, so cookie-client UPDATEs are
-  // silently filtered to 0 rows. Service-role bypasses RLS and actually persists.
-  const service = await supabaseService();
+  const successUrl = `${baseUrl}/profile/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}`;
+  const cancelUrl = `${baseUrl}/profile/billing?checkout=cancel`;
 
   try {
     const stripe = getStripe();
@@ -152,11 +181,15 @@ const baseHandler = async (req: Request) => {
               name: (product.name as Record<string, string>).en || product.code,
             },
             unit_amount: product.price_cents,
+            tax_behavior:
+              product.tax_behavior === "inclusive" ? "inclusive" : "exclusive",
           },
           quantity: 1,
         },
       ],
       mode: "payment",
+      automatic_tax: { enabled: true },
+      billing_address_collection: "required",
       success_url: successUrl,
       cancel_url: cancelUrl,
       client_reference_id: purchase.id,
@@ -176,6 +209,24 @@ const baseHandler = async (req: Request) => {
 
     if (updateError) {
       console.error("Failed to update purchase with session ID:", updateError);
+      // Never disclose a Checkout URL that cannot be reconciled to our journal.
+      // The session is not yet paid, so expire it at Stripe and fail closed.
+      try {
+        await stripe.checkout.sessions.expire(session.id);
+      } catch (expireError) {
+        console.error(
+          "Failed to expire unreconciled Stripe Checkout session:",
+          expireError,
+        );
+      }
+      await service
+        .from("purchases")
+        .update({ status: "failed" })
+        .eq("id", purchase.id);
+      return createErrorResponse(ApiErrorCode.INTERNAL_ERROR, {
+        status: 500,
+        detail: "Checkout session could not be reconciled",
+      });
     }
 
     return createSuccessResponse({

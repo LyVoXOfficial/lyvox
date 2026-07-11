@@ -62,7 +62,7 @@ describe("SEC-AUTHZ-GUARD · migration authz guard", () => {
   it("every migration satisfies RULE-A / RULE-01 / RULE-02 or is grandfathered", () => {
     const { violations, createdTableCount } = analyzeMigrations(
       migrations,
-      AUTHZ_GUARD_EXEMPTIONS
+      AUTHZ_GUARD_EXEMPTIONS,
     );
 
     // Sanity: the table extractor actually saw the schema (not a broken walk).
@@ -72,21 +72,21 @@ describe("SEC-AUTHZ-GUARD · migration authz guard", () => {
       const grouped = violations
         .map(
           (v) =>
-            `  [${v.kind}] ${v.identifier}  (in ${v.migration})\n      ${v.message}`
+            `  [${v.kind}] ${v.identifier}  (in ${v.migration})\n      ${v.message}`,
         )
         .join("\n\n");
       throw new Error(
         `SEC-AUTHZ-GUARD found ${violations.length} unguarded authorization issue(s) in migrations:\n\n` +
           `${grouped}\n\n` +
           `Fix the migration, or — if this is an intentional, documented exception — add an entry to\n` +
-          `apps/web/src/lib/db/authzGuardExemptions.ts with a reason (> 10 chars).`
+          `apps/web/src/lib/db/authzGuardExemptions.ts with a reason (> 10 chars).`,
       );
     }
   });
 
   it("every allowlist entry has a documented reason (> 10 chars)", () => {
     const bad = AUTHZ_GUARD_EXEMPTIONS.filter(
-      (e) => !e.reason || e.reason.trim().length <= 10
+      (e) => !e.reason || e.reason.trim().length <= 10,
     );
     expect(bad.map((e) => `${e.kind}:${e.identifier}`)).toEqual([]);
   });
@@ -94,17 +94,22 @@ describe("SEC-AUTHZ-GUARD · migration authz guard", () => {
   it("no allowlist entry is stale — each still corresponds to a real violation without the allowlist", () => {
     // Re-run with an EMPTY allowlist and collect the identifiers that actually violate.
     const { violations } = analyzeMigrations(migrations, []);
-    const realKeys = new Set(violations.map((v) => `${v.kind} ${v.identifier}`));
-    const stale = AUTHZ_GUARD_EXEMPTIONS.filter(
-      (e) => !realKeys.has(`${e.kind} ${e.identifier}`)
+    const realKeys = new Set(
+      violations.map((v) => `${v.kind} ${v.identifier}`),
+    );
+    const realScopedKeys = new Set(
+      violations.map((v) => `${v.kind} ${v.identifier} ${v.migration}`),
+    );
+    const stale = AUTHZ_GUARD_EXEMPTIONS.filter((e) =>
+      e.migration
+        ? !realScopedKeys.has(`${e.kind} ${e.identifier} ${e.migration}`)
+        : !realKeys.has(`${e.kind} ${e.identifier}`),
     );
     if (stale.length > 0) {
-      const msg = stale
-        .map((e) => `  [${e.kind}] ${e.identifier}`)
-        .join("\n");
+      const msg = stale.map((e) => `  [${e.kind}] ${e.identifier}`).join("\n");
       throw new Error(
         `The following AUTHZ_GUARD_EXEMPTIONS no longer match any real violation (migration fixed or ` +
-          `renamed?). Remove them from authzGuardExemptions.ts:\n\n${msg}`
+          `renamed?). Remove them from authzGuardExemptions.ts:\n\n${msg}`,
       );
     }
   });
@@ -117,15 +122,20 @@ describe("SEC-AUTHZ-GUARD · detects bad migrations (positive controls)", () => 
     analyzeMigrations([{ name, sql }], []).violations;
 
   it("flags a table with no RLS", () => {
-    const v = run("x.sql", `create table public.secrets (id uuid primary key);`);
-    expect(v.some((x) => x.kind === "table-no-rls" && x.identifier === "secrets")).toBe(true);
+    const v = run(
+      "x.sql",
+      `create table public.secrets (id uuid primary key);`,
+    );
+    expect(
+      v.some((x) => x.kind === "table-no-rls" && x.identifier === "secrets"),
+    ).toBe(true);
   });
 
   it("does NOT flag a table that enables RLS", () => {
     const v = run(
       "x.sql",
       `create table public.ok (id uuid primary key);
-       alter table public.ok enable row level security;`
+       alter table public.ok enable row level security;`,
     );
     expect(v.some((x) => x.kind === "table-no-rls")).toBe(false);
   });
@@ -134,9 +144,12 @@ describe("SEC-AUTHZ-GUARD · detects bad migrations (positive controls)", () => 
     const v = analyzeMigrations(
       [
         { name: "a.sql", sql: `create table public.late (id uuid);` },
-        { name: "b.sql", sql: `alter table if exists public.late enable row level security;` },
+        {
+          name: "b.sql",
+          sql: `alter table if exists public.late enable row level security;`,
+        },
       ],
-      []
+      [],
     ).violations;
     expect(v.some((x) => x.kind === "table-no-rls")).toBe(false);
   });
@@ -147,22 +160,38 @@ describe("SEC-AUTHZ-GUARD · detects bad migrations (positive controls)", () => 
   });
 
   it("flags a combined `select, insert` grant (no column list) — the chat_offers shape", () => {
-    const v = run("x.sql", `grant select, insert on public.things to authenticated;`);
-    expect(v.some((x) => x.kind === "table-wide-grant" && x.identifier.includes("insert"))).toBe(true);
+    const v = run(
+      "x.sql",
+      `grant select, insert on public.things to authenticated;`,
+    );
+    expect(
+      v.some(
+        (x) => x.kind === "table-wide-grant" && x.identifier.includes("insert"),
+      ),
+    ).toBe(true);
   });
 
   it("flags `grant all privileges` (not just the bare `all` token)", () => {
-    const v = run("x.sql", `grant all privileges on public.payouts to authenticated;`);
+    const v = run(
+      "x.sql",
+      `grant all privileges on public.payouts to authenticated;`,
+    );
     expect(v.some((x) => x.kind === "table-wide-grant")).toBe(true);
   });
 
   it("flags a blanket `grant ... on all tables in schema` to anon", () => {
-    const v = run("x.sql", `grant insert on all tables in schema public to anon;`);
+    const v = run(
+      "x.sql",
+      `grant insert on all tables in schema public to anon;`,
+    );
     expect(v.some((x) => x.kind === "table-wide-grant")).toBe(true);
   });
 
   it("does NOT flag a column-scoped UPDATE grant", () => {
-    const v = run("x.sql", `grant update (title, price) on public.adverts to authenticated;`);
+    const v = run(
+      "x.sql",
+      `grant update (title, price) on public.adverts to authenticated;`,
+    );
     expect(v.some((x) => x.kind === "table-wide-grant")).toBe(false);
   });
 
@@ -182,10 +211,13 @@ describe("SEC-AUTHZ-GUARD · detects bad migrations (positive controls)", () => 
       "x.sql",
       `create table public.foo (id uuid, verified boolean);
        alter table public.foo enable row level security;
-       create policy p on public.foo for insert to authenticated with check (id = auth.uid());`
+       create policy p on public.foo for insert to authenticated with check (id = auth.uid());`,
     );
     expect(
-      v.some((x) => x.kind === "unlocked-column-policy" && x.identifier === "foo:insert")
+      v.some(
+        (x) =>
+          x.kind === "unlocked-column-policy" && x.identifier === "foo:insert",
+      ),
     ).toBe(true);
   });
 
@@ -196,7 +228,7 @@ describe("SEC-AUTHZ-GUARD · detects bad migrations (positive controls)", () => 
        alter table public.foo enable row level security;
        create policy p on public.foo for insert to authenticated with check (id = auth.uid());
        revoke insert on public.foo from authenticated;
-       grant insert (id) on public.foo to authenticated;`
+       grant insert (id) on public.foo to authenticated;`,
     );
     expect(v.some((x) => x.kind === "unlocked-column-policy")).toBe(false);
   });
@@ -206,7 +238,7 @@ describe("SEC-AUTHZ-GUARD · detects bad migrations (positive controls)", () => 
       "x.sql",
       `create table public.svc (id uuid, status text);
        alter table public.svc enable row level security;
-       create policy r on public.svc for select to authenticated using (true);`
+       create policy r on public.svc for select to authenticated using (true);`,
     );
     expect(v.some((x) => x.kind === "unlocked-column-policy")).toBe(false);
   });
@@ -216,7 +248,7 @@ describe("SEC-AUTHZ-GUARD · detects bad migrations (positive controls)", () => 
       "x.sql",
       `create table public.adm (id uuid, status text);
        alter table public.adm enable row level security;
-       create policy a on public.adm for all to public using (is_admin()) with check (is_admin());`
+       create policy a on public.adm for all to public using (is_admin()) with check (is_admin());`,
     );
     expect(v.some((x) => x.kind === "unlocked-column-policy")).toBe(false);
   });
@@ -226,7 +258,7 @@ describe("SEC-AUTHZ-GUARD · detects bad migrations (positive controls)", () => 
       "x.sql",
       `create table public.plain (id uuid, title text, note text);
        alter table public.plain enable row level security;
-       create policy p on public.plain for insert to authenticated with check (id = auth.uid());`
+       create policy p on public.plain for insert to authenticated with check (id = auth.uid());`,
     );
     expect(v.some((x) => x.kind === "unlocked-column-policy")).toBe(false);
   });
@@ -234,27 +266,39 @@ describe("SEC-AUTHZ-GUARD · detects bad migrations (positive controls)", () => 
   it("flags a SECURITY DEFINER fn(uuid) with no revoke (RULE-02)", () => {
     const v = run(
       "x.sql",
-      `create function public.danger(p_id uuid) returns void language sql security definer as $$ select 1 $$;`
+      `create function public.danger(p_id uuid) returns void language sql security definer as $$ select 1 $$;`,
     );
-    expect(v.some((x) => x.kind === "unlocked-definer-fn" && x.identifier === "danger")).toBe(true);
+    expect(
+      v.some(
+        (x) => x.kind === "unlocked-definer-fn" && x.identifier === "danger",
+      ),
+    ).toBe(true);
   });
 
   it("flags a fn revoked only FROM authenticated (missing anon)", () => {
     const v = run(
       "x.sql",
       `create function public.half(p_id uuid) returns void language sql security definer as $$ select 1 $$;
-       revoke execute on function public.half(uuid) from authenticated;`
+       revoke execute on function public.half(uuid) from authenticated;`,
     );
-    expect(v.some((x) => x.kind === "unlocked-definer-fn" && x.identifier === "half")).toBe(true);
+    expect(
+      v.some(
+        (x) => x.kind === "unlocked-definer-fn" && x.identifier === "half",
+      ),
+    ).toBe(true);
   });
 
   it("flags a fn revoked only FROM public (Supabase grants execute to authenticated+anon)", () => {
     const v = run(
       "x.sql",
       `create function public.pubonly(p_id uuid) returns void language sql security definer as $$ select 1 $$;
-       revoke execute on function public.pubonly(uuid) from public;`
+       revoke execute on function public.pubonly(uuid) from public;`,
     );
-    expect(v.some((x) => x.kind === "unlocked-definer-fn" && x.identifier === "pubonly")).toBe(true);
+    expect(
+      v.some(
+        (x) => x.kind === "unlocked-definer-fn" && x.identifier === "pubonly",
+      ),
+    ).toBe(true);
   });
 
   it("does NOT flag a fn(uuid) properly revoked from public, authenticated, anon", () => {
@@ -262,7 +306,7 @@ describe("SEC-AUTHZ-GUARD · detects bad migrations (positive controls)", () => 
       "x.sql",
       `create function public.safe(p_id uuid) returns void language sql security definer as $$ select 1 $$;
        revoke execute on function public.safe(uuid) from public, authenticated, anon;
-       grant execute on function public.safe(uuid) to service_role;`
+       grant execute on function public.safe(uuid) to service_role;`,
     );
     expect(v.some((x) => x.kind === "unlocked-definer-fn")).toBe(false);
   });
@@ -272,17 +316,60 @@ describe("SEC-AUTHZ-GUARD · detects bad migrations (positive controls)", () => 
       "x.sql",
       `create function public.reopened(p_id uuid) returns void language sql security definer as $$ select 1 $$;
        revoke execute on function public.reopened(uuid) from public, authenticated, anon;
-       grant execute on function public.reopened(uuid) to authenticated;`
+       grant execute on function public.reopened(uuid) to authenticated;`,
     );
-    expect(v.some((x) => x.kind === "unlocked-definer-fn" && x.identifier === "reopened")).toBe(true);
+    expect(
+      v.some(
+        (x) => x.kind === "unlocked-definer-fn" && x.identifier === "reopened",
+      ),
+    ).toBe(true);
   });
 
-  it("does NOT flag a SECURITY DEFINER fn with NO uuid arg", () => {
+  it("flags a SECURITY DEFINER fn with no uuid arg", () => {
     const v = run(
       "x.sql",
-      `create function public.refresh_it() returns void language sql security definer as $$ select 1 $$;`
+      `create function public.refresh_it() returns void language sql security definer as $$ select 1 $$;`,
     );
-    expect(v.some((x) => x.kind === "unlocked-definer-fn")).toBe(false);
+    expect(
+      v.some(
+        (x) =>
+          x.kind === "unlocked-definer-fn" && x.identifier === "refresh_it",
+      ),
+    ).toBe(true);
+  });
+
+  it("scopes a historical definer exemption to one migration", () => {
+    const { violations } = analyzeMigrations(
+      [
+        {
+          name: "old.sql",
+          sql: `create function public.refresh_it() returns void language sql security definer as $$ select 1 $$;`,
+        },
+        {
+          name: "new.sql",
+          sql: `create or replace function public.refresh_it() returns void language sql security definer as $$ select 1 $$;`,
+        },
+      ],
+      [
+        {
+          kind: "unlocked-definer-fn",
+          identifier: "refresh_it",
+          migration: "old.sql",
+          reason: "Historical definition is remediated by a later migration.",
+        },
+      ],
+    );
+
+    expect(
+      violations.some(
+        (violation) =>
+          violation.identifier === "refresh_it" &&
+          violation.migration === "new.sql",
+      ),
+    ).toBe(true);
+    expect(
+      violations.some((violation) => violation.migration === "old.sql"),
+    ).toBe(false);
   });
 
   it("multi-line function signature: uuid on a continuation line is still detected", () => {
@@ -291,18 +378,26 @@ describe("SEC-AUTHZ-GUARD · detects bad migrations (positive controls)", () => 
       `create function public.multi(
          p_actor text,
          p_target uuid
-       ) returns void language sql security definer as $$ select 1 $$;`
+       ) returns void language sql security definer as $$ select 1 $$;`,
     );
-    expect(v.some((x) => x.kind === "unlocked-definer-fn" && x.identifier === "multi")).toBe(true);
+    expect(
+      v.some(
+        (x) => x.kind === "unlocked-definer-fn" && x.identifier === "multi",
+      ),
+    ).toBe(true);
   });
 
   it("comment containing `revoke ... from public, authenticated, anon` does NOT satisfy the lock", () => {
     const v = run(
       "x.sql",
       `-- revoke execute on function public.tricky(uuid) from public, authenticated, anon;
-       create function public.tricky(p_id uuid) returns void language sql security definer as $$ select 1 $$;`
+       create function public.tricky(p_id uuid) returns void language sql security definer as $$ select 1 $$;`,
     );
-    expect(v.some((x) => x.kind === "unlocked-definer-fn" && x.identifier === "tricky")).toBe(true);
+    expect(
+      v.some(
+        (x) => x.kind === "unlocked-definer-fn" && x.identifier === "tricky",
+      ),
+    ).toBe(true);
   });
 
   it("`grant`/`revoke` words inside a $$ function body are ignored (not parsed as statements)", () => {
@@ -311,7 +406,7 @@ describe("SEC-AUTHZ-GUARD · detects bad migrations (positive controls)", () => 
       `create function public.bodytext() returns text language sql security definer as $$
          select 'grant update on public.x to authenticated'::text $$;
        alter table public.dummy enable row level security;
-       create table public.dummy (id uuid);`
+       create table public.dummy (id uuid);`,
     );
     // the string inside the body must not create a table-wide-grant violation
     expect(v.some((x) => x.kind === "table-wide-grant")).toBe(false);
@@ -322,13 +417,17 @@ describe("SEC-AUTHZ-GUARD · detects bad migrations (positive controls)", () => 
 
 describe("SEC-AUTHZ-GUARD · primitives", () => {
   it("preprocessSql strips line comments", () => {
-    expect(preprocessSql(`grant x; -- revoke y\nselect 1`)).not.toMatch(/revoke y/);
+    expect(preprocessSql(`grant x; -- revoke y\nselect 1`)).not.toMatch(
+      /revoke y/,
+    );
   });
   it("preprocessSql strips block comments", () => {
     expect(preprocessSql(`a /* grant all */ b`)).not.toMatch(/grant all/);
   });
   it("preprocessSql blanks dollar-quoted bodies", () => {
-    expect(preprocessSql(`create fn as $$ grant all on t to anon; $$;`)).not.toMatch(/grant all/);
+    expect(
+      preprocessSql(`create fn as $$ grant all on t to anon; $$;`),
+    ).not.toMatch(/grant all/);
   });
   it("isTableWideWrite: 'update' bare is table-wide", () => {
     expect(isTableWideWrite("update")).toBe(true);
@@ -342,8 +441,8 @@ describe("SEC-AUTHZ-GUARD · primitives", () => {
   it("extractDefinerFns: detects uuid arg across newlines", () => {
     const fns = extractDefinerFns(
       preprocessSql(
-        `create function public.f(\n a text,\n b uuid\n) returns void security definer as '' ;`
-      )
+        `create function public.f(\n a text,\n b uuid\n) returns void security definer as '' ;`,
+      ),
     );
     expect(fns[0]?.hasUuidArg).toBe(true);
   });

@@ -331,7 +331,9 @@ deno_version = 2
 # secret_key = "env(SECRET_VALUE)"
 
 [analytics]
-enabled = true
+# Vector requires the Docker daemon on an unauthenticated TCP socket on Windows.
+# Keep local analytics off; production observability is configured separately.
+enabled = false
 port = 54327
 # Configure one of the supported backends: `postgres`, `bigquery`.
 backend = "postgres"

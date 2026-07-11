@@ -273,5 +273,5 @@ LIMIT 6;
 
 ## 🔗 Related Docs
 
-**Development:** [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [user-profile.md](./user-profile.md) • [database-schema.md](./database-schema.md) • [security-compliance.md](./security-compliance.md)
+**Development:** [Production master](../MASTER_PRODUCTION_TZ.md) • [user-profile.md](./user-profile.md) • [database-schema.md](./database-schema.md) • [security-compliance.md](./security-compliance.md)
 **Catalog:** [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md)

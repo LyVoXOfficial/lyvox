@@ -1,6 +1,7 @@
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { hasAdminRole } from "@/lib/adminRole";
+import { getAdminAccess } from "@/lib/auth/requireAdmin";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -11,6 +12,7 @@ import {
 import { validateRequest } from "@/lib/validations";
 import { updateBusinessSchema } from "@/lib/validations/business";
 import { assertSameOrigin } from "@/lib/security/csrf";
+import type { TablesUpdate } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
 
@@ -65,7 +67,10 @@ type VerificationRow = {
   created_at: string;
 };
 
-function computeBadges(row: { entity_verified: boolean; vat_number: string | null }) {
+function computeBadges(row: {
+  entity_verified: boolean;
+  vat_number: string | null;
+}) {
   return {
     verified_business: row.entity_verified,
     vat_registered: !!row.vat_number && row.entity_verified,
@@ -101,13 +106,15 @@ export async function GET(
     .maybeSingle();
 
   if (fetchError || !row) {
-    return createErrorResponse(ApiErrorCode.BUSINESS_NOT_FOUND, { status: 404 });
+    return createErrorResponse(ApiErrorCode.BUSINESS_NOT_FOUND, {
+      status: 404,
+    });
   }
 
   const business = row as BusinessRow;
 
   // ── Determine viewer privilege ──────────────────────────────────────────────
-  const isAdminUser = hasAdminRole(user);
+  const isAdminUser = hasAdminRole(user) && (await getAdminAccess()).ok;
 
   let isMember = false;
   if (user && !isAdminUser) {
@@ -158,7 +165,9 @@ export async function GET(
   // ── Public branch: only if active; return §8.3 subset ─────────────────────
   if (business.status !== "active") {
     // Don't reveal drafts/suspended to non-members
-    return createErrorResponse(ApiErrorCode.BUSINESS_NOT_FOUND, { status: 404 });
+    return createErrorResponse(ApiErrorCode.BUSINESS_NOT_FOUND, {
+      status: 404,
+    });
   }
 
   return createSuccessResponse({
@@ -204,7 +213,9 @@ export async function PATCH(
     .maybeSingle();
 
   if (fetchError || !existingRow) {
-    return createErrorResponse(ApiErrorCode.BUSINESS_NOT_FOUND, { status: 404 });
+    return createErrorResponse(ApiErrorCode.BUSINESS_NOT_FOUND, {
+      status: 404,
+    });
   }
 
   // ── Ownership check via cookie client (RLS) ────────────────────────────────
@@ -223,13 +234,16 @@ export async function PATCH(
     return parseResult.response;
   }
 
-  const validationResult = validateRequest(updateBusinessSchema, parseResult.data);
+  const validationResult = validateRequest(
+    updateBusinessSchema,
+    parseResult.data,
+  );
   if (!validationResult.success) {
     return validationResult.response;
   }
 
   // Build update object: only keys present in validated data (zod strips locked fields)
-  const updateObj = validationResult.data as Record<string, unknown>;
+  const updateObj: TablesUpdate<"businesses"> = validationResult.data;
 
   // Skip update if nothing to change
   if (Object.keys(updateObj).length === 0) {

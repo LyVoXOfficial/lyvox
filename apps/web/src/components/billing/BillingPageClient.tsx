@@ -60,6 +60,7 @@ interface BillingPageClientProps {
   purchases: Purchase[];
   benefits: Benefit[];
   messages: Record<string, any>;
+  paidBoostsEnabled: boolean;
 }
 
 const statusFallbacks: Record<string, string> = {
@@ -80,6 +81,7 @@ const benefitFallbacks: Record<string, string> = {
 export default function BillingPageClient({
   purchases,
   benefits,
+  paidBoostsEnabled,
 }: BillingPageClientProps) {
   const { t, locale } = useI18n();
 
@@ -171,12 +173,14 @@ export default function BillingPageClient({
             )}
           </p>
         </div>
-        <Button asChild>
-          <Link href="/profile/adverts">
-            <Plus className="h-4 w-4" aria-hidden="true" />
-            {translate("billing.boost_listing", "Boost a listing")}
-          </Link>
-        </Button>
+        {paidBoostsEnabled && (
+          <Button asChild>
+            <Link href="/profile/adverts">
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              {translate("billing.boost_listing", "Boost a listing")}
+            </Link>
+          </Button>
+        )}
       </header>
 
       <div className="mb-6 grid gap-3 sm:grid-cols-3">

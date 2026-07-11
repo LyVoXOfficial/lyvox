@@ -2,7 +2,7 @@
 
 LyVoX is a Belgium-focused trust-first marketplace: C2C/B2C listings with verification, structured categories, moderation, chat, billing, and compliance-oriented seller flows.
 
-The current source of truth for product direction and technical scope is [`docs/PROJECT_VISION_AND_TZ.md`](docs/PROJECT_VISION_AND_TZ.md).
+The single source of truth for Production scope, priorities, status, and release gates is [`docs/MASTER_PRODUCTION_TZ.md`](docs/MASTER_PRODUCTION_TZ.md). Product vision and feature PRDs are subordinate references and do not carry current status.
 
 ## Structure
 

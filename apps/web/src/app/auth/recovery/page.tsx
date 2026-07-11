@@ -37,8 +37,10 @@ function RecoveryPageInner() {
         return;
       }
 
+      const callbackUrl = new URL("/auth/callback", window.location.origin);
+      callbackUrl.searchParams.set("next", "/auth/reset-password");
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        redirectTo: callbackUrl.toString(),
       });
 
       if (error) {

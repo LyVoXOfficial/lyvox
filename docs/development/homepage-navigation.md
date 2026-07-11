@@ -118,9 +118,8 @@ const { data } = await supabase
 
 ## 🔗 Related Docs
 
-**Development:** [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md)
+**Development:** [Production master](../MASTER_PRODUCTION_TZ.md)
 **Catalog:** [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md) • [DATABASE_STRATEGY.md](../catalog/DATABASE_STRATEGY.md) • [CATALOG_IMPLEMENTATION_STATUS.md](../catalog/CATALOG_IMPLEMENTATION_STATUS.md) • [categories/real-estate.md](../catalog/categories/real-estate.md)
-
 
 
 

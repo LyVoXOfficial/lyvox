@@ -240,9 +240,8 @@ Return JSON:
 
 ## 🔗 Related Docs
 
-**Development:** [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [admin-panel.md](./admin-panel.md) • [database-schema.md](./database-schema.md) • [backend-logic.md](./backend-logic.md)
+**Development:** [Production master](../MASTER_PRODUCTION_TZ.md) • [admin-panel.md](./admin-panel.md) • [database-schema.md](./database-schema.md) • [backend-logic.md](./backend-logic.md)
 **Catalog:** [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md)
-
 
 
 

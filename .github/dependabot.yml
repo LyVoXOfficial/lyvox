@@ -12,19 +12,12 @@ updates:
       - power4ik
     assignees:
       - power4ik
-    # RULE-05: next.js vuln blocks deployment, review immediately
-    labels:
-      - "dependencies"
-      - "security"
-    # Commit message prefix for clarity
+    # RULE-05: Next.js advisories block deployment and must be reviewed immediately.
     commit-message:
       prefix: "deps:"
       include: scope
-    # Group minor/patch updates per package
     allow:
       - dependency-type: "all"
-    # Always attempt auto-merge for patch+minor (not major)
-    auto-merge: true
     rebase-strategy: auto
 
   # GitHub Actions
@@ -38,9 +31,6 @@ updates:
       - power4ik
     assignees:
       - power4ik
-    labels:
-      - "ci/cd"
-      - "actions"
     commit-message:
       prefix: "ci:"
     allow:

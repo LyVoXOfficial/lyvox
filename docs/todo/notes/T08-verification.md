@@ -1,3 +1,6 @@
+> [!NOTE]
+> **ARCHIVED VERIFICATION EVIDENCE.** Это датированный локальный evidence-снимок, не текущий release status и не разрешение на rollout. Канонический статус: [`docs/MASTER_PRODUCTION_TZ.md`](../../MASTER_PRODUCTION_TZ.md).
+
 # T08 Verification
 
 Date: 2026-07-04

@@ -1,4 +1,7 @@
-last_sync: 2025-11-09
+> [!IMPORTANT]
+> Единственная точка входа в production-работу и источник текущего статуса: [`docs/MASTER_PRODUCTION_TZ.md`](./MASTER_PRODUCTION_TZ.md). Остальные документы дают подчинённый контекст.
+
+last_sync: 2026-07-11
 
 # LyVoX Knowledge Map
 
@@ -10,17 +13,14 @@ last_sync: 2025-11-09
 
 ## 📚 Documentation Hierarchy
 
-> **PROMPT_MAIN.md** is the root entrypoint. Every documentation journey starts there.
+> Current navigation starts from the Production master. Architecture, domain and implementation documents do not own backlog priority or release status.
 
 ```text
 📁 LyVoX Workspace (root)
 │
-├─ 📄 PROMPT_MAIN.md                     🎯 Root Knowledge Entrypoint
-│   └─ Entry point for AI assistants and contributors
-│   └─ Links to Master Checklist, deployment workflows, core references
-│
-├─ 📁 docs/                              🔒 Private Documentation Root (never public)
+├─ 📁 docs/                              Documentation root
 │   │
+│   ├─ 📄 MASTER_PRODUCTION_TZ.md        Canonical production backlog and status
 │   ├─ 📄 KNOWLEDGE_MAP.md               📚 This document — knowledge hierarchy
 │   │
 │   ├─ 📄 CURSOR_KNOWLEDGE_BASE.md       🌐 General Technical Foundation
@@ -31,8 +31,6 @@ last_sync: 2025-11-09
 │   │   ├─ 📄 ARCH_RULES.md              (Non-negotiable architectural constraints)
 │   │   ├─ 📄 requirements.md            (Requirements, ERD, RLS, environment matrix)
 │   │   ├─ 📄 API_REFERENCE.md           (API contracts and schemas)
-│   │   ├─ 📄 PLAN.md                    (Roadmap and milestones)
-│   │   ├─ 📄 TODO.md                    (Operational backlog)
 │   │   ├─ 📄 INSTALL.md                 (Environment setup)
 │   │   ├─ 📄 MCP_SERVICES.md            (Supabase & Vercel MCP usage)
 │   │   └─ Additional planning/compliance docs
@@ -44,7 +42,6 @@ last_sync: 2025-11-09
 │   │   └─ (Conceptual descriptions of business flows and rules)
 │   │
 │   ├─ 📁 development/                   💻 Implementation Guides & Modules
-│   │   ├─ 📄 MASTER_CHECKLIST.md        🎯 Start here — prioritized task list
 │   │   ├─ 📄 README.md                  (Development documentation overview)
 │   │   ├─ 📄 database-schema.md         (Supabase schema details)
 │   │   ├─ 📄 api-architecture.md        (Route handler design patterns)
@@ -56,7 +53,7 @@ last_sync: 2025-11-09
 │   │   │   verification.md, chat-messages.md, billing-subscriptions.md,
 │   │   │   moderation-ai.md, admin-panel.md, notifications.md,
 │   │   │   user-dashboard.md, seo-metadata.md, i18n.md, mobile-responsive.md
-│   │   └─ Planning files: roadmap.md, risks-mitigation.md, checklists.md
+│   │   └─ Planning support: risks-mitigation.md
 │   │
 │   └─ 📁 catalog/                       📦 Category & Enrichment System
 │       ├─ 📄 CATALOG_MASTER.md          (Master catalog design)
@@ -76,17 +73,16 @@ last_sync: 2025-11-09
 
 ---
 
-## 🎯 Authority Sources
+## Authority sources
 
 | Document | Authoritative For |
 |----------|-------------------|
-| `PROMPT_MAIN.md` | AI workflow, deployment checklist, task execution rules |
+| `docs/MASTER_PRODUCTION_TZ.md` | Current scope, priority, status and release readiness |
 | `docs/CURSOR_KNOWLEDGE_BASE.md` | Global technical patterns and architecture principles |
 | `docs/ARCHITECTURE.md` | System topology, journeys, and stack versions |
 | `docs/ARCH_RULES.md` | Non-negotiable architectural constraints |
 | `docs/requirements.md` | Schema, RLS policies, compliance, environment setup |
 | `docs/API_REFERENCE.md` | API contracts (request/response schemas) |
-| `docs/development/MASTER_CHECKLIST.md` | Task priorities, dependencies, completion tracking |
 | `supabase/migrations/` | Canonical database definition |
 | `supabase/types/database.types.ts` | Generated TypeScript types matching schema |
 
@@ -94,7 +90,7 @@ last_sync: 2025-11-09
 
 ## 📖 Layered Knowledge System
 
-1. **Layer 1 — Root Entry Point:** `PROMPT_MAIN.md` (start here for workflow, references, and governance).  
+1. **Layer 1 — Production entry point:** `docs/MASTER_PRODUCTION_TZ.md`.
 2. **Layer 2 — General Foundation:** `docs/CURSOR_KNOWLEDGE_BASE.md` (global technical knowledge).  
 3. **Layer 3 — Core Documentation:** Root-level docs inside `docs/` (architecture, requirements, planning).  
 4. **Layer 4 — Domain Knowledge:** `docs/domains/` (business logic, conceptual rules).  
@@ -106,9 +102,7 @@ last_sync: 2025-11-09
 ## 🔗 Cross-Reference Patterns
 
 - **Domain ↔ Development:** Domain docs explain *what/why*; development docs explain *how/where*. Example: `domains/moderation.md` ↔ `development/moderation-ai.md`.  
-- **Development ↔ Master Checklist:** Implementation guides link to IDs in `MASTER_CHECKLIST.md` (e.g., `UI-015`, `DB-003`).  
 - **Catalog ↔ Implementation:** `catalog/CATALOG_MASTER.md` (strategy) ↔ `development/categories.md` (execution) ↔ `catalog/categories/*.md` (attributes).  
-- **PROMPT_MAIN.md ↔ KNOWLEDGE_MAP.md:** PROMPT references this map; this map points back to PROMPT as the root.  
 - **CURSOR_KNOWLEDGE_BASE.md ↔ All Layers:** Acts as the shared foundation for domain and development docs.  
 
 ---
@@ -117,18 +111,16 @@ last_sync: 2025-11-09
 
 ### For New Contributors
 
-1. Read `PROMPT_MAIN.md` to understand workflow and governance.  
+1. Start from `docs/MASTER_PRODUCTION_TZ.md` for current work and release status.
 2. Skim `docs/CURSOR_KNOWLEDGE_BASE.md` for platform fundamentals.  
 3. Review `docs/ARCHITECTURE.md` and `docs/requirements.md` for high-level context.  
-4. Follow `docs/development/MASTER_CHECKLIST.md` to pick prioritized tasks.  
 
 ### For AI Assistants
 
-1. Always start with `PROMPT_MAIN.md`.  
+1. Start with `docs/MASTER_PRODUCTION_TZ.md`.
 2. Use `CURSOR_KNOWLEDGE_BASE.md` for architectural patterns.  
 3. Dive into `docs/domains/` for business logic.  
-4. Implement using `docs/development/` guides; update `MASTER_CHECKLIST.md` as required.  
-5. Consult `docs/catalog/` for taxonomy, AI enrichment, and attribute structures.  
+4. Consult `docs/catalog/` for taxonomy, AI enrichment, and attribute structures.
 
 ### Quick Lookup
 
@@ -140,14 +132,9 @@ last_sync: 2025-11-09
 
 ---
 
-## 🔒 Privacy & Repository Policy
+## Historical privacy statement (retired)
 
-The **entire `/docs` directory (including this file and `PROMPT_MAIN.md`) must remain private**. Do not upload, push, or sync documentation to any public repository.  
-
-- Contains internal specifications, schema, compliance notes.  
-- Must stay local until a secure private repository is configured.  
-- Ensure `.gitignore` excludes `/docs/**`.  
-- AI assistants must not publish or leak documentation content.  
+The former instruction to keep `/docs` local and exclude it from Git is no longer valid for this repository. Do not change Git visibility, ignore rules, publishing policy, or repository access based on this archive; follow the current repository governance and `docs/MASTER_PRODUCTION_TZ.md`.
 
 ---
 
@@ -156,26 +143,12 @@ The **entire `/docs` directory (including this file and `PROMPT_MAIN.md`) must r
 - Update this map when new documentation layers or directories are introduced.  
 - Revise authority table if canonical sources change.  
 - Keep cross-reference examples in sync with major document reorganizations.  
-- Refresh `last_sync` whenever edits occur.  
-- Validate this map against `PROMPT_MAIN.md` and `CURSOR_KNOWLEDGE_BASE.md` after updates.  
+- Do not maintain `last_sync` manually; regenerate or retire this map through an explicit current task.
 
 ---
 
 ## Cross-References
 
-- 🔗 `PROMPT_MAIN.md` — root knowledge entrypoint (this file references it explicitly).  
 - 🔗 `docs/CURSOR_KNOWLEDGE_BASE.md` — foundational technical knowledge.  
-- 🔗 `docs/development/MASTER_CHECKLIST.md` — operational execution track.  
 
-📚 For full navigation instructions, see the “Knowledge Context” section inside `PROMPT_MAIN.md`.
-
-
-## 🤖 AI Enrichment & Cross-Reference System
-
-This workspace maintains AI-generated links between domain, development, and catalog documents.
-
-See `docs/AI_LINKS_INDEX.md` for the full matrix of relationships.
-
-
-
-
+Current navigation and execution begin in [`docs/MASTER_PRODUCTION_TZ.md`](./MASTER_PRODUCTION_TZ.md).

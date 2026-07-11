@@ -128,9 +128,8 @@
 ## 🔗 Related Docs
 
 **Domains:** [devops.md](../domains/devops.md)
-**Development:** [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [deep-audit-20251108.md](./deep-audit-20251108.md) • [security-compliance.md](./security-compliance.md)
+**Development:** [Production master](../MASTER_PRODUCTION_TZ.md) • [deep-audit-20251108.md](./deep-audit-20251108.md) • [security-compliance.md](./security-compliance.md)
 **Catalog:** [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md)
-
 
 
 

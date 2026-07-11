@@ -43,14 +43,12 @@ async function updateProfileAction(formData: FormData) {
       : user.email?.split("@")[0] || "LyVoX user";
   const phone = typeof phoneRaw === "string" && phoneRaw.trim() ? phoneRaw.trim() : null;
 
-  const { error } = await supabase.from("profiles").upsert(
-    {
-      id: user.id,
-      display_name: displayName,
-      phone,
-    },
-    { onConflict: "id" },
-  );
+  const { error } = await supabase
+    .from("profiles")
+    .update({ display_name: displayName, phone })
+    .eq("id", user.id)
+    .select("id")
+    .single();
 
   if (error) {
     redirect("/profile/edit?status=error");

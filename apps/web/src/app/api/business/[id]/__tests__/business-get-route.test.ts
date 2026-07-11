@@ -4,6 +4,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 
 const getUserMock = vi.fn();
 const cookieRpcMock = vi.fn();
+const getAdminAccessMock = vi.fn();
 
 vi.mock("@/lib/supabaseServer", () => ({
   supabaseServer: async () => ({
@@ -23,6 +24,10 @@ vi.mock("@/lib/adminRole", () => ({
     const u = user as { app_metadata?: { role?: string } };
     return u.app_metadata?.role === "admin";
   },
+}));
+
+vi.mock("@/lib/auth/requireAdmin", () => ({
+  getAdminAccess: () => getAdminAccessMock(),
 }));
 
 // Import after mocks
@@ -100,6 +105,11 @@ beforeEach(() => {
   getUserMock.mockReset();
   cookieRpcMock.mockReset();
   serviceFromMock.mockReset();
+  getAdminAccessMock.mockReset();
+  getAdminAccessMock.mockResolvedValue({
+    ok: true,
+    user: { id: "admin-user" },
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -171,12 +181,18 @@ describe("GET /api/business/[id]", () => {
     cookieRpcMock.mockResolvedValue({ data: true, error: null });
 
     const verificationRows = [
-      { method: "vies", status: "verified", verified_at: "2026-06-27T00:00:00.000Z", created_at: "2026-06-27T00:00:00.000Z" },
+      {
+        method: "vies",
+        status: "verified",
+        verified_at: "2026-06-27T00:00:00.000Z",
+        created_at: "2026-06-27T00:00:00.000Z",
+      },
     ];
 
     serviceFromMock.mockImplementation((table: string) => {
       if (table === "businesses") return makeBusinessFetch(ACTIVE_BUSINESS);
-      if (table === "verifications") return makeVerificationFetch(verificationRows);
+      if (table === "verifications")
+        return makeVerificationFetch(verificationRows);
       throw new Error("unexpected table: " + table);
     });
 
@@ -204,7 +220,9 @@ describe("GET /api/business/[id]", () => {
 
   it("(e) authenticated non-member + active → public subset; created_by and self_certified_ip absent; is_business_member=false", async () => {
     // Logged-in user with no admin role
-    getUserMock.mockResolvedValue({ data: { user: { id: "non-member-user" } } });
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "non-member-user" } },
+    });
     // is_business_member RPC returns false (non-member)
     cookieRpcMock.mockResolvedValue({ data: false, error: null });
 
@@ -253,7 +271,8 @@ describe("GET /api/business/[id]", () => {
 
     serviceFromMock.mockImplementation((table: string) => {
       if (table === "businesses") return makeBusinessFetch(ACTIVE_BUSINESS);
-      if (table === "verifications") return makeVerificationFetch(verificationRows);
+      if (table === "verifications")
+        return makeVerificationFetch(verificationRows);
       throw new Error("unexpected table: " + table);
     });
 
@@ -265,5 +284,25 @@ describe("GET /api/business/[id]", () => {
 
     // Admin path skips the member RPC
     expect(cookieRpcMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps an AAL1 platform admin on the public subset unless they are a member", async () => {
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "admin-user", app_metadata: { role: "admin" } } },
+    });
+    getAdminAccessMock.mockResolvedValue({ ok: false, reason: "mfa_required" });
+    cookieRpcMock.mockResolvedValue({ data: false, error: null });
+    serviceFromMock.mockImplementation((table: string) => {
+      if (table === "businesses") return makeBusinessFetch(ACTIVE_BUSINESS);
+      throw new Error("unexpected table: " + table);
+    });
+
+    const response = await GET(makeGet(), makeContext());
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.data.business.created_by).toBeUndefined();
+    expect(body.data.verifications).toBeUndefined();
+    expect(cookieRpcMock).toHaveBeenCalled();
   });
 });

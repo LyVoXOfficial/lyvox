@@ -1,4 +1,5 @@
-> ⚠ УСТАРЕЛО — этот файл больше не ведётся. Единый источник правды: [docs/MASTER_TODO.md](../MASTER_TODO.md). Сведено туда; можно удалить.
+> [!WARNING]
+> **Архивный отчёт о статусе каталога. Не принимать отмеченную ниже готовность за текущее состояние.** Актуальный scope и критерии приёмки находятся только в [`docs/MASTER_PRODUCTION_TZ.md`](../MASTER_PRODUCTION_TZ.md). Файл сохранён как история.
 
 # LyVoX Catalog System - Implementation Status
 
@@ -322,7 +323,6 @@ Refer to individual documentation files in `docs/catalog/` or raise an issue wit
 ## 🔗 Related Docs
 
 **Catalog:** [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) • [FINAL_COMPLETION_REPORT.md](./FINAL_COMPLETION_REPORT.md) • [POSTFORM_INTEGRATION.md](./POSTFORM_INTEGRATION.md) • [CATALOG_MASTER.md](./CATALOG_MASTER.md) • [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
-
 
 
 

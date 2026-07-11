@@ -55,15 +55,17 @@ last_sync: 2025-10-28
 - Reviews: future UI surfaces average ratings (“Надёжный продавец ★4.8”). Requires additional RLS, pagination, and display components.
 - Notifications: seller/buyer reminders (confirm meeting, leave review) can reuse existing email/SMS infrastructure.
 
-## Improvements & TODO Links
-- TODO.md items:
-  - Implement deals domain (buyer↔seller commitments).
-  - Extend adverts with `deal_status` field and transition handling.
-  - Add RLS policies for `public.deals`.
-  - Integrate trust_score deltas and `public.reviews` table.
-  - Introduce rate limits for `/api/deals/create` and related endpoints.
-  - Build UI flows for buyer/seller confirmation + review prompts.
-- PLAN.md milestone “M2.5 – Secure Reservations & Deals Layer” tracks rollout stages.
+## Candidate improvements
+
+Ниже исторические идеи; исполнять только после включения в [Production master](../MASTER_PRODUCTION_TZ.md):
+
+- Implement deals domain (buyer↔seller commitments).
+- Extend adverts with `deal_status` field and transition handling.
+- Add RLS policies for `public.deals`.
+- Integrate trust_score deltas and `public.reviews` table.
+- Introduce rate limits for `/api/deals/create` and related endpoints.
+- Build UI flows for buyer/seller confirmation + review prompts.
+- Legacy milestone “M2.5 – Secure Reservations & Deals Layer” described the former rollout stages.
 - Update `docs/requirements.md` once schema is finalised (table definitions, ERD, retention requirements).
 
 ## Change Log

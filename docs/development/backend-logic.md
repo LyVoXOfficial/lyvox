@@ -215,9 +215,8 @@ await emailQueue.add('send-email', {
 
 ## 🔗 Related Docs
 
-**Development:** [database-schema.md](./database-schema.md) • [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [deep-audit-20251108.md](./deep-audit-20251108.md) • [moderation-ai.md](./moderation-ai.md)
+**Development:** [database-schema.md](./database-schema.md) • [Production master](../MASTER_PRODUCTION_TZ.md) • [deep-audit-20251108.md](./deep-audit-20251108.md) • [moderation-ai.md](./moderation-ai.md)
 **Catalog:** [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md)
-
 
 
 

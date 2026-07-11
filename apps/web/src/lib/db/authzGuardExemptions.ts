@@ -31,18 +31,6 @@ export const AUTHZ_GUARD_EXEMPTIONS: AuthzExemption[] = [
   },
   {
     kind: "unlocked-definer-fn",
-    identifier: "is_user_blocked",
-    reason:
-      "Predicate helper used by fraud/publish checks; returns a boolean block status and does not mutate — intentionally callable by authenticated.",
-  },
-  {
-    kind: "unlocked-definer-fn",
-    identifier: "user_has_flag",
-    reason:
-      "Feature-flag predicate helper read by RLS/route checks; returns a boolean and does not mutate — intentionally callable by authenticated.",
-  },
-  {
-    kind: "unlocked-definer-fn",
     identifier: "create_review",
     reason:
       "RPC the buyer calls to create their own review; authorizes on auth.uid() internally (purchase ownership), so authenticated execute is the intended entry point.",
@@ -59,6 +47,111 @@ export const AUTHZ_GUARD_EXEMPTIONS: AuthzExemption[] = [
     reason:
       "Public FTS search RPC (fixed 13-arg signature); its uuid arg is a category_id FILTER, not a caller identity — read-only, returns only active adverts, and must stay executable by anon+authenticated so search works logged-out.",
   },
+  {
+    kind: "unlocked-definer-fn",
+    identifier: "handle_new_user",
+    migration: "20251101090000_security_refactor.sql",
+    reason:
+      "Historical trigger definition predates the all-definer guard; direct EXECUTE is revoked by the forward security convergence migration.",
+  },
+  {
+    kind: "unlocked-definer-fn",
+    identifier: "refresh_category_advert_counts",
+    migration: "20251102100000_category_counts.sql",
+    reason:
+      "Historical maintenance helper is locked to service_role by the forward security convergence migration; future definitions remain gated.",
+  },
+  {
+    kind: "unlocked-definer-fn",
+    identifier: "refresh_top_sellers",
+    migration: "20251107010000_views_favorites_top_sellers.sql",
+    reason:
+      "Historical maintenance helper is locked to service_role by the forward security convergence migration; future definitions remain gated.",
+  },
+  {
+    kind: "unlocked-definer-fn",
+    identifier: "update_conversation_last_message_at",
+    migration: "20251108120000_chat_tables.sql",
+    reason:
+      "Historical trigger definition predates the all-definer guard; direct EXECUTE is revoked by the forward security convergence migration.",
+  },
+  {
+    kind: "unlocked-definer-fn",
+    identifier: "sync_profile_verified_email",
+    migration: "20260626160000_sync_verified_email.sql",
+    reason:
+      "Historical trigger definition predates the all-definer guard; direct EXECUTE is revoked by the forward security convergence migration.",
+  },
+  {
+    kind: "unlocked-definer-fn",
+    identifier: "create_business",
+    migration: "20260626170000_businesses_core.sql",
+    reason:
+      "Authenticated self-service RPC authorizes through auth.uid(); forward convergence revokes anon and grants only authenticated plus service_role.",
+  },
+  {
+    kind: "unlocked-definer-fn",
+    identifier: "sync_verification_caches",
+    migration: "20260626172000_verifications.sql",
+    reason:
+      "Historical trigger definition predates the all-definer guard; direct EXECUTE is revoked by the forward security convergence migration.",
+  },
+  {
+    kind: "unlocked-definer-fn",
+    identifier: "cleanup_kyc_on_business_delete",
+    migration: "20260626173000_kyc_records.sql",
+    reason:
+      "Historical trigger definition predates the all-definer guard; direct EXECUTE is revoked by the forward security convergence migration.",
+  },
+  {
+    kind: "unlocked-definer-fn",
+    identifier: "refresh_seller_rating",
+    migration: "20260627270000_reviews.sql",
+    reason:
+      "Historical trigger definition predates the all-definer guard; direct EXECUTE is revoked by the forward security convergence migration.",
+  },
+  {
+    kind: "unlocked-definer-fn",
+    identifier: "refresh_top_sellers",
+    migration: "20260629000000_f11_advert_views_dedup.sql",
+    reason:
+      "Historical maintenance redefinition is locked to service_role by forward convergence; the exception is scoped to this migration only.",
+  },
+  {
+    kind: "unlocked-definer-fn",
+    identifier: "refresh_seller_rating",
+    migration: "20260629100000_f14_trust_score_formula.sql",
+    reason:
+      "Historical trigger redefinition predates the all-definer guard; direct EXECUTE is revoked by forward convergence.",
+  },
+  {
+    kind: "unlocked-definer-fn",
+    identifier: "refresh_top_sellers",
+    migration: "20260704140000_t18_seed_switch.sql",
+    reason:
+      "Historical maintenance redefinition is locked to service_role by forward convergence; the exception is scoped to this migration only.",
+  },
+  {
+    kind: "unlocked-definer-fn",
+    identifier: "is_admin",
+    migration: "20260710181000_p004_capability_control.sql",
+    reason:
+      "RLS predicate intentionally executes for anon/authenticated and derives identity only from auth.jwt/auth.uid; no caller-controlled subject argument exists.",
+  },
+  {
+    kind: "unlocked-definer-fn",
+    identifier: "set_platform_setting",
+    migration: "20260710181000_p004_capability_control.sql",
+    reason:
+      "Authenticated admin RPC performs internal is_admin plus AAL2 authorization, revision checks and immutable audit; browser execution is intentional.",
+  },
+  {
+    kind: "unlocked-definer-fn",
+    identifier: "activate_platform_emergency_stop",
+    migration: "20260710181000_p004_capability_control.sql",
+    reason:
+      "Authenticated admin emergency RPC performs internal is_admin plus AAL2 authorization and only moves the system toward a safer stopped state.",
+  },
 
   // ── RULE-01: table-wide write grants that are pre-existing and verified NOT column-exposure holes.
   {
@@ -73,18 +166,6 @@ export const AUTHZ_GUARD_EXEMPTIONS: AuthzExemption[] = [
   //    docs/security/SEC-AUTHZ-GUARD-live-audit.md; allowlisted so the guard gates NEW migrations
   //    without being red on the baseline. The staleness test will force removal of each entry once
   //    its "revoke <op> ... from authenticated" lands. RULE-01b now BLOCKS any new such migration.
-  {
-    kind: "unlocked-column-policy",
-    identifier: "profiles:insert",
-    reason:
-      "KNOWN pre-existing hole (verified_*/itsme_*/pro_until settable on self-insert); UPDATE was column-scoped by the lockdown, INSERT was not. Tracked for remediation in SEC-AUTHZ-GUARD-live-audit.md — remove this entry when the revoke lands.",
-  },
-  {
-    kind: "unlocked-column-policy",
-    identifier: "purchases:insert",
-    reason:
-      "KNOWN pre-existing (status settable on self-insert). Money-flow is F3-gated regardless; tracked for remediation in SEC-AUTHZ-GUARD-live-audit.md — remove when column-scoped.",
-  },
   {
     kind: "unlocked-column-policy",
     identifier: "reports:insert",

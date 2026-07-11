@@ -180,9 +180,8 @@ Body: {
 ## 🔗 Related Docs
 
 **Domains:** [phones.md](../domains/phones.md)
-**Development:** [security-compliance.md](./security-compliance.md) • [deep-audit-20251108.md](./deep-audit-20251108.md) • [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md)
+**Development:** [security-compliance.md](./security-compliance.md) • [deep-audit-20251108.md](./deep-audit-20251108.md) • [Production master](../MASTER_PRODUCTION_TZ.md)
 **Core:** [API_REFERENCE.md](../API_REFERENCE.md)
-
 
 
 

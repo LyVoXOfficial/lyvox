@@ -12,11 +12,12 @@ const root = process.cwd();
 const TARGETS = [
   { dir: path.join(root, "docs", "domains"), type: "Domains" },
   { dir: path.join(root, "docs", "development"), type: "Development" },
-  { dir: path.join(root, "docs", "catalog"), type: "Catalog" }
+  { dir: path.join(root, "docs", "catalog"), type: "Catalog" },
 ];
 
 const EXTRA_FILES = [
-  { file: path.join(root, "docs", "API_REFERENCE.md"), type: "Core" }
+  { file: path.join(root, "docs", "API_REFERENCE.md"), type: "Core" },
+  { file: path.join(root, "docs", "MASTER_PRODUCTION_TZ.md"), type: "Core" },
 ];
 
 const KEYWORD_PATTERNS = [
@@ -64,7 +65,7 @@ const KEYWORD_PATTERNS = [
   { name: "catalog_ai", regex: /AI enrichment/i, weight: 3 },
   { name: "postform", regex: /PostForm/i, weight: 3 },
   { name: "trust_flows", regex: /reputation|fraud/i, weight: 2 },
-  { name: "analytics_pipeline", regex: /pipeline|metrics/i, weight: 2 }
+  { name: "analytics_pipeline", regex: /pipeline|metrics/i, weight: 2 },
 ];
 
 function gatherDocs() {
@@ -148,7 +149,12 @@ function extractTokens(doc) {
     }
   }
 
-  return { tokens, tables: Array.from(tables), endpoints: Array.from(endpoints), tasks: Array.from(tasks) };
+  return {
+    tokens,
+    tables: Array.from(tables),
+    endpoints: Array.from(endpoints),
+    tasks: Array.from(tasks),
+  };
 }
 
 function computeScore(aTokens, bTokens) {
@@ -230,27 +236,43 @@ function selectLinks(doc, docs) {
   ensureCore();
 
   if (selected.length < 2 && doc.tables.length) {
-    const schemaDoc = docs.find((d) => posixPath(d.path).endsWith("docs/development/database-schema.md"));
+    const schemaDoc = docs.find((d) =>
+      posixPath(d.path).endsWith("docs/development/database-schema.md"),
+    );
     if (schemaDoc && !selected.some((c) => c.target.path === schemaDoc.path)) {
       selected.push({ target: schemaDoc, score: 3 });
-      if (!selectedByType.has(schemaDoc.type)) selectedByType.set(schemaDoc.type, []);
+      if (!selectedByType.has(schemaDoc.type))
+        selectedByType.set(schemaDoc.type, []);
       selectedByType.get(schemaDoc.type).push({ target: schemaDoc, score: 3 });
     }
   }
 
   if (selected.length < 2 && doc.type === "Development") {
-    const checklist = docs.find((d) => posixPath(d.path).endsWith("docs/development/MASTER_CHECKLIST.md"));
-    if (checklist && !selected.some((c) => c.target.path === checklist.path)) {
-      selected.push({ target: checklist, score: 3 });
-      if (!selectedByType.has(checklist.type)) selectedByType.set(checklist.type, []);
-      selectedByType.get(checklist.type).push({ target: checklist, score: 3 });
+    const productionMaster = docs.find((d) =>
+      posixPath(d.path).endsWith("docs/MASTER_PRODUCTION_TZ.md"),
+    );
+    if (
+      productionMaster &&
+      !selected.some((c) => c.target.path === productionMaster.path)
+    ) {
+      selected.push({ target: productionMaster, score: 3 });
+      if (!selectedByType.has(productionMaster.type))
+        selectedByType.set(productionMaster.type, []);
+      selectedByType
+        .get(productionMaster.type)
+        .push({ target: productionMaster, score: 3 });
     }
   }
 
   if (selected.length > 5) {
     selected.length = 5;
     for (const [type, arr] of selectedByType.entries()) {
-      selectedByType.set(type, arr.filter((item) => selected.some((s) => s.target.path === item.target.path)));
+      selectedByType.set(
+        type,
+        arr.filter((item) =>
+          selected.some((s) => s.target.path === item.target.path),
+        ),
+      );
     }
   }
 
@@ -304,16 +326,19 @@ function generateIndex(relationships) {
   const lines = [
     "# AI Documentation Cross-Reference",
     "",
+    "> [!WARNING]",
+    "> Generated relationship index only. It is not a task queue or authority source. Start current work from `docs/MASTER_PRODUCTION_TZ.md`; all generated relationships are subordinate.",
+    "",
     `last_sync: ${timestamp}`,
     "",
     "## Cross-Reference Index",
-    ""
+    "",
   ];
   const docsRoot = path.join(root, "docs");
   const sources = Array.from(relationships.keys())
     .map((absPath) => ({
       abs: absPath,
-      rel: posixPath(path.relative(docsRoot, absPath))
+      rel: posixPath(path.relative(docsRoot, absPath)),
     }))
     .sort((a, b) => a.rel.localeCompare(b.rel));
   for (const sourceInfo of sources) {
@@ -353,7 +378,7 @@ function verifyLinks(docs, relationships) {
         if (!fs.existsSync(absoluteTarget)) {
           issues.push({
             source: posixPath(path.relative(docsRoot, doc.path)),
-            href: link.href
+            href: link.href,
           });
         }
       }
@@ -365,7 +390,8 @@ function verifyLinks(docs, relationships) {
 function updateKnowledgeMap() {
   const kmPath = path.join(root, "docs", "KNOWLEDGE_MAP.md");
   let content = fs.readFileSync(kmPath, "utf8");
-  const section = "## \uD83E\uDD16 AI Enrichment & Cross-Reference System\n\nThis workspace maintains AI-generated links between domain, development, and catalog documents.\n\nSee `docs/AI_LINKS_INDEX.md` for the full matrix of relationships.\n";
+  const section =
+    "## \uD83E\uDD16 AI Enrichment & Cross-Reference System\n\nThis workspace maintains AI-generated links between domain, development, and catalog documents.\n\nCurrent scope, priority, status, and release readiness live only in `docs/MASTER_PRODUCTION_TZ.md`; generated cross-references are subordinate navigation aids.\n";
   const regex = /## \uD83E\uDD16 AI Enrichment & Cross-Reference System[\s\S]*/;
   if (regex.test(content)) {
     content = content.replace(regex, section.trim() + "\n");
@@ -443,7 +469,7 @@ function main() {
     }
     generateIndex(relationships);
     updateKnowledgeMap();
-    console.log("Applied AI linking updates." );
+    console.log("Applied AI linking updates.");
   }
 }
 

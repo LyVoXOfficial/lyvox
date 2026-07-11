@@ -1,4 +1,5 @@
-> ⚠ УСТАРЕЛО — этот файл больше не ведётся. Единый источник правды: [docs/MASTER_TODO.md](./MASTER_TODO.md). Сведено туда; можно удалить.
+> [!WARNING]
+> **Архивный UX-аудит и roadmap. Статусы и приоритеты ниже не являются действующими.** Актуальные UX-задачи находятся только в [`docs/MASTER_PRODUCTION_TZ.md`](./MASTER_PRODUCTION_TZ.md). Файл сохранён как история.
 
 # LyVoX UX audit and next-generation marketplace roadmap
 

@@ -1,6 +1,7 @@
 # PRD 62 — Listing Cards per Category + KB Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> [!WARNING]
+> **ARCHIVED IMPLEMENTATION PLAN — DO NOT EXECUTE AS A BACKLOG.** Этот документ сохраняется как история уже принятого технического подхода. Он не задаёт текущие priority/status/order и не разрешает правки. Единственный рабочий источник: [`docs/MASTER_PRODUCTION_TZ.md`](../../MASTER_PRODUCTION_TZ.md).
 
 **Goal:** Add per-category key-specs strip, document badges, F13 CatalogGroupTabs (readonly) detail renderer, and KB block with disclaimer + ambiguous-generation CTA to the ad detail page (`ad/[id]`).
 
@@ -1033,34 +1034,9 @@ git commit -m "feat(62-kb-block): wire KeySpecsStrip/DocumentBadges/CatalogDetai
 
 ---
 
-### Task 6: Docs update — PRD 62 status + MASTER_TODO
+### Historical documentation note
 
-**Files:**
-- Modify: `docs/MASTER_TODO.md`
-- Modify: `docs/features/62-listing-detail-per-category.md`
-
-- [ ] **Step 1: Update PRD 62 status header**
-
-In `docs/features/62-listing-detail-per-category.md`, change the status line from:
-```
-> **Статус кода:** 🟡 ЧАСТИЧНО
-```
-to:
-```
-> **Статус кода:** 🟡 ЧАСТИЧНО — F7/F13 foundations wired to detail page; key-specs strip + doc badges + KB disclaimer + ambiguous CTA done; non-transport KB (electronics/pets/fashion) §13 follow-up
-```
-Also update `**Последнее обновление:**` to `2026-06-29`.
-
-- [ ] **Step 2: Update MASTER_TODO.md §8 matrix row for PRD 62**
-
-Find the row for `62` in the §8 feature matrix. Update its status to reflect partial progress: key-specs/doc-badges/KB-block done; non-transport KB follow-up.
-
-- [ ] **Step 3: Commit docs**
-
-```bash
-git add docs/MASTER_TODO.md docs/features/62-listing-detail-per-category.md
-git commit -m "docs(62-status): mark key-specs/doc-badges/KB-block done; non-transport KB §13 follow-up"
-```
+The original plan ended by updating a now-retired tracker. That instruction has been removed. Any remaining requirement or implementation evidence must be reconciled through `docs/MASTER_PRODUCTION_TZ.md`; subordinate PRD headers do not carry current status.
 
 ---
 

@@ -259,8 +259,7 @@ const channel = supabase
 ## 🔗 Related Docs
 
 **Domains:** [chat.md](../domains/chat.md)
-**Development:** [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [deep-audit-20251108.md](./deep-audit-20251108.md) • [database-schema.md](./database-schema.md) • [README.md](./README.md)
-
+**Development:** [Production master](../MASTER_PRODUCTION_TZ.md) • [deep-audit-20251108.md](./deep-audit-20251108.md) • [database-schema.md](./database-schema.md) • [README.md](./README.md)
 
 
 

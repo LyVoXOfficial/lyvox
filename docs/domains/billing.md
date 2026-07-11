@@ -6,7 +6,7 @@ last_sync: 2025-10-28
 - Платные бусты объявлений, премиум-резерв, скрытие номера и другие платные опции.
 - Интеграция со Stripe (или альтернативным PSP) для платежей и чеков.
 - Требует чётких правил возвратов и антикража (chargeback handling).
-- Связанные документы: [domains/adverts.md](./adverts.md), [requirements.md](../requirements.md), [PLAN.md](../PLAN.md).
+- Связанные документы: [domains/adverts.md](./adverts.md), [requirements.md](../requirements.md), [Production master](../MASTER_PRODUCTION_TZ.md).
 
 ## Data Model (proposed)
 - `public.products` (`id`, `code`, `name`, `price_cents`, `currency`, `active`)
@@ -27,9 +27,9 @@ last_sync: 2025-10-28
 - Привязка к объявлениям (буст/скрытие номера) через `benefits`.
 - UI индикаторы буста/премиума в карточке объявления.
 
-## Improvements & TODO Links
-- TODO.md: добавить RFC на продукты/бенефиты, webhook‑безопасность и reconciliation job.
-- PLAN.md: добавить этап “Monetization rollout” после Production.
+## Candidate improvements
+
+Исторические идеи: RFC на продукты/бенефиты, webhook-безопасность, reconciliation job и этап Monetization rollout. Исполнять только после включения в [Production master](../MASTER_PRODUCTION_TZ.md).
 
 ## Change Log
 - 2025-10-28: Initial RFC for monetization.
@@ -38,4 +38,4 @@ last_sync: 2025-10-28
 
 ## 🔗 Related Docs
 
-**Development:** [billing-subscriptions.md](../development/billing-subscriptions.md) • [database-schema.md](../development/database-schema.md) • [MASTER_CHECKLIST.md](../development/MASTER_CHECKLIST.md) • [deep-audit-20251108.md](../development/deep-audit-20251108.md) • [backend-logic.md](../development/backend-logic.md)
+**Development:** [billing-subscriptions.md](../development/billing-subscriptions.md) • [database-schema.md](../development/database-schema.md) • [Production master](../MASTER_PRODUCTION_TZ.md) • [deep-audit-20251108.md](../development/deep-audit-20251108.md) • [backend-logic.md](../development/backend-logic.md)

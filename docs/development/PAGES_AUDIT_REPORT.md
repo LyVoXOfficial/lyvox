@@ -313,9 +313,8 @@ Test all pages with German locale:
 
 ## 🔗 Related Docs
 
-**Development:** [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [README.md](./README.md)
+**Development:** [Production master](../MASTER_PRODUCTION_TZ.md) • [README.md](./README.md)
 **Catalog:** [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md) • [CATALOG_IMPLEMENTATION_STATUS.md](../catalog/CATALOG_IMPLEMENTATION_STATUS.md) • [FINAL_COMPLETION_REPORT.md](../catalog/FINAL_COMPLETION_REPORT.md)
-
 
 
 

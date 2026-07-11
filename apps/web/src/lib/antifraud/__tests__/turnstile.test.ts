@@ -60,8 +60,14 @@ describe("verifyTurnstile", () => {
     const resultNull = await verifyTurnstile(null);
     const resultUndefined = await verifyTurnstile(undefined);
 
-    expect(resultNull).toEqual({ ok: false, codes: ["missing-input-response"] });
-    expect(resultUndefined).toEqual({ ok: false, codes: ["missing-input-response"] });
+    expect(resultNull).toEqual({
+      ok: false,
+      codes: ["missing-input-response"],
+    });
+    expect(resultUndefined).toEqual({
+      ok: false,
+      codes: ["missing-input-response"],
+    });
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
@@ -101,5 +107,83 @@ describe("verifyTurnstile", () => {
 
     const [, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
     expect(init.body).toContain("remoteip=10.0.0.1");
+  });
+
+  it("fails closed without a secret when the caller marks Turnstile required", async () => {
+    vi.stubEnv("TURNSTILE_SECRET_KEY", "");
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const result = await verifyTurnstile("some-token", null, {
+      required: true,
+    });
+
+    expect(result).toEqual({ ok: false, codes: ["missing-input-secret"] });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("rejects tokens larger than Cloudflare's documented limit without a network call", async () => {
+    vi.stubEnv("TURNSTILE_SECRET_KEY", "test-secret");
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const result = await verifyTurnstile("x".repeat(2_049));
+
+    expect(result).toEqual({
+      ok: false,
+      codes: ["invalid-input-response"],
+    });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("requires the expected action and hostname when supplied", async () => {
+    vi.stubEnv("TURNSTILE_SECRET_KEY", "test-secret");
+    const fetchSpy = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        success: true,
+        action: "access_gate_unlock",
+        hostname: "www.lyvox.be",
+      }),
+    });
+    vi.stubGlobal("fetch", fetchSpy);
+
+    await expect(
+      verifyTurnstile("token", null, {
+        required: true,
+        expectedAction: "access_gate_unlock",
+        expectedHostname: "www.lyvox.be",
+      }),
+    ).resolves.toEqual({ ok: true });
+
+    fetchSpy.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        success: true,
+        action: "register",
+        hostname: "www.lyvox.be",
+      }),
+    });
+    await expect(
+      verifyTurnstile("token", null, {
+        expectedAction: "access_gate_unlock",
+        expectedHostname: "www.lyvox.be",
+      }),
+    ).resolves.toEqual({ ok: false, codes: ["action-mismatch"] });
+
+    fetchSpy.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        success: true,
+        action: "access_gate_unlock",
+        hostname: "evil.example",
+      }),
+    });
+    await expect(
+      verifyTurnstile("token", null, {
+        expectedAction: "access_gate_unlock",
+        expectedHostname: "www.lyvox.be",
+      }),
+    ).resolves.toEqual({ ok: false, codes: ["hostname-mismatch"] });
   });
 });

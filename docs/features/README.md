@@ -78,5 +78,5 @@
 ## Как пользоваться
 - Каждый документ — самостоятельный PRD по [`_TEMPLATE.md`](./_TEMPLATE.md).
 - Зависимости указаны в шапке каждого PRD (например, «Споры» зависят от «Escrow»).
-- Источник продуктовой правды верхнего уровня: [`../PROJECT_VISION_AND_TZ.md`](../PROJECT_VISION_AND_TZ.md) и [`../COMPETITIVE_STRATEGY.md`](../COMPETITIVE_STRATEGY.md).
+- Единственный источник продуктового scope, приоритетов и production-статуса верхнего уровня: [`../MASTER_PRODUCTION_TZ.md`](../MASTER_PRODUCTION_TZ.md). Vision, strategy и PRD ниже являются вспомогательным контекстом и действуют только в пределах ссылок из master.
 - Статусы здесь — снимок на дату; при реализации обновляем и таблицу, и шапку PRD.

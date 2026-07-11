@@ -4,8 +4,11 @@ import { unstable_cache, revalidateTag } from "next/cache";
 import { supabaseService } from "@/lib/supabaseService";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { loadCatalogGroups } from "@/lib/catalog/loadCatalogGroups";
-import { detectCategoryType, type CategoryType } from "@/lib/utils/categoryDetector";
-import { isCapabilityEnabled } from "@/lib/capabilities";
+import {
+  detectCategoryType,
+  type CategoryType,
+} from "@/lib/utils/categoryDetector";
+import { getIntegrationStatus } from "@/lib/integrations/registry";
 import {
   buildAdvertSourceHash,
   resolveAdvertSourceLocale,
@@ -13,7 +16,10 @@ import {
 import type { Locale } from "@/lib/i18n";
 import type { Tables } from "@/lib/supabaseTypes";
 import type { BusinessPublicData } from "@/components/business/TraderPanel";
-import type { CatalogFieldDefinition, CatalogSchemaGroup } from "@/catalog/renderer/types";
+import type {
+  CatalogFieldDefinition,
+  CatalogSchemaGroup,
+} from "@/catalog/renderer/types";
 
 // PERF-01: single source of truth for the (viewer-independent) advert-detail
 // payload. This is wrapped in `unstable_cache` so warm requests skip the ~18
@@ -142,9 +148,6 @@ export type VehicleGeneration = {
   vehicle_generation_i18n?: Array<{
     locale: string;
     summary: string | null;
-    pros: string[] | null;
-    cons: string[] | null;
-    inspection_tips: string[] | null;
   }>;
 };
 
@@ -225,7 +228,11 @@ export type SimilarAdvertItem = {
 
 // Raw similar-advert row: media kept as paths so the page can batch-sign them.
 export type SimilarAdvertRaw = Omit<SimilarAdvertItem, "image"> & {
-  media: Array<{ url: string | null; preview_url: string | null; sort: number | null }>;
+  media: Array<{
+    url: string | null;
+    preview_url: string | null;
+    sort: number | null;
+  }>;
 };
 
 function normalizeNullableNumber(value: unknown): number | null {
@@ -287,7 +294,9 @@ export function determineGeneration(
   }
 
   // Backward compat: try JSONB specifics.generation_id (pre-F7 records).
-  const jsonbId = specifics.generation_id ? String(specifics.generation_id) : null;
+  const jsonbId = specifics.generation_id
+    ? String(specifics.generation_id)
+    : null;
   if (jsonbId) {
     const match = generations.find((g) => g.id === jsonbId);
     if (match) return match;
@@ -323,22 +332,32 @@ async function loadVehicleInsights(
 
   const base = Array.isArray(data) ? data[0] : null;
   if (error || !base) {
-    if (error) console.warn("Failed to load vehicle insights", { generationId, error });
+    if (error)
+      console.warn("Failed to load vehicle insights", { generationId, error });
     return null;
   }
 
   const normalizedBase: VehicleInsights = {
     ...(base as VehicleInsights),
-    reliability_score: normalizeNullableNumber((base as VehicleInsights).reliability_score),
-    popularity_score: normalizeNullableNumber((base as VehicleInsights).popularity_score),
+    reliability_score: normalizeNullableNumber(
+      (base as VehicleInsights).reliability_score,
+    ),
+    popularity_score: normalizeNullableNumber(
+      (base as VehicleInsights).popularity_score,
+    ),
   };
 
   const { data: translations } = await client
     .from("vehicle_generation_insights_i18n")
-    .select("locale, pros, cons, inspection_tips, notable_features, engine_examples, common_issues")
+    .select(
+      "locale, pros, cons, inspection_tips, notable_features, engine_examples, common_issues",
+    )
     .eq("generation_id", generationId);
 
-  return { ...normalizedBase, vehicle_generation_insights_i18n: translations ?? [] };
+  return {
+    ...normalizedBase,
+    vehicle_generation_insights_i18n: translations ?? [],
+  };
 }
 
 /**
@@ -361,8 +380,13 @@ export async function loadAdvertDetailCore(
     // Do NOT return null: unstable_cache memoizes a resolved null for the whole
     // revalidate window. THROW so the failure is never cached and the next
     // request retries (matches the old uncached loader's self-healing).
-    console.error("loadAdvertDetailCore: service client unavailable", { advertId, error });
-    throw error instanceof Error ? error : new Error("advertDetail: service client unavailable");
+    console.error("loadAdvertDetailCore: service client unavailable", {
+      advertId,
+      error,
+    });
+    throw error instanceof Error
+      ? error
+      : new Error("advertDetail: service client unavailable");
   }
 
   cacheLog("core:cold-load", { advertId, locale, onlyActive });
@@ -378,7 +402,11 @@ export async function loadAdvertDetailCore(
         )
         .eq("id", advertId)
         .limit(1),
-      svc.from("ad_item_specifics").select("specifics").eq("advert_id", advertId).limit(1),
+      svc
+        .from("ad_item_specifics")
+        .select("specifics")
+        .eq("advert_id", advertId)
+        .limit(1),
       svc
         .from("media")
         .select("id,url,preview_url,sort,w,h")
@@ -398,16 +426,26 @@ export async function loadAdvertDetailCore(
     if (advertRes.error) {
       // Transient DB error (pooler drop / timeout). Throw, don't return null —
       // a cached null would 404 a LIVE listing for the full revalidate window.
-      console.error("Failed to load advert record", { advertId, error: advertRes.error });
-      throw new Error(`advertDetail: advert query failed: ${advertRes.error.message}`);
+      console.error("Failed to load advert record", {
+        advertId,
+        error: advertRes.error,
+      });
+      throw new Error(
+        `advertDetail: advert query failed: ${advertRes.error.message}`,
+      );
     }
     // Genuine absent / inactive → null IS cacheable (a real 404 for the public
     // cache; drafts are then loaded uncached + owner-gated by getAdvertDetail).
     if (!advert) return null;
     if (onlyActive && advert.status !== "active") return null;
 
-    const specificsRecord = Array.isArray(specificsRes.data) ? specificsRes.data[0] : null;
-    const specifics = ((specificsRecord as any)?.specifics ?? {}) as Record<string, any>;
+    const specificsRecord = Array.isArray(specificsRes.data)
+      ? specificsRes.data[0]
+      : null;
+    const specifics = ((specificsRecord as any)?.specifics ?? {}) as Record<
+      string,
+      any
+    >;
 
     const media: RawMediaItem[] = (
       (mediaRes.data as RawMediaItem[] | null) ?? []
@@ -420,9 +458,15 @@ export async function loadAdvertDetailCore(
       h: row.h ?? null,
     }));
 
-    const benefits = ((benefitsRes.data as Array<{ benefit_type: string; valid_until: string }>) ?? []).map(
-      (b) => ({ benefit_type: b.benefit_type, valid_until: b.valid_until }),
-    );
+    const benefits = (
+      (benefitsRes.data as Array<{
+        benefit_type: string;
+        valid_until: string;
+      }>) ?? []
+    ).map((b) => ({
+      benefit_type: b.benefit_type,
+      valid_until: b.valid_until,
+    }));
 
     // Derived inputs for wave 1.
     const makeId = specifics.make_id ? String(specifics.make_id) : null;
@@ -431,8 +475,11 @@ export async function loadAdvertDetailCore(
     const optionCategories = extractReferencedOptionCategories(specifics);
 
     const sourceLocale = resolveAdvertSourceLocale(advert.content_locale);
+    const translationCapability = await getIntegrationStatus(
+      "advert_translations",
+    );
     const wantsTranslation =
-      isCapabilityEnabled("advert_translations") && locale !== sourceLocale;
+      translationCapability.effective && locale !== sourceLocale;
     const sourceHash = wantsTranslation ? buildAdvertSourceHash(advert) : null;
 
     // ── Wave 1: everything derivable from the advert row + specifics ───────
@@ -465,7 +512,9 @@ export async function loadAdvertDetailCore(
       advert.category_id
         ? svc
             .from("categories")
-            .select("path, slug, level, name_en, name_nl, name_fr, name_de, name_ru")
+            .select(
+              "path, slug, level, name_en, name_nl, name_fr, name_de, name_ru",
+            )
             .eq("id", advert.category_id)
             .limit(1)
         : Promise.resolve({ data: null, error: null } as const),
@@ -474,7 +523,11 @@ export async function loadAdvertDetailCore(
         .select("display_name, verified_email, verified_phone, created_at")
         .eq("id", advert.user_id)
         .limit(1),
-      svc.from("trust_score").select("score").eq("user_id", advert.user_id).limit(1),
+      svc
+        .from("trust_score")
+        .select("score")
+        .eq("user_id", advert.user_id)
+        .limit(1),
       svc
         .from("adverts")
         .select("id", { head: true, count: "exact" })
@@ -522,7 +575,7 @@ export async function loadAdvertDetailCore(
         ? svc
             .from("vehicle_generations")
             .select(
-              "id, model_id, code, start_year, end_year, facelift, summary, production_countries, vehicle_generation_i18n(locale, summary, pros, cons, inspection_tips)",
+              "id, model_id, code, start_year, end_year, facelift, summary, production_countries, vehicle_generation_i18n(locale, summary)",
             )
             .eq("model_id", modelId)
             .order("start_year", { ascending: true })
@@ -530,7 +583,9 @@ export async function loadAdvertDetailCore(
       optionCategories.length
         ? svc
             .from("vehicle_options")
-            .select("id, category, code, name_en, name_nl, name_fr, name_de, name_ru")
+            .select(
+              "id, category, code, name_en, name_nl, name_fr, name_de, name_ru",
+            )
             .in("category", optionCategories)
             .order("category", { ascending: true })
             .order("name_en", { ascending: true })
@@ -540,13 +595,15 @@ export async function loadAdvertDetailCore(
     // Translation
     let translation: AdvertTranslationRecord | null = null;
     if (!translationRes.error && Array.isArray(translationRes.data)) {
-      translation = (translationRes.data[0] as AdvertTranslationRecord | undefined) ?? null;
+      translation =
+        (translationRes.data[0] as AdvertTranslationRecord | undefined) ?? null;
     }
 
     // Category + breadcrumbs (breadcrumbs need category.path → wave 2)
-    const category = (
-      Array.isArray(categoryRes.data) ? (categoryRes.data[0] as CategorySummary | undefined) : undefined
-    ) ?? null;
+    const category =
+      (Array.isArray(categoryRes.data)
+        ? (categoryRes.data[0] as CategorySummary | undefined)
+        : undefined) ?? null;
 
     // Seller
     const profile = Array.isArray(profileRes.data) ? profileRes.data[0] : null;
@@ -561,21 +618,37 @@ export async function loadAdvertDetailCore(
       activeAdverts: activeCountRes.count ?? 0,
     };
 
-    const businessData = (businessRes.data as BusinessPublicData | null) ?? null;
+    const businessData =
+      (businessRes.data as BusinessPublicData | null) ?? null;
 
-    const make = (Array.isArray(makeRes.data) ? (makeRes.data[0] as VehicleMake) : null) ?? null;
-    const model = (Array.isArray(modelRes.data) ? (modelRes.data[0] as VehicleModel) : null) ?? null;
-    const color = (Array.isArray(colorRes.data) ? (colorRes.data[0] as VehicleColor) : null) ?? null;
-    const generations = (
+    const make =
+      (Array.isArray(makeRes.data) ? (makeRes.data[0] as VehicleMake) : null) ??
+      null;
+    const model =
+      (Array.isArray(modelRes.data)
+        ? (modelRes.data[0] as VehicleModel)
+        : null) ?? null;
+    const color =
+      (Array.isArray(colorRes.data)
+        ? (colorRes.data[0] as VehicleColor)
+        : null) ?? null;
+    const generations =
       !generationsRes.error && Array.isArray(generationsRes.data)
         ? (generationsRes.data as VehicleGeneration[])
-        : []
-    );
-    const vehicleOptions = ((optionsRes.data as VehicleOption[] | null) ?? []) as VehicleOption[];
+        : [];
+    const vehicleOptions = ((optionsRes.data as VehicleOption[] | null) ??
+      []) as VehicleOption[];
 
-    const selectedGeneration = determineGeneration(generations, specifics, advert.generation_id);
+    const selectedGeneration = determineGeneration(
+      generations,
+      specifics,
+      advert.generation_id,
+    );
     const insightsGenerationId =
-      advert.generation_id ?? specifics.generation_id ?? selectedGeneration?.id ?? null;
+      advert.generation_id ??
+      specifics.generation_id ??
+      selectedGeneration?.id ??
+      null;
 
     // Domain drives both catalog schema and the page's JSON-LD/spec renderers.
     const listingDomain: CategoryType = make
@@ -595,17 +668,24 @@ export async function loadAdvertDetailCore(
       crumbPaths.length
         ? svc
             .from("categories")
-            .select("path, slug, level, name_en, name_nl, name_fr, name_de, name_ru")
+            .select(
+              "path, slug, level, name_en, name_nl, name_fr, name_de, name_ru",
+            )
             .in("path", crumbPaths)
         : Promise.resolve({ data: null, error: null } as const),
       insightsGenerationId
         ? loadVehicleInsights(svc, String(insightsGenerationId))
         : Promise.resolve(null),
-      loadCatalogGroups(listingDomain, svc).catch(() => ({ groups: [], fields: {} })),
+      loadCatalogGroups(listingDomain, svc).catch(() => ({
+        groups: [],
+        fields: {},
+      })),
     ]);
 
     const categoryBreadcrumbs = Array.isArray(breadcrumbsRes.data)
-      ? (breadcrumbsRes.data as CategorySummary[]).sort((a, b) => (a.level ?? 0) - (b.level ?? 0))
+      ? (breadcrumbsRes.data as CategorySummary[]).sort(
+          (a, b) => (a.level ?? 0) - (b.level ?? 0),
+        )
       : [];
 
     return {
@@ -650,7 +730,10 @@ export function getCachedActiveAdvertDetail(
   return unstable_cache(
     () => loadAdvertDetailCore(advertId, locale, true),
     ["advert-detail", advertId, locale],
-    { revalidate: ADVERT_DETAIL_REVALIDATE_SECONDS, tags: ["advert", advertCacheTag(advertId)] },
+    {
+      revalidate: ADVERT_DETAIL_REVALIDATE_SECONDS,
+      tags: ["advert", advertCacheTag(advertId)],
+    },
   )();
 }
 
@@ -708,7 +791,8 @@ async function loadSimilarAdvertsRaw(
       .limit(8);
 
     if (error || !data) {
-      if (error) console.warn("Failed to load similar adverts", { advertId, error });
+      if (error)
+        console.warn("Failed to load similar adverts", { advertId, error });
       return [];
     }
 
@@ -749,7 +833,10 @@ async function loadSimilarAdvertsRaw(
         : [],
     }));
   } catch (error) {
-    console.warn("Failed to load similar adverts (unexpected)", { advertId, error });
+    console.warn("Failed to load similar adverts (unexpected)", {
+      advertId,
+      error,
+    });
     return [];
   }
 }

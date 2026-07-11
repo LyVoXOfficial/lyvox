@@ -1895,7 +1895,7 @@ When adding new categories:
 7. Add validation rules
 8. Update i18n strings
 9. Write tests
-10. Update MASTER_CHECKLIST.md
+10. Update Production evidence/status only when required by `docs/MASTER_PRODUCTION_TZ.md`
 
 ---
 
@@ -1905,5 +1905,5 @@ When adding new categories:
 
 ## 🔗 Related Docs
 
-**Development:** [MASTER_CHECKLIST.md](../development/MASTER_CHECKLIST.md) • [deep-audit-20251108.md](../development/deep-audit-20251108.md)
+**Development:** [Production master](../MASTER_PRODUCTION_TZ.md) • [deep-audit-20251108.md](../development/deep-audit-20251108.md)
 **Catalog:** [FINAL_COMPLETION_REPORT.md](./FINAL_COMPLETION_REPORT.md) • [CATALOG_IMPLEMENTATION_STATUS.md](./CATALOG_IMPLEMENTATION_STATUS.md) • [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md)

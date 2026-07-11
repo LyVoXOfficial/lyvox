@@ -2,26 +2,49 @@ import type { MetadataRoute } from "next";
 import { guides } from "@/lib/guides";
 import { localizedSitemapEntries } from "@/lib/seo/localizedUrls";
 import { supabaseService } from "@/lib/supabaseService";
+import { getAccessGateRuntime } from "@/lib/security/accessGate";
 
 export const revalidate = 3600; // rebuild at most once per hour
 
 const STATIC_ROUTES: MetadataRoute.Sitemap = [
   ...localizedSitemapEntries("/", { changeFrequency: "daily", priority: 1.0 }),
-  ...localizedSitemapEntries("/sell", { changeFrequency: "monthly", priority: 0.8 }),
-  ...localizedSitemapEntries("/guides", { changeFrequency: "monthly", priority: 0.7 }),
+  ...localizedSitemapEntries("/sell", {
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }),
+  ...localizedSitemapEntries("/guides", {
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }),
   ...guides.flatMap((guide) =>
     localizedSitemapEntries(`/guides/${guide.slug}`, {
       changeFrequency: "monthly",
       priority: 0.65,
     }),
   ),
-  ...localizedSitemapEntries("/legal/privacy", { changeFrequency: "yearly", priority: 0.2 }),
-  ...localizedSitemapEntries("/legal/terms", { changeFrequency: "yearly", priority: 0.2 }),
-  ...localizedSitemapEntries("/legal/cookies", { changeFrequency: "yearly", priority: 0.2 }),
-  ...localizedSitemapEntries("/legal/imprint", { changeFrequency: "yearly", priority: 0.2 }),
+  ...localizedSitemapEntries("/legal/privacy", {
+    changeFrequency: "yearly",
+    priority: 0.2,
+  }),
+  ...localizedSitemapEntries("/legal/terms", {
+    changeFrequency: "yearly",
+    priority: 0.2,
+  }),
+  ...localizedSitemapEntries("/legal/cookies", {
+    changeFrequency: "yearly",
+    priority: 0.2,
+  }),
+  ...localizedSitemapEntries("/legal/imprint", {
+    changeFrequency: "yearly",
+    priority: 0.2,
+  }),
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Closed production must not enumerate routes or touch marketplace data with
+  // service-role credentials merely because a crawler requested the sitemap.
+  if (getAccessGateRuntime().active) return [];
+
   const categoryRoutes: MetadataRoute.Sitemap = [];
   try {
     const supabase = await supabaseService();
@@ -29,12 +52,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // listing every empty leaf would ship thin/soft-404 pages to Google
     // (level-1 hubs stay regardless: they are the permanent IA skeleton).
     const [{ data: categories }, { data: stocked }] = await Promise.all([
-      supabase.from("categories").select("id, path, level").eq("is_active", true),
-      supabase.from("adverts").select("category_id").eq("status", "active").limit(5000),
+      supabase
+        .from("categories")
+        .select("id, path, level")
+        .eq("is_active", true),
+      supabase
+        .from("adverts")
+        .select("category_id")
+        .eq("status", "active")
+        .limit(5000),
     ]);
 
-    const stockedIds = new Set((stocked ?? []).map((a) => a.category_id).filter(Boolean));
-    const pathById = new Map((categories ?? []).map((c) => [c.id, c.path as string | null]));
+    const stockedIds = new Set(
+      (stocked ?? []).map((a) => a.category_id).filter(Boolean),
+    );
+    const pathById = new Map(
+      (categories ?? []).map((c) => [c.id, c.path as string | null]),
+    );
     const stockedPaths = [...stockedIds]
       .map((id) => pathById.get(id))
       .filter((p): p is string => Boolean(p));

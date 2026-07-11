@@ -3,6 +3,53 @@
     "title": "LyVoX",
     "description": "Marktplatz für Waren, Dienstleistungen und Immobilien"
   },
+  "access_gate": {
+    "meta_title": "LyVoX — Private Vorschau",
+    "meta_description": "LyVoX bereitet den öffentlichen Start in Belgien vor.",
+    "skip_to_content": "Zum Inhalt springen",
+    "status": "Private Vorschau",
+    "eyebrow": "Ein neuer Marktplatz für Belgien",
+    "title": "Ein ruhigerer Marktplatz nimmt Gestalt an.",
+    "body": "LyVoX wird für die erste öffentliche Veröffentlichung vorbereitet. Der Zugang ist vorerst auf Personen beschränkt, die den Dienst testen.",
+    "form_eyebrow": "Zugang auf Einladung",
+    "form_title": "Private Vorschau öffnen",
+    "form_body": "Verwenden Sie den Zugangscode, den das Testteam erhalten hat.",
+    "code_label": "Zugangscode",
+    "code_placeholder": "Zugangscode eingeben",
+    "security_check": "Sicherheitsprüfung",
+    "security_unavailable": "Die Sicherheitsprüfung konnte nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut.",
+    "reload": "Seite neu laden",
+    "submit": "LyVoX öffnen",
+    "privacy_note": "Der Code wird sicher geprüft. Das Zugriffscookie enthält ihn niemals.",
+    "invalid": "Dieser Zugangscode ist nicht gültig.",
+    "captcha": "Schließen Sie die Sicherheitsprüfung ab und versuchen Sie es erneut.",
+    "rate_limited": "Zu viele Versuche. Warten Sie einige Minuten und versuchen Sie es erneut.",
+    "unavailable": "Der private Zugang ist vorübergehend nicht verfügbar. Prüfen Sie die Serverkonfiguration.",
+    "unlocked_eyebrow": "Vorschau entsperrt",
+    "unlocked_title": "Dieser Browser kann auf LyVoX zugreifen.",
+    "unlocked_body": "Fahren Sie dort fort, wo Sie aufgehört haben, oder sperren Sie die Vorschau auf diesem Gerät erneut.",
+    "continue": "Weiter zu LyVoX",
+    "relock": "Vorschau sperren",
+    "footer": "In Belgien für lokales Kaufen und Verkaufen entwickelt.",
+    "build_label": "Private Version"
+  },
+  "account_recovery": {
+    "reset_title": "Neues Passwort festlegen",
+    "reset_body": "Verwenden Sie ein Passwort, das Sie bei keinem anderen Dienst nutzen.",
+    "new_password": "Neues Passwort",
+    "password_hint": "Mindestens 8 Zeichen und 3 davon: Großbuchstabe, Kleinbuchstabe, Zahl, Sonderzeichen.",
+    "confirm_password": "Neues Passwort bestätigen",
+    "password_weak": "Verwenden Sie mindestens 8 Zeichen und 3 davon: Großbuchstabe, Kleinbuchstabe, Zahl, Sonderzeichen.",
+    "password_mismatch": "Die Passwörter stimmen nicht überein.",
+    "update_failed": "Das Passwort konnte nicht aktualisiert werden. Fordern Sie einen neuen Wiederherstellungslink an und versuchen Sie es erneut.",
+    "updated_title": "Passwort aktualisiert",
+    "updated_body": "Ihre anderen Sitzungen wurden beendet. Melden Sie sich mit dem neuen Passwort erneut an.",
+    "updated_sessions_warning": "Das Passwort wurde geändert, aber LyVoX konnte nicht bestätigen, dass alle anderen Sitzungen beendet wurden. Prüfen Sie jetzt Ihre aktiven Sitzungen.",
+    "review_sessions": "Aktive Sitzungen prüfen",
+    "back_to_login": "Zurück zur Anmeldung",
+    "updating": "Passwort wird aktualisiert…",
+    "update_password": "Passwort aktualisieren"
+  },
   "nav": {
     "sell": "Verkaufen",
     "sign_in": "Anmelden",
@@ -28,6 +75,8 @@
     "payment_title": "Bereit für lokale Zahlungen",
     "payment_body": "Die Abrechnung unterstützt belgische Zahlungsmethoden über die Anbietereinstellungen.",
     "payment_action": "Abrechnung ansehen",
+    "contact_title": "Bewusst nur Kontakt",
+    "contact_body": "Vereinbaren Sie Zahlung und Übergabe direkt mit der anderen Person; LyVoX verwaltet kein Geld für den Artikel.",
     "report_title": "Verdächtige Angebote melden",
     "report_body": "Halten Sie Zahlungs- und Versandgespräche nach Möglichkeit innerhalb von LyVoX.",
     "report_action": "Support kontaktieren"
@@ -231,6 +280,7 @@
     "faq_title": "Häufige Fragen",
     "faq_q1": "Was kostet das Inserieren?",
     "faq_a1": "Eine normale Anzeige ist kostenlos. Optionale bezahlte Boosts erhöhen die Sichtbarkeit und sind immer als beworben gekennzeichnet.",
+    "faq_a1_contact": "Eine normale Anzeige ist kostenlos. Bezahlte Werbung ist in der aktuellen Kontaktversion nicht verfügbar.",
     "faq_q2": "Brauche ich ein Geschäftskonto?",
     "faq_a2": "Nein — Privatverkäufer bestätigen nur E-Mail und Telefon. Unternehmen werden über KBO/USt geprüft und erhalten ein öffentliches Händlerprofil.",
     "faq_q3": "Wie erreichen mich Käufer?",
@@ -255,9 +305,18 @@
         "intro": "Diese Checks helfen, bevor Sie zu einem Verkäufer fahren oder einen Artikel reservieren.",
         "category_label": "Anzeigen durchsuchen",
         "sections": [
-          { "heading": "Anzeige kritisch lesen", "body": "Unscharfe Fotos, kopierte Texte, sehr niedrige Preise oder Druck zur schnellen Entscheidung sind Warnzeichen." },
-          { "heading": "Verkäufersignale vergleichen", "body": "Achten Sie auf Profilalter, Verifizierung, frühere Anzeigen und klare Antworten auf normale Fragen." },
-          { "heading": "Vor dem Termin prüfen", "body": "Fragen Sie nach aktuellen Fotos, Seriennummern oder Dokumenten, wenn sie für den Artikel relevant sind." }
+          {
+            "heading": "Anzeige kritisch lesen",
+            "body": "Unscharfe Fotos, kopierte Texte, sehr niedrige Preise oder Druck zur schnellen Entscheidung sind Warnzeichen."
+          },
+          {
+            "heading": "Verkäufersignale vergleichen",
+            "body": "Achten Sie auf Profilalter, Verifizierung, frühere Anzeigen und klare Antworten auf normale Fragen."
+          },
+          {
+            "heading": "Vor dem Termin prüfen",
+            "body": "Fragen Sie nach aktuellen Fotos, Seriennummern oder Dokumenten, wenn sie für den Artikel relevant sind."
+          }
         ]
       },
       "car-pass-controleren-tweedehands-auto": {
@@ -265,9 +324,18 @@
         "intro": "In Belgien ist die Kilometerhistorie wichtig. Der Car-Pass gehört zu einer breiteren Fahrzeugprüfung.",
         "category_label": "Transportanzeigen ansehen",
         "sections": [
-          { "heading": "Dokument früh anfragen", "body": "Ein seriöser Verkäufer kann Kilometerstand, Wartung, Prüfung und Fahrzeugpapiere vor dem Besuch erklären." },
-          { "heading": "Daten abgleichen", "body": "Vergleichen Sie Kilometer, Fahrgestellnummer, Prüfunterlagen und Anzeige. Abweichungen brauchen eine klare Erklärung." },
-          { "heading": "Bei Tageslicht prüfen", "body": "Kontrollieren Sie Abnutzung, Warnleuchten, Reifen, Schlüssel und Papiere gemeinsam vor Ort." }
+          {
+            "heading": "Dokument früh anfragen",
+            "body": "Ein seriöser Verkäufer kann Kilometerstand, Wartung, Prüfung und Fahrzeugpapiere vor dem Besuch erklären."
+          },
+          {
+            "heading": "Daten abgleichen",
+            "body": "Vergleichen Sie Kilometer, Fahrgestellnummer, Prüfunterlagen und Anzeige. Abweichungen brauchen eine klare Erklärung."
+          },
+          {
+            "heading": "Bei Tageslicht prüfen",
+            "body": "Kontrollieren Sie Abnutzung, Warnleuchten, Reifen, Schlüssel und Papiere gemeinsam vor Ort."
+          }
         ]
       },
       "imei-serienummer-elektronica-checken": {
@@ -275,9 +343,18 @@
         "intro": "Telefone, Laptops und Tablets lassen sich besser prüfen, wenn Kennungen und Eigentumsnachweis vorliegen.",
         "category_label": "Elektronikanzeigen ansehen",
         "sections": [
-          { "heading": "Gerät und Nachweis abgleichen", "body": "Vergleichen Sie IMEI oder Seriennummer mit Einstellungen, Karton, Rechnung oder Garantieseite." },
-          { "heading": "Grundfunktionen testen", "body": "Prüfen Sie Laden, Kamera, Lautsprecher, Display, Kontosperre, Akku und Netzverbindung." },
-          { "heading": "Nachweise im Chat behalten", "body": "Fotos, Zusagen und Gerätedaten bleiben so mit Anzeige und Verkäufer verbunden." }
+          {
+            "heading": "Gerät und Nachweis abgleichen",
+            "body": "Vergleichen Sie IMEI oder Seriennummer mit Einstellungen, Karton, Rechnung oder Garantieseite."
+          },
+          {
+            "heading": "Grundfunktionen testen",
+            "body": "Prüfen Sie Laden, Kamera, Lautsprecher, Display, Kontosperre, Akku und Netzverbindung."
+          },
+          {
+            "heading": "Nachweise im Chat behalten",
+            "body": "Fotos, Zusagen und Gerätedaten bleiben so mit Anzeige und Verkäufer verbunden."
+          }
         ]
       },
       "veilige-afspraak-tweedehands-deal": {
@@ -285,9 +362,18 @@
         "intro": "Eine gute Übergabe ist öffentlich, ruhig und leicht abzubrechen, wenn der Artikel nicht passt.",
         "category_label": "Lokale Anzeigen ansehen",
         "sections": [
-          { "heading": "Öffentlichen Ort wählen", "body": "Treffen Sie sich tagsüber an einem belebten Ort mit Zeit für eine ruhige Prüfung." },
-          { "heading": "Anzeige bereithalten", "body": "Vergleichen Sie Anzeige, Chat und vereinbarten Preis direkt mit dem Artikel." },
-          { "heading": "Druck ernst nehmen", "body": "Plötzlicher Ortswechsel, verweigerte Prüfung oder Eile sind Gründe, den Termin zu beenden." }
+          {
+            "heading": "Öffentlichen Ort wählen",
+            "body": "Treffen Sie sich tagsüber an einem belebten Ort mit Zeit für eine ruhige Prüfung."
+          },
+          {
+            "heading": "Anzeige bereithalten",
+            "body": "Vergleichen Sie Anzeige, Chat und vereinbarten Preis direkt mit dem Artikel."
+          },
+          {
+            "heading": "Druck ernst nehmen",
+            "body": "Plötzlicher Ortswechsel, verweigerte Prüfung oder Eile sind Gründe, den Termin zu beenden."
+          }
         ]
       },
       "epc-attest-huren-kopen": {
@@ -295,9 +381,18 @@
         "intro": "Der Energieausweis hilft beim Vergleich, muss aber zur richtigen Immobilie passen.",
         "category_label": "Immobilienanzeigen ansehen",
         "sections": [
-          { "heading": "Ausweis anfragen", "body": "Adresse, Einheit, Datum und Nummer sollten mit Anzeige und Besichtigung übereinstimmen." },
-          { "heading": "Mit der Realität vergleichen", "body": "Prüfen Sie Fenster, Heizung, Dämmung und Renovierungsangaben während des Besuchs." },
-          { "heading": "Fragen schriftlich stellen", "body": "Chat-Antworten zu Arbeiten, Kosten oder Terminen lassen sich später leichter prüfen." }
+          {
+            "heading": "Ausweis anfragen",
+            "body": "Adresse, Einheit, Datum und Nummer sollten mit Anzeige und Besichtigung übereinstimmen."
+          },
+          {
+            "heading": "Mit der Realität vergleichen",
+            "body": "Prüfen Sie Fenster, Heizung, Dämmung und Renovierungsangaben während des Besuchs."
+          },
+          {
+            "heading": "Fragen schriftlich stellen",
+            "body": "Chat-Antworten zu Arbeiten, Kosten oder Terminen lassen sich später leichter prüfen."
+          }
         ]
       },
       "huurwaarborg-en-contract-controleren": {
@@ -305,9 +400,18 @@
         "intro": "Vergleichen Sie Vertrag, Identität und Besichtigung, bevor Sie sich für eine Mietwohnung entscheiden.",
         "category_label": "Mietanzeigen ansehen",
         "sections": [
-          { "heading": "Rolle der Kontaktperson prüfen", "body": "Klären Sie, ob die Person Eigentümer, Makler oder bevollmächtigt ist." },
-          { "heading": "Vertrag ruhig lesen", "body": "Adresse, Laufzeit, Miete, Kaution, Übergabeprotokoll, Kosten und Kündigung müssen klar sein." },
-          { "heading": "Eile vermeiden", "body": "Druck vor einer echten Besichtigung, fehlende Dokumente oder verschiedene Namen sind Warnzeichen." }
+          {
+            "heading": "Rolle der Kontaktperson prüfen",
+            "body": "Klären Sie, ob die Person Eigentümer, Makler oder bevollmächtigt ist."
+          },
+          {
+            "heading": "Vertrag ruhig lesen",
+            "body": "Adresse, Laufzeit, Miete, Kaution, Übergabeprotokoll, Kosten und Kündigung müssen klar sein."
+          },
+          {
+            "heading": "Eile vermeiden",
+            "body": "Druck vor einer echten Besichtigung, fehlende Dokumente oder verschiedene Namen sind Warnzeichen."
+          }
         ]
       },
       "fiets-kopen-framenummer-check": {
@@ -315,9 +419,18 @@
         "intro": "Eine lesbare Rahmennummer und eine schlüssige Verkäufergeschichte senken das Risiko.",
         "category_label": "Transportanzeigen ansehen",
         "sections": [
-          { "heading": "Rahmennummer finden", "body": "Fragen Sie nach der Stelle und vergleichen Sie sie mit Rechnung, Registrierung oder Fotos." },
-          { "heading": "Zustand prüfen", "body": "Bremsen, Licht, Akku bei E-Bikes, Schlüssel, Ladegerät und Preis sollten zusammenpassen." },
-          { "heading": "Fehlende Basics hinterfragen", "body": "Kein Schlüssel, kein Ladegerät oder entfernte Kennzeichen sind klare Stoppsignale." }
+          {
+            "heading": "Rahmennummer finden",
+            "body": "Fragen Sie nach der Stelle und vergleichen Sie sie mit Rechnung, Registrierung oder Fotos."
+          },
+          {
+            "heading": "Zustand prüfen",
+            "body": "Bremsen, Licht, Akku bei E-Bikes, Schlüssel, Ladegerät und Preis sollten zusammenpassen."
+          },
+          {
+            "heading": "Fehlende Basics hinterfragen",
+            "body": "Kein Schlüssel, kein Ladegerät oder entfernte Kennzeichen sind klare Stoppsignale."
+          }
         ]
       },
       "jobaanbieding-scam-herkennen": {
@@ -325,9 +438,18 @@
         "intro": "Echte Arbeitgeber können Rolle, Unternehmen und Ablauf ohne Umgehung normaler Checks erklären.",
         "category_label": "Jobanzeigen ansehen",
         "sections": [
-          { "heading": "Arbeitgeber prüfen", "body": "Vergleichen Sie Firmenname, Website, Standort, E-Mail-Domain und Aufgabenbeschreibung." },
-          { "heading": "Vage Aufgaben erkennen", "body": "Unklare Arbeit, unrealistische Vergütung oder Druck zum Plattformwechsel sind riskant." },
-          { "heading": "Ablauf nachvollziehbar halten", "body": "Interviewzeiten, Rolle und nächste Schritte sollten schriftlich festgehalten werden." }
+          {
+            "heading": "Arbeitgeber prüfen",
+            "body": "Vergleichen Sie Firmenname, Website, Standort, E-Mail-Domain und Aufgabenbeschreibung."
+          },
+          {
+            "heading": "Vage Aufgaben erkennen",
+            "body": "Unklare Arbeit, unrealistische Vergütung oder Druck zum Plattformwechsel sind riskant."
+          },
+          {
+            "heading": "Ablauf nachvollziehbar halten",
+            "body": "Interviewzeiten, Rolle und nächste Schritte sollten schriftlich festgehalten werden."
+          }
         ]
       },
       "huisdier-adoptie-advertentie-check": {
@@ -335,9 +457,18 @@
         "intro": "Bei Tieren zählen Wohlergehen, Dokumente und ein echter Besuch mehr als Geschwindigkeit.",
         "category_label": "Tieranzeigen ansehen",
         "sections": [
-          { "heading": "Nach dem Tier fragen", "body": "Alter, Gesundheit, Impfungen, Herkunft, Chip und Abgabegrund sollten klar sein." },
-          { "heading": "Umgebung ansehen", "body": "Ein Besuch zeigt Wohlergehen, Verhalten und ob Fotos zur Situation passen." },
-          { "heading": "Bei Druck stoppen", "body": "Dringende Geschichten, verweigerte Treffen oder unklare Dokumente rechtfertigen eine Meldung." }
+          {
+            "heading": "Nach dem Tier fragen",
+            "body": "Alter, Gesundheit, Impfungen, Herkunft, Chip und Abgabegrund sollten klar sein."
+          },
+          {
+            "heading": "Umgebung ansehen",
+            "body": "Ein Besuch zeigt Wohlergehen, Verhalten und ob Fotos zur Situation passen."
+          },
+          {
+            "heading": "Bei Druck stoppen",
+            "body": "Dringende Geschichten, verweigerte Treffen oder unklare Dokumente rechtfertigen eine Meldung."
+          }
         ]
       },
       "chat-signalen-verdachte-verkoper": {
@@ -345,9 +476,18 @@
         "intro": "Die Kommunikation zeigt oft, ob eine Anzeige zusätzliche Prüfung braucht.",
         "category_label": "Anzeigen durchsuchen",
         "sections": [
-          { "heading": "Wechselnde Geschichten beachten", "body": "Andere Orte, Namen, Artikeldetails oder Verkaufsgründe machen eine Anzeige weniger vertrauenswürdig." },
-          { "heading": "Konkrete Fragen stellen", "body": "Fragen Sie nach Zustand, Zubehör, Dokumenten, Seriennummer und Prüfmöglichkeit." },
-          { "heading": "Melden nutzen", "body": "Wenn der Chat manipulativ wirkt oder der Anzeige widerspricht, melden Sie ihn zur Prüfung." }
+          {
+            "heading": "Wechselnde Geschichten beachten",
+            "body": "Andere Orte, Namen, Artikeldetails oder Verkaufsgründe machen eine Anzeige weniger vertrauenswürdig."
+          },
+          {
+            "heading": "Konkrete Fragen stellen",
+            "body": "Fragen Sie nach Zustand, Zubehör, Dokumenten, Seriennummer und Prüfmöglichkeit."
+          },
+          {
+            "heading": "Melden nutzen",
+            "body": "Wenn der Chat manipulativ wirkt oder der Anzeige widerspricht, melden Sie ihn zur Prüfung."
+          }
         ]
       }
     }
@@ -1571,8 +1711,11 @@
     },
     "boost": {
       "title": "Ihre Anzeige Boosten",
-      "description": "Wählen Sie ein Boost-Paket, um die Sichtbarkeit Ihrer Anzeige zu erhöhen",
-      "features": "Höhere Sichtbarkeit in Suchergebnissen",
+      "description": "Prüfen Sie vor der Zahlung den genauen Vorteil, die Dauer und die MwSt.-Behandlung",
+      "features": "Anzeigenvorteil",
+      "duration_days": "{count} Tage",
+      "vat_inclusive": "MwSt. inbegriffen",
+      "vat_exclusive": "MwSt. nicht inbegriffen",
       "no_products": "Keine Boost-Produkte verfügbar"
     },
     "checkout": {
@@ -1638,7 +1781,7 @@
   "auth": {
     "backToMarketplace": "Zurück zum Marktplatz",
     "protectedAccess": "Geschützter Kontozugang",
-    "heroHeading": "Melden Sie sich an, um Anzeigen, Nachrichten und sichere Zahlungen zu verwalten.",
+    "heroHeading": "Melden Sie sich an, um Anzeigen, Nachrichten und gespeicherte Einträge zu verwalten.",
     "heroSubtitle": "Verwenden Sie Passwort, Magic Link oder OAuth. Wir halten Kontoaktionen übersichtlich und bringen Sie genau zu der Marktplatz-Aufgabe zurück, die Sie begonnen haben.",
     "featureSellerTools": "Tools für verifizierte Verkäufer",
     "featureSavedListings": "Gespeicherte Anzeigen",
@@ -1909,7 +2052,6 @@
     "view_results": "Ergebnisse ansehen",
     "alerts": "Benachrichtigungen",
     "alert_frequency": "Benachrichtigen",
-    "alert_instant": "Sofort",
     "alert_daily": "Täglich",
     "alert_off": "Aus",
     "delete": "Löschen",
@@ -1919,7 +2061,7 @@
     "signin_prompt": "Melden Sie sich an, um Suchen geräteübergreifend zu speichern und Benachrichtigungen zu erhalten.",
     "alert_title": "Neue Treffer: {name}",
     "alert_body": "{count} neue Anzeige(n) passen zu Ihrer gespeicherten Suche.",
-    "emptyDesc": "Speichere eine Suche und werde benachrichtigt, sobald ein Treffer erscheint.",
+    "emptyDesc": "Speichere eine Suche und erhalte täglich eine Benachrichtigung bei neuen Treffern.",
     "startSearch": "Suche starten"
   },
   "pro": {
@@ -1934,7 +2076,7 @@
     "submit_label": "Registrierung einreichen",
     "intro": {
       "heading": "Unternehmensidentität",
-      "body": "Registrieren Sie Ihr Unternehmen auf LyVoX für professionelle Verkäuferfunktionen, ein verifiziertes Unternehmensabzeichen und vollständige Compliance mit dem belgischen Verbraucherrecht.",
+      "body": "Erstellen Sie ein Händlerprofil und hinterlegen Sie die für Käufer wichtigen Unternehmensdaten. Verifizierung und Rechtsstatus werden getrennt angezeigt.",
       "requires_phone": "Eine verifizierte Telefonnummer ist erforderlich, um professioneller Verkäufer zu werden."
     },
     "identity": {
@@ -2035,6 +2177,7 @@
       "pending_invite": "Einladung ausstehend",
       "unnamed_member": "Mitglied",
       "upgrade_heading": "Auf Pro upgraden",
+      "active_heading": "Pro aktiv",
       "upgrade_body": "Schalten Sie erweiterte Verkäuferfunktionen mit einem Pro-Abonnement frei.",
       "upgrade": {
         "cta": "Auf Pro upgraden",

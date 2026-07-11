@@ -19,15 +19,21 @@ afterEach(() => {
 
 describe("isHardFailEnv", () => {
   it("hard-fails on Vercel production", () => {
-    expect(isHardFailEnv({ VERCEL_ENV: "production", NODE_ENV: "production" })).toBe(true);
+    expect(
+      isHardFailEnv({ VERCEL_ENV: "production", NODE_ENV: "production" }),
+    ).toBe(true);
   });
 
   it("does NOT hard-fail on Vercel preview (previews may lack Upstash)", () => {
-    expect(isHardFailEnv({ VERCEL_ENV: "preview", NODE_ENV: "production" })).toBe(false);
+    expect(
+      isHardFailEnv({ VERCEL_ENV: "preview", NODE_ENV: "production" }),
+    ).toBe(false);
   });
 
   it("does NOT hard-fail on Vercel development", () => {
-    expect(isHardFailEnv({ VERCEL_ENV: "development", NODE_ENV: "production" })).toBe(false);
+    expect(
+      isHardFailEnv({ VERCEL_ENV: "development", NODE_ENV: "production" }),
+    ).toBe(false);
   });
 
   it("hard-fails on self-hosted production (no VERCEL_ENV)", () => {
@@ -48,7 +54,10 @@ describe("validateEnv", () => {
   });
 
   it("flags missing always-critical Supabase keys", () => {
-    const r = validateEnv({ ...FULL_PROD_ENV, SUPABASE_SERVICE_ROLE_KEY: undefined });
+    const r = validateEnv({
+      ...FULL_PROD_ENV,
+      SUPABASE_SERVICE_ROLE_KEY: undefined,
+    });
     expect(r.ok).toBe(false);
     expect(r.missingCritical).toContain("SUPABASE_SERVICE_ROLE_KEY");
   });
@@ -81,36 +90,76 @@ describe("validateEnv", () => {
   });
 
   it("warns on a present-but-invalid value without hard-failing (shape is advisory)", () => {
-    const r = validateEnv({ ...FULL_PROD_ENV, NEXT_PUBLIC_SUPABASE_URL: "not-a-url" });
+    const r = validateEnv({
+      ...FULL_PROD_ENV,
+      NEXT_PUBLIC_SUPABASE_URL: "not-a-url",
+    });
     // Presence is the boot gate; a malformed value is a warning, not a block.
     expect(r.missingCritical).toEqual([]);
     expect(r.ok).toBe(true);
-    expect(r.warnings.some((w) => w.includes("NEXT_PUBLIC_SUPABASE_URL") && w.includes("invalid"))).toBe(
-      true,
-    );
+    expect(
+      r.warnings.some(
+        (w) => w.includes("NEXT_PUBLIC_SUPABASE_URL") && w.includes("invalid"),
+      ),
+    ).toBe(true);
   });
 
   it("treats a whitespace-only critical value as missing (isBlank trims)", () => {
-    const r = validateEnv({ ...FULL_PROD_ENV, SUPABASE_SERVICE_ROLE_KEY: "   " });
+    const r = validateEnv({
+      ...FULL_PROD_ENV,
+      SUPABASE_SERVICE_ROLE_KEY: "   ",
+    });
     expect(r.missingCritical).toContain("SUPABASE_SERVICE_ROLE_KEY");
     expect(r.ok).toBe(false);
   });
 
   it("carries the hardFail decision derived from the env", () => {
     expect(validateEnv({ ...FULL_PROD_ENV }).hardFail).toBe(true);
-    expect(validateEnv({ ...FULL_PROD_ENV, VERCEL_ENV: "preview" }).hardFail).toBe(false);
+    expect(
+      validateEnv({ ...FULL_PROD_ENV, VERCEL_ENV: "preview" }).hardFail,
+    ).toBe(false);
+  });
+
+  it("warns that a Vercel preview remains locked when gate credentials are absent", () => {
+    const result = validateEnv({
+      VERCEL_ENV: "preview",
+      NODE_ENV: "production",
+      NEXT_PUBLIC_SUPABASE_URL: "https://x.supabase.co",
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: "anon",
+      SUPABASE_SERVICE_ROLE_KEY: "service",
+    });
+
+    expect(result.hardFail).toBe(false);
+    expect(
+      result.warnings.some((warning) =>
+        warning.includes("PRODUCTION_ACCESS_CODE"),
+      ),
+    ).toBe(true);
+    expect(
+      result.warnings.some((warning) =>
+        warning.includes("PRODUCTION_ACCESS_GATE_SECRET"),
+      ),
+    ).toBe(true);
   });
 
   it("SEC-ENV: warns when STRIPE_SECRET_KEY is a full-access key, not a restricted one", () => {
-    const r = validateEnv({ ...FULL_PROD_ENV, STRIPE_SECRET_KEY: "sk_live_abc123" });
+    const r = validateEnv({
+      ...FULL_PROD_ENV,
+      STRIPE_SECRET_KEY: "sk_live_abc123",
+    });
     expect(r.ok).toBe(true); // advisory only — never blocks boot
-    expect(r.warnings.some((w) => w.includes("STRIPE_SECRET_KEY") && w.includes("restricted"))).toBe(
-      true,
-    );
+    expect(
+      r.warnings.some(
+        (w) => w.includes("STRIPE_SECRET_KEY") && w.includes("restricted"),
+      ),
+    ).toBe(true);
   });
 
   it("SEC-ENV: does NOT warn when STRIPE_SECRET_KEY is already a restricted key", () => {
-    const r = validateEnv({ ...FULL_PROD_ENV, STRIPE_SECRET_KEY: "rk_live_abc123" });
+    const r = validateEnv({
+      ...FULL_PROD_ENV,
+      STRIPE_SECRET_KEY: "rk_live_abc123",
+    });
     expect(r.warnings.some((w) => w.includes("restricted"))).toBe(false);
   });
 });
@@ -129,7 +178,10 @@ describe("assertEnvOnBoot", () => {
   it("warns instead of throwing in development", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     expect(() =>
-      assertEnvOnBoot({ NODE_ENV: "development", NEXT_PUBLIC_SUPABASE_URL: undefined }),
+      assertEnvOnBoot({
+        NODE_ENV: "development",
+        NEXT_PUBLIC_SUPABASE_URL: undefined,
+      }),
     ).not.toThrow();
     expect(warn).toHaveBeenCalled();
   });

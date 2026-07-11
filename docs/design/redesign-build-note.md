@@ -1,3 +1,6 @@
+> [!CAUTION]
+> **Исторический cloud-design handoff. Не исполнять инструкции `pixel-by-pixel`, не копировать устаревший макет и не выполнять описанный здесь production deploy.** Текущие приоритеты задаёт [`docs/MASTER_PRODUCTION_TZ.md`](../MASTER_PRODUCTION_TZ.md), а обязательный визуальный контракт — [`docs/DESIGN_SYSTEM.md`](../DESIGN_SYSTEM.md). Содержимое ниже оставлено только для происхождения решений.
+
 # LyVoX UI Redesign (from cloud-design handoff) — Build Note
 
 **Goal:** recreate the cloud-design mockup **pixel-by-pixel** on the real Next.js pages. **Presentation only** —

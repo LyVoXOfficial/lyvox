@@ -20,7 +20,7 @@
  *           column (this is exactly how profiles-INSERT stayed open). The only migration-level lock is
  *           an explicit revoke, so we require one whenever a sensitive-column table gets a reachable
  *           write policy. Discriminator against service-managed tables: a write POLICY must exist.
- *   RULE-02 (privileged functions locked): every SECURITY DEFINER function with a uuid argument
+ *   RULE-02 (privileged functions locked): every SECURITY DEFINER function
  *           revokes EXECUTE from BOTH authenticated AND anon in the same migration (Supabase grants
  *           EXECUTE to authenticated+anon by default; `revoke ... from public` alone is NOT enough).
  *
@@ -55,6 +55,8 @@ export interface AuthzExemption {
    *  - unlocked-definer-fn   → function name (e.g. "is_business_member")
    */
   identifier: string;
+  /** Optional exact migration filename; scopes a historical exception so future redefinitions are still gated. */
+  migration?: string;
   /** > 10 chars. Why this historical exception is safe / intentional. */
   reason: string;
 }
@@ -177,13 +179,13 @@ export function normIdent(raw: string): string {
 
 const CREATE_TABLE_RE =
   /\bcreate\s+table\s+(?:if\s+not\s+exists\s+)?("?[\w.]+"?)/gi;
-const DROP_TABLE_RE =
-  /\bdrop\s+table\s+(?:if\s+exists\s+)?("?[\w.]+"?)/gi;
+const DROP_TABLE_RE = /\bdrop\s+table\s+(?:if\s+exists\s+)?("?[\w.]+"?)/gi;
 const ENABLE_RLS_RE =
   /\balter\s+table\s+(?:if\s+exists\s+)?(?:only\s+)?("?[\w.]+"?)\s+enable\s+row\s+level\s+security/gi;
 
 /** All grant statements: captures (privileges, object, roles). */
-const GRANT_RE = /\bgrant\s+([\s\S]*?)\s+on\s+([\s\S]*?)\s+to\s+([\s\S]*?)(?:;|$)/gi;
+const GRANT_RE =
+  /\bgrant\s+([\s\S]*?)\s+on\s+([\s\S]*?)\s+to\s+([\s\S]*?)(?:;|$)/gi;
 
 /** create [or replace] function NAME( — the `(` is consumed so we can balance from there. */
 const CREATE_FUNCTION_RE =
@@ -298,7 +300,7 @@ const TABLE_CONSTRAINT_KW =
 
 /** Map of table -> set of declared column names, from CREATE TABLE bodies + ALTER TABLE ADD COLUMN. */
 export function extractColumnsByTable(
-  cleanSql: string
+  cleanSql: string,
 ): Map<string, Set<string>> {
   const cols = new Map<string, Set<string>>();
   const add = (table: string, col: string) => {
@@ -309,7 +311,10 @@ export function extractColumnsByTable(
 
   for (const m of cleanSql.matchAll(CREATE_TABLE_RE)) {
     const table = m[1];
-    const openParen = cleanSql.indexOf("(", m.index! + m[0].length - table.length);
+    const openParen = cleanSql.indexOf(
+      "(",
+      m.index! + m[0].length - table.length,
+    );
     if (openParen === -1) continue;
     const body = readBalancedArgs(cleanSql, openParen);
     for (const raw of splitTopLevel(body)) {
@@ -340,13 +345,20 @@ export function extractWritePolicies(cleanSql: string): WritePolicy[] {
     const onM = /\bon\s+("?[\w.]+"?)/i.exec(stmt);
     if (!onM) continue;
     const table = normIdent(onM[1]);
-    const cmd = (/(\bfor\s+(insert|update|delete|select|all)\b)/i.exec(stmt)?.[2] ?? "all").toLowerCase();
-    const roles = (/\bto\s+([\s\S]*?)(?:\busing\b|\bwith\s+check\b|;)/i.exec(stmt)?.[1] ?? "public").trim();
+    const cmd = (
+      /(\bfor\s+(insert|update|delete|select|all)\b)/i.exec(stmt)?.[2] ?? "all"
+    ).toLowerCase();
+    const roles = (
+      /\bto\s+([\s\S]*?)(?:\busing\b|\bwith\s+check\b|;)/i.exec(stmt)?.[1] ??
+      "public"
+    ).trim();
     const usingExpr = /\busing\s*\(/i.exec(stmt);
     const checkExpr = /\bwith\s+check\s*\(/i.exec(stmt);
     let gate = "";
-    if (usingExpr) gate += " " + readBalancedArgs(stmt, stmt.indexOf("(", usingExpr.index));
-    if (checkExpr) gate += " " + readBalancedArgs(stmt, stmt.indexOf("(", checkExpr.index));
+    if (usingExpr)
+      gate += " " + readBalancedArgs(stmt, stmt.indexOf("(", usingExpr.index));
+    if (checkExpr)
+      gate += " " + readBalancedArgs(stmt, stmt.indexOf("(", checkExpr.index));
     out.push({ table, cmd, roles, gate: gate.trim() });
   }
   return out;
@@ -367,13 +379,29 @@ export interface AnalyzeResult {
 
 export function analyzeMigrations(
   files: PseudoMigration[],
-  exemptions: AuthzExemption[]
+  exemptions: AuthzExemption[],
 ): AnalyzeResult {
-  const exemptSet = new Set(
-    exemptions.map((e) => `${e.kind} ${e.identifier}`)
+  const globalExemptSet = new Set(
+    exemptions
+      .filter((exemption) => !exemption.migration)
+      .map((exemption) => `${exemption.kind}::${exemption.identifier}`),
   );
-  const isExempt = (kind: ViolationKind, identifier: string) =>
-    exemptSet.has(`${kind} ${identifier}`);
+  const scopedExemptSet = new Set(
+    exemptions
+      .filter((exemption) => exemption.migration)
+      .map(
+        (exemption) =>
+          `${exemption.kind}::${exemption.identifier}::${exemption.migration}`,
+      ),
+  );
+  const isExempt = (
+    kind: ViolationKind,
+    identifier: string,
+    migration?: string,
+  ) =>
+    globalExemptSet.has(`${kind}::${identifier}`) ||
+    (migration !== undefined &&
+      scopedExemptSet.has(`${kind}::${identifier}::${migration}`));
 
   const created = new Map<string, string>(); // table -> first migration that created it
   const dropped = new Set<string>();
@@ -411,15 +439,20 @@ export function analyzeMigrations(
       if (!writePoliciesByTable.has(wp.table))
         writePoliciesByTable.set(wp.table, []);
       writePoliciesByTable.get(wp.table)!.push(wp);
-      if (!policySourceMig.has(wp.table)) policySourceMig.set(wp.table, file.name);
+      if (!policySourceMig.has(wp.table))
+        policySourceMig.set(wp.table, file.name);
     }
     for (const rm of clean.matchAll(REVOKE_TABLE_RE)) {
       const privs = rm[1].toLowerCase();
       const table = normIdent(rm[2]);
       const roles = rm[3];
       // We only care about revokes that pull the default table-wide write from authenticated.
-      if (/\bon\s+function\b/i.test(rm[0]) || /\bfunction\b/.test(rm[2])) continue;
-      if (!rolesInclude(roles, "authenticated") && !rolesInclude(roles, "public"))
+      if (/\bon\s+function\b/i.test(rm[0]) || /\bfunction\b/.test(rm[2]))
+        continue;
+      if (
+        !rolesInclude(roles, "authenticated") &&
+        !rolesInclude(roles, "public")
+      )
         continue;
       const ops: string[] = [];
       if (/\ball\b/.test(privs)) ops.push("insert", "update");
@@ -434,10 +467,14 @@ export function analyzeMigrations(
       const object = m[2].toLowerCase();
       const roleList = m[3];
       // Skip function-execute grants (handled by RULE-02); those have `on function`.
-      if (/\bon\s+function\b/i.test(`on ${object}`) || /\bfunction\b/.test(object))
+      if (
+        /\bon\s+function\b/i.test(`on ${object}`) ||
+        /\bfunction\b/.test(object)
+      )
         continue;
       const toAuthOrAnon =
-        rolesInclude(roleList, "authenticated") || rolesInclude(roleList, "anon");
+        rolesInclude(roleList, "authenticated") ||
+        rolesInclude(roleList, "anon");
       if (!toAuthOrAnon) continue;
 
       // Blanket "on all tables in schema ..." is always a table-wide hazard.
@@ -447,13 +484,18 @@ export function analyzeMigrations(
       // Resolve the target table name for the allowlist key.
       const tableName = blanket
         ? "*all-tables*"
-        : normIdent(object.replace(/^table\s+/i, "").trim().split(/\s|,/)[0]);
+        : normIdent(
+            object
+              .replace(/^table\s+/i, "")
+              .trim()
+              .split(/\s|,/)[0],
+          );
       const role = rolesInclude(roleList, "anon") ? "anon" : "authenticated";
       const priv = /\ball\b/i.test(privClause)
         ? "all"
         : /\binsert\b/i.test(privClause)
-        ? "insert"
-        : "update";
+          ? "insert"
+          : "update";
       const identifier = `${tableName}:${priv}:${role}`;
       if (isExempt("table-wide-grant", identifier)) continue;
 
@@ -467,7 +509,7 @@ export function analyzeMigrations(
       });
     }
 
-    // RULE-02: SECURITY DEFINER functions with a uuid arg must revoke execute from
+    // RULE-02: every SECURITY DEFINER function must revoke execute from
     // authenticated AND anon IN THE SAME migration (and not re-grant it).
     const definerFns = extractDefinerFns(clean);
     if (definerFns.length) {
@@ -476,28 +518,23 @@ export function analyzeMigrations(
         const fn = normIdent(rm[1]);
         revokedRolesByFn.set(
           fn,
-          (revokedRolesByFn.get(fn) || "") + " " + rm[2].toLowerCase()
+          (revokedRolesByFn.get(fn) || "") + " " + rm[2].toLowerCase(),
         );
       }
       const regrantedFns = new Set<string>();
       for (const gm of clean.matchAll(GRANT_EXECUTE_RE)) {
         const fn = normIdent(gm[1]);
-        if (
-          rolesInclude(gm[2], "authenticated") ||
-          rolesInclude(gm[2], "anon")
-        )
+        if (rolesInclude(gm[2], "authenticated") || rolesInclude(gm[2], "anon"))
           regrantedFns.add(fn);
       }
 
       for (const fn of definerFns) {
-        if (!fn.hasUuidArg) continue;
-        if (isExempt("unlocked-definer-fn", fn.name)) continue;
+        if (isExempt("unlocked-definer-fn", fn.name, file.name)) continue;
         const revoked = revokedRolesByFn.get(fn.name) || "";
         // `revoke ... from public, authenticated, anon` (one statement) satisfies both.
         const revokesAuth = rolesInclude(revoked, "authenticated");
         const revokesAnon = rolesInclude(revoked, "anon");
-        const locked =
-          revokesAuth && revokesAnon && !regrantedFns.has(fn.name);
+        const locked = revokesAuth && revokesAnon && !regrantedFns.has(fn.name);
         if (locked) continue;
 
         let why: string;
@@ -510,7 +547,7 @@ export function analyzeMigrations(
           kind: "unlocked-definer-fn",
           identifier: fn.name,
           migration: file.name,
-          message: `SECURITY DEFINER function public.${fn.name}(${fn.args}) takes a uuid argument but ${why}. RULE-02: revoke execute on function public.${fn.name}(...) from public, authenticated, anon; grant execute ... to service_role. If it is an intentional RLS-predicate helper (like is_business_member) that must stay executable, add a documented allowlist entry "${fn.name}".`,
+          message: `SECURITY DEFINER function public.${fn.name}(${fn.args}) is not locked: ${why}. RULE-02: revoke execute on function public.${fn.name}(...) from public, authenticated, anon; grant execute only to the required role. If it is an intentional RLS-predicate helper (like is_business_member) that must stay executable, add a documented allowlist entry "${fn.name}".`,
         });
       }
     }
@@ -547,7 +584,7 @@ export function analyzeMigrations(
           (p.cmd === op || p.cmd === "all") &&
           (rolesInclude(p.roles, "authenticated") ||
             rolesInclude(p.roles, "public")) &&
-          gateNonAdminReachable(p.gate)
+          gateNonAdminReachable(p.gate),
       );
       if (!reachable) continue;
       if (revokedOps.has(`${table}:${op}`)) continue; // default grant explicitly revoked → locked
@@ -556,9 +593,12 @@ export function analyzeMigrations(
       violations.push({
         kind: "unlocked-column-policy",
         identifier,
-        migration: policySourceMig.get(table) ?? created.get(table) ?? "(unknown)",
-        message: `public.${table} has trust/entitlement column(s) [${[...sensCols].join(
-          ", "
+        migration:
+          policySourceMig.get(table) ?? created.get(table) ?? "(unknown)",
+        message: `public.${table} has trust/entitlement column(s) [${[
+          ...sensCols,
+        ].join(
+          ", ",
         )}] and an authenticated ${op.toUpperCase()} policy, but no "revoke ${op} on public.${table} from authenticated". RULE-01b: Supabase's DEFAULT table-wide ${op} grant (never written in a migration) lets the user set those columns on their own row via direct PostgREST, bypassing the API zod strip. Add "revoke ${op} on public.${table} from authenticated;" then "grant ${op} (editable_cols) on public.${table} to authenticated;", or add a documented allowlist entry "${identifier}".`,
       });
     }

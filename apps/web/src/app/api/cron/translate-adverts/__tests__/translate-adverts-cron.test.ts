@@ -4,7 +4,7 @@ vi.mock("server-only", () => ({}));
 
 const serviceFromMock = vi.fn();
 const getUserByIdMock = vi.fn();
-const isCapabilityEnabledMock = vi.fn();
+const getIntegrationStatusMock = vi.fn();
 const getTranslationProviderMock = vi.fn();
 
 vi.mock("@/lib/supabaseService", () => ({
@@ -14,8 +14,8 @@ vi.mock("@/lib/supabaseService", () => ({
   }),
 }));
 
-vi.mock("@/lib/capabilities", () => ({
-  isCapabilityEnabled: (...args: unknown[]) => isCapabilityEnabledMock(...args),
+vi.mock("@/lib/integrations/registry", () => ({
+  getIntegrationStatus: (...args: unknown[]) => getIntegrationStatusMock(...args),
 }));
 
 vi.mock("@/lib/translations/provider", () => ({
@@ -91,7 +91,7 @@ describe("GET /api/cron/translate-adverts", () => {
     delete process.env.TRANSLATE_INCLUDE_SEED;
     serviceFromMock.mockReset();
     getUserByIdMock.mockReset();
-    isCapabilityEnabledMock.mockReset().mockReturnValue(true);
+    getIntegrationStatusMock.mockReset().mockResolvedValue({ effective: true });
     getTranslationProviderMock.mockReset().mockReturnValue({
       name: "external",
       translate: vi.fn(async (text: string, _from: string, to: string) => `${text}-${to}`),
@@ -115,7 +115,7 @@ describe("GET /api/cron/translate-adverts", () => {
   });
 
   it("does no work when the advert translations capability is OFF", async () => {
-    isCapabilityEnabledMock.mockReturnValue(false);
+    getIntegrationStatusMock.mockResolvedValue({ effective: false });
 
     const res = await GET(req("Bearer testsecret"));
     const body = await res.json();

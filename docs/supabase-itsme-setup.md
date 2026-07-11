@@ -159,6 +159,5 @@ if (profile?.itsme_verified) {
 ## Связанные документы
 
 - [Authentication Domain Documentation](./domains/auth.md)
-- [Master Checklist - ITSME-001, ITSME-002](../development/MASTER_CHECKLIST.md)
+- [Production master — identity and provider gates](./MASTER_PRODUCTION_TZ.md)
 - [Supabase OAuth Setup](./supabase-oauth-setup.md)
-

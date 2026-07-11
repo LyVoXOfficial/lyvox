@@ -1,3 +1,6 @@
+> [!WARNING]
+> **Исторический UI-конспект с неполными placeholder-токенами. Не использовать как действующую дизайн-систему и не копировать значения без проверки.** Текущий визуальный контракт: [`docs/DESIGN_SYSTEM.md`](../DESIGN_SYSTEM.md); scope и критерии готовности: [`docs/MASTER_PRODUCTION_TZ.md`](../MASTER_PRODUCTION_TZ.md).
+
 # UI-гайды
 
 ## Design System
@@ -196,9 +199,7 @@ apps/web/src/components/
 
 ## 🔗 Related Docs
 
-**Development:** [database-schema.md](./database-schema.md) • [deep-audit-20251108.md](./deep-audit-20251108.md) • [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [roadmap.md](./roadmap.md)
+**Development:** [database-schema.md](./database-schema.md) • [deep-audit-20251108.md](./deep-audit-20251108.md) • [Production master](../MASTER_PRODUCTION_TZ.md)
 **Catalog:** [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md)
-
-
 
 

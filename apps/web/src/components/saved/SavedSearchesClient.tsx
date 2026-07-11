@@ -9,7 +9,7 @@ import { useI18n } from "@/i18n";
 import { getLocalSavedSearches, removeLocalSavedSearch, type SavedSearchFilters } from "@/lib/savedSearches";
 import { MarketplaceEmptyState } from "@/components/marketplace-grid-states";
 
-type AlertFrequency = "instant" | "daily" | "off";
+type AlertFrequency = "daily" | "off";
 
 type Row = {
   id: string;
@@ -112,7 +112,7 @@ export default function SavedSearchesClient() {
         <MarketplaceEmptyState
           icon={SearchIcon}
           title={tr("saved.empty", "You haven't saved any searches yet.")}
-          description={tr("saved.emptyDesc", "Save a search to get notified the moment a matching listing appears.")}
+          description={tr("saved.emptyDesc", "Save a search to receive a daily alert when new matches are found.")}
           primaryAction={{ href: "/search", label: tr("saved.startSearch", "Start a search") }}
         />
       ) : (
@@ -159,7 +159,6 @@ export default function SavedSearchesClient() {
                       onChange={(event) => updateAlertFrequency(r, event.target.value as AlertFrequency)}
                       aria-label={t("saved.alert_frequency")}
                     >
-                      <option value="instant">{t("saved.alert_instant")}</option>
                       <option value="daily">{t("saved.alert_daily")}</option>
                       <option value="off">{t("saved.alert_off")}</option>
                     </select>

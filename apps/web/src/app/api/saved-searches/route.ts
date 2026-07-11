@@ -57,7 +57,9 @@ const filtersSchema = z.object({
   sort_by: z.string().max(40).nullish(),
 });
 type SavedFilters = z.infer<typeof filtersSchema>;
-const alertFrequencySchema = z.enum(["instant", "daily", "off"]);
+// Delivery is executed by the daily production cron. Do not expose a cadence
+// that the scheduler cannot honour.
+const alertFrequencySchema = z.enum(["daily", "off"]);
 
 const createSchema = z.object({
   name: z.string().min(1).max(120),

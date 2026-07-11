@@ -1,6 +1,6 @@
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
-import { hasAdminRole } from "@/lib/adminRole";
+import { getAdminAccess } from "@/lib/auth/requireAdmin";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import { withCsrfProtection } from "@/lib/security/csrf";
 import {
@@ -55,15 +55,15 @@ const getRequestContext = async (req: Request): Promise<RequestContext> => {
 const resolveUserId = (req: Request) => getRequestContext(req).then(({ user }) => user?.id ?? null);
 
 const baseHandler = async (req: Request) => {
-  const { supabase, user } = await getRequestContext(req);
-
-  if (!user) {
-    return createErrorResponse(ApiErrorCode.UNAUTH, { status: 401 });
+  const { supabase } = await getRequestContext(req);
+  const access = await getAdminAccess();
+  if (!access.ok) {
+    return createErrorResponse(
+      access.reason === "unauthenticated" ? ApiErrorCode.UNAUTH : ApiErrorCode.FORBIDDEN,
+      { status: access.reason === "unauthenticated" ? 401 : access.reason === "mfa_required" ? 428 : 403 },
+    );
   }
-
-  if (!hasAdminRole(user)) {
-    return createErrorResponse(ApiErrorCode.FORBIDDEN, { status: 403 });
-  }
+  const user = access.user;
 
   const parseResult = await safeJsonParse<{ id?: unknown; new_status?: unknown; unpublish?: unknown }>(req);
   if (!parseResult.success) {

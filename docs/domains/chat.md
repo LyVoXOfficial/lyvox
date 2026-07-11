@@ -6,7 +6,7 @@ last_sync: 2025-10-28
 - Realtime диалоги продавец↔покупатель без перезагрузки страницы на Supabase Realtime (websocket `postgres_changes`).
 - Разделение ответственности: SSR получает стартовые данные, подписка живёт только в клиентском компоненте (`use client`).
 - Интеграции: профили, объявления (контекст сделки), модерация/жалобы, логи, уведомления.
-- Связанные документы: [domains/profile.md](./profile.md), [domains/adverts.md](./adverts.md), [domains/moderation.md](./moderation.md), [requirements.md](../requirements.md), [API_REFERENCE.md](../API_REFERENCE.md), [PLAN.md](../PLAN.md).
+- Связанные документы: [domains/profile.md](./profile.md), [domains/adverts.md](./adverts.md), [domains/moderation.md](./moderation.md), [requirements.md](../requirements.md), [API_REFERENCE.md](../API_REFERENCE.md), [Production master](../MASTER_PRODUCTION_TZ.md).
 
 ## Data Model (proposed)
 - `public.conversations`:
@@ -74,14 +74,16 @@ last_sync: 2025-10-28
 - Авто‑mute: при X подтверждённых жалобах по участнику в рамках N дней — пометка `muted=true` в `participants`.
 - В UI — кнопка “Пожаловаться” на сообщении, попадание в очередь модерации.
 
-## Improvements & TODO Links
-- TODO.md:
-  - Ship migrations для `conversations`/`participants`/`messages` и обновить типы.
-  - Реализовать server actions и лимиты отправки.
-  - Собрать клиентский UI с жизненным циклом подписки, оптимистичной отправкой и retry.
-  - Добавить QA: smoke‑тест realtime, сценарии реконнекта, Sentry‑алерты `channel/system`.
-  - Проработать уведомления и ретеншн политики; связать с модерацией.
-- PLAN.md: раздел “Realtime‑чат” и Post‑MVP блок фиксируют задачи и критерии.
+## Candidate improvements
+
+Исполнять только после включения в [Production master](../MASTER_PRODUCTION_TZ.md):
+
+- Ship migrations для `conversations`/`participants`/`messages` и обновить типы.
+- Реализовать server actions и лимиты отправки.
+- Собрать клиентский UI с жизненным циклом подписки, оптимистичной отправкой и retry.
+- Добавить QA: smoke‑тест realtime, сценарии реконнекта, Sentry‑алерты `channel/system`.
+- Проработать уведомления и ретеншн политики; связать с модерацией.
+- The legacy Realtime Chat and Post-MVP sections described the former acceptance criteria.
 
 ## Change Log
 - 2025-10-28: Initial domain doc with schema, RLS, realtime, notifications, retention, moderation and TODO links.
@@ -91,4 +93,4 @@ last_sync: 2025-10-28
 ## 🔗 Related Docs
 
 **Domains:** [deals.md](./deals.md) • [moderation.md](./moderation.md)
-**Development:** [chat-messages.md](../development/chat-messages.md) • [MASTER_CHECKLIST.md](../development/MASTER_CHECKLIST.md) • [database-schema.md](../development/database-schema.md)
+**Development:** [chat-messages.md](../development/chat-messages.md) • [Production master](../MASTER_PRODUCTION_TZ.md) • [database-schema.md](../development/database-schema.md)

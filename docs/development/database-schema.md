@@ -246,9 +246,8 @@ CREATE TRIGGER update_adverts_updated_at
 ## 🔗 Related Docs
 
 **Domains:** [chat.md](../domains/chat.md)
-**Development:** [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [deep-audit-20251108.md](./deep-audit-20251108.md) • [user-profile.md](./user-profile.md)
+**Development:** [Production master](../MASTER_PRODUCTION_TZ.md) • [deep-audit-20251108.md](./deep-audit-20251108.md) • [user-profile.md](./user-profile.md)
 **Catalog:** [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md)
-
 
 
 

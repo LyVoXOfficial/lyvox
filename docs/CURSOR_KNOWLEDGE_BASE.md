@@ -325,9 +325,7 @@ For project-specific details, consult:
 - Update this document when foundational architecture, security practices, or platform-wide patterns change.  
 - Keep `last_sync` aligned with the latest modification date.  
 - Link back to this document when other guides rely on global technical context.  
-- Cross-reference with `docs/KNOWLEDGE_MAP.md` and `PROMPT_MAIN.md` for navigation guidance.  
-
-
+- Start current work from `docs/MASTER_PRODUCTION_TZ.md`; `KNOWLEDGE_MAP.md` is navigation only and does not own task status.
 
 
 

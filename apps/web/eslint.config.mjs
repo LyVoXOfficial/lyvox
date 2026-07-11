@@ -57,7 +57,7 @@ const eslintConfig = [
       // TODO(tech-debt): eslint-plugin-react-hooks v7.0.1 introduced this rule;
       // existing useEffect patterns in SearchBar, CookieConsent*, RecentlyViewed
       // synchronously call setState inside effects, which is now flagged.
-      // Track in docs/MASTER_TODO.md — refactor before upgrading hooks plugin again.
+      // Track in docs/MASTER_PRODUCTION_TZ.md — refactor before upgrading hooks plugin again.
       "react-hooks/set-state-in-effect": "warn",
     },
   },

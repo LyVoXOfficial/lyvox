@@ -2,9 +2,9 @@ import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import { createErrorResponse, createSuccessResponse, ApiErrorCode } from "@/lib/apiErrors";
-import { isCapabilityEnabled } from "@/lib/capabilities";
 import { getStripe } from "@/lib/stripe/client";
 import { withCsrfProtection } from "@/lib/security/csrf";
+import { getIntegrationStatus } from "@/lib/integrations/registry";
 
 export const runtime = "nodejs";
 
@@ -27,11 +27,11 @@ const subscribeIpLimiter = createRateLimiter({
 });
 
 const baseHandler = async (req: Request): Promise<Response> => {
-  // Step 1: Feature gate — both flag AND price must be set
-  if (
-    !isCapabilityEnabled("pro_subscriptions") ||
-    !process.env.STRIPE_PRO_PRICE_ID
-  ) {
+  // Step 1: audited runtime toggle + keys + approvals + launch mode + kill switches.
+  const capability = await getIntegrationStatus("pro_subscriptions");
+  const priceId = process.env.STRIPE_PRO_PRICE_ID;
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!capability.effective || !priceId || !baseUrl) {
     return createErrorResponse(ApiErrorCode.FEATURE_DISABLED, { status: 404 });
   }
 
@@ -78,12 +78,11 @@ const baseHandler = async (req: Request): Promise<Response> => {
 
     if (updateError) {
       console.error("Failed to persist stripe_customer_id:", updateError);
-      // Non-fatal: checkout can still proceed — the webhook will set it again
+      return createErrorResponse(ApiErrorCode.INTERNAL_ERROR, { status: 500 });
     }
   }
 
   // Step 4: Create Stripe subscription checkout session
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const successUrl = `${baseUrl}/pro?sub=success`;
   const cancelUrl = `${baseUrl}/pro?sub=cancel`;
 
@@ -92,7 +91,7 @@ const baseHandler = async (req: Request): Promise<Response> => {
     customer: customerId,
     line_items: [
       {
-        price: process.env.STRIPE_PRO_PRICE_ID,
+        price: priceId,
         quantity: 1,
       },
     ],

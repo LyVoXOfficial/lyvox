@@ -1,7 +1,13 @@
 "use client";
 
 import Script from "next/script";
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 declare global {
   interface Window {
@@ -20,6 +26,9 @@ export type TurnstileWidgetHandle = {
 
 type Props = {
   onToken: (token: string | null) => void;
+  onError?: () => void;
+  action?: string;
+  size?: "normal" | "compact" | "flexible";
 };
 
 /**
@@ -29,46 +38,55 @@ type Props = {
  * Extracted from the original register-only inline implementation so
  * login/recovery/phone flows can reuse the exact same render/reset behavior.
  */
-const TurnstileWidget = forwardRef<TurnstileWidgetHandle, Props>(function TurnstileWidget(
-  { onToken },
-  ref,
-) {
-  const [scriptLoaded, setScriptLoaded] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const widgetIdRef = useRef<string | null>(null);
+const TurnstileWidget = forwardRef<TurnstileWidgetHandle, Props>(
+  function TurnstileWidget({ onToken, onError, action, size = "normal" }, ref) {
+    const [scriptLoaded, setScriptLoaded] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const widgetIdRef = useRef<string | null>(null);
 
-  useImperativeHandle(ref, () => ({
-    reset: () => {
-      window.turnstile?.reset?.(widgetIdRef.current ?? undefined);
-      onToken(null);
-    },
-  }));
+    useImperativeHandle(ref, () => ({
+      reset: () => {
+        window.turnstile?.reset?.(widgetIdRef.current ?? undefined);
+        onToken(null);
+      },
+    }));
 
-  useEffect(() => {
-    if (!siteKey || !scriptLoaded || !containerRef.current) return;
-    if (widgetIdRef.current) return; // already rendered — guard against StrictMode double-effect
+    useEffect(() => {
+      if (!siteKey || !scriptLoaded || !containerRef.current) return;
+      if (widgetIdRef.current) return; // already rendered — guard against StrictMode double-effect
 
-    widgetIdRef.current = window.turnstile?.render(containerRef.current, {
-      sitekey: siteKey,
-      callback: (token: string) => onToken(token),
-      "error-callback": () => onToken(null),
-      "expired-callback": () => onToken(null),
-    }) ?? null;
-  }, [scriptLoaded, onToken]);
+      const options: Record<string, unknown> = {
+        sitekey: siteKey,
+        size,
+        callback: (token: string) => onToken(token),
+        "error-callback": () => {
+          onToken(null);
+          onError?.();
+        },
+        "expired-callback": () => onToken(null),
+      };
+      if (action) options.action = action;
 
-  if (!siteKey) return null;
+      widgetIdRef.current =
+        window.turnstile?.render(containerRef.current, options) ?? null;
+      if (!widgetIdRef.current) onError?.();
+    }, [action, onError, scriptLoaded, onToken, size]);
 
-  return (
-    <>
-      <Script
-        src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-        async
-        defer
-        onLoad={() => setScriptLoaded(true)}
-      />
-      <div ref={containerRef} />
-    </>
-  );
-});
+    if (!siteKey) return null;
+
+    return (
+      <>
+        <Script
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+          async
+          defer
+          onLoad={() => setScriptLoaded(true)}
+          onError={() => onError?.()}
+        />
+        <div ref={containerRef} />
+      </>
+    );
+  },
+);
 
 export default TurnstileWidget;

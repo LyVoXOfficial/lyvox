@@ -249,7 +249,7 @@ export function BusinessCabinet({
           </section>
 
           {/* Upgrade to Pro CTA — flag-gated */}
-          {proSubscriptionsEnabled && (
+          {(proSubscriptionsEnabled || (isPro && Boolean(proUntil))) && (
             <section
               className="relative overflow-hidden rounded-[var(--r)] p-[22px] text-white"
               style={{
@@ -261,7 +261,7 @@ export function BusinessCabinet({
                 <>
                   <div className="mb-1.5 flex items-center gap-2 text-[17px] font-extrabold">
                     <Star className="h-[18px] w-[18px] fill-current" aria-hidden="true" />
-                    {tf("pro.cabinet.upgrade_heading", "Pro active")}
+                    {tf("pro.cabinet.active_heading", "Pro active")}
                   </div>
                   <p className="text-[12.5px]/[1.55] opacity-90">
                     {tf("pro.cabinet.upgrade.active_until", "Pro active until")}{" "}

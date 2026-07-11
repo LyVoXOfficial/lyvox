@@ -77,7 +77,7 @@ const nextConfig: NextConfig = {
             value: 'camera=(), microphone=(), geolocation=()',
           },
           // NOTE: Content-Security-Policy is intentionally NOT set here — it is
-          // emitted per-request (with a nonce) from src/middleware.ts. See the
+          // emitted per-request (with a nonce) from src/proxy.ts. See the
           // comment at the top of this file (SEC-CSP).
         ],
       },
@@ -86,17 +86,8 @@ const nextConfig: NextConfig = {
       // caches/CDNs, including authenticated pages (e.g. /profile) and API JSON,
       // which risks leaking private data across users. Public pages should opt
       // into caching individually via route segment config (e.g.
-      // `export const revalidate = 3600`). Immutable static assets stay cached
-      // below.
-      {
-        source: '/_next/static/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
+      // `export const revalidate = 3600`). Next.js owns immutable caching for
+      // its hashed `/_next/static` assets.
       {
         source: '/images/:path*',
         headers: [
@@ -111,5 +102,4 @@ const nextConfig: NextConfig = {
 };
 
 export default withBundleAnalyzer(nextConfig);
-
 

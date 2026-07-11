@@ -22,14 +22,18 @@ interface Product {
   name: Record<string, string>;
   price_cents: number;
   currency: string;
+  duration_days: number;
+  benefit_type: string;
+  tax_behavior: "inclusive" | "exclusive";
 }
 
 interface BoostDialogProps {
   advertId?: string;
   trigger?: React.ReactNode;
+  enabled?: boolean;
 }
 
-export default function BoostDialog({ advertId, trigger }: BoostDialogProps) {
+export default function BoostDialog({ advertId, trigger, enabled }: BoostDialogProps) {
   const { t, locale } = useI18n();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -37,12 +41,33 @@ export default function BoostDialog({ advertId, trigger }: BoostDialogProps) {
   const [loading, setLoading] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
+  const [effective, setEffective] = useState<boolean | null>(enabled ?? null);
 
   useEffect(() => {
-    if (open) {
+    if (enabled !== undefined) {
+      setEffective(enabled);
+      return;
+    }
+
+    let active = true;
+    fetch("/api/capabilities/paid_boosts", { cache: "no-store" })
+      .then(async (response) => (response.ok ? response.json() : null))
+      .then((body) => {
+        if (active) setEffective(body?.data?.effective === true);
+      })
+      .catch(() => {
+        if (active) setEffective(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [enabled]);
+
+  useEffect(() => {
+    if (open && effective) {
       loadProducts();
     }
-  }, [open]);
+  }, [open, effective]);
 
   const loadProducts = async () => {
     setLoading(true);
@@ -96,6 +121,10 @@ export default function BoostDialog({ advertId, trigger }: BoostDialogProps) {
     return product.name[locale] || product.name.en || product.code;
   };
 
+  // Product truth: no paid CTA, price claim, or catalogue request is rendered
+  // until the same effective capability used by the billing API is true.
+  if (effective !== true) return null;
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
@@ -132,7 +161,7 @@ export default function BoostDialog({ advertId, trigger }: BoostDialogProps) {
                       <div>
                         <h3 className="font-semibold">{getProductName(product)}</h3>
                         <p className="text-sm text-muted-foreground">
-                          {t("billing.boost.features")}
+                          {t("billing.boost.features")} · {t("billing.boost.duration_days").replace("{count}", String(product.duration_days))}
                         </p>
                       </div>
                       <div className="text-right">
@@ -142,6 +171,9 @@ export default function BoostDialog({ advertId, trigger }: BoostDialogProps) {
                             locale,
                             product.currency,
                           )}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {t(product.tax_behavior === "inclusive" ? "billing.boost.vat_inclusive" : "billing.boost.vat_exclusive")}
                         </p>
                       </div>
                     </div>

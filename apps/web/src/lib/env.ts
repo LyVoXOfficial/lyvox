@@ -17,6 +17,7 @@
  *  - **Hard-fail only in real production.** See {@link isHardFailEnv}.
  */
 import { z } from "zod";
+import { isAccessGateRuntimeActive } from "@/lib/security/accessGate";
 
 type EnvMap = Record<string, string | undefined>;
 
@@ -46,7 +47,10 @@ const ALWAYS_CRITICAL = [
  * fine (rate-limiter no-ops for local convenience); absent in prod is the exact
  * SEC-RL2 hole — limits silently off — so prod must refuse to boot.
  */
-const CRITICAL_IN_PROD = ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"] as const;
+const CRITICAL_IN_PROD = [
+  "UPSTASH_REDIS_REST_URL",
+  "UPSTASH_REDIS_REST_TOKEN",
+] as const;
 
 /**
  * Non-critical integrations. Each degrades gracefully when unset; we surface an
@@ -54,15 +58,70 @@ const CRITICAL_IN_PROD = ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"] 
  * but never block boot. `detail` documents what stops working.
  */
 const OPTIONAL_DEGRADATIONS: ReadonlyArray<{ key: string; detail: string }> = [
-  { key: "STRIPE_SECRET_KEY", detail: "billing (boost + Pro) checkout/subscribe disabled" },
-  { key: "STRIPE_WEBHOOK_SECRET", detail: "Stripe webhook signature verification disabled" },
-  { key: "TURNSTILE_SECRET_KEY", detail: "bot protection skipped on register/OTP" },
+  {
+    key: "NEXT_PUBLIC_SITE_URL",
+    detail: "provider return and canonical URLs are unsafe",
+  },
+  {
+    key: "STRIPE_SECRET_KEY",
+    detail: "billing (boost + Pro) checkout/subscribe disabled",
+  },
+  {
+    key: "STRIPE_WEBHOOK_SECRET",
+    detail: "Stripe webhook signature verification disabled",
+  },
+  { key: "STRIPE_PRO_PRICE_ID", detail: "Pro subscription offer disabled" },
+  {
+    key: "STRIPE_IDENTITY_WEBHOOK_SECRET",
+    detail: "Stripe Identity adapter disabled",
+  },
+  {
+    key: "TURNSTILE_SECRET_KEY",
+    detail: "bot protection skipped on register/OTP",
+  },
+  {
+    key: "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
+    detail: "Turnstile widget not rendered",
+  },
   { key: "SENTRY_DSN", detail: "server error tracking disabled" },
-  { key: "RESEND_API_KEY", detail: "email via Resend disabled (may fall back to SendGrid)" },
+  { key: "NEXT_PUBLIC_SENTRY_DSN", detail: "browser error tracking disabled" },
+  {
+    key: "RESEND_API_KEY",
+    detail: "email via Resend disabled (may fall back to SendGrid)",
+  },
   { key: "SENDGRID_API_KEY", detail: "email via SendGrid disabled" },
+  {
+    key: "EMAIL_FROM",
+    detail: "transactional email sender identity is not configured",
+  },
   { key: "CRON_SECRET", detail: "all cron endpoints reject (fail-closed 401)" },
   { key: "TWILIO_ACCOUNT_SID", detail: "SMS OTP send disabled" },
   { key: "TWILIO_AUTH_TOKEN", detail: "SMS OTP send disabled" },
+  { key: "TWILIO_FROM", detail: "SMS OTP send disabled" },
+  {
+    key: "TRANSLATION_PROVIDER_URL",
+    detail: "advert translation provider disabled",
+  },
+  {
+    key: "TRANSLATION_PROVIDER_KEY",
+    detail: "advert translation provider disabled",
+  },
+  { key: "OPENAI_API_KEY", detail: "AI moderation provider disabled" },
+  { key: "ITSME_CLIENT_ID", detail: "itsme adapter remains locked" },
+  { key: "ITSME_CLIENT_SECRET", detail: "itsme adapter remains locked" },
+  { key: "ITSME_REDIRECT_URI", detail: "itsme adapter remains locked" },
+  { key: "WHATSAPP_ACCESS_TOKEN", detail: "WhatsApp adapter remains locked" },
+  {
+    key: "WHATSAPP_PHONE_NUMBER_ID",
+    detail: "WhatsApp adapter remains locked",
+  },
+  { key: "ESCROW_PROVIDER_API_KEY", detail: "escrow adapter remains locked" },
+  {
+    key: "ESCROW_PROVIDER_WEBHOOK_SECRET",
+    detail: "escrow adapter remains locked",
+  },
+  { key: "NEXT_PUBLIC_VAPID_PUBLIC_KEY", detail: "Web Push remains locked" },
+  { key: "VAPID_PRIVATE_KEY", detail: "Web Push remains locked" },
 ];
 
 /**
@@ -78,6 +137,11 @@ export const envSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
   UPSTASH_REDIS_REST_URL: z.string().url().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
+  PRODUCTION_ACCESS_GATE_ENABLED: z
+    .enum(["true", "false", "1", "0"])
+    .optional(),
+  PRODUCTION_ACCESS_CODE: z.string().min(1).optional(),
+  PRODUCTION_ACCESS_GATE_SECRET: z.string().min(32).optional(),
 });
 
 export type EnvReport = {
@@ -90,7 +154,8 @@ export type EnvReport = {
   warnings: string[];
 };
 
-const isBlank = (v: string | undefined): boolean => v === undefined || v.trim() === "";
+const isBlank = (v: string | undefined): boolean =>
+  v === undefined || v.trim() === "";
 
 /**
  * Pure environment audit. Never throws, never mutates. Callers decide what to
@@ -110,12 +175,40 @@ export function validateEnv(env: EnvMap = process.env): EnvReport {
   for (const key of CRITICAL_IN_PROD) {
     if (isBlank(env[key])) {
       if (hardFail) missingCritical.push(key);
-      else warnings.push(`${key} not set — rate limiting is a no-op (dev convenience).`);
+      else
+        warnings.push(
+          `${key} not set — rate limiting is a no-op (dev convenience).`,
+        );
     }
   }
 
   for (const { key, detail } of OPTIONAL_DEGRADATIONS) {
     if (isBlank(env[key])) warnings.push(`${key} not set — ${detail}.`);
+  }
+
+  // Production access is default-closed. Missing/short credentials do not open
+  // the site; the proxy keeps UI and browser APIs locked and the holding page
+  // reports a configuration problem without exposing secret values.
+  const accessGateActive = isAccessGateRuntimeActive(env);
+  if (accessGateActive) {
+    const accessCode = env.PRODUCTION_ACCESS_CODE;
+    if (
+      isBlank(accessCode) ||
+      new TextEncoder().encode(accessCode).byteLength < 16
+    ) {
+      warnings.push(
+        "PRODUCTION_ACCESS_CODE missing or shorter than 16 bytes — production preview remains locked.",
+      );
+    }
+    const signingSecret = env.PRODUCTION_ACCESS_GATE_SECRET;
+    if (
+      isBlank(signingSecret) ||
+      new TextEncoder().encode(signingSecret).byteLength < 32
+    ) {
+      warnings.push(
+        "PRODUCTION_ACCESS_GATE_SECRET missing or shorter than 32 bytes — production preview remains locked.",
+      );
+    }
   }
 
   // Surface malformed (present-but-invalid) values without ever hard-failing on
@@ -124,7 +217,8 @@ export function validateEnv(env: EnvMap = process.env): EnvReport {
   if (!parsed.success) {
     for (const issue of parsed.error.issues) {
       const key = issue.path.join(".");
-      if (!isBlank(env[key])) warnings.push(`${key} is set but invalid: ${issue.message}.`);
+      if (!isBlank(env[key]))
+        warnings.push(`${key} is set but invalid: ${issue.message}.`);
     }
   }
 
@@ -137,11 +231,16 @@ export function validateEnv(env: EnvMap = process.env): EnvReport {
       "STRIPE_SECRET_KEY is a full-access key (sk_live_.../sk_test_...) — SEC-ENV requires a " +
         "restricted key (rk_live_.../rk_test_...) scoped to only the permissions " +
         "billing/checkout/subscribe actually need. " +
-        "Rotate via the Stripe dashboard per docs/security/SEC-ENV-key-rotation.md."
+        "Rotate via the Stripe dashboard per docs/security/SEC-ENV-key-rotation.md.",
     );
   }
 
-  return { ok: missingCritical.length === 0, hardFail, missingCritical, warnings };
+  return {
+    ok: missingCritical.length === 0,
+    hardFail,
+    missingCritical,
+    warnings,
+  };
 }
 
 /**
@@ -153,7 +252,9 @@ export function assertEnvOnBoot(env: EnvMap = process.env): void {
   const report = validateEnv(env);
 
   if (report.warnings.length > 0) {
-    console.warn(`[env] ${report.warnings.length} degraded/optional integration(s):`);
+    console.warn(
+      `[env] ${report.warnings.length} degraded/optional integration(s):`,
+    );
     for (const w of report.warnings) console.warn(`[env]   • ${w}`);
   }
 

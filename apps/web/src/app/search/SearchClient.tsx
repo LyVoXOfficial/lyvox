@@ -111,7 +111,13 @@ export type SearchInitialState = {
  * which is exactly what lets the SSR seed survive while client re-fetching stays
  * snappy.
  */
-export default function SearchClient({ initial }: { initial: SearchInitialState }) {
+export default function SearchClient({
+  initial,
+  discoverEnabled,
+}: {
+  initial: SearchInitialState;
+  discoverEnabled: boolean;
+}) {
   const { t, locale } = useI18n();
   const searchParams = useSearchParams();
   const searchHref = useCallback(
@@ -715,19 +721,21 @@ export default function SearchClient({ initial }: { initial: SearchInitialState 
             }}
           />
 
-          <Link
-            href="/discover"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground transition hover:text-primary"
-            style={{
-              height: "40px",
-              padding: "0 14px",
-              borderRadius: "var(--rm)",
-              border: "1px solid var(--border)",
-              background: "var(--secondary)",
-            }}
-          >
-            {t("discover.enter")}
-          </Link>
+          {discoverEnabled ? (
+            <Link
+              href={localizeHref("/discover", locale)}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground transition hover:text-primary"
+              style={{
+                height: "40px",
+                padding: "0 14px",
+                borderRadius: "var(--rm)",
+                border: "1px solid var(--border)",
+                background: "var(--secondary)",
+              }}
+            >
+              {t("discover.enter")}
+            </Link>
+          ) : null}
 
           {/* Mobile-only: Filters drawer trigger */}
           <div className="lg:hidden">

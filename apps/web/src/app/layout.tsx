@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { Onest, Geist_Mono } from "next/font/google";
+import { headers } from "next/headers";
 import type { ReactNode } from "react";
 import { getBaseUrl } from "@/lib/seo/baseUrl";
 import { FavoritesProvider } from "@/components/favorites/FavoritesProvider";
@@ -17,9 +18,10 @@ import { CookieConsentProvider } from "@/components/cookie/CookieConsentProvider
 import { CookieBanner } from "@/components/cookie/CookieBanner";
 import { CookiePreferenceCenter } from "@/components/cookie/CookiePreferenceCenter";
 import { Toaster } from "sonner";
-import { isCapabilityEnabled } from "@/lib/capabilities";
 import { WebPushRegistrar } from "@/components/WebPushRegistrar";
 import { ErrorTrackingProvider } from "@/components/ErrorTrackingProvider";
+import { ACCESS_GATE_PATH } from "@/lib/security/accessGate";
+import { pathnameHeaderName } from "@/lib/i18n";
 
 // Brand typography — Onest (grotesque with Cyrillic coverage for the ru locale)
 // for UI + display, Geist Mono for tabular/numeric data. Exposed as CSS vars and
@@ -54,7 +56,17 @@ export async function generateMetadata(): Promise<Metadata> {
   const alternateLocale = locales.filter((l) => l !== locale);
 
   const localizedOgCodes = alternateLocale.map((l) =>
-    l === "en" ? "en_US" : l === "nl" ? "nl_BE" : l === "fr" ? "fr_BE" : l === "ru" ? "ru_RU" : l === "de" ? "de_DE" : l,
+    l === "en"
+      ? "en_US"
+      : l === "nl"
+        ? "nl_BE"
+        : l === "fr"
+          ? "fr_BE"
+          : l === "ru"
+            ? "ru_RU"
+            : l === "de"
+              ? "de_DE"
+              : l,
   );
 
   return {
@@ -90,9 +102,35 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const { locale, messages } = await getI18nProps();
-  const webPushEnabled = isCapabilityEnabled("web_push");
+  const requestHeaders = await headers();
+
+  // The production preview wall gets a deliberately minimal shell. Keeping it
+  // outside the marketplace providers prevents hidden navigation, data fetches,
+  // and integration failures from leaking through the public holding page.
+  if (requestHeaders.get(pathnameHeaderName) === ACCESS_GATE_PATH) {
+    return (
+      <html lang={locale} className={`${onest.variable} ${geistMono.variable}`}>
+        <body className="min-h-screen font-sans">
+          <I18nProvider locale={locale} messages={messages}>
+            {children}
+          </I18nProvider>
+        </body>
+      </html>
+    );
+  }
+
+  const { getIntegrationStatus } = await import("@/lib/integrations/registry");
+  const [webPush, errorTracking, analytics] = await Promise.all([
+    getIntegrationStatus("web_push"),
+    getIntegrationStatus("error_tracking"),
+    getIntegrationStatus("analytics_insights"),
+  ]);
   return (
     <html lang={locale} className={`${onest.variable} ${geistMono.variable}`}>
       <body className="min-h-screen flex flex-col font-sans">
@@ -106,7 +144,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                   {/* Bottom clearance for the fixed mobile BottomNav is handled solely by
                       ViewportBottomSpacer below (audit B-1/B-3) — do not add a duplicate
                       pb here or content gets double-spaced on generic pages. */}
-                  <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-4 md:py-6">{children}</main>
+                  <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-4 md:py-6">
+                    {children}
+                  </main>
                   <LegalFooter />
                   <ViewportBottomSpacer />
                   <BottomNav />
@@ -116,10 +156,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             {/* Cookie consent banner + preference center — available app-wide */}
             <CookieBanner />
             <CookiePreferenceCenter />
+            <ErrorTrackingProvider
+              errorTrackingEnabled={errorTracking.effective}
+              analyticsEnabled={analytics.effective}
+            />
           </CookieConsentProvider>
         </I18nProvider>
-        <WebPushRegistrar enabled={webPushEnabled} />
-        <ErrorTrackingProvider />
+        <WebPushRegistrar enabled={webPush.effective} />
         {/* Global toast container — without this, every toast.* call across the app is silently dropped. */}
         <Toaster position="top-center" richColors closeButton />
       </body>

@@ -149,9 +149,8 @@
 
 ## 🔗 Related Docs
 
-**Development:** [user-profile.md](./user-profile.md) • [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [deep-audit-20251108.md](./deep-audit-20251108.md) • [database-schema.md](./database-schema.md)
+**Development:** [user-profile.md](./user-profile.md) • [Production master](../MASTER_PRODUCTION_TZ.md) • [deep-audit-20251108.md](./deep-audit-20251108.md) • [database-schema.md](./database-schema.md)
 **Catalog:** [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md)
-
 
 
 

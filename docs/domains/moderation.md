@@ -41,12 +41,13 @@ last_sync: 2025-10-28
 
 ## Integrations & Dependencies
 - Trust adjustments leverage `public.trust_inc(uid uuid, pts int)` defined in migrations (increments `public.trust_score`).
-- Emails/notifications for moderation are not yet implemented (tracked in TODO below).
+- Emails/notifications for moderation remain a candidate improvement below.
 - DSAR obligations require retention of resolved reports for ≥12 months (see [requirements.md](../requirements.md#data-retention)).
 
-## Improvements & TODO Links
-- TODO.md: expand automated API coverage to include report list/update error paths.
-- Future work: implement notification channel for accepted reports (add TODO entry if prioritised).
+## Candidate improvements
+
+- Expand automated API coverage to include report list/update error paths only after prioritisation in the [Production master](../MASTER_PRODUCTION_TZ.md).
+- Future work: implement a notification channel for accepted reports if prioritised in the Production master.
 - Ensure final blocked advert workflow (status `'blocked'`) is implemented before trust penalties automatically unpublish listings.
 
 ## Change Log

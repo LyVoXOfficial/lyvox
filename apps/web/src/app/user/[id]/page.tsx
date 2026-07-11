@@ -13,6 +13,7 @@ import { deriveSellerBadges, type SellerBadge } from "@/lib/profile/sellerBadges
 import { TraderPanel, type BusinessPublicData } from "@/components/business/TraderPanel";
 import { TrustScoreBadge } from "@/components/trust/TrustScoreBadge";
 import { TrustScoreCard } from "@/components/trust/TrustScoreCard";
+import { getIntegrationStatus } from "@/lib/integrations/registry";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -393,6 +394,7 @@ export default async function PublicProfilePage({
 }) {
   const { id } = await params;
   const { locale, messages } = await getI18nProps();
+  const itsmeCapability = await getIntegrationStatus("itsme");
   const t = (key: string) =>
     key.split(".").reduce<any>((acc, p) => (acc ? acc[p] : undefined), messages) ?? key;
 
@@ -731,6 +733,7 @@ export default async function PublicProfilePage({
             verifiedEmail={verified_email ?? false}
             verifiedPhone={verified_phone ?? false}
             itsmeVerified={itsme_verified ?? false}
+            identityVerificationAvailable={itsmeCapability.effective}
             createdAt={created_at}
             activeListingsCount={active_adverts.length}
             isOwnProfile={isOwnProfile}

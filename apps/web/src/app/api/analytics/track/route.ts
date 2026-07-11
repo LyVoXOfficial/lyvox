@@ -10,6 +10,7 @@ import {
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import { ANALYTICS_EVENTS, DEAL_STUB_EVENTS, type AnalyticsEventName } from "@/lib/analytics/events";
 import { withCsrfProtection } from "@/lib/security/csrf";
+import { getIntegrationStatus } from "@/lib/integrations/registry";
 
 export const runtime = "nodejs";
 
@@ -41,7 +42,35 @@ const analyticsLimiter = createRateLimiter({
   prefix: "analytics:track",
 });
 
+function hasFreshAnalyticsConsent(req: Request): boolean {
+  const rawCookie = req.headers
+    .get("cookie")
+    ?.split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith("lyvox_cookie_consent="))
+    ?.slice("lyvox_cookie_consent=".length);
+  if (!rawCookie) return false;
+  try {
+    const value = JSON.parse(decodeURIComponent(rawCookie)) as Record<string, unknown>;
+    return (
+      value.analytics === true &&
+      typeof value.ts === "number" &&
+      Date.now() - value.ts <= 365 * 24 * 60 * 60 * 1000
+    );
+  } catch {
+    return false;
+  }
+}
+
 async function handleTrack(req: Request) {
+  const capability = await getIntegrationStatus("analytics_insights");
+  if (!capability.effective) {
+    return createSuccessResponse({ tracked: false, reason: "capability_disabled" });
+  }
+  if (!hasFreshAnalyticsConsent(req)) {
+    return createSuccessResponse({ tracked: false, reason: "consent_required" });
+  }
+
   const parseResult = await safeJsonParse<unknown>(req);
   if (!parseResult.success) return parseResult.response;
 
