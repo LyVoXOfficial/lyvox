@@ -179,9 +179,6 @@ type VehicleGeneration = {
   vehicle_generation_i18n?: Array<{
     locale: string;
     summary: string | null;
-    pros: string[] | null;
-    cons: string[] | null;
-    inspection_tips: string[] | null;
   }>;
 };
 
@@ -268,9 +265,6 @@ type TranslatedInsights = {
 
 type GenerationLocaleData = {
   summary: string | null;
-  pros: string[];
-  cons: string[];
-  inspectionTips: string[];
 };
 
 type DetailItem = {
@@ -1098,51 +1092,6 @@ export default async function AdvertPage({ params }: PageProps) {
                 <p className="text-sm text-foreground/90">{generationLocale.summary}</p>
               ) : null}
 
-              {generationLocale?.pros.length ? (
-                <div>
-                  <h3 className="mb-2 text-sm font-semibold text-green-600 dark:text-green-400">
-                    {translate("advert.insights.pros", "Pros")}
-                  </h3>
-                  <ul className="space-y-1 text-sm">
-                    {generationLocale.pros.map((item, index) => (
-                      <li key={`${item}-${index}`} className="flex items-start gap-2">
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" aria-hidden="true" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-
-              {generationLocale?.cons.length ? (
-                <div>
-                  <h3 className="mb-2 text-sm font-semibold text-red-600 dark:text-red-400">
-                    {translate("advert.insights.cons", "Cons")}
-                  </h3>
-                  <ul className="space-y-1 text-sm">
-                    {generationLocale.cons.map((item, index) => (
-                      <li key={`${item}-${index}`} className="flex items-start gap-2">
-                        <CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" aria-hidden="true" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-
-              {generationLocale?.inspectionTips.length ? (
-                <div>
-                  <h3 className="mb-2 text-sm font-semibold">
-                    {translate("advert.insights.inspection_tips", "Inspection tips")}
-                  </h3>
-                  <ul className="list-inside list-disc space-y-1 text-sm">
-                    {generationLocale.inspectionTips.map((item, index) => (
-                      <li key={`${item}-${index}`}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-
               {data.selectedGeneration.production_countries?.length ? (
                 <div>
                   <h3 className="mb-2 text-sm font-semibold">
@@ -1605,9 +1554,6 @@ function getGenerationLocaleData(
 
   return {
     summary: translation?.summary ?? generation.summary ?? null,
-    pros: translation?.pros ?? [],
-    cons: translation?.cons ?? [],
-    inspectionTips: translation?.inspection_tips ?? [],
   };
 }
 

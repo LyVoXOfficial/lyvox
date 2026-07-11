@@ -54,6 +54,7 @@ type PostFormProps = {
   userPhone?: string | null;
   isVerified?: boolean;
   completeListing?: boolean;
+  paidBoostsEnabled?: boolean;
 };
 
 const AUTO_SAVE_INTERVAL_MS = 30_000;
@@ -142,6 +143,7 @@ export function PostForm({
   userPhone,
   isVerified = false,
   completeListing = false,
+  paidBoostsEnabled = false,
 }: PostFormProps) {
   const { t } = useI18n();
   const router = useRouter();
@@ -2942,6 +2944,7 @@ export function PostForm({
               {advertToEdit?.status === "active" && advertId && (
                 <BoostDialog
                   advertId={advertId}
+                  enabled={paidBoostsEnabled}
                   trigger={
                     <Button variant="outline" size="lg" disabled={isLoading} title={t("billing.boost.title")} className="text-amber-600 hover:text-amber-700">
                       <Zap className="mr-1 h-4 w-4" />
@@ -3065,6 +3068,7 @@ export function PostForm({
             {advertToEdit?.status === "active" && advertId && (
               <BoostDialog
                 advertId={advertId}
+                enabled={paidBoostsEnabled}
                 trigger={
                   <Button variant="outline" size="lg" disabled={isLoading} title={t("billing.boost.title")} className="text-amber-600 hover:text-amber-700">
                     <Zap className="mr-1 h-4 w-4" />

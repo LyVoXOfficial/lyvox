@@ -19,6 +19,7 @@ const getUserMock = vi.fn();
 const cookieFromMock = vi.fn();
 // Service-role client: pre-check SELECT + phones upsert + phone_otps writes
 const serviceFromMock = vi.fn();
+const getIntegrationStatusMock = vi.fn();
 
 vi.mock("@/lib/supabaseServer", () => ({
   supabaseServer: async () => ({ auth: { getUser: getUserMock }, from: cookieFromMock }),
@@ -26,6 +27,10 @@ vi.mock("@/lib/supabaseServer", () => ({
 
 vi.mock("@/lib/supabaseService", () => ({
   supabaseService: async () => ({ from: serviceFromMock }),
+}));
+
+vi.mock("@/lib/integrations/registry", () => ({
+  getIntegrationStatus: (...args: unknown[]) => getIntegrationStatusMock(...args),
 }));
 
 // Bypass rate-limiter wrappers so POST === baseHandler for testing.
@@ -97,6 +102,7 @@ describe("POST /api/phone/request — service-role enforcement", () => {
     serviceFromMock.mockReset();
     fetchMock.mockReset();
     verifyTurnstileMock.mockReset();
+    getIntegrationStatusMock.mockReset().mockResolvedValue({ effective: true });
 
     // Default: user is logged in
     getUserMock.mockResolvedValue({ data: { user: { id: USER_ID } } });
@@ -106,6 +112,14 @@ describe("POST /api/phone/request — service-role enforcement", () => {
     fetchMock.mockResolvedValue(twilioOk());
     // Default: Turnstile returns ok (simulates no-secret / skipped path)
     verifyTurnstileMock.mockResolvedValue({ ok: true, skipped: true });
+  });
+
+  it("404 without parsing, OTP writes or Twilio calls when SMS capability is ineffective", async () => {
+    getIntegrationStatusMock.mockResolvedValue({ effective: false });
+    const res = await POST(jsonReq({ phone: VALID_PHONE }));
+    expect(res.status).toBe(404);
+    expect(serviceFromMock).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("403 CAPTCHA_FAILED when Turnstile verification fails", async () => {

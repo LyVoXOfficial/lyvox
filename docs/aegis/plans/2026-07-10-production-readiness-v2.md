@@ -180,7 +180,6 @@ Files:
 - `README.md`
 - `CLAUDE.md`
 - `docs/MASTER_PRODUCTION_TZ.md`
-- `docs/MASTER_TODO.md`
 - `docs/PROJECT_VISION_AND_TZ.md`
 - `docs/features/FOUNDATIONS-F1-F14.md`
 - old operational/design docs named by the audit
@@ -188,7 +187,7 @@ Files:
 Steps:
 
 1. Declare master as the only target/status source.
-2. Reclassify vision as product strategy, MASTER_TODO as legacy PRD catalog, foundations as ticket definitions.
+2. Reclassify vision as product strategy, retire duplicate backlog/checklist owners, and keep foundations as ticket definitions.
 3. Remove duplicate current-order claims and stale status authority.
 4. Link subordinate release/capability/design/agent specs.
 5. Correct CSP/SEC-DEP/OPS priority contradictions.

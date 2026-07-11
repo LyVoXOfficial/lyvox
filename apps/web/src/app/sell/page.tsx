@@ -5,6 +5,7 @@ import { getI18nProps } from "@/i18n/server";
 import { getJsonLdScriptProps } from "@/lib/seo";
 import { localizeHref } from "@/lib/i18n";
 import { languageAlternates, localizedCanonical } from "@/lib/seo/localizedUrls";
+import { getPublicProductTruthSnapshot } from "@/lib/productTruth";
 
 // Indexable seller landing (supply wave): the guest-facing pitch for the
 // high-intent "post a free ad" queries. The actual /post flow stays behind
@@ -33,6 +34,7 @@ export default async function SellPage() {
   const { locale, messages } = await getI18nProps();
   const s = sellCopy(messages);
   const home = (messages?.home ?? {}) as SellMessages;
+  const productTruth = await getPublicProductTruthSnapshot();
   const href = (path: string) => localizeHref(path, locale);
 
   const steps = [
@@ -42,7 +44,10 @@ export default async function SellPage() {
   ];
 
   const faq = [
-    { q: s.faq_q1, a: s.faq_a1 },
+    {
+      q: s.faq_q1,
+      a: productTruth.paidBoosts && productTruth.boostRanking ? s.faq_a1 : s.faq_a1_contact,
+    },
     { q: s.faq_q2, a: s.faq_a2 },
     { q: s.faq_q3, a: s.faq_a3 },
   ].filter((item) => item.q && item.a);

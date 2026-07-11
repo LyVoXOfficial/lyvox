@@ -20,6 +20,7 @@ import {
   SEARCH_PAGE_LIMIT,
 } from "@/lib/search/constants";
 import { AdsGridSkeleton } from "@/components/marketplace-grid-states";
+import { getIntegrationStatus } from "@/lib/integrations/registry";
 import SearchClient, { type SearchInitialState } from "./SearchClient";
 
 type RawSearchParams = Record<string, string | string[] | undefined>;
@@ -51,6 +52,7 @@ export default async function SearchPage({
 }: {
   searchParams: Promise<RawSearchParams>;
 }) {
+  const discoverStatusPromise = getIntegrationStatus("discover_v2");
   const sp = toURLSearchParams(await searchParams);
   const baseRequest = readSearchRequestFromParams(sp, SEARCH_PAGE_LIMIT);
   const mainParams = buildSearchRequestParams(baseRequest);
@@ -147,7 +149,7 @@ export default async function SearchPage({
         </div>
       }
     >
-      <SearchClient initial={initial} />
+      <SearchClient initial={initial} discoverEnabled={(await discoverStatusPromise).effective} />
     </Suspense>
   );
 }

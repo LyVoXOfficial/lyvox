@@ -234,7 +234,6 @@ export async function POST(request: Request) {
 ## 🔗 Related Docs
 
 **Domains:** [adverts.md](../domains/adverts.md)
-**Development:** [deep-audit-20251108.md](./deep-audit-20251108.md) • [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [chat-messages.md](./chat-messages.md)
+**Development:** [deep-audit-20251108.md](./deep-audit-20251108.md) • [Production master](../MASTER_PRODUCTION_TZ.md) • [chat-messages.md](./chat-messages.md)
 **Core:** [API_REFERENCE.md](../API_REFERENCE.md)
-
 

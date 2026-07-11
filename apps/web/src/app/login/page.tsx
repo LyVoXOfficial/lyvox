@@ -17,6 +17,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useI18n } from "@/i18n";
 import TurnstileWidget, { type TurnstileWidgetHandle } from "@/components/antifraud/TurnstileWidget";
 import { verifyCaptcha } from "@/lib/antifraud/verifyCaptchaClient";
+import { sanitizeInternalReturnTo } from "@/lib/security/safeReturnTo";
 
 // PERF-07 item 2: /login was the sole consumer of the zod `loginSchema`, which
 // dragged the whole zod runtime into this route's first-load JS for a single
@@ -64,6 +65,8 @@ function LoginPageInner() {
 
   const callbackError = searchParams.get("error");
   const callbackMessage = searchParams.get("message");
+  const requestedNext = searchParams.get("next");
+  const safeNext = sanitizeInternalReturnTo(requestedNext, "/profile");
 
   useEffect(() => {
     if (callbackError && callbackMessage) {
@@ -143,8 +146,7 @@ function LoginPageInner() {
         });
       } else if (data.session) {
         toast.success(tr("auth.signedInSuccess", "Signed in successfully."));
-        const next = searchParams.get("next") ?? "/profile";
-        router.push(next);
+        router.push(safeNext);
       }
     } catch (error) {
       logger.error("Password login exception", {
@@ -181,8 +183,7 @@ function LoginPageInner() {
       }
 
       const redirectUrl = new URL("/auth/callback", window.location.origin);
-      const next = searchParams.get("next") ?? "/profile";
-      redirectUrl.searchParams.set("next", next);
+      redirectUrl.searchParams.set("next", safeNext);
 
       const { error } = await supabase.auth.signInWithOtp({
         email: validationResult.data.email,
@@ -235,8 +236,7 @@ function LoginPageInner() {
     setLoading(true);
     try {
       const redirectUrl = new URL("/auth/callback", window.location.origin);
-      const next = searchParams.get("next") ?? "/profile";
-      redirectUrl.searchParams.set("next", next);
+      redirectUrl.searchParams.set("next", safeNext);
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
@@ -267,8 +267,9 @@ function LoginPageInner() {
     }
   };
 
-  const next = searchParams.get("next");
-  const registerHref = next ? `/register?next=${encodeURIComponent(next)}` : "/register";
+  const registerHref = requestedNext !== null
+    ? `/register?next=${encodeURIComponent(safeNext)}`
+    : "/register";
 
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-background">
@@ -288,7 +289,7 @@ function LoginPageInner() {
               {tr("auth.protectedAccess", "Protected account access")}
             </div>
             <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-foreground md:text-4xl">
-              {tr("auth.heroHeading", "Sign in to manage listings, messages, and trusted payments.")}
+              {tr("auth.heroHeading", "Sign in to manage listings, messages, and saved items.")}
             </h1>
             <p className="text-base leading-7 text-muted-foreground">
               {tr(

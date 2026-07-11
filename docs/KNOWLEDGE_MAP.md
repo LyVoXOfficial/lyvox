@@ -1,7 +1,7 @@
-> [!WARNING]
-> **Историческая карта документации от 2025-11-09. Не использовать указанные ниже entrypoint, authority или checklist для выбора задач.** Единственная актуальная точка входа в production-работу: [`docs/MASTER_PRODUCTION_TZ.md`](./MASTER_PRODUCTION_TZ.md). Карта сохранена до отдельной регенерации.
+> [!IMPORTANT]
+> Единственная точка входа в production-работу и источник текущего статуса: [`docs/MASTER_PRODUCTION_TZ.md`](./MASTER_PRODUCTION_TZ.md). Остальные документы дают подчинённый контекст.
 
-last_sync: 2025-11-09
+last_sync: 2026-07-11
 
 # LyVoX Knowledge Map
 
@@ -13,17 +13,14 @@ last_sync: 2025-11-09
 
 ## 📚 Documentation Hierarchy
 
-> **Historical mapping (retired):** at the time, `PROMPT_MAIN.md` was treated as the root entrypoint. Do not use it to start current work.
+> Current navigation starts from the Production master. Architecture, domain and implementation documents do not own backlog priority or release status.
 
 ```text
 📁 LyVoX Workspace (root)
 │
-├─ 📄 PROMPT_MAIN.md                     Historical root entrypoint (retired)
-│   └─ Historical entry point for AI assistants and contributors (retired)
-│   └─ Historical links to retired checklist and deployment workflows
-│
-├─ 📁 docs/                              Historical documentation root
+├─ 📁 docs/                              Documentation root
 │   │
+│   ├─ 📄 MASTER_PRODUCTION_TZ.md        Canonical production backlog and status
 │   ├─ 📄 KNOWLEDGE_MAP.md               📚 This document — knowledge hierarchy
 │   │
 │   ├─ 📄 CURSOR_KNOWLEDGE_BASE.md       🌐 General Technical Foundation
@@ -34,8 +31,6 @@ last_sync: 2025-11-09
 │   │   ├─ 📄 ARCH_RULES.md              (Non-negotiable architectural constraints)
 │   │   ├─ 📄 requirements.md            (Requirements, ERD, RLS, environment matrix)
 │   │   ├─ 📄 API_REFERENCE.md           (API contracts and schemas)
-│   │   ├─ 📄 PLAN.md                    (Roadmap and milestones)
-│   │   ├─ 📄 TODO.md                    (Historical backlog; retired)
 │   │   ├─ 📄 INSTALL.md                 (Environment setup)
 │   │   ├─ 📄 MCP_SERVICES.md            (Supabase & Vercel MCP usage)
 │   │   └─ Additional planning/compliance docs
@@ -47,7 +42,6 @@ last_sync: 2025-11-09
 │   │   └─ (Conceptual descriptions of business flows and rules)
 │   │
 │   ├─ 📁 development/                   💻 Implementation Guides & Modules
-│   │   ├─ 📄 MASTER_CHECKLIST.md        Historical prioritized list (retired)
 │   │   ├─ 📄 README.md                  (Development documentation overview)
 │   │   ├─ 📄 database-schema.md         (Supabase schema details)
 │   │   ├─ 📄 api-architecture.md        (Route handler design patterns)
@@ -59,7 +53,7 @@ last_sync: 2025-11-09
 │   │   │   verification.md, chat-messages.md, billing-subscriptions.md,
 │   │   │   moderation-ai.md, admin-panel.md, notifications.md,
 │   │   │   user-dashboard.md, seo-metadata.md, i18n.md, mobile-responsive.md
-│   │   └─ Planning files: roadmap.md, risks-mitigation.md, checklists.md
+│   │   └─ Planning support: risks-mitigation.md
 │   │
 │   └─ 📁 catalog/                       📦 Category & Enrichment System
 │       ├─ 📄 CATALOG_MASTER.md          (Master catalog design)
@@ -79,17 +73,16 @@ last_sync: 2025-11-09
 
 ---
 
-## Historical authority sources (retired)
+## Authority sources
 
 | Document | Authoritative For |
 |----------|-------------------|
-| `PROMPT_MAIN.md` | Historical AI workflow and deployment rules (retired) |
+| `docs/MASTER_PRODUCTION_TZ.md` | Current scope, priority, status and release readiness |
 | `docs/CURSOR_KNOWLEDGE_BASE.md` | Global technical patterns and architecture principles |
 | `docs/ARCHITECTURE.md` | System topology, journeys, and stack versions |
 | `docs/ARCH_RULES.md` | Non-negotiable architectural constraints |
 | `docs/requirements.md` | Schema, RLS policies, compliance, environment setup |
 | `docs/API_REFERENCE.md` | API contracts (request/response schemas) |
-| `docs/development/MASTER_CHECKLIST.md` | Historical priorities and completion tracking (retired) |
 | `supabase/migrations/` | Canonical database definition |
 | `supabase/types/database.types.ts` | Generated TypeScript types matching schema |
 
@@ -97,7 +90,7 @@ last_sync: 2025-11-09
 
 ## 📖 Layered Knowledge System
 
-1. **Layer 1 — Historical root entry point:** `PROMPT_MAIN.md` (retired workflow).
+1. **Layer 1 — Production entry point:** `docs/MASTER_PRODUCTION_TZ.md`.
 2. **Layer 2 — General Foundation:** `docs/CURSOR_KNOWLEDGE_BASE.md` (global technical knowledge).  
 3. **Layer 3 — Core Documentation:** Root-level docs inside `docs/` (architecture, requirements, planning).  
 4. **Layer 4 — Domain Knowledge:** `docs/domains/` (business logic, conceptual rules).  
@@ -109,9 +102,7 @@ last_sync: 2025-11-09
 ## 🔗 Cross-Reference Patterns
 
 - **Domain ↔ Development:** Domain docs explain *what/why*; development docs explain *how/where*. Example: `domains/moderation.md` ↔ `development/moderation-ai.md`.  
-- **Development ↔ Master Checklist:** historical links to retired IDs in `MASTER_CHECKLIST.md` (for traceability only).
 - **Catalog ↔ Implementation:** `catalog/CATALOG_MASTER.md` (strategy) ↔ `development/categories.md` (execution) ↔ `catalog/categories/*.md` (attributes).  
-- **PROMPT_MAIN.md ↔ KNOWLEDGE_MAP.md:** historical circular navigation, now retired.
 - **CURSOR_KNOWLEDGE_BASE.md ↔ All Layers:** Acts as the shared foundation for domain and development docs.  
 
 ---
@@ -120,18 +111,16 @@ last_sync: 2025-11-09
 
 ### For New Contributors
 
-1. Retired instruction: do not use `PROMPT_MAIN.md` as current workflow or governance.
+1. Start from `docs/MASTER_PRODUCTION_TZ.md` for current work and release status.
 2. Skim `docs/CURSOR_KNOWLEDGE_BASE.md` for platform fundamentals.  
 3. Review `docs/ARCHITECTURE.md` and `docs/requirements.md` for high-level context.  
-4. Historical instruction, no longer valid: use `docs/development/MASTER_CHECKLIST.md` to pick tasks.
 
 ### For AI Assistants
 
-1. Historical instruction, no longer valid: start with `PROMPT_MAIN.md`.
+1. Start with `docs/MASTER_PRODUCTION_TZ.md`.
 2. Use `CURSOR_KNOWLEDGE_BASE.md` for architectural patterns.  
 3. Dive into `docs/domains/` for business logic.  
-4. Historical instruction, no longer valid: implement from `docs/development/` guides and update `MASTER_CHECKLIST.md`.
-5. Consult `docs/catalog/` for taxonomy, AI enrichment, and attribute structures.  
+4. Consult `docs/catalog/` for taxonomy, AI enrichment, and attribute structures.
 
 ### Quick Lookup
 
@@ -155,21 +144,11 @@ The former instruction to keep `/docs` local and exclude it from Git is no longe
 - Revise authority table if canonical sources change.  
 - Keep cross-reference examples in sync with major document reorganizations.  
 - Do not maintain `last_sync` manually; regenerate or retire this map through an explicit current task.
-- Do not validate current documentation against retired `PROMPT_MAIN.md`.
 
 ---
 
 ## Cross-References
 
-- 🔗 `PROMPT_MAIN.md` — historical root entrypoint (retired).
 - 🔗 `docs/CURSOR_KNOWLEDGE_BASE.md` — foundational technical knowledge.  
-- 🔗 `docs/development/MASTER_CHECKLIST.md` — historical execution track (retired).
 
-Current navigation and execution begin in [`docs/MASTER_PRODUCTION_TZ.md`](./MASTER_PRODUCTION_TZ.md), not in `PROMPT_MAIN.md`.
-
-
-## 🤖 AI Enrichment & Cross-Reference System
-
-This workspace maintains AI-generated links between domain, development, and catalog documents.
-
-See `docs/AI_LINKS_INDEX.md` for the full matrix of relationships.
+Current navigation and execution begin in [`docs/MASTER_PRODUCTION_TZ.md`](./MASTER_PRODUCTION_TZ.md).

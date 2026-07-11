@@ -6,8 +6,12 @@ alter table if exists public.profiles
   add column if not exists flags jsonb default '{}'::jsonb,
   add column if not exists blocked_until timestamptz;
 
--- 2. Add index for blocked users query
-create index if not exists idx_profiles_blocked on public.profiles(blocked_until) where blocked_until is not null and blocked_until > now();
+-- 2. Add index for blocked users query.
+-- Fresh-replay exception: now() cannot appear in an index predicate. The
+-- static non-null predicate still supports blocked_until > now() range scans.
+create index if not exists idx_profiles_blocked
+  on public.profiles(blocked_until)
+  where blocked_until is not null;
 
 -- 3. Add index for flags query (for users with specific flags)
 create index if not exists idx_profiles_flags on public.profiles using gin(flags);
@@ -16,53 +20,46 @@ create index if not exists idx_profiles_flags on public.profiles using gin(flags
 comment on column public.profiles.flags is 'JSON object containing account flags. Common flags: fraud_suspected, spam_detected, manual_review, high_risk, etc.';
 comment on column public.profiles.blocked_until is 'Timestamp until which the account is blocked. NULL means not blocked.';
 
--- 5. Create helper function to check if user is blocked
+-- 5. Create a read-only helper for trusted server-side fraud checks.
 create or replace function public.is_user_blocked(user_id_param uuid)
 returns boolean
-language plpgsql
+language sql
+stable
 security definer
-as $$
-declare
-  blocked_until_val timestamptz;
-begin
-  select blocked_until into blocked_until_val
-  from public.profiles
-  where id = user_id_param;
-  
-  if blocked_until_val is null then
-    return false;
-  end if;
-  
-  if blocked_until_val > now() then
-    return true;
-  else
-    -- Block has expired, clear it
-    update public.profiles
-    set blocked_until = null
-    where id = user_id_param;
-    return false;
-  end if;
-end;
-$$;
+set search_path = ''
+as $function$
+  select coalesce(
+    (
+      select profile.blocked_until > pg_catalog.now()
+      from public.profiles as profile
+      where profile.id = user_id_param
+    ),
+    false
+  );
+$function$;
 
--- 6. Create helper function to check if user has a specific flag
+revoke execute on function public.is_user_blocked(uuid)
+  from public, anon, authenticated;
+grant execute on function public.is_user_blocked(uuid) to service_role;
+
+-- 6. Create a read-only helper for trusted server-side flag checks.
 create or replace function public.user_has_flag(user_id_param uuid, flag_name text)
 returns boolean
-language plpgsql
+language sql
+stable
 security definer
-as $$
-declare
-  flags_val jsonb;
-begin
-  select flags into flags_val
-  from public.profiles
-  where id = user_id_param;
-  
-  if flags_val is null then
-    return false;
-  end if;
-  
-  return (flags_val ? flag_name) and (flags_val->>flag_name)::boolean = true;
-end;
-$$;
+set search_path = ''
+as $function$
+  select coalesce(
+    (
+      select profile.flags -> flag_name = 'true'::pg_catalog.jsonb
+      from public.profiles as profile
+      where profile.id = user_id_param
+    ),
+    false
+  );
+$function$;
 
+revoke execute on function public.user_has_flag(uuid, text)
+  from public, anon, authenticated;
+grant execute on function public.user_has_flag(uuid, text) to service_role;

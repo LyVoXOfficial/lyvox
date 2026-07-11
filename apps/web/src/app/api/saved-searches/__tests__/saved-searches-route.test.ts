@@ -68,6 +68,15 @@ describe("/api/saved-searches list+create", () => {
     expect((await res.json()).ok).toBe(true);
   });
 
+  it("POST rejects an unsupported instant cadence", async () => {
+    getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
+
+    const res = await POST(jsonReq({ name: "x", filters: {}, alert_frequency: "instant" }));
+
+    expect(res.status).toBe(400);
+    expect(fromMock).not.toHaveBeenCalled();
+  });
+
   it("GET returns rows with computed new_count", async () => {
     getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
     const lastSeen = "2026-06-26T00:00:00.000Z";
@@ -128,6 +137,15 @@ describe("/api/saved-searches/[id] delete+patch", () => {
     const res = await PATCH(jsonReq({ alert_frequency: "off" }, "PATCH"), ctx(UUID));
     expect(res.status).toBe(200);
     expect(captured).toEqual({ alert_frequency: "off", alert_enabled: false });
+  });
+
+  it("PATCH rejects an unsupported instant cadence", async () => {
+    getUserMock.mockResolvedValue({ data: { user: { id: "u1" } } });
+
+    const res = await PATCH(jsonReq({ alert_frequency: "instant" }, "PATCH"), ctx(UUID));
+
+    expect(res.status).toBe(400);
+    expect(fromMock).not.toHaveBeenCalled();
   });
 
   it("PATCH 400 with an empty body", async () => {

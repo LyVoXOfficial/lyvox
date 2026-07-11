@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
-import { hasAdminRole } from "@/lib/adminRole";
+import { getAdminAccess } from "@/lib/auth/requireAdmin";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -15,18 +15,10 @@ export const revalidate = 0;
 export async function GET(request: NextRequest) {
   try {
     const supabase = await supabaseServer();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ ok: false, error: "UNAUTHENTICATED" }, { status: 401 });
-    }
-
-    // Check if user is admin
-    const isAdmin = hasAdminRole(user);
-    if (!isAdmin) {
-      return NextResponse.json({ ok: false, error: "FORBIDDEN" }, { status: 403 });
+    const access = await getAdminAccess();
+    if (!access.ok) {
+      const status = access.reason === "unauthenticated" ? 401 : access.reason === "mfa_required" ? 428 : 403;
+      return NextResponse.json({ ok: false, error: access.reason.toUpperCase() }, { status });
     }
 
     const { searchParams } = new URL(request.url);
@@ -124,4 +116,3 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-

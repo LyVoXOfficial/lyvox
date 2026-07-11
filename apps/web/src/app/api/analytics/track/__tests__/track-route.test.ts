@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const getUserMock = vi.fn();
 const fromMock = vi.fn();
+const getIntegrationStatusMock = vi.fn();
 
 vi.mock("@/lib/supabaseServer", () => ({
   supabaseServer: async () => ({
@@ -17,6 +18,10 @@ vi.mock("@/lib/supabaseService", () => ({
   }),
 }));
 
+vi.mock("@/lib/integrations/registry", () => ({
+  getIntegrationStatus: (...args: unknown[]) => getIntegrationStatusMock(...args),
+}));
+
 vi.mock("@/lib/rateLimiter", () => ({
   createRateLimiter: () => async () => ({ success: true, limit: 120, remaining: 119, reset: 0, retryAfterSec: 0 }),
   withRateLimit: (handler: (...a: unknown[]) => unknown) => handler,
@@ -27,10 +32,14 @@ const upsertMock = vi.fn();
 
 const { POST } = await import("../route");
 
-function makeReq(body: unknown) {
+function makeReq(body: unknown, consent = true) {
+  const consentValue = encodeURIComponent(JSON.stringify({ analytics: true, functional: false, ts: Date.now() }));
   return new Request("https://x.test/api/analytics/track", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(consent ? { Cookie: `lyvox_cookie_consent=${consentValue}` } : {}),
+    },
     body: JSON.stringify(body),
   });
 }
@@ -39,9 +48,23 @@ beforeEach(() => {
   getUserMock.mockReset().mockResolvedValue({ data: { user: null } });
   fromMock.mockReset().mockReturnValue({ upsert: upsertMock });
   upsertMock.mockReset().mockResolvedValue({ data: null, error: null });
+  getIntegrationStatusMock.mockReset().mockResolvedValue({ effective: true });
 });
 
 describe("POST /api/analytics/track — F6", () => {
+  it("drops events before parsing or DB access when analytics capability is off", async () => {
+    getIntegrationStatusMock.mockResolvedValue({ effective: false });
+    const res = await POST(makeReq({ event_name: "advert_viewed" }));
+    expect((await res.json()).data.reason).toBe("capability_disabled");
+    expect(upsertMock).not.toHaveBeenCalled();
+  });
+
+  it("drops events without fresh analytics consent", async () => {
+    const res = await POST(makeReq({ event_name: "advert_viewed" }, false));
+    expect((await res.json()).data.reason).toBe("consent_required");
+    expect(upsertMock).not.toHaveBeenCalled();
+  });
+
   it("400 on missing event_name", async () => {
     const res = await POST(makeReq({}));
     expect(res.status).toBe(400);

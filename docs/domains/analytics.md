@@ -20,9 +20,9 @@ last_sync: 2025-10-28
 - Уважать пользовательские согласия на трекинг.
 - Экспорт метрик для продуктовых решений (листы приоритета).
 
-## Improvements & TODO Links
-- TODO.md: выбор провайдера, схема событий, базовые панели.
-- PLAN.md: включить в Scaling волну.
+## Candidate improvements
+
+Исторические идеи: выбор провайдера, схема событий, базовые панели и Scaling-волна. Исполнять только после включения в [Production master](../MASTER_PRODUCTION_TZ.md).
 
 ## Change Log
 - 2025-10-28: Initial analytics RFC.
@@ -31,5 +31,5 @@ last_sync: 2025-10-28
 
 ## 🔗 Related Docs
 
-**Development:** [admin-panel.md](../development/admin-panel.md) • [deep-audit-20251108.md](../development/deep-audit-20251108.md) • [MASTER_CHECKLIST.md](../development/MASTER_CHECKLIST.md)
+**Development:** [admin-panel.md](../development/admin-panel.md) • [deep-audit-20251108.md](../development/deep-audit-20251108.md) • [Production master](../MASTER_PRODUCTION_TZ.md)
 **Catalog:** [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md) • [FINAL_COMPLETION_REPORT.md](../catalog/FINAL_COMPLETION_REPORT.md)

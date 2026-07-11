@@ -19,7 +19,8 @@ type TopAdvert = {
 
 /**
  * TopAdvertCard — fetches from /api/top-adverts and renders the #1 advert
- * through the standard AdCard with a synthetic "boost" benefit badge.
+ * through the standard AdCard. Popularity is editorial ranking, not a paid
+ * benefit, so this component must never synthesize a boost/sponsored claim.
  * Owns its section header so the title never orphans when data is empty.
  * All data-fetch and route (/api/top-adverts) logic is preserved unchanged.
  */
@@ -71,14 +72,6 @@ export default function TopAdvertCard() {
   // Nothing to show — return null (no orphan header because title is inside)
   if (!advert) return null;
 
-  // Synthesise a "boost" benefit so BenefitsBadge renders the amber Boost pill
-  const boostBenefit = [
-    {
-      benefit_type: "boost",
-      valid_until: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-  ];
-
   return (
     <section className="space-y-4">
       <h2
@@ -97,7 +90,6 @@ export default function TopAdvertCard() {
           location={advert.location}
           image={advert.image}
           likeCount={advert.like_count}
-          benefits={boostBenefit}
         />
       </div>
     </section>

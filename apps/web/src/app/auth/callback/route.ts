@@ -3,6 +3,7 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { logger } from "@/lib/errorLogger";
 import { supabaseService } from "@/lib/supabaseService";
 import type { Database, TablesUpdate } from "@/lib/supabaseTypes";
+import { sanitizeInternalReturnTo } from "@/lib/security/safeReturnTo";
 
 export const runtime = "nodejs";
 
@@ -11,7 +12,7 @@ export async function GET(request: NextRequest) {
   const code = url.searchParams.get("code");
   const error = url.searchParams.get("error");
   const errorDescription = url.searchParams.get("error_description");
-  const next = url.searchParams.get("next") ?? "/profile";
+  const next = sanitizeInternalReturnTo(url.searchParams.get("next"), "/profile");
   const cookiesToSet: Array<{ name: string; value: string; options: CookieOptions }> = [];
 
   const supabase = createServerClient<Database>(

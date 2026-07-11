@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseService } from "@/lib/supabaseService";
 import { createErrorResponse, createSuccessResponse, ApiErrorCode } from "@/lib/apiErrors";
-import { isCapabilityEnabled } from "@/lib/capabilities";
+import { getIntegrationStatus } from "@/lib/integrations/registry";
 import type { Database, Tables, TablesInsert, TablesUpdate } from "@/lib/supabaseTypes";
 import { getTranslationProvider } from "@/lib/translations/provider";
 import {
@@ -238,7 +238,8 @@ export async function GET(request: Request) {
     return createErrorResponse(ApiErrorCode.UNAUTH, { status: 401, detail: "Cron auth required" });
   }
 
-  if (!isCapabilityEnabled("advert_translations")) {
+  const capability = await getIntegrationStatus("advert_translations");
+  if (!capability.effective) {
     return createSuccessResponse({
       disabled: true,
       processed: 0,

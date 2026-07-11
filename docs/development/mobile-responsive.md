@@ -221,8 +221,7 @@
 
 ## 🔗 Related Docs
 
-**Development:** [deep-audit-20251108.md](./deep-audit-20251108.md) • [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [database-schema.md](./database-schema.md) • [notifications.md](./notifications.md) • [README.md](./README.md)
-
+**Development:** [deep-audit-20251108.md](./deep-audit-20251108.md) • [Production master](../MASTER_PRODUCTION_TZ.md) • [database-schema.md](./database-schema.md) • [notifications.md](./notifications.md) • [README.md](./README.md)
 
 
 

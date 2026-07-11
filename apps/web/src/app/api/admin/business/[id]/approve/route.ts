@@ -1,6 +1,5 @@
-import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
-import { hasAdminRole } from "@/lib/adminRole";
+import { getAdminAccess } from "@/lib/auth/requireAdmin";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -20,18 +19,14 @@ export async function POST(
   const { id } = await context.params;
 
   // ── Auth: require admin ────────────────────────────────────────────────────
-  const cookieClient = await supabaseServer();
-  const {
-    data: { user },
-  } = await cookieClient.auth.getUser();
-
-  if (!user) {
-    return createErrorResponse(ApiErrorCode.UNAUTH, { status: 401 });
+  const access = await getAdminAccess();
+  if (!access.ok) {
+    return createErrorResponse(
+      access.reason === "unauthenticated" ? ApiErrorCode.UNAUTH : ApiErrorCode.FORBIDDEN,
+      { status: access.reason === "unauthenticated" ? 401 : access.reason === "mfa_required" ? 428 : 403 },
+    );
   }
-
-  if (!hasAdminRole(user)) {
-    return createErrorResponse(ApiErrorCode.FORBIDDEN, { status: 403 });
-  }
+  const user = access.user;
 
   // ── Service-role client for all writes ─────────────────────────────────────
   const service = await supabaseService();

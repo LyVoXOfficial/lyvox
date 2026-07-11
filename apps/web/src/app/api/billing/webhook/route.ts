@@ -10,6 +10,8 @@ import {
   ApiErrorCode,
 } from "@/lib/apiErrors";
 import Stripe from "stripe";
+import { getIntegrationStatus } from "@/lib/integrations/registry";
+import { getCommercialBoundary } from "@/lib/settings/platformSettings";
 
 export const runtime = "nodejs";
 
@@ -53,7 +55,7 @@ async function idempotencyGate(
 
   // Attempt to record this event. ignoreDuplicates: true → ON CONFLICT DO NOTHING.
   // data will be [{event_id}] on insert, [] on conflict.
-  const { data: newRows } = await we
+  const { data: newRows, error: insertError } = await we
     .upsert(
       {
         provider: "stripe",
@@ -66,16 +68,28 @@ async function idempotencyGate(
     )
     .select("event_id");
 
+  if (insertError) {
+    throw new Error(
+      `Failed to journal webhook ${event.id}: ${insertError.message}`,
+    );
+  }
+
   const isFirstDelivery = Array.isArray(newRows) && newRows.length > 0;
   if (isFirstDelivery) {
     return "process";
   }
 
   // Conflict: event_id already exists. Determine if it was processed successfully.
-  const { data: existing } = await we
+  const { data: existing, error: readError } = await we
     .select("processed_at")
     .eq("event_id", event.id)
     .maybeSingle();
+
+  if (readError) {
+    throw new Error(
+      `Failed to read webhook journal ${event.id}: ${readError.message}`,
+    );
+  }
 
   if (existing?.processed_at) {
     console.log(`Webhook ${event.id} already processed — skipping`);
@@ -97,13 +111,22 @@ async function markWebhookProcessed(
     .eq("event_id", eventId);
 
   if (error) {
-    // Non-fatal: the business effect already happened. Log so we can monitor
-    // events stuck with processed_at=NULL in the webhook_events table.
-    console.error(`Failed to mark webhook ${eventId} processed:`, error);
+    // Business effects are idempotent. Returning 5xx is safer than acknowledging
+    // an event while its journal still says it needs reconciliation.
+    throw new Error(
+      `Failed to mark webhook ${eventId} processed: ${error.message}`,
+    );
   }
 }
 
 export async function POST(req: NextRequest) {
+  // Cheap DB-authoritative boundary first. In the initial contact-only state,
+  // arbitrary public POSTs cannot amplify into health/approval registry reads.
+  const { launchMode, reconciliationEnabled } = await getCommercialBoundary();
+  if (launchMode === "contact_only" && !reconciliationEnabled) {
+    return createErrorResponse(ApiErrorCode.FEATURE_DISABLED, { status: 404 });
+  }
+
   const body = await req.text();
   const signature = req.headers.get("stripe-signature");
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -136,10 +159,56 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  const eventCapabilityName = (() => {
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object as Stripe.Checkout.Session;
+      return session.mode === "subscription" || session.metadata?.plan === "pro"
+        ? ("pro_subscriptions" as const)
+        : ("paid_boosts" as const);
+    }
+    if (
+      event.type === "customer.subscription.updated" ||
+      event.type === "customer.subscription.deleted" ||
+      event.type === "invoice.paid"
+    ) {
+      return "pro_subscriptions" as const;
+    }
+    if (
+      event.type === "payment_intent.succeeded" ||
+      event.type === "payment_intent.payment_failed"
+    ) {
+      return "paid_boosts" as const;
+    }
+    return null;
+  })();
+  const eventCapability = eventCapabilityName
+    ? await getIntegrationStatus(eventCapabilityName)
+    : null;
+
+  const reconciliationOnly = Boolean(
+    eventCapability && !eventCapability.effective,
+  );
+  if (reconciliationOnly && !reconciliationEnabled) {
+    return createSuccessResponse({
+      received: true,
+      ignored: true,
+      reason: "capability_disabled",
+    });
+  }
+
   const supabase = await supabaseService();
 
   // ── F1: Idempotency gate ──────────────────────────────────────────────────
-  const gate = await idempotencyGate(supabase, event);
+  let gate: "process" | "skip";
+  try {
+    gate = await idempotencyGate(supabase, event);
+  } catch (error) {
+    console.error("Webhook journal error:", error);
+    return createErrorResponse(ApiErrorCode.INTERNAL_ERROR, {
+      status: 500,
+      detail: "Webhook journal unavailable",
+    });
+  }
   if (gate === "skip") {
     return createSuccessResponse({ received: true, skipped: true });
   }
@@ -158,20 +227,43 @@ export async function POST(req: NextRequest) {
             session.client_reference_id ?? session.metadata?.user_id;
           if (!userId) {
             console.error(
-              "Pro subscription checkout: missing user id (client_reference_id / metadata.user_id)"
+              "Pro subscription checkout: missing user id (client_reference_id / metadata.user_id)",
+            );
+            break;
+          }
+
+          const customerId =
+            typeof session.customer === "string" ? session.customer : null;
+          if (!customerId) {
+            console.error(
+              "Pro subscription checkout: missing Stripe customer id",
+            );
+            break;
+          }
+
+          const { data: knownProfile, error: knownProfileError } =
+            await supabase
+              .from("profiles")
+              .select("id")
+              .eq("id", userId)
+              .eq("stripe_customer_id", customerId)
+              .maybeSingle();
+          if (knownProfileError || !knownProfile) {
+            console.error(
+              "Pro subscription checkout does not match a known LyVoX customer",
             );
             break;
           }
 
           const stripe = getStripe();
           const sub = await stripe.subscriptions.retrieve(
-            session.subscription as string
+            session.subscription as string,
           );
           const proUntil = periodEndISO(sub);
 
           if (proUntil === null) {
             console.error(
-              `checkout.session.completed: skipping pro_until update for sub ${session.subscription} — no current_period_end`
+              `checkout.session.completed: skipping pro_until update for sub ${session.subscription} — no current_period_end`,
             );
             break;
           }
@@ -187,7 +279,7 @@ export async function POST(req: NextRequest) {
           if (profileError) {
             console.error(
               "Failed to update profile for pro subscription:",
-              profileError
+              profileError,
             );
           }
           break;
@@ -202,78 +294,71 @@ export async function POST(req: NextRequest) {
           break;
         }
 
-        // Check if purchase already processed (idempotency at business-logic level)
-        const { data: existingPurchase } = await supabase
+        // Bind the signed event to the exact immutable purchase snapshot created
+        // before redirecting to Stripe. No prefix inference or dashboard-created
+        // session can mint a LyVoX entitlement.
+        const { data: purchase, error: purchaseError } = await supabase
           .from("purchases")
-          .select("id, status")
+          .select(
+            "id, user_id, advert_id, product_code, product_offer_version, amount_cents, currency, status, provider_session_id",
+          )
           .eq("id", purchaseId)
           .maybeSingle();
 
-        if (existingPurchase?.status === "completed") {
+        if (purchaseError || !purchase) {
+          console.error(
+            `Purchase ${purchaseId} not found for signed checkout session`,
+          );
+          break;
+        }
+
+        if (purchase.status === "completed") {
           console.log(`Purchase ${purchaseId} already processed`);
           break;
         }
 
-        // Update purchase status
-        const { error: updateError } = await supabase
-          .from("purchases")
-          .update({
-            status: "completed",
-            provider_payment_intent_id: session.payment_intent as string,
-          })
-          .eq("id", purchaseId);
+        const expectedAdvertId = purchase.advert_id ?? "";
+        const sessionMatchesPurchase =
+          purchase.provider_session_id === session.id &&
+          session.payment_status === "paid" &&
+          session.amount_total === purchase.amount_cents &&
+          session.currency?.toLowerCase() ===
+            (purchase.currency ?? "EUR").toLowerCase() &&
+          metadata.purchase_id === purchase.id &&
+          metadata.user_id === purchase.user_id &&
+          metadata.product_code === purchase.product_code &&
+          (metadata.advert_id ?? "") === expectedAdvertId;
 
-        if (updateError) {
-          console.error("Failed to update purchase:", updateError);
+        if (!sessionMatchesPurchase) {
+          console.error(
+            `Checkout session ${session.id} does not match purchase ${purchaseId}`,
+          );
           break;
         }
 
-        // Get purchase details
-        const { data: purchase } = await supabase
-          .from("purchases")
-          .select("user_id, product_code, amount_cents, currency")
-          .eq("id", purchaseId)
-          .single();
-
-        if (!purchase) {
-          console.error(`Purchase ${purchaseId} not found`);
-          break;
-        }
-
-        // Get product details
+        // Resolve the versioned offer contract that was accepted at checkout.
         const { data: product } = await supabase
           .from("products")
-          .select("code")
+          .select(
+            "code, capability, benefit_type, duration_days, offer_version",
+          )
           .eq("code", purchase.product_code)
+          .eq("capability", "paid_boosts")
           .single();
 
-        if (!product) {
+        if (
+          !product ||
+          product.offer_version !== purchase.product_offer_version
+        ) {
           console.error(`Product ${purchase.product_code} not found`);
           break;
         }
 
-        // Create benefits based on product type
-        const benefitType = product.code.startsWith("boost") ? "boost" :
-                          product.code.startsWith("premium") ? "premium" :
-                          product.code.startsWith("hide_phone") ? "hide_phone" :
-                          product.code.startsWith("reserve") ? "reserve" :
-                          product.code.startsWith("highlight") ? "highlight" : null;
-
-        if (benefitType && purchase.user_id) {
+        if (purchase.user_id) {
           // purchase.user_id is nullable after GDPR erasure; skip benefit
           // creation if the account has been erased (no user to grant it to).
-          // Calculate valid_until based on product code
-          let validUntil = new Date();
-          if (product.code.includes("7d")) {
-            validUntil.setDate(validUntil.getDate() + 7);
-          } else if (product.code.includes("30d")) {
-            validUntil.setDate(validUntil.getDate() + 30);
-          } else if (product.code.includes("90d")) {
-            validUntil.setDate(validUntil.getDate() + 90);
-          } else {
-            // Default to 30 days
-            validUntil.setDate(validUntil.getDate() + 30);
-          }
+          const validUntil = new Date();
+          validUntil.setDate(validUntil.getDate() + product.duration_days);
 
           const benefitData: {
             purchase_id: string;
@@ -284,21 +369,25 @@ export async function POST(req: NextRequest) {
           } = {
             purchase_id: purchaseId,
             user_id: purchase.user_id,
-            benefit_type: benefitType,
+            benefit_type: product.benefit_type,
             valid_until: validUntil.toISOString(),
           };
 
-          // Add advert_id if provided in metadata
-          if (metadata.advert_id) {
-            benefitData.advert_id = metadata.advert_id;
+          if (purchase.advert_id) {
+            benefitData.advert_id = purchase.advert_id;
           }
 
           const { error: benefitError } = await supabase
             .from("benefits")
-            .insert(benefitData);
+            .upsert(benefitData, {
+              onConflict: "purchase_id,benefit_type",
+              ignoreDuplicates: true,
+            });
 
           if (benefitError) {
-            console.error("Failed to create benefit:", benefitError);
+            throw new Error(
+              `Failed to create benefit: ${benefitError.message}`,
+            );
           } else if (benefitData.advert_id) {
             // PERF-01: a boost benefit changes the advert's BenefitsBadge — bust
             // the cached /ad/[id] detail so the badge appears without the delay.
@@ -306,11 +395,29 @@ export async function POST(req: NextRequest) {
           }
         }
 
+        const { error: updateError } = await supabase
+          .from("purchases")
+          .update({
+            status: "completed",
+            provider_payment_intent_id: session.payment_intent as string,
+          })
+          .eq("id", purchaseId)
+          .eq("status", "pending");
+
+        if (updateError) {
+          throw new Error(
+            `Failed to complete purchase: ${updateError.message}`,
+          );
+        }
+
         // Log action
         await supabase.from("logs").insert({
           user_id: purchase.user_id,
           action: "purchase_completed",
-          details: { purchase_id: purchaseId, product_code: purchase.product_code } as never,
+          details: {
+            purchase_id: purchaseId,
+            product_code: purchase.product_code,
+          } as never,
         });
 
         break;
@@ -329,7 +436,7 @@ export async function POST(req: NextRequest) {
           proUntil = periodEndISO(sub);
           if (proUntil === null) {
             console.error(
-              `customer.subscription.updated: skipping pro_until update for sub ${sub.id} — no current_period_end`
+              `customer.subscription.updated: skipping pro_until update for sub ${sub.id} — no current_period_end`,
             );
             break;
           }
@@ -345,7 +452,7 @@ export async function POST(req: NextRequest) {
         if (profileError) {
           console.error(
             "Failed to update profile on subscription.updated:",
-            profileError
+            profileError,
           );
         }
         break;
@@ -363,7 +470,7 @@ export async function POST(req: NextRequest) {
         if (profileError) {
           console.error(
             "Failed to update profile on subscription.deleted:",
-            profileError
+            profileError,
           );
         }
         break;
@@ -371,8 +478,7 @@ export async function POST(req: NextRequest) {
 
       case "invoice.paid": {
         const invoice = event.data.object as Stripe.Invoice;
-        const subRef =
-          invoice.parent?.subscription_details?.subscription;
+        const subRef = invoice.parent?.subscription_details?.subscription;
         if (!subRef) {
           // Not a subscription invoice — ignore
           break;
@@ -385,7 +491,7 @@ export async function POST(req: NextRequest) {
 
         if (proUntil === null) {
           console.error(
-            `invoice.paid: skipping pro_until update for sub ${subRef} — no current_period_end`
+            `invoice.paid: skipping pro_until update for sub ${subRef} — no current_period_end`,
           );
           break;
         }
@@ -398,7 +504,7 @@ export async function POST(req: NextRequest) {
         if (profileError) {
           console.error(
             "Failed to update profile on invoice.paid:",
-            profileError
+            profileError,
           );
         }
         break;
@@ -430,7 +536,10 @@ export async function POST(req: NextRequest) {
           await supabase.from("logs").insert({
             user_id: purchase.user_id,
             action: "purchase_failed",
-            details: { purchase_id: purchase.id, payment_intent_id: paymentIntent.id } as never,
+            details: {
+              purchase_id: purchase.id,
+              payment_intent_id: paymentIntent.id,
+            } as never,
           });
         }
         break;

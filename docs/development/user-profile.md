@@ -183,9 +183,8 @@ GET /api/profile/adverts?status=active&page=1
 
 ## 🔗 Related Docs
 
-**Development:** [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [database-schema.md](./database-schema.md) • [deep-audit-20251108.md](./deep-audit-20251108.md) • [user-dashboard.md](./user-dashboard.md)
+**Development:** [Production master](../MASTER_PRODUCTION_TZ.md) • [database-schema.md](./database-schema.md) • [deep-audit-20251108.md](./deep-audit-20251108.md) • [user-dashboard.md](./user-dashboard.md)
 **Catalog:** [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md)
-
 
 
 

@@ -49,7 +49,9 @@ const mutateLimiter = createRateLimiter({
   prefix: "saved:mutate",
 });
 const uuidSchema = z.string().uuid();
-const alertFrequencySchema = z.enum(["instant", "daily", "off"]);
+// Delivery is executed by the daily production cron. Do not expose a cadence
+// that the scheduler cannot honour.
+const alertFrequencySchema = z.enum(["daily", "off"]);
 const patchSchema = z
   .object({
     alert_enabled: z.boolean().optional(),

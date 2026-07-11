@@ -8,6 +8,8 @@ import type Stripe from "stripe";
 const constructEventMock = vi.fn();
 const subscriptionsRetrieveMock = vi.fn();
 const fromServiceMock = vi.fn();
+const getIntegrationStatusMock = vi.fn();
+const getCommercialBoundaryMock = vi.fn();
 
 vi.mock("@/lib/stripe/client", () => ({
   getStripe: (): Pick<Stripe, "webhooks" | "subscriptions"> =>
@@ -25,6 +27,14 @@ vi.mock("@/lib/supabaseService", () => ({
   supabaseService: async () => ({
     from: fromServiceMock,
   }),
+}));
+
+vi.mock("@/lib/integrations/registry", () => ({
+  getIntegrationStatus: (...args: unknown[]) => getIntegrationStatusMock(...args),
+}));
+
+vi.mock("@/lib/settings/platformSettings", () => ({
+  getCommercialBoundary: () => getCommercialBoundaryMock(),
 }));
 
 // Import the route after mocks are registered
@@ -106,6 +116,20 @@ function makeUpdateChain(
   };
 }
 
+function makeKnownProfileChain(
+  updateSpy: ReturnType<typeof vi.fn>,
+  eqSpy: ReturnType<typeof vi.fn>,
+) {
+  const selectChain = {
+    eq: () => selectChain,
+    maybeSingle: async () => ({ data: { id: "known-profile" }, error: null }),
+  };
+  return {
+    ...makeUpdateChain(updateSpy, eqSpy),
+    select: () => selectChain,
+  };
+}
+
 /**
  * F1: webhook_events table mock.
  *
@@ -115,16 +139,28 @@ function makeUpdateChain(
  *                         false → processed_at is null (retry of failed event)
  */
 function makeWebhookEventsChain(
-  options: { isFirstDelivery?: boolean; alreadyProcessed?: boolean } = {}
+  options: {
+    isFirstDelivery?: boolean;
+    alreadyProcessed?: boolean;
+    upsertError?: { message: string } | null;
+    readError?: { message: string } | null;
+    markError?: { message: string } | null;
+  } = {}
 ) {
-  const { isFirstDelivery = true, alreadyProcessed = false } = options;
+  const {
+    isFirstDelivery = true,
+    alreadyProcessed = false,
+    upsertError = null,
+    readError = null,
+    markError = null,
+  } = options;
   return {
     // Called as: supabase.from("webhook_events").upsert({...}, {...}).select("event_id")
     upsert: (_data: unknown, _opts: unknown) => ({
       select: (_cols: string) =>
         Promise.resolve({
           data: isFirstDelivery ? [{ event_id: "evt_test" }] : [],
-          error: null,
+          error: upsertError,
         }),
     }),
     // Called as: supabase.from("webhook_events").select("processed_at").eq(...).maybeSingle()
@@ -138,13 +174,13 @@ function makeWebhookEventsChain(
                 ? new Date(1000000000000).toISOString()
                 : null,
             },
-            error: null,
+            error: readError,
           }),
       }),
     }),
     // Called as: supabase.from("webhook_events").update({...}).eq("event_id", ...)
     update: (_data: unknown) => ({
-      eq: (_col: string, _val: unknown) => Promise.resolve({ error: null }),
+      eq: (_col: string, _val: unknown) => Promise.resolve({ error: markError }),
     }),
   };
 }
@@ -154,68 +190,56 @@ function makeWebhookEventsChain(
  * Now includes webhook_events table support (F1).
  */
 function makeBoostSupabaseImpl() {
-  const purchaseSelectMaybeSingleCalled: unknown[] = [];
-  const purchaseSelectSingleCalled: unknown[] = [];
-  let selectCallCount = 0;
-
   return (table: string) => {
     if (table === "webhook_events") {
       return makeWebhookEventsChain();
     }
     if (table === "purchases") {
       return {
-        select: (_cols: string) => {
-          selectCallCount++;
-          const callIndex = selectCallCount;
-          return {
-            eq: (_col: string, _val: unknown) => {
-              if (callIndex === 1) {
-                // idempotency check
-                return {
-                  maybeSingle: async () => {
-                    purchaseSelectMaybeSingleCalled.push(_val);
-                    return { data: { id: _val, status: "pending" }, error: null };
-                  },
-                };
-              }
-              // fetch details
-              return {
-                single: async () => {
-                  purchaseSelectSingleCalled.push(_val);
-                  return {
-                    data: {
-                      user_id: "user-boost",
-                      product_code: "boost_7d",
-                      amount_cents: 500,
-                      currency: "eur",
-                    },
-                    error: null,
-                  };
-                },
-              };
-            },
-          };
-        },
-        update: (_data: unknown) => ({
-          eq: async () => ({ error: null }),
-        }),
-      };
-    }
-    if (table === "products") {
-      return {
         select: () => ({
-          eq: () => ({
-            single: async () => ({
-              data: { code: "boost_7d" },
+          eq: (_col: string, value: unknown) => ({
+            maybeSingle: async () => ({
+              data: {
+                id: value,
+                user_id: "user-boost",
+                advert_id: "advert-xyz",
+                product_code: "boost_7d",
+                product_offer_version: 1,
+                amount_cents: 500,
+                currency: "eur",
+                status: "pending",
+                provider_session_id: "cs_boost_001",
+              },
               error: null,
             }),
           }),
         }),
+        update: (_data: unknown) => ({
+          eq: () => ({ eq: async () => ({ error: null }) }),
+        }),
+      };
+    }
+    if (table === "products") {
+      const productChain = {
+        eq: () => productChain,
+        single: async () => ({
+          data: {
+            code: "boost_7d",
+            capability: "paid_boosts",
+            benefit_type: "boost",
+            duration_days: 7,
+            offer_version: 1,
+          },
+          error: null,
+        }),
+      };
+      return {
+        select: () => productChain,
       };
     }
     if (table === "benefits") {
       return {
-        insert: async () => ({ error: null }),
+        upsert: async () => ({ error: null }),
       };
     }
     if (table === "logs") {
@@ -235,6 +259,28 @@ describe("POST /api/billing/webhook", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     process.env.STRIPE_WEBHOOK_SECRET = "whsec_test_secret";
+    getIntegrationStatusMock.mockResolvedValue({ effective: true });
+    getCommercialBoundaryMock.mockResolvedValue({
+      launchMode: "paid_platform_services",
+      reconciliationEnabled: false,
+      configAvailable: true,
+    });
+  });
+
+  it("keeps Stripe and the financial journal unreachable in contact_only", async () => {
+    getCommercialBoundaryMock.mockResolvedValue({
+      launchMode: "contact_only",
+      reconciliationEnabled: false,
+      configAvailable: true,
+    });
+    getIntegrationStatusMock.mockResolvedValue({ effective: false });
+
+    const res = await POST(makeWebhookReq() as unknown as import("next/server").NextRequest);
+
+    expect(res.status).toBe(404);
+    expect(constructEventMock).not.toHaveBeenCalled();
+    expect(getIntegrationStatusMock).not.toHaveBeenCalled();
+    expect(fromServiceMock).not.toHaveBeenCalled();
   });
 
   // ── Bad signature → 400 ───────────────────────────────────────────────────
@@ -250,6 +296,7 @@ describe("POST /api/billing/webhook", () => {
     expect(res.status).toBe(400);
     expect(body.ok).toBe(false);
     expect(body.error).toBe("BAD_INPUT");
+    expect(getIntegrationStatusMock).not.toHaveBeenCalled();
   });
 
   // ── Missing stripe-signature header → 400 ────────────────────────────────
@@ -294,7 +341,7 @@ describe("POST /api/billing/webhook", () => {
     const eqSpy = vi.fn();
     fromServiceMock.mockImplementation((table: string) => {
       if (table === "webhook_events") return makeWebhookEventsChain();
-      if (table === "profiles") return makeUpdateChain(updateSpy, eqSpy);
+      if (table === "profiles") return makeKnownProfileChain(updateSpy, eqSpy);
       throw new Error("Unexpected table: " + table);
     });
 
@@ -559,11 +606,20 @@ describe("POST /api/billing/webhook", () => {
       data: {
         object: {
           mode: "payment",
+          id: "cs_boost_001",
           client_reference_id: "purchase-boost-id-001",
           customer: "cus_boost",
           payment_intent: "pi_boost_123",
+          payment_status: "paid",
+          amount_total: 500,
+          currency: "eur",
           subscription: null,
-          metadata: { advert_id: "advert-xyz" },
+          metadata: {
+            purchase_id: "purchase-boost-id-001",
+            user_id: "user-boost",
+            product_code: "boost_7d",
+            advert_id: "advert-xyz",
+          },
         } as Partial<Stripe.Checkout.Session>,
       },
     } as Stripe.Event);
@@ -660,5 +716,75 @@ describe("POST /api/billing/webhook", () => {
       expect.objectContaining({ pro_until: new Date(periodEnd * 1000).toISOString() })
     );
     expect(eqSpy).toHaveBeenCalledWith("stripe_customer_id", "cus_retry");
+  });
+
+  it("reconciles a known subscription cancellation while new sales are emergency-stopped", async () => {
+    getIntegrationStatusMock.mockResolvedValue({ effective: false });
+    getCommercialBoundaryMock.mockResolvedValue({
+      launchMode: "contact_only",
+      reconciliationEnabled: true,
+      configAvailable: true,
+    });
+    const sub = makeSubscriptionStub({ customer: "cus_emergency_cancel", status: "canceled" });
+    constructEventMock.mockReturnValue({
+      id: "evt_emergency_cancel",
+      type: "customer.subscription.deleted",
+      data: { object: sub },
+    } as Stripe.Event);
+
+    const updateSpy = vi.fn();
+    const eqSpy = vi.fn();
+    fromServiceMock.mockImplementation((table: string) => {
+      if (table === "webhook_events") return makeWebhookEventsChain();
+      if (table === "profiles") return makeUpdateChain(updateSpy, eqSpy);
+      throw new Error("Unexpected table: " + table);
+    });
+
+    const res = await POST(makeWebhookReq() as unknown as import("next/server").NextRequest);
+
+    expect(res.status).toBe(200);
+    expect(updateSpy).toHaveBeenCalledWith({ pro_until: null });
+    expect(eqSpy).toHaveBeenCalledWith("stripe_customer_id", "cus_emergency_cancel");
+  });
+
+  it("returns 500 without business effects when the webhook cannot be journaled", async () => {
+    constructEventMock.mockReturnValue({
+      id: "evt_journal_down",
+      type: "payment_intent.succeeded",
+      data: { object: { id: "pi_test" } },
+    } as Stripe.Event);
+    fromServiceMock.mockImplementation((table: string) => {
+      if (table === "webhook_events") {
+        return makeWebhookEventsChain({ upsertError: { message: "db unavailable" } });
+      }
+      throw new Error(`Unexpected business table: ${table}`);
+    });
+
+    const response = await POST(
+      makeWebhookReq() as unknown as import("next/server").NextRequest,
+    );
+
+    expect(response.status).toBe(500);
+    expect(fromServiceMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns 500 when an idempotent effect cannot be marked processed", async () => {
+    constructEventMock.mockReturnValue({
+      id: "evt_mark_down",
+      type: "payment_intent.succeeded",
+      data: { object: { id: "pi_test" } },
+    } as Stripe.Event);
+    fromServiceMock.mockImplementation((table: string) => {
+      if (table === "webhook_events") {
+        return makeWebhookEventsChain({ markError: { message: "db unavailable" } });
+      }
+      throw new Error(`Unexpected business table: ${table}`);
+    });
+
+    const response = await POST(
+      makeWebhookReq() as unknown as import("next/server").NextRequest,
+    );
+
+    expect(response.status).toBe(500);
   });
 });

@@ -1,6 +1,7 @@
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
 import { hasAdminRole } from "@/lib/adminRole";
+import { getAdminAccess } from "@/lib/auth/requireAdmin";
 import {
   createErrorResponse,
   createSuccessResponse,
@@ -113,7 +114,7 @@ export async function GET(
   const business = row as BusinessRow;
 
   // ── Determine viewer privilege ──────────────────────────────────────────────
-  const isAdminUser = hasAdminRole(user);
+  const isAdminUser = hasAdminRole(user) && (await getAdminAccess()).ok;
 
   let isMember = false;
   if (user && !isAdminUser) {

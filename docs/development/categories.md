@@ -189,9 +189,8 @@ export async function generateMetadata({
 ## 🔗 Related Docs
 
 **Domains:** [adverts.md](../domains/adverts.md)
-**Development:** [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [search-filters.md](./search-filters.md) • [backend-logic.md](./backend-logic.md)
+**Development:** [Production master](../MASTER_PRODUCTION_TZ.md) • [search-filters.md](./search-filters.md) • [backend-logic.md](./backend-logic.md)
 **Catalog:** [CATALOG_IMPLEMENTATION_STATUS.md](../catalog/CATALOG_IMPLEMENTATION_STATUS.md)
-
 
 
 

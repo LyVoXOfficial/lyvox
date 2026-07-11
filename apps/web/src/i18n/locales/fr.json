@@ -3,6 +3,53 @@
     "title": "LyVoX",
     "description": "Place de marché: biens, services, immobilier"
   },
+  "access_gate": {
+    "meta_title": "LyVoX — Aperçu privé",
+    "meta_description": "LyVoX prépare son lancement public en Belgique.",
+    "skip_to_content": "Aller au contenu",
+    "status": "Aperçu privé",
+    "eyebrow": "Une nouvelle place de marché pour la Belgique",
+    "title": "Un marché local plus serein prend forme.",
+    "body": "LyVoX se prépare pour sa première ouverture au public. Pour le moment, l’accès est réservé aux personnes qui testent le service.",
+    "form_eyebrow": "Accès sur invitation",
+    "form_title": "Entrer dans l’aperçu privé",
+    "form_body": "Utilisez le code d’accès communiqué à l’équipe de test.",
+    "code_label": "Code d’accès",
+    "code_placeholder": "Saisissez votre code d’accès",
+    "security_check": "Contrôle de sécurité",
+    "security_unavailable": "Le contrôle de sécurité n’a pas pu se charger. Rechargez la page et réessayez.",
+    "reload": "Recharger la page",
+    "submit": "Ouvrir LyVoX",
+    "privacy_note": "Le code est vérifié de manière sécurisée. Le cookie d’accès ne le contient jamais.",
+    "invalid": "Ce code d’accès n’est pas valide.",
+    "captcha": "Effectuez le contrôle de sécurité et réessayez.",
+    "rate_limited": "Trop de tentatives. Patientez quelques minutes avant de réessayer.",
+    "unavailable": "L’accès privé est temporairement indisponible. Vérifiez la configuration du serveur.",
+    "unlocked_eyebrow": "Aperçu déverrouillé",
+    "unlocked_title": "Ce navigateur peut accéder à LyVoX.",
+    "unlocked_body": "Reprenez là où vous vous êtes arrêté ou verrouillez à nouveau l’aperçu sur cet appareil.",
+    "continue": "Continuer vers LyVoX",
+    "relock": "Verrouiller cet aperçu",
+    "footer": "Conçu en Belgique pour les achats et ventes de proximité.",
+    "build_label": "Version privée"
+  },
+  "account_recovery": {
+    "reset_title": "Choisissez un nouveau mot de passe",
+    "reset_body": "Utilisez un mot de passe que vous n’utilisez pour aucun autre service.",
+    "new_password": "Nouveau mot de passe",
+    "password_hint": "Au moins 8 caractères et 3 éléments parmi : majuscule, minuscule, chiffre, symbole.",
+    "confirm_password": "Confirmez le nouveau mot de passe",
+    "password_weak": "Utilisez au moins 8 caractères et 3 éléments parmi : majuscule, minuscule, chiffre, symbole.",
+    "password_mismatch": "Les mots de passe ne correspondent pas.",
+    "update_failed": "Le mot de passe n’a pas pu être mis à jour. Demandez un nouveau lien de récupération et réessayez.",
+    "updated_title": "Mot de passe mis à jour",
+    "updated_body": "Vos autres sessions ont été fermées. Reconnectez-vous avec le nouveau mot de passe.",
+    "updated_sessions_warning": "Le mot de passe a été modifié, mais LyVoX n’a pas pu confirmer la fermeture de toutes les autres sessions. Vérifiez maintenant vos sessions actives.",
+    "review_sessions": "Vérifier les sessions actives",
+    "back_to_login": "Retour à la connexion",
+    "updating": "Mise à jour du mot de passe…",
+    "update_password": "Mettre à jour le mot de passe"
+  },
   "nav": {
     "sell": "Vendre",
     "sign_in": "Se connecter",
@@ -28,6 +75,8 @@
     "payment_title": "Prêt pour les paiements locaux",
     "payment_body": "La facturation est configurée pour prendre en charge les méthodes de paiement belges via les paramètres du fournisseur.",
     "payment_action": "Voir la facturation",
+    "contact_title": "Mise en relation uniquement",
+    "contact_body": "Convenez directement du paiement et de la remise avec l’autre personne ; LyVoX ne gère pas l’argent de l’objet.",
     "report_title": "Signaler les offres suspectes",
     "report_body": "Gardez si possible les conversations de paiement et de livraison au sein de LyVoX.",
     "report_action": "Contacter le support"
@@ -231,6 +280,7 @@
     "faq_title": "Questions fréquentes",
     "faq_q1": "Combien coûte la publication ?",
     "faq_a1": "Publier une annonce classique est gratuit. Les boosts payants optionnels augmentent la visibilité et sont toujours signalés comme sponsorisés.",
+    "faq_a1_contact": "Publier une annonce classique est gratuit. La promotion payante n’est pas disponible dans la version actuelle de mise en relation.",
     "faq_q2": "Faut-il un compte professionnel ?",
     "faq_a2": "Non — les particuliers confirment simplement e-mail et téléphone. Les entreprises sont vérifiées via BCE/TVA et reçoivent un profil vendeur public.",
     "faq_q3": "Comment les acheteurs me contactent-ils ?",
@@ -1661,8 +1711,11 @@
     },
     "boost": {
       "title": "Boostez Votre Annonce",
-      "description": "Choisissez un package de boost pour augmenter la visibilité de votre annonce",
-      "features": "Visibilité accrue dans les résultats de recherche",
+      "description": "Vérifiez l’avantage exact, la durée et le traitement TVA avant de payer",
+      "features": "Avantage pour l’annonce",
+      "duration_days": "{count} jours",
+      "vat_inclusive": "TVA comprise",
+      "vat_exclusive": "TVA non comprise",
       "no_products": "Aucun produit de boost disponible"
     },
     "checkout": {
@@ -1728,7 +1781,7 @@
   "auth": {
     "backToMarketplace": "Retour au marché",
     "protectedAccess": "Accès sécurisé au compte",
-    "heroHeading": "Connectez-vous pour gérer vos annonces, messages et paiements sécurisés.",
+    "heroHeading": "Connectez-vous pour gérer vos annonces, messages et favoris.",
     "heroSubtitle": "Utilisez un mot de passe, un lien magique ou OAuth. Nous gardons les actions de compte claires et vous ramenons à la tâche du marché que vous aviez commencée.",
     "featureSellerTools": "Outils pour vendeurs vérifiés",
     "featureSavedListings": "Annonces enregistrées",
@@ -1999,7 +2052,6 @@
     "view_results": "Voir les résultats",
     "alerts": "Alertes",
     "alert_frequency": "Notifier",
-    "alert_instant": "Immédiatement",
     "alert_daily": "Chaque jour",
     "alert_off": "Désactivé",
     "delete": "Supprimer",
@@ -2009,7 +2061,7 @@
     "signin_prompt": "Connectez-vous pour enregistrer vos recherches sur tous vos appareils et recevoir des alertes.",
     "alert_title": "Nouveaux résultats : {name}",
     "alert_body": "{count} nouvelle(s) annonce(s) correspondent à votre recherche enregistrée.",
-    "emptyDesc": "Enregistrez une recherche pour être alerté dès qu'une annonce correspond.",
+    "emptyDesc": "Enregistrez une recherche pour recevoir une alerte quotidienne en cas de nouvelles correspondances.",
     "startSearch": "Lancer une recherche"
   },
   "pro": {
@@ -2024,7 +2076,7 @@
     "submit_label": "Soumettre l'inscription",
     "intro": {
       "heading": "Identité de l'entreprise",
-      "body": "Enregistrez votre entreprise sur LyVoX pour accéder aux fonctionnalités vendeur professionnel, un badge d'entreprise vérifiée et la conformité totale au droit belge de la consommation.",
+      "body": "Créez un profil professionnel et renseignez les informations utiles aux acheteurs. La vérification et le statut juridique sont affichés séparément.",
       "requires_phone": "Un numéro de téléphone vérifié est requis pour devenir vendeur professionnel."
     },
     "identity": {
@@ -2125,6 +2177,7 @@
       "pending_invite": "Invitation en attente",
       "unnamed_member": "Membre",
       "upgrade_heading": "Passer à Pro",
+      "active_heading": "Pro actif",
       "upgrade_body": "Débloquez des fonctionnalités vendeur avancées avec un abonnement Pro.",
       "upgrade": {
         "cta": "Passer à Pro",

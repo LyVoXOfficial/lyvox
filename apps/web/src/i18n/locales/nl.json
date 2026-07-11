@@ -3,6 +3,53 @@
     "title": "LyVoX",
     "description": "Marktplaats voor goederen, diensten en vastgoed"
   },
+  "access_gate": {
+    "meta_title": "LyVoX — Privévoorvertoning",
+    "meta_description": "LyVoX bereidt de publieke lancering in België voor.",
+    "skip_to_content": "Ga naar de inhoud",
+    "status": "Privévoorvertoning",
+    "eyebrow": "Een nieuwe marktplaats voor België",
+    "title": "Een rustigere marktplaats krijgt vorm.",
+    "body": "LyVoX wordt klaargemaakt voor de eerste publieke release. De toegang is voorlopig beperkt tot de mensen die de dienst testen.",
+    "form_eyebrow": "Toegang op uitnodiging",
+    "form_title": "Open de privévoorvertoning",
+    "form_body": "Gebruik de toegangscode die met het testteam is gedeeld.",
+    "code_label": "Toegangscode",
+    "code_placeholder": "Voer je toegangscode in",
+    "security_check": "Beveiligingscontrole",
+    "security_unavailable": "De beveiligingscontrole kon niet laden. Laad de pagina opnieuw en probeer het nog eens.",
+    "reload": "Pagina opnieuw laden",
+    "submit": "Open LyVoX",
+    "privacy_note": "De code wordt veilig gecontroleerd. De toegangscookie bevat de code nooit.",
+    "invalid": "Deze toegangscode is niet geldig.",
+    "captcha": "Voltooi de beveiligingscontrole en probeer opnieuw.",
+    "rate_limited": "Te veel pogingen. Wacht enkele minuten en probeer opnieuw.",
+    "unavailable": "Privétoegang is tijdelijk niet beschikbaar. Controleer de serverconfiguratie.",
+    "unlocked_eyebrow": "Voorvertoning ontgrendeld",
+    "unlocked_title": "Deze browser heeft toegang tot LyVoX.",
+    "unlocked_body": "Ga verder waar je gebleven was of vergrendel de voorvertoning opnieuw op dit apparaat.",
+    "continue": "Ga verder naar LyVoX",
+    "relock": "Vergrendel deze voorvertoning",
+    "footer": "Gebouwd in België voor lokaal kopen en verkopen.",
+    "build_label": "Privéversie"
+  },
+  "account_recovery": {
+    "reset_title": "Kies een nieuw wachtwoord",
+    "reset_body": "Gebruik een wachtwoord dat je niet voor een andere dienst gebruikt.",
+    "new_password": "Nieuw wachtwoord",
+    "password_hint": "Minstens 8 tekens en 3 van: hoofdletter, kleine letter, cijfer, symbool.",
+    "confirm_password": "Bevestig nieuw wachtwoord",
+    "password_weak": "Gebruik minstens 8 tekens en 3 van: hoofdletter, kleine letter, cijfer, symbool.",
+    "password_mismatch": "De wachtwoorden komen niet overeen.",
+    "update_failed": "Het wachtwoord kon niet worden bijgewerkt. Vraag een nieuwe herstellink aan en probeer opnieuw.",
+    "updated_title": "Wachtwoord bijgewerkt",
+    "updated_body": "Je andere sessies zijn gesloten. Meld je opnieuw aan met het nieuwe wachtwoord.",
+    "updated_sessions_warning": "Het wachtwoord is gewijzigd, maar LyVoX kon niet bevestigen dat alle andere sessies zijn gesloten. Controleer nu je actieve sessies.",
+    "review_sessions": "Actieve sessies controleren",
+    "back_to_login": "Terug naar aanmelden",
+    "updating": "Wachtwoord bijwerken…",
+    "update_password": "Wachtwoord bijwerken"
+  },
   "nav": {
     "sell": "Verkopen",
     "sign_in": "Inloggen",
@@ -28,6 +75,8 @@
     "payment_title": "Klaar voor lokale betalingen",
     "payment_body": "Facturatie is ingesteld om Belgische betaalmethoden via providerinstellingen te ondersteunen.",
     "payment_action": "Facturatie bekijken",
+    "contact_title": "Bewust alleen contact",
+    "contact_body": "Spreek betaling en overdracht rechtstreeks met de andere persoon af; LyVoX verwerkt geen geld voor het zoekertje.",
     "report_title": "Meld verdachte deals",
     "report_body": "Houd gesprekken over betaling en verzending waar mogelijk binnen LyVoX.",
     "report_action": "Contacteer support"
@@ -231,6 +280,7 @@
     "faq_title": "Veelgestelde vragen",
     "faq_q1": "Wat kost het plaatsen?",
     "faq_a1": "Een gewoon zoekertje plaatsen is gratis. Optionele betaalde boosts vergroten de zichtbaarheid en zijn altijd gemarkeerd als gepromoot.",
+    "faq_a1_contact": "Een gewoon zoekertje plaatsen is gratis. Betaalde promotie is niet beschikbaar in de huidige contact-only versie.",
     "faq_q2": "Heb ik een zakelijk account nodig?",
     "faq_a2": "Nee — particulieren bevestigen enkel e-mail en telefoon. Bedrijven worden geverifieerd via KBO/btw en krijgen een publiek handelaarsprofiel.",
     "faq_q3": "Hoe nemen kopers contact op?",
@@ -1661,8 +1711,11 @@
     },
     "boost": {
       "title": "Boost Uw Advertentie",
-      "description": "Kies een boostpakket om de zichtbaarheid van uw advertentie te vergroten",
-      "features": "Hogere zichtbaarheid in zoekresultaten",
+      "description": "Bekijk vóór betaling het exacte voordeel, de duur en de btw-behandeling",
+      "features": "Voordeel voor het zoekertje",
+      "duration_days": "{count} dagen",
+      "vat_inclusive": "Btw inbegrepen",
+      "vat_exclusive": "Btw niet inbegrepen",
       "no_products": "Geen boostproducten beschikbaar"
     },
     "checkout": {
@@ -1728,7 +1781,7 @@
   "auth": {
     "backToMarketplace": "Terug naar de marktplaats",
     "protectedAccess": "Beveiligde accounttoegang",
-    "heroHeading": "Meld u aan om advertenties, berichten en vertrouwde betalingen te beheren.",
+    "heroHeading": "Meld u aan om zoekertjes, berichten en bewaarde items te beheren.",
     "heroSubtitle": "Gebruik een wachtwoord, magische link of OAuth. We houden accountacties helder en brengen u terug naar precies de marktplaatstaak waarmee u begon.",
     "featureSellerTools": "Tools voor geverifieerde verkopers",
     "featureSavedListings": "Opgeslagen advertenties",
@@ -1999,7 +2052,6 @@
     "view_results": "Resultaten bekijken",
     "alerts": "Meldingen",
     "alert_frequency": "Melden",
-    "alert_instant": "Meteen",
     "alert_daily": "Dagelijks",
     "alert_off": "Uit",
     "delete": "Verwijderen",
@@ -2009,7 +2061,7 @@
     "signin_prompt": "Meld u aan om zoekopdrachten op alle apparaten op te slaan en meldingen te krijgen.",
     "alert_title": "Nieuwe resultaten: {name}",
     "alert_body": "{count} nieuw(e) zoekertje(s) komen overeen met uw opgeslagen zoekopdracht.",
-    "emptyDesc": "Bewaar een zoekopdracht en ontvang een melding zodra er een match is.",
+    "emptyDesc": "Bewaar een zoekopdracht en ontvang dagelijks een melding bij nieuwe resultaten.",
     "startSearch": "Start een zoekopdracht"
   },
   "pro": {
@@ -2024,7 +2076,7 @@
     "submit_label": "Registratie indienen",
     "intro": {
       "heading": "Bedrijfsidentiteit",
-      "body": "Registreer uw bedrijf op LyVoX voor professionele verkopersfuncties, een geverifieerd bedrijfsbadge en volledige naleving van de Belgische consumentenwetgeving.",
+      "body": "Maak een handelaarsprofiel en vul de bedrijfsgegevens in die kopers nodig hebben. Verificatie en juridische status worden apart getoond.",
       "requires_phone": "Een geverifieerd telefoonnummer is vereist om professionele verkoper te worden."
     },
     "identity": {
@@ -2125,6 +2177,7 @@
       "pending_invite": "Uitnodiging in behandeling",
       "unnamed_member": "Lid",
       "upgrade_heading": "Upgrade naar Pro",
+      "active_heading": "Pro actief",
       "upgrade_body": "Ontgrendel geavanceerde verkopersfuncties met een Pro-abonnement.",
       "upgrade": {
         "cta": "Upgraden naar Pro",

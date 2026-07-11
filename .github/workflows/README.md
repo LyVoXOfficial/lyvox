@@ -31,7 +31,7 @@ pnpm build
 node scripts/check-i18n-keys.js
 ```
 
-Do not run the retired `checklist:update` workflow and do not modify `docs/development/MASTER_CHECKLIST.md` as a current tracker.
+Do not add a second checklist workflow or progress tracker beside `docs/MASTER_PRODUCTION_TZ.md`.
 
 ## Secrets
 

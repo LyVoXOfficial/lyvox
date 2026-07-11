@@ -104,4 +104,4 @@
 5. Выбрать клин-нишу и город запуска (рекомендация — в GTM-плане).
 
 ---
-Связанные документы: [GO_TO_MARKET.md](GO_TO_MARKET.md) · [PRODUCT_ROADMAP.md](PRODUCT_ROADMAP.md) · [../MASTER_PRODUCTION_TZ.md](../MASTER_PRODUCTION_TZ.md)
+Связанные документы: [GO_TO_MARKET.md](GO_TO_MARKET.md) · [Production master](../MASTER_PRODUCTION_TZ.md)

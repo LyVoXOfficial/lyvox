@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { absoluteUrl } from "@/lib/seo/baseUrl";
 import { localizePath, supportedLocales } from "@/lib/i18n";
+import { getAccessGateRuntime } from "@/lib/security/accessGate";
 
 const PRIVATE_PATHS = [
   "/api/",
@@ -12,11 +13,21 @@ const PRIVATE_PATHS = [
   "/compare",
   "/register",
   "/login",
+  "/auth",
   "/verify",
   "/pro",
 ];
 
 export default function robots(): MetadataRoute.Robots {
+  if (getAccessGateRuntime().active) {
+    return {
+      rules: {
+        userAgent: "*",
+        disallow: "/",
+      },
+    };
+  }
+
   const localizedPrivatePaths = supportedLocales.flatMap((locale) =>
     PRIVATE_PATHS.map((path) => localizePath(path, locale)),
   );

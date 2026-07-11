@@ -29,9 +29,16 @@ describe("checkUserBlocked", () => {
     expect(r.reason).toMatch(/unavailable/i);
   });
 
-  it("does NOT block a brand-new user with no profile row, even when failClosed", async () => {
+  it("fails closed when a high-risk path finds no profile row", async () => {
     maybeSingleMock.mockResolvedValue({ data: null, error: null });
-    expect((await checkUserBlocked("u1", { failClosed: true })).isBlocked).toBe(false);
+    const result = await checkUserBlocked("u1", { failClosed: true });
+    expect(result.isBlocked).toBe(true);
+    expect(result.reason).toMatch(/incomplete/i);
+  });
+
+  it("keeps low-risk reads backward-compatible when no profile row exists", async () => {
+    maybeSingleMock.mockResolvedValue({ data: null, error: null });
+    expect((await checkUserBlocked("u1")).isBlocked).toBe(false);
   });
 
   it("blocks while blocked_until is in the future and surfaces the flag reason", async () => {

@@ -199,8 +199,7 @@ apps/web/src/components/
 
 ## 🔗 Related Docs
 
-**Development:** [database-schema.md](./database-schema.md) • [deep-audit-20251108.md](./deep-audit-20251108.md) • [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [roadmap.md](./roadmap.md)
+**Development:** [database-schema.md](./database-schema.md) • [deep-audit-20251108.md](./deep-audit-20251108.md) • [Production master](../MASTER_PRODUCTION_TZ.md)
 **Catalog:** [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md)
-
 
 

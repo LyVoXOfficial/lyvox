@@ -254,4 +254,26 @@ describe("GET /auth/callback — F10 itsme_sub uniqueness", () => {
     expect(location).toContain("/login");
     expect(location).toContain("missing_code");
   });
+
+  it("rejects an external next target after a successful code exchange", async () => {
+    const user = {
+      id: "user-email-1",
+      email: "user@example.com",
+      app_metadata: { provider: "email" },
+      user_metadata: {},
+      identities: [],
+    };
+    exchangeCodeForSessionMock.mockResolvedValue({
+      data: { session: { user }, user },
+      error: null,
+    });
+
+    const req = new Request(
+      "https://www.lyvox.be/auth/callback?code=valid-code&next=https%3A%2F%2Fevil.test%2Fphish",
+    );
+    const res = await GET(req as unknown as import("next/server").NextRequest);
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe("https://www.lyvox.be/profile");
+  });
 });

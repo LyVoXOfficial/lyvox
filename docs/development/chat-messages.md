@@ -309,8 +309,7 @@ function useRealtimeMessages(conversationId: string) {
 ## 🔗 Related Docs
 
 **Domains:** [chat.md](../domains/chat.md) • [deals.md](../domains/deals.md)
-**Development:** [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [database-schema.md](./database-schema.md) • [security-compliance.md](./security-compliance.md)
-
+**Development:** [Production master](../MASTER_PRODUCTION_TZ.md) • [database-schema.md](./database-schema.md) • [security-compliance.md](./security-compliance.md)
 
 
 

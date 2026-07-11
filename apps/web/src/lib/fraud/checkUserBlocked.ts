@@ -36,7 +36,16 @@ export async function checkUserBlocked(
   }
 
   if (!profile) {
-    // No profile row yet (e.g. a brand-new account) — there is nothing to block.
+    // The auth trigger creates a profile synchronously. On a high-risk path,
+    // absence is therefore an integrity failure (or a deleted-row bypass), not
+    // proof that the user is safe.
+    if (options.failClosed) {
+      return {
+        isBlocked: true,
+        blockedUntil: null,
+        reason: "Account verification is incomplete. Please try again or contact support.",
+      };
+    }
     return { isBlocked: false, blockedUntil: null };
   }
 
@@ -99,4 +108,3 @@ export async function checkUserFlags(userId: string): Promise<{
     flagNames,
   };
 }
-

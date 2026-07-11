@@ -237,5 +237,5 @@ Include language alternates inside `app/sitemap.ts`:
 
 ## 🔗 Related Docs
 
-**Development:** [MASTER_CHECKLIST.md](../development/MASTER_CHECKLIST.md)
+**Development:** [Production master](../MASTER_PRODUCTION_TZ.md)
 **Catalog:** [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md) • [CATALOG_IMPLEMENTATION_STATUS.md](../catalog/CATALOG_IMPLEMENTATION_STATUS.md) • [FINAL_COMPLETION_REPORT.md](../catalog/FINAL_COMPLETION_REPORT.md) • [IMPLEMENTATION_SUMMARY.md](../catalog/IMPLEMENTATION_SUMMARY.md)

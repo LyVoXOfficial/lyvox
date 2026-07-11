@@ -50,13 +50,13 @@ vi.mock("@/lib/stripe/client", () => ({
     }) as unknown as Stripe,
 }));
 
-vi.mock("@/lib/capabilities", () => ({
-  isCapabilityEnabled: vi.fn(),
+vi.mock("@/lib/integrations/registry", () => ({
+  getIntegrationStatus: vi.fn(),
 }));
 
 // Import after mocks are registered
-import { isCapabilityEnabled } from "@/lib/capabilities";
-const isCapabilityEnabledMock = vi.mocked(isCapabilityEnabled);
+import { getIntegrationStatus } from "@/lib/integrations/registry";
+const getIntegrationStatusMock = vi.mocked(getIntegrationStatus);
 
 const { POST } = await import("../route");
 
@@ -108,7 +108,7 @@ describe("POST /api/billing/subscribe", () => {
 
   // (a) Flag OFF → 404 FEATURE_DISABLED, Stripe NOT called
   it("(a) returns 404 FEATURE_DISABLED when capability flag is OFF", async () => {
-    isCapabilityEnabledMock.mockReturnValue(false);
+    getIntegrationStatusMock.mockResolvedValue({ effective: false } as never);
 
     const res = await POST(makeReq());
     const body = await res.json();
@@ -122,7 +122,7 @@ describe("POST /api/billing/subscribe", () => {
 
   // (b) Flag ON but STRIPE_PRO_PRICE_ID unset → 404
   it("(b) returns 404 FEATURE_DISABLED when STRIPE_PRO_PRICE_ID is not set", async () => {
-    isCapabilityEnabledMock.mockReturnValue(true);
+    getIntegrationStatusMock.mockResolvedValue({ effective: true } as never);
     // STRIPE_PRO_PRICE_ID is already deleted in beforeEach
 
     const res = await POST(makeReq());
@@ -135,9 +135,24 @@ describe("POST /api/billing/subscribe", () => {
     expect(sessionsCreateMock).not.toHaveBeenCalled();
   });
 
+  it("fails closed before auth or Stripe when NEXT_PUBLIC_SITE_URL is not set", async () => {
+    getIntegrationStatusMock.mockResolvedValue({ effective: true } as never);
+    process.env.STRIPE_PRO_PRICE_ID = "price_test_123";
+    delete process.env.NEXT_PUBLIC_SITE_URL;
+
+    const res = await POST(makeReq());
+    const body = await res.json();
+
+    expect(res.status).toBe(404);
+    expect(body.error).toBe("FEATURE_DISABLED");
+    expect(getUserMock).not.toHaveBeenCalled();
+    expect(customersCreateMock).not.toHaveBeenCalled();
+    expect(sessionsCreateMock).not.toHaveBeenCalled();
+  });
+
   // (c) Flag ON + price set + no user → 401
   it("(c) returns 401 when not signed in", async () => {
-    isCapabilityEnabledMock.mockReturnValue(true);
+    getIntegrationStatusMock.mockResolvedValue({ effective: true } as never);
     process.env.STRIPE_PRO_PRICE_ID = "price_test_123";
 
     getUserMock.mockResolvedValue({ data: { user: null } });
@@ -152,7 +167,7 @@ describe("POST /api/billing/subscribe", () => {
 
   // (d) Happy path — user HAS an existing stripe_customer_id → reuse, no customers.create
   it("(d) reuses existing stripe_customer_id and returns 200 with url", async () => {
-    isCapabilityEnabledMock.mockReturnValue(true);
+    getIntegrationStatusMock.mockResolvedValue({ effective: true } as never);
     process.env.STRIPE_PRO_PRICE_ID = "price_test_pro_456";
 
     getUserMock.mockResolvedValue({
@@ -192,7 +207,7 @@ describe("POST /api/billing/subscribe", () => {
 
   // (e) Happy path — user has NO stripe_customer_id → create customer + persist via service-role
   it("(e) creates stripe customer, persists via service-role, returns 200 with url", async () => {
-    isCapabilityEnabledMock.mockReturnValue(true);
+    getIntegrationStatusMock.mockResolvedValue({ effective: true } as never);
     process.env.STRIPE_PRO_PRICE_ID = "price_test_pro_456";
 
     getUserMock.mockResolvedValue({

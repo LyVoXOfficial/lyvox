@@ -1,3 +1,6 @@
+> [!NOTE]
+> **ARCHIVED IMPLEMENTATION EVIDENCE.** Это снимок исследования уже выполненной работы, не активная задача и не источник priority/status/order. Канонический backlog: [`docs/MASTER_PRODUCTION_TZ.md`](../../MASTER_PRODUCTION_TZ.md).
+
 # T08 Recon - PostForm fast goods
 
 Branch: `feat/post-fast-goods`

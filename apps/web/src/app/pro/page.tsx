@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ProOnboardingWizard } from "./ProOnboardingWizard";
 import { BusinessCabinet } from "./BusinessCabinet";
 import { TeamManager } from "./TeamManager";
-import { isCapabilityEnabled } from "@/lib/capabilities";
+import { getIntegrationStatus } from "@/lib/integrations/registry";
 import { signMediaUrls } from "@/lib/media/signMediaUrls";
 import { isPro } from "@/lib/billing/proStatus";
 import type { ProfileAdvert } from "@/lib/profileTypes";
@@ -191,6 +191,7 @@ export default async function ProPage() {
         : viewerMemberRow?.role === "admin"
           ? "admin"
           : "member";
+    const proSubscriptions = await getIntegrationStatus("pro_subscriptions");
 
     return (
       <main className="container mx-auto max-w-5xl p-4">
@@ -200,7 +201,7 @@ export default async function ProPage() {
           members={members}
           viewerId={user.id}
           viewerRole={viewerRole}
-          proSubscriptionsEnabled={isCapabilityEnabled("pro_subscriptions")}
+          proSubscriptionsEnabled={proSubscriptions.effective}
           isPro={userIsPro}
           proUntil={proUntil}
           locale={locale}

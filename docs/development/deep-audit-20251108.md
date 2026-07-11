@@ -2,7 +2,7 @@
 
 ## 1. Engagement Overview
 
-- **Scope:** End-to-end audit across all phases (`Phase 0` Foundation → `Phase 6` Production Readiness) as documented in `docs/development/MASTER_CHECKLIST.md` and `docs/PLAN.md`.
+- **Scope:** End-to-end audit across the phases defined by the legacy checklist and plan that existed at the time; both trackers have since been retired in favour of `docs/MASTER_PRODUCTION_TZ.md`.
 - **Stakeholders:** LyVoX Core PM (product scope), Lead Backend Engineer (Supabase & API), Lead Frontend Engineer (Next.js UI), Security & Compliance Officer (GDPR/DSA), Operations Lead (monitoring & runbooks).
 - **Primary Artifacts Reviewed:** `supabase/migrations/**`, `supabase/config.toml`, `apps/web/src/**`, documentation under `docs/development/**` and `docs/domains/**`, architectural references (`docs/ARCHITECTURE.md`, `docs/requirements.md`), and runtime configuration (`apps/web/src/lib/**`, `apps/web/src/app/api/**`).
 - **Methodology:** Document cross-check, targeted code inspection, configuration review, and gap analysis against checklist acceptance criteria. Severity is rated High/Medium/Low; effort estimates are S (≤1d), M (≤3d), L (>3d).
@@ -218,6 +218,6 @@ const { data, error } = await supabase.auth.signInWithPassword({
 
 ## 🔗 Related Docs
 
-**Development:** [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [security-compliance.md](./security-compliance.md) • [database-schema.md](./database-schema.md)
+**Development:** [Production master](../MASTER_PRODUCTION_TZ.md) • [security-compliance.md](./security-compliance.md) • [database-schema.md](./database-schema.md)
 **Catalog:** [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md)
 **Core:** [API_REFERENCE.md](../API_REFERENCE.md)

@@ -15,11 +15,13 @@ vi.mock("@/lib/supabaseService", () => ({
   supabaseService: async () => ({ from: serviceFromMock }),
 }));
 
-vi.mock("@/lib/adminRole", () => ({
-  hasAdminRole: (user: unknown) => {
-    if (!user) return false;
-    const u = user as { app_metadata?: { role?: string } };
-    return u.app_metadata?.role === "admin";
+vi.mock("@/lib/auth/requireAdmin", () => ({
+  getAdminAccess: async () => {
+    const result = await getUserMock();
+    const user = result.data.user;
+    if (!user) return { ok: false, reason: "unauthenticated" };
+    if (user.app_metadata?.role !== "admin") return { ok: false, reason: "forbidden" };
+    return { ok: true, user };
   },
 }));
 

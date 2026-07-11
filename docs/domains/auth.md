@@ -672,6 +672,6 @@ For issues with authentication:
 ## 🔗 Related Docs
 
 **Domains:** [devops.md](./devops.md)
-**Development:** [MASTER_CHECKLIST.md](../development/MASTER_CHECKLIST.md) • [deep-audit-20251108.md](../development/deep-audit-20251108.md)
+**Development:** [Production master](../MASTER_PRODUCTION_TZ.md) • [deep-audit-20251108.md](../development/deep-audit-20251108.md)
 **Catalog:** [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md)
 **Core:** [API_REFERENCE.md](../API_REFERENCE.md)

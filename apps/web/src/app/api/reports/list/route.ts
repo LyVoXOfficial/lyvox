@@ -1,6 +1,6 @@
 import { supabaseServer } from "@/lib/supabaseServer";
 import { supabaseService } from "@/lib/supabaseService";
-import { hasAdminRole } from "@/lib/adminRole";
+import { getAdminAccess } from "@/lib/auth/requireAdmin";
 import { createRateLimiter, withRateLimit } from "@/lib/rateLimiter";
 import {
   createErrorResponse,
@@ -49,10 +49,12 @@ const getRequestContext = async (req: Request): Promise<RequestContext> => {
 const resolveUserId = (req: Request) => getRequestContext(req).then(({ user }) => user?.id ?? null);
 
 const baseHandler = async (request: Request) => {
-  const { user } = await getRequestContext(request);
-
-  if (!hasAdminRole(user)) {
-    return createErrorResponse(ApiErrorCode.FORBIDDEN, { status: 403 });
+  const access = await getAdminAccess();
+  if (!access.ok) {
+    return createErrorResponse(
+      access.reason === "unauthenticated" ? ApiErrorCode.UNAUTH : ApiErrorCode.FORBIDDEN,
+      { status: access.reason === "unauthenticated" ? 401 : access.reason === "mfa_required" ? 428 : 403 },
+    );
   }
 
   let adminClient;

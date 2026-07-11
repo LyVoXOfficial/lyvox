@@ -20,9 +20,9 @@ last_sync: 2025-10-28
 ## Integrations & Dependencies
 - Взаимосвязь с модерацией (перекрёстные ссылки из жалоб), Trust Score корректировки по итогам.
 
-## Improvements & TODO Links
-- TODO.md: RFC на статусы спора, SLA, шаблоны коммуникаций, UI очередей.
-- PLAN.md: добавить в Production волну как операционный процесс.
+## Candidate improvements
+
+Историческая идея: RFC на статусы спора, SLA, шаблоны коммуникаций и UI очередей. Исполнять только после включения в [Production master](../MASTER_PRODUCTION_TZ.md).
 
 ## Change Log
 - 2025-10-28: Initial disputes RFC.

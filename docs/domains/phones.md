@@ -45,12 +45,15 @@ last_sync: 2025-10-28
 - Environment variables (see `.env.example`):
   - `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM`, `TWILIO_LOOKUP_URL`.
   - Upstash Redis: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`.
-- Cron/Edge function should purge expired OTPs and anonymise old lookup payloads (tracked in TODO).
+- Cron/Edge function should purge expired OTPs and anonymise old lookup payloads; current status belongs to the Production master.
 - DSAR exports must include phone number + verification flag (documented in [requirements.md](../requirements.md#data-retention)).
 
-## Improvements & TODO Links
-- TODO.md already covers cron cleanup for expired OTPs (completed) and broader DSAR workflows.
-- TODO.md: "Review OTP TTL and resend UX; confirm 10-minute expiry and audit logging satisfy product requirements."
+## Candidate improvements
+
+Исполнять только после включения в [Production master](../MASTER_PRODUCTION_TZ.md):
+
+- Broader DSAR workflows; expired-OTP cron cleanup is historical completed work.
+- Review OTP TTL and resend UX; confirm that expiry and audit logging satisfy product requirements.
 - Consider masking `lookup` payload before storing or trimming to minimal fields to reduce PII exposure.
 
 ## Change Log

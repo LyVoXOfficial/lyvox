@@ -5,7 +5,7 @@
 >
 > Связанные документы: [ARCH_RULES](./ARCH_RULES.md) • [ARCHITECTURE](./ARCHITECTURE.md) • [API_REFERENCE](./API_REFERENCE.md) • [INSTALL](./INSTALL.md)
 
-<!-- Short aliases used by PLAN.md -->
+<!-- Short aliases retained for requirement traceability -->
 
 <span id="REQ:Core"></span>
 <span id="REQ:Security"></span>
@@ -262,7 +262,6 @@ erDiagram
 - Codify Cloudflare WAF plus Zero Trust configuration as infrastructure-as-code.
 - Configure a Supabase cron (or external trigger) for the `maintenance-cleanup` Edge Function and surface retention knobs via env.
 - Ship dependent make/model/year pickers for Transport listings (EV subcategory, structured mileage/condition capture) backed by Supabase tables `vehicle_makes`, `vehicle_models`, and `vehicle_generations`.
-
 
 
 

@@ -1043,5 +1043,5 @@ Write in {locale}. Use Belgian terminology.
 
 ## 🔗 Related Docs
 
-**Development:** [MASTER_CHECKLIST.md](../../development/MASTER_CHECKLIST.md)
+**Development:** [Production master](../../MASTER_PRODUCTION_TZ.md)
 **Catalog:** [CATALOG_MASTER.md](../CATALOG_MASTER.md) • [CATALOG_IMPLEMENTATION_STATUS.md](../CATALOG_IMPLEMENTATION_STATUS.md) • [FINAL_COMPLETION_REPORT.md](../FINAL_COMPLETION_REPORT.md) • [IMPLEMENTATION_SUMMARY.md](../IMPLEMENTATION_SUMMARY.md)

@@ -8,7 +8,7 @@ import RecentlyViewed from "@/components/discovery/RecentlyViewed";
 import SearchBar from "@/components/SearchBar";
 import TopSellersCarousel from "@/components/home/TopSellersCarousel";
 import TopAdvertCard from "@/components/home/TopAdvertCard";
-import { ArrowRight, BadgeEuro, Car, Home as HomeIcon, Laptop, MessageCircleWarning, ShieldCheck } from "lucide-react";
+import { ArrowRight, BadgeEuro, Car, Handshake, Home as HomeIcon, Laptop, MessageCircleWarning, ShieldCheck } from "lucide-react";
 
 // PERF-003: Lazy load carousels below the fold
 const CategoriesCarousel = dynamic(() => import("@/components/categories-carousel"), {
@@ -26,6 +26,7 @@ import {
 import { localizeHref } from "@/lib/i18n";
 import { getRequestSupabase } from "@/lib/supabaseServer";
 import { getHomeSections } from "@/lib/home/getHomeSections";
+import { getPublicProductTruthSnapshot } from "@/lib/productTruth";
 
 export const revalidate = 60;
 
@@ -48,6 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Home() {
   const { locale, messages } = await getI18nProps();
+  const productTruth = await getPublicProductTruthSnapshot();
   const supabase = await getRequestSupabase();
 
   const { freeAds, latestAds } = await getHomeSections(supabase);
@@ -274,12 +276,19 @@ export default async function Home() {
               href: "/contact",
               icon: MessageCircleWarning,
             },
-            {
-              title: t("infocards.payment_title"),
-              body: t("infocards.payment_body"),
-              href: "/profile/billing",
-              icon: BadgeEuro,
-            },
+            productTruth.marketplacePayments
+              ? {
+                  title: t("infocards.payment_title"),
+                  body: t("infocards.payment_body"),
+                  href: "/profile/billing",
+                  icon: BadgeEuro,
+                }
+              : {
+                  title: t("infocards.contact_title"),
+                  body: t("infocards.contact_body"),
+                  href: "/sell",
+                  icon: Handshake,
+                },
           ].map(({ title, body, href, icon: Icon }) => (
             <Link
               key={href}
@@ -320,16 +329,18 @@ export default async function Home() {
 
         {/* ── DISCOVER — retention loop, demoted below the shopping sections
                (council verdict: not top-of-funnel while the catalog is small) */}
-        <Link
-          href={href("/discover")}
-          className="flex items-center justify-between gap-3 rounded-2xl border border-border/70 bg-card px-5 py-4 shadow-[var(--shadow-card)] transition hover:border-primary/40"
-        >
-          <span>
-            <span className="block font-semibold text-foreground">{t("discover.title")}</span>
-            <span className="block text-sm text-muted-foreground">{t("discover.subtitle")}</span>
-          </span>
-          <ArrowRight className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
-        </Link>
+        {productTruth.discoverV2 ? (
+          <Link
+            href={href("/discover")}
+            className="flex items-center justify-between gap-3 rounded-2xl border border-border/70 bg-card px-5 py-4 shadow-[var(--shadow-card)] transition hover:border-primary/40"
+          >
+            <span>
+              <span className="block font-semibold text-foreground">{t("discover.title")}</span>
+              <span className="block text-sm text-muted-foreground">{t("discover.subtitle")}</span>
+            </span>
+            <ArrowRight className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+          </Link>
+        ) : null}
 
         {/* ── RECOMMENDED NOW — the growing feed goes LAST so it never
                buries the sections above; auto-load is capped inside

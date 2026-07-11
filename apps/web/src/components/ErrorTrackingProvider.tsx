@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
+import { useCookieConsent } from '@/components/cookie/CookieConsentProvider';
 
 // PERF-07 item 1 (owner-approved defer): @sentry/nextjs is the largest
 // remaining shared client chunk (it also carries @vercel/analytics). It used to
@@ -15,8 +16,18 @@ import { Analytics } from '@vercel/analytics/react';
 // load are not captured by Sentry. Today no DSN is configured in prod, so this
 // is a pure bundle win with identical behavior; the tradeoff only applies once
 // Sentry is enabled.
-export function ErrorTrackingProvider() {
+export function ErrorTrackingProvider({
+  errorTrackingEnabled,
+  analyticsEnabled,
+}: {
+  errorTrackingEnabled: boolean;
+  analyticsEnabled: boolean;
+}) {
+  const { consent, decided } = useCookieConsent();
+  const analyticsConsent = decided && consent?.analytics === true;
+
   useEffect(() => {
+    if (!errorTrackingEnabled || !analyticsConsent) return;
     const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
     if (!dsn) return;
 
@@ -46,12 +57,12 @@ export function ErrorTrackingProvider() {
 
     const timer = window.setTimeout(initSentry, 2000);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [analyticsConsent, errorTrackingEnabled]);
 
   return (
     <>
       {/* Vercel Speed Insights + Web Analytics (automatically enabled if NEXT_PUBLIC_VERCEL_ANALYTICS_ID is set) */}
-      <Analytics />
+      {analyticsEnabled && analyticsConsent && <Analytics />}
     </>
   );
 }

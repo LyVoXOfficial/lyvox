@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseServer } from "@/lib/supabaseServer";
 import { revalidateAdvert } from "@/lib/advert/advertDetail";
 import { supabaseService } from "@/lib/supabaseService";
-import { hasAdminRole } from "@/lib/adminRole";
+import { getAdminAccess } from "@/lib/auth/requireAdmin";
 import { assertSameOrigin } from "@/lib/security/csrf";
 import { validateRequest, moderationReviewSchema } from "@/lib/validations";
 
@@ -20,20 +19,12 @@ export async function POST(request: NextRequest) {
   if (csrfError) return csrfError;
 
   try {
-    const supabase = await supabaseServer();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ ok: false, error: "UNAUTHENTICATED" }, { status: 401 });
+    const access = await getAdminAccess();
+    if (!access.ok) {
+      const status = access.reason === "unauthenticated" ? 401 : access.reason === "mfa_required" ? 428 : 403;
+      return NextResponse.json({ ok: false, error: access.reason.toUpperCase() }, { status });
     }
-
-    // Check if user is admin
-    const isAdmin = hasAdminRole(user);
-    if (!isAdmin) {
-      return NextResponse.json({ ok: false, error: "FORBIDDEN" }, { status: 403 });
-    }
+    const user = access.user;
 
     let rawBody: unknown;
     try {
@@ -111,4 +102,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

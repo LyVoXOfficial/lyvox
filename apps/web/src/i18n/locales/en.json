@@ -3,6 +3,53 @@
     "title": "LyVoX",
     "description": "Marketplace for goods, services and real estate"
   },
+  "access_gate": {
+    "meta_title": "LyVoX — Private preview",
+    "meta_description": "LyVoX is preparing for its public launch in Belgium.",
+    "skip_to_content": "Skip to content",
+    "status": "Private preview",
+    "eyebrow": "A new marketplace for Belgium",
+    "title": "A quieter marketplace is taking shape.",
+    "body": "LyVoX is being prepared for its first public release. Access is currently limited to the people testing the service.",
+    "form_eyebrow": "Invitation access",
+    "form_title": "Enter the private preview",
+    "form_body": "Use the access code shared with the testing team.",
+    "code_label": "Access code",
+    "code_placeholder": "Enter your access code",
+    "security_check": "Security check",
+    "security_unavailable": "The security check could not load. Reload the page and try again.",
+    "reload": "Reload page",
+    "submit": "Open LyVoX",
+    "privacy_note": "The code is checked securely. The access cookie never contains it.",
+    "invalid": "That access code is not valid.",
+    "captcha": "Complete the security check and try again.",
+    "rate_limited": "Too many attempts. Wait a few minutes and try again.",
+    "unavailable": "Private access is temporarily unavailable. Check the server configuration.",
+    "unlocked_eyebrow": "Preview unlocked",
+    "unlocked_title": "This browser can access LyVoX.",
+    "unlocked_body": "Continue where you left off, or lock the preview again on this device.",
+    "continue": "Continue to LyVoX",
+    "relock": "Lock this preview",
+    "footer": "Built in Belgium for local buying and selling.",
+    "build_label": "Private build"
+  },
+  "account_recovery": {
+    "reset_title": "Choose a new password",
+    "reset_body": "Use a password you do not use for another service.",
+    "new_password": "New password",
+    "password_hint": "At least 8 characters and 3 of: uppercase, lowercase, number, symbol.",
+    "confirm_password": "Confirm new password",
+    "password_weak": "Use at least 8 characters and 3 of: uppercase, lowercase, number, symbol.",
+    "password_mismatch": "The passwords do not match.",
+    "update_failed": "The password could not be updated. Request a new recovery link and try again.",
+    "updated_title": "Password updated",
+    "updated_body": "Your other sessions were closed. Sign in again with the new password.",
+    "updated_sessions_warning": "The password changed, but LyVoX could not confirm that every other session was closed. Review active sessions now.",
+    "review_sessions": "Review active sessions",
+    "back_to_login": "Return to sign in",
+    "updating": "Updating password…",
+    "update_password": "Update password"
+  },
   "nav": {
     "sell": "Sell",
     "sign_in": "Sign in",
@@ -28,6 +75,8 @@
     "payment_title": "Local payment readiness",
     "payment_body": "Billing is set up to support Belgian checkout methods through provider settings.",
     "payment_action": "View billing",
+    "contact_title": "Contact-only by design",
+    "contact_body": "Agree payment and handover directly with the other person; LyVoX does not handle item money.",
     "report_title": "Report suspicious deals",
     "report_body": "Keep payment and shipping conversations inside LyVoX whenever possible.",
     "report_action": "Contact support"
@@ -231,6 +280,7 @@
     "faq_title": "Frequently asked questions",
     "faq_q1": "How much does posting cost?",
     "faq_a1": "Posting a regular listing is free. Optional paid boosts raise visibility and are always labelled as promoted.",
+    "faq_a1_contact": "Posting a regular listing is free. Paid promotion is not available in the current contact-only release.",
     "faq_q2": "Do I need a business account?",
     "faq_a2": "No — private sellers just confirm email and phone. Businesses are verified with KBO/VAT and get a public trader profile.",
     "faq_q3": "How do buyers contact me?",
@@ -1661,8 +1711,11 @@
     },
     "boost": {
       "title": "Boost Your Advert",
-      "description": "Choose a boost package to increase visibility of your advert",
-      "features": "Higher visibility in search results",
+      "description": "Review the exact benefit, duration, and tax treatment before payment",
+      "features": "Listing benefit",
+      "duration_days": "{count} days",
+      "vat_inclusive": "VAT included",
+      "vat_exclusive": "VAT excluded",
       "no_products": "No boost products available"
     },
     "checkout": {
@@ -1728,7 +1781,7 @@
   "auth": {
     "backToMarketplace": "Back to marketplace",
     "protectedAccess": "Protected account access",
-    "heroHeading": "Sign in to manage listings, messages, and trusted payments.",
+    "heroHeading": "Sign in to manage listings, messages, and saved items.",
     "heroSubtitle": "Use password, magic link, or OAuth. We keep account actions clear and route you back to the exact marketplace task you started.",
     "featureSellerTools": "Verified seller tools",
     "featureSavedListings": "Saved listings",
@@ -1999,7 +2052,6 @@
     "view_results": "View results",
     "alerts": "Alerts",
     "alert_frequency": "Notify",
-    "alert_instant": "Immediately",
     "alert_daily": "Daily",
     "alert_off": "Off",
     "delete": "Delete",
@@ -2009,7 +2061,7 @@
     "signin_prompt": "Sign in to save searches across devices and get alerts.",
     "alert_title": "New matches: {name}",
     "alert_body": "{count} new listing(s) match your saved search.",
-    "emptyDesc": "Save a search to get notified the moment a matching listing appears.",
+    "emptyDesc": "Save a search to receive a daily alert when new matches are found.",
     "startSearch": "Start a search"
   },
   "pro": {
@@ -2024,7 +2076,7 @@
     "submit_label": "Submit registration",
     "intro": {
       "heading": "Company identity",
-      "body": "Register your company on LyVoX to unlock professional seller features, a verified business badge, and full compliance with Belgian consumer law.",
+      "body": "Create a trader profile and record the business details buyers need. Verification and legal status are shown separately.",
       "requires_phone": "A verified phone number is required to become a professional seller."
     },
     "identity": {
@@ -2125,6 +2177,7 @@
       "pending_invite": "Pending invite",
       "unnamed_member": "Member",
       "upgrade_heading": "Upgrade to Pro",
+      "active_heading": "Pro active",
       "upgrade_body": "Unlock advanced seller features with a Pro subscription.",
       "upgrade": {
         "cta": "Upgrade to Pro",

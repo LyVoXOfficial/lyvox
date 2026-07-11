@@ -181,6 +181,9 @@ Thumbs.db
 **/*secret*
 **/*credential*
 **/*password*
+# Product source code for the password-reset journey is not a credential.
+!apps/web/src/app/auth/reset-password/
+!apps/web/src/app/auth/reset-password/**
 **/.env.local
 **/.env.production
 .vercel

@@ -15,6 +15,7 @@ import { requestOtpSchema } from "@/lib/validations/phone";
 import { parseBelgianMobile } from "@/lib/validations/belgianPhone";
 import { verifyTurnstile } from "@/lib/antifraud/turnstile";
 import type { TablesInsert } from "@/lib/supabaseTypes";
+import { getIntegrationStatus } from "@/lib/integrations/registry";
 
 export const runtime = "nodejs";
 
@@ -54,6 +55,11 @@ const getUserId = async (req: Request) => {
 };
 
 const baseHandler = async (req: Request) => {
+  const capability = await getIntegrationStatus("sms_otp");
+  if (!capability.effective) {
+    return createErrorResponse(ApiErrorCode.FEATURE_DISABLED, { status: 404 });
+  }
+
   const parseResult = await safeJsonParse<{ phone?: unknown }>(req);
   if (!parseResult.success) {
     return parseResult.response;

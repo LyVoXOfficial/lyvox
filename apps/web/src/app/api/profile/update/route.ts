@@ -9,7 +9,7 @@ import {
 import { assertSameOrigin } from "@/lib/security/csrf";
 import { validateRequest } from "@/lib/validations";
 import { updateProfileSchema } from "@/lib/validations/profile";
-import type { TablesInsert } from "@/lib/supabaseTypes";
+import type { TablesUpdate } from "@/lib/supabaseTypes";
 
 export const runtime = "nodejs";
 
@@ -38,13 +38,16 @@ export async function POST(req: Request) {
 
   const { display_name, discover_prefs } = validationResult.data;
 
-  const payload: TablesInsert<"profiles"> = { id: user.id };
+  const payload: TablesUpdate<"profiles"> = {};
   if (display_name !== undefined) payload.display_name = display_name;
   if (discover_prefs !== undefined) payload.discover_prefs = discover_prefs;
 
-  const { error } = await supabase.from("profiles").upsert(payload, {
-    onConflict: "id",
-  });
+  const { error } = await supabase
+    .from("profiles")
+    .update(payload)
+    .eq("id", user.id)
+    .select("id")
+    .single();
 
   if (error) {
     return handleSupabaseError(error, ApiErrorCode.UPDATE_FAILED);

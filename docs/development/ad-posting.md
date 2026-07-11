@@ -167,6 +167,6 @@ useEffect(() => {
 ## 🔗 Related Docs
 
 **Domains:** [adverts.md](../domains/adverts.md)
-**Development:** [deep-audit-20251108.md](./deep-audit-20251108.md) • [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md)
+**Development:** [deep-audit-20251108.md](./deep-audit-20251108.md) • [Production master](../MASTER_PRODUCTION_TZ.md)
 **Catalog:** [DATABASE_STRATEGY.md](../catalog/DATABASE_STRATEGY.md)
 **Core:** [API_REFERENCE.md](../API_REFERENCE.md)

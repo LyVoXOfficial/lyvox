@@ -200,9 +200,8 @@ export async function middleware(request: NextRequest) {
 
 ## 🔗 Related Docs
 
-**Development:** [MASTER_CHECKLIST.md](./MASTER_CHECKLIST.md) • [moderation-ai.md](./moderation-ai.md) • [deep-audit-20251108.md](./deep-audit-20251108.md)
+**Development:** [Production master](../MASTER_PRODUCTION_TZ.md) • [moderation-ai.md](./moderation-ai.md) • [deep-audit-20251108.md](./deep-audit-20251108.md)
 **Catalog:** [CATALOG_MASTER.md](../catalog/CATALOG_MASTER.md) • [FINAL_COMPLETION_REPORT.md](../catalog/FINAL_COMPLETION_REPORT.md)
-
 
 
 

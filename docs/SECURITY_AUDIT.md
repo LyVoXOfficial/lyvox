@@ -192,7 +192,7 @@ effect. Never set the role via `user_metadata` (see C1).
   was fixed to the real envelope.
 - **✅ D3 — `docs/INSTALL.md`** references to the non-existent `supabase/reports.sql`
   (3×) removed/replaced with the migration-based flow; env-var guidance corrected.
-- **✅ D4 — `docs/TODO.md`** stale chat items marked done; the false "no undocumented
+- **✅ D4 — retired legacy tracker** stale chat items marked done; the false "no undocumented
   routes" note replaced with an accurate pointer.
 - **✅ D6 — Env drift:** `.env.example` updated — added `STRIPE_SECRET_KEY`,
   `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_BASE_URL`, `RATE_LIMIT_SEARCH_IP_PER_MIN`;
@@ -224,7 +224,7 @@ Docs/config:
 - `docs/API_REFERENCE.md` — regenerated to cover all 58 routes (D1).
 - `docs/ARCHITECTURE.md` — fix rate-limit claims (D2).
 - `docs/INSTALL.md` — remove dead `reports.sql` refs, fix env guidance (D3).
-- `docs/TODO.md` — un-stale chat items + audit note (D4).
+- Retired legacy tracker — un-stale chat items + audit note (D4).
 - `docs/REFACTORING_LARGE_FILES.md` — staged refactor plan (N3).
 - `docs/SECURITY_AUDIT.md` — this file.
 

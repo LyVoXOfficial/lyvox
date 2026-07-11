@@ -1,6 +1,7 @@
 # Hardening Batch-3 (B4 + B1) Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> [!WARNING]
+> **ARCHIVED IMPLEMENTATION PLAN — DO NOT EXECUTE AS A BACKLOG.** Этот документ сохраняется как история уже принятого технического подхода. Он не задаёт текущие priority/status/order и не разрешает правки. Единственный рабочий источник: [`docs/MASTER_PRODUCTION_TZ.md`](../../MASTER_PRODUCTION_TZ.md).
 
 **Goal:** Fix two P1 regressions: (B4) anonymise raw IP stored in `advert_views.ip_address` to satisfy GDPR; (B1) add DB-level `UNIQUE(reviewer_id, subject_id)` on `reviews` after safe deduplication.
 
@@ -245,57 +246,9 @@ git commit -m "feat(B1): UNIQUE(reviewer_id, subject_id) on reviews — DB-level
 
 ---
 
-### Task 3: gen:types + docs update
+### Historical documentation note
 
-**Files:**
-- Modify: `supabase/types/database.types.ts` (auto-generated — do NOT edit by hand, run `pnpm gen:types`)
-- Modify: `docs/features/41-gdpr-legal.md` — note B4 IP anonymisation as retention fix
-- Modify: `docs/MASTER_TODO.md` — close B1 and B4 in §13; add rows to §12b progress table
-
-- [ ] **Step 1: Regenerate types**
-
-```bash
-pnpm gen:types
-```
-
-Expected: `supabase/types/database.types.ts` updated (column comment for `advert_views.ip_address` may appear in generated output).
-
-- [ ] **Step 2: Run full check post-gen**
-
-```bash
-pnpm typecheck && pnpm test && pnpm lint
-```
-
-Expected: all green.
-
-- [ ] **Step 3: Update docs/features/41-gdpr-legal.md**
-
-In section **8. Безопасность, приватность, комплаенс**, append (or find the retention bullet and add):
-
-```
-> **B4 (2026-06-29):** `advert_views.ip_address` anonymised in prod via migration
-> `20260629210000` — IPv4 → /24, IPv6 → /48; new rows write `NULL`. Rate-limit
-> and dedup use viewer_key (md5 hash) and the runtime request IP — not the DB column.
-> Addresses F4 retention: raw visitor IPs no longer stored.
-```
-
-- [ ] **Step 4: Update docs/MASTER_TODO.md §13 and §12b**
-
-In **§13** table, mark B1 and B4 as ✅ with their commit hashes (fill after committing).
-
-In **§12b** table (дополнительные изменения batch-2), add:
-
-```
-| B4 IP anonymisation (advert_views) | ✅ | <commit> |
-| B1 UNIQUE(reviewer_id, subject_id) | ✅ | <commit> |
-```
-
-- [ ] **Step 5: Commit docs**
-
-```bash
-git add supabase/types/database.types.ts docs/features/41-gdpr-legal.md docs/MASTER_TODO.md
-git commit -m "docs(§13): close B1+B4, update §12b; gen:types post-migrations"
-```
+The original plan ended by updating a now-retired tracker. That instruction has been removed. Generated types and the GDPR PRD remain technical references; current completion status and any follow-up work must be recorded only in `docs/MASTER_PRODUCTION_TZ.md`.
 
 ---
 

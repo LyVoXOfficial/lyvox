@@ -1316,5 +1316,5 @@ DROP TABLE <category>_listings CASCADE;
 
 ## 🔗 Related Docs
 
-**Development:** [MASTER_CHECKLIST.md](../development/MASTER_CHECKLIST.md)
+**Development:** [Production master](../MASTER_PRODUCTION_TZ.md)
 **Catalog:** [CATALOG_MASTER.md](./CATALOG_MASTER.md) • [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) • [CATALOG_IMPLEMENTATION_STATUS.md](./CATALOG_IMPLEMENTATION_STATUS.md) • [categories/real-estate.md](./categories/real-estate.md)

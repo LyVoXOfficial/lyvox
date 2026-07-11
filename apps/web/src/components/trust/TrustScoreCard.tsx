@@ -12,6 +12,7 @@ interface TrustScoreCardProps {
   verifiedEmail: boolean;
   verifiedPhone: boolean;
   itsmeVerified: boolean;
+  identityVerificationAvailable: boolean;
   createdAt: string | null;
   activeListingsCount: number;
   isOwnProfile: boolean;
@@ -69,6 +70,7 @@ export function TrustScoreCard({
   verifiedEmail,
   verifiedPhone,
   itsmeVerified,
+  identityVerificationAvailable,
   createdAt,
   activeListingsCount,
   isOwnProfile,
@@ -85,12 +87,15 @@ export function TrustScoreCard({
       )
     : t("trust_score.last_updated_never");
 
-  const allVerified = verifiedEmail && verifiedPhone && itsmeVerified;
+  const allVerified =
+    verifiedEmail && verifiedPhone && (!identityVerificationAvailable || itsmeVerified);
 
   const improvementTips: string[] = [];
   if (!verifiedEmail) improvementTips.push(t("trust_score.improve_verify_email"));
   if (!verifiedPhone) improvementTips.push(t("trust_score.improve_verify_phone"));
-  if (!itsmeVerified) improvementTips.push(t("trust_score.improve_verify_itsme"));
+  if (identityVerificationAvailable && !itsmeVerified) {
+    improvementTips.push(t("trust_score.improve_verify_itsme"));
+  }
 
   return (
     <section
@@ -136,7 +141,9 @@ export function TrustScoreCard({
 
       {/* Verifiable component facts */}
       <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
-        <FactRow verified={itsmeVerified} label={t("trust_score.fact_id_verified")} />
+        {(identityVerificationAvailable || itsmeVerified) && (
+          <FactRow verified={itsmeVerified} label={t("trust_score.fact_id_verified")} />
+        )}
         <FactRow verified={verifiedPhone} label={t("trust_score.fact_phone_verified")} />
         <FactRow verified={verifiedEmail} label={t("trust_score.fact_email_verified")} />
         <InfoRow

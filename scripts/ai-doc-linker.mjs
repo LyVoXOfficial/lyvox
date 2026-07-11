@@ -327,7 +327,7 @@ function generateIndex(relationships) {
     "# AI Documentation Cross-Reference",
     "",
     "> [!WARNING]",
-    "> Generated relationship index only. It is not a task queue or authority source. Start current work from `docs/MASTER_PRODUCTION_TZ.md`; links to archived checklists are historical.",
+    "> Generated relationship index only. It is not a task queue or authority source. Start current work from `docs/MASTER_PRODUCTION_TZ.md`; all generated relationships are subordinate.",
     "",
     `last_sync: ${timestamp}`,
     "",
@@ -391,7 +391,7 @@ function updateKnowledgeMap() {
   const kmPath = path.join(root, "docs", "KNOWLEDGE_MAP.md");
   let content = fs.readFileSync(kmPath, "utf8");
   const section =
-    "## \uD83E\uDD16 AI Enrichment & Cross-Reference System\n\nThis workspace maintains AI-generated links between domain, development, and catalog documents.\n\nSee `docs/AI_LINKS_INDEX.md` for the full matrix of relationships.\n";
+    "## \uD83E\uDD16 AI Enrichment & Cross-Reference System\n\nThis workspace maintains AI-generated links between domain, development, and catalog documents.\n\nCurrent scope, priority, status, and release readiness live only in `docs/MASTER_PRODUCTION_TZ.md`; generated cross-references are subordinate navigation aids.\n";
   const regex = /## \uD83E\uDD16 AI Enrichment & Cross-Reference System[\s\S]*/;
   if (regex.test(content)) {
     content = content.replace(regex, section.trim() + "\n");

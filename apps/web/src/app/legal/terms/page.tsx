@@ -1,6 +1,7 @@
 import { getI18nProps } from "@/i18n/server";
 import { LEGAL_ENTITY } from "@/lib/legal/entity";
 import { LegalDraftBanner } from "@/components/legal/LegalDraftBanner";
+import { getPublicProductTruthSnapshot } from "@/lib/productTruth";
 
 export const metadata = {
   title: "Terms of Service",
@@ -8,6 +9,7 @@ export const metadata = {
 
 export default async function TermsPage() {
   const { messages } = await getI18nProps();
+  const productTruth = await getPublicProductTruthSnapshot();
 
   function t(key: string): string {
     const parts = key.split(".");
@@ -64,10 +66,17 @@ export default async function TermsPage() {
       {/* Paid ranking / boost disclosure */}
       <section className="mb-8">
         <h2 className="mb-2 text-lg font-semibold">{t("legal.terms_paid_ranking")}</h2>
-        <p>
-          LyVoX offers paid listing boosts and Pro subscriptions that improve a listing&apos;s
-          visibility in search results. Boosted listings may appear higher in search rankings.
-        </p>
+        {productTruth.paidBoosts && productTruth.boostRanking ? (
+          <p>
+            Paid promotion is active. Its exact duration, effect, price and sponsored treatment
+            are disclosed before purchase and wherever the promoted placement appears.
+          </p>
+        ) : (
+          <p>
+            Paid listing promotion and paid search ranking are not available in the current
+            contact-only release. No listing receives paid priority in search.
+          </p>
+        )}
         <p className="mt-2 text-muted-foreground italic">
           [Full disclosure wording pending legal review]
         </p>

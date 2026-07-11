@@ -15,6 +15,7 @@ import { localizeHref, supportedLocales, type Locale } from "@/lib/i18n";
 import { useDebounce } from "@/hooks/useDebounce";
 import { supabase } from "@/lib/supabaseClient";
 import { logger } from "@/lib/errorLogger";
+import { sanitizeInternalReturnTo } from "@/lib/security/safeReturnTo";
 
 declare global {
   interface Window {
@@ -57,6 +58,8 @@ export default function RegisterForm({ initialLocale }: Props) {
   const messages = useMemo(() => registerMessages[locale], [locale]);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const requestedNext = searchParams.get("next");
+  const safeNext = sanitizeInternalReturnTo(requestedNext, "/onboarding");
 
   const {
     register,
@@ -147,8 +150,7 @@ export default function RegisterForm({ initialLocale }: Props) {
     setSocialLoading(true);
     try {
       const redirectUrl = new URL("/auth/callback", window.location.origin);
-      const next = searchParams.get("next") ?? "/onboarding";
-      redirectUrl.searchParams.set("next", next);
+      redirectUrl.searchParams.set("next", safeNext);
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
@@ -277,8 +279,8 @@ export default function RegisterForm({ initialLocale }: Props) {
     }
   });
 
-  const loginHref = searchParams.get("next")
-    ? localizeHref(`/login?next=${encodeURIComponent(searchParams.get("next") ?? "")}`, locale)
+  const loginHref = requestedNext !== null
+    ? localizeHref(`/login?next=${encodeURIComponent(safeNext)}`, locale)
     : localizeHref("/login", locale);
 
   return (

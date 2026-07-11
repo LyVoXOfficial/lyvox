@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { getI18nProps } from "@/i18n/server";
 import SwipeDeck from "@/components/discover/SwipeDeck";
 import { DROPS } from "@/lib/discover/deck";
+import { getIntegrationStatus } from "@/lib/integrations/registry";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +11,9 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { robots: { index: false, follow: true } };
 
 export default async function DiscoverPage() {
+  const status = await getIntegrationStatus("discover_v2");
+  if (!status.effective) redirect("/search");
+
   const { messages } = await getI18nProps();
   const t = (key: string) =>
     key.split(".").reduce<any>((acc, p) => (acc ? acc[p] : undefined), messages) ?? key;

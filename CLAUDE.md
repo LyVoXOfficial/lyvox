@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 LyVoX is a Belgium-focused trust-first C2C/B2C marketplace. Stack: **Next.js 16 (App Router) + React 19 + TypeScript + Supabase (Postgres/Auth/Storage/Edge Functions) + Stripe + Upstash Redis**. pnpm monorepo, deployed on Vercel. Auth is **Supabase Auth + itsme (OIDC)** — never Auth0.
 
-The only current Production backlog and status source is `docs/MASTER_PRODUCTION_TZ.md`. Feature specs in `docs/features/<id>-*.md`, `docs/PROJECT_VISION_AND_TZ.md`, `docs/MASTER_TODO.md`, foundations, audits, and old checklists are subordinate or historical and must not override the master.
+The only current Production backlog and status source is `docs/MASTER_PRODUCTION_TZ.md`. Feature specs in `docs/features/<id>-*.md`, `docs/PROJECT_VISION_AND_TZ.md`, foundations, audits, and implementation guides are subordinate or historical and must not override the master.
 
 ## Commands
 

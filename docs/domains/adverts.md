@@ -50,7 +50,7 @@ last_sync: 2025-10-28
 - No explicit rate limits today. Abuse mitigated via:
   - Storage path validation (`${userId}/${advertId}/...`).
   - Media cap of 12 items per advert.
-- TODO.md entry “Evaluate rate limiting strategy for media upload/complete endpoints once production traffic increases.” tracks future work.
+- Candidate improvement: evaluate rate limiting for media upload/complete endpoints once production traffic provides evidence. Prioritisation belongs to the [Production master](../MASTER_PRODUCTION_TZ.md).
 
 ## Integrations & Dependencies
 - Storage: Supabase Storage `ad-media` bucket.
@@ -58,10 +58,13 @@ last_sync: 2025-10-28
 - Moderation: admin takedowns triggered from `/api/reports/update` may set advert status to `inactive` and adjust trust score.
 - Logging: `public.logs` persists `advert_*`, `media_*` and denial events for audit/DSAR needs.
 
-## Improvements & TODO Links
-- TODO.md: implement cascading make/model/year selectors using vehicle tables (transport listings).
-- TODO.md: evaluate dedicated rate limiting for media endpoints once production data justifies it.
-- PLAN.md: moderation roadmap should formalise `blocked` state before exposing it in the UI.
+## Candidate improvements
+
+Исполнять только после включения в [Production master](../MASTER_PRODUCTION_TZ.md):
+
+- Implement cascading make/model/year selectors using vehicle tables (transport listings).
+- Evaluate dedicated rate limiting for media endpoints once production data justifies it.
+- Formalise the moderation `blocked` state before exposing it in the UI.
 
 ## Change Log
 - 2025-10-28: Initial domain documentation based on current API implementation and migrations.
